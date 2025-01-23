@@ -1,0 +1,29 @@
+name: PBIタイプ設定
+
+on:
+ issues:
+   types: [opened]
+
+jobs:
+ set-pbi-type:
+   if: ${{ env.VIEW_ID == '1' }}
+   runs-on: ubuntu-latest
+   steps:
+     - name: PBIタイプを設定
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         PROJECT_NUMBER: "1"
+         VIEW_PBI: "1" # PBIボード用View ID
+         FIELD_TYPE: "163048810" # item_typeフィールドのID
+       run: |
+         gh api graphql -f query='
+           mutation($project:ID!, $item:ID!) {
+             updateProjectV2ItemFieldValue(input: {
+               projectId: $project
+               itemId: $item
+               fieldId: "163048810"
+               value: "PBI"
+             }) {
+               projectV2Item { id }
+             }
+           }'
