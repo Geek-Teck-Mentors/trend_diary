@@ -3,71 +3,39 @@ on:
  issues:
    types: [opened]
 jobs:
- set-sbi-type:
+ set-fields:
    runs-on: ubuntu-latest
+   env:
+     # GitHub Project設定
+     PROJECT_NUMBER: 1
+     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+     # フィールドID
+     FIELD_TYPE_ID: 163048810
+     FIELD_SPRINT: Sprint
+     # 値設定
+     TYPE_VALUE: SBI
    steps:
-     - name: プロジェクトデータの取得 
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-         PROJECT_NUMBER: "1"
-         VIEW_SBI: "3"
-         FIELD_TYPE_ID: "163048810"
-         FIELD_SPRINT_ID: "163048199" 
-         FIELD_PROGRESS_ID: "163048200"
+     - name: カレントスプリントに追加
+       uses: blombard/move-to-next-iteration@master
+       with:
+         owner: ${{ github.repository_owner }}
+         number: ${{ env.PROJECT_NUMBER }}
+         token: ${{ env.GITHUB_TOKEN }}
+         iteration-field: ${{ env.FIELD_SPRINT }}
+         iteration: new
+         new-iteration: current
+
+     - name: タイプを設定
        run: |
-         # プロジェクトIDの取得
-         PROJECT_ID=$(gh api graphql -f query='
-           query($org: String!, $number: Int!) {
-             organization(login: $org) {
-               projectV2(number: $number) {
-                 id
-               }
-             }
-           }' -f org=$GITHUB_REPOSITORY_OWNER -f number=$PROJECT_NUMBER --jq '.data.organization.projectV2.id')
-         
-         # アイテムIDの取得
-         ITEM_ID=$(gh api graphql -f query='
-           mutation($projectId: ID!, $contentId: ID!) {
-             addProjectV2ItemById(input: {
-               projectId: $projectId
-               contentId: "${{ github.event.issue.node_id }}"
-             }) {
-               item {
-                 id
-               }
-             }
-           }' -f projectId=$PROJECT_ID --jq '.data.addProjectV2ItemById.item.id')
-
-         # スプリントを@currentに設定
          gh api graphql -f query='
-           mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!) {
+           mutation($value: String!) {
              updateProjectV2ItemFieldValue(input: {
-               projectId: $projectId
-               itemId: $itemId
-               fieldId: $fieldId
-               value: { 
-                 iterationId: "@current"
-               }
-             }) {
-               projectV2Item {
-                 id
-               }
-             }
-           }' -f projectId=$PROJECT_ID -f itemId=$ITEM_ID -f fieldId=$FIELD_SPRINT_ID
-
-         # タイプフィールドの設定
-         gh api graphql -f query='
-           mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
-             updateProjectV2ItemFieldValue(input: {
-               projectId: $projectId
-               itemId: $itemId
-               fieldId: $fieldId
-               value: { 
+               fieldId: "$FIELD_TYPE_ID"
+               value: {
                  singleSelectOptionId: $value
                }
              }) {
-               projectV2Item {
-                 id
-               }
+               clientMutationId
              }
-           }' -f projectId=$PROJECT_ID -f itemId=$ITEM_ID -f fieldId=$FIELD_TYPE_ID -f value="SBI"
+           }
+         ' -f value="${{ env.TYPE_VALUE }}"
