@@ -1,4 +1,4 @@
-name: SBIタイプとスプリント設定
+name: SBIタイプとフィールド設定
 
 on:
  issues:
@@ -9,19 +9,21 @@ jobs:
    if: ${{ env.VIEW_ID == env.VIEW_SBI }}
    runs-on: ubuntu-latest
    steps:
-     - name: SBIタイプとスプリントを設定
+     - name: SBIタイプとフィールドを設定
        env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          PROJECT_NUMBER: "1"
          # Projects設定
-         VIEW_SBI: "3" # SBIボード用View ID  
-         FIELD_TYPE_ID: "163048810" # item_typeフィールドのID
-         FIELD_SPRINT_ID: "163048199" # スプリントフィールドのID
+         VIEW_SBI: "3"
+         FIELD_TYPE_ID: "163048810"
+         FIELD_SPRINT_ID: "163048199" 
+         FIELD_PROGRESS_ID: "163048200" # Progressフィールド
          # 定数
          ITEM_TYPE_VALUE: "SBI"
          SPRINT_VALUE: "Current"
+         PROGRESS_VALUE: "Status" # デフォルト値
        run: |
-         # item_typeをSBIに設定
+         # item_type設定
          gh api graphql -f query='
            mutation($project:ID!, $item:ID!) {
              updateProjectV2ItemFieldValue(input: {
@@ -34,7 +36,7 @@ jobs:
              }
            }'
            
-         # スプリントをCurrentに設定
+         # スプリント設定
          gh api graphql -f query='
            mutation($project:ID!, $item:ID!) {
              updateProjectV2ItemFieldValue(input: {
@@ -42,6 +44,19 @@ jobs:
                itemId: $item
                fieldId: "$FIELD_SPRINT_ID"
                value: "$SPRINT_VALUE"
+             }) {
+               projectV2Item { id }
+             }
+           }'
+
+         # Progress設定
+         gh api graphql -f query='
+           mutation($project:ID!, $item:ID!) {
+             updateProjectV2ItemFieldValue(input: {
+               projectId: $project
+               itemId: $item
+               fieldId: "$FIELD_PROGRESS_ID"
+               value: "$PROGRESS_VALUE"
              }) {
                projectV2Item { id }
              }
