@@ -10,7 +10,7 @@ env:
   FIELD_TYPE: "163048810"
 jobs:
   set-pbi-type:
-    if: ${{ env.VIEW_ID == '1' }}
+    if: env.VIEW_ID == '1'
     runs-on: ubuntu-latest
     steps:
       - name: PBIタイプを設定
