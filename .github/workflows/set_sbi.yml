@@ -2,15 +2,15 @@ name: スプリントとタイプ設定
 on:
  issues:
    types: [opened]
-
+env:
+ GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ ORG: Geek-Teck-Mentors
+ PROJECT_NUMBER: 1
+ FIELD_SPRINT: Sprint
+ ITERATION: current
 jobs:
  set-fields:
    runs-on: ubuntu-latest
-   env:
-     ORG: Geek-Teck-Mentors
-     PROJECT_NUMBER: 1
-     FIELD_SPRINT: Sprint
-     ITERATION: current
    steps:
      - name: スプリントとタイプ設定
        run: |
