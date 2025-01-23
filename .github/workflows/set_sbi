@@ -1,0 +1,48 @@
+name: SBIタイプとスプリント設定
+
+on:
+ issues:
+   types: [opened]
+
+jobs:
+ set-sbi-type:
+   if: ${{ env.VIEW_ID == env.VIEW_SBI }}
+   runs-on: ubuntu-latest
+   steps:
+     - name: SBIタイプとスプリントを設定
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         PROJECT_NUMBER: "1"
+         # Projects設定
+         VIEW_SBI: "3" # SBIボード用View ID  
+         FIELD_TYPE_ID: "163048810" # item_typeフィールドのID
+         FIELD_SPRINT_ID: "163048199" # スプリントフィールドのID
+         # 定数
+         ITEM_TYPE_VALUE: "SBI"
+         SPRINT_VALUE: "Current"
+       run: |
+         # item_typeをSBIに設定
+         gh api graphql -f query='
+           mutation($project:ID!, $item:ID!) {
+             updateProjectV2ItemFieldValue(input: {
+               projectId: $project
+               itemId: $item
+               fieldId: "$FIELD_TYPE_ID"
+               value: "$ITEM_TYPE_VALUE"
+             }) {
+               projectV2Item { id }
+             }
+           }'
+           
+         # スプリントをCurrentに設定
+         gh api graphql -f query='
+           mutation($project:ID!, $item:ID!) {
+             updateProjectV2ItemFieldValue(input: {
+               projectId: $project
+               itemId: $item
+               fieldId: "$FIELD_SPRINT_ID"
+               value: "$SPRINT_VALUE"
+             }) {
+               projectV2Item { id }
+             }
+           }'
