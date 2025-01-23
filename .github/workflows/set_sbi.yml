@@ -1,63 +1,56 @@
 name: SBIタイプとフィールド設定
-
 on:
- issues:
-   types: [opened]
-
+  issues:
+    types: [opened]
 jobs:
- set-sbi-type:
-   if: ${{ env.VIEW_ID == env.VIEW_SBI }}
-   runs-on: ubuntu-latest
-   steps:
-     - name: SBIタイプとフィールドを設定
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-         PROJECT_NUMBER: "1"
-         # Projects設定
-         VIEW_SBI: "3"
-         FIELD_TYPE_ID: "163048810"
-         FIELD_SPRINT_ID: "163048199" 
-         FIELD_PROGRESS_ID: "163048200" # Progressフィールド
-         # 定数
-         ITEM_TYPE_VALUE: "SBI"
-         SPRINT_VALUE: "Current"
-         PROGRESS_VALUE: "Status" # デフォルト値
-       run: |
-         # item_type設定
-         gh api graphql -f query='
-           mutation($project:ID!, $item:ID!) {
-             updateProjectV2ItemFieldValue(input: {
-               projectId: $project
-               itemId: $item
-               fieldId: "$FIELD_TYPE_ID"
-               value: "$ITEM_TYPE_VALUE"
-             }) {
-               projectV2Item { id }
-             }
-           }'
-           
-         # スプリント設定
-         gh api graphql -f query='
-           mutation($project:ID!, $item:ID!) {
-             updateProjectV2ItemFieldValue(input: {
-               projectId: $project
-               itemId: $item
-               fieldId: "$FIELD_SPRINT_ID"
-               value: "$SPRINT_VALUE"
-             }) {
-               projectV2Item { id }
-             }
-           }'
+  set-sbi-type:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get project data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT_NUMBER: "1"
+          VIEW_SBI: "3"
+          FIELD_TYPE_ID: "163048810"
+          FIELD_SPRINT_ID: "163048199"
+          FIELD_PROGRESS_ID: "163048200"
+        run: |
+          # Get project ID
+          PROJECT_ID=$(gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              organization(login: $org) {
+                projectV2(number: $number) {
+                  id
+                }
+              }
+            }' -f org=$GITHUB_REPOSITORY_OWNER -f number=$PROJECT_NUMBER --jq '.data.organization.projectV2.id')
+          
+          # Get item ID
+          ITEM_ID=$(gh api graphql -f query='
+            mutation($projectId: ID!, $contentId: ID!) {
+              addProjectV2ItemById(input: {
+                projectId: $projectId
+                contentId: "${{ github.event.issue.node_id }}"
+              }) {
+                item {
+                  id
+                }
+              }
+            }' -f projectId=$PROJECT_ID --jq '.data.addProjectV2ItemById.item.id')
 
-         # Progress設定
-         gh api graphql -f query='
-           mutation($project:ID!, $item:ID!) {
-             updateProjectV2ItemFieldValue(input: {
-               projectId: $project
-               itemId: $item
-               fieldId: "$FIELD_PROGRESS_ID"
-               value: "$PROGRESS_VALUE"
-             }) {
-               projectV2Item { id }
-             }
-           }'
+          # Update fields
+          gh api graphql -f query='
+            mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $projectId
+                itemId: $itemId
+                fieldId: $fieldId
+                value: { 
+                  singleSelectOptionId: $value
+                }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f projectId=$PROJECT_ID -f itemId=$ITEM_ID -f fieldId=$FIELD_SPRINT_ID -f value="Current"
