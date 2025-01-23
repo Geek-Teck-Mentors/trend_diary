@@ -1,41 +1,53 @@
-name: スプリントとタイプを設定する
+name: スプリントとタイプ設定
 on:
  issues:
    types: [opened]
+
 jobs:
  set-fields:
    runs-on: ubuntu-latest
    env:
-     # GitHub Project設定
+     ORG: Geek-Teck-Mentors
      PROJECT_NUMBER: 1
-     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-     # フィールドID
-     FIELD_TYPE_ID: 163048810
      FIELD_SPRINT: Sprint
-     # 値設定
-     TYPE_VALUE: SBI
+     ITERATION: current
    steps:
-     - name: カレントスプリントに追加
-       uses: blombard/move-to-next-iteration@master
-       with:
-         owner: ${{ github.repository_owner }}
-         number: ${{ env.PROJECT_NUMBER }}
-         token: ${{ env.GITHUB_TOKEN }}
-         iteration-field: ${{ env.FIELD_SPRINT }}
-         iteration: new
-         new-iteration: current
-
-     - name: タイプを設定
+     - name: スプリントとタイプ設定
        run: |
-         gh api graphql -f query='
-           mutation($value: String!) {
-             updateProjectV2ItemFieldValue(input: {
-               fieldId: "$FIELD_TYPE_ID"
-               value: {
-                 singleSelectOptionId: $value
+         PROJECT_ID=$(gh api graphql -f query='
+           query($org: String!) {
+             organization(login: $org) {
+               projectV2(number: ${{ env.PROJECT_NUMBER }}) {
+                 id
                }
-             }) {
-               clientMutationId
              }
            }
-         ' -f value="${{ env.TYPE_VALUE }}"
+         ' -f org="${{ env.ORG }}" --jq '.data.organization.projectV2.id')
+         
+         ITEM_ID=$(gh api graphql -f query='
+           mutation($projectId: ID!, $issueId: ID!) {
+             addProjectV2ItemById(input: {projectId: $projectId, contentId: $issueId}) {
+               item {
+                 id
+               }
+             }
+           }
+         ' -f projectId="$PROJECT_ID" -f issueId="${{ github.event.issue.node_id }}" --jq '.data.addProjectV2ItemById.item.id')
+         
+         gh api graphql -f query='
+           mutation($itemId: ID!, $fieldId: ID!, $iterationId: ID!) {
+             updateProjectV2ItemFieldValue(
+               input: {
+                 itemId: $itemId
+                 fieldId: $fieldId
+                 value: {
+                   iterationId: $iterationId
+                 }
+               }
+             ) {
+               projectV2Item {
+                 id
+               }
+             }
+           }
+         ' -f itemId="$ITEM_ID" -f fieldId="${{ env.FIELD_SPRINT }}" -f iterationId="${{ env.ITERATION }}"
