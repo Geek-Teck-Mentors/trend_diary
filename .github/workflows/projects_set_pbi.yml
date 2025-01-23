@@ -1,4 +1,5 @@
 name: PBIタイプ設定
+
 on:
   issues:
     types: [opened]
@@ -12,10 +13,10 @@ env:
 
 jobs:
   set-pbi-type:
-    if: ${{ env.VIEW_ID == '1' }}
     runs-on: ubuntu-latest
     steps:
-      - name: PBIタイプを設定
+      - name: Check View ID
+        if: ${{ env.VIEW_ID == '1' }}
         run: |
           gh api graphql -f query='
             mutation($project:ID!, $item:ID!) {
