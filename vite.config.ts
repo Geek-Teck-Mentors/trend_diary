@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+
 import build from "@hono/vite-build/cloudflare-pages";
 import devServer from "@hono/vite-dev-server";
 import adapter from "@hono/vite-dev-server/cloudflare";
@@ -13,5 +15,8 @@ export default defineConfig({
   ],
   optimizeDeps: {
     entries: [],
+  },
+  test: {
+    globals: true,
   },
 });
