@@ -6,10 +6,10 @@ import { todoSchema } from "../schema";
 
 const app = new Hono();
 
-app.get("/", (c) => {
+app.get("/", async (c) => {
   const service = new TodoService(new MockTodoRepository());
 
-  const todoList = service.getTodoList();
+  const todoList = await service.getTodoList();
 
   return c.json(
     todoList.map((v) => v.toJSON()),
@@ -17,12 +17,15 @@ app.get("/", (c) => {
   );
 });
 
-app.get("/:id", (c) => {
+app.get("/:id", async (c) => {
   const { id } = c.req.param();
+
+  const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
+  if (!valResult.data) throw new Error(valResult.error.toString());
 
   const service = new TodoService(new MockTodoRepository());
 
-  const todo = service.getTodo(UUID.fromString(id));
+  const todo = await service.getTodo(UUID.fromString(id));
 
   return c.json(todo.toJSON(), 200);
 });
@@ -30,13 +33,42 @@ app.get("/:id", (c) => {
 app.post("/", async (c) => {
   const body = await c.req.json();
 
-  const data = todoSchema
+  const valResult = todoSchema
     .pick({ title: true, description: true, dueDate: true })
-    .parse(body);
+    .safeParse(body);
+  if (!valResult.data) throw new Error(valResult.error.toString());
+
+  const data = valResult.data;
 
   const service = new TodoService(new MockTodoRepository());
 
-  const todo = service.createTodo(data.title, data.description, data.dueDate);
+  const todo = await service.createTodo(
+    data.title,
+    data.description,
+    data.dueDate
+  );
+
+  return c.json(todo.toJSON(), 200);
+});
+
+app.patch("/:id", async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json();
+
+  const valResult = todoSchema
+    .pick({
+      todoId: true,
+      title: true,
+      description: true,
+      completed: true,
+      dueDate: true,
+    })
+    .safeParse({ ...body, todoId: id });
+  if (!valResult.data) throw new Error(valResult.error.toString());
+
+  const service = new TodoService(new MockTodoRepository());
+
+  const todo = await service.updateTodo(valResult.data);
 
   return c.json(todo.toJSON(), 200);
 });
@@ -44,11 +76,12 @@ app.post("/", async (c) => {
 app.delete("/:id", async (c) => {
   const { id } = c.req.param();
 
-  const data = todoSchema.pick({ todoId: true }).parse(id);
+  const valResult = todoSchema.pick({ todoId: true }).safeParse(id);
+  if (!valResult.data) throw new Error(valResult.error.toString());
 
   const service = new TodoService(new MockTodoRepository());
 
-  service.deleteTodo(UUID.fromString(data.todoId));
+  await service.deleteTodo(UUID.fromString(valResult.data.todoId));
 
   return c.status(204);
 });

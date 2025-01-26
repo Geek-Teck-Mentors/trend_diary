@@ -1,38 +1,36 @@
 import { Todo } from "./todo";
 import { Repository } from "./repository";
 import { UUID } from "../common/uuid";
+import { UpdateTodoInput } from "./schema";
 
 export class TodoService {
   constructor(private repository: Repository) {}
 
-  createTodo(title: string, description?: string, dueDate?: Date): Todo {
+  createTodo(title: string, description?: string, dueDate?: Date) {
     const todo = Todo.new(title, description, dueDate);
     return this.repository.createTodo(todo);
   }
 
-  getTodoList(): Todo[] {
+  getTodoList() {
     return this.repository.getTodoList();
   }
 
-  getTodo(id: UUID): Todo {
+  getTodo(id: UUID) {
     return this.repository.getTodo(id);
   }
 
-  updateTodo(todo: Todo): Todo {
+  async updateTodo(input: UpdateTodoInput) {
+    const todo = await this.repository.getTodo(UUID.fromString(input.todoId));
+
+    todo.title = input.title;
+    todo.description = input.description;
+    todo.dueDate = input.dueDate;
+    if (todo.completed !== input.completed) todo.toggleComplete();
+
     return this.repository.updateTodo(todo);
   }
 
-  deleteTodo(id: UUID): void {
-    this.repository.deleteTodo(id);
-  }
-
-  markAsComplete(id: UUID): Todo {
-    const todo = this.getTodo(id);
-    todo.toggleComplete();
-    return this.updateTodo(todo);
-  }
-
-  getOverdueTodos(): Todo[] {
-    return this.getTodoList().filter((todo) => todo.isOverdue());
+  deleteTodo(id: UUID) {
+    return this.repository.deleteTodo(id);
   }
 }

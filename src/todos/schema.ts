@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Todo } from "./todo";
 
 export const todoSchema = z.object({
   todoId: z.string().uuid(),
@@ -12,3 +13,5 @@ export const todoSchema = z.object({
 
 export type TodoInput = z.input<typeof todoSchema>;
 export type TodoOutput = z.output<typeof todoSchema>;
+
+export type UpdateTodoInput = Omit<TodoInput, "createdAt" | "updatedAt">;
