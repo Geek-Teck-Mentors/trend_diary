@@ -76,14 +76,14 @@ app.patch("/:id", async (c) => {
 app.delete("/:id", async (c) => {
   const { id } = c.req.param();
 
-  const valResult = todoSchema.pick({ todoId: true }).safeParse(id);
+  const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
   if (!valResult.data) throw new Error(valResult.error.toString());
 
   const service = new TodoService(new MockTodoRepository());
 
   await service.deleteTodo(UUID.fromString(valResult.data.todoId));
 
-  return c.status(204);
+  return new Response(null, { status: 204 });
 });
 
 export { app as todoApp };
