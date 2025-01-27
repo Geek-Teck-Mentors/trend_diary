@@ -21,7 +21,7 @@ app.get("/:id", async (c) => {
   const { id } = c.req.param();
 
   const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
-  if (!valResult.data) throw new Error(valResult.error.toString());
+  if (!valResult.success) throw new Error(valResult.error.toString());
 
   const service = new TodoService(new MockTodoRepository());
 
@@ -36,7 +36,7 @@ app.post("/", async (c) => {
   const valResult = todoSchema
     .pick({ title: true, description: true, dueDate: true })
     .safeParse(body);
-  if (!valResult.data) throw new Error(valResult.error.toString());
+  if (!valResult.success) throw new Error(valResult.error.toString());
 
   const data = valResult.data;
 
@@ -64,7 +64,7 @@ app.patch("/:id", async (c) => {
       dueDate: true,
     })
     .safeParse({ ...body, todoId: id });
-  if (!valResult.data) throw new Error(valResult.error.toString());
+  if (!valResult.success) throw new Error(valResult.error.toString());
 
   const service = new TodoService(new MockTodoRepository());
 
@@ -77,7 +77,7 @@ app.delete("/:id", async (c) => {
   const { id } = c.req.param();
 
   const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
-  if (!valResult.data) throw new Error(valResult.error.toString());
+  if (!valResult.success) throw new Error(valResult.error.toString());
 
   const service = new TodoService(new MockTodoRepository());
 

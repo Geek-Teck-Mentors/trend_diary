@@ -15,3 +15,7 @@ export type TodoInput = z.input<typeof todoSchema>;
 export type TodoOutput = z.output<typeof todoSchema>;
 
 export type UpdateTodoInput = Omit<TodoInput, "createdAt" | "updatedAt">;
+
+export function isTodo(value: unknown): value is TodoOutput {
+  return todoSchema.safeParse(value).success;
+}
