@@ -1,12 +1,19 @@
 import { Hono } from "hono";
 import { renderer } from "./renderer";
 import { apiApp } from "./api.route";
-import { logger } from "hono/logger";
 import { timeout } from "hono/timeout";
+import { logger } from "./logger/logger";
+import { requestLogger } from "./middleware/requestLogger";
 
-const app = new Hono();
+type Env = {
+  Variables: {
+    logger: typeof logger;
+  };
+};
 
-app.use(logger());
+const app = new Hono<Env>();
+
+app.use(requestLogger);
 
 // apiの登録
 app.route("/api", apiApp);

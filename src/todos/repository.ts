@@ -1,5 +1,4 @@
 import { UUID } from "../common/uuid";
-import { UpdateTodoInput } from "./schema";
 import { Todo } from "./todo";
 
 export abstract class Repository {
