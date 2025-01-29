@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { todoApp } from "./todos/presentation/handler";
+import { todoApp } from "./todos/presentation/route";
 
 const app = new Hono();
 

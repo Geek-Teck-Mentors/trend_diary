@@ -1,94 +1,92 @@
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
 import { TodoService } from "../service";
-import { MockTodoRepository } from "../repository/mock";
 import { UUID } from "../../common/uuid";
 import { todoSchema } from "../schema";
 import { HTTPException } from "hono/http-exception";
+import { Repository } from "../repository";
 
-const app = new Hono();
+// Factoryパターン参考：https://hono.dev/docs/guides/best-practices#factory-createhandlers-in-hono-factory
+export class TodoHandlerFactory {
+  constructor(private readonly repository: Repository) {}
 
-app.get("/", async (c) => {
-  const service = new TodoService(new MockTodoRepository());
+  createHandlers() {
+    return {
+      getList: async (c: Context) => {
+        const service = new TodoService(this.repository);
+        const todoList = await service.getTodoList();
+        return c.json(
+          todoList.map((v) => v.toJSON()),
+          200
+        );
+      },
 
-  const todoList = await service.getTodoList();
+      getOne: async (c: Context) => {
+        const { id } = c.req.param();
+        const valResult = todoSchema
+          .pick({ todoId: true })
+          .safeParse({ todoId: id });
+        if (!valResult.success) {
+          throw new HTTPException(400, { message: valResult.error.toString() });
+        }
 
-  return c.json(
-    todoList.map((v) => v.toJSON()),
-    200
-  );
-});
+        const service = new TodoService(this.repository);
+        const todo = await service.getTodo(UUID.fromString(id));
+        return c.json(todo.toJSON(), 200);
+      },
 
-app.get("/:id", async (c) => {
-  const { id } = c.req.param();
+      create: async (c: Context) => {
+        const body = await c.req.json();
+        const valResult = todoSchema
+          .pick({ title: true, description: true, dueDate: true })
+          .safeParse(body);
+        if (!valResult.success) {
+          throw new HTTPException(400, { message: valResult.error.toString() });
+        }
 
-  const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
-  if (!valResult.success)
-    throw new HTTPException(400, { message: valResult.error.toString() });
+        const data = valResult.data;
+        const service = new TodoService(this.repository);
+        const todo = await service.createTodo(
+          data.title,
+          data.description,
+          data.dueDate
+        );
+        return c.json(todo.toJSON(), 200);
+      },
 
-  const service = new TodoService(new MockTodoRepository());
+      update: async (c: Context) => {
+        const { id } = c.req.param();
+        const body = await c.req.json();
+        const valResult = todoSchema
+          .pick({
+            todoId: true,
+            title: true,
+            description: true,
+            completed: true,
+            dueDate: true,
+          })
+          .safeParse({ ...body, todoId: id });
+        if (!valResult.success) {
+          throw new HTTPException(400, { message: valResult.error.toString() });
+        }
 
-  const todo = await service.getTodo(UUID.fromString(id));
+        const service = new TodoService(this.repository);
+        const todo = await service.updateTodo(valResult.data);
+        return c.json(todo.toJSON(), 200);
+      },
 
-  return c.json(todo.toJSON(), 200);
-});
+      delete: async (c: Context) => {
+        const { id } = c.req.param();
+        const valResult = todoSchema
+          .pick({ todoId: true })
+          .safeParse({ todoId: id });
+        if (!valResult.success) {
+          throw new HTTPException(400, { message: valResult.error.toString() });
+        }
 
-app.post("/", async (c) => {
-  const body = await c.req.json();
-
-  const valResult = todoSchema
-    .pick({ title: true, description: true, dueDate: true })
-    .safeParse(body);
-  if (!valResult.success)
-    throw new HTTPException(400, { message: valResult.error.toString() });
-
-  const data = valResult.data;
-
-  const service = new TodoService(new MockTodoRepository());
-
-  const todo = await service.createTodo(
-    data.title,
-    data.description,
-    data.dueDate
-  );
-
-  return c.json(todo.toJSON(), 200);
-});
-
-app.patch("/:id", async (c) => {
-  const { id } = c.req.param();
-  const body = await c.req.json();
-
-  const valResult = todoSchema
-    .pick({
-      todoId: true,
-      title: true,
-      description: true,
-      completed: true,
-      dueDate: true,
-    })
-    .safeParse({ ...body, todoId: id });
-  if (!valResult.success)
-    throw new HTTPException(400, { message: valResult.error.toString() });
-
-  const service = new TodoService(new MockTodoRepository());
-
-  const todo = await service.updateTodo(valResult.data);
-
-  return c.json(todo.toJSON(), 200);
-});
-
-app.delete("/:id", async (c) => {
-  const { id } = c.req.param();
-
-  const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
-  if (!valResult.success)
-    throw new HTTPException(400, { message: valResult.error.toString() });
-
-  const service = new TodoService(new MockTodoRepository());
-
-  await service.deleteTodo(UUID.fromString(valResult.data.todoId));
-
-  return new Response(null, { status: 204 });
-});
-
-export { app as todoApp };
+        const service = new TodoService(this.repository);
+        await service.deleteTodo(UUID.fromString(valResult.data.todoId));
+        return new Response(null, { status: 204 });
+      },
+    };
+  }
+}
