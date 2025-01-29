@@ -24,7 +24,7 @@ export const requestLogger = createMiddleware(async (c, next) => {
 
   requestLogger.info("Request started");
 
-  c.set(CONTEXT_KEY.APP_LOG, { appLogger });
+  c.set(CONTEXT_KEY.APP_LOG, appLogger);
   await next();
 
   const responseTime = Math.round(performance.now() - startTime);

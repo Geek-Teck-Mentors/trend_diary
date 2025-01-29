@@ -3,6 +3,7 @@ import { TodoService } from "../service";
 import { MockTodoRepository } from "../repository/mock";
 import { UUID } from "../../common/uuid";
 import { todoSchema } from "../schema";
+import { HTTPException } from "hono/http-exception";
 
 const app = new Hono();
 
@@ -21,7 +22,8 @@ app.get("/:id", async (c) => {
   const { id } = c.req.param();
 
   const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
-  if (!valResult.success) throw new Error(valResult.error.toString());
+  if (!valResult.success)
+    throw new HTTPException(400, { message: valResult.error.toString() });
 
   const service = new TodoService(new MockTodoRepository());
 
@@ -36,7 +38,8 @@ app.post("/", async (c) => {
   const valResult = todoSchema
     .pick({ title: true, description: true, dueDate: true })
     .safeParse(body);
-  if (!valResult.success) throw new Error(valResult.error.toString());
+  if (!valResult.success)
+    throw new HTTPException(400, { message: valResult.error.toString() });
 
   const data = valResult.data;
 
@@ -64,7 +67,8 @@ app.patch("/:id", async (c) => {
       dueDate: true,
     })
     .safeParse({ ...body, todoId: id });
-  if (!valResult.success) throw new Error(valResult.error.toString());
+  if (!valResult.success)
+    throw new HTTPException(400, { message: valResult.error.toString() });
 
   const service = new TodoService(new MockTodoRepository());
 
@@ -77,7 +81,8 @@ app.delete("/:id", async (c) => {
   const { id } = c.req.param();
 
   const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
-  if (!valResult.success) throw new Error(valResult.error.toString());
+  if (!valResult.success)
+    throw new HTTPException(400, { message: valResult.error.toString() });
 
   const service = new TodoService(new MockTodoRepository());
 
