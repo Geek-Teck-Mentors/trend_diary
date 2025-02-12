@@ -11,7 +11,15 @@ export const todoSchema = z.object({
   updatedAt: z.date(),
 });
 
-export type TodoInput = z.input<typeof todoSchema>;
+export type TodoInput = {
+  todoId: string;
+  title: string;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+  description?: string | undefined;
+  dueDate?: string | undefined;
+};
 export type TodoOutput = z.output<typeof todoSchema>;
 
 export type UpdateTodoInput = Omit<TodoInput, "createdAt" | "updatedAt">;

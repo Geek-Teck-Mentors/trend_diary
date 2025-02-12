@@ -39,9 +39,9 @@ export class Todo extends BaseModel {
       data.title,
       data.description,
       data.completed,
-      data.dueDate,
-      data.createdAt,
-      data.updatedAt
+      data.dueDate ? new Date(data.dueDate) : undefined,
+      data.createdAt ? new Date(data.createdAt) : undefined,
+      data.updatedAt ? new Date(data.updatedAt) : undefined
     );
   }
 
@@ -95,9 +95,9 @@ export class Todo extends BaseModel {
       title: this._title,
       description: this._description,
       completed: this._completed,
-      dueDate: this._dueDate,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      dueDate: this._dueDate?.toString(),
+      createdAt: this.createdAt.toString(),
+      updatedAt: this.updatedAt.toString(),
     };
   }
 }

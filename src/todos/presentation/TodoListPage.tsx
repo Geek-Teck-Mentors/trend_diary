@@ -1,23 +1,43 @@
 import { hc } from "hono/client";
 import { apiApp } from "../../api.route";
+import { useState } from "hono/jsx";
 import { Todo } from "../todo";
-import { useEffect, useState } from "hono/jsx";
 
-export const TodoListPage = () => {
-  const client = hc<typeof apiApp>("/api");
-  const [todos, setTodos] = useState<Todo[]>([]);
+export const TodoListPage = async () => {
+  // 初期データの取得
+  const client = hc<typeof apiApp>("http://localhost:5173/api");
+  const res = await client.todos.$get();
+  const initialData = await res.json();
 
-  useEffect(() => {
-    const f = async () => {
-      const res = await client.todos.$get();
-      console.log((await res.json()).map((v) => v));
-    };
-    f();
-  }, []);
+  // useStateの初期値として使用
+  const [todos, setTodos] = useState<Todo[]>(
+    initialData.map((v) => Todo.fromJSON(v))
+  );
+  const [loading, setLoading] = useState(false);
+
+  // 新しいTodoを追加する関数
+  const addTodo = async () => {
+    setLoading(true);
+    try {
+      const res = await client.todos.$post({
+        json: {
+          title: "新しいTodo",
+          description: "説明",
+        },
+      });
+      const newTodo = Todo.fromJSON(await res.json());
+      setTodos((v) => [...v, newTodo]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
       <h1>Todoリスト</h1>
+      <button onClick={addTodo} disabled={loading}>
+        {loading ? "追加中..." : "新しいTodoを追加"}
+      </button>
       <ul>
         {todos.map((todo) => (
           <li key={todo.todoId}>
