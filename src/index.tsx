@@ -23,11 +23,7 @@ app.get("/", (c) => {
 });
 
 app.get("/todos", async (c) => {
-  // サーバ2サーバでAPIエンドポイントのtodosを取得するか、同じロジック使うしかなさそう。
-  const res = await fetch("http://localhost:5173/api/todos");
-  const todos = await res.json();
-
-  return c.render(<TodoListPage todos={todos} />);
+  return c.render(<TodoListPage />);
 });
 
 export default app;
