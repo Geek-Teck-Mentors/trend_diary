@@ -7,13 +7,12 @@ import { Repository } from "../repository";
 
 // Factoryパターン参考：https://hono.dev/docs/guides/best-practices#factory-createhandlers-in-hono-factory
 export class TodoHandlerFactory {
-  constructor(private readonly repository: Repository) {}
+  constructor(private readonly todoService: TodoService) {}
 
   createHandlers() {
     return {
       getList: async (c: Context) => {
-        const service = new TodoService(this.repository);
-        const todoList = await service.getTodoList();
+        const todoList = await this.todoService.getTodoList();
         return c.json(
           todoList.map((v) => v.toJSON()),
           200
@@ -29,8 +28,7 @@ export class TodoHandlerFactory {
           throw new HTTPException(400, { message: valResult.error.toString() });
         }
 
-        const service = new TodoService(this.repository);
-        const todo = await service.getTodo(UUID.fromString(id));
+        const todo = await this.todoService.getTodo(UUID.fromString(id));
         return c.json(todo.toJSON(), 200);
       },
 
@@ -44,8 +42,7 @@ export class TodoHandlerFactory {
         }
 
         const data = valResult.data;
-        const service = new TodoService(this.repository);
-        const todo = await service.createTodo(
+        const todo = await this.todoService.createTodo(
           data.title,
           data.description,
           data.dueDate
@@ -69,8 +66,7 @@ export class TodoHandlerFactory {
           throw new HTTPException(400, { message: valResult.error.toString() });
         }
 
-        const service = new TodoService(this.repository);
-        const todo = await service.updateTodo(valResult.data);
+        const todo = await this.todoService.updateTodo(valResult.data);
         return c.json(todo.toJSON(), 200);
       },
 
@@ -83,8 +79,9 @@ export class TodoHandlerFactory {
           throw new HTTPException(400, { message: valResult.error.toString() });
         }
 
-        const service = new TodoService(this.repository);
-        await service.deleteTodo(UUID.fromString(valResult.data.todoId));
+        await this.todoService.deleteTodo(
+          UUID.fromString(valResult.data.todoId)
+        );
         return new Response(null, { status: 204 });
       },
     };
