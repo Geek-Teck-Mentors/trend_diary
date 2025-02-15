@@ -1,6 +1,6 @@
 import { Todo } from "./todo";
 import { Repository } from "./repository";
-import { UUID } from "../common/uuid";
+import { UUID } from "../../src/common/uuid";
 import { UpdateTodoInput } from "./schema";
 
 export class TodoService {

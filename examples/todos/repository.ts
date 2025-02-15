@@ -1,4 +1,4 @@
-import { UUID } from "../common/uuid";
+import { UUID } from "../../src/common/uuid";
 import { Todo } from "./todo";
 
 export abstract class Repository {

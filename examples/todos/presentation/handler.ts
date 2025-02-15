@@ -1,6 +1,6 @@
 import { Context, Hono } from "hono";
 import { TodoService } from "../service";
-import { UUID } from "../../common/uuid";
+import { UUID } from "../../../src/common/uuid";
 import { todoSchema } from "../schema";
 import { HTTPException } from "hono/http-exception";
 import { Repository } from "../repository";

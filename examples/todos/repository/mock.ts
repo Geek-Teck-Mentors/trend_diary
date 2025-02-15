@@ -1,4 +1,4 @@
-import { UUID } from "../../common/uuid";
+import { UUID } from "../../../src/common/uuid";
 import { Repository } from "../repository";
 import { Todo } from "../todo";
 

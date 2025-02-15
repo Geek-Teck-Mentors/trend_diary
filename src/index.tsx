@@ -5,7 +5,8 @@ import { errorHandler } from "./middleware/errorHandler";
 import { renderer } from "./renderer";
 import { apiApp } from "./api.route";
 import { Env } from "./env";
-import { TodoListPage } from "./todos/presentation/TodoListPage";
+// TODO: 検証終わり次第、importを消す
+import { TodoListPage } from "../examples/todos/presentation/TodoListPage";
 
 const app = new Hono<Env>();
 

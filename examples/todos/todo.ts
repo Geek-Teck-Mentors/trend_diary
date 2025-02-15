@@ -1,7 +1,7 @@
 import { todoSchema, TodoInput } from "./schema";
-import { UUID } from "../common/uuid";
-import { UndefinedOr } from "../common/typeUtility";
-import { BaseModel } from "../common/baseModel";
+import { UUID } from "../../src/common/uuid";
+import { UndefinedOr } from "../../src/common/typeUtility";
+import { BaseModel } from "../../src/common/baseModel";
 
 export class Todo extends BaseModel {
   private constructor(
