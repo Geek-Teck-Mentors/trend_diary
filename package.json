@@ -9,8 +9,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@remix-run/cloudflare": "^2.8.1",
+    "@remix-run/cloudflare-pages": "^2.8.1",
+    "@remix-run/react": "^2.8.1",
     "hono": "^4.6.18",
+    "isbot": "^4",
     "pino": "^9.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "uuid": "^11.0.5",
     "zod": "^3.24.1"
   },
@@ -18,7 +24,11 @@
     "@cloudflare/workers-types": "^4.20241218.0",
     "@hono/vite-build": "^1.2.0",
     "@hono/vite-dev-server": "^0.18.1",
+    "@remix-run/dev": "^2.8.1",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
     "@types/uuid": "^10.0.0",
+    "remix-hono": "^0.0.16",
     "vite": "^5.4.12",
     "vitest": "^3.0.4",
     "wrangler": "^3.96.0"
