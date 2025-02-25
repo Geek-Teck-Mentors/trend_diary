@@ -13,7 +13,6 @@
     "@remix-run/cloudflare-pages": "^2.8.1",
     "@remix-run/react": "^2.8.1",
     "hono": "^4.6.18",
-    "isbot": "^4",
     "pino": "^9.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

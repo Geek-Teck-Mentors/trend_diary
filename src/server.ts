@@ -12,7 +12,11 @@ const app = new Hono<Env>();
 app.use(requestLogger);
 app.onError(errorHandler);
 
+app.use("/api", timeout(5000));
+app.route("/api", apiApp);
+
 app.all("*", async (c) => {
+  // remixのビルド結果をhonoにうまく繋ぎこむために使う virtual import
   // @ts-expect-error it's not typed
   const build = await import("virtual:remix/server-build");
   const handler = createRequestHandler(build, "development");
@@ -23,8 +27,5 @@ app.all("*", async (c) => {
   } as unknown as AppLoadContext;
   return handler(c.req.raw, remixContext);
 });
-
-app.use("/api", timeout(5000));
-app.route("/api", apiApp);
 
 export default app;
