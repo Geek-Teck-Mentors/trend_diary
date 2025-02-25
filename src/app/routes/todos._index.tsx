@@ -4,6 +4,7 @@ import { apiApp } from "../../../src/api.route";
 import { useState } from "react";
 import { hc } from "hono/client";
 import { Todo } from "../../../examples/todos/todo";
+import { TodoList } from "../../../examples/todos/presentation/TodoList";
 
 // APIレスポンスの型定義
 interface TodoData {
@@ -26,17 +27,31 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }
 
     const initialData = (await response.json()) as TodoData[];
-    return json({
-      todos: initialData,
-      baseUrl: new URL(request.url).origin,
-    });
+    return new Response(
+      JSON.stringify({
+        todos: initialData,
+        baseUrl: new URL(request.url).origin,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error loading todos:", error);
-    return json({
-      todos: [] as TodoData[],
-      error: "Failed to load todos",
-      baseUrl: new URL(request.url).origin,
-    });
+    return new Response(
+      JSON.stringify({
+        todos: [] as TodoData[],
+        error: "Failed to load todos",
+        baseUrl: new URL(request.url).origin,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   }
 };
 
@@ -58,48 +73,30 @@ export default function TodoListRemix() {
   const [loading, setLoading] = useState(false);
 
   // 新しいTodoを追加する関数
-  const addTodo = () => {
+  const addTodo = async () => {
     setLoading(true);
 
-    // 必要なときにのみクライアントを作成して使用
-    const client = hc<typeof apiApp>(`${baseUrl}/api`);
+    try {
+      // 必要なときにのみクライアントを作成して使用
+      const client = hc<typeof apiApp>(`${baseUrl}/api`);
 
-    client.todos
-      .$post({
+      const res = await client.todos.$post({
         json: {
           title: "新しいTodoアイテム",
           description: "説明文",
         },
-      })
-      .then((res: Response) => res.json())
-      // 修正: 型アサーションを追加して型エラーを解消
-      .then((data: unknown) => {
-        const todoData = data as TodoData;
-        const newTodo = Todo.fromJSON(todoData);
-        setTodos((v: Todo[]) => [...v, newTodo]);
-      })
-      .catch((err: Error) => {
-        console.error("Error adding todo:", err);
-      })
-      .finally(() => {
-        setLoading(false);
       });
+
+      const data = await res.json();
+      const todoData = data as TodoData;
+      const newTodo = Todo.fromJSON(todoData);
+      setTodos((prevTodos) => [...prevTodos, newTodo]);
+    } catch (err) {
+      console.error("Todoの追加中にエラーが発生しました:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div>
-      <h1>Todoリスト</h1>
-      <button onClick={addTodo} disabled={loading}>
-        {loading ? "追加中..." : "新しいTodoを追加"}
-      </button>
-      <ul>
-        {todos.map((todo: Todo) => (
-          <li key={todo.todoId.toString()}>
-            <div>{todo.title}</div>
-            <div>{todo.description}</div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  return <TodoList loading={loading} todos={todos} addTodo={addTodo} />;
 }
