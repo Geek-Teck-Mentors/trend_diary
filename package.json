@@ -6,7 +6,8 @@
     "build": "vite build",
     "preview": "wrangler pages dev",
     "deploy": "npm run build && wrangler pages deploy",
-    "test": "vitest run"
+    "test": "vitest run",
+    "tsc": "tsc --noEmit"
   },
   "dependencies": {
     "@remix-run/cloudflare": "^2.8.1",
@@ -30,6 +31,7 @@
     "@types/uuid": "^10.0.0",
     "remix-hono": "^0.0.16",
     "tailwindcss": "^4.0.8",
+    "typescript": "^5.7.3",
     "vite": "^5.4.12",
     "vitest": "^3.0.4",
     "wrangler": "^3.96.0"

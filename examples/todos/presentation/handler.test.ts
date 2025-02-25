@@ -1,5 +1,4 @@
-import app from "../../../src";
-import { isTodo } from "../schema";
+import app from "../../../src/server";
 
 // ? DBの場合は接続するURIの切り替えで実現する。今回は仮実装のため、モックのみ存在する。
 describe("Example Todos", () => {
