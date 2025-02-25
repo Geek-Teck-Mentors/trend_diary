@@ -11,7 +11,9 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 export default function Index() {
   return (
     <div>
-      <h1>Welcome Remix and Hono on Vite</h1>
+      <h1 className="text-2xl bg-black text-white">
+        Welcome Remix and Hono on Vite
+      </h1>
       <ul>
         <li>Remix</li>
         <li>

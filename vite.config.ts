@@ -5,6 +5,7 @@ import devServer, { defaultOptions } from "@hono/vite-dev-server";
 import adapter from "@hono/vite-dev-server/cloudflare";
 import { defineConfig } from "vite";
 import { vitePlugin as remix } from "@remix-run/dev";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   ssr: {
@@ -13,6 +14,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    tailwindcss(),
     remix({
       appDirectory: "src/app",
     }),
