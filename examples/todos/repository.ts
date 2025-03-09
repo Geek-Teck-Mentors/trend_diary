@@ -1,10 +1,10 @@
 import { UUID } from "../../src/common/uuid";
 import { Todo } from "./todo";
 
-export abstract class Repository {
-  abstract createTodo(todo: Todo): Promise<Todo>;
-  abstract getTodoList(): Promise<Todo[]>;
-  abstract getTodo(id: UUID): Promise<Todo>;
-  abstract updateTodo(todo: Todo): Promise<Todo>;
-  abstract deleteTodo(id: UUID): Promise<void>;
+export interface Repository {
+  createTodo(todo: Todo): Promise<Todo>;
+  getTodoList(): Promise<Todo[]>;
+  getTodo(id: UUID): Promise<Todo>;
+  updateTodo(todo: Todo): Promise<Todo>;
+  deleteTodo(id: UUID): Promise<void>;
 }

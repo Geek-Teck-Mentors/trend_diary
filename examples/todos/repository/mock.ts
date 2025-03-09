@@ -14,11 +14,10 @@ const sampleTodos = [
   Todo.new("ジム", "週末のヨガクラスに参加する", new Date(2025, 1, 6)),
 ];
 
-export class MockTodoRepository extends Repository {
+export class MockTodoRepository implements Repository {
   private todos: Map<string, Todo> = new Map();
 
   constructor() {
-    super();
     this.initialize();
   }
 
