@@ -5,9 +5,5 @@
     // TODO: SUPPORTED TYPESCRIPT VERSIONS: >=4.7.4 <5.6.0の解消
     "warnOnUnsupportedTypeScriptVersion": false
   },
-  "env": {
-    "browser": true,
-    "node": true
-  },
   "extends": ["airbnb", "airbnb-typescript", "prettier"]
 }
