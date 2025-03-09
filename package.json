@@ -10,8 +10,8 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext .ts,.tsx .",
     "lint:fix": "eslint --ext .ts,.tsx . --fix",
-    "fmt:check": "prettier . --check",
-    "fmt": "prettier . --write"
+    "format": "prettier . --check",
+    "format:fix": "prettier . --write"
   },
   "dependencies": {
     "@remix-run/cloudflare": "^2.8.1",
