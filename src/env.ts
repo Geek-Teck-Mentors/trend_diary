@@ -1,5 +1,5 @@
-import { logger } from "./logger/logger";
-import { CONTEXT_KEY } from "./middleware/context";
+import { logger } from './logger/logger';
+import CONTEXT_KEY from './middleware/context';
 
 export type Env = {
   Variables: {

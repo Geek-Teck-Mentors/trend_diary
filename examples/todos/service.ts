@@ -1,9 +1,9 @@
-import { Todo } from "./todo";
-import { Repository } from "./repository";
-import { UUID } from "../../src/common/uuid";
-import { UpdateTodoInput } from "./schema";
+import Todo from './todo';
+import { Repository } from './repository';
+import UUID from '../../src/common/uuid';
+import { UpdateTodoInput } from './schema';
 
-export class TodoService {
+export default class TodoService {
   constructor(private repository: Repository) {}
 
   createTodo(title: string, description?: string, dueDate?: Date) {
@@ -24,9 +24,7 @@ export class TodoService {
 
     todo.title = input.title;
     todo.description = input.description;
-    todo.dueDate = input.dueDate
-      ? new Date(Date.parse(input.dueDate))
-      : undefined;
+    todo.dueDate = input.dueDate ? input.dueDate : undefined;
     if (todo.completed !== input.completed) todo.toggleComplete();
 
     return this.repository.updateTodo(todo);

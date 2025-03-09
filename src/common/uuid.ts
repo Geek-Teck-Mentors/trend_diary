@@ -1,8 +1,9 @@
-import { z } from "zod";
-import { v4 as uuidv4 } from "uuid";
+import { z } from 'zod';
+import { v4 as uuidv4 } from 'uuid';
 
-export class UUID {
+export default class UUID {
   private static readonly schema = z.string().uuid();
+
   private readonly value: string;
 
   private constructor(value: string) {

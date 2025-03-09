@@ -1,12 +1,9 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
+import React from 'react';
+import type { MetaFunction } from '@remix-run/cloudflare';
 
-export const meta: MetaFunction = () => {
-  return [{ title: "Remix and Hono on Vite" }];
-};
+export const meta: MetaFunction = () => [{ title: 'Remix and Hono on Vite' }];
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
-  return Response.json({});
-};
+export const loader = async () => Response.json({});
 
 export default function Index() {
   return (

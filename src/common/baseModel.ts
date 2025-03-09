@@ -1,17 +1,18 @@
-export class BaseModel {
+export default class BaseModel {
   public readonly createdAt: Date;
-  protected _updatedAt: Date;
+
+  protected updatedAtValue: Date;
 
   protected constructor(createdAt: Date, updatedAt: Date) {
     this.createdAt = createdAt;
-    this._updatedAt = updatedAt;
+    this.updatedAtValue = updatedAt;
   }
 
   get updatedAt(): Date {
-    return this._updatedAt;
+    return this.updatedAtValue;
   }
 
   protected updateTimestamp(): void {
-    this._updatedAt = new Date();
+    this.updatedAtValue = new Date();
   }
 }
