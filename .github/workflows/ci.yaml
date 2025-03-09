@@ -73,8 +73,25 @@ jobs:
       - name: Format
         run: npm run fmt:check
 
+  ts-compile-check:
+    needs: [lint, format]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+      - name: 依存関係のキャッシュを復元
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+      - name: TypeScript型チェック
+        run: npm run check-types
+
   test:
-    needs: [lint, format] # lint と format が成功した後に実行
+    needs: ts-compile-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +111,7 @@ jobs:
         run: npm run test
 
   build:
-    needs: [lint, format] # lint と format が成功した後に実行
+    needs: ts-compile-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
