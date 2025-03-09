@@ -1,12 +1,11 @@
-import { Context, Hono } from "hono";
-import { TodoService } from "../service";
-import { UUID } from "../../../src/common/uuid";
-import { todoSchema } from "../schema";
-import { HTTPException } from "hono/http-exception";
-import { Repository } from "../repository";
+import { Context } from 'hono';
+import { HTTPException } from 'hono/http-exception';
+import TodoService from '../service';
+import UUID from '../../../src/common/uuid';
+import { todoSchema } from '../schema';
 
 // Factoryパターン参考：https://hono.dev/docs/guides/best-practices#factory-createhandlers-in-hono-factory
-export class TodoHandlerFactory {
+export default class TodoHandlerFactory {
   constructor(private readonly todoService: TodoService) {}
 
   createHandlers() {
@@ -15,15 +14,13 @@ export class TodoHandlerFactory {
         const todoList = await this.todoService.getTodoList();
         return c.json(
           todoList.map((v) => v.toJSON()),
-          200
+          200,
         );
       },
 
       getOne: async (c: Context) => {
         const { id } = c.req.param();
-        const valResult = todoSchema
-          .pick({ todoId: true })
-          .safeParse({ todoId: id });
+        const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
         if (!valResult.success) {
           throw new HTTPException(400, { message: valResult.error.toString() });
         }
@@ -41,12 +38,8 @@ export class TodoHandlerFactory {
           throw new HTTPException(400, { message: valResult.error.toString() });
         }
 
-        const data = valResult.data;
-        const todo = await this.todoService.createTodo(
-          data.title,
-          data.description,
-          data.dueDate
-        );
+        const { data } = valResult;
+        const todo = await this.todoService.createTodo(data.title, data.description, data.dueDate);
         return c.json(todo.toJSON(), 200);
       },
 
@@ -72,16 +65,12 @@ export class TodoHandlerFactory {
 
       delete: async (c: Context) => {
         const { id } = c.req.param();
-        const valResult = todoSchema
-          .pick({ todoId: true })
-          .safeParse({ todoId: id });
+        const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
         if (!valResult.success) {
           throw new HTTPException(400, { message: valResult.error.toString() });
         }
 
-        await this.todoService.deleteTodo(
-          UUID.fromString(valResult.data.todoId)
-        );
+        await this.todoService.deleteTodo(UUID.fromString(valResult.data.todoId));
         return new Response(null, { status: 204 });
       },
     };

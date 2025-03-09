@@ -1,7 +1,7 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 export default {
-  content: ["./src/**/{**,.client,.server}/**/*.{tsx}"],
+  content: ['./src/**/{**,.client,.server}/**/*.{tsx}'],
   theme: {
     extend: {},
   },

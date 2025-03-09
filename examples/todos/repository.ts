@@ -1,5 +1,5 @@
-import { UUID } from "../../src/common/uuid";
-import { Todo } from "./todo";
+import UUID from '../../src/common/uuid';
+import Todo from './todo';
 
 export interface Repository {
   createTodo(todo: Todo): Promise<Todo>;

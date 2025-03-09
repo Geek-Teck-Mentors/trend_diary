@@ -1,9 +1,8 @@
-import { z } from "zod";
-import { Todo } from "./todo";
+import { z } from 'zod';
 
 export const todoSchema = z.object({
   todoId: z.string().uuid(),
-  title: z.string().min(1, "Title cannot be empty"),
+  title: z.string().min(1, 'Title cannot be empty'),
   description: z.string().optional(),
   completed: z.boolean(),
   dueDate: z.date().optional(),
@@ -22,7 +21,7 @@ export type TodoInput = {
 };
 export type TodoOutput = z.output<typeof todoSchema>;
 
-export type UpdateTodoInput = Omit<TodoInput, "createdAt" | "updatedAt">;
+export type UpdateTodoInput = Omit<z.input<typeof todoSchema>, 'createdAt' | 'updatedAt'>;
 
 export function isTodo(value: unknown): value is TodoOutput {
   return todoSchema.safeParse(value).success;

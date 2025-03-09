@@ -1,25 +1,25 @@
-import type { AppLoadContext } from "@remix-run/cloudflare";
-import { createRequestHandler } from "@remix-run/cloudflare";
-import { Hono } from "hono";
-import { requestLogger } from "./middleware/requestLogger";
-import { errorHandler } from "./middleware/errorHandler";
-import { Env } from "./env";
-import { timeout } from "hono/timeout";
-import { apiApp } from "./api.route";
+import type { AppLoadContext } from '@remix-run/cloudflare';
+import { createRequestHandler } from '@remix-run/cloudflare';
+import { Hono } from 'hono';
+import { timeout } from 'hono/timeout';
+import loggerMiddleware from './middleware/requestLogger';
+import errorHandler from './middleware/errorHandler';
+import { Env } from './env';
+import apiApp from './api.route';
 
 const app = new Hono<Env>();
 
-app.use(requestLogger);
+app.use(loggerMiddleware);
 app.onError(errorHandler);
 
-app.use("/api", timeout(5000));
-app.route("/api", apiApp);
+app.use('/api', timeout(5000));
+app.route('/api', apiApp);
 
-app.all("*", async (c) => {
+app.all('*', async (c) => {
   // remixのビルド結果をhonoにうまく繋ぎこむために使う virtual import
   // @ts-expect-error it's not typed
-  const build = await import("virtual:remix/server-build");
-  const handler = createRequestHandler(build, "development");
+  const build = await import('virtual:remix/server-build');
+  const handler = createRequestHandler(build, 'development');
   const remixContext = {
     cloudflare: {
       env: c.env,

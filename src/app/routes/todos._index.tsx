@@ -1,10 +1,10 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { useLoaderData } from "@remix-run/react";
-import { apiApp } from "../../../src/api.route";
-import { useState } from "react";
-import { hc } from "hono/client";
-import { Todo } from "../../../examples/todos/todo";
-import { TodoList } from "../../../examples/todos/presentation/TodoList";
+import { type LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { useLoaderData } from '@remix-run/react';
+import React, { useState } from 'react';
+import { hc } from 'hono/client';
+import apiApp from '../../api.route';
+import Todo from '../../../examples/todos/todo';
+import TodoList from '../../../examples/todos/presentation/TodoList';
 
 // APIレスポンスの型定義
 interface TodoData {
@@ -34,23 +34,24 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       }),
       {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-      }
+      },
     );
   } catch (error) {
-    console.error("Error loading todos:", error);
+    // eslint-disable-next-line no-console
+    console.error('Error loading todos:', error);
     return new Response(
       JSON.stringify({
         todos: [] as TodoData[],
-        error: "Failed to load todos",
+        error: 'Failed to load todos',
         baseUrl: new URL(request.url).origin,
       }),
       {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-      }
+      },
     );
   }
 };
@@ -63,13 +64,9 @@ type LoaderData = {
 };
 
 export default function TodoListRemix() {
-  const { todos: initialData, baseUrl } = useLoaderData<
-    typeof loader
-  >() as LoaderData;
+  const { todos: initialData, baseUrl } = useLoaderData<typeof loader>() as LoaderData;
   // 初回データはサーバーサイドから取得済み
-  const [todos, setTodos] = useState<Todo[]>(
-    initialData.map((v: TodoData) => Todo.fromJSON(v))
-  );
+  const [todos, setTodos] = useState<Todo[]>(initialData.map((v: TodoData) => Todo.fromJSON(v)));
   const [loading, setLoading] = useState(false);
 
   // 新しいTodoを追加する関数
@@ -82,8 +79,8 @@ export default function TodoListRemix() {
 
       const res = await client.todos.$post({
         json: {
-          title: "新しいTodoアイテム",
-          description: "説明文",
+          title: '新しいTodoアイテム',
+          description: '説明文',
         },
       });
 
@@ -92,7 +89,8 @@ export default function TodoListRemix() {
       const newTodo = Todo.fromJSON(todoData);
       setTodos((prevTodos) => [...prevTodos, newTodo]);
     } catch (err) {
-      console.error("Todoの追加中にエラーが発生しました:", err);
+      // eslint-disable-next-line no-console
+      console.error('Todoの追加中にエラーが発生しました:', err);
     } finally {
       setLoading(false);
     }

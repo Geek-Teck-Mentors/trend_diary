@@ -1,24 +1,23 @@
-import pino from "pino";
+import pino from 'pino';
 
-export type LogLevel = "debug" | "info" | "warn" | "error";
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type LogMessage = string | Record<string, unknown>;
 export type LogContext = Record<string, unknown>;
 
 class Logger {
   private readonly logger: pino.Logger;
+
   private readonly context: LogContext;
 
   constructor(context: LogContext = {}) {
     this.context = context;
     this.logger = pino({
-      level: import.meta.env.PROD ? "info" : "debug",
+      level: import.meta.env.PROD ? 'info' : 'debug',
       formatters: {
-        level: (label) => {
-          return { level: label };
-        },
+        level: (label) => ({ level: label }),
       },
       timestamp: () => `,"time":${Date.now()}`,
-      messageKey: "msg",
+      messageKey: 'msg',
       // * pinoでエラーを表示する場合に使用する
       serializers: {
         err: pino.stdSerializers.err,
@@ -32,7 +31,7 @@ class Logger {
   }
 
   private log(level: LogLevel, message: LogMessage, ...args: unknown[]): void {
-    if (typeof message === "string") {
+    if (typeof message === 'string') {
       this.logger[level](this.context, message, ...args);
     } else {
       this.logger[level]({ ...this.context, ...message });
@@ -40,16 +39,19 @@ class Logger {
   }
 
   debug(message: LogMessage, ...args: unknown[]): void {
-    this.log("debug", message, ...args);
+    this.log('debug', message, ...args);
   }
+
   info(message: LogMessage, ...args: unknown[]): void {
-    this.log("info", message, ...args);
+    this.log('info', message, ...args);
   }
+
   warn(message: LogMessage, ...args: unknown[]): void {
-    this.log("warn", message, ...args);
+    this.log('warn', message, ...args);
   }
+
   error(message: LogMessage, ...args: unknown[]): void {
-    this.log("error", message, ...args);
+    this.log('error', message, ...args);
   }
 }
 
