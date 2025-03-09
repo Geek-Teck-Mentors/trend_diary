@@ -64,13 +64,9 @@ type LoaderData = {
 };
 
 export default function TodoListRemix() {
-  const { todos: initialData, baseUrl } = useLoaderData<
-    typeof loader
-  >() as LoaderData;
+  const { todos: initialData, baseUrl } = useLoaderData<typeof loader>() as LoaderData;
   // 初回データはサーバーサイドから取得済み
-  const [todos, setTodos] = useState<Todo[]>(
-    initialData.map((v: TodoData) => Todo.fromJSON(v)),
-  );
+  const [todos, setTodos] = useState<Todo[]>(initialData.map((v: TodoData) => Todo.fromJSON(v)));
   const [loading, setLoading] = useState(false);
 
   // 新しいTodoを追加する関数

@@ -3,9 +3,7 @@ import TodoHandlerFactory from './handler';
 import MockTodoRepository from '../repository/mock';
 import TodoService from '../service';
 
-const handlerFactory = new TodoHandlerFactory(
-  new TodoService(new MockTodoRepository()),
-);
+const handlerFactory = new TodoHandlerFactory(new TodoService(new MockTodoRepository()));
 const handlers = handlerFactory.createHandlers();
 
 const app = new Hono()

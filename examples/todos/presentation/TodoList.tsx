@@ -11,7 +11,7 @@ export default function TodoList({ loading, todos, addTodo }: Props) {
   return (
     <div>
       <h1>Todoリスト</h1>
-      <button onClick={addTodo} disabled={loading} type="button">
+      <button onClick={addTodo} disabled={loading} type='button'>
         {loading ? '追加中...' : '新しいTodoを追加'}
       </button>
       <ul>

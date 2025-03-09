@@ -22,15 +22,7 @@ export default class Todo extends BaseModel {
     const parsedDescription = todoSchema.shape.description.parse(description);
     const parsedDueDate = todoSchema.shape.dueDate.parse(dueDate);
 
-    return new this(
-      UUID.new(),
-      parsedTitle,
-      parsedDescription,
-      false,
-      parsedDueDate,
-      now,
-      now,
-    );
+    return new this(UUID.new(), parsedTitle, parsedDescription, false, parsedDueDate, now, now);
   }
 
   static fromJSON(data: TodoInput): Todo {

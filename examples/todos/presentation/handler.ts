@@ -20,9 +20,7 @@ export default class TodoHandlerFactory {
 
       getOne: async (c: Context) => {
         const { id } = c.req.param();
-        const valResult = todoSchema
-          .pick({ todoId: true })
-          .safeParse({ todoId: id });
+        const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
         if (!valResult.success) {
           throw new HTTPException(400, { message: valResult.error.toString() });
         }
@@ -41,11 +39,7 @@ export default class TodoHandlerFactory {
         }
 
         const { data } = valResult;
-        const todo = await this.todoService.createTodo(
-          data.title,
-          data.description,
-          data.dueDate,
-        );
+        const todo = await this.todoService.createTodo(data.title, data.description, data.dueDate);
         return c.json(todo.toJSON(), 200);
       },
 
@@ -71,16 +65,12 @@ export default class TodoHandlerFactory {
 
       delete: async (c: Context) => {
         const { id } = c.req.param();
-        const valResult = todoSchema
-          .pick({ todoId: true })
-          .safeParse({ todoId: id });
+        const valResult = todoSchema.pick({ todoId: true }).safeParse({ todoId: id });
         if (!valResult.success) {
           throw new HTTPException(400, { message: valResult.error.toString() });
         }
 
-        await this.todoService.deleteTodo(
-          UUID.fromString(valResult.data.todoId),
-        );
+        await this.todoService.deleteTodo(UUID.fromString(valResult.data.todoId));
         return new Response(null, { status: 204 });
       },
     };
