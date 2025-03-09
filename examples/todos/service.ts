@@ -24,7 +24,9 @@ export class TodoService {
 
     todo.title = input.title;
     todo.description = input.description;
-    todo.dueDate = input.dueDate;
+    todo.dueDate = input.dueDate
+      ? new Date(Date.parse(input.dueDate))
+      : undefined;
     if (todo.completed !== input.completed) todo.toggleComplete();
 
     return this.repository.updateTodo(todo);
