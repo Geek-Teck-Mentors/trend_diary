@@ -73,8 +73,9 @@ jobs:
       - name: Format
         run: npm run fmt:check
 
+  # 本来であれば、概念的にコンパイルはLint/Formatと同列ではないが、実行時間短縮のために並列実行にしている
   ts-compile-check:
-    needs: [lint, format]
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +92,7 @@ jobs:
         run: npm run check-types
 
   test:
-    needs: ts-compile-check
+    needs: [lint, format, ts-compile-check]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -111,7 +112,7 @@ jobs:
         run: npm run test
 
   build:
-    needs: ts-compile-check
+    needs: [lint, format, ts-compile-check]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
