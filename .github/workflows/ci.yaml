@@ -22,7 +22,7 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-      - name: 依存関係のキャッシュを復元
+      - name: 依存関係のキャッシュ
         uses: actions/cache@v4
         id: node-modules-cache
         with:
