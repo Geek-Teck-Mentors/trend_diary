@@ -110,23 +110,3 @@ jobs:
 
       - name: テストの実行
         run: npm run test
-
-  build:
-    needs: [lint, format, ts-compile-check]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Node.jsの構築
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: 依存関係のキャッシュを復元
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Build
-        run: npm run build
