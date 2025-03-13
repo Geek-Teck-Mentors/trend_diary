@@ -12,12 +12,12 @@ services:
       POSTGRES_DB: trend_diary
       PGDATA: /var/lib/postgresql/data/pgdata
     command: postgres
-  hono:
-    build: .
-    ports:
-      - 5173:5173
-    volumes:
-      - ./src:/app/src
-      - ./public:/app/public
-    working_dir: /app
-    command: npm run dev -- --host
+  # hono:
+  #   build: .
+  #   ports:
+  #     - 5173:5173
+  #   volumes:
+  #     - ./src:/app/src
+  #     - ./public:/app/public
+  #   working_dir: /app
+  #   command: npm run dev -- --host
