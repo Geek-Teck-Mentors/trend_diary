@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// GENERATE ER DIAGRAM
+generator erd {
+  provider = "prisma-erd-generator"
+  theme = "forest"
+  output = "ERD.md"
+  includeRelationFromFields = true
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id        Int  @id @default(autoincrement()) @map("user_id")
+  account_id Int
+  displayName String @map("display_name")
+  avatarUrl String @map("avatar_url")
+  createdAt DateTime @default(now()) @db.Timestamp() @map("created_at")
+  updatedAt DateTime @updatedAt @db.Timestamp() @map("updated_at")
+}
