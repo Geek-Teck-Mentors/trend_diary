@@ -4,9 +4,9 @@ generator client {
 
 // GENERATE ER DIAGRAM
 generator erd {
-  provider = "prisma-erd-generator"
-  theme = "forest"
-  output = "ERD.md"
+  provider                  = "prisma-erd-generator"
+  theme                     = "forest"
+  output                    = "ERD.md"
   includeRelationFromFields = true
 }
 
@@ -16,10 +16,11 @@ datasource db {
 }
 
 model User {
-  user_id        Int  @id @default(autoincrement()) @map("user_id")
-  account_id Int
-  displayName String @map("display_name")
-  avatarUrl String @map("avatar_url")
-  createdAt DateTime @default(now()) @db.Timestamp() @map("created_at")
-  updatedAt DateTime @updatedAt @db.Timestamp() @map("updated_at")
+  userId      Int      @id @default(autoincrement()) @map("user_id")
+  accountId   Int      @map("account_id")
+  displayName String   @map("display_name")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamp()
+
+  @@map("users")
 }
