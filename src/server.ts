@@ -6,7 +6,6 @@ import loggerMiddleware from './middleware/requestLogger';
 import errorHandler from './middleware/errorHandler';
 import { Env } from './env';
 import apiApp from './api.route';
-import getRdbClient from './infrastructure/rdb';
 
 const app = new Hono<Env>();
 
