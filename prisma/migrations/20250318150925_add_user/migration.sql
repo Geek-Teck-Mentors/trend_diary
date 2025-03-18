@@ -1,8 +1,8 @@
 -- CreateTable
 CREATE TABLE "users" (
-    "user_id" TEXT NOT NULL,
-    "account_id" TEXT NOT NULL,
-    "display_name" TEXT NOT NULL,
+    "user_id" VARCHAR(1024) NOT NULL,
+    "account_id" VARCHAR(1024) NOT NULL,
+    "display_name" VARCHAR(1024) NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP NOT NULL,
 
