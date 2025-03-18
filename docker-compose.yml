@@ -2,22 +2,16 @@ services:
   postgres:
     image: postgres:latest
     ports:
-      - '5432:5432'
+      - 5432:5432
     volumes:
-      - ./postgresql/.data:/var/lib/postgresql/data/pgdata
+      - postgres_data:/var/lib/postgresql/data
       - ./postgresql/postgresql.conf:/etc/postgresql/postgresql.conf
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: trend_diary
-      PGDATA: /var/lib/postgresql/data/pgdata
     command: postgres
-  # hono:
-  #   build: .
-  #   ports:
-  #     - 5173:5173
-  #   volumes:
-  #     - ./src:/app/src
-  #     - ./public:/app/public
-  #   working_dir: /app
-  #   command: npm run dev -- --host
+
+volumes:
+  postgres_data:
+    driver: local
