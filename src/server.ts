@@ -21,7 +21,8 @@ app.post('/api/user', async (c) => {
   const db = getRdbClient(c.env.DATABASE_URL);
   const user = await db.user.create({
     data: {
-      accountId: 1,
+      userId: `user_id_test_${Math.random()}`,
+      accountId: 'test',
       displayName: 'test',
     },
   });

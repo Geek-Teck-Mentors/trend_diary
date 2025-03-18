@@ -16,8 +16,8 @@ datasource db {
 }
 
 model User {
-  userId      Int      @id @default(autoincrement()) @map("user_id")
-  accountId   Int      @map("account_id")
+  userId      String   @id @map("user_id")
+  accountId   String   @map("account_id")
   displayName String   @map("display_name")
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp()
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamp()
