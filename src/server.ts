@@ -16,19 +16,6 @@ app.onError(errorHandler);
 app.use('/api', timeout(5000));
 app.route('/api', apiApp);
 
-// TODO: Prisma DBのUserモデルを作成test用。これが終われば削除する
-app.post('/api/user', async (c) => {
-  const db = getRdbClient(c.env.DATABASE_URL);
-  const user = await db.user.create({
-    data: {
-      userId: `user_id_test_${Math.random()}`,
-      accountId: 'test',
-      displayName: 'test',
-    },
-  });
-  return c.json(user);
-});
-
 app.all('*', async (c) => {
   // remixのビルド結果をhonoにうまく繋ぎこむために使う virtual import
   // @ts-expect-error it's not typed
