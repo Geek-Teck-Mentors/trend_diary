@@ -8,6 +8,11 @@ on:
     branches:
       - main
 
+# 連続push時に同じジョブが並列で実行されるのを防ぐ
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_VERSION_FILE: .node-version
 
