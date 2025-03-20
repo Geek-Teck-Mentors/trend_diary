@@ -13,12 +13,13 @@ env:
   NODE_VERSION_FILE: .node-version
 
 jobs:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Node.jsの構築
-      uses: ./.github/actions/setup_node
-      with:
-        node-version-file: ${{ env.NODE_VERSION_FILE }}
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-    - name: Prismaファイルの検証
-      run: npx prisma format --check
+      - name: Prismaファイルの検証
+        run: npx prisma format --check
