@@ -76,6 +76,7 @@ jobs:
     outputs:
       test_runner: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
