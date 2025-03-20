@@ -10,6 +10,11 @@ inputs:
     required: false
     default: ''
 
+# カバレッジの可視化で、コメントを残すための権限
+permissions:
+  contents: read
+  pull-requests: write
+
 runs:
   using: 'composite'
   steps:
