@@ -84,8 +84,8 @@ jobs:
       - name: フロントエンドのテスト
         uses: ./.github/actions/test_cov
         with:
-          coverageName: 'Frontend'
-          testCommand: 'npm run test:frontend:coverage'
+          coverage-name: 'Frontend'
+          test-command: 'npm run test:frontend:coverage'
 
   test-backend:
     needs: [lint, format, ts-compile-check]
@@ -100,5 +100,5 @@ jobs:
       - name: バックエンドのテスト
         uses: ./.github/actions/test_cov
         with:
-          coverageName: 'Backend'
-          testCommand: 'npm run test:backend:coverage'
+          coverage-name: 'Backend'
+          test-command: 'npm run test:backend:coverage'
