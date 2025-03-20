@@ -7,111 +7,116 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - '.github/workflows/ci.yaml'
+
+# カバレッジの可視化で、コメントを残すための権限
+permissions:
+  contents: read
+  pull-requests: write
 
 # 連続push時に同じジョブが並列で実行されるのを防ぐ
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
 
 jobs:
-  setup:
+  setup-config:
     runs-on: ubuntu-latest
+    outputs:
+      runner: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Node.jsの構築
-        uses: actions/setup-node@v4
+        uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: 依存関係のキャッシュ
-        uses: actions/cache@v4
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: ライブラリのインストール
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci
+      - run: echo "Setup completed"
 
   lint:
-    needs: setup
-    runs-on: ubuntu-latest
+    needs: setup-config
+    runs-on: ${{ needs.setup-config.outputs.runner }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Node.jsの構築
-        uses: actions/setup-node@v4
+        uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: 依存関係のキャッシュを復元
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Lint
         run: npm run lint
 
   format:
-    needs: setup
-    runs-on: ubuntu-latest
+    needs: setup-config
+    runs-on: ${{ needs.setup-config.outputs.runner }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Node.jsの構築
-        uses: actions/setup-node@v4
+        uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: 依存関係のキャッシュを復元
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Format
         run: npm run format
 
   # 本来であれば、概念的にコンパイルはLint/Formatと同列ではないが、実行時間短縮のために並列実行にしている
   ts-compile-check:
-    needs: setup
-    runs-on: ubuntu-latest
+    needs: setup-config
+    runs-on: ${{ needs.setup-config.outputs.runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
-        uses: actions/setup-node@v4
+        uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-      - name: 依存関係のキャッシュを復元
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
       - name: TypeScript型チェック
         run: npm run check-types
 
-  test:
+  setup-test:
     needs: [lint, format, ts-compile-check]
     runs-on: ubuntu-latest
+    outputs:
+      test_runner: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Node.jsの構築
-        uses: actions/setup-node@v4
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+      - run: echo "Test configuration completed"
+
+  test-frontend:
+    needs: setup-test
+    runs-on: ${{ needs.setup-test.outputs.test_runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-      - name: 依存関係のキャッシュを復元
-        uses: actions/cache@v4
+      - name: フロントエンドのテスト
+        uses: ./.github/actions/test_cov
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+          target: frontend
 
-      - name: テストの実行
-        run: npm run test
+  test-backend:
+    needs: setup-test
+    runs-on: ${{ needs.setup-test.outputs.test_runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: バックエンドのテスト
+        uses: ./.github/actions/test_cov
+        with:
+          target: backend
