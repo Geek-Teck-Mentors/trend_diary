@@ -2,7 +2,7 @@ name: Setup Node.js Composite Action
 description: 'Node.jsのバージョンを指定してNode.jsをセットアップするComposite Action'
 
 inputs:
-  nodeVersionFile:
+  node-version-file:
     description: 'Node.jsのバージョンが記述されたファイル'
     required: true
     default: '.node-version'
@@ -13,7 +13,7 @@ runs:
     - name: Node.jsの構築
       uses: actions/setup-node@v4
       with:
-        node-version-file: ${{ env.NODE_VERSION_FILE }}
+        node-version-file: ${{ inputs.node-version-file }}
 
     - name: 依存関係のキャッシュ
       uses: actions/cache@v4
