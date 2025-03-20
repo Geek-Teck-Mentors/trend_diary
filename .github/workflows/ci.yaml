@@ -17,34 +17,21 @@ concurrency:
 env:
   NODE_VERSION_FILE: .node-version
 
-# すべてのジョブで共通の設定を定義
-defaults:
-  run:
-    shell: bash
-
-# 変数としてワークフロー全体で使用する値を定義
-# この変数はjobs.*.runs-onで使用可能
 jobs:
-  # ジョブレベルの変数を定義
   config:
     runs-on: ubuntu-latest
     outputs:
       runner: ubuntu-latest
-    steps:
-      - run: echo "Runner configured"
-
-  setup:
-    needs: config
-    runs-on: ${{ needs.config.outputs.runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
+      - run: echo "Config completed"
 
   lint:
-    needs: setup
+    needs: config
     runs-on: ${{ needs.config.outputs.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +44,7 @@ jobs:
         run: npm run lint
 
   format:
-    needs: setup
+    needs: config
     runs-on: ${{ needs.config.outputs.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -71,7 +58,7 @@ jobs:
 
   # 本来であれば、概念的にコンパイルはLint/Formatと同列ではないが、実行時間短縮のために並列実行にしている
   ts-compile-check:
-    needs: setup
+    needs: config
     runs-on: ${{ needs.config.outputs.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -83,9 +70,21 @@ jobs:
       - name: TypeScript型チェック
         run: npm run check-types
 
-  test-frontend:
+  test-config:
     needs: [lint, format, ts-compile-check]
-    runs-on: ${{ needs.config.outputs.runner }}
+    runs-on: ubuntu-latest
+    outputs:
+      test_runner: ubuntu-latest
+    steps:
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+      - run: echo "Test configuration completed"
+
+  test-frontend:
+    needs: test-config
+    runs-on: ${{ needs.test-config.outputs.test_runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -99,8 +98,8 @@ jobs:
           target: frontend
 
   test-backend:
-    needs: [lint, format, ts-compile-check]
-    runs-on: ${{ needs.config.outputs.runner }}
+    needs: test-config
+    runs-on: ${{ needs.test-config.outputs.test_runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
