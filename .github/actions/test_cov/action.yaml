@@ -14,6 +14,7 @@ runs:
   using: 'composite'
   steps:
     - name: テストの実行
+      shell: bash
       run: ${{ inputs.test-command }}
 
     - name: カバレッジの可視化
