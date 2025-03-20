@@ -36,6 +36,11 @@ export default defineConfig({
     globals: true,
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
+      // 最低限の閾値60% 必須。命令網羅や関数網羅はもう少し開発が進んでから導入
+      thresholds: {
+        branches: 60, // 分岐網羅, 処理のパスの通過率とほぼ同義
+      },
+      exclude: ['examples'],
     },
   },
 });
