@@ -2,13 +2,9 @@ name: 'Test Composite Action'
 description: 'テストを実行し、テストカバレッジの可視化まで行うComposite Action'
 
 inputs:
-  test-command:
-    description: 'テスト用のコマンド'
+  target:
+    description: 'テスト対象 (frontend または backend)'
     required: true
-  coverage-name:
-    description: 'カバレッジの名前'
-    required: false
-    default: ''
 
 # カバレッジの可視化で、コメントを残すための権限
 permissions:
@@ -20,11 +16,12 @@ runs:
   steps:
     - name: テストの実行
       shell: bash
-      run: ${{ inputs.test-command }}
+      run: npm run test:${{ inputs.target }}
 
     - name: カバレッジの可視化
       if: github.event_name == 'pull_request'
       uses: davelosert/vitest-coverage-report-action@v2
       with:
-        name: ${{ inputs.coverage-name }}
+        name: ${{ inputs.target }}
+        vite-config-path: vite.config.${{ inputs.target }}.ts
         comment-on: ${{ github.event_name == 'pull_request' && 'pr' || 'commit' }}
