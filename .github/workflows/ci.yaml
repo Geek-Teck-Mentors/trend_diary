@@ -101,28 +101,22 @@ jobs:
       - name: TypeScript型チェック
         run: npm run check-types
 
-  test:
+  test-frontend:
     needs: [lint, format, ts-compile-check]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Node.jsの構築
-        uses: actions/setup-node@v4
+      - name: フロントエンドのテスト
+        uses: ./.github/actions/test_cov
         with:
-          node-version-file: ${{ env.NODE_VERSION_FILE }}
+          coverageName: 'Frontend'
+          testCommand: 'npm run test:frontend:coverage'
 
-      - name: 依存関係のキャッシュを復元
-        uses: actions/cache@v4
+  test-backend:
+    needs: [lint, format, ts-compile-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: バックエンドのテスト
+        uses: ./.github/actions/test_cov
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: テストの実行
-        run: npm run test:coverage
-
-      - name: カバレッジの可視化
-        if: github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2
-        with:
-          comment-on: ${{ github.event_name == 'pull_request' && 'pr' || 'commit' }}
+          coverageName: 'Backend'
+          testCommand: 'npm run test:backend:coverage'
