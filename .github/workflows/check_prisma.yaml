@@ -16,6 +16,7 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
