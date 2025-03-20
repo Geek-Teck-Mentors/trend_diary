@@ -6,11 +6,6 @@ inputs:
     description: 'テスト対象 (frontend または backend)'
     required: true
 
-# カバレッジの可視化で、コメントを残すための権限
-permissions:
-  contents: read
-  pull-requests: write
-
 runs:
   using: 'composite'
   steps:
