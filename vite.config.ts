@@ -40,7 +40,7 @@ export default defineConfig({
       thresholds: {
         branches: 60, // 分岐網羅, 処理のパスの通過率とほぼ同義
       },
-      exclude: ['examples'],
+      include: ['src/**/*'],
     },
   },
 });
