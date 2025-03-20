@@ -13,19 +13,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v4
-
-    - name: Node.jsの構築
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: .node-version
-
-    - name: 依存関係のキャッシュを復元
-      uses: actions/cache@v4
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
     - name: テストの実行
       run: ${{ inputs.testCommand }}
 
