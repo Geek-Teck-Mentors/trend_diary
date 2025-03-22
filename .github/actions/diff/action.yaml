@@ -1,0 +1,40 @@
+name: diff
+description: git diffを取得し、指定したディレクトリ以下の変更ファイル数をカウントする
+
+inputs:
+  subdir:
+    description: チェックするディレクトリ
+    required: true
+  exclude_pattern:
+    description: 除外するパターン（グロブパターン）
+    required: false
+    default: ''
+outputs:
+  diff-count:
+    value: ${{ steps.diff.outputs.diff-count }}
+    description: 変更ファイル数
+
+runs:
+  using: composite
+  steps:
+    - id: diff
+      env:
+        TARGET_BRANCH: ${{ github.base_ref || 'main' }}
+      run: |
+        git fetch origin ${TARGET_BRANCH}
+
+        # 基本的な差分取得
+        all_files=$(git diff origin/${TARGET_BRANCH} HEAD --name-only --relative=${{ inputs.subdir }})
+
+        # 除外パターンが指定されていない場合
+        if [ -z "${{ inputs.exclude_pattern }}" ]; then
+          count=$(echo "$all_files" | wc -l)
+        else
+          # 除外パターンを使ってフィルタ
+          filtered_files=$(echo "$all_files" | grep -v -E "${{ inputs.exclude_pattern }}" || true)
+          count=$(echo "$filtered_files" | grep -v "^$" | wc -l)
+        fi
+
+        echo "Matched files count: $count"
+        echo "diff-count=$count" >> $GITHUB_OUTPUT
+      shell: bash

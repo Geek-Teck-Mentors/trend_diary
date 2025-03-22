@@ -89,11 +89,34 @@ jobs:
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-      - run: echo "Test configuration completed"
+
+      # フロントエンド関連ファイルの差分チェック
+      - name: フロントエンドの差分チェック
+        id: check-frontend
+        uses: ./.github/actions/diff
+        with:
+          subdir: src/app
+
+      # バックエンド関連ファイルの差分チェック（除外ディレクトリあり）
+      - name: バックエンドの差分チェック
+        id: check-backend
+        uses: ./.github/actions/diff
+        with:
+          subdir: src
+          exclude_pattern: '^src/app/|^src/middleware/|^src/logger/'
+
+      # 差分の要約を出力
+      - name: 差分結果の表示
+        run: |
+          echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
+          echo "バックエンド差分: ${{ steps.check-backend.outputs.diff-count }} ファイル"
+          echo "Test configuration completed"
+        shell: bash
 
   test-frontend:
     needs: setup-test
     runs-on: ${{ needs.setup-test.outputs.test_runner }}
+    if: ${{ needs.setup-test.outputs.run_frontend_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -109,6 +132,7 @@ jobs:
   test-backend:
     needs: setup-test
     runs-on: ${{ needs.setup-test.outputs.test_runner }}
+    if: ${{ needs.setup-test.outputs.run_backend_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
