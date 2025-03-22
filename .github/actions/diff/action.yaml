@@ -1,3 +1,4 @@
+# 参考: https://qiita.com/ningenMe/items/e2ed82c9c740ad10d480
 name: diff
 description: git diffを取得し、指定したディレクトリ以下の変更ファイル数をカウントする
 
@@ -20,6 +21,7 @@ runs:
     - id: diff
       env:
         TARGET_BRANCH: ${{ github.base_ref || 'main' }}
+        EXCLUDE_PATTERN: ${{ inputs.exclude_pattern }}
       run: |
         git fetch origin ${TARGET_BRANCH}
 
@@ -27,11 +29,11 @@ runs:
         all_files=$(git diff origin/${TARGET_BRANCH} HEAD --name-only --relative=${{ inputs.subdir }})
 
         # 除外パターンが指定されていない場合
-        if [ -z "${{ inputs.exclude_pattern }}" ]; then
+        if [ -z "${EXCLUDE_PATTERN}" ]; then
           count=$(echo "$all_files" | wc -l)
         else
           # 除外パターンを使ってフィルタ
-          filtered_files=$(echo "$all_files" | grep -v -E "${{ inputs.exclude_pattern }}" || true)
+          filtered_files=$(echo "$all_files" | grep -v -E "${EXCLUDE_PATTERN}" || true)
           count=$(echo "$filtered_files" | grep -v "^$" | wc -l)
         fi
 
