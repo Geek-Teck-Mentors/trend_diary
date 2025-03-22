@@ -7,7 +7,7 @@ inputs:
     description: チェックするディレクトリ
     required: true
   exclude_pattern:
-    description: 除外するパターン（グロブパターン）
+    description: 除外するパターン(スペース区切り)
     required: false
     default: ''
 outputs:
@@ -21,22 +21,8 @@ runs:
     - id: diff
       env:
         TARGET_BRANCH: ${{ github.base_ref || 'main' }}
-        EXCLUDE_PATTERN: ${{ inputs.exclude_pattern }}
       run: |
         git fetch origin ${TARGET_BRANCH}
-
-        # 基本的な差分取得
-        all_files=$(git diff origin/${TARGET_BRANCH} HEAD --name-only --relative=${{ inputs.subdir }})
-
-        # 除外パターンが指定されていない場合
-        if [ -z "${EXCLUDE_PATTERN}" ]; then
-          count=$(echo "$all_files" | wc -l)
-        else
-          # 除外パターンを使ってフィルタ
-          filtered_files=$(echo "$all_files" | grep -v -E "${EXCLUDE_PATTERN}" || true)
-          count=$(echo "$filtered_files" | grep -v "^$" | wc -l)
-        fi
-
-        echo "Matched files count: $count"
+        count=$(git diff origin/${TARGET_BRANCH} HEAD --name-only -- ${{ inputs.subdir }} ":(exclude)${{ inputs.exclude_pattern }}" | wc -l)
         echo "diff-count=$count" >> $GITHUB_OUTPUT
       shell: bash
