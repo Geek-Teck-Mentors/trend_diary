@@ -15,12 +15,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 認証情報
+model Account {
+  accountId String    @id @map("account_id") @db.VarChar(1024)
+  email     String    @unique @db.VarChar(1024)
+  password  String    @db.VarChar(1024)
+  lastLogin DateTime? @map("last_login") @db.Timestamptz()
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@map("accounts")
+}
+
 model User {
-  userId      String   @id @map("user_id") @db.VarChar(1024)
-  accountId   String   @map("account_id") @db.VarChar(1024)
-  displayName String   @map("display_name") @db.VarChar(1024)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamp()
+  userId      String @id @map("user_id") @db.VarChar(1024)
+  accountId   String @map("account_id") @db.VarChar(1024)
+  displayName String @map("display_name") @db.VarChar(1024)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@map("users")
 }
