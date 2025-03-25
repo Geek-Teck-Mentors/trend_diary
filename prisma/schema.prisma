@@ -17,7 +17,8 @@ datasource db {
 
 // 認証情報
 model Account {
-  accountId String    @id @map("account_id") @db.VarChar(1024)
+  /// グローバルなID, クライアントには公開しない
+  accountId BigInt    @id @default(autoincrement()) @map("account_id") @db.BigInt /// postgresqlの自動採番を使うための記法: https://www.prisma.io/docs/orm/reference/prisma-schema-reference#postgresql-3
   email     String    @unique @db.VarChar(1024)
   password  String    @db.VarChar(1024)
   lastLogin DateTime? @default(now()) @map("last_login") @db.Timestamptz()
@@ -30,13 +31,14 @@ model Account {
 }
 
 model User {
-  userId      String  @id @map("user_id") @db.VarChar(1024)
-  accountId   String  @map("account_id") @db.VarChar(1024)
-  displayName String? @map("display_name") @db.VarChar(1024)
-
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+  /// グローバルなID, クライアントには公開しない
+  userId      BigInt    @id @default(autoincrement()) @map("user_id") @db.BigInt /// postgresqlの自動採番を使うための記法: https://www.prisma.io/docs/orm/reference/prisma-schema-reference#postgresql-3
+  /// グローバルなID, クライアントには公開しない
+  accountId   BigInt    @map("account_id")
+  displayName String?   @map("display_name") @db.VarChar(1024)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@map("users")
 }
