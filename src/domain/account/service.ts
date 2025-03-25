@@ -39,12 +39,26 @@ export default class AccountService {
   }
 
   async login(accountId: UUID, plainPassword: string): Promise<boolean> {
+    // 存在確認
     const account = await this.accountRepository.findById(accountId);
     if (isNull(account)) throw ACCOUNT_NOT_FOUND;
 
-    return bcrypt.compare(plainPassword, account.password);
+    // パスワードの照合
+    const isPasswordMatch = await bcrypt.compare(plainPassword, account.password);
+    if (!isPasswordMatch) return false;
+
+    // 最終ログインを記録
+    account.recordLogin();
+    try {
+      await this.accountRepository.save(account);
+    } catch (error) {
+      throw ServerError.handle(error);
+    }
+
+    return true;
   }
 
+  // ログアウト
   async logout(accountId: UUID): Promise<void> {
     const account = await this.accountRepository.findById(accountId);
     if (isNull(account)) throw ACCOUNT_NOT_FOUND;
@@ -52,19 +66,7 @@ export default class AccountService {
     // TODO: 後でセッションの削除処理を追加
   }
 
-  async recordLogin(accountId: UUID): Promise<void> {
-    const account = await this.accountRepository.findById(accountId);
-    if (isNull(account)) throw ACCOUNT_NOT_FOUND;
-
-    account.recordLogin();
-
-    try {
-      await this.accountRepository.save(account);
-    } catch (error) {
-      throw ServerError.handle(error);
-    }
-  }
-
+  // アカウントの削除
   async deactivateAccount(accountId: UUID): Promise<void> {
     const account = await this.accountRepository.findById(accountId);
     if (isNull(account)) throw ACCOUNT_NOT_FOUND;
