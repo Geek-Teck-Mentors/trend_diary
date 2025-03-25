@@ -31,8 +31,10 @@ export default class AccountService {
 
     // アカウント作成 & ユーザー作成
     try {
-      const account = await this.accountRepository.createAccount(email, hashedPassword);
-      await this.userRepository.createUser(account.accountId);
+      await this.accountRepository.transaction(async () => {
+        const account = await this.accountRepository.createAccount(email, hashedPassword);
+        await this.userRepository.createUser(account.accountId);
+      });
     } catch (error) {
       throw ServerError.handle(error);
     }
