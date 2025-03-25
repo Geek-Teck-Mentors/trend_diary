@@ -20,7 +20,7 @@ model Account {
   accountId String    @id @map("account_id") @db.VarChar(1024)
   email     String    @unique @db.VarChar(1024)
   password  String    @db.VarChar(1024)
-  lastLogin DateTime? @map("last_login") @db.Timestamptz()
+  lastLogin DateTime? @default(now()) @map("last_login") @db.Timestamptz()
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
@@ -30,9 +30,9 @@ model Account {
 }
 
 model User {
-  userId      String @id @map("user_id") @db.VarChar(1024)
-  accountId   String @map("account_id") @db.VarChar(1024)
-  displayName String @map("display_name") @db.VarChar(1024)
+  userId      String  @id @map("user_id") @db.VarChar(1024)
+  accountId   String  @map("account_id") @db.VarChar(1024)
+  displayName String? @map("display_name") @db.VarChar(1024)
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
