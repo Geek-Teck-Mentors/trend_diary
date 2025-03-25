@@ -1,6 +1,10 @@
 {
   "name": "my-app",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,9 +17,15 @@
     "lint": "eslint --ext .ts,.tsx .",
     "lint:fix": "eslint --ext .ts,.tsx . --fix",
     "format": "prettier . --check",
-    "format:fix": "prettier . --write"
+    "format:fix": "prettier . --write",
+    "db:gen": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev --skip-seed",
+    "db:reset": "npx prisma migrate reset --skip-seed",
+    "db:studio": "npx prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "@prisma/extension-accelerate": "^1.2.2",
     "@remix-run/cloudflare": "^2.8.1",
     "@remix-run/cloudflare-pages": "^2.8.1",
     "@remix-run/react": "^2.8.1",
@@ -31,6 +41,7 @@
     "@cloudflare/workers-types": "^4.20241218.0",
     "@hono/vite-build": "^1.2.0",
     "@hono/vite-dev-server": "^0.18.1",
+    "@prisma/generator-helper": "^6.5.0",
     "@remix-run/dev": "^2.8.1",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
@@ -44,6 +55,8 @@
     "eslint-config-prettier": "^10.1.1",
     "prettier": "3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "prisma": "^6.5.0",
+    "prisma-erd-generator": "^2.0.4",
     "remix-hono": "^0.0.16",
     "tailwindcss": "^4.0.8",
     "typescript": "^5.7.3",

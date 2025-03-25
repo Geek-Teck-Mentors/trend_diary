@@ -1,0 +1,30 @@
+name: Check Prisma Schema
+description: 'Prismaのスキーマファイルが正しい形式であるかを検証します'
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'prisma/schema.prisma'
+      - '.github/workflows/check_prisma.yaml'
+
+env:
+  NODE_VERSION_FILE: .node-version
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: Prismaファイルの検証
+        run: npx prisma format --check
