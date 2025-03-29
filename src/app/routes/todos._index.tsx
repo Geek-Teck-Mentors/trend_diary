@@ -2,7 +2,7 @@ import { type LoaderFunctionArgs } from '@remix-run/cloudflare';
 import { useLoaderData } from '@remix-run/react';
 import React, { useState } from 'react';
 import { hc } from 'hono/client';
-import apiApp from '../../api/api.route';
+import apiApp from '../../api.route';
 import Todo from '../../../examples/todos/todo';
 import TodoList from '../../../examples/todos/presentation/TodoList';
 

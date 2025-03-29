@@ -10,10 +10,8 @@ export default class ServerError extends Error {
   // 例外をキャッチしてサーバーエラーのハンドリングを行う関数
   static handle(error: any): Error {
     if (error instanceof ServerError) return error;
+    if (error instanceof Error) return new ServerError(`${error.message}`);
 
-    if (error instanceof Error)
-      return new ServerError(`Failed to deactivate account: ${error.message}`);
-
-    return new ServerError(`Failed to deactivate account: ${error}`);
+    return new ServerError(`${error}`);
   }
 }

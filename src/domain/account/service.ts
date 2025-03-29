@@ -1,9 +1,10 @@
 import * as bcrypt from 'bcrypt';
-import { AccountRepository, UserRepository } from './repository';
-import UUID from '../../common/uuid';
+import { AccountRepository } from './repository';
 import { ACCOUNT_ALREADY_EXISTS, ACCOUNT_NOT_FOUND } from './error';
 import { isNull } from '../../common/typeUtility';
 import { ServerError } from '../../common/errors';
+import { UserRepository } from '../user/repository';
+import Account from './account';
 
 export default class AccountService {
   constructor(
@@ -11,7 +12,7 @@ export default class AccountService {
     private userRepository: UserRepository,
   ) {}
 
-  async signUp(email: string, plainPassword: string): Promise<void> {
+  async signUp(email: string, plainPassword: string): Promise<Account> {
     // 既にアカウントがあるかチェック
     const existingAccount = await this.accountRepository.findByEmail(email);
     if (existingAccount) throw ACCOUNT_ALREADY_EXISTS;
@@ -20,16 +21,18 @@ export default class AccountService {
 
     // アカウント作成 & ユーザー作成
     try {
-      await this.accountRepository.transaction(async () => {
+      return await this.accountRepository.transaction(async () => {
         const account = await this.accountRepository.createAccount(email, hashedPassword);
         await this.userRepository.createUser(account.accountId);
+
+        return account;
       });
     } catch (error) {
       throw ServerError.handle(error);
     }
   }
 
-  async login(accountId: UUID, plainPassword: string): Promise<boolean> {
+  async login(accountId: bigint, plainPassword: string): Promise<boolean> {
     // 存在確認
     const account = await this.accountRepository.findById(accountId);
     if (isNull(account)) throw ACCOUNT_NOT_FOUND;
@@ -50,7 +53,7 @@ export default class AccountService {
   }
 
   // ログアウト
-  async logout(accountId: UUID): Promise<void> {
+  async logout(accountId: bigint): Promise<void> {
     const account = await this.accountRepository.findById(accountId);
     if (isNull(account)) throw ACCOUNT_NOT_FOUND;
 
@@ -58,14 +61,12 @@ export default class AccountService {
   }
 
   // アカウントの削除
-  async deactivateAccount(accountId: UUID): Promise<void> {
+  async deactivateAccount(accountId: bigint): Promise<void> {
     const account = await this.accountRepository.findById(accountId);
     if (isNull(account)) throw ACCOUNT_NOT_FOUND;
 
-    account.deactivate();
-
     try {
-      await this.accountRepository.save(account);
+      await this.accountRepository.delete(account);
     } catch (error) {
       throw ServerError.handle(error);
     }
