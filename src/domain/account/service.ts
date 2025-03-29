@@ -1,6 +1,5 @@
 import * as bcrypt from 'bcrypt';
 import { AccountRepository, UserRepository } from './repository';
-import { accountSchema } from './schema';
 import UUID from '../../common/uuid';
 import { ACCOUNT_ALREADY_EXISTS, ACCOUNT_NOT_FOUND } from './error';
 import { isNull } from '../../common/typeUtility';
@@ -13,16 +12,6 @@ export default class AccountService {
   ) {}
 
   async signUp(email: string, plainPassword: string): Promise<void> {
-    const emailValidation = accountSchema.shape.email.safeParse(email);
-    if (!emailValidation.success) {
-      throw new Error(`Invalid email format: ${emailValidation.error.message}`);
-    }
-
-    const passwordValidation = accountSchema.shape.password.safeParse(plainPassword);
-    if (!passwordValidation.success) {
-      throw new Error(`Password does not meet requirements: ${passwordValidation.error.message}`);
-    }
-
     // 既にアカウントがあるかチェック
     const existingAccount = await this.accountRepository.findByEmail(email);
     if (existingAccount) throw ACCOUNT_ALREADY_EXISTS;
