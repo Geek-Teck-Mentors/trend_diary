@@ -1,2 +1,5 @@
+# VSCodeの設定ファイル
+.vscode/
+
 # prismaのER図自動生成ファイル
 prisma/ERD.md
