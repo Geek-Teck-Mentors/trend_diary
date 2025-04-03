@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    build: ./postgresql
     ports:
       - 5432:5432
     volumes:
@@ -10,7 +10,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: trend_diary
-    command: postgres
+      POSTGRES_INITDB_ARGS: "--locale=ja_JP.UTF-8"
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
 
 volumes:
   postgres_data:
