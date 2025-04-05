@@ -147,7 +147,7 @@ jobs:
       - name: PostgreSQLが起動するまで待機
         uses: ./.github/actions/backoff
         with:
-          command: "docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres"
+          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
           fail_command: docker compose down
 
       - name: DB Migration
