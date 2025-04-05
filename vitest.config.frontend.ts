@@ -14,6 +14,8 @@ export default defineConfig({
       'src/logger/**/*',
       'src/lib/utils.ts',
     ],
+    // テストファイルがない場合にエラーになるため、テストファイルがない場合でも正常終了とする
+    passWithNoTests: true,
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
       include: ['src/app/**/*', 'src/components/**/*'],
