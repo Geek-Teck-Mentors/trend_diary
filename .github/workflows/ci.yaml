@@ -145,28 +145,10 @@ jobs:
         run: docker compose build && docker compose up -d
 
       - name: PostgreSQLが起動するまで待機
-        run: |
-          echo "PostgreSQLの起動を待機中..."
-          # PostgreSQLが応答するまで待機
-          MAX_RETRIES=30
-          RETRY_INTERVAL=2
-          count=0
-
-          until docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres 2>/dev/null || [ $count -eq $MAX_RETRIES ]; do
-            echo "PostgreSQL起動待機中... ($count/$MAX_RETRIES)"
-            sleep $RETRY_INTERVAL
-            count=$((count+1))
-          done
-
-          if [ $count -eq $MAX_RETRIES ]; then
-            echo "PostgreSQLの起動タイムアウト"
-            docker logs $(docker ps -q -f name=postgres)
-            exit 1
-          fi
-
-          echo "PostgreSQL起動完了"
-          # データベースが安定するまでさらに待機
-          sleep 3
+        uses: ./.github/actions/backoff
+        with:
+          command: "docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres"
+          fail_command: docker compose down
 
       - name: DB Migration
         run: npm run db:migrate
