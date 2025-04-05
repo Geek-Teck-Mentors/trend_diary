@@ -24,7 +24,7 @@ concurrency:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
-  DATABASE_URL: postgresql://postgres:password@localhost/trend_diary
+  DATABASE_URL: postgresql://postgres:password@localhost:5432/trend_diary
 
 jobs:
   setup-config:
