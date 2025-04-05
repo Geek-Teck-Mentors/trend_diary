@@ -5,6 +5,18 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   test: {
     globals: true,
+    include: ['src/**/*.test.ts'],
+    exclude: [
+      'src/components/ui/**/*',
+      'src/domain/**/*',
+      'src/common/**/*',
+      'src/middleware/**/*',
+      'src/logger/**/*',
+      'src/lib/utils.ts',
+      'src/app/**/*',
+      'src/components/**/*',
+      'src/domain/**/repository/*.ts',
+    ],
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
       thresholds: {
