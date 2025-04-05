@@ -83,6 +83,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       test_runner: ubuntu-latest
+      run_frontend_test: ${{ steps.check-frontend.outputs.diff-count != 0 }}
+      run_backend_test: ${{ steps.check-backend.outputs.diff-count != 0 }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -136,6 +138,12 @@ jobs:
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: PostgreSQLのセットアップ
+        run: docker compose up -d
+
+      - name: DB Migration
+        run: npm run db:migrate
 
       - name: バックエンドのテスト
         uses: ./.github/actions/test_cov
