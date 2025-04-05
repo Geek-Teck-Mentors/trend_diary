@@ -18,6 +18,8 @@ export default defineConfig({
         'src/app/**/*',
         'src/middleware/**/*',
         'src/logger/**/*',
+        'src/lib/**/*',
+        'src/components/**/*',
         'src/domain/**/repository/*.ts',
       ],
     },

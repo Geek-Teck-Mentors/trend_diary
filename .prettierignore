@@ -3,3 +3,7 @@
 
 # prismaのER図自動生成ファイル
 prisma/ERD.md
+
+# shadcnのコンポーネントの自動生成ファイル
+src/components/ui
+src/lib/utils.ts

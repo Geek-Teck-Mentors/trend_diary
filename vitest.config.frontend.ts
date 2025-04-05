@@ -7,7 +7,8 @@ export default defineConfig({
     globals: true,
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
-      include: ['src/app/*'],
+      include: ['src/app/**/*', 'src/components/**/*'],
+      exclude: ['src/components/ui/**/*'],
     },
   },
 });
