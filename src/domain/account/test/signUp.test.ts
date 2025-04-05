@@ -13,7 +13,7 @@ describe('POST /api/account', () => {
     await db.$queryRaw`TRUNCATE TABLE "users";`;
   }
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     await cleanUp();
   });
 
@@ -21,14 +21,20 @@ describe('POST /api/account', () => {
     await cleanUp();
   });
 
-  it('正常系', async () => {
-    const res = await app.request(
+  async function requestShort(body: string) {
+    return app.request(
       '/api/account',
       {
         method: 'POST',
-        body: JSON.stringify({ email: 'test@test.com', password: 'test_password' }),
+        body,
       },
       env,
+    );
+  }
+
+  it('正常系', async () => {
+    const res = await requestShort(
+      JSON.stringify({ email: 'signup@test.com', password: 'test_password' }),
     );
 
     expect(res.status).toBe(201);
@@ -36,6 +42,32 @@ describe('POST /api/account', () => {
     expect(body).toEqual({
       accountId: expect.any(String),
       email: expect.any(String),
+    });
+  });
+
+  describe('異常系', async () => {
+    const testCases: Array<{
+      name: string;
+      input: string | { email: string; password: string };
+      status: number;
+    }> = [
+      {
+        name: '不正なメールアドレス',
+        input: { email: 'invalid-email', password: 'test_password' },
+        status: 422,
+      },
+      {
+        name: '不正なパスワード',
+        input: { email: 'test@test.com', password: 'abc' },
+        status: 422,
+      },
+    ];
+
+    testCases.forEach((testCase) => {
+      it(testCase.name, async () => {
+        const res = await requestShort(JSON.stringify(testCase.input));
+        expect(res.status).toBe(testCase.status);
+      });
     });
   });
 });

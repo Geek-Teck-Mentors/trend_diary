@@ -13,7 +13,7 @@ describe('AccountService', () => {
     await db.$queryRaw`TRUNCATE TABLE "users";`;
   }
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     await cleanUp();
   });
 
@@ -23,7 +23,7 @@ describe('AccountService', () => {
 
   describe('signUp', () => {
     it('正常系', async () => {
-      const email = 'test@test.com';
+      const email = 'signup_service@test.com';
       const plainPassword = 'password';
       const res = await service.signUp(email, plainPassword);
 
@@ -39,14 +39,13 @@ describe('AccountService', () => {
       expect(res.updatedAt).not.toBeNull();
     });
 
-    it('異常系: すでに存在するメールアドレス', async () => {
+    it('異常系: 既に存在するメールアドレス', async () => {
       // 一旦一度作成する
-      const email = 'test@test.com';
+      const email = 'signup_service2@test.com';
       const plainPassword = 'password';
       await service.signUp(email, plainPassword);
 
       // もう一度同じメールアドレスで作成しようとする
-
       await expect(service.signUp(email, plainPassword)).rejects.toThrow(AlreadyExistsError);
     });
   });
