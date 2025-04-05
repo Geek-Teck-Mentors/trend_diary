@@ -24,6 +24,7 @@ concurrency:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
+  DATABASE_URL: postgresql://postgres:password@localhost/trend_diary
 
 jobs:
   setup-config:
@@ -138,12 +139,19 @@ jobs:
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
+      # Dockerのキャッシュ
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./docker
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: PostgreSQLのセットアップ
-        run: docker compose up -d
+        run: docker compose build && docker compose up -d
 
       - name: DB Migration
-        run: DATABASE_URL=postgresql://postgres:password@localhost/trend_diary npm run db:migrate
+        run: npm run db:migrate
 
       - name: バックエンドのテスト
         uses: ./.github/actions/test_cov
