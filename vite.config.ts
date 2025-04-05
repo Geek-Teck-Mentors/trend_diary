@@ -32,4 +32,7 @@ export default defineConfig({
   optimizeDeps: {
     entries: [],
   },
+  test: {
+    globals: true,
+  },
 });
