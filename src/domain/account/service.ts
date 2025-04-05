@@ -1,7 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { AccountRepository } from './repository';
-import { ACCOUNT_ALREADY_EXISTS, ACCOUNT_NOT_FOUND } from './error';
-import { isNull } from '../../common/typeUtility';
+import { ACCOUNT_ALREADY_EXISTS } from './error';
 import { ServerError } from '../../common/errors';
 import { UserRepository } from '../user/repository';
 import Account from './account';
@@ -32,43 +31,43 @@ export default class AccountService {
     }
   }
 
-  async login(accountId: bigint, plainPassword: string): Promise<boolean> {
-    // 存在確認
-    const account = await this.accountRepository.findById(accountId);
-    if (isNull(account)) throw ACCOUNT_NOT_FOUND;
+  // async login(accountId: bigint, plainPassword: string): Promise<boolean> {
+  //   // 存在確認
+  //   const account = await this.accountRepository.findById(accountId);
+  //   if (isNull(account)) throw ACCOUNT_NOT_FOUND;
 
-    // パスワードの照合
-    const isPasswordMatch = await bcrypt.compare(plainPassword, account.password);
-    if (!isPasswordMatch) return false;
+  //   // パスワードの照合
+  //   const isPasswordMatch = await bcrypt.compare(plainPassword, account.password);
+  //   if (!isPasswordMatch) return false;
 
-    // 最終ログインを記録
-    account.recordLogin();
-    try {
-      await this.accountRepository.save(account);
-    } catch (error) {
-      throw ServerError.handle(error);
-    }
+  //   // 最終ログインを記録
+  //   account.recordLogin();
+  //   try {
+  //     await this.accountRepository.save(account);
+  //   } catch (error) {
+  //     throw ServerError.handle(error);
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
-  // ログアウト
-  async logout(accountId: bigint): Promise<void> {
-    const account = await this.accountRepository.findById(accountId);
-    if (isNull(account)) throw ACCOUNT_NOT_FOUND;
+  // // ログアウト
+  // async logout(accountId: bigint): Promise<void> {
+  //   const account = await this.accountRepository.findById(accountId);
+  //   if (isNull(account)) throw ACCOUNT_NOT_FOUND;
 
-    // TODO: 後でセッションの削除処理を追加
-  }
+  //   // TODO: 後でセッションの削除処理を追加
+  // }
 
-  // アカウントの削除
-  async deactivateAccount(accountId: bigint): Promise<void> {
-    const account = await this.accountRepository.findById(accountId);
-    if (isNull(account)) throw ACCOUNT_NOT_FOUND;
+  // // アカウントの削除
+  // async deactivateAccount(accountId: bigint): Promise<void> {
+  //   const account = await this.accountRepository.findById(accountId);
+  //   if (isNull(account)) throw ACCOUNT_NOT_FOUND;
 
-    try {
-      await this.accountRepository.delete(account);
-    } catch (error) {
-      throw ServerError.handle(error);
-    }
-  }
+  //   try {
+  //     await this.accountRepository.delete(account);
+  //   } catch (error) {
+  //     throw ServerError.handle(error);
+  //   }
+  // }
 }

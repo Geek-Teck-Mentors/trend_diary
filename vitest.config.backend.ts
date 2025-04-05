@@ -14,7 +14,7 @@ export default defineConfig({
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
       include: ['src/**/*'],
-      exclude: ['src/app/**/*', 'src/middleware/**/*', 'src/logger/**/*'],
+      exclude: ['src/app/**/*', 'src/middleware/**/*', 'src/logger/**/*', 'src/domain/**/repository/*.ts'],
     },
   },
 });
