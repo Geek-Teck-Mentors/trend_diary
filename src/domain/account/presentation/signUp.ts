@@ -42,10 +42,18 @@ export default async function signUp(c: Context<Env>) {
   try {
     const account = await service.signUp(valid.data.email, valid.data.password);
     logger.info('sign up success', { accountId: account.accountId.toString() });
+
+    return c.json(
+      {
+        accountId: account.accountId.toString(),
+        email: account.email,
+      },
+      201,
+    );
   } catch (error) {
     if (error instanceof AlreadyExistsError) {
       throw new HTTPException(409, {
-        message: 'Account already exists',
+        message: error.message,
       });
     }
 
@@ -57,5 +65,8 @@ export default async function signUp(c: Context<Env>) {
     }
 
     logger.error('unknown error', error);
+    throw new HTTPException(500, {
+      message: 'unknown error',
+    });
   }
 }

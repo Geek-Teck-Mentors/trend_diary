@@ -1,7 +1,9 @@
+import { Prisma } from '@prisma/client';
 import { Nullable } from '../../../common/typeUtility';
 import { RdbClient, TransactionManager } from '../../../infrastructure/rdb';
 import Account from '../account';
 import { AccountRepository } from '../repository';
+import { AlreadyExistsError } from '../../../common/errors';
 
 export default class AccountRepositoryImpl extends TransactionManager implements AccountRepository {
   constructor(private db: RdbClient) {
@@ -9,22 +11,31 @@ export default class AccountRepositoryImpl extends TransactionManager implements
   }
 
   async createAccount(email: string, hashedPassword: string): Promise<Account> {
-    const account = await this.db.account.create({
-      data: {
-        email,
-        password: hashedPassword,
-      },
-    });
+    try {
+      const account = await this.db.account.create({
+        data: {
+          email,
+          password: hashedPassword,
+        },
+      });
 
-    return new Account(
-      account.accountId,
-      account.email,
-      account.password,
-      account.lastLogin ?? undefined,
-      account.createdAt,
-      account.updatedAt,
-      account.deletedAt ?? undefined,
-    );
+      return new Account(
+        account.accountId,
+        account.email,
+        account.password,
+        account.lastLogin ?? undefined,
+        account.createdAt,
+        account.updatedAt,
+        account.deletedAt ?? undefined,
+      );
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new AlreadyExistsError(error.message);
+        }
+      }
+      throw error;
+    }
   }
 
   async findById(accountId: bigint): Promise<Nullable<Account>> {

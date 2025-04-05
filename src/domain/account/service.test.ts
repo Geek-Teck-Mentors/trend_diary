@@ -1,6 +1,6 @@
+import { AlreadyExistsError } from '../../common/errors';
 import getRdbClient from '../../infrastructure/rdb';
 import UserRepositoryImpl from '../user/repository/userRepository';
-import { ACCOUNT_ALREADY_EXISTS } from './error';
 import AccountRepositoryImpl from './repository/accountRepository';
 import AccountService from './service';
 
@@ -8,9 +8,17 @@ describe('AccountService', () => {
   const db = getRdbClient(process.env.DATABASE_URL ?? '');
   const service = new AccountService(new AccountRepositoryImpl(db), new UserRepositoryImpl(db));
 
-  beforeEach(async () => {
+  async function cleanUp() {
     await db.$queryRaw`TRUNCATE TABLE "accounts";`;
     await db.$queryRaw`TRUNCATE TABLE "users";`;
+  }
+
+  beforeEach(async () => {
+    await cleanUp();
+  });
+
+  afterAll(async () => {
+    await cleanUp();
   });
 
   describe('signUp', () => {
@@ -38,10 +46,8 @@ describe('AccountService', () => {
       await service.signUp(email, plainPassword);
 
       // もう一度同じメールアドレスで作成しようとする
-      // Promiseのエラーをテストする: https://vitest.dev/api/expect.html#tothrowerror
-      await expect(service.signUp(email, plainPassword)).rejects.toThrowError(
-        ACCOUNT_ALREADY_EXISTS,
-      );
+
+      await expect(service.signUp(email, plainPassword)).rejects.toThrow(AlreadyExistsError);
     });
   });
 });

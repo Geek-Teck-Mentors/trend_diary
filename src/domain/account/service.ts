@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import { AccountRepository } from './repository';
 import { ACCOUNT_ALREADY_EXISTS } from './error';
-import { ServerError } from '../../common/errors';
+import { AlreadyExistsError, ServerError } from '../../common/errors';
 import { UserRepository } from '../user/repository';
 import Account from './account';
 
@@ -27,6 +27,7 @@ export default class AccountService {
         return account;
       });
     } catch (error) {
+      if (error instanceof AlreadyExistsError) throw ACCOUNT_ALREADY_EXISTS;
       throw ServerError.handle(error);
     }
   }
