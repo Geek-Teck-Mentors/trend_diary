@@ -5,13 +5,12 @@ services:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./postgresql/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgresql/setup_config.sql:/docker-entrypoint-initdb.d/setup_config.sql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: trend_diary
-      POSTGRES_INITDB_ARGS: "--locale=ja_JP.UTF-8"
-    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    command: postgres
 
 volumes:
   postgres_data:
