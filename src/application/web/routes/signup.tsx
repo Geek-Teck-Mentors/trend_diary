@@ -1,6 +1,6 @@
 import React from 'react';
 import type { MetaFunction } from '@remix-run/cloudflare';
-import { Button } from '../../components/ui/button';
+import { Button } from '@/application/web/components/ui/button';
 import {
   Card,
   CardContent,
@@ -8,10 +8,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../../components/ui/card';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Separator } from '../../components/ui/separator';
+} from '@/application/web/components/ui/card';
+import { Input } from '@/application/web/components/ui/input';
+import { Label } from '@/application/web/components/ui/label';
+import { Separator } from '@/application/web/components/ui/separator';
 
 export const meta: MetaFunction = () => [{ title: 'アカウント登録 | マイアプリ' }];
 

@@ -15,7 +15,7 @@
     "dist/",
     "coverage/",
     "build/",
-    "src/components/ui",
-    "src/lib/utils.ts"
+    "src/application/web/components/ui",
+    "src/application/web/lib/utils.ts"
   ]
 }
