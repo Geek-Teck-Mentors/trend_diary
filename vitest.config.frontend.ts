@@ -3,6 +3,14 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        find: '@',
+        replacement: '/src',
+      },
+    ],
+  },
   test: {
     globals: true,
     include: ['src/app/**/*.test.ts', 'src/components/**/*.test.ts'],

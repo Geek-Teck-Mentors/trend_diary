@@ -2,9 +2,23 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
 
+// ci環境ではDATABASE_URLが設定されているため
+const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';
+
 export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        find: '@',
+        replacement: '/src',
+      },
+    ],
+  },
   test: {
     globals: true,
+    env: {
+      DATABASE_URL: dbUrl,
+    },
     include: ['src/**/*.test.ts'],
     exclude: [
       'src/app/**/*',
