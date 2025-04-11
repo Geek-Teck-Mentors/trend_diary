@@ -33,7 +33,7 @@ export default defineConfig({
     build(),
     devServer({
       adapter,
-      entry: 'src/server.ts',
+      entry: 'src/application/server.ts',
       exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/web/**'],
       injectClientScript: false,
     }),

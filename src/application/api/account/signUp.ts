@@ -1,13 +1,13 @@
 import { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { AlreadyExistsError, ServerError } from '../../../common/errors';
-import getRdbClient from '../../../infrastructure/rdb';
-import UserRepositoryImpl from '../../user/repository/userRepository';
-import AccountRepositoryImpl from '../repository/accountRepository';
-import { accountSchema } from '../schema';
-import AccountService from '../service';
+import { AlreadyExistsError, ServerError } from '@/common/errors';
+import getRdbClient from '@/infrastructure/rdb';
+import UserRepositoryImpl from '@/domain/user/repository/userRepository';
+import AccountRepositoryImpl from '@/domain/account/repository/accountRepository';
+import { accountSchema } from '@/domain/account/schema';
+import AccountService from '@/domain/account/service';
 import { logger } from '../../../logger/logger';
-import { Env } from '../../../env';
+import { Env } from '../env';
 
 export default async function signUp(c: Context<Env>) {
   let body;

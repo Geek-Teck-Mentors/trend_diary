@@ -4,8 +4,8 @@ import { Hono } from 'hono';
 import { timeout } from 'hono/timeout';
 import loggerMiddleware from './middleware/requestLogger';
 import errorHandler from './middleware/errorHandler';
-import { Env } from './env';
-import apiApp from './api.route';
+import { Env } from './api/env';
+import apiApp from './api/route';
 
 const app = new Hono<Env>();
 
