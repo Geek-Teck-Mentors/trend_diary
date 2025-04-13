@@ -16,6 +16,15 @@ export default defineConfig({
       externalConditions: ['workerd', 'worker'],
     },
   },
+  resolve: {
+    alias: [
+      // viteではtsconfigに加えて、以下の設定も必要
+      {
+        find: '@',
+        replacement: '/src',
+      },
+    ],
+  },
   plugins: [
     tailwindcss(),
     remix({
@@ -31,5 +40,8 @@ export default defineConfig({
   ],
   optimizeDeps: {
     entries: [],
+  },
+  test: {
+    globals: true,
   },
 });

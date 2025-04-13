@@ -3,11 +3,38 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        find: '@',
+        replacement: '/src',
+      },
+    ],
+  },
   test: {
     globals: true,
+    include: ['src/app/**/*.test.ts', 'src/components/**/*.test.ts'],
+    exclude: [
+      'src/components/ui/**/*',
+      'src/domain/**/*',
+      'src/common/**/*',
+      'src/middleware/**/*',
+      'src/logger/**/*',
+      'src/lib/utils.ts',
+    ],
+    // テストファイルがない場合にエラーになるため、テストファイルがない場合でも正常終了とする
+    passWithNoTests: true,
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
-      include: ['src/app/*'],
+      include: ['src/app/**/*', 'src/components/**/*'],
+      exclude: [
+        'src/components/ui/**/*',
+        'src/domain/**/*',
+        'src/common/**/*',
+        'src/middleware/**/*',
+        'src/logger/**/*',
+        'src/lib/utils.ts',
+      ],
     },
   },
 });

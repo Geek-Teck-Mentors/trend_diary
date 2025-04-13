@@ -11,5 +11,8 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["Supabase"]
+  "cSpell.words": [
+    "Supabase",
+    "Timestamptz"
+  ]
 }

@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
-// TODO: 検証終わり次第、importを消す
-import todoApp from '../examples/todos/presentation/route';
+import accountApp from './domain/account/presentation/route';
 
-const app = new Hono().route('/todos', todoApp);
+const app = new Hono().route('/account', accountApp);
 
 export default app;

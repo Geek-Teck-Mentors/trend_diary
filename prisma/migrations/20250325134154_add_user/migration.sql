@@ -2,7 +2,7 @@
 CREATE TABLE "users" (
     "user_id" BIGSERIAL NOT NULL,
     "account_id" BIGINT NOT NULL,
-    "display_name" VARCHAR(1024) NOT NULL,
+    "display_name" VARCHAR(1024),
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP NOT NULL,
 
