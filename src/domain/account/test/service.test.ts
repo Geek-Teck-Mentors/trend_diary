@@ -1,7 +1,8 @@
-import { AlreadyExistsError } from '../../../common/errors';
-import getRdbClient from '../../../infrastructure/rdb';
-import UserRepositoryImpl from '../../user/repository/userRepository';
-import AccountRepositoryImpl from '../repository/accountRepository';
+import AccountRepositoryImpl from '@/domain/repository/accountRepository';
+import { AlreadyExistsError } from '@/common/errors';
+import getRdbClient from '@/infrastructure/rdb';
+import UserRepositoryImpl from '@/domain/repository/userRepository';
+
 import AccountService from '../service';
 
 describe('AccountService', () => {
