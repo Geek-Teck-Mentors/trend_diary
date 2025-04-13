@@ -6,8 +6,8 @@ import UserRepositoryImpl from '@/domain/user/repository/userRepository';
 import AccountRepositoryImpl from '@/domain/account/repository/accountRepository';
 import { accountSchema } from '@/domain/account/schema';
 import AccountService from '@/domain/account/service';
-import { logger } from '../../../logger/logger';
-import { Env } from '../env';
+import { logger } from '@/logger/logger';
+import { Env } from '@/application/env';
 
 export default async function signUp(c: Context<Env>) {
   let body;
