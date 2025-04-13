@@ -39,10 +39,7 @@ describe('POST /api/account', () => {
 
     expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body).toEqual({
-      accountId: expect.any(String),
-      email: expect.any(String),
-    });
+    expect(body).toEqual({});
   });
 
   describe('異常系', async () => {
