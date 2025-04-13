@@ -1,11 +1,11 @@
-import { baseSchema } from '../baseSchema';
+import { baseSchema, deletedAtSchema } from '../baseSchema';
 
 describe('baseSchema', () => {
   const validBase = {
     createdAt: new Date(),
     updatedAt: new Date(),
-    deletedAt: undefined,
   };
+
   describe('createdAt と updatedAt', () => {
     it('日付型のcreatedAtとupdatedAtを受け入れること', () => {
       expect(() => {
@@ -35,27 +35,30 @@ describe('baseSchema', () => {
       }).toThrow();
     });
   });
+});
+
+describe('deletedAtSchema', () => {
+  const validBase = {
+    deletedAt: new Date(),
+  };
 
   describe('deletedAt', () => {
     it('deletedAtが日付型の場合に受け入れること', () => {
       expect(() => {
-        baseSchema.parse({
-          ...validBase,
-          deletedAt: new Date(),
-        });
+        deletedAtSchema.parse(validBase);
       }).not.toThrow();
     });
 
     it('deletedAtがundefinedの場合に受け入れること', () => {
-      const { deletedAt, ...accountWithoutDeletedAt } = validBase;
+      const { deletedAt, ...withoutDeletedAt } = validBase;
       expect(() => {
-        baseSchema.parse(accountWithoutDeletedAt);
+        deletedAtSchema.parse(withoutDeletedAt);
       }).not.toThrow();
     });
 
     it('日付型でないdeletedAtを拒否すること', () => {
       expect(() => {
-        baseSchema.parse({
+        deletedAtSchema.parse({
           ...validBase,
           deletedAt: 'not-a-date',
         });
@@ -64,7 +67,7 @@ describe('baseSchema', () => {
 
     it('nullのdeletedAtを拒否すること', () => {
       expect(() => {
-        baseSchema.parse({
+        deletedAtSchema.parse({
           ...validBase,
           deletedAt: null,
         });
