@@ -105,7 +105,7 @@ jobs:
         uses: ./.github/actions/diff
         with:
           subdir: src
-          exclude_pattern: 'src/app/ src/middleware/ src/logger/ src/lib src/components/'
+          exclude_pattern: 'src/application/web/ src/application/middleware/ src/logger/'
 
       - name: 差分結果の表示
         run: |
