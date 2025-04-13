@@ -1,5 +1,5 @@
-import getRdbClient from '../../../infrastructure/rdb';
-import app from '../../../server';
+import getRdbClient from '@/infrastructure/rdb';
+import app from '../../server';
 
 const env = {
   DATABASE_URL: process.env.DATABASE_URL,

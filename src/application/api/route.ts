@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import accountApp from './domain/account/presentation/route';
+import accountApp from '@/application/api/account/route';
 
 const app = new Hono().route('/account', accountApp);
 

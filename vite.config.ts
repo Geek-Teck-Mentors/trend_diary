@@ -28,13 +28,13 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     remix({
-      appDirectory: 'src/app',
+      appDirectory: 'src/application/web',
     }),
     build(),
     devServer({
       adapter,
-      entry: 'src/server.ts',
-      exclude: [...defaultOptions.exclude, '/assets/**', '/src/app/**'],
+      entry: 'src/application/server.ts',
+      exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/web/**'],
       injectClientScript: false,
     }),
   ],

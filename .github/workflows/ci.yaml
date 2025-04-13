@@ -97,15 +97,15 @@ jobs:
         id: check-frontend
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/app src/components'
-          exclude_pattern: 'src/components/ui'
+          subdir: 'src/application/web src/application/web/components'
+          exclude_pattern: 'src/application/web/components/ui'
 
       - name: バックエンドの差分チェック
         id: check-backend
         uses: ./.github/actions/diff
         with:
           subdir: src
-          exclude_pattern: 'src/app/ src/middleware/ src/logger/ src/lib src/components/'
+          exclude_pattern: 'src/application/web/ src/application/middleware/ src/logger/'
 
       - name: 差分結果の表示
         run: |

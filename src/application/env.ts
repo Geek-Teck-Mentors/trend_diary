@@ -1,4 +1,4 @@
-import { logger } from './logger/logger';
+import { logger } from '@/logger/logger';
 import CONTEXT_KEY from './middleware/context';
 
 export type Env = {
