@@ -29,6 +29,7 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 
   if (!result.success) {
+    // Response.jsonを使った実装例があまりにも少ないため、deprecatedでも利用する
     return json(
       {
         errors: result.error.flatten().fieldErrors,
@@ -117,7 +118,7 @@ export default function Signup() {
             </Button>
             <Separator className='bg-slate-700' />
             <div className='text-center text-sm text-slate-400'>
-              すでにアカウントをお持ちですか？{' '}
+              既にアカウントをお持ちですか？{' '}
               <a href='/login' className='text-slate-300 underline hover:text-slate-50'>
                 ログイン
               </a>
