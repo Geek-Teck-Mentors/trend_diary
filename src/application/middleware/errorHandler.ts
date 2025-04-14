@@ -9,7 +9,7 @@ const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
   if (err instanceof HTTPException) {
     return c.json(
       {
-        msg: err.message,
+        message: err.message,
       },
       {
         status: err.status,
