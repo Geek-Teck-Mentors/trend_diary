@@ -43,7 +43,7 @@ export default async function signUp(c: Context<Env>) {
     const account = await service.signUp(valid.data.email, valid.data.password);
     logger.info('sign up success', { accountId: account.accountId.toString() });
 
-    return c.json({}, 201);
+    return c.status(201);
   } catch (error) {
     if (error instanceof AlreadyExistsError) {
       throw new HTTPException(409, {
