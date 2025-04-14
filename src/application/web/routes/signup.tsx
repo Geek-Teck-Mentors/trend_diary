@@ -16,7 +16,7 @@ import { Separator } from '@/application/web/components/ui/separator';
 import { accountSchema } from '@/domain/account/schema';
 import getApiClient from '@/infrastructure/api';
 
-export const meta: MetaFunction = () => [{ title: 'アカウント登録 | TrendDiary' }];
+export const meta: MetaFunction = () => [{ title: 'アカウント作成 | TrendDiary' }];
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
