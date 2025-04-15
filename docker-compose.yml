@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: trend_diary
+      POSTGRES_DB: postgres
     command: postgres
 
 volumes:
