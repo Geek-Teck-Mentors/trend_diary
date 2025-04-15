@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: trend_diary
+      POSTGRES_DB: postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
     command: postgres
 
 volumes:
