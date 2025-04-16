@@ -3,10 +3,9 @@
 import { defineConfig } from 'vite';
 import { coverageReporter, srcAlias } from './config';
 
-// テスト対象とするファイルパスを定義
 const testInclude = ['src/application/web/**/*.test.ts'];
 
-// カバレッジから除外するファイルパスを定義
+const coverageInclude = ['src/application/web/**/*', 'src/application/web/components/**/*'];
 const coverageExclude = [
   'src/application/api/**/*',
   'src/application/middleware/**/*',
@@ -28,7 +27,7 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       reporter: coverageReporter,
-      include: ['src/application/web/**/*', 'src/application/web/components/**/*'],
+      include: coverageInclude,
       exclude: coverageExclude,
     },
   },
