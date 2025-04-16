@@ -9,7 +9,8 @@ const includeDirs = ['src/application/api', 'src/domain', 'src/common'];
 const includeFiles = includeDirs.map((dir) => `${dir}/**/*.test.ts`);
 const includeCoverageDirs = includeDirs.map((dir) => `${dir}/**/*`);
 
-const excludeDirs = ['src/domain/repository/*'];
+// exclude対象はリポジトリのファイルのみを指定
+const exclude = ['src/domain/repository/**/*'];
 
 export default defineConfig({
   resolve: {
@@ -26,7 +27,7 @@ export default defineConfig({
       DATABASE_URL: dbUrl,
     },
     include: includeFiles,
-    exclude: excludeDirs,
+    exclude,
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
       thresholds: {
@@ -36,7 +37,7 @@ export default defineConfig({
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
       include: includeCoverageDirs,
-      exclude: excludeDirs,
+      exclude,
     },
   },
 });
