@@ -6,6 +6,17 @@ import { coverageReporter, srcAlias } from './config';
 // ci環境ではDATABASE_URLが設定されているため
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';
 
+const testInclude = ['src/**/*.test.ts'];
+const testExclude = [
+  'src/application/middleware/**/*',
+  'src/logger/**/*',
+  'src/application/web/**/*',
+  'src/domain/repository/*',
+];
+
+const coverageInclude = ['src/**/*'];
+const coverageExclude = [...testExclude];
+
 export default defineConfig({
   resolve: {
     alias: [srcAlias],
@@ -15,13 +26,8 @@ export default defineConfig({
     env: {
       DATABASE_URL: dbUrl,
     },
-    include: ['src/**/*.test.ts'],
-    exclude: [
-      'src/application/middleware/**/*',
-      'src/logger/**/*',
-      'src/application/web/**/*',
-      'src/domain/repository/*',
-    ],
+    include: testInclude,
+    exclude: testExclude,
     coverage: {
       reporter: coverageReporter,
       thresholds: {
@@ -30,13 +36,8 @@ export default defineConfig({
         functions: 60, // 関数網羅, 関数の実行パスの通過率
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
-      include: ['src/**/*'],
-      exclude: [
-        'src/application/middleware/**/*',
-        'src/application/web/**/*',
-        'src/logger/**/*',
-        'src/domain/repository/*',
-      ],
+      include: coverageInclude,
+      exclude: coverageExclude,
     },
   },
 });
