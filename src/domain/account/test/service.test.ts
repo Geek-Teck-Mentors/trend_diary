@@ -22,11 +22,11 @@ describe('AccountService', () => {
     await cleanUp();
   });
 
-  describe('signUp', () => {
+  describe('signup', () => {
     it('正常系', async () => {
       const email = 'signup_service@test.com';
       const plainPassword = 'password';
-      const res = await service.signUp(email, plainPassword);
+      const res = await service.signup(email, plainPassword);
 
       expect(res).toBeDefined();
       expect(res.email).toBe(email);
@@ -44,10 +44,10 @@ describe('AccountService', () => {
       // 一旦一度作成する
       const email = 'signup_service2@test.com';
       const plainPassword = 'password';
-      await service.signUp(email, plainPassword);
+      await service.signup(email, plainPassword);
 
       // もう一度同じメールアドレスで作成しようとする
-      await expect(service.signUp(email, plainPassword)).rejects.toThrow(AlreadyExistsError);
+      await expect(service.signup(email, plainPassword)).rejects.toThrow(AlreadyExistsError);
     });
   });
 });

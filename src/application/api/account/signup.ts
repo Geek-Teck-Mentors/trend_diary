@@ -9,7 +9,7 @@ import AccountService from '@/domain/account/service';
 import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
 
-export default async function signUp(c: Context<Env>) {
+export default async function signup(c: Context<Env>) {
   let body;
   try {
     body = await c.req.json();
@@ -40,7 +40,7 @@ export default async function signUp(c: Context<Env>) {
   const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb));
 
   try {
-    const account = await service.signUp(valid.data.email, valid.data.password);
+    const account = await service.signup(valid.data.email, valid.data.password);
     logger.info('sign up success', { accountId: account.accountId.toString() });
 
     return c.json({}, 201);
