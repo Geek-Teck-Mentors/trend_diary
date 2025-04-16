@@ -6,15 +6,15 @@ import { coverageReporter, srcAlias } from './config';
 // ci環境ではDATABASE_URLが設定されているため
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';
 
-const testInclude = ['src/**/*.test.ts'];
-const testExclude = [
-  'src/application/middleware/**/*',
-  'src/logger/**/*',
-  'src/application/web/**/*',
-  'src/domain/repository/*',
+const testInclude = [
+  'src/application/api/**/*.test.ts',
+  'src/domain/**/*.test.ts',
+  'src/common/**/*.test.ts',
 ];
 
-const coverageInclude = ['src/**/*'];
+const testExclude = ['src/domain/repository/*'];
+
+const coverageInclude = ['src/application/api/*', 'src/domain/**/*', 'src/common/**/*'];
 const coverageExclude = [...testExclude];
 
 export default defineConfig({
