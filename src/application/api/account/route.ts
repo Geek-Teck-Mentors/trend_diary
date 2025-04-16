@@ -4,5 +4,3 @@ import signUp from './signUp';
 const app = new Hono().post('/', signUp);
 
 export default app;
-
-// テストを回すためにコメント追加
