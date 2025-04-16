@@ -6,15 +6,14 @@ import { coverageReporter, srcAlias } from './config';
 // ci環境ではDATABASE_URLが設定されているため
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';
 
-const testInclude = [
-  'src/application/api/**/*.test.ts',
-  'src/domain/**/*.test.ts',
-  'src/common/**/*.test.ts',
-];
+const testTargetPaths = ['src/application/api', 'src/domain', 'src/common'];
+
+const testInclude = testTargetPaths.map((path) => `${path}/**/*.test.ts`);
 
 const testExclude = ['src/domain/repository/*'];
 
-const coverageInclude = ['src/application/api/*', 'src/domain/**/*', 'src/common/**/*'];
+// カバレッジ対象のファイルパスを生成（.test.tsファイル以外全部）
+const coverageInclude = testTargetPaths.map((path) => `${path}/**/*`);
 const coverageExclude = [...testExclude];
 
 export default defineConfig({
