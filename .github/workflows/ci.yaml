@@ -10,6 +10,8 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/ci.yaml'
+      - 'vitest.config.frontend.ts'
+      - 'vitest.config.backend.ts'
 
 # カバレッジの可視化で、コメントを残すための権限
 permissions:
