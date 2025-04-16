@@ -9,6 +9,7 @@ import { defineConfig } from 'vite';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { vitePlugin as remix } from '@remix-run/dev';
 import tailwindcss from '@tailwindcss/vite';
+import { srcAlias } from './config';
 
 export default defineConfig({
   ssr: {
@@ -19,10 +20,7 @@ export default defineConfig({
   resolve: {
     alias: [
       // viteではtsconfigに加えて、以下の設定も必要
-      {
-        find: '@',
-        replacement: '/src',
-      },
+      srcAlias,
     ],
   },
   plugins: [
