@@ -6,15 +6,6 @@ import { coverageReporter, srcAlias } from './config';
 const testInclude = ['src/application/web/**/*.test.ts'];
 
 const coverageInclude = ['src/application/web/**/*', 'src/application/web/components/**/*'];
-const coverageExclude = [
-  'src/application/api/**/*',
-  'src/application/middleware/**/*',
-  'src/domain/**/*',
-  'src/common/**/*',
-  'src/logger/**/*',
-  'src/application/web/components/ui/**/*',
-  'src/application/web/lib/utils.ts',
-];
 
 export default defineConfig({
   resolve: {
@@ -28,7 +19,6 @@ export default defineConfig({
     coverage: {
       reporter: coverageReporter,
       include: coverageInclude,
-      exclude: coverageExclude,
     },
   },
 });
