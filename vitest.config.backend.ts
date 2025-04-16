@@ -14,6 +14,7 @@ const testExclude = ['src/domain/repository/*'];
 
 // カバレッジ対象のファイルパスを生成（.test.tsファイル以外全部）
 const coverageInclude = testTargetPaths.map((path) => `${path}/**/*`);
+const coverageExclude = [...testExclude];
 
 export default defineConfig({
   resolve: {
@@ -35,6 +36,7 @@ export default defineConfig({
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
       include: coverageInclude,
+      exclude: coverageExclude,
     },
   },
 });
