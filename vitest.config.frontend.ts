@@ -1,15 +1,11 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
+import { coverageReporter, srcAlias } from './config';
 
 export default defineConfig({
   resolve: {
-    alias: [
-      {
-        find: '@',
-        replacement: '/src',
-      },
-    ],
+    alias: [srcAlias],
   },
   test: {
     globals: true,
@@ -24,7 +20,7 @@ export default defineConfig({
     // テストファイルがない場合にエラーになるため、テストファイルがない場合でも正常終了とする
     passWithNoTests: true,
     coverage: {
-      reporter: ['text', 'json-summary', 'json'],
+      reporter: coverageReporter,
       include: ['src/application/web/**/*', 'src/application/web/components/**/*'],
       exclude: [
         'src/domain/**/*',

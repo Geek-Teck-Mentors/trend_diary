@@ -1,18 +1,14 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
+import { coverageReporter, srcAlias } from './config';
 
 // ci環境ではDATABASE_URLが設定されているため
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';
 
 export default defineConfig({
   resolve: {
-    alias: [
-      {
-        find: '@',
-        replacement: '/src',
-      },
-    ],
+    alias: [srcAlias],
   },
   test: {
     globals: true,
@@ -27,7 +23,7 @@ export default defineConfig({
       'src/domain/repository/*',
     ],
     coverage: {
-      reporter: ['text', 'json-summary', 'json'],
+      reporter: coverageReporter,
       thresholds: {
         statements: 60, // 命令網羅, ソースコードの全ての命令が実行されるかどうか
         branches: 60, // 分岐網羅, 処理のパスの通過率とほぼ同義
