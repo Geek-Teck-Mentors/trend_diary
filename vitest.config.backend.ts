@@ -5,13 +5,6 @@ import { defineConfig } from 'vite';
 // ci環境ではDATABASE_URLが設定されているため
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';
 
-const includeDirs = ['src/application/api', 'src/domain', 'src/common'];
-const includeFiles = includeDirs.map((dir) => `${dir}/**/*.test.ts`);
-const includeCoverageDirs = includeDirs.map((dir) => `${dir}/**/*`);
-
-// exclude対象はリポジトリのファイルのみを指定
-const exclude = ['src/domain/repository/**/*'];
-
 export default defineConfig({
   resolve: {
     alias: [
@@ -26,8 +19,13 @@ export default defineConfig({
     env: {
       DATABASE_URL: dbUrl,
     },
-    include: includeFiles,
-    exclude,
+    include: ['src/**/*.test.ts'],
+    exclude: [
+      'src/application/middleware/**/*',
+      'src/logger/**/*',
+      'src/application/web/**/*',
+      'src/domain/repository/*',
+    ],
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
       thresholds: {
@@ -36,8 +34,13 @@ export default defineConfig({
         functions: 60, // 関数網羅, 関数の実行パスの通過率
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
-      include: includeCoverageDirs,
-      exclude,
+      include: ['src/**/*'],
+      exclude: [
+        'src/application/middleware/**/*',
+        'src/application/web/**/*',
+        'src/logger/**/*',
+        'src/domain/repository/*',
+      ],
     },
   },
 });
