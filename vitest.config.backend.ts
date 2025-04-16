@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 // ci環境ではDATABASE_URLが設定されているため
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';
 
-const includeDirs = ['src/application/api', 'src/domain/**', 'src/common/**'];
+const includeDirs = ['src/application/api', 'src/domain', 'src/common'];
 const includeFiles = includeDirs.map((dir) => `${dir}/**/*.test.ts`);
 const includeCoverageDirs = includeDirs.map((dir) => `${dir}/**/*`);
 
