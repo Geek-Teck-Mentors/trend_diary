@@ -32,7 +32,7 @@ describe('POST /api/account', () => {
     );
   }
 
-  it('正常系', async () => {
+  it('正常系: 新規登録できる', async () => {
     const res = await requestShort(
       JSON.stringify({ email: 'signup@test.com', password: 'test_password' }),
     );
@@ -65,6 +65,18 @@ describe('POST /api/account', () => {
         const res = await requestShort(JSON.stringify(testCase.input));
         expect(res.status).toBe(testCase.status);
       });
+    });
+
+    it('異常系: 既に存在するメールアドレスの場合', async () => {
+      const email = 'test@example.com';
+
+      // 1回目の登録
+      const res1 = await requestShort(JSON.stringify({ email, password: 'test_password' }));
+      expect(res1.status).toBe(201);
+
+      // 2回目の登録
+      const res2 = await requestShort(JSON.stringify({ email, password: 'test_password' }));
+      expect(res2.status).toBe(409);
     });
   });
 });
