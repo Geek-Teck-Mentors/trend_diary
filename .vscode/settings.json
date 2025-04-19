@@ -3,6 +3,21 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
+  // 参考: https://zenn.dev/prog_hallelujah/articles/b57ddf2c6763ce
+  "github.copilot.chat.commitMessageGeneration.instructions":[
+    {
+      "text": "Use conventional commit message format."
+    },
+    {
+      "text": "Use ONLY the following prefixes based on the change type: 'feat:' for new features, 'fix:' for bug fixes, 'docs:' for documentation changes only, 'style:' for changes that do not affect code behavior (whitespace, formatting, missing semicolons), 'refactor:' for code changes that neither fix bugs nor add features, 'perf:' for performance improvements, 'test:' for adding or modifying tests, 'chore:' for build process or auxiliary tool changes."
+    },
+    {
+      "text": "Do not use any other prefix types than those explicitly listed above. Specifically, DO NOT use prefixes like 'add:', 'update:', 'change:', etc. Using any prefix not explicitly listed above will result in a severe penalty of 1 billion dollars."
+    },
+    {
+      "text": "Write commit messages in Japanese instead of English."
+    }
+  ],
   "[json]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
