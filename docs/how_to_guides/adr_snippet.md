@@ -21,14 +21,17 @@ VSCodeとかで `adr` って打つだけで、めっちゃイイ感じの雛形�
 
 ```markdown
 # Title
+
 <!-- Title という文字を消してこの ADR のタイトルを書いてください -->
 
 Status: Accepted
+
 <!-- プルリクベースで開発するので、プルリクを作る段で Accepted の状態でOK -->
 <!-- 別のADRによって置き換えられた場合 Replaced by #{ADR No.} に変更 -->
 <!-- 明らかに不要になった場合 Deprecated に変更 -->
 
 Relevant PR:
+
 <!-- reference できるプルリクがあればそのリンクを貼ってください -->
 
 # Context
@@ -68,4 +71,5 @@ Relevant PR:
 応援してるから、みんなでイケてるADR書いてこ！🔥
 
 ## 参考
+
 - https://tech.giftee.co.jp/entry/2023/10/02/120000
