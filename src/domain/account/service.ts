@@ -11,7 +11,7 @@ export default class AccountService {
     private userRepository: UserRepository,
   ) {}
 
-  async signUp(email: string, plainPassword: string): Promise<Account> {
+  async signup(email: string, plainPassword: string): Promise<Account> {
     // 既にアカウントがあるかチェック
     const existingAccount = await this.accountRepository.findByEmail(email);
     if (existingAccount) throw ACCOUNT_ALREADY_EXISTS;

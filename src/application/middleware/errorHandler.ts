@@ -7,7 +7,14 @@ const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
   const logger = c.get(CONTEXT_KEY.APP_LOG);
 
   if (err instanceof HTTPException) {
-    return err.getResponse();
+    return c.json(
+      {
+        message: err.message,
+      },
+      {
+        status: err.status,
+      },
+    );
   }
 
   // 予期しないエラーの場合
