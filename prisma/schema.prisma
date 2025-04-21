@@ -43,7 +43,7 @@ model User {
   @@map("users")
 }
 
-model articles {
+model Article {
   articleId BigInt   @id @default(autoincrement()) @map("article_id") @db.BigInt /// postgresqlの自動採番を使うための記法: https://www.prisma.io/docs/orm/reference/prisma-schema-reference#postgresql-3
   media String @map("media") @db.VarChar(10)
   title String @map("title") @db.VarChar(100)
@@ -51,4 +51,6 @@ model articles {
   description String @map("description") @db.VarChar(255)
   url String @map("url") @db.Text
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  @@map("articles")
 }
