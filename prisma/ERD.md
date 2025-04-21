@@ -21,4 +21,15 @@ erDiagram
     DateTime deleted_at "❓"
     }
   
+
+  "articles" {
+    BigInt article_id "🗝️"
+    String media 
+    String title 
+    String author 
+    String description 
+    String url 
+    DateTime created_at 
+    }
+  
 ```
