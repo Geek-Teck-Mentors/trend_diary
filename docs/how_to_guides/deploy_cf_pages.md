@@ -1,3 +1,11 @@
+## 手順
+
+1. 開発中の変更を作業ブランチでコミットする
+2. `npm run deploy`
+3. 出力でプレビューリンクが出るので、それで確認. (本番の場合も同様)
+
+## 他
+
 下記を大いに参考にした。
 https://dev.classmethod.jp/articles/hono-remix-adapter-cloudflare-pages/
 
