@@ -11,8 +11,12 @@ class Logger {
 
   constructor(context: LogContext = {}) {
     this.context = context;
+
+    // Viteの環境変数（import.meta.env）の代わりにprocess.env.NODE_ENVを使う
+    const isProd = typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
+
     this.logger = pino({
-      level: import.meta.env.PROD ? 'info' : 'debug',
+      level: isProd ? 'info' : 'debug',
       formatters: {
         level: (label) => ({ level: label }),
       },
