@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { AccountRepository } from './repository';
 import { ACCOUNT_ALREADY_EXISTS } from './error';
 import { AlreadyExistsError, ServerError } from '../../common/errors';
