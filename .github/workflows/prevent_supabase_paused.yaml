@@ -1,3 +1,4 @@
+# 参考: https://dev.to/jps27cse/how-to-prevent-your-supabase-project-database-from-being-paused-using-github-actions-3hel
 name: Ping Supabase to Prevent Pausing
 on:
   schedule:
