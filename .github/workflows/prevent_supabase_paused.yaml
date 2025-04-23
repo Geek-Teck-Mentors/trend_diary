@@ -28,18 +28,22 @@ jobs:
           node -e "
           (async () => {
             try {
-              // Import Supabase client
+              // Supabaseクライアント作成
               const { createClient } = require('@supabase/supabase-js');
               const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-              // Ping Supabase by querying a table (e.g., 'songs')
-              const { data, error } = await supabase.sql`SELECT version()`;
-              // Handle errors
+              
+              const { data, error } = await supabase.rpc('version');
+              
+              // エラーチェック
               if (error) throw error;
-              // Log success
-              console.log('Ping successful:', data);
+              
+              // 成功ログ出力
+              console.log('バージョン取得でPing成功！ DB元気だよ～！');
+              console.log('バージョン情報: ' + data);
+              process.exit(0);
             } catch (err) {
-              // Log and exit with error
-              console.error('Error pinging Supabase:', err.message);
+              // エラーログ出してエラー終了
+              console.error('Supabaseへの接続エラー:', err.message);
               process.exit(1);
             }
           })();
