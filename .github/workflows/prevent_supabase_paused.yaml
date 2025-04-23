@@ -30,26 +30,17 @@ jobs:
               // Supabaseクライアント作成
               const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
               
-              // バージョン取得するだけの超シンプルなクエリ
-              const { data, error } = await supabase
-                .rpc('pg_version');
+              // 超シンプルにpingテーブルのレコード数だけ取得
+              const { count, error } = await supabase
+                .from('ping')
+                .select('*', { count: 'exact', head: true });
               
               // エラーチェック
-              if (error) {
-                // 別の方法を試す
-                const { data: versionData, error: versionError } = await supabase
-                  .from('_pgsql_raw')
-                  .select('*')
-                  .filter('query', 'eq', 'SELECT version()');
-                
-                if (versionError) throw versionError;
-                console.log('Raw SQLでバージョン取得成功！ DB元気だよ〜🔥');
-                process.exit(0);
-              }
+              if (error) throw error;
               
               // 成功ログ出力
-              console.log('バージョンチェックでPing成功！ DBバッチリ生きてる〜🔥');
-              console.log('バージョン情報: ' + JSON.stringify(data));
+              console.log('Pingテーブル接続OK！ DBマジ元気～🔥');
+              console.log(`現在のpingレコード数: ${count || 0}`);
               process.exit(0);
             } catch (err) {
               // エラーログ出してエラー終了
