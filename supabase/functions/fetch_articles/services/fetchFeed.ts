@@ -1,6 +1,9 @@
 import { parseFeed } from "jsr:@mikaelporttila/rss@*";
 
-export default async (url: string) => {
+const QIITA_RUL =  "https://qiita.com/popular-items/feed.atom"
+const ZENN_URL =  "https://zenn.dev/feed";
+
+const fetchFeed = async (url: string) => {
   const feedUrl = new URL(url);
 
   const res = await fetch(feedUrl);
@@ -15,3 +18,13 @@ export default async (url: string) => {
 
   return feed;
 };
+
+export const fetchQiitaFeed = async () => {
+  const feed = await fetchFeed(QIITA_RUL);
+  return feed;
+}
+
+export const fetchZennFeed = async () => {
+  const feed = await fetchFeed(ZENN_URL);
+  return feed;
+}
