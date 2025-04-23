@@ -22,7 +22,7 @@ jobs:
 
       - name: Create Ping Script
         run: |
-          cat > pingSupabase.js << 'EOL'
+          cat > pingSupabase.mjs << 'EOL'
           import { createClient } from '@supabase/supabase-js';
 
           (async () => {
@@ -30,18 +30,26 @@ jobs:
               // Supabaseクライアント作成
               const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
               
-              // シンプルなシステムテーブルを使ってみる
+              // バージョン取得するだけの超シンプルなクエリ
               const { data, error } = await supabase
-                .from('pg_catalog.pg_tables')
-                .select('schemaname')
-                .limit(1);
+                .rpc('pg_version');
               
               // エラーチェック
-              if (error) throw error;
+              if (error) {
+                // 別の方法を試す
+                const { data: versionData, error: versionError } = await supabase
+                  .from('_pgsql_raw')
+                  .select('*')
+                  .filter('query', 'eq', 'SELECT version()');
+                
+                if (versionError) throw versionError;
+                console.log('Raw SQLでバージョン取得成功！ DB元気だよ〜🔥');
+                process.exit(0);
+              }
               
-              // 成功ログ出力（機密情報は出さないようにする）
-              console.log('DB接続チェックでPing成功！ DBバッチリ生きてる〜🔥');
-              console.log('スキーマ情報: データあり (セキュリティのため詳細非表示)');
+              // 成功ログ出力
+              console.log('バージョンチェックでPing成功！ DBバッチリ生きてる〜🔥');
+              console.log('バージョン情報: ' + JSON.stringify(data));
               process.exit(0);
             } catch (err) {
               // エラーログ出してエラー終了
@@ -55,4 +63,4 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_PROJECT_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node pingSupabase.js
+        run: node pingSupabase.mjs
