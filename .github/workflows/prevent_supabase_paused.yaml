@@ -32,14 +32,18 @@ jobs:
               const { createClient } = require('@supabase/supabase-js');
               const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
               
-              const { data, error } = await supabase.rpc('version');
+              // シンプルなシステムテーブルを使ってみる
+              const { data, error } = await supabase
+                .from('pg_catalog.pg_tables')
+                .select('schemaname')
+                .limit(1);
               
               // エラーチェック
               if (error) throw error;
               
-              // 成功ログ出力
-              console.log('バージョン取得でPing成功！ DB元気だよ～！');
-              console.log('バージョン情報: ' + data);
+              // 成功ログ出力（機密情報は出さないようにする）
+              console.log('DB接続チェックでPing成功！ DBバッチリ生きてる〜🔥');
+              console.log('スキーマ情報: データあり (セキュリティのため詳細非表示)');
               process.exit(0);
             } catch (err) {
               // エラーログ出してエラー終了
