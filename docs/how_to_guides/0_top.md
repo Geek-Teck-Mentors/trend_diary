@@ -5,3 +5,5 @@
 - [環境構築](system_setup.md)
 - [Supabaseローカル環境構築](supabase_local_setup.md)
 - [ローカル環境でのテストのセットアップ](local_test_setup.md)
+- [ADRの作成方法](adr_snippet.md)
+- [cloudflare pagesのデプロイ](deploy_cf_pages.md)
