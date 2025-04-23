@@ -20,12 +20,9 @@ jobs:
       - name: Install Supabase Client
         run: npm install @supabase/supabase-js
 
-      - name: Ping Supabase
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_PROJECT_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Create Ping Script
         run: |
-          node -e "
+          cat > pingSupabase.js << 'EOL'
           (async () => {
             try {
               // Supabaseクライアント作成
@@ -51,4 +48,10 @@ jobs:
               process.exit(1);
             }
           })();
-          "
+          EOL
+
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_PROJECT_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node pingSupabase.js
