@@ -50,7 +50,7 @@ model Article {
   author      String   @map("author") @db.VarChar(30)
   description String   @map("description") @db.VarChar(255)
   url         String   @map("url") @db.Text
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp()
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   @@map("articles")
 }
