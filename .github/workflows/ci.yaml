@@ -12,6 +12,8 @@ on:
       - '.github/workflows/ci.yaml'
       - 'vitest.config.frontend.ts'
       - 'vitest.config.backend.ts'
+      - 'package.json'
+      - 'package-lock.json'
 
 # カバレッジの可視化で、コメントを残すための権限
 permissions:

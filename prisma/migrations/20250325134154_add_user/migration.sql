@@ -3,8 +3,8 @@ CREATE TABLE "users" (
     "user_id" BIGSERIAL NOT NULL,
     "account_id" BIGINT NOT NULL,
     "display_name" VARCHAR(1024),
-    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP NOT NULL,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("user_id")
 );

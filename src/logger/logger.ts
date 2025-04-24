@@ -11,8 +11,9 @@ class Logger {
 
   constructor(context: LogContext = {}) {
     this.context = context;
+
     this.logger = pino({
-      level: import.meta.env.PROD ? 'info' : 'debug',
+      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
       formatters: {
         level: (label) => ({ level: label }),
       },

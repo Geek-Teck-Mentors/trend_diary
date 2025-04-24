@@ -36,8 +36,8 @@ model User {
   /// グローバルなID, クライアントには公開しない
   accountId   BigInt    @map("account_id")
   displayName String?   @map("display_name") @db.VarChar(1024)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@map("users")

@@ -1,14 +1,14 @@
 /// <reference types="vitest" />
 
-import build from '@hono/vite-build/cloudflare-pages';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import devServer, { defaultOptions } from '@hono/vite-dev-server';
+import { defaultOptions } from '@hono/vite-dev-server';
 import adapter from '@hono/vite-dev-server/cloudflare';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { vitePlugin as remix } from '@remix-run/dev';
 import tailwindcss from '@tailwindcss/vite';
+import serverAdapter from 'hono-remix-adapter/vite';
 import { srcAlias } from './config';
 
 export default defineConfig({
@@ -27,13 +27,12 @@ export default defineConfig({
     tailwindcss(),
     remix({
       appDirectory: 'src/application/web',
+      buildDirectory: 'dist',
     }),
-    build(),
-    devServer({
+    serverAdapter({
       adapter,
       entry: 'src/application/server.ts',
       exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/web/**'],
-      injectClientScript: false,
     }),
   ],
   optimizeDeps: {
