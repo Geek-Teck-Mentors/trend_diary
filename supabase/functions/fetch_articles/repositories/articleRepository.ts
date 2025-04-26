@@ -1,0 +1,24 @@
+import { QueryError } from "jsr:@supabase/supabase-js@2";
+import supabaseClient from "../infrastructure/supabase-client.ts";
+import type { TablesInsert } from "../infrastructure/database.types.ts";
+import { Article } from "../domain/article.ts";
+
+export type BulkCreateArticlesParams = TablesInsert<"articles">[];
+
+export const bulkCreateArticle = async (
+  params: BulkCreateArticlesParams,
+): Promise<{ data: Article[] | null  ; error: QueryError | null }> => {
+  const { data, error } = await supabaseClient
+    .from("articles")
+    .insert(params)
+    .select()
+    .returns<Array<Article>>();
+
+
+  if (error) {
+    console.error("Error creating article:", error);
+    return { data: null, error };
+  }
+
+  return { data, error: null };
+}
