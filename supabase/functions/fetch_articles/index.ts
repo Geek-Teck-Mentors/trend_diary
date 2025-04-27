@@ -1,8 +1,8 @@
-import { Hono } from 'jsr:@hono/hono'
-import { fetchQiitaFeed, fetchZennFeed } from './services/fetchFeed.ts'
+import { Hono } from 'jsr:@hono/hono';
+import { fetchQiitaFeed, fetchZennFeed } from './services/fetchFeed.ts';
 
-const functionName = 'fetch_articles'
-const app = new Hono().basePath(`/${functionName}`)
+const functionName = 'fetch_articles';
+const app = new Hono().basePath(`/${functionName}`);
 
 app.post('/qiita', async (c) => {
   const articles = await fetchQiitaFeed();

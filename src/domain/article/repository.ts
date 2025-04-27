@@ -1,4 +1,4 @@
-import Article from "./article";
+import Article from './article';
 
 export interface ArticleRepository {
   createArticle(
@@ -9,7 +9,5 @@ export interface ArticleRepository {
     url: string,
   ): Promise<Article>;
 
-  bulkCreateArticles(
-    articles: Article[]
-  ): Promise<Article[]>;
-};
+  bulkCreateArticles(articles: Article[]): Promise<Article[]>;
+}

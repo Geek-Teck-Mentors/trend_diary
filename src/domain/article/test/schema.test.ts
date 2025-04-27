@@ -1,24 +1,24 @@
-import { articleSchema } from "../schema";
+import { articleSchema } from '../schema';
 
-describe("記事スキーマ", () => {
+describe('記事スキーマ', () => {
   const validArticle = {
     articleId: BigInt(123456789),
-    media: "news",
-    title: "Test Article",
-    author: "John Doe",
-    description: "This is a test article description.",
-    url: "http://example.com",
+    media: 'news',
+    title: 'Test Article',
+    author: 'John Doe',
+    description: 'This is a test article description.',
+    url: 'http://example.com',
     createdAt: new Date(),
   };
 
-  it("有効な記事データを受け入れること", () => {
+  it('有効な記事データを受け入れること', () => {
     expect(() => {
       articleSchema.parse(validArticle);
     }).not.toThrow();
   });
 
-  describe("articleId のバリデーション", () => {
-    it("有効なbigint型のarticleIdを受け入れること", () => {
+  describe('articleId のバリデーション', () => {
+    it('有効なbigint型のarticleIdを受け入れること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
@@ -27,11 +27,11 @@ describe("記事スキーマ", () => {
       }).not.toThrow();
     });
 
-    it("bigint型でないarticleIdを拒否すること", () => {
+    it('bigint型でないarticleIdを拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          articleId: "123456789",
+          articleId: '123456789',
         });
       }).toThrow();
 
@@ -44,26 +44,26 @@ describe("記事スキーマ", () => {
     });
   });
 
-  describe("media のバリデーション", () => {
-    it("境界値の文字列を受け入れること", () => {
+  describe('media のバリデーション', () => {
+    it('境界値の文字列を受け入れること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          media: "a".repeat(10),
+          media: 'a'.repeat(10),
         });
       }).not.toThrow();
     });
 
-    it("無効な文字列を拒否すること", () => {
+    it('無効な文字列を拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          media: "a".repeat(11),
+          media: 'a'.repeat(11),
         });
       }).toThrow();
     });
 
-    it("String型でないmediaを拒否すること", () => {
+    it('String型でないmediaを拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
@@ -80,26 +80,26 @@ describe("記事スキーマ", () => {
     });
   });
 
-  describe("title のバリデーション", () => {
-    it("境界値の文字列を受け入れること", () => {
+  describe('title のバリデーション', () => {
+    it('境界値の文字列を受け入れること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          title: "a".repeat(100),
+          title: 'a'.repeat(100),
         });
       }).not.toThrow();
     });
 
-    it("無効な文字列を拒否すること", () => {
+    it('無効な文字列を拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          title: "a".repeat(101),
+          title: 'a'.repeat(101),
         });
       }).toThrow();
     });
 
-    it("String型でないtitleを拒否すること", () => {
+    it('String型でないtitleを拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
@@ -116,24 +116,24 @@ describe("記事スキーマ", () => {
     });
   });
 
-  describe("author のバリデーション", () => {
-    it("境界値の文字列を受け入れること", () => {
+  describe('author のバリデーション', () => {
+    it('境界値の文字列を受け入れること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          author: "a".repeat(30),
+          author: 'a'.repeat(30),
         });
       }).not.toThrow();
     });
-    it("無効な文字列を拒否すること", () => {
+    it('無効な文字列を拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          author: "a".repeat(31),
+          author: 'a'.repeat(31),
         });
       }).toThrow();
     });
-    it("String型でないauthorを拒否すること", () => {
+    it('String型でないauthorを拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
@@ -148,26 +148,26 @@ describe("記事スキーマ", () => {
       }).toThrow();
     });
   });
-  describe("description のバリデーション", () => {
-    it("境界値の長さの文字列を受け入れること", () => {
+  describe('description のバリデーション', () => {
+    it('境界値の長さの文字列を受け入れること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          description: "a".repeat(255),
+          description: 'a'.repeat(255),
         });
       }).not.toThrow();
     });
 
-    it("無効な文字列を拒否すること", () => {
+    it('無効な文字列を拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          description: "a".repeat(256),
+          description: 'a'.repeat(256),
         });
       }).toThrow();
     });
 
-    it("String型でないdescriptionを拒否すること", () => {
+    it('String型でないdescriptionを拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
@@ -183,26 +183,26 @@ describe("記事スキーマ", () => {
       }).toThrow();
     });
   });
-  describe("url のバリデーション", () => {
-    it("有効なURLを受け入れること", () => {
+  describe('url のバリデーション', () => {
+    it('有効なURLを受け入れること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          url: "http://example.com/article",
+          url: 'http://example.com/article',
         });
       }).not.toThrow();
     });
 
-    it("無効なURLを拒否すること", () => {
+    it('無効なURLを拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,
-          url: "invalid-url",
+          url: 'invalid-url',
         });
       }).toThrow();
     });
 
-    it("String型でないurlを拒否すること", () => {
+    it('String型でないurlを拒否すること', () => {
       expect(() => {
         articleSchema.parse({
           ...validArticle,

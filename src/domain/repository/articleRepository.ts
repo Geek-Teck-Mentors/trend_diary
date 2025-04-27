@@ -1,6 +1,6 @@
-import { RdbClient } from "@/infrastructure/rdb";
-import { ArticleRepository } from "../article/repository";
-import Article from "../article/article";
+import { RdbClient } from '@/infrastructure/rdb';
+import { ArticleRepository } from '../article/repository';
+import Article from '../article/article';
 
 export default class ArticleRepositoryImpl implements ArticleRepository {
   constructor(private db: RdbClient) {}
@@ -33,9 +33,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
     );
   }
 
-  async bulkCreateArticles(
-    articles: Article[]
-  ): Promise<Article[]> {
+  async bulkCreateArticles(articles: Article[]): Promise<Article[]> {
     await this.db.article.createMany({
       data: articles.map((article) => ({
         media: article.media,
@@ -53,14 +51,17 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       },
     });
 
-    return newArticles.map((newArticle) => new Article(
-      newArticle.articleId,
-      newArticle.media,
-      newArticle.title,
-      newArticle.author,
-      newArticle.description,
-      newArticle.url,
-      newArticle.createdAt,
-    ));
+    return newArticles.map(
+      (newArticle) =>
+        new Article(
+          newArticle.articleId,
+          newArticle.media,
+          newArticle.title,
+          newArticle.author,
+          newArticle.description,
+          newArticle.url,
+          newArticle.createdAt,
+        ),
+    );
   }
 }
