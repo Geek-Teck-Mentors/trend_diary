@@ -21,4 +21,10 @@ erDiagram
     DateTime deleted_at "❓"
     }
   
+
+  "ping" {
+    BigInt id "🗝️"
+    DateTime created_at 
+    }
+  
 ```

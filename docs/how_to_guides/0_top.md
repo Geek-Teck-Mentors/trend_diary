@@ -7,3 +7,4 @@
 - [ローカル環境でのテストのセットアップ](local_test_setup.md)
 - [ADRの作成方法](adr_snippet.md)
 - [cloudflare pagesのデプロイ](deploy_cf_pages.md)
+- [本番のDBマイグレーション適用](deploy_database.md)

@@ -21,6 +21,7 @@
     "db:gen": "npx prisma generate",
     "db:migrate": "npx prisma migrate dev --skip-seed",
     "db:migrate:sql-only": "npx prisma migrate dev --skip-seed --skip-generate",
+    "db:migrate:deploy": "npx prisma migrate deploy",
     "db:reset": "npx prisma migrate reset --skip-seed",
     "db:studio": "npx prisma studio"
   },
