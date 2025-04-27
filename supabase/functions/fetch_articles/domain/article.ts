@@ -2,7 +2,7 @@
 export class Article {
   constructor(
     public articleId: bigint,
-    public media: 'qiita' | 'zenn',
+    public media: string,
     public title: string,
     public author: string,
     public description: string,
