@@ -8,4 +8,8 @@ export interface ArticleRepository {
     description: string,
     url: string,
   ): Promise<Article>;
+
+  bulkCreateArticles(
+    articles: Article[]
+  ): Promise<Article[]>;
 };

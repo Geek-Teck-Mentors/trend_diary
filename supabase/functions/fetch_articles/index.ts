@@ -4,12 +4,14 @@ import { fetchQiitaFeed, fetchZennFeed } from './services/fetchFeed.ts'
 const functionName = 'fetch_articles'
 const app = new Hono().basePath(`/${functionName}`)
 
-app.post('/', async (c) => {
-    const articles = await Promise.all([
-        fetchQiitaFeed(),
-        fetchZennFeed()
-    ]);
-    return c.json(articles);
-})
+app.post('/qiita', async (c) => {
+  const articles = await fetchQiitaFeed();
+  return c.json(articles);
+});
 
-Deno.serve(app.fetch)
+app.post('/zenn', async (c) => {
+  const articles = await fetchZennFeed();
+  return c.json(articles);
+});
+
+Deno.serve(app.fetch);

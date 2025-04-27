@@ -19,14 +19,8 @@ type ZennItem = {
 
 const fetchFeed = async <T>(url: string): Promise<T[]> => {
   const parser = new Parser<{items: T[]}, T>();
-
-  try {
-    const feed = await parser.parseURL(url);
-    return feed.items;
-  } catch (error) {
-    console.error("Error fetching feed:", error);
-    throw error;
-  }
+  const feed = await parser.parseURL(url);
+  return feed.items;
 };
 
 export const fetchQiitaFeed = async () => {
