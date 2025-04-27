@@ -12,9 +12,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
+    }
   },
-  "exclude": [
-    "supabase/functions"
-  ]
+  "exclude": ["supabase/functions"]
 }
