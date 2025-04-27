@@ -1,5 +1,13 @@
 import React from 'react';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  isRouteErrorResponse,
+  useRouteError,
+} from '@remix-run/react';
 
 import './styles.css';
 
@@ -23,4 +31,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return <Outlet />;
+}
+
+// 400台のエラーは不要なのでログ出力しないようにする
+// 参考: https://zenn.dev/mkizka/articles/0db9bc30e1f707#(3)-errorresponseimpl
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div>
+        <h1>
+          {error.status} {error.statusText}
+        </h1>
+        <p>{error.data}</p>
+      </div>
+    );
+  }
+  if (error instanceof Error) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <p>{error.message}</p>
+        <p>The stack trace is:</p>
+        <pre>{error.stack}</pre>
+      </div>
+    );
+  }
+  return <h1>Unknown Error</h1>;
 }

@@ -5,8 +5,13 @@
  * For more information, see https://remix.run/file-conventions/entry.server
  */
 import React from 'react';
-import type { AppLoadContext, EntryContext } from '@remix-run/cloudflare';
-import { RemixServer } from '@remix-run/react';
+import type {
+  ActionFunctionArgs,
+  AppLoadContext,
+  EntryContext,
+  LoaderFunctionArgs,
+} from '@remix-run/cloudflare';
+import { isRouteErrorResponse, RemixServer } from '@remix-run/react';
 import { renderToReadableStream } from 'react-dom/server';
 
 export default async function handleRequest(
@@ -38,4 +43,14 @@ export default async function handleRequest(
     headers: responseHeaders,
     status: responseStatusCode,
   });
+}
+
+// 404エラー, abortされたリクエストの場合は不要なのでログ出力しない
+// 参考: https://zenn.dev/mkizka/articles/0db9bc30e1f707#(1)-error%3A-no-route-matches-url-%22%2Ffoo%22
+export function handleError(error: unknown, { request }: LoaderFunctionArgs | ActionFunctionArgs) {
+  if ((isRouteErrorResponse(error) && error.status === 404) || request.signal.aborted) {
+    return;
+  }
+  // eslint-disable-next-line no-console
+  console.error(error);
 }
