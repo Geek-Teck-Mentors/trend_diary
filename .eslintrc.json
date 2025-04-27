@@ -16,6 +16,7 @@
     "coverage/",
     "build/",
     "src/application/web/components/ui",
-    "src/application/web/lib/utils.ts"
+    "src/application/web/lib/utils.ts",
+    "supabase/functions"
   ]
 }
