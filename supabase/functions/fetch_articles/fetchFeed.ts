@@ -37,12 +37,7 @@ export const fetchQiitaFeed = async () => {
     url: item.link,
   }));
 
-  const { data: articles, error } = await bulkCreateArticle(params);
-  if (error) {
-    console.error('Error creating articles:', error);
-    throw error;
-  }
-  return articles;
+  await bulkCreateArticle(params);
 };
 
 export const fetchZennFeed = async () => {
@@ -55,10 +50,5 @@ export const fetchZennFeed = async () => {
     description: item.content,
     url: item.link,
   }));
-  const { data: articles, error } = await bulkCreateArticle(params);
-  if (error) {
-    console.error('Error creating articles:', error);
-    throw error;
-  }
-  return articles;
+  await bulkCreateArticle(params);
 };

@@ -5,13 +5,13 @@ const functionName = 'fetch_articles';
 const app = new Hono().basePath(`/${functionName}`);
 
 app.post('/qiita', async (c) => {
-  const articles = await fetchQiitaFeed();
-  return c.json(articles);
+  await fetchQiitaFeed();
+  return c.json({status: 'ok', message: 'Qiita feed fetched successfully'});
 });
 
 app.post('/zenn', async (c) => {
-  const articles = await fetchZennFeed();
-  return c.json(articles);
+  await fetchZennFeed();
+  return c.json({status: 'ok', message: 'Zenn feed fetched successfully'});
 });
 
 Deno.serve(app.fetch);

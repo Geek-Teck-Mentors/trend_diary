@@ -16,12 +16,10 @@ const normalizeForArticleInput = (params: ArticleInput): ArticleInput => ({
 
 export const bulkCreateArticle = async (
   params: BulkCreateArticlesParams,
-): Promise<{ data: Article[] | null; error: QueryError | null }> => {
-  const insertParams: TablesInsert<'articles'>[] = params.map((param) => ({
-    ...normalizeForArticleInput(param),
-  }));
+): Promise<void> => {
+  const insertParams: TablesInsert<'articles'>[] = params.map(normalizeForArticleInput);
 
-  const { data, error } = await supabaseClient
+  const { error } = await supabaseClient
     .from('articles')
     .insert(insertParams)
     .select()
@@ -29,8 +27,6 @@ export const bulkCreateArticle = async (
 
   if (error) {
     console.error('Error creating article:', error);
-    return { data: null, error };
+    throw new Error('Failed to create article: ' + error);
   }
-
-  return { data, error: null };
 };
