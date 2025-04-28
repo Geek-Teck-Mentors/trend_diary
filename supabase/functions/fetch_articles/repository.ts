@@ -1,15 +1,23 @@
 import { QueryError } from 'jsr:@supabase/supabase-js@2';
 import supabaseClient from '../infrastructure/supabase_client.ts';
 import type { TablesInsert } from '../infrastructure/database.types.ts';
-import { Article } from './model.ts';
-import { normalizeForArticleInput } from './domain/schema.ts';
+import { Article, ArticleInput } from './model.ts';
 
-export type BulkCreateArticlesParams = TablesInsert<'articles'>[];
+export type BulkCreateArticlesParams = ArticleInput[];
+
+const normalizeForArticleInput = (params: ArticleInput): ArticleInput => ({
+  media: params.media.length > 10 ? params.media.slice(0, 10) : params.media,
+  title: params.title.length > 100 ? params.title.slice(0, 100) : params.title,
+  author: params.author.length > 30 ? params.author.slice(0, 30) : params.author,
+  description:
+    params.description.length > 255 ? params.description.slice(0, 255) : params.description,
+  url: params.url,
+});
 
 export const bulkCreateArticle = async (
   params: BulkCreateArticlesParams,
 ): Promise<{ data: Article[] | null; error: QueryError | null }> => {
-  const insertParams = params.map((param) => ({
+  const insertParams: TablesInsert<'articles'>[] = params.map((param) => ({
     ...normalizeForArticleInput(param),
   }));
 
