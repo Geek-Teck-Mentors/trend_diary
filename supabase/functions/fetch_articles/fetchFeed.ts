@@ -4,26 +4,20 @@ import {
   type BulkCreateArticlesParams,
 } from './repository.ts';
 
+const fetchFeed = async <T>(url: string): Promise<T[]> => {
+  const parser = new Parser<{ items: T[] }, T>();
+  const feed = await parser.parseURL(url);
+  return feed.items;
+};
+
+
 const QIITA_URL = 'https://qiita.com/popular-items/feed.atom';
+
 type QiitaItem = {
   title: string;
   author: string;
   content: string;
   link: string;
-};
-
-const ZENN_URL = 'https://zenn.dev/feed';
-type ZennItem = {
-  title: string;
-  creator: string;
-  content: string;
-  link: string;
-};
-
-const fetchFeed = async <T>(url: string): Promise<T[]> => {
-  const parser = new Parser<{ items: T[] }, T>();
-  const feed = await parser.parseURL(url);
-  return feed.items;
 };
 
 export const fetchQiitaFeed = async () => {
@@ -38,6 +32,15 @@ export const fetchQiitaFeed = async () => {
   }));
 
   await bulkCreateArticle(params);
+};
+
+
+const ZENN_URL = 'https://zenn.dev/feed';
+type ZennItem = {
+  title: string;
+  creator: string;
+  content: string;
+  link: string;
 };
 
 export const fetchZennFeed = async () => {
