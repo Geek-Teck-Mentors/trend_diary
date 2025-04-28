@@ -159,9 +159,9 @@ jobs:
           fail_command: docker compose down
 
       - name: DB Migration
-        run: |
-          export DIRECT_URL=${{ env.DATABASE_URL }}
-          npm run db:migrate
+        env:
+          DIRECT_URL: ${{ env.DATABASE_URL }}
+        run: npm run db:migrate
 
       - name: バックエンドのテスト
         uses: ./.github/actions/test_cov
