@@ -6,7 +6,7 @@ export const articleSchema = z.object({
   title: z.string().max(100),
   author: z.string().max(30),
   description: z.string().max(255),
-  url: z.string().startsWith('http://'),
+  url: z.string().url(),
   createdAt: z.date(),
 });
 
