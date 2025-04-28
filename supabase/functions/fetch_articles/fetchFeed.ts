@@ -1,8 +1,5 @@
-import Parser from "npm:rss-parser@3.13.0";
-import {
-  bulkCreateArticle,
-  type BulkCreateArticlesParams,
-} from "./repository.ts";
+import Parser from 'npm:rss-parser@3.13.0';
+import { bulkCreateArticle, type BulkCreateArticlesParams } from './repository.ts';
 
 async function fetchFeed<T>(url: string): Promise<T[]> {
   const parser = new Parser<{ items: T[] }, T>();
@@ -10,7 +7,7 @@ async function fetchFeed<T>(url: string): Promise<T[]> {
   return feed.items;
 }
 
-const QIITA_URL = "https://qiita.com/popular-items/feed.atom";
+const QIITA_URL = 'https://qiita.com/popular-items/feed.atom';
 
 type QiitaItem = {
   title: string;
@@ -23,7 +20,7 @@ export async function fetchQiitaFeed() {
   const feedItems = await fetchFeed<QiitaItem>(QIITA_URL);
 
   const params: BulkCreateArticlesParams = feedItems.map((item) => ({
-    media: "qiita",
+    media: 'qiita',
     title: item.title,
     author: item.author,
     description: item.content,
@@ -33,7 +30,7 @@ export async function fetchQiitaFeed() {
   await bulkCreateArticle(params);
 }
 
-const ZENN_URL = "https://zenn.dev/feed";
+const ZENN_URL = 'https://zenn.dev/feed';
 
 type ZennItem = {
   title: string;
@@ -46,7 +43,7 @@ export async function fetchZennFeed() {
   const feedItems = await fetchFeed<ZennItem>(ZENN_URL);
 
   const params: BulkCreateArticlesParams = feedItems.map((item) => ({
-    media: "zenn",
+    media: 'zenn',
     title: item.title,
     author: item.creator,
     description: item.content,
