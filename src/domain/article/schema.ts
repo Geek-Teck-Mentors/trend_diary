@@ -10,8 +10,5 @@ export const articleSchema = z.object({
   createdAt: z.date(),
 });
 
-export type ArticleInput = Pick<
-  z.infer<typeof articleSchema>,
-  'media' | 'title' | 'author' | 'description' | 'url'
->;
+export type ArticleInput = Omit<z.infer<typeof articleSchema>, 'articleId' | 'createdAt'>;
 export type ArticleOutput = z.output<typeof articleSchema>;
