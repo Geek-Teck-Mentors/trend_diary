@@ -29,6 +29,7 @@ concurrency:
 env:
   NODE_VERSION_FILE: .node-version
   DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
+  DIRECT_URL: postgresql://postgres:password@localhost:5432/postgres # migrationのために必要な環境変数
 
 jobs:
   setup-config:
@@ -155,9 +156,7 @@ jobs:
           fail_command: docker compose down
 
       - name: DB Migration
-        run: |
-          export DIRECT_URL=${{ env.DATABASE_URL }}
-          npm run db:migrate
+        run: npm run db:migrate
 
       - name: バックエンドのテスト
         uses: ./.github/actions/test_cov
