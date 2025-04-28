@@ -79,6 +79,7 @@
     "wrangler": "^3.114.7"
   },
   "overrides": {
-    "esbuild": "0.17.19"
+    "esbuild": "0.17.19",
+    "estree-util-value-to-estree": "3.3.3"
   }
 }
