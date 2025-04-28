@@ -69,7 +69,10 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Deno Lint
-        run: deno lint -c ./supabase/functions/deno.json
+        run: |
+          ls -lah
+          ls supabase
+          deno lint -c ./supabase/functions/deno.json
 
   format:
     needs: setup-config
