@@ -142,8 +142,6 @@ jobs:
     needs: setup-test
     runs-on: ${{ needs.setup-test.outputs.test_runner }}
     if: ${{ needs.setup-test.outputs.run_backend_test == 'true' }}
-    env:
-      DIRECT_URL: ${{ env.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -161,6 +159,8 @@ jobs:
           fail_command: docker compose down
 
       - name: DB Migration
+        env:
+          DIRECT_URL: ${{ env.DATABASE_URL }}
         run: npm run db:migrate
 
       - name: バックエンドのテスト
