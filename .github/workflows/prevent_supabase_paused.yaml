@@ -45,7 +45,7 @@ jobs:
               process.exit(0);
             } catch (err) {
               // エラーログ出してエラー終了
-              console.error('Supabaseへの接続エラー:', err.message);
+              console.error('Supabaseへの接続エラー:', err);
               process.exit(1);
             }
           })();

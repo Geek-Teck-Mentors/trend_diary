@@ -89,8 +89,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       test_runner: ubuntu-latest
-      run_frontend_test: ${{ steps.check-frontend.outputs.diff-count != 0 }}
-      run_backend_test: ${{ steps.check-backend.outputs.diff-count != 0 }}
+      run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-frontend.outputs.diff-count != 0 }}
+      run_backend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-backend.outputs.diff-count != 0 }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -114,9 +114,13 @@ jobs:
 
       - name: 差分結果の表示
         run: |
-          echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
-          echo "バックエンド差分: ${{ steps.check-backend.outputs.diff-count }} ファイル"
-          echo "Test configuration completed"
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "メインブランチなので、リグレッションテストとして全て実行"
+          else
+            echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
+            echo "バックエンド差分: ${{ steps.check-backend.outputs.diff-count }} ファイル"
+            echo "テストの準備完了"
+          fi
         shell: bash
 
   test-frontend:
