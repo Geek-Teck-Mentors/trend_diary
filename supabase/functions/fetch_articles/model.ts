@@ -10,3 +10,5 @@ export class Article {
     public readonly createdAt: Date = new Date(),
   ) {}
 }
+
+export type ArticleInput = Omit<Article, 'articleId' | 'createdAt'>;

@@ -2,7 +2,7 @@ import Parser from 'npm:rss-parser@3.13.0';
 import {
   bulkCreateArticle,
   type BulkCreateArticlesParams,
-} from '../repositories/articleRepository.ts';
+} from './repository.ts';
 
 const QIITA_URL = 'https://qiita.com/popular-items/feed.atom';
 type QiitaItem = {

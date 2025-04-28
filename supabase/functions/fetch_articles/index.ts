@@ -1,5 +1,5 @@
 import { Hono } from 'jsr:@hono/hono';
-import { fetchQiitaFeed, fetchZennFeed } from './services/fetchFeed.ts';
+import { fetchQiitaFeed, fetchZennFeed } from './fetchFeed.ts';
 
 const functionName = 'fetch_articles';
 const app = new Hono().basePath(`/${functionName}`);

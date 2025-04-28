@@ -1,8 +1,8 @@
 import { QueryError } from 'jsr:@supabase/supabase-js@2';
-import supabaseClient from '../../infrastructure/supabase_client.ts';
-import type { TablesInsert } from '../../infrastructure/database.types.ts';
-import { Article } from '../domain/article.ts';
-import { normalizeForArticleInput } from '../domain/schema.ts';
+import supabaseClient from '../infrastructure/supabase_client.ts';
+import type { TablesInsert } from '../infrastructure/database.types.ts';
+import { Article } from './model.ts';
+import { normalizeForArticleInput } from './domain/schema.ts';
 
 export type BulkCreateArticlesParams = TablesInsert<'articles'>[];
 
