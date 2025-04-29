@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export class Article {
   constructor(
     public articleId: bigint,
