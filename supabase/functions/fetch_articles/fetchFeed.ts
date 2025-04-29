@@ -1,5 +1,8 @@
 import Parser from 'npm:rss-parser@3.13.0';
-import { bulkCreateArticle, type BulkCreateArticlesParams } from './repository.ts';
+import ArticlesRepository from './repository/index.ts';
+import { ArticleInput } from './model.ts';
+
+const articlesRepository = new ArticlesRepository();
 
 async function fetchFeed<T>(url: string): Promise<T[]> {
   const parser = new Parser<{ items: T[] }, T>();
@@ -19,7 +22,7 @@ type QiitaItem = {
 export async function fetchQiitaFeed() {
   const feedItems = await fetchFeed<QiitaItem>(QIITA_URL);
 
-  const params: BulkCreateArticlesParams = feedItems.map((item) => ({
+  const params: ArticleInput[] = feedItems.map((item) => ({
     media: 'qiita',
     title: item.title,
     author: item.author,
@@ -27,7 +30,7 @@ export async function fetchQiitaFeed() {
     url: item.link,
   }));
 
-  await bulkCreateArticle(params);
+  await articlesRepository.bulkCreateArticle(params);
 }
 
 const ZENN_URL = 'https://zenn.dev/feed';
@@ -42,12 +45,12 @@ type ZennItem = {
 export async function fetchZennFeed() {
   const feedItems = await fetchFeed<ZennItem>(ZENN_URL);
 
-  const params: BulkCreateArticlesParams = feedItems.map((item) => ({
+  const params: ArticleInput[] = feedItems.map((item) => ({
     media: 'zenn',
     title: item.title,
     author: item.creator,
     description: item.content,
     url: item.link,
   }));
-  await bulkCreateArticle(params);
+  await articlesRepository.bulkCreateArticle(params);
 }
