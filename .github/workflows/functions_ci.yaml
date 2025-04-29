@@ -1,0 +1,40 @@
+name: Functions CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/functions/**'
+      - '.github/workflows/functions_ci.yaml'
+
+env:
+  DENO_VERSION: 2.0.6
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Denoの構築
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Lint
+        run: |
+          deno lint -c supabase/functions/fetch_articles/deno.json
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Denoの構築
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Format
+        run: |
+          deno fmt -c supabase/functions/fetch_articles/deno.json
