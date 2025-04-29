@@ -13,6 +13,7 @@ on:
 
 env:
   DENO_VERSION: 2.0.6
+  FUNCTIONS: fetch_articles
 
 jobs:
   lint:
@@ -25,7 +26,9 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Lint
         run: |
-          deno lint -c supabase/functions/fetch_articles/deno.json
+          for function_name in ${{ env.FUNCTIONS }}; do
+            deno lint -c supabase/functions/${function_name}/deno.json
+          done
 
   format:
     runs-on: ubuntu-latest
@@ -37,4 +40,6 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Format
         run: |
-          deno fmt -c supabase/functions/fetch_articles/deno.json
+          for function_name in ${{ env.FUNCTIONS }}; do
+            deno fmt -c supabase/functions/${function_name}/deno.json
+          done
