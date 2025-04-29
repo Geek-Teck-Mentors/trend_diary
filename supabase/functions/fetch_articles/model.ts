@@ -10,4 +10,4 @@ export class Article {
   ) {}
 }
 
-export type ArticleInput = Omit<Article, 'articleId' | 'createdAt'>;
+export type ArticleInput = Omit<Article, "articleId" | "createdAt">;
