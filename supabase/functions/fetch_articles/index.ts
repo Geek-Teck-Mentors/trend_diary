@@ -1,17 +1,28 @@
 import { Hono } from 'jsr:@hono/hono';
-import { fetchQiitaFeed, fetchZennFeed } from './fetchFeed.ts';
+import { QiitaFetcher, ZennFetcher } from './fetchFeed.ts';
 
-const functionName = 'fetch_articles';
+const functionName = 'articles';
 const app = new Hono().basePath(`/${functionName}`);
 
-app.post('/qiita', async (c) => {
-  await fetchQiitaFeed();
-  return c.json({ status: 'ok', message: 'Qiita feed fetched successfully' });
-});
+app.post('/articles/:media', async (c) => {
+  const media = c.req.param('media');
+  switch (media) {
+    case 'qiita': {
+      const qiitaFetcher = new QiitaFetcher();
+      await qiitaFetcher.fetch();
+      break;
+    }
+    case 'zenn': {
+      const zennFetcher = new ZennFetcher();
+      await zennFetcher.fetch();
+      break;
+    }
+    default: {
+      throw new Error('Invalid media type');
+    }
+  }
 
-app.post('/zenn', async (c) => {
-  await fetchZennFeed();
-  return c.json({ status: 'ok', message: 'Zenn feed fetched successfully' });
-});
+  return c.json({ status: 'ok', message: 'Articles fetched successfully' });
+})
 
 Deno.serve(app.fetch);

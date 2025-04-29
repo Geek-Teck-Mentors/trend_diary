@@ -10,7 +10,10 @@ async function fetchFeed<T>(url: string): Promise<T[]> {
   return feed.items;
 }
 
-const QIITA_URL = 'https://qiita.com/popular-items/feed.atom';
+ interface ArticleFetcher {
+  url: string;
+  fetch(): Promise<void>;
+}
 
 type QiitaItem = {
   title: string;
@@ -19,21 +22,24 @@ type QiitaItem = {
   link: string;
 };
 
-export async function fetchQiitaFeed() {
-  const feedItems = await fetchFeed<QiitaItem>(QIITA_URL);
+export class QiitaFetcher implements ArticleFetcher {
+  url = 'https://qiita.com/popular-items/feed.atom';
 
-  const params: ArticleInput[] = feedItems.map((item) => ({
-    media: 'qiita',
-    title: item.title,
-    author: item.author,
-    description: item.content,
-    url: item.link,
-  }));
+  async fetch() {
+    const feedItems = await fetchFeed<QiitaItem>(this.url);
 
-  await articlesRepository.bulkCreateArticle(params);
+    const params: ArticleInput[] = feedItems.map((item) => ({
+      media: 'qiita',
+      title: item.title,
+      author: item.author,
+      description: item.content,
+      url: item.link,
+    }));
+
+    await articlesRepository.bulkCreateArticle(params);
+  }
 }
 
-const ZENN_URL = 'https://zenn.dev/feed';
 
 type ZennItem = {
   title: string;
@@ -41,16 +47,20 @@ type ZennItem = {
   content: string;
   link: string;
 };
+export class ZennFetcher implements ArticleFetcher{
+  url = 'https://zenn.dev/feed';
 
-export async function fetchZennFeed() {
-  const feedItems = await fetchFeed<ZennItem>(ZENN_URL);
+  async fetch() {
+    const feedItems = await fetchFeed<ZennItem>(this.url);
 
-  const params: ArticleInput[] = feedItems.map((item) => ({
-    media: 'zenn',
-    title: item.title,
-    author: item.creator,
-    description: item.content,
-    url: item.link,
-  }));
-  await articlesRepository.bulkCreateArticle(params);
+    const params: ArticleInput[] = feedItems.map((item) => ({
+      media: 'zenn',
+      title: item.title,
+      author: item.creator,
+      description: item.content,
+      url: item.link,
+    }));
+
+    await articlesRepository.bulkCreateArticle(params);
+  }
 }
