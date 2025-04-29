@@ -7,3 +7,7 @@ prisma/ERD.md
 # shadcnのコンポーネントの自動生成ファイル
 src/application/web/ui
 src/application/web/lib/utils.ts
+
+# supabase edge functions
+# 環境がdenoであるため
+supabase/functions
