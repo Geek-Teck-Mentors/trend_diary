@@ -3,7 +3,7 @@ import fetchFeed from "./fetchFeed/index.ts";
 import { SupabaseClientError } from "./repository/error.ts";
 import { InvalidMediaError, RssParserError } from "./fetchFeed/error.ts";
 
-const functionName = "articles";
+const functionName = "fetch_articles";
 const app = new Hono().basePath(`/${functionName}`);
 
 app.post("/articles/:media", async (c) => {
