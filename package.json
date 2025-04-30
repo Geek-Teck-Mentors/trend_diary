@@ -24,7 +24,7 @@
     "db:migrate:deploy": "npx prisma migrate deploy",
     "db:reset": "npx prisma migrate reset --skip-seed",
     "db:studio": "npx prisma studio",
-    "supabase:db:type-gen": "npx supabase gen types typescript --local"
+    "supabase:db:type-gen": "npx supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
