@@ -34,7 +34,7 @@ app.post("/articles/:media", async (c) => {
       );
     } else if (error instanceof Error) {
       return c.json(
-        { status: "generic error", message: error.message },
+        { status: "unknown error", message: error.message },
         500,
       );
     }
