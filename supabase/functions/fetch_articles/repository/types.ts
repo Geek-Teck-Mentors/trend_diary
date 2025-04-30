@@ -1,5 +1,5 @@
 import { Article, ArticleInput } from "../model.ts";
 
-export interface ArticlesRepository {
+export interface ArticleRepository {
   bulkCreateArticle: (params: ArticleInput[]) => Promise<Article[]>;
 }

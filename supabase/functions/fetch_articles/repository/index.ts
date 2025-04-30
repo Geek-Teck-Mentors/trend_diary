@@ -1,11 +1,11 @@
 import supabaseClient from "../../infrastructure/supabase_client.ts";
 import type { TablesInsert } from "../../infrastructure/database.types.ts";
 import { Article, ArticleInput } from "../model.ts";
-import type { ArticlesRepository } from "./types.ts";
+import type { ArticleRepository } from "./types.ts";
 import { SupabaseClientError } from "./error.ts";
 import { QueryError } from "jsr:@supabase/supabase-js@2";
 
-export default class ArticlesRepositoryImpl implements ArticlesRepository {
+export default class ArticleRepositoryImpl implements ArticleRepository {
   async bulkCreateArticle(params: ArticleInput[]) {
     const insertParams: TablesInsert<"articles">[] = params.map(
       this.normalizeForArticleInput,
