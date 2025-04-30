@@ -22,5 +22,4 @@ Prisma公式ドキュメントに従い以下を実行
 2. supabase-js 向け型定義の更新(supabaseのfunctionsで参照するデータベースを変更した場合)
    1. Supabaseをローカルで起動(ローカルの場合)
    2. supabase のデータベースにマイグレーションを適用
-   3. `npx supabase gen types typescript --local` を実行
-   4. 生成された型定義を `database.types.ts` にコピー
+   3. `npm run supabase:db:type-gen` を実行
