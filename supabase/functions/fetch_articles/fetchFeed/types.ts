@@ -10,7 +10,7 @@ export type FeedItem = {
   author: string;
   description: string;
   url: string;
-}
+};
 
 export type QiitaItem = {
   title: string;

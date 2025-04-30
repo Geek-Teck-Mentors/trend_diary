@@ -11,7 +11,10 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       this.normalizeForArticleInput,
     );
 
-    const { data, error }: { data: Article[] | null, error: QueryError | null } = await supabaseClient
+    const { data, error }: {
+      data: Article[] | null;
+      error: QueryError | null;
+    } = await supabaseClient
       .from("articles")
       .insert(insertParams)
       .select()
