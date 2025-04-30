@@ -1,6 +1,6 @@
 import { Hono } from "jsr:@hono/hono";
 import fetchFeed from "./fetchFeed/index.ts";
-import { SupabaseClientError } from "./repository/error.ts";
+import { DataFetchError } from "./repository/error.ts";
 import { RssParserError } from "./fetchFeed/error.ts";
 
 const functionName = "fetch_articles";
@@ -22,9 +22,9 @@ app.post("/articles/:media", async (c) => {
       );
     }
   } catch (error) {
-    if (error instanceof SupabaseClientError) {
+    if (error instanceof DataFetchError) {
       return c.json(
-        { status: "supabase client error", message: error.message },
+        { status: "data fetch error", message: error.message },
         500,
       );
     } else if (error instanceof RssParserError) {
