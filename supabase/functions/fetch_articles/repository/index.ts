@@ -1,8 +1,9 @@
 import supabaseClient from "../../infrastructure/supabase_client.ts";
 import type { TablesInsert } from "../../infrastructure/database.types.ts";
-import { ArticleInput } from "../model.ts";
+import { Article, ArticleInput } from "../model.ts";
 import type { ArticlesRepository } from "./types.ts";
 import { SupabaseClientError } from "./error.ts";
+import { QueryError } from "jsr:@supabase/supabase-js@2";
 
 export default class ArticlesRepositoryImpl implements ArticlesRepository {
   async bulkCreateArticle(params: ArticleInput[]) {
@@ -10,14 +11,23 @@ export default class ArticlesRepositoryImpl implements ArticlesRepository {
       this.normalizeForArticleInput,
     );
 
-    const { error } = await supabaseClient
+    const { data, error }: { data: Article[] | null, error: QueryError | null } = await supabaseClient
       .from("articles")
-      .insert(insertParams);
+      .insert(insertParams)
+      .select()
+      .returns<Article[]>();
 
     if (error) {
       console.error("Error creating article:", error);
       throw new SupabaseClientError("Failed to create article: " + error);
     }
+
+    if (!data) {
+      console.error("No data returned from Supabase");
+      throw new SupabaseClientError("No data returned from Supabase");
+    }
+
+    return data!;
   }
 
   private normalizeForArticleInput = (params: ArticleInput): ArticleInput => ({
