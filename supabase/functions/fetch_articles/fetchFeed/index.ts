@@ -1,8 +1,8 @@
-import { InvalidMediaError } from "./error.ts";
 import { QiitaFetcher } from "./qiita_fetcher.ts";
+import { Media } from "./types.ts";
 import { ZennFetcher } from "./zenn_fetcher.ts";
 
-export default function fetchFeed(media: string) {
+export default function fetchFeed(media: Media) {
   switch (media) {
     case "qiita": {
       const qiitaFetcher = new QiitaFetcher();
@@ -11,9 +11,6 @@ export default function fetchFeed(media: string) {
     case "zenn": {
       const zennFetcher = new ZennFetcher();
       return zennFetcher.fetch();
-    }
-    default: {
-      throw new InvalidMediaError(media);
     }
   }
 }

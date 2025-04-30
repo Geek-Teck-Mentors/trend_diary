@@ -3,6 +3,8 @@ export interface ArticleFetcher {
   fetch(): Promise<FeedItem[]>;
 }
 
+export type Media = "qiita" | "zenn";
+
 export type FeedItem = {
   title: string;
   author: string;
