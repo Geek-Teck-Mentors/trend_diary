@@ -2,7 +2,6 @@ import supabaseClient from "../../infrastructure/supabase_client.ts";
 import type { TablesInsert } from "../../infrastructure/database.types.ts";
 import { Article, ArticleInput } from "../model.ts";
 import type { ArticleRepository } from "./types.ts";
-import { DataFetchError } from "./error.ts";
 import { QueryError } from "jsr:@supabase/supabase-js@2";
 
 export default class ArticleRepositoryImpl implements ArticleRepository {
@@ -20,14 +19,8 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       .select()
       .returns<Article[]>();
 
-    if (error) {
-      console.error("Error creating article:", error);
-      throw new DataFetchError("Failed to create article: " + error);
-    }
-
-    if (!data) {
-      console.error("No data returned from Supabase");
-      throw new DataFetchError("No data returned from Supabase");
+    if (error || !data) {
+      throw new Error("unexpected error on bulkCreateArticle: " + error);
     }
 
     return data!;
