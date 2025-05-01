@@ -3,7 +3,7 @@ import fetchFeed from "./fetchFeed/index.ts";
 import { DataFetchError } from "./repository/error.ts";
 import { RssParserError } from "./fetchFeed/error.ts";
 
-// supabase edge functionのためにedge functionsの名前を指定
+// functionNameはsupabase functionsの名前に一致させないとsupabaseがリクエストを振り分けない
 const functionName = "fetch_articles";
 const app = new Hono().basePath(`/${functionName}`);
 
