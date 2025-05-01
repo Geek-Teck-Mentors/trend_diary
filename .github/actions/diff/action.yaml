@@ -23,6 +23,15 @@ runs:
         TARGET_BRANCH: ${{ github.base_ref || 'main' }}
       run: |
         git fetch origin ${TARGET_BRANCH}
-        count=$(git diff origin/${TARGET_BRANCH} HEAD --name-only -- ${{ inputs.subdir }} ":(exclude)${{ inputs.exclude_pattern }}" | wc -l)
+
+        EXCLUDE_OPTS=""
+        # 除外パターンをスペースで分割して追加
+        for pattern in ${{ inputs.exclude_pattern }}; do
+          EXCLUDE_OPTS="${EXCLUDE_OPTS} \":(exclude)$pattern\""
+        done
+
+        # 最終的なコマンドを実行
+        GIT_DIFF_CMD="git diff origin/${TARGET_BRANCH} HEAD --name-only -- ${{ inputs.subdir }} ${EXCLUDE_OPTS}"
+        count=$(bash -c "$GIT_DIFF_CMD" | wc -l)
         echo "diff-count=$count" >> $GITHUB_OUTPUT
       shell: bash
