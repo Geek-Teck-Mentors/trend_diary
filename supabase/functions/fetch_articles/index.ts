@@ -1,6 +1,9 @@
 import { Hono } from "jsr:@hono/hono";
-import { QiitaFetcher } from "./fetchFeed/qiita_fetcher.ts";
-import { ZennFetcher } from "./fetchFeed/zenn_fetcher.ts";
+import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
+import { Executor } from "./executor.ts";
+import ArticleRepositoryImpl from "./repository.ts";
+import { DatabaseError, MediaFetchError } from "./error.ts";
+import { rdbClient } from "../infrastructure/supabase_client.ts";
 
 // functionNameはsupabase functionsの名前に一致させないとsupabaseがリクエストを振り分けない
 const functionName = "fetch_articles";
@@ -9,30 +12,22 @@ const app = new Hono().basePath(`/${functionName}`);
 app.post("/articles/qiita", async (c) => {
   try {
     const fetcher = new QiitaFetcher();
-    const items = await fetcher.fetch();
-    return c.json({ status: "ok", message: "successfully fetched articles", items }, 200)
-  } catch (error) {
-    if (error instanceof Error) {
-      return c.json(
-        { status: "unknown error", message: error.message },
-        500,
-      );
-    }
-  }
-});
+    const repository = new ArticleRepositoryImpl(rdbClient);
 
-app.post("/articles/zenn", async (c) => {
-  try {
-    const fetcher = new ZennFetcher();
-    const items = await fetcher.fetch();
-    return c.json({ status: "ok", message: "successfully fetched articles", items }, 200)
+    const exec = new Executor("qiita", fetcher, repository);
+    const res = await exec.do();
+    return c.json(res, 201);
   } catch (error) {
-    if (error instanceof Error) {
-      return c.json(
-        { status: "unknown error", message: error.message },
-        500,
-      );
+    if (error instanceof MediaFetchError) {
+      console.error("MediaFetchError", error);
+      return c.json({ message: "internal server error" }, 500);
+    } else if (error instanceof DatabaseError) {
+      console.error("DatabaseError", error);
+      return c.json({ message: "internal server error" }, 500);
     }
+
+    console.error("Error", error);
+    return c.json({ message: "unknown error" }, 500);
   }
 });
 

@@ -1,5 +1,7 @@
-import { ArticleFetcher, FeedItem, ZennItem } from "./types.ts";
-import { fetchRssFeed } from "./utils.ts";
+import { MediaFetchError } from "../error.ts";
+import { ArticleFetcher } from "../model/interface.ts";
+import { FeedItem, ZennItem } from "../model/types.ts";
+import { fetchRssFeed } from "./fetch.ts";
 
 export class ZennFetcher implements ArticleFetcher {
   url = "https://zenn.dev/feed";
@@ -15,6 +17,10 @@ export class ZennFetcher implements ArticleFetcher {
       url: item.link,
     }));
 
-    return params;
+      return params;
+    } catch (error) {
+      console.error("Error processing feed items:", error);
+      throw new MediaFetchError("Failed to process feed items: " + error);
+    }
   }
 }

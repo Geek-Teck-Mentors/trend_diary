@@ -27,8 +27,10 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "cSpell.words": [
+    "qiita",
     "Supabase",
-    "Timestamptz"
+    "Timestamptz",
+    "zenn"
   ],
   "[markdown]":  {
       "editor.wordWrap": "on",
