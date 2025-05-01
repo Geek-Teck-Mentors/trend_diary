@@ -3,7 +3,7 @@ import { ArticleInput } from "./model/model.ts";
 
 export class Executor {
   constructor(
-    private media: "qiita" | "zenn",
+    private media: string,
     private fetcher: ArticleFetcher,
     private repository: ArticleRepository,
   ) {}
