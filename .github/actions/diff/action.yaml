@@ -23,6 +23,22 @@ runs:
         TARGET_BRANCH: ${{ github.base_ref || 'main' }}
       run: |
         git fetch origin ${TARGET_BRANCH}
-        count=$(git diff origin/${TARGET_BRANCH} HEAD --name-only -- ${{ inputs.subdir }} ":(exclude)${{ inputs.exclude_pattern }}" | wc -l)
+
+        GIT_DIFF_CMD="git diff origin/${TARGET_BRANCH} HEAD --name-only -- ${{ inputs.subdir }}"
+
+        # 除外パターンがあればそれぞれに対して:(exclude)を付ける
+        if [ -n "${{ inputs.exclude_pattern }}" ]; then
+          for pattern in ${{ inputs.exclude_pattern }}; do
+            GIT_DIFF_CMD="$GIT_DIFF_CMD ':(exclude)$pattern'"
+          done
+        fi
+
+        # コマンドを実行
+        files=$(bash -c "$GIT_DIFF_CMD")
+
+        # ファイル数をカウント
+        count=$(echo "$files" | grep -v '^$' | wc -l)
+        count=$(echo "$count" | tr -d ' ')
+
         echo "diff-count=$count" >> $GITHUB_OUTPUT
       shell: bash
