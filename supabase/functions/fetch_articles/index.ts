@@ -1,5 +1,6 @@
 import { Hono } from "jsr:@hono/hono";
 import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
+import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import { Executor } from "./executor.ts";
 import ArticleRepositoryImpl from "./repository.ts";
 import { DatabaseError, MediaFetchError } from "./error.ts";
@@ -15,6 +16,28 @@ app.post("/articles/qiita", async (c) => {
     const repository = new ArticleRepositoryImpl(rdbClient);
 
     const exec = new Executor("qiita", fetcher, repository);
+    const res = await exec.do();
+    return c.json(res, 201);
+  } catch (error) {
+    if (error instanceof MediaFetchError) {
+      console.error("MediaFetchError", error);
+      return c.json({ message: "internal server error" }, 500);
+    } else if (error instanceof DatabaseError) {
+      console.error("DatabaseError", error);
+      return c.json({ message: "internal server error" }, 500);
+    }
+
+    console.error("Error", error);
+    return c.json({ message: "unknown error" }, 500);
+  }
+});
+
+app.post("/articles/zenn", async (c) => {
+  try {
+    const fetcher = new ZennFetcher();
+    const repository = new ArticleRepositoryImpl(rdbClient);
+
+    const exec = new Executor("zenn", fetcher, repository);
     const res = await exec.do();
     return c.json(res, 201);
   } catch (error) {
