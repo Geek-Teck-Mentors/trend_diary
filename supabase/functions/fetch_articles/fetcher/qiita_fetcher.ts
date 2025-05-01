@@ -7,18 +7,19 @@ export class QiitaFetcher implements ArticleFetcher {
   url = "https://qiita.com/popular-items/feed.atom";
 
   async fetch() {
-    const feedItems = await fetchRssFeed<QiitaItem>(this.url);
-    let params: FeedItem[] = [];
+    try {
+      const feedItems = await fetchRssFeed<QiitaItem>(this.url);
+      let params: FeedItem[] = [];
 
-    params = feedItems.map((item) => ({
-      title: item.title,
-      author: item.author,
-      description: item.content,
-      url: item.link,
-    }));
+      params = feedItems.map((item) => ({
+        title: item.title,
+        author: item.author,
+        description: item.content,
+        url: item.link,
+      }));
 
       return params;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error processing feed items:", error);
       throw new MediaFetchError("Failed to process feed items: " + error);
     }
