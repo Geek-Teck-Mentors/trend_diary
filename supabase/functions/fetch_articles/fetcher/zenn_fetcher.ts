@@ -11,7 +11,6 @@ export class ZennFetcher implements ArticleFetcher {
       let params: FeedItem[] = [];
 
       params = feedItems.map((item) => ({
-        media: "zenn",
         title: item.title,
         author: item.creator,
         description: item.content,
