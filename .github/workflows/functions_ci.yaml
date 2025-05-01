@@ -25,8 +25,9 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Lint
         run: |
+          exclude_functions=${{ env.EXCLUDE_FUNCTIONS }}
           for function_name in $(ls supabase/functions); do
-            if [[ ! " ${EXCLUDE_FUNCTIONS[@]} " =~ " ${function_name} " ]]; then
+            if [[ ! " ${exclude_functions[@]} " =~ " ${function_name} " ]]; then
               deno lint -c supabase/functions/${function_name}/deno.json
             fi
           done
@@ -41,8 +42,9 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Format
         run: |
+          exclude_functions=${{ env.EXCLUDE_FUNCTIONS }}
           for function_name in $(ls supabase/functions); do
-            if [[ ! " ${EXCLUDE_FUNCTIONS[@]} " =~ " ${function_name} " ]]; then
+            if [[ ! " ${exclude_functions[@]} " =~ " ${function_name} " ]]; then
               deno fmt -c supabase/functions/${function_name}/deno.json
             fi
           done
