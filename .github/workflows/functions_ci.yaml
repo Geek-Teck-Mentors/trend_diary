@@ -12,7 +12,7 @@ on:
       - '.github/workflows/functions_ci.yaml'
 
 env:
-  DENO_VERSION: 2.0.6
+  DENO_VERSION: 2.3.1
   EXCLUDE_FUNCTIONS: ("infrastructure")
 jobs:
   lint:
