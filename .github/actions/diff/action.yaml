@@ -24,21 +24,14 @@ runs:
       run: |
         git fetch origin ${TARGET_BRANCH}
 
-        GIT_DIFF_CMD="git diff origin/${TARGET_BRANCH} HEAD --name-only -- ${{ inputs.subdir }}"
+        EXCLUDE_OPTS=""
+        # 除外パターンをスペースで分割して追加
+        for pattern in ${{ inputs.exclude_pattern }}; do
+          EXCLUDE_OPTS="${EXCLUDE_OPTS} \":(exclude)$pattern\""
+        done
 
-        # 除外パターンがあればそれぞれに対して:(exclude)を付ける
-        if [ -n "${{ inputs.exclude_pattern }}" ]; then
-          for pattern in ${{ inputs.exclude_pattern }}; do
-            GIT_DIFF_CMD="$GIT_DIFF_CMD ':(exclude)$pattern'"
-          done
-        fi
-
-        # コマンドを実行
-        files=$(bash -c "$GIT_DIFF_CMD")
-
-        # ファイル数をカウント
-        count=$(echo "$files" | grep -v '^$' | wc -l)
-        count=$(echo "$count" | tr -d ' ')
-
+        # 最終的なコマンドを実行
+        GIT_DIFF_CMD="git diff origin/${TARGET_BRANCH} HEAD --name-only -- ${{ inputs.subdir }} ${EXCLUDE_OPTS}"
+        count=$(bash -c "$GIT_DIFF_CMD" | wc -l)
         echo "diff-count=$count" >> $GITHUB_OUTPUT
       shell: bash
