@@ -10,6 +10,8 @@ import {
 } from '@remix-run/react';
 
 import './styles.css';
+import { SidebarProvider } from './components/ui/sidebar';
+import AppSidebar from './components/Sidebar';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -21,7 +23,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <SidebarProvider>
+          <AppSidebar />
+          <div className='w-full'>{children}</div>
+        </SidebarProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
