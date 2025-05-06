@@ -13,8 +13,8 @@ import {
 import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
-import { accountSchema } from '@/domain/account/schema/accountSchema';
 import getApiClient from '@/infrastructure/api';
+import { accountSchema } from '@/domain/account';
 
 export const meta: MetaFunction = () => [{ title: 'アカウント作成 | TrendDiary' }];
 
