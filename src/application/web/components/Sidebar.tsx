@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Home, Newspaper } from 'lucide-react';
+import { BookOpen, Newspaper, TrendingUp } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -16,8 +16,8 @@ import {
 const menuItems = [
   {
     title: 'トレンド',
-    url: '/trend',
-    icon: Home,
+    url: '/trends',
+    icon: TrendingUp,
   },
   {
     title: '読んだ記事',
