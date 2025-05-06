@@ -1,5 +1,7 @@
+import { Nullable } from '@/common/types/utility';
 import User from '../model/user';
 
 export interface UserRepository {
-  createUser(accountId: bigint, displayName?: string): Promise<User>;
+  create(accountId: bigint, displayName?: string): Promise<User>;
+  findByAccountId(accountId: bigint): Promise<Nullable<User>>;
 }
