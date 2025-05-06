@@ -3,7 +3,7 @@ import { AccountRepository } from './repository';
 import { ACCOUNT_ALREADY_EXISTS } from './error';
 import { AlreadyExistsError, ServerError } from '../../common/errors';
 import { UserRepository } from '../user/repository';
-import Account from './account';
+import Account from './model/account';
 
 export default class AccountService {
   constructor(
