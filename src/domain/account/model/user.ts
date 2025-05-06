@@ -11,8 +11,4 @@ export default class User extends BaseModel {
   ) {
     super(createdAt, updatedAt, deletedAt);
   }
-
-  deactivate(): void {
-    this.deactivate();
-  }
 }

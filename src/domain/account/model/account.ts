@@ -16,8 +16,4 @@ export default class Account extends BaseModel {
   recordLogin(): void {
     this.lastLogin = new Date();
   }
-
-  deactivate(): void {
-    this.deactivate();
-  }
 }
