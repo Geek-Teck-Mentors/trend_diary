@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
-import { AccountRepository } from '../repository';
+import { AccountRepository } from '../repository/accountRepository';
 import { ACCOUNT_ALREADY_EXISTS } from '../error';
 import { AlreadyExistsError, ServerError } from '../../../common/errors';
-import { UserRepository } from '../../user/repository';
+import { UserRepository } from '../repository/userRepository';
 import Account from '../model/account';
 
 export default class AccountService {
