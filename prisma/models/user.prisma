@@ -8,5 +8,6 @@ model User {
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
 
+  @@unique([accountId], name: "users_account_id_unique")
   @@map("users")
 }

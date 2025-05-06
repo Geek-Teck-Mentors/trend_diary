@@ -1,6 +1,12 @@
 ```mermaid
 erDiagram
 
+  "ping" {
+    BigInt id "🗝️"
+    DateTime created_at 
+    }
+  
+
   "accounts" {
     BigInt account_id "🗝️"
     String email 
@@ -19,12 +25,6 @@ erDiagram
     DateTime created_at 
     DateTime updated_at 
     DateTime deleted_at "❓"
-    }
-  
-
-  "ping" {
-    BigInt id "🗝️"
-    DateTime created_at 
     }
   
 ```
