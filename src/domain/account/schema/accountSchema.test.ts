@@ -1,4 +1,4 @@
-import { accountSchema } from '../schema';
+import { accountSchema } from '../schema/acountSchema';
 
 describe('アカウントスキーマ', () => {
   const validAccount = {
