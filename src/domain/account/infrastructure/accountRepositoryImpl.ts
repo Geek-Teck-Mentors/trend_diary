@@ -1,9 +1,10 @@
 import { Prisma } from '@prisma/client';
-import { Nullable } from '@/common/typeUtility';
+import { Nullable } from '@/common/types/utility';
 import { RdbClient, TransactionManager } from '@/infrastructure/rdb';
 import { AlreadyExistsError } from '@/common/errors';
-import Account from '../account/account';
-import { AccountRepository } from '../account/repository';
+
+import { AccountRepository } from '../repository/accountRepository';
+import Account from '../model/account';
 
 export default class AccountRepositoryImpl extends TransactionManager implements AccountRepository {
   constructor(private db: RdbClient) {

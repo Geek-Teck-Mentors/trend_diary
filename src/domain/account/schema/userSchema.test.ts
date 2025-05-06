@@ -1,4 +1,4 @@
-import { userSchema } from '../schema';
+import { userSchema } from './userSchema';
 
 describe('ユーザースキーマ', () => {
   const validUser = {

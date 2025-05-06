@@ -12,10 +12,64 @@ import {
 import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
-import { accountSchema } from '@/domain/account/schema';
-// import getApiClient from '@/infrastructure/api';
+import { accountSchema } from '@/domain/account';
 
 export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }];
+
+export default function Login() {
+  const actionData = useActionData<typeof action>();
+
+  return (
+    <div className='bg-background flex min-h-screen items-center justify-center p-4'>
+      <Card className='flex w-full max-w-md flex-col'>
+        <CardHeader className='space-y-1'>
+          <CardTitle className='text-2xl font-bold'>ログイン</CardTitle>
+        </CardHeader>
+        <Form method='post' className='flex flex-1 flex-col'>
+          <CardContent className='flex flex-1 flex-col gap-6'>
+            <div className='space-y-2'>
+              <Label htmlFor='email'>メールアドレス</Label>
+              <Input
+                id='email'
+                name='email'
+                type='email'
+                placeholder='taro@example.com'
+                aria-invalid={actionData?.errors?.email ? true : undefined}
+              />
+              {actionData?.errors?.email && (
+                <p className='text-destructive text-sm'>{actionData.errors.email.at(0)}</p>
+              )}
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='password'>パスワード</Label>
+              <Input
+                id='password'
+                name='password'
+                type='password'
+                aria-invalid={actionData?.errors?.password ? true : undefined}
+              />
+              {actionData?.errors?.password && (
+                <p className='text-destructive text-sm'>{actionData.errors.password.at(0)}</p>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter className='flex flex-col gap-4 border-t pt-6'>
+            <Button type='submit' className='w-full'>
+              ログイン
+            </Button>
+            <Separator />
+            <div className='text-muted-foreground text-center text-sm'>
+              アカウントをお持ちでないですか？{' '}
+              <a href='/signup' className='text-primary hover:text-primary/90 underline'>
+                アカウント作成
+              </a>
+            </div>
+          </CardFooter>
+        </Form>
+      </Card>
+    </div>
+  );
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -65,61 +119,4 @@ export async function action({ request }: ActionFunctionArgs) {
       { status: 500 },
     );
   }
-}
-
-export default function Login() {
-  const actionData = useActionData<typeof action>();
-
-  return (
-    <div className='flex min-h-screen items-center justify-center bg-slate-950 p-4'>
-      <Card className='flex w-full max-w-md flex-col bg-slate-900 text-slate-50'>
-        <CardHeader className='space-y-1'>
-          <CardTitle className='text-2xl font-bold'>ログイン</CardTitle>
-        </CardHeader>
-        <Form method='post' className='flex flex-1 flex-col'>
-          <CardContent className='flex flex-1 flex-col gap-6'>
-            <div className='space-y-2'>
-              <Label htmlFor='email'>メールアドレス</Label>
-              <Input
-                id='email'
-                name='email'
-                type='email'
-                placeholder='taro@example.com'
-                className='border-slate-700 bg-slate-800 text-slate-50'
-                aria-invalid={actionData?.errors?.email ? true : undefined}
-              />
-              {actionData?.errors?.email && (
-                <p className='text-sm text-red-500'>{actionData.errors.email.at(0)}</p>
-              )}
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='password'>パスワード</Label>
-              <Input
-                id='password'
-                name='password'
-                type='password'
-                className='border-slate-700 bg-slate-800 text-slate-50'
-                aria-invalid={actionData?.errors?.password ? true : undefined}
-              />
-              {actionData?.errors?.password && (
-                <p className='text-sm text-red-500'>{actionData.errors.password.at(0)}</p>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className='flex flex-col gap-4 border-t border-slate-800 pt-6'>
-            <Button type='submit' className='w-full bg-slate-50 text-slate-900 hover:bg-slate-200'>
-              ログイン
-            </Button>
-            <Separator className='bg-slate-700' />
-            <div className='text-center text-sm text-slate-400'>
-              アカウントをお持ちでないですか？{' '}
-              <a href='/signup' className='text-slate-300 underline hover:text-slate-50'>
-                アカウント作成
-              </a>
-            </div>
-          </CardFooter>
-        </Form>
-      </Card>
-    </div>
-  );
 }

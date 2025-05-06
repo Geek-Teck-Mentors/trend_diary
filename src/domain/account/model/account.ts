@@ -1,4 +1,4 @@
-import BaseModel from '../../common/baseModel';
+import BaseModel from '@/common/model/baseModel';
 
 export default class Account extends BaseModel {
   constructor(
@@ -15,9 +15,5 @@ export default class Account extends BaseModel {
 
   recordLogin(): void {
     this.lastLogin = new Date();
-  }
-
-  deactivate(): void {
-    this.deactivate();
   }
 }
