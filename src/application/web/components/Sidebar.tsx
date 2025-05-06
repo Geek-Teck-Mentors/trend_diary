@@ -15,7 +15,7 @@ import {
 
 const menuItems = [
   {
-    title: 'Home',
+    title: 'トレンド',
     url: '/trend',
     icon: Home,
   },
