@@ -9,7 +9,7 @@ import {
   useRouteError,
 } from '@remix-run/react';
 
-import '@/application/web/styles.css';
+import './styles.css';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
