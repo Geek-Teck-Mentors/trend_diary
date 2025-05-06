@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { baseSchema, deletedAtSchema } from '@/common/baseSchema';
+import baseSchema from '@/common/schema/baseSchema';
+import deletedAtSchema from '@/common/schema/deletedAtSchema';
 
 export const userSchema = z
   .object({

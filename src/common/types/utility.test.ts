@@ -1,4 +1,4 @@
-import { isNull } from '../typeUtility';
+import { isNull } from './utility';
 
 describe('typeUtility', () => {
   describe('isNull', () => {

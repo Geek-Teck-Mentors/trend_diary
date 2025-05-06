@@ -1,4 +1,4 @@
-import { Nullable } from '../../../common/typeUtility';
+import { Nullable } from '../../../common/types/utility';
 import { TransactionClient } from '../../../infrastructure/rdb';
 import Account from '../model/account';
 

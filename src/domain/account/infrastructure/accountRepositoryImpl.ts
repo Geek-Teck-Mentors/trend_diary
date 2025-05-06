@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { Nullable } from '@/common/typeUtility';
+import { Nullable } from '@/common/types/utility';
 import { RdbClient, TransactionManager } from '@/infrastructure/rdb';
 import { AlreadyExistsError } from '@/common/errors';
 

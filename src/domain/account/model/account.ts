@@ -1,4 +1,4 @@
-import BaseModel from '@/common/baseModel';
+import BaseModel from '@/common/model/baseModel';
 
 export default class Account extends BaseModel {
   constructor(
