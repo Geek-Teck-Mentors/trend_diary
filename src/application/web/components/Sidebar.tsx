@@ -16,7 +16,7 @@ import {
 const menuItems = [
   {
     title: 'Home',
-    url: '#',
+    url: '/trend',
     icon: Home,
   },
   {
@@ -31,8 +31,8 @@ export default function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className='flex items-center gap-2 px-4 py-2'>
-          <BookOpen className='h-5 w-5' />
-          <span className='font-semibold'>TrendDiary</span>
+          <BookOpen className='h-6 w-6' />
+          <span className='text-xl font-semibold'>TrendDiary</span>
         </div>
       </SidebarHeader>
       <SidebarContent>

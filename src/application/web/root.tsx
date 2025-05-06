@@ -9,9 +9,7 @@ import {
   useRouteError,
 } from '@remix-run/react';
 
-import './styles.css';
-import { SidebarProvider } from './components/ui/sidebar';
-import AppSidebar from './components/Sidebar';
+import '@/application/web/styles.css';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -23,10 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <SidebarProvider>
-          <AppSidebar />
-          <div className='w-full'>{children}</div>
-        </SidebarProvider>
+        <div className='w-full'>{children}</div>
         <ScrollRestoration />
         <Scripts />
       </body>
