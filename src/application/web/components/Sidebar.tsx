@@ -15,7 +15,7 @@ import {
 
 const menuItems = [
   {
-    title: 'トレンド',
+    title: 'トレンド記事',
     url: '/trends',
     icon: TrendingUp,
   },

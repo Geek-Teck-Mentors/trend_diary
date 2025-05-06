@@ -1,7 +1,7 @@
 import React from 'react';
 import type { MetaFunction } from '@remix-run/cloudflare';
 
-export const meta: MetaFunction = () => [{ title: 'Remix and Hono on Vite' }];
+export const meta: MetaFunction = () => [{ title: 'トレンド記事 | TrendDiary' }];
 
 export default function TrendIndex() {
   return (
