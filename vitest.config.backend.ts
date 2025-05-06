@@ -10,7 +10,8 @@ const testTargetPaths = ['src/application/api', 'src/domain', 'src/common'];
 
 const testInclude = testTargetPaths.map((path) => `${path}/**/*.test.ts`);
 
-const testExclude = ['src/domain/repository/*'];
+// リポジトリの詳細実装での単体テストには担保できる品質特性がないため、除外
+const testExclude = ['src/domain/**/infrastructure/*'];
 
 // カバレッジ対象のファイルパスを生成（.test.tsファイル以外全部）
 const coverageInclude = testTargetPaths.map((path) => `${path}/**/*`);
