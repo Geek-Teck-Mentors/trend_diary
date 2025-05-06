@@ -4,7 +4,7 @@ import { AlreadyExistsError, ServerError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
 
 import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepository';
-import { accountSchema } from '@/domain/account/schema/acountSchema';
+import { accountSchema } from '@/domain/account/schema/accountSchema';
 import AccountService from '@/domain/account/service/accountService';
 import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
