@@ -37,8 +37,8 @@ export default class AccountService {
     }
   }
 
-  async login(accountId: bigint, plainPassword: string): Promise<User> {
-    const account = await this.accountRepository.findById(accountId);
+  async login(email: string, plainPassword: string): Promise<User> {
+    const account = await this.accountRepository.findByEmail(email);
     if (isNull(account)) throw new NotFoundError('Account not found');
 
     const isMatchPassword = await bcrypt.compare(plainPassword, account.password);
