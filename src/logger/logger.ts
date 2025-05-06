@@ -51,8 +51,8 @@ class Logger {
     this.log('warn', message, ...args);
   }
 
-  error(message: LogMessage, ...args: unknown[]): void {
-    this.log('error', message, ...args);
+  error(message: LogMessage, error: Error | unknown, ...args: unknown[]): void {
+    this.log('error', message, error, ...args);
   }
 }
 
