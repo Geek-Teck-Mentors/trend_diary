@@ -2,12 +2,11 @@ import { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { AlreadyExistsError, ServerError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
-import UserRepositoryImpl from '@/domain/repository/userRepository';
-import AccountRepositoryImpl from '@/domain/repository/accountRepository';
-import { accountSchema } from '@/domain/account/schema';
-import AccountService from '@/domain/account/service';
+
+import { accountSchema } from '@/domain/account/schema/accountSchema';
 import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
+import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 
 export default async function signup(c: Context<Env>) {
   let body;

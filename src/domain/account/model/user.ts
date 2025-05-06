@@ -1,4 +1,4 @@
-import BaseModel from '../../common/baseModel';
+import BaseModel from '@/common/model/baseModel';
 
 export default class User extends BaseModel {
   constructor(
@@ -10,9 +10,5 @@ export default class User extends BaseModel {
     deletedAt?: Date,
   ) {
     super(createdAt, updatedAt, deletedAt);
-  }
-
-  deactivate(): void {
-    this.deactivate();
   }
 }

@@ -1,9 +1,8 @@
 import bcrypt from 'bcryptjs';
-import { AccountRepository } from './repository';
-import { ACCOUNT_ALREADY_EXISTS } from './error';
-import { AlreadyExistsError, ServerError } from '../../common/errors';
-import { UserRepository } from '../user/repository';
-import Account from './account';
+import { AccountRepository } from '../repository/accountRepository';
+import { AlreadyExistsError, ServerError } from '../../../common/errors';
+import { UserRepository } from '../repository/userRepository';
+import Account from '../model/account';
 
 export default class AccountService {
   constructor(
@@ -14,7 +13,7 @@ export default class AccountService {
   async signup(email: string, plainPassword: string): Promise<Account> {
     // 既にアカウントがあるかチェック
     const existingAccount = await this.accountRepository.findByEmail(email);
-    if (existingAccount) throw ACCOUNT_ALREADY_EXISTS;
+    if (existingAccount) throw new AlreadyExistsError('Account already exists');
 
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
@@ -27,7 +26,6 @@ export default class AccountService {
         return account;
       });
     } catch (error) {
-      if (error instanceof AlreadyExistsError) throw ACCOUNT_ALREADY_EXISTS;
       throw ServerError.handle(error);
     }
   }

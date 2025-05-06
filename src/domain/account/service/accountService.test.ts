@@ -1,9 +1,9 @@
-import AccountRepositoryImpl from '@/domain/repository/accountRepository';
+import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl';
 import { AlreadyExistsError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
-import UserRepositoryImpl from '@/domain/repository/userRepository';
 
-import AccountService from '../service';
+import AccountService from './accountService';
+import UserRepositoryImpl from '../infrastructure/userRepositoryImpl';
 
 describe('AccountService', () => {
   const db = getRdbClient(process.env.DATABASE_URL ?? '');
