@@ -5,7 +5,7 @@ import getRdbClient from '@/infrastructure/rdb';
 import UserRepositoryImpl from '@/domain/repository/userRepository';
 import AccountRepositoryImpl from '@/domain/repository/accountRepository';
 import { accountSchema } from '@/domain/account/schema/acountSchema';
-import AccountService from '@/domain/account/service';
+import AccountService from '@/domain/account/service/accountService';
 import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
 
