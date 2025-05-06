@@ -3,8 +3,8 @@ import { Nullable } from '@/common/typeUtility';
 import { RdbClient, TransactionManager } from '@/infrastructure/rdb';
 import { AlreadyExistsError } from '@/common/errors';
 
-import { AccountRepository } from '../account/repository/accountRepository';
-import Account from '../account/model/account';
+import { AccountRepository } from '../repository/accountRepository';
+import Account from '../model/account';
 
 export default class AccountRepositoryImpl extends TransactionManager implements AccountRepository {
   constructor(private db: RdbClient) {

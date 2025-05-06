@@ -1,6 +1,6 @@
 import { RdbClient } from '@/infrastructure/rdb';
-import { UserRepository } from '../account/repository/userRepository';
-import User from '../account/model/user';
+import { UserRepository } from '../repository/userRepository';
+import User from '../model/user';
 
 export default class UserRepositoryImpl implements UserRepository {
   constructor(private db: RdbClient) {}
