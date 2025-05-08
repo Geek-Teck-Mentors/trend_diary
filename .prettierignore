@@ -5,5 +5,4 @@
 prisma/ERD.md
 
 # shadcnのコンポーネントの自動生成ファイル
-src/application/web/ui
-src/application/web/lib/utils.ts
+src/application/web/components/ui

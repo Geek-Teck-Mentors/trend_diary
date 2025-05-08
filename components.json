@@ -14,8 +14,8 @@
     "components": "@/application/web/components",
     "utils": "@/application/web/utils",
     "ui": "@/application/web/components/ui",
-    "lib": "@/application/web/lib",
-    "hooks": "@/application/web/hooks"
+    "lib": "@/application/web/components/ui/lib",
+    "hooks": "@/application/web/components/ui/hooks"
   },
   "iconLibrary": "lucide"
 }
