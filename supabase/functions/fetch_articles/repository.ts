@@ -4,6 +4,7 @@ import { QueryError } from "jsr:@supabase/supabase-js@2";
 import { ArticleRepository } from "./model/interface.ts";
 import { DatabaseError } from "./error.ts";
 import { RdbClient } from "../infrastructure/supabase_client.ts";
+import { logger } from "../infrastructure/logger.ts";
 
 export default class ArticleRepositoryImpl implements ArticleRepository {
   constructor(
@@ -14,6 +15,8 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
     const insertParams: TablesInsert<"articles">[] = params.map(
       this.normalizeForArticleInput,
     );
+
+    logger.info("Start inserting articles into Supabase");
 
     const { data, error }: {
       data: Article[] | null;

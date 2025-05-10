@@ -1,3 +1,4 @@
+import { logger } from "../../infrastructure/logger.ts";
 import { MediaFetchError } from "../error.ts";
 import { ArticleFetcher } from "../model/interface.ts";
 import { FeedItem, QiitaItem } from "../model/types.ts";
@@ -20,7 +21,7 @@ export class QiitaFetcher implements ArticleFetcher {
 
       return params;
     } catch (error: unknown) {
-      console.error("Error processing feed items:", error);
+      logger.error("Error fetching Qiita feed:", error);
       throw new MediaFetchError("Failed to process feed items: " + error);
     }
   }

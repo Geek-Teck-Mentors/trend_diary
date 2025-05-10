@@ -1,0 +1,123 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@std/fmt@^1.0.5": "1.0.7",
+    "jsr:@std/fs@^1.0.11": "1.0.17",
+    "jsr:@std/io@~0.225.2": "0.225.2",
+    "jsr:@std/log@*": "0.224.14"
+  },
+  "jsr": {
+    "@std/fmt@1.0.7": {
+      "integrity": "2a727c043d8df62cd0b819b3fb709b64dd622e42c3b1bb817ea7e6cc606360fb"
+    },
+    "@std/fs@1.0.17": {
+      "integrity": "1c00c632677c1158988ef7a004cb16137f870aafdb8163b9dce86ec652f3952b"
+    },
+    "@std/io@0.225.2": {
+      "integrity": "3c740cd4ee4c082e6cfc86458f47e2ab7cb353dc6234d5e9b1f91a2de5f4d6c7"
+    },
+    "@std/log@0.224.14": {
+      "integrity": "257f7adceee3b53bb2bc86c7242e7d1bc59729e57d4981c4a7e5b876c808f05e",
+      "dependencies": [
+        "jsr:@std/fmt",
+        "jsr:@std/fs",
+        "jsr:@std/io"
+      ]
+    }
+  },
+  "redirects": {
+    "https://deno.land/std/log/mod.ts": "https://deno.land/std@0.224.0/log/mod.ts"
+  },
+  "remote": {
+    "https://deno.land/std@0.192.0/_util/asserts.ts": "178dfc49a464aee693a7e285567b3d0b555dc805ff490505a8aae34f9cfb1462",
+    "https://deno.land/std@0.192.0/bytes/copy.ts": "939d89e302a9761dcf1d9c937c7711174ed74c59eef40a1e4569a05c9de88219",
+    "https://deno.land/std@0.192.0/fmt/colors.ts": "d67e3cd9f472535241a8e410d33423980bec45047e343577554d3356e1f0ef4e",
+    "https://deno.land/std@0.192.0/fs/exists.ts": "29c26bca8584a22876be7cb8844f1b6c8fc35e9af514576b78f5c6884d7ed02d",
+    "https://deno.land/std@0.192.0/io/buf_writer.ts": "48c33c8f00b61dcbc7958706741cec8e59810bd307bc6a326cbd474fe8346dfd",
+    "https://deno.land/std@0.192.0/log/handlers.ts": "38871ecbfa67b0d39dc3384210439ac9a13cba6118b912236f9011b5989b9a4d",
+    "https://deno.land/std@0.192.0/log/levels.ts": "6309147664e9e008cd6671610f2505c4c95f181f6bae4816a84b33e0aec66859",
+    "https://deno.land/std@0.192.0/log/logger.ts": "257ceb47e3f5f872068073de9809b015a7400e8d86dd40563c1d80169e578f71",
+    "https://deno.land/std@0.192.0/log/mod.ts": "36d156ad18de3f1806c6ddafa4965129be99ccafc27f1813de528d65b6c528bf",
+    "https://deno.land/std@0.224.0/assert/assert.ts": "09d30564c09de846855b7b071e62b5974b001bb72a4b797958fe0660e7849834",
+    "https://deno.land/std@0.224.0/assert/assertion_error.ts": "ba8752bd27ebc51f723702fac2f54d3e94447598f54264a6653d6413738a8917",
+    "https://deno.land/std@0.224.0/fmt/colors.ts": "508563c0659dd7198ba4bbf87e97f654af3c34eb56ba790260f252ad8012e1c5",
+    "https://deno.land/std@0.224.0/fs/exists.ts": "3d38cb7dcbca3cf313be343a7b8af18a87bddb4b5ca1bd2314be12d06533b50f",
+    "https://deno.land/std@0.224.0/io/types.ts": "acecb3074c730b5ff487ba4fe9ce51e67bd982aa07c95e5f5679b7b2f24ad129",
+    "https://deno.land/std@0.224.0/io/write_all.ts": "24aac2312bb21096ae3ae0b102b22c26164d3249dff96dbac130958aa736f038",
+    "https://deno.land/std@0.224.0/log/_config.ts": "489e11b6d3c917bf5fc954c5e914c095d3480efd924d1e85f2fc576468581c54",
+    "https://deno.land/std@0.224.0/log/_state.ts": "314c0c31ab9c8f4fb33326ad446757d35f75e5bb21746b7720ed4e3f3a939da1",
+    "https://deno.land/std@0.224.0/log/base_handler.ts": "f03f013dac9c1a226aab60c6f5751b3131cc4f2808720715285e0dab5697a54e",
+    "https://deno.land/std@0.224.0/log/console_handler.ts": "9b17b9025c7d94eab950a25eccca81fd9dd71d063b9f458f149e52db52ab0295",
+    "https://deno.land/std@0.224.0/log/critical.ts": "a8b44a4c6768629d2a506ffe1a1a048da7ae76d3146000f8a492008eac4ecba0",
+    "https://deno.land/std@0.224.0/log/debug.ts": "ddd63a549fedc3061deba47e41cd2170263831fc266e503a12b610b77439333b",
+    "https://deno.land/std@0.224.0/log/error.ts": "3979ee3aadc962345ad50eff8a5470ad3fe07c70370808ddc178ee08c3d6c89c",
+    "https://deno.land/std@0.224.0/log/file_handler.ts": "68d6d81ec53bdd6ba61eaceec19d12de59a8ad12ace0d7980a592a51f924a242",
+    "https://deno.land/std@0.224.0/log/formatters.ts": "29e0325902c3b1cbb3b9ffc1f9d77ac2d2e5af35d27b9bdfe4fdbbd83588d4a8",
+    "https://deno.land/std@0.224.0/log/get_logger.ts": "36a5febf5338f68aadafaf23bbe38a208e2a3150ec02ca2ec5d3c6bbaf840641",
+    "https://deno.land/std@0.224.0/log/info.ts": "e6c4971e35092d85cd3241fe7eccdb42999083d14db6aadc5e741f6231e275ad",
+    "https://deno.land/std@0.224.0/log/levels.ts": "632ba12baa2600750d004cc5cb4eabe10e410f3f2bdfcb9f7142b6d767f2fee6",
+    "https://deno.land/std@0.224.0/log/logger.ts": "57109848fb587fb3843a7b893f22f1a86c1b78c289172627a6305906738f238a",
+    "https://deno.land/std@0.224.0/log/mod.ts": "650c53c2c5d9eb05210c4ec54184ecb5bd24fb32ce28e65fad039853978f53f3",
+    "https://deno.land/std@0.224.0/log/rotating_file_handler.ts": "a6e7c712e568b618303273ff95483f6ab86dec0a485c73c2e399765f752b5aa8",
+    "https://deno.land/std@0.224.0/log/setup.ts": "42425c550da52c7def7f63a4fcc1ac01a4aec6c73336697a640978d6a324e7a6",
+    "https://deno.land/std@0.224.0/log/warn.ts": "f1a6bc33a481f231a0257e6d66e26c2e695b931d5e917d8de4f2b825778dfd4e"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@cloudflare/workers-types@^4.20241218.0",
+        "npm:@hono/vite-build@^1.2.0",
+        "npm:@hono/vite-dev-server@~0.18.1",
+        "npm:@prisma/client@^6.7.0",
+        "npm:@prisma/extension-accelerate@^1.2.2",
+        "npm:@prisma/generator-helper@^6.5.0",
+        "npm:@radix-ui/react-checkbox@^1.1.4",
+        "npm:@radix-ui/react-dialog@^1.1.11",
+        "npm:@radix-ui/react-label@^2.1.2",
+        "npm:@radix-ui/react-separator@^1.1.4",
+        "npm:@radix-ui/react-slot@^1.2.0",
+        "npm:@radix-ui/react-tooltip@^1.2.4",
+        "npm:@remix-run/cloudflare-pages@^2.16.5",
+        "npm:@remix-run/cloudflare@^2.16.5",
+        "npm:@remix-run/dev@^2.16.5",
+        "npm:@remix-run/react@^2.16.5",
+        "npm:@tailwindcss/vite@^4.0.8",
+        "npm:@types/bcryptjs@^2.4.6",
+        "npm:@types/react-dom@^18.2.7",
+        "npm:@types/react@^18.2.20",
+        "npm:@types/uuid@10",
+        "npm:@typescript-eslint/eslint-plugin@^7.18.0",
+        "npm:@typescript-eslint/parser@^7.18.0",
+        "npm:@vitest/coverage-v8@^3.0.9",
+        "npm:bcryptjs@^3.0.2",
+        "npm:class-variance-authority@~0.7.1",
+        "npm:clsx@^2.1.1",
+        "npm:eslint-config-airbnb-typescript@18",
+        "npm:eslint-config-airbnb@^19.0.4",
+        "npm:eslint-config-prettier@^10.1.1",
+        "npm:eslint@^8.57.1",
+        "npm:hono-remix-adapter@~0.5.4",
+        "npm:hono@^4.6.18",
+        "npm:lucide-react@0.487",
+        "npm:pino@^9.6.0",
+        "npm:prettier-plugin-tailwindcss@~0.6.11",
+        "npm:prettier@3.5.3",
+        "npm:prisma-erd-generator@^2.0.4",
+        "npm:prisma@^6.7.0",
+        "npm:react-dom@^18.2.0",
+        "npm:react@^18.2.0",
+        "npm:remix-hono@^0.0.16",
+        "npm:rss-parser@^3.13.0",
+        "npm:tailwind-merge@^3.1.0",
+        "npm:tailwindcss@^4.0.8",
+        "npm:tw-animate-css@^1.2.5",
+        "npm:typescript@^5.7.3",
+        "npm:uuid@^11.0.5",
+        "npm:vite@^5.4.19",
+        "npm:vitest@^3.0.4",
+        "npm:wrangler@^3.114.7",
+        "npm:zod@^3.24.1"
+      ]
+    }
+  }
+}
