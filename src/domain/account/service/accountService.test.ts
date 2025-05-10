@@ -55,14 +55,24 @@ describe('AccountService', () => {
   });
 
   describe('login', () => {
-    it('正常系', async () => {
-      // 事前にアカウントを作成
-      const email = 'login_success_test@example.com';
-      const plainPassword = 'password';
+    // ログインテスト用の共通変数
+    const email = 'login_test@example.com';
+    const plainPassword = 'password';
+    const wrongPassword = 'wrong_password';
+
+    // 各ログインテスト前に実行（アカウント作成）
+    beforeEach(async () => {
+      // 異常系：存在しないメールアドレスのテストでは事前アカウント作成は不要
+      if (expect.getState().currentTestName?.includes('存在しないメールアドレス')) {
+        return;
+      }
+
+      // それ以外のテストケースでは事前にアカウントを作成しておく
       const account = await service.signup(email, plainPassword);
-
       expect(account).toBeDefined();
+    });
 
+    it('正常系', async () => {
       const user = await service.login(email, plainPassword);
 
       expect(user).toBeDefined();
@@ -76,19 +86,10 @@ describe('AccountService', () => {
 
     it('異常系: 存在しないメールアドレス', async () => {
       const nonExistentEmail = 'non_existent_test@example.com';
-      const plainPassword = 'password';
-
       await expect(service.login(nonExistentEmail, plainPassword)).rejects.toThrow(NotFoundError);
     });
 
     it('異常系: パスワードが間違っている', async () => {
-      // 事前にアカウントを作成
-      const email = 'login_wrong_password_test@example.com';
-      const plainPassword = 'password';
-      await service.signup(email, plainPassword);
-
-      // 間違ったパスワードでログイン
-      const wrongPassword = 'wrong_password';
       await expect(service.login(email, wrongPassword)).rejects.toThrow(ClientError);
     });
   });
