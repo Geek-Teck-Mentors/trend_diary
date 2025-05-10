@@ -15,40 +15,30 @@ env:
   DENO_VERSION: 2.3.1
   EXCLUDE_FUNCTIONS: ("infrastructure")
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      runner: ubuntu-latest
-    steps:
-      - name: Define functions
-        run: |
-          runs_on_each_function() {
-            local command=$1
-            local exclude_functions=${{ env.EXCLUDE_FUNCTIONS }}
-            for function_name in $(ls supabase/functions); do
-              if [[ ! " ${exclude_functions[@]} " =~ " ${function_name} " ]]; then
-                $command -c supabase/functions/${function_name}/deno.json
-              fi
-            done
-          }
   lint:
-    needs: setup
-    runs-on: ${{ needs.setup.outputs.runner }}
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Denoの構築
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
+      - name: define runs_on_each_supabase_functions
+        working-directory: .github/scripts
+        run: ./runs_on_each_supabase_functions.sh
       - name: Lint
-        run: runs_on_each_function "deno lint"
+        run: runs_on_each_supabase_functions "deno lint"
 
   format:
-    needs: setup
-    runs-on: ${{ needs.setup.outputs.runner }}
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Denoの構築
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
+      - name: define runs_on_each_supabase_functions
+        working-directory: .github/scripts
+        run: ./runs_on_each_supabase_functions.sh
       - name: Format
         run: runs_on_each_function "deno fmt"
