@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy_type:
-        description: デプロイの種類
+        description: 対象リソース
         required: true
         default: web
         type: choice
