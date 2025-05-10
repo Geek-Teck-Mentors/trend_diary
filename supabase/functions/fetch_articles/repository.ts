@@ -28,7 +28,9 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       .returns<Article[]>();
 
     if (error) {
-      throw new DatabaseError("Failed to create article: " + JSON.stringify(error));
+      throw new DatabaseError(
+        "Failed to create article: " + JSON.stringify(error),
+      );
     }
 
     if (!data) {
