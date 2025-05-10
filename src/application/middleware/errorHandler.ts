@@ -18,10 +18,7 @@ const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
   }
 
   // 予期しないエラーの場合
-  logger.error({
-    msg: 'Unhandled error',
-    err, // * pinoのstdSerializersで処理されるよう、errプロパティ名を使用
-  });
+  logger.error('Unhandled error', err);
 
   return c.json('Internal Server Error', { status: 500 });
 };
