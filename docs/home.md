@@ -15,23 +15,24 @@
 ```sh
 ./src
 ├── application # 今回作成するアプリケーションサーバ用のディレクトリ
-│   ├── api
+│   ├── api # hono api
 │   ├── env.ts
 │   ├── middleware
-│   ├── server.ts
-│   └── web
+│   ├── server.ts # アプリケーションを起動するサーバ
+│   └── web # Remix Frontend
 ├── common # src配下のディレクトリ間で共通使用するものを入れる
-│   ├── baseModel.ts
-│   ├── baseSchema.ts
-│   ├── errors
-│   ├── test
-│   └── typeUtility.ts
 ├── domain # DDDにおけるドメインと同じ
-│   ├── account
-│   ├── repository # リポジトリ層の詳細な実装
-│   └── user
+│   └── account
+│       ├── index.ts # package外で使用できるクラスなどをexport
+│       ├── infrastructure # repositoryの実装詳細
+│       ├── model
+│       ├── repository # リポジトリインターフェース
+│       ├── schema # バリデーションスキーマ
+│       └── service
 ├── infrastructure # インフラ関連. 永続化層との接続などネットワーク的な意味合いが強い
 │   └── rdb.ts
 └── logger
     └── logger.ts
 ```
+
+テストファイルは`test`というフォルダを切らず、実装されているコードと同じ階層に置くものとする。
