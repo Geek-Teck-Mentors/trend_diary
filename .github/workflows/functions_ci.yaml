@@ -23,11 +23,10 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
-      - name: define runs_on_each_supabase_functions
-        working-directory: .github/scripts
-        run: source ./define_runs_on_each_supabase_functions.sh
       - name: Lint
-        run: runs_on_each_supabase_functions "deno lint" "${{ env.EXCLUDE_FUNCTIONS }}"
+        run: |
+          chmod +x .github/scripts/runs_on_each_supabase_functions.sh
+          .github/scripts/runs_on_each_supabase_functions.sh "deno lint" "${{ env.EXCLUDE_FUNCTIONS }}"
 
   format:
     runs-on: ubuntu-latest
@@ -37,8 +36,7 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
-      - name: define runs_on_each_supabase_functions
-        working-directory: .github/scripts
-        run: source ./define_runs_on_each_supabase_functions.sh
       - name: Format
-        run: runs_on_each_supabase_functions "deno fmt" "${{ env.EXCLUDE_FUNCTIONS }}"
+        run: |
+          chmod +x .github/scripts/runs_on_each_supabase_functions.sh
+          .github/scripts/runs_on_each_supabase_functions.sh "deno fmt" "${{ env.EXCLUDE_FUNCTIONS }}"
