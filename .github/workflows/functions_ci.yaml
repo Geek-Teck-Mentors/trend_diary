@@ -25,9 +25,9 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
       - name: define runs_on_each_supabase_functions
         working-directory: .github/scripts
-        run: ./define_runs_on_each_supabase_functions.sh
+        run: source ./define_runs_on_each_supabase_functions.sh
       - name: Lint
-        run: runs_on_each_supabase_functions "deno lint"
+        run: runs_on_each_supabase_functions "deno lint" "${{ env.EXCLUDE_FUNCTIONS }}"
 
   format:
     runs-on: ubuntu-latest
@@ -39,6 +39,6 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
       - name: define runs_on_each_supabase_functions
         working-directory: .github/scripts
-        run: ./define_runs_on_each_supabase_functions.sh
+        run: source ./define_runs_on_each_supabase_functions.sh
       - name: Format
-        run: runs_on_each_supabase_functions "deno fmt"
+        run: runs_on_each_supabase_functions "deno fmt" "${{ env.EXCLUDE_FUNCTIONS }}"
