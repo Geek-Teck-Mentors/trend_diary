@@ -2,12 +2,12 @@ model User {
   /// グローバルなID, クライアントには公開しない
   userId      BigInt    @id @default(autoincrement()) @map("user_id") @db.BigInt /// postgresqlの自動採番を使うための記法: https://www.prisma.io/docs/orm/reference/prisma-schema-reference#postgresql-3
   /// グローバルなID, クライアントには公開しない
-  accountId   BigInt    @map("account_id")
+  accountId   BigInt    @map("account_id") @db.BigInt
   displayName String?   @map("display_name") @db.VarChar(1024)
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
 
-  @@unique([accountId], name: "users_account_id_unique")
+  @@index([accountId, deletedAt], name: "users_account_id_index")
   @@map("users")
 }

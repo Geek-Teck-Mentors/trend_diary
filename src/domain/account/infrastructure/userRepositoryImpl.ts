@@ -24,9 +24,10 @@ export default class UserRepositoryImpl implements UserRepository {
   }
 
   async findByAccountId(accountId: bigint): Promise<Nullable<User>> {
-    const user = await this.db.user.findUnique({
+    const user = await this.db.user.findFirst({
       where: {
         accountId,
+        deletedAt: null,
       },
     });
 
