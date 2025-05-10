@@ -27,7 +27,7 @@ app.post("/articles/qiita", async (c) => {
       return c.json({ message: "internal server error" }, 500);
     }
 
-    console.error("Error", error);
+    console.error("Unknown error", error);
     return c.json({ message: "unknown error" }, 500);
   }
 });
