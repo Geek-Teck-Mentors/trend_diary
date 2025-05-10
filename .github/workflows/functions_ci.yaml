@@ -43,9 +43,9 @@ jobs:
         run: runs_on_each_function "deno lint"
 
   format:
-    runs-on: ubuntu-latest
+    needs: setup
+    runs-on: ${{ needs.setup.outputs.runner }}
     steps:
-      - uses: actions/checkout@v4
       - name: Denoの構築
         uses: denoland/setup-deno@v2
         with:
