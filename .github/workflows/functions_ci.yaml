@@ -26,10 +26,10 @@ jobs:
       - name: Lint
         uses: ./.github/actions/runs_on_each_supabase_functions
         with:
-          DENO_COMMAND: "deno lint"
+          DENO_COMMAND: 'deno lint'
           EXCLUDE_FUNCTIONS: ${{ env.EXCLUDE_FUNCTIONS }}
 
-  format  :
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,5 +40,5 @@ jobs:
       - name: Format
         uses: ./.github/actions/runs_on_each_supabase_functions
         with:
-          DENO_COMMAND: "deno fmt --check"
+          DENO_COMMAND: 'deno fmt --check'
           EXCLUDE_FUNCTIONS: ${{ env.EXCLUDE_FUNCTIONS }}
