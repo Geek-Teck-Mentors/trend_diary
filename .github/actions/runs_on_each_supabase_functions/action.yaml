@@ -16,7 +16,6 @@ runs:
     - name: RUN
       shell: bash
       run: |
-        echo "${{ inputs.EXCLUDE_FUNCTIONS }}"
         exclude_functions=${{ inputs.EXCLUDE_FUNCTIONS }}
         for function_name in $(ls supabase/functions); do
           if [[ ! " ${exclude_functions[@]} " =~ " ${function_name} " ]]; then
