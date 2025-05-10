@@ -26,7 +26,7 @@ jobs:
       - name: Lint
         run: |
           chmod +x .github/scripts/runs_on_each_supabase_functions.sh
-          .github/scripts/runs_on_each_supabase_functions.sh "deno lint" "${{ env.EXCLUDE_FUNCTIONS }}"
+          .github/scripts/runs_on_each_supabase_functions.sh "deno lint" $EXCLUDE_FUNCTIONS
 
   format:
     runs-on: ubuntu-latest
@@ -39,4 +39,4 @@ jobs:
       - name: Format
         run: |
           chmod +x .github/scripts/runs_on_each_supabase_functions.sh
-          .github/scripts/runs_on_each_supabase_functions.sh "deno fmt" "${{ env.EXCLUDE_FUNCTIONS }}"
+          .github/scripts/runs_on_each_supabase_functions.sh "deno fmt" $EXCLUDE_FUNCTIONS
