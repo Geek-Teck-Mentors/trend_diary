@@ -1,4 +1,4 @@
-import { logger } from "../../infrastructure/logger.ts";
+import { logger } from "../../../logger/logger.ts";
 import { MediaFetchError } from "../error.ts";
 import { ArticleFetcher } from "../model/interface.ts";
 import { FeedItem, QiitaItem } from "../model/types.ts";

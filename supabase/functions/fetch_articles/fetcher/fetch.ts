@@ -1,5 +1,5 @@
 import Parser from "npm:rss-parser@3.13.0";
-import { logger } from "../../infrastructure/logger.ts";
+import { logger } from "../../../logger/logger.ts";
 
 export async function fetchRssFeed<T>(url: string): Promise<T[]> {
   logger.info("Fetching RSS feed from URL:", url);

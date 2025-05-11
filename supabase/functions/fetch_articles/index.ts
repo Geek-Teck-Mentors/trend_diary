@@ -4,8 +4,8 @@ import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import { Executor } from "./executor.ts";
 import ArticleRepositoryImpl from "./repository.ts";
 import { InternalServerError } from "./error.ts";
-import { rdbClient } from "../infrastructure/supabase_client.ts";
-import { logger } from "../infrastructure/logger.ts";
+import { rdbClient } from "../../infrastructure/supabase_client.ts";
+import { logger } from "../../logger/logger.ts";
 // functionNameはsupabase functionsの名前に一致させないとsupabaseがリクエストを振り分けない
 const functionName = "fetch_articles";
 const app = new Hono().basePath(`/${functionName}`);

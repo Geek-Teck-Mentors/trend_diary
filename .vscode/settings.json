@@ -43,7 +43,7 @@
   },
   "deno.enable": true,
   "deno.enablePaths": [
-    "supabase/functions"
+    "supabase"
   ],
   "deno.lint": true,
   "deno.importMap": "supabase/functions/fetch_articles/deno.json",
