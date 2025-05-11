@@ -36,3 +36,17 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Format
         run: deno fmt --check -c supabase/style_config.json
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Denoの構築
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Type Check
+        run: |
+          for function_name in $(ls supabase/functions); do
+            deno check -c supabase/functions/$function_name/deno.json supabase/**/*.ts
+          done
