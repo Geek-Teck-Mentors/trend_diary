@@ -8,15 +8,9 @@ import UserRepositoryImpl from '../infrastructure/userRepositoryImpl';
 import db from '@/test/__mocks__/prisma';
 
 describe('AccountService', () => {
-  let accountRepo: AccountRepositoryImpl;
-  let userRepo: UserRepositoryImpl;
-  let service: AccountService;
-
-  beforeEach(() => {
-    accountRepo = new AccountRepositoryImpl(db);
-    userRepo = new UserRepositoryImpl(db);
-    service = new AccountService(accountRepo, userRepo);
-  });
+  const accountRepo = new AccountRepositoryImpl(db);
+  const userRepo = new UserRepositoryImpl(db);
+  const service = new AccountService(accountRepo, userRepo);
 
   describe('signup', () => {
     it('正常系', async () => {
@@ -61,7 +55,7 @@ describe('AccountService', () => {
 
       db.account.create.mockResolvedValue({
         email,
-        password: 'hashed_password',
+        password: await bcrypt.hash(plainPassword, 10),
         accountId: BigInt(1),
         lastLogin: null,
         createdAt: new Date(),
