@@ -37,6 +37,8 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       throw new DatabaseError("No data returned from Supabase");
     }
 
+    logger.info("Inserted articles into Supabase successfully");
+
     return data;
   }
 
