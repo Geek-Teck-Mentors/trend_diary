@@ -46,7 +46,6 @@
     "supabase"
   ],
   "deno.lint": true,
-  "deno.importMap": "supabase/functions/fetch_articles/deno.json",
   "deno.unstable": [
     "bare-node-builtins",
     "byonm",
