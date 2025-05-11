@@ -7,13 +7,13 @@ on:
       - main
     paths:
       - 'supabase/**'
-      - '.github/workflows/functions_ci.yaml'
+      - '.github/workflows/supabase_ci.yaml'
   pull_request:
     branches:
       - main
     paths:
       - 'supabase/**'
-      - '.github/workflows/functions_ci.yaml'
+      - '.github/workflows/supabase_ci.yaml'
 
 env:
   DENO_VERSION: 2.3.1
