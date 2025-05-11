@@ -6,6 +6,19 @@ on:
     workflows: [CI]
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_type:
+        description: 対象リソース
+        required: true
+        default: web
+        type: choice
+        options:
+          - web
+          - database
+
+env:
+  HAS_CI_SUCCEEDED: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -14,6 +27,7 @@ concurrency:
 jobs:
   web:
     runs-on: ubuntu-latest
+    if: ${{ github.env.HAS_CI_SUCCEEDED || github.event.inputs.deploy_type == 'web' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -42,6 +56,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_DATABASE_URL }}
     runs-on: ubuntu-latest
+    if: ${{ github.env.HAS_CI_SUCCEEDED || github.event.inputs.deploy_type == 'database' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
