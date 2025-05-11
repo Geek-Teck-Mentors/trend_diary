@@ -1,12 +1,9 @@
 import getRdbClient from '@/infrastructure/rdb';
 import app from '../../server';
-
-const env = {
-  DATABASE_URL: process.env.DATABASE_URL,
-};
+import TEST_ENV from '@/test/env';
 
 describe('POST /api/account', () => {
-  const db = getRdbClient(env.DATABASE_URL ?? '');
+  const db = getRdbClient(TEST_ENV.DATABASE_URL ?? '');
 
   async function cleanUp() {
     await db.$queryRaw`TRUNCATE TABLE "accounts";`;
@@ -28,7 +25,7 @@ describe('POST /api/account', () => {
         method: 'POST',
         body,
       },
-      env,
+      TEST_ENV,
     );
   }
 
