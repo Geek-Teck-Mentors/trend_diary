@@ -46,8 +46,9 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Type Check
+        # deno checkのファイル指定で`**`を使うと、サブディレクトリのファイルがチェックされなくなるため、全部のディレクトリを手動でそれぞれ指定する
+        # deno checkはdeno.jsonのある環境でしか実行できないため、各関数のdeno.jsonを指定する
         run: |
           for function_name in $(ls supabase/functions); do
-            deno check -c supabase/functions/$function_name/deno.json supabase/**/*.ts
-            deno check -c supabase/functions/$function_name/deno.json supabase/functions/**/*.ts
+            find supabase -name "*.ts" | xargs deno check -c supabase/functions/$function_name/deno.json
           done
