@@ -9,4 +9,4 @@ src/application/web/components/ui
 
 # supabase edge functions
 # 環境がdenoであるため
-supabase/functions
+supabase
