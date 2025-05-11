@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/functions_ci.yaml'
   pull_request:
     branches:
       - main
