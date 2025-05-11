@@ -1,4 +1,5 @@
-name: Functions CI
+name: Supabase CI
+description: SupabaseプロジェクトのCI
 
 on:
   push:
@@ -8,12 +9,11 @@ on:
     branches:
       - main
     paths:
-      - 'supabase/functions/**'
+      - 'supabase/**'
       - '.github/workflows/functions_ci.yaml'
 
 env:
   DENO_VERSION: 2.3.1
-  EXCLUDE_FUNCTIONS: ("infrastructure")
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -24,10 +24,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Lint
-        uses: ./.github/actions/runs_on_each_supabase_functions
-        with:
-          DENO_COMMAND: 'deno lint'
-          EXCLUDE_FUNCTIONS: ${{ env.EXCLUDE_FUNCTIONS }}
+        run: deno lint -c supabase/style_config.json
 
   format:
     runs-on: ubuntu-latest
@@ -38,7 +35,4 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Format
-        uses: ./.github/actions/runs_on_each_supabase_functions
-        with:
-          DENO_COMMAND: 'deno fmt --check'
-          EXCLUDE_FUNCTIONS: ${{ env.EXCLUDE_FUNCTIONS }}
+        run: deno fmt --check -c supabase/style_config.json
