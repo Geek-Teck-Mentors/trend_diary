@@ -16,7 +16,16 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       this.normalizeForArticleInput,
     );
 
-    logger.info("Start inserting articles into Supabase");
+    logger.debug("Start inserting articles into Supabase", {
+      SQL: "INSERT INTO articles (media, title, author, description, url) VALUES ($1, $2, $3, $4, $5)",
+      values: insertParams.map((param) => [
+        param.media,
+        param.title,
+        param.author,
+        param.description,
+        param.url,
+      ]),
+    });
 
     const { data, error }: {
       data: Article[] | null;
