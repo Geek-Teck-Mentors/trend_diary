@@ -1,9 +1,3 @@
 {
-  "imports": {},
-  "lint": {
-    "include": ["."]
-  },
-  "fmt": {
-    "include": ["."]
-  }
+  "imports": {}
 }
