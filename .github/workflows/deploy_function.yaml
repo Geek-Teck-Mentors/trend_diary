@@ -7,8 +7,8 @@ on:
         description: '関数名'
         required: true
         type: choice
-        options: # 関数名確定後、追記
-          - function1
+        options:
+          - fetch_articles
 
 env:
   SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

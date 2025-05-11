@@ -1,0 +1,56 @@
+name: Functions CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/functions_ci.yaml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/functions_ci.yaml'
+
+env:
+  DENO_VERSION: 2.3.1
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Denoの構築
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Lint
+        run: deno lint -c supabase/style_config.json
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Denoの構築
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Format
+        run: deno fmt --check -c supabase/style_config.json
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Denoの構築
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Type Check
+        # deno checkのファイル指定で`**`を使うと、サブディレクトリのファイルがチェックされなくなるため、全部のディレクトリを手動でそれぞれ指定する
+        # deno checkはdeno.jsonのある環境でしか実行できないため、各関数のdeno.jsonを指定する
+        run: |
+          for function_name in $(ls supabase/functions); do
+            find supabase -name "*.ts" | xargs deno check -c supabase/functions/$function_name/deno.json
+          done

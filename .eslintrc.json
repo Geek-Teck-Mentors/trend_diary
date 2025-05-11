@@ -15,6 +15,7 @@
     "dist/",
     "coverage/",
     "build/",
-    "src/application/web/components/ui"
+    "src/application/web/components/ui",
+    "supabase"
   ]
 }
