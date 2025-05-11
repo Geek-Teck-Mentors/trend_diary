@@ -41,8 +41,8 @@ export default class AccountService {
     const account = await this.accountRepository.findByEmail(email);
     if (isNull(account)) throw new NotFoundError('Account not found');
 
-    const isMatchPassword = await bcrypt.compare(plainPassword, account.password);
-    if (!isMatchPassword) throw new ClientError('Invalid password');
+    const isPasswordMatch = await bcrypt.compare(plainPassword, account.password);
+    if (!isPasswordMatch) throw new ClientError('Invalid password');
 
     account.recordLogin();
     try {
