@@ -49,4 +49,5 @@ jobs:
         run: |
           for function_name in $(ls supabase/functions); do
             deno check -c supabase/functions/$function_name/deno.json supabase/**/*.ts
+            deno check -c supabase/functions/$function_name/deno.json supabase/functions/**/*.ts
           done
