@@ -29,6 +29,17 @@ erDiagram
     }
   
 
+  "sessions" {
+    String session_id "🗝️"
+    BigInt account_id 
+    String session_token 
+    DateTime expires_at 
+    String ip_address "❓"
+    String user_agent "❓"
+    DateTime created_at 
+    }
+  
+
   "users" {
     BigInt user_id "🗝️"
     BigInt account_id 
