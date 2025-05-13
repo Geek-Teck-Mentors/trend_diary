@@ -9,6 +9,7 @@
   "rules": {
     "consistent-return": "off",
     "import/extensions": "off",
+    "complexity": ["error", { "max": 10 }], // 循環的複雑度：10以下は非常に良いとされるため
     "import/no-extraneous-dependencies": [
       "error",
       {
@@ -27,6 +28,7 @@
     "dist/",
     "coverage/",
     "build/",
-    "src/application/web/components/ui"
+    "src/application/web/components/ui",
+    "supabase"
   ]
 }

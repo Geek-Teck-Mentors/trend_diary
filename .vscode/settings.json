@@ -27,8 +27,10 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "cSpell.words": [
+    "qiita",
     "Supabase",
-    "Timestamptz"
+    "Timestamptz",
+    "zenn"
   ],
   "[markdown]":  {
       "editor.wordWrap": "on",
@@ -38,6 +40,25 @@
           "other": "on"
       },
       "editor.snippetSuggestions": "top"
-  }
-
+  },
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "supabase"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
 }

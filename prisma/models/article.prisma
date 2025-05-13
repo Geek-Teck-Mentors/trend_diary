@@ -1,0 +1,11 @@
+model Article {
+  articleId   BigInt   @id @default(autoincrement()) @map("article_id") @db.BigInt
+  media       String   @map("media") @db.VarChar(10)
+  title       String   @map("title") @db.VarChar(100)
+  author      String   @map("author") @db.VarChar(30)
+  description String   @map("description") @db.VarChar(255)
+  url         String   @map("url") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@map("articles")
+}
