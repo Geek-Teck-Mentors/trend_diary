@@ -8,7 +8,8 @@
   "extends": ["airbnb", "airbnb-typescript", "prettier"],
   "rules": {
     "consistent-return": "off",
-    "import/extensions": "off"
+    "import/extensions": "off",
+    "complexity": ["error", { "max": 10 }] // 循環的複雑度：10以下は非常に良いとされるため
   },
   "ignorePatterns": [
     "node_modules/",
