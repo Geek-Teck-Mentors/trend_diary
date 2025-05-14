@@ -8,4 +8,6 @@ export interface AccountRepository extends TransactionClient {
   findByEmail(email: string): Promise<Nullable<Account>>;
   save(account: Account): Promise<Account>;
   delete(account: Account): Promise<Account>;
+  addSession(accountId: bigint, expiresAt: Date): Promise<void>;
+  removeSession(sessionId: string): Promise<void>;
 }

@@ -123,4 +123,21 @@ export default class AccountRepositoryImpl extends TransactionManager implements
       updatedAccount.deletedAt ?? undefined,
     );
   }
+
+  async addSession(accountId: bigint, expiresAt: Date): Promise<void> {
+    await this.db.session.create({
+      data: {
+        accountId,
+        expiresAt,
+      },
+    });
+  }
+
+  async removeSession(sessionId: string): Promise<void> {
+    await this.db.session.delete({
+      where: {
+        sessionId,
+      },
+    });
+  }
 }

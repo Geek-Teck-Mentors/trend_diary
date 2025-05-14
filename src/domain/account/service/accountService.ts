@@ -11,6 +11,8 @@ import Account from '../model/account';
 import { isNull, Nullable } from '@/common/types/utility';
 import User from '../model/user';
 
+const SESSION_EXPIRED = 30 * 24 * 60 * 60 * 1000; // 30日, day*h*min*sec*1000ms
+
 export default class AccountService {
   constructor(
     private accountRepository: AccountRepository,
@@ -60,6 +62,11 @@ export default class AccountService {
     try {
       const user = await this.userRepository.findByAccountId(account.accountId);
       if (isNull(user)) throw new ServerError('User not found'); // signup時に作成されているはず
+
+      await this.accountRepository.addSession(
+        account.accountId,
+        new Date(Date.now() + SESSION_EXPIRED),
+      );
       return user;
     } catch (error) {
       throw ServerError.handle(error);
