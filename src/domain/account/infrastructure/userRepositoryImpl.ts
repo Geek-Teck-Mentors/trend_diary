@@ -1,3 +1,4 @@
+import { getUserBySessionId } from '@prisma/client/sql';
 import { RdbClient } from '@/infrastructure/rdb';
 import { UserRepository } from '../repository/userRepository';
 import User from '../model/user';
@@ -39,6 +40,22 @@ export default class UserRepositoryImpl implements UserRepository {
       user.displayName ?? undefined,
       user.createdAt,
       user.updatedAt,
+    );
+  }
+
+  async findBySessionId(sessionId: string): Promise<Nullable<User>> {
+    const result = await this.db.$queryRawTyped(getUserBySessionId(sessionId, new Date()));
+    if (result.length === 0) return null;
+
+    const user = result.at(0);
+    if (!user) return null;
+
+    return new User(
+      user.user_id,
+      user.account_id,
+      user.display_name ?? undefined,
+      user.created_at,
+      user.updated_at,
     );
   }
 }

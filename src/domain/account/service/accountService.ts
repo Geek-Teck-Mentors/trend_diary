@@ -66,6 +66,17 @@ export default class AccountService {
     }
   }
 
+  async getLoginUser(sessionId: string): Promise<User> {
+    try {
+      const user = await this.userRepository.findBySessionId(sessionId);
+      if (isNull(user)) throw new NotFoundError('User not found');
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundError) throw error;
+      throw ServerError.handle(error);
+    }
+  }
+
   // // ログアウト
   // async logout(accountId: bigint): Promise<void> {
   //   const account = await this.accountRepository.findById(accountId);

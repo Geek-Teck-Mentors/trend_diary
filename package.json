@@ -19,6 +19,7 @@
     "format": "prettier . --check",
     "format:fix": "prettier . --write",
     "db:gen": "npx prisma generate",
+    "sql:gen": "npx prisma generate --sql",
     "db:migrate": "npx prisma migrate dev --skip-seed",
     "db:migrate:sql-only": "npx prisma migrate dev --skip-seed --skip-generate",
     "db:migrate:deploy": "npx prisma migrate deploy",
