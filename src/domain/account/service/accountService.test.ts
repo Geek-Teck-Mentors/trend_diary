@@ -113,12 +113,26 @@ describe('AccountService', () => {
     });
 
     it('準正常系: 存在しないメールアドレス', async () => {
+      db.account.findUnique.mockResolvedValue(null);
+
       const nonExistentEmail = 'non_existent_test@example.com';
       await expect(service.login(nonExistentEmail, plainPassword)).rejects.toThrow(NotFoundError);
     });
 
     it('準正常系: パスワードが間違っている', async () => {
-      await expect(service.login(email, wrongPassword)).rejects.toThrow(ClientError);
+      db.account.findUnique.mockResolvedValue({
+        email,
+        password: await bcrypt.hash(plainPassword, 10),
+        accountId: BigInt(1),
+        lastLogin: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      });
+
+      await expect(service.login(email, wrongPassword)).rejects.toThrow(
+        new ClientError('Invalid password'),
+      );
     });
   });
 });
