@@ -8,7 +8,7 @@ import {
 } from '../../../common/errors';
 import { UserRepository } from '../repository/userRepository';
 import Account from '../model/account';
-import { isNull } from '@/common/types/utility';
+import { isNull, Nullable } from '@/common/types/utility';
 import User from '../model/user';
 
 export default class AccountService {
@@ -38,7 +38,13 @@ export default class AccountService {
   }
 
   async login(email: string, plainPassword: string): Promise<User> {
-    const account = await this.accountRepository.findByEmail(email);
+    let account: Nullable<Account>;
+    try {
+      account = await this.accountRepository.findByEmail(email);
+    } catch (error) {
+      if (error instanceof NotFoundError) throw error;
+      throw new ServerError('Failed to find account');
+    }
     if (isNull(account)) throw new NotFoundError('Account not found');
 
     const isPasswordMatch = await bcrypt.compare(plainPassword, account.password);
