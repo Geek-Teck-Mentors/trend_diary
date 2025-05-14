@@ -84,13 +84,16 @@ export default class AccountService {
     }
   }
 
-  // // ログアウト
-  // async logout(accountId: bigint): Promise<void> {
-  //   const account = await this.accountRepository.findById(accountId);
-  //   if (isNull(account)) throw ACCOUNT_NOT_FOUND;
-
-  //   // TODO: 後でセッションの削除処理を追加
-  // }
+  async logout(sessionId: string): Promise<void> {
+    try {
+      const account = await this.accountRepository.findBySessionId(sessionId);
+      if (isNull(account)) throw new NotFoundError('Account not found');
+      await this.accountRepository.removeSession(sessionId);
+    } catch (error) {
+      if (error instanceof NotFoundError) throw error;
+      throw ServerError.handle(error);
+    }
+  }
 
   // // アカウントの削除
   // async deactivateAccount(accountId: bigint): Promise<void> {

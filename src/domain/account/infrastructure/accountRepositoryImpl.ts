@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { getAccountBySessionId } from '@prisma/client/sql';
 import { Nullable } from '@/common/types/utility';
 import { RdbClient, TransactionManager } from '@/infrastructure/rdb';
 import { AlreadyExistsError } from '@/common/errors';
@@ -76,6 +77,24 @@ export default class AccountRepositoryImpl extends TransactionManager implements
       account.createdAt,
       account.updatedAt,
       account.deletedAt ?? undefined,
+    );
+  }
+
+  async findBySessionId(sessionId: string): Promise<Nullable<Account>> {
+    const result = await this.db.$queryRawTyped(getAccountBySessionId(sessionId));
+    if (result.length === 0) return null;
+
+    const account = result.at(0);
+    if (!account) return null;
+
+    return new Account(
+      account.account_id,
+      account.email,
+      '',
+      account.last_login ?? undefined,
+      account.created_at,
+      account.updated_at,
+      account.deleted_at ?? undefined,
     );
   }
 
