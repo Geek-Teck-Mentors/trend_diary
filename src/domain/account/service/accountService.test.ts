@@ -53,31 +53,17 @@ describe('AccountService', () => {
       const email = faker.internet.email();
       const plainPassword = 'password';
 
-      db.account.create.mockResolvedValue({
+      db.account.findUnique.mockResolvedValue({
+        accountId: BigInt(1),
         email,
         password: await bcrypt.hash(plainPassword, 10),
-        accountId: BigInt(1),
         lastLogin: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
       });
-      db.user.create.mockResolvedValue({
-        userId: BigInt(1),
-        accountId: BigInt(1),
-        displayName: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-      });
-      await service.signup(email, plainPassword);
 
-      db.account.create.mockRejectedValueOnce(new AlreadyExistsError('アカウントは既に存在します'));
-
-      // もう一度同じメールアドレスで作成しようとする
-      await expect(service.signup(email, plainPassword)).rejects.toThrowError(
-        'アカウントは既に存在します',
-      );
+      await expect(service.signup(email, plainPassword)).rejects.toThrow(AlreadyExistsError);
     });
   });
 
