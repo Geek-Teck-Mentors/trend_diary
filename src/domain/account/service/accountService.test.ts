@@ -1,31 +1,40 @@
+import { faker } from '@faker-js/faker';
+import bcrypt from 'bcryptjs';
 import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl';
-import { AlreadyExistsError } from '@/common/errors';
-import getRdbClient from '@/infrastructure/rdb';
+import { AlreadyExistsError, NotFoundError, ClientError, ServerError } from '@/common/errors';
 
 import AccountService from './accountService';
 import UserRepositoryImpl from '../infrastructure/userRepositoryImpl';
+import db from '@/test/__mocks__/prisma';
 
 describe('AccountService', () => {
-  const db = getRdbClient(process.env.DATABASE_URL ?? '');
-  const service = new AccountService(new AccountRepositoryImpl(db), new UserRepositoryImpl(db));
-
-  async function cleanUp() {
-    await db.$queryRaw`TRUNCATE TABLE "accounts";`;
-    await db.$queryRaw`TRUNCATE TABLE "users";`;
-  }
-
-  beforeAll(async () => {
-    await cleanUp();
-  });
-
-  afterAll(async () => {
-    await cleanUp();
-  });
+  const accountRepo = new AccountRepositoryImpl(db);
+  const userRepo = new UserRepositoryImpl(db);
+  const service = new AccountService(accountRepo, userRepo);
 
   describe('signup', () => {
     it('正常系', async () => {
-      const email = 'signup_service@test.com';
+      const email = faker.internet.email();
       const plainPassword = 'password';
+
+      db.account.create.mockResolvedValue({
+        email,
+        password: 'hashed_password',
+        accountId: BigInt(1),
+        lastLogin: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      });
+      db.user.create.mockResolvedValue({
+        userId: BigInt(1),
+        accountId: BigInt(1),
+        displayName: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      });
+
       const res = await service.signup(email, plainPassword);
 
       expect(res).toBeDefined();
@@ -40,14 +49,106 @@ describe('AccountService', () => {
       expect(res.updatedAt).not.toBeNull();
     });
 
-    it('異常系: 既に存在するメールアドレス', async () => {
-      // 一旦一度作成する
-      const email = 'signup_service2@test.com';
+    it('準正常系: 既に存在するメールアドレス', async () => {
+      const email = faker.internet.email();
       const plainPassword = 'password';
-      await service.signup(email, plainPassword);
 
-      // もう一度同じメールアドレスで作成しようとする
+      db.account.findUnique.mockResolvedValue({
+        accountId: BigInt(1),
+        email,
+        password: await bcrypt.hash(plainPassword, 10),
+        lastLogin: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      });
+
       await expect(service.signup(email, plainPassword)).rejects.toThrow(AlreadyExistsError);
+    });
+
+    it('異常系: 意図しないDBエラー', async () => {
+      const email = faker.internet.email();
+      const plainPassword = 'password';
+
+      db.account.create.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.signup(email, plainPassword)).rejects.toThrow(ServerError);
+    });
+  });
+
+  describe('login', () => {
+    const email = faker.internet.email();
+    const plainPassword = 'password';
+    const wrongPassword = 'wrong_password';
+
+    it('正常系', async () => {
+      db.account.findUnique.mockResolvedValue({
+        email,
+        password: await bcrypt.hash(plainPassword, 10),
+        accountId: BigInt(1),
+        lastLogin: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      });
+
+      db.user.findFirst.mockResolvedValue({
+        userId: BigInt(1),
+        accountId: BigInt(1),
+        displayName: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      });
+
+      db.account.update.mockResolvedValue({
+        email,
+        password: await bcrypt.hash(plainPassword, 10),
+        accountId: BigInt(1),
+        lastLogin: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      });
+
+      const user = await service.login(email, plainPassword);
+      expect(user).toBeDefined();
+      expect(user.accountId).toBeDefined();
+      expect(user.accountId).not.toBeNull();
+      expect(user.userId).toBeDefined();
+      expect(user.userId).not.toBeNull();
+      expect(user.createdAt).toBeDefined();
+      expect(user.updatedAt).toBeDefined();
+    });
+
+    describe('準正常系', () => {
+      it('存在しないメールアドレス', async () => {
+        db.account.findUnique.mockResolvedValue(null);
+
+        const nonExistentEmail = 'non_existent_test@example.com';
+        await expect(service.login(nonExistentEmail, plainPassword)).rejects.toThrow(NotFoundError);
+      });
+      it('パスワードが間違っている', async () => {
+        db.account.findUnique.mockResolvedValue({
+          email,
+          password: await bcrypt.hash(plainPassword, 10),
+          accountId: BigInt(1),
+          lastLogin: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
+        });
+
+        await expect(service.login(email, wrongPassword)).rejects.toThrow(
+          new ClientError('Invalid password'),
+        );
+      });
+    });
+
+    it('異常系: 意図しないDBエラー', async () => {
+      db.account.findUnique.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.login(email, plainPassword)).rejects.toThrow(ServerError);
     });
   });
 });

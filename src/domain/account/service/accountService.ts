@@ -1,8 +1,15 @@
 import bcrypt from 'bcryptjs';
 import { AccountRepository } from '../repository/accountRepository';
-import { AlreadyExistsError, ServerError } from '../../../common/errors';
+import {
+  AlreadyExistsError,
+  ClientError,
+  NotFoundError,
+  ServerError,
+} from '../../../common/errors';
 import { UserRepository } from '../repository/userRepository';
 import Account from '../model/account';
+import { isNull, Nullable } from '@/common/types/utility';
+import User from '../model/user';
 
 export default class AccountService {
   constructor(
@@ -21,7 +28,7 @@ export default class AccountService {
     try {
       return await this.accountRepository.transaction(async () => {
         const account = await this.accountRepository.createAccount(email, hashedPassword);
-        await this.userRepository.createUser(account.accountId);
+        await this.userRepository.create(account.accountId);
 
         return account;
       });
@@ -30,25 +37,34 @@ export default class AccountService {
     }
   }
 
-  // async login(accountId: bigint, plainPassword: string): Promise<boolean> {
-  //   // 存在確認
-  //   const account = await this.accountRepository.findById(accountId);
-  //   if (isNull(account)) throw ACCOUNT_NOT_FOUND;
+  async login(email: string, plainPassword: string): Promise<User> {
+    let account: Nullable<Account>;
+    try {
+      account = await this.accountRepository.findByEmail(email);
+    } catch (error) {
+      if (error instanceof NotFoundError) throw error;
+      throw new ServerError('Failed to find account');
+    }
+    if (isNull(account)) throw new NotFoundError('Account not found');
 
-  //   // パスワードの照合
-  //   const isPasswordMatch = await bcrypt.compare(plainPassword, account.password);
-  //   if (!isPasswordMatch) return false;
+    const isPasswordMatch = await bcrypt.compare(plainPassword, account.password);
+    if (!isPasswordMatch) throw new ClientError('Invalid password');
 
-  //   // 最終ログインを記録
-  //   account.recordLogin();
-  //   try {
-  //     await this.accountRepository.save(account);
-  //   } catch (error) {
-  //     throw ServerError.handle(error);
-  //   }
+    account.recordLogin();
+    try {
+      await this.accountRepository.save(account);
+    } catch (error) {
+      throw ServerError.handle(error);
+    }
 
-  //   return true;
-  // }
+    try {
+      const user = await this.userRepository.findByAccountId(account.accountId);
+      if (isNull(user)) throw new ServerError('User not found'); // signup時に作成されているはず
+      return user;
+    } catch (error) {
+      throw ServerError.handle(error);
+    }
+  }
 
   // // ログアウト
   // async logout(accountId: bigint): Promise<void> {

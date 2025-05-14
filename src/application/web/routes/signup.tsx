@@ -103,6 +103,17 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
     if (res.status === 201) return redirect('/login');
+    if (res.status === 409) {
+      return json(
+        {
+          errors: {
+            email: ['このメールアドレスは既に使用されています'],
+            password: undefined,
+          },
+        },
+        { status: res.status },
+      );
+    }
 
     return json(
       {

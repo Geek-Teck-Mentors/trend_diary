@@ -30,6 +30,7 @@
     "schema": "./prisma"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.5.0",
     "@prisma/client": "^6.7.0",
     "@prisma/extension-accelerate": "^1.2.2",
     "@radix-ui/react-checkbox": "^1.1.4",
@@ -59,6 +60,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241218.0",
+    "@faker-js/faker": "^9.7.0",
     "@hono/vite-build": "^1.2.0",
     "@hono/vite-dev-server": "^0.18.1",
     "@prisma/generator-helper": "^6.5.0",
@@ -83,6 +85,7 @@
     "typescript": "^5.7.3",
     "vite": "^5.4.19",
     "vitest": "^3.0.4",
+    "vitest-mock-extended": "^3.1.0",
     "wrangler": "^3.114.7"
   },
   "overrides": {

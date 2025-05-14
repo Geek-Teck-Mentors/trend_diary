@@ -1,6 +1,6 @@
 import React from 'react';
 import type { MetaFunction, ActionFunctionArgs } from '@remix-run/cloudflare';
-import { Form, useActionData, json } from '@remix-run/react';
+import { Form, useActionData, json, redirect } from '@remix-run/react';
 import { Button } from '@/application/web/components/ui/button';
 import {
   Card,
@@ -13,6 +13,7 @@ import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
 import { accountSchema } from '@/domain/account';
+import getApiClient from '@/infrastructure/api';
 
 export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }];
 
@@ -91,23 +92,36 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
-    // const client = getApiClient();
-    // const res = await client.account.$post({
-    //   json: {
-    //     email,
-    //     password,
-    //   },
-    // });
-    // if (res.status === 201) return redirect('/login');
-    // return json(
-    //   {
-    //     errors: {
-    //       email: undefined,
-    //       password: undefined,
-    //     },
-    //   },
-    //   { status: res.status },
-    // );
+    const client = getApiClient();
+    const res = await client.account.login.$post({
+      json: {
+        email,
+        password,
+      },
+    });
+
+    if (res.status === 200) return redirect('/trends');
+    if (res.status === 401 || res.status === 404) {
+      return json(
+        {
+          errors: {
+            email: ['メールアドレスまたはパスワードが正しくありません。'],
+            password: undefined,
+          },
+        },
+        { status: res.status },
+      );
+    }
+
+    return json(
+      {
+        errors: {
+          email: ['ログインに失敗しました。'],
+          password: undefined,
+        },
+      },
+      { status: res.status },
+    );
   } catch (error) {
     return json(
       {

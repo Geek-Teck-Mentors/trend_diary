@@ -1,12 +1,9 @@
 import getRdbClient from '@/infrastructure/rdb';
 import app from '../../server';
-
-const env = {
-  DATABASE_URL: process.env.DATABASE_URL,
-};
+import TEST_ENV from '@/test/env';
 
 describe('POST /api/account', () => {
-  const db = getRdbClient(env.DATABASE_URL ?? '');
+  const db = getRdbClient(TEST_ENV.DATABASE_URL ?? '');
 
   async function cleanUp() {
     await db.$queryRaw`TRUNCATE TABLE "accounts";`;
@@ -28,11 +25,11 @@ describe('POST /api/account', () => {
         method: 'POST',
         body,
       },
-      env,
+      TEST_ENV,
     );
   }
 
-  it('正常系: 新規登録できる', async () => {
+  it('正常系', async () => {
     const res = await requestShort(
       JSON.stringify({ email: 'signup@test.com', password: 'test_password' }),
     );
@@ -42,7 +39,7 @@ describe('POST /api/account', () => {
     expect(body).toEqual({});
   });
 
-  describe('異常系', async () => {
+  describe('準正常系', async () => {
     const testCases: Array<{
       name: string;
       input: string | { email: string; password: string };
@@ -67,7 +64,7 @@ describe('POST /api/account', () => {
       });
     });
 
-    it('異常系: 既に存在するメールアドレスの場合', async () => {
+    it('既に存在するメールアドレスの場合', async () => {
       const email = 'test@example.com';
 
       // 1回目の登録

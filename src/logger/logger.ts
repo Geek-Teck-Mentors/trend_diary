@@ -51,8 +51,9 @@ class Logger {
     this.log('warn', message, ...args);
   }
 
-  error(message: LogMessage, ...args: unknown[]): void {
-    this.log('error', message, ...args);
+  error(message: LogMessage, error: Error | unknown, ...args: unknown[]): void {
+    // * pinoのstdSerializersで処理されるよう、errプロパティ名を使用
+    this.log('error', { message, err: error }, ...args);
   }
 }
 
