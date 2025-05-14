@@ -2,7 +2,7 @@
 CREATE TABLE "sessions" (
     "session_id" VARCHAR(255) NOT NULL,
     "account_id" BIGINT NOT NULL,
-    "session_token" VARCHAR(255) NOT NULL,
+    "session_token" VARCHAR(255),
     "expires_at" TIMESTAMPTZ NOT NULL,
     "ip_address" VARCHAR(45),
     "user_agent" VARCHAR(255),

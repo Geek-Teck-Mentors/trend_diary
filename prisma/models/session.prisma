@@ -1,7 +1,7 @@
 model Session {
-  sessionId    String @id @default(uuid()) @map("session_id") @db.VarChar(255)
-  accountId    BigInt @map("account_id") @db.BigInt
-  sessionToken String @map("session_token") @db.VarChar(255)
+  sessionId    String  @id @default(uuid()) @map("session_id") @db.VarChar(255)
+  accountId    BigInt  @map("account_id") @db.BigInt
+  sessionToken String? @map("session_token") @db.VarChar(255)
 
   expiresAt DateTime @map("expires_at") @db.Timestamptz()
   ipAddress String?  @map("ip_address") @db.VarChar(45) // IPv4 or IPv6
