@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl';
-import { AlreadyExistsError, NotFoundError, ClientError } from '@/common/errors';
+import { AlreadyExistsError, NotFoundError, ClientError, ServerError } from '@/common/errors';
 
 import AccountService from './accountService';
 import UserRepositoryImpl from '../infrastructure/userRepositoryImpl';
@@ -65,6 +65,15 @@ describe('AccountService', () => {
 
       await expect(service.signup(email, plainPassword)).rejects.toThrow(AlreadyExistsError);
     });
+
+    it('異常系: 意図しないDBエラー', async () => {
+      const email = faker.internet.email();
+      const plainPassword = 'password';
+
+      db.account.create.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.signup(email, plainPassword)).rejects.toThrow(ServerError);
+    });
   });
 
   describe('login', () => {
@@ -112,27 +121,34 @@ describe('AccountService', () => {
       expect(user.updatedAt).toBeDefined();
     });
 
-    it('準正常系: 存在しないメールアドレス', async () => {
-      db.account.findUnique.mockResolvedValue(null);
+    describe('準正常系', () => {
+      it('存在しないメールアドレス', async () => {
+        db.account.findUnique.mockResolvedValue(null);
 
-      const nonExistentEmail = 'non_existent_test@example.com';
-      await expect(service.login(nonExistentEmail, plainPassword)).rejects.toThrow(NotFoundError);
+        const nonExistentEmail = 'non_existent_test@example.com';
+        await expect(service.login(nonExistentEmail, plainPassword)).rejects.toThrow(NotFoundError);
+      });
+      it('パスワードが間違っている', async () => {
+        db.account.findUnique.mockResolvedValue({
+          email,
+          password: await bcrypt.hash(plainPassword, 10),
+          accountId: BigInt(1),
+          lastLogin: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
+        });
+
+        await expect(service.login(email, wrongPassword)).rejects.toThrow(
+          new ClientError('Invalid password'),
+        );
+      });
     });
 
-    it('準正常系: パスワードが間違っている', async () => {
-      db.account.findUnique.mockResolvedValue({
-        email,
-        password: await bcrypt.hash(plainPassword, 10),
-        accountId: BigInt(1),
-        lastLogin: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-      });
+    it('異常系: 意図しないDBエラー', async () => {
+      db.account.findUnique.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.login(email, wrongPassword)).rejects.toThrow(
-        new ClientError('Invalid password'),
-      );
+      await expect(service.login(email, plainPassword)).rejects.toThrow(ServerError);
     });
   });
 });
