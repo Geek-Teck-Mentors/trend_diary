@@ -109,7 +109,7 @@ export async function action({ request }: ActionFunctionArgs) {
             password: undefined,
           },
         },
-        { status: 401 },
+        { status: res.status },
       );
     }
 
@@ -120,7 +120,7 @@ export async function action({ request }: ActionFunctionArgs) {
           password: undefined,
         },
       },
-      { status: 500 },
+      { status: res.status },
     );
   } catch (error) {
     return json(
