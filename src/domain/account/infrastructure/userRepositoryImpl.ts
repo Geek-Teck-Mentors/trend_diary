@@ -1,4 +1,4 @@
-import { getUserBySessionId } from '@prisma/client/sql';
+import { User as PrismaUser } from '@prisma/client';
 import { RdbClient } from '@/infrastructure/rdb';
 import { UserRepository } from '../repository/userRepository';
 import User from '../model/user';
@@ -44,18 +44,32 @@ export default class UserRepositoryImpl implements UserRepository {
   }
 
   async findBySessionId(sessionId: string): Promise<Nullable<User>> {
-    const result = await this.db.$queryRawTyped(getUserBySessionId(sessionId, new Date()));
+    const result = await this.db.$queryRaw<PrismaUser[]>`
+    SELECT
+      users.user_id,
+      users.account_id,
+      users.display_name,
+      users.created_at,
+      users.updated_at
+    FROM
+      users
+      INNER JOIN sessions ON users.account_id = sessions.account_id
+      AND sessions.session_id = ${sessionId}
+    WHERE
+      users.deleted_at IS NULL
+      AND sessions.expires_at > ${new Date()}`;
+
     if (result.length === 0) return null;
 
     const user = result.at(0);
     if (!user) return null;
 
     return new User(
-      user.user_id,
-      user.account_id,
-      user.display_name ?? undefined,
-      user.created_at,
-      user.updated_at,
+      user.userId,
+      user.accountId,
+      user.displayName ?? undefined,
+      user.createdAt,
+      user.updatedAt,
     );
   }
 }
