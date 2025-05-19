@@ -50,7 +50,6 @@ jobs:
           DIRECT_URL: ${{ env.DATABASE_URL }}
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-          post-command: "npm run sql:gen"
       - run: echo "Setup completed"
 
   lint:
