@@ -53,6 +53,11 @@ jobs:
           command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
           fail_command: docker compose down
 
+      - name: DB Migration
+        env:
+          DIRECT_URL: ${{ env.DATABASE_URL }}
+        run: npm run db:migrate
+
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         env:
