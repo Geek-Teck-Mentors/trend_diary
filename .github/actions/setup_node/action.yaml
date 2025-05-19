@@ -1,11 +1,15 @@
 name: Setup Node.js Composite Action
-description: 'Node.jsのバージョンを指定してNode.jsをセットアップするComposite Action'
+description: 'Node.jsのバージョンを指定してNode.jsをセットアップし、オプションのポストコマンドを実行するComposite Action'
 
 inputs:
   node-version-file:
     description: 'Node.jsのバージョンが記述されたファイル'
     required: true
     default: '.node-version'
+  post-command:
+    description: 'セットアップ後に実行する追加コマンド'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -26,3 +30,8 @@ runs:
       if: steps.node-modules-cache.outputs.cache-hit != 'true'
       shell: bash
       run: npm ci
+
+    - name: 構築後の追加コマンド実行
+      if: inputs.post-command != ''
+      shell: bash
+      run: ${{ inputs.post-command }}
