@@ -44,6 +44,15 @@ jobs:
       runner: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: PostgreSQLのセットアップ # PrismaのSQLを生成するため
+        run: docker compose build && docker compose up -d
+
+      - name: PostgreSQLが起動するまで待機
+        uses: ./.github/actions/backoff
+        with:
+          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
+          fail_command: docker compose down
+
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         env:
