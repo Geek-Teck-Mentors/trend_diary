@@ -6,10 +6,6 @@ inputs:
     description: 'Node.jsのバージョンが記述されたファイル'
     required: true
     default: '.node-version'
-  post-command:
-    description: 'Node.jsのセットアップ後に実行するコマンド'
-    required: false
-    default: ''
 
 runs:
   using: 'composite'
@@ -30,10 +26,3 @@ runs:
       if: steps.node-modules-cache.outputs.cache-hit != 'true'
       shell: bash
       run: npm ci
-
-    - name: Node.jsのセットアップ後のコマンド実行
-      if: ${{ inputs.post-command != '' }}
-      shell: bash
-      run: |
-        echo "Node.jsのセットアップ後のコマンドを実行します"
-        eval ${{ inputs.post-command }}

@@ -48,7 +48,6 @@ jobs:
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-          post-command: 'npm run db:gen'
       - run: echo "Setup completed"
 
   lint:
