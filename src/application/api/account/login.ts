@@ -1,5 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
+import { setCookie } from 'hono/cookie';
 import { ClientError, ServerError } from '@/common/errors';
 import {
   AccountService,
@@ -18,12 +19,20 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
   const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb));
 
   try {
-    const user = await service.login(valid.email, valid.password);
-    logger.info('login success', { userId: user.userId.toString() });
+    const result = await service.login(valid.email, valid.password);
+    logger.info('login success', { userId: result.user.userId.toString() });
+
+    // セッションIDをCookieにセット
+    setCookie(c, 'sid', result.sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60, // 30日
+    });
 
     return c.json(
       {
-        displayName: user.displayName,
+        displayName: result.user.displayName,
       },
       200,
     );

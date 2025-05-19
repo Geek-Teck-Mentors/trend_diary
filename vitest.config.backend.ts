@@ -26,6 +26,13 @@ export default defineConfig({
     env: {
       DATABASE_URL: dbUrl,
     },
+    // シングルスレッドにして、並列テストでのDB競合エラーを防ぐ
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     include: testInclude,
     exclude: testExclude,
     coverage: {

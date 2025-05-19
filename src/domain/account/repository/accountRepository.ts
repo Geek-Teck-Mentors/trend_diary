@@ -9,6 +9,6 @@ export interface AccountRepository extends TransactionClient {
   findBySessionId(sessionId: string): Promise<Nullable<Account>>;
   save(account: Account): Promise<Account>;
   delete(account: Account): Promise<Account>;
-  addSession(accountId: bigint, expiresAt: Date): Promise<void>;
+  addSession(accountId: bigint, expiresAt: Date): Promise<string>;
   removeSession(sessionId: string): Promise<void>;
 }

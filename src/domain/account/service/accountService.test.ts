@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
-import { Account, User } from '@prisma/client';
+import { Account, Session, User } from '@prisma/client';
 import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl';
 import { AlreadyExistsError, NotFoundError, ClientError, ServerError } from '@/common/errors';
 
@@ -25,6 +25,16 @@ const mockUser: User = {
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null,
+};
+
+const mockSession: Session = {
+  sessionId: faker.string.uuid(),
+  accountId: BigInt(1),
+  sessionToken: null,
+  userAgent: faker.internet.userAgent(),
+  ipAddress: faker.internet.ipv4(),
+  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  createdAt: new Date(),
 };
 
 describe('AccountService', () => {
@@ -89,8 +99,9 @@ describe('AccountService', () => {
         lastLogin: new Date(),
         updatedAt: new Date(),
       });
+      db.session.create.mockResolvedValue(mockSession);
 
-      const user = await service.login(email, password);
+      const { user, sessionId } = await service.login(email, password);
       expect(user).toBeDefined();
       expect(user.accountId).toBeDefined();
       expect(user.accountId).not.toBeNull();
@@ -98,6 +109,8 @@ describe('AccountService', () => {
       expect(user.userId).not.toBeNull();
       expect(user.createdAt).toBeDefined();
       expect(user.updatedAt).toBeDefined();
+      expect(sessionId).toBeDefined();
+      expect(sessionId).not.toBeNull();
     });
 
     describe('準正常系', () => {

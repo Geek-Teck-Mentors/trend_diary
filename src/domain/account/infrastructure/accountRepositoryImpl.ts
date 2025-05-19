@@ -154,13 +154,15 @@ export default class AccountRepositoryImpl extends TransactionManager implements
     );
   }
 
-  async addSession(accountId: bigint, expiresAt: Date): Promise<void> {
-    await this.db.session.create({
+  async addSession(accountId: bigint, expiresAt: Date): Promise<string> {
+    const session = await this.db.session.create({
       data: {
         accountId,
         expiresAt,
       },
     });
+
+    return session.sessionId;
   }
 
   async removeSession(sessionId: string): Promise<void> {

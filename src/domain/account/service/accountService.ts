@@ -13,6 +13,11 @@ import User from '../model/user';
 
 const SESSION_EXPIRED = 30 * 24 * 60 * 60 * 1000; // 30日, day*h*min*sec*1000ms
 
+type LoginResult = {
+  user: User;
+  sessionId: string;
+};
+
 export default class AccountService {
   constructor(
     private accountRepository: AccountRepository,
@@ -39,7 +44,7 @@ export default class AccountService {
     }
   }
 
-  async login(email: string, plainPassword: string): Promise<User> {
+  async login(email: string, plainPassword: string): Promise<LoginResult> {
     let account: Nullable<Account>;
     try {
       account = await this.accountRepository.findByEmail(email);
@@ -63,11 +68,15 @@ export default class AccountService {
       const user = await this.userRepository.findByAccountId(account.accountId);
       if (isNull(user)) throw new ServerError('User not found'); // signup時に作成されているはず
 
-      await this.accountRepository.addSession(
+      const sessionId = await this.accountRepository.addSession(
         account.accountId,
         new Date(Date.now() + SESSION_EXPIRED),
       );
-      return user;
+
+      return {
+        user,
+        sessionId,
+      };
     } catch (error) {
       throw ServerError.handle(error);
     }
