@@ -8,10 +8,10 @@ import TEST_ENV from '@/test/env';
 describe('DELETE /api/account/logout', () => {
   let db: PrismaClient;
   let service: AccountService;
+  let setCookie: string[];
 
   const TEST_EMAIL = faker.internet.email();
   const TEST_PASSWORD = 'test_password';
-  let sessionId: string;
 
   async function cleanUp(): Promise<void> {
     await db.$queryRaw`TRUNCATE TABLE "accounts";`;
@@ -26,7 +26,7 @@ describe('DELETE /api/account/logout', () => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
+          Cookie: setCookie.join('; '),
         },
       },
       TEST_ENV,
@@ -39,18 +39,28 @@ describe('DELETE /api/account/logout', () => {
   });
 
   afterAll(async () => {
+    await cleanUp();
     await db.$disconnect();
   });
 
+  // テスト前にセッションが有効か確認
   beforeEach(async () => {
-    await service.signup(TEST_EMAIL, TEST_PASSWORD);
-    // ログインしてセッションIDを取得
-    const loginResult = await service.login(TEST_EMAIL, TEST_PASSWORD);
-    sessionId = loginResult.sessionId;
-  });
-
-  afterEach(async () => {
     await cleanUp();
+    await service.signup(TEST_EMAIL, TEST_PASSWORD);
+    const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD });
+
+    const res = await app.request(
+      '/api/account/login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body,
+      },
+      TEST_ENV,
+    );
+    setCookie = res.headers.getSetCookie();
   });
 
   describe('正常系', () => {
@@ -62,7 +72,7 @@ describe('DELETE /api/account/logout', () => {
 
   describe('準正常系', () => {
     it('認証がない場合は401エラー', async () => {
-      sessionId = '';
+      setCookie = [];
       const res = await requestLogout();
       expect(res.status).toBe(401);
     });

@@ -10,5 +10,6 @@ export type Env = {
   Variables: {
     [CONTEXT_KEY.APP_LOG]: typeof logger;
     [CONTEXT_KEY.SESSION_USER]: User;
+    [CONTEXT_KEY.SESSION_ID]: string;
   };
 };

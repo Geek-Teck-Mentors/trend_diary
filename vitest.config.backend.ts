@@ -25,6 +25,7 @@ export default defineConfig({
     globals: true,
     env: {
       DATABASE_URL: dbUrl,
+      SECRET_KEY: process.env.SECRET,
     },
     // シングルスレッドにして、並列テストでのDB競合エラーを防ぐ
     pool: 'threads',

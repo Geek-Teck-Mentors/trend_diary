@@ -6,11 +6,12 @@ import CONTEXT_KEY from './context';
 import getRdbClient from '@/infrastructure/rdb';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import { NotFoundError } from '@/common/errors';
+import { SESSION_NAME } from '@/common/constants/session';
 
 const authenticator = createMiddleware<Env>(async (c, next) => {
   const logger = c.get(CONTEXT_KEY.APP_LOG);
 
-  const sessionId = await getSignedCookie(c, c.env.SECRET_KEY, 'sid');
+  const sessionId = await getSignedCookie(c, c.env.SECRET_KEY, SESSION_NAME);
   if (!sessionId) throw new HTTPException(401, { message: 'login required' });
 
   const rdb = getRdbClient(c.env.DATABASE_URL);
@@ -20,6 +21,7 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
     const user = await service.getLoginUser(sessionId);
 
     c.set(CONTEXT_KEY.SESSION_USER, user);
+    c.set(CONTEXT_KEY.SESSION_ID, sessionId);
     await next();
   } catch (error) {
     if (error instanceof NotFoundError) {

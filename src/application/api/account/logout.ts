@@ -1,18 +1,15 @@
-import { getCookie, deleteCookie } from 'hono/cookie';
+import { deleteCookie } from 'hono/cookie';
 import { Context } from 'hono';
 import { Env } from '@/application/env';
 import { NotFoundError } from '@/common/errors';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import getRdbClient from '@/infrastructure/rdb';
 import { logger } from '@/logger/logger';
+import CONTEXT_KEY from '@/application/middleware/context';
+import { SESSION_NAME } from '@/common/constants/session';
 
 export default async function logout(c: Context<Env>) {
-  // セッションIDをCookieから取得
-  const sessionId = getCookie(c, 'sid');
-
-  if (!sessionId) {
-    return c.json({ message: 'Unauthorized' }, 401);
-  }
+  const sessionId = c.get(CONTEXT_KEY.SESSION_ID);
 
   try {
     const rdb = getRdbClient(c.env.DATABASE_URL);
@@ -20,7 +17,7 @@ export default async function logout(c: Context<Env>) {
 
     await service.logout(sessionId);
 
-    deleteCookie(c, 'sid');
+    deleteCookie(c, SESSION_NAME);
 
     logger.info('logout success');
     return c.body(null, 204);

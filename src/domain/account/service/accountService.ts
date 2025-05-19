@@ -10,12 +10,12 @@ import { UserRepository } from '../repository/userRepository';
 import Account from '../model/account';
 import { isNull, Nullable } from '@/common/types/utility';
 import User from '../model/user';
-
-const SESSION_EXPIRED = 30 * 24 * 60 * 60 * 1000; // 30日, day*h*min*sec*1000ms
+import { SESSION_EXPIRED } from '@/common/constants/session';
 
 type LoginResult = {
   user: User;
   sessionId: string;
+  expiredAt: Date;
 };
 
 export default class AccountService {
@@ -68,14 +68,13 @@ export default class AccountService {
       const user = await this.userRepository.findByAccountId(account.accountId);
       if (isNull(user)) throw new ServerError('User not found'); // signup時に作成されているはず
 
-      const sessionId = await this.accountRepository.addSession(
-        account.accountId,
-        new Date(Date.now() + SESSION_EXPIRED),
-      );
+      const expiredAt = new Date(Date.now() + SESSION_EXPIRED);
+      const sessionId = await this.accountRepository.addSession(account.accountId, expiredAt);
 
       return {
         user,
         sessionId,
+        expiredAt,
       };
     } catch (error) {
       throw ServerError.handle(error);

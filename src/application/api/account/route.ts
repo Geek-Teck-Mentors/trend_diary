@@ -5,10 +5,11 @@ import { Env } from '@/application/env';
 import zodValidator from '@/application/middleware/zodValidator';
 import login from './login';
 import logout from './logout';
+import authenticator from '@/application/middleware/authenticator';
 
 const app = new Hono<Env>()
   .post('/', signup)
   .post('/login', zodValidator('json', accountSchema.pick({ email: true, password: true })), login)
-  .delete('/logout', logout);
+  .delete('/logout', authenticator, logout);
 
 export default app;

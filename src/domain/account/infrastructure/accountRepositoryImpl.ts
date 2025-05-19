@@ -86,14 +86,13 @@ export default class AccountRepositoryImpl extends TransactionManager implements
       accounts.email,
       accounts.last_login,
       accounts.created_at,
-      accounts.updated_at,
-      accounts.deleted_at
+      accounts.updated_at
     FROM
       accounts
       INNER JOIN sessions ON accounts.account_id = sessions.account_id
-      AND sessions.session_id = ${sessionId}
     WHERE
-      accounts.deleted_at IS NULL`;
+      accounts.deleted_at IS NULL
+      AND sessions.session_id = ${sessionId}`;
     if (result.length === 0) return null;
 
     const account = result.at(0);

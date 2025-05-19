@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
-import { setCookie } from 'hono/cookie';
+import { setSignedCookie } from 'hono/cookie';
 import { ClientError, ServerError } from '@/common/errors';
 import {
   AccountService,
@@ -11,6 +11,7 @@ import {
 import { logger } from '@/logger/logger';
 import getRdbClient from '@/infrastructure/rdb';
 import { ZodValidatedContext } from '@/application/middleware/zodValidator';
+import { SESSION_NAME } from '@/common/constants/session';
 
 export default async function login(c: ZodValidatedContext<AccountInput>) {
   const valid = c.req.valid('json');
@@ -23,11 +24,11 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
     logger.info('login success', { userId: result.user.userId.toString() });
 
     // セッションIDをCookieにセット
-    setCookie(c, 'sid', result.sessionId, {
+    await setSignedCookie(c, SESSION_NAME, result.sessionId, c.env.SECRET_KEY, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      maxAge: 30 * 24 * 60 * 60, // 30日
+      expires: result.expiredAt,
     });
 
     return c.json(
