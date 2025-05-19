@@ -6,7 +6,6 @@
     "npm": ">=8.0.0"
   },
   "scripts": {
-    "postinstall": "npm run db:gen",
     "dev": "remix vite:dev",
     "build": "remix vite:build",
     "preview": "wrangler pages dev",
