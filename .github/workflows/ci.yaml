@@ -46,10 +46,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
-        env:
-          DIRECT_URL: ${{ env.DATABASE_URL }}
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
+          post-command: 'npm run db:gen'
       - run: echo "Setup completed"
 
   lint:
