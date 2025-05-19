@@ -48,6 +48,10 @@ jobs:
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
+      - name: Prismaキャッシュのセットアップ
+        uses: ./.github/actions/setup_prisma_cache
+        with:
+          schema-path: prisma/main.prisma
       - run: echo "Setup completed"
 
   lint:
@@ -86,6 +90,11 @@ jobs:
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: Prismaキャッシュのセットアップ
+        uses: ./.github/actions/setup_prisma_cache
+        with:
+          schema-path: prisma/main.prisma
 
       - name: TypeScript型チェック
         run: npm run check-types
@@ -164,6 +173,11 @@ jobs:
         with:
           command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
           fail_command: docker compose down
+
+      - name: Prismaキャッシュのセットアップ
+        uses: ./.github/actions/setup_prisma_cache
+        with:
+          schema-path: prisma/main.prisma
 
       - name: DB Migration
         env:
