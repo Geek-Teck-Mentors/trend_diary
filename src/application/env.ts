@@ -5,7 +5,6 @@ import User from '@/domain/account/model/user';
 export type Env = {
   Bindings: {
     DATABASE_URL: string;
-    SECRET_KEY: string;
   };
   Variables: {
     [CONTEXT_KEY.APP_LOG]: typeof logger;

@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
-import { setSignedCookie } from 'hono/cookie';
+import { setCookie } from 'hono/cookie';
 import { ClientError, ServerError } from '@/common/errors';
 import {
   AccountService,
@@ -24,7 +24,7 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
     logger.info('login success', { userId: result.user.userId.toString() });
 
     // セッションIDをCookieにセット
-    await setSignedCookie(c, SESSION_NAME, result.sessionId, c.env.SECRET_KEY, {
+    setCookie(c, SESSION_NAME, result.sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',

@@ -1,5 +1,5 @@
 import { createMiddleware } from 'hono/factory';
-import { getSignedCookie } from 'hono/cookie';
+import { getCookie } from 'hono/cookie';
 import { HTTPException } from 'hono/http-exception';
 import { Env } from '../env';
 import CONTEXT_KEY from './context';
@@ -11,7 +11,7 @@ import { SESSION_NAME } from '@/common/constants/session';
 const authenticator = createMiddleware<Env>(async (c, next) => {
   const logger = c.get(CONTEXT_KEY.APP_LOG);
 
-  const sessionId = await getSignedCookie(c, c.env.SECRET_KEY, SESSION_NAME);
+  const sessionId = getCookie(c, SESSION_NAME);
   if (!sessionId) throw new HTTPException(401, { message: 'login required' });
 
   const rdb = getRdbClient(c.env.DATABASE_URL);
