@@ -143,4 +143,63 @@ describe('AccountService', () => {
       await expect(service.login(email, password)).rejects.toThrow(ServerError);
     });
   });
+
+  describe('getLoginUser', () => {
+    const { sessionId } = mockSession;
+
+    it('正常系', async () => {
+      db.$queryRaw.mockResolvedValue([mockUser]);
+
+      const user = await service.getLoginUser(sessionId);
+
+      expect(user).toBeDefined();
+      expect(user.accountId).toBe(mockUser.accountId);
+      expect(user.userId).toBe(mockUser.userId);
+      expect(user.createdAt).toBeDefined();
+      expect(user.updatedAt).toBeDefined();
+    });
+
+    describe('準正常系', () => {
+      it('存在しないセッションID', async () => {
+        db.$queryRaw.mockResolvedValue([]);
+
+        await expect(service.getLoginUser(sessionId)).rejects.toThrow(
+          new NotFoundError('User not found'),
+        );
+      });
+    });
+
+    it('異常系: 意図しないDBエラー', async () => {
+      db.$queryRaw.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.getLoginUser(sessionId)).rejects.toThrow(ServerError);
+    });
+  });
+
+  describe('logout', () => {
+    const { sessionId } = mockSession;
+
+    it('正常系', async () => {
+      db.$queryRaw.mockResolvedValue([mockAccount]);
+      db.session.delete.mockResolvedValue(mockSession);
+
+      await expect(service.logout(sessionId)).resolves.not.toThrow();
+    });
+
+    describe('準正常系', () => {
+      it('存在しないセッションID', async () => {
+        db.$queryRaw.mockResolvedValue([]);
+
+        await expect(service.logout(sessionId)).rejects.toThrow(
+          new NotFoundError('Account not found'),
+        );
+      });
+    });
+
+    it('異常系: 意図しないDBエラー', async () => {
+      db.$queryRaw.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.logout(sessionId)).rejects.toThrow(ServerError);
+    });
+  });
 });
