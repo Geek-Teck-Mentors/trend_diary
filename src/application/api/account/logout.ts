@@ -1,7 +1,9 @@
 import { deleteCookie } from 'hono/cookie';
 import { Context } from 'hono';
+import { HTTPException } from 'hono/http-exception';
+import { ContentfulStatusCode } from 'hono/utils/http-status';
 import { Env } from '@/application/env';
-import { NotFoundError } from '@/common/errors';
+import { ClientError, ServerError } from '@/common/errors';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import getRdbClient from '@/infrastructure/rdb';
 import { logger } from '@/logger/logger';
@@ -22,10 +24,11 @@ export default async function logout(c: Context<Env>) {
     logger.info('logout success');
     return c.body(null, 204);
   } catch (error) {
-    if (error instanceof NotFoundError) {
-      return c.json({ message: 'Account not found' }, 404);
+    if (error instanceof ClientError) {
+      throw new HTTPException(error.statusCode as ContentfulStatusCode, { message: error.message });
     }
-    logger.error('logout error', error);
-    throw error;
+
+    logger.error(error instanceof ServerError ? 'internal server error' : 'unknown error', error);
+    throw new HTTPException(500, { message: 'Internal server error' });
   }
 }
