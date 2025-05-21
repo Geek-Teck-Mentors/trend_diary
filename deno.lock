@@ -1,0 +1,99 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@std/fmt@^1.0.5": "1.0.7",
+    "jsr:@std/fs@^1.0.11": "1.0.17",
+    "jsr:@std/io@~0.225.2": "0.225.2",
+    "jsr:@std/log@*": "0.224.14"
+  },
+  "jsr": {
+    "@std/fmt@1.0.7": {
+      "integrity": "2a727c043d8df62cd0b819b3fb709b64dd622e42c3b1bb817ea7e6cc606360fb"
+    },
+    "@std/fs@1.0.17": {
+      "integrity": "1c00c632677c1158988ef7a004cb16137f870aafdb8163b9dce86ec652f3952b"
+    },
+    "@std/io@0.225.2": {
+      "integrity": "3c740cd4ee4c082e6cfc86458f47e2ab7cb353dc6234d5e9b1f91a2de5f4d6c7"
+    },
+    "@std/log@0.224.14": {
+      "integrity": "257f7adceee3b53bb2bc86c7242e7d1bc59729e57d4981c4a7e5b876c808f05e",
+      "dependencies": [
+        "jsr:@std/fmt",
+        "jsr:@std/fs",
+        "jsr:@std/io"
+      ]
+    }
+  },
+  "remote": {
+    "https://deno.land/std@0.152.0/fmt/colors.ts": "6f9340b7fb8cc25a993a99e5efc56fe81bb5af284ff412129dd06df06f53c0b4",
+    "https://deno.land/std@0.152.0/testing/_diff.ts": "029a00560b0d534bc0046f1bce4bd36b3b41ada3f2a3178c85686eb2ff5f1413",
+    "https://deno.land/std@0.152.0/testing/_format.ts": "0d8dc79eab15b67cdc532826213bbe05bccfd276ca473a50a3fc7bbfb7260642",
+    "https://deno.land/std@0.152.0/testing/asserts.ts": "093735c88f52bbead7f60a1f7a97a2ce4df3c2d5fab00a46956f20b4a5793ccd",
+    "https://deno.land/std@0.152.0/testing/mock.ts": "c7cc7eae6eecbe692798bd7ce155f81a9c600865b0b2e8799068e8a85cc83b3d",
+    "https://deno.land/std@0.83.0/fmt/colors.ts": "c5665c66f1a67228f21c5989bbb04b36d369b98dd7ceac06f5e26856c81c2531",
+    "https://deno.land/std@0.83.0/testing/_diff.ts": "9656b2dbe0a76684e705375fd03bfe0108e9e00845ccb9e47abff52f156fe4e8",
+    "https://deno.land/std@0.83.0/testing/asserts.ts": "a8d30ca52b1bf4f928c521e80b58d04ed3930b9507c598cfffd1ecedf3f6eaf2"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@cloudflare/workers-types@^4.20241218.0",
+        "npm:@faker-js/faker@^9.7.0",
+        "npm:@hono/vite-build@^1.2.0",
+        "npm:@hono/vite-dev-server@~0.18.1",
+        "npm:@hono/zod-validator@0.5",
+        "npm:@prisma/client@^6.7.0",
+        "npm:@prisma/extension-accelerate@^1.2.2",
+        "npm:@prisma/generator-helper@^6.5.0",
+        "npm:@radix-ui/react-checkbox@^1.1.4",
+        "npm:@radix-ui/react-dialog@^1.1.11",
+        "npm:@radix-ui/react-label@^2.1.2",
+        "npm:@radix-ui/react-separator@^1.1.4",
+        "npm:@radix-ui/react-slot@^1.2.0",
+        "npm:@radix-ui/react-tooltip@^1.2.4",
+        "npm:@remix-run/cloudflare-pages@^2.16.5",
+        "npm:@remix-run/cloudflare@^2.16.5",
+        "npm:@remix-run/dev@^2.16.5",
+        "npm:@remix-run/react@^2.16.5",
+        "npm:@tailwindcss/vite@^4.0.8",
+        "npm:@types/bcryptjs@^2.4.6",
+        "npm:@types/react-dom@^18.2.7",
+        "npm:@types/react@^18.2.20",
+        "npm:@types/uuid@10",
+        "npm:@typescript-eslint/eslint-plugin@^7.18.0",
+        "npm:@typescript-eslint/parser@^7.18.0",
+        "npm:@vitest/coverage-v8@^3.0.9",
+        "npm:bcryptjs@^3.0.2",
+        "npm:class-variance-authority@~0.7.1",
+        "npm:clsx@^2.1.1",
+        "npm:eslint-config-airbnb-typescript@18",
+        "npm:eslint-config-airbnb@^19.0.4",
+        "npm:eslint-config-prettier@^10.1.1",
+        "npm:eslint@^8.57.1",
+        "npm:hono-remix-adapter@~0.5.4",
+        "npm:hono@^4.6.18",
+        "npm:lucide-react@0.487",
+        "npm:pino@^9.6.0",
+        "npm:prettier-plugin-tailwindcss@~0.6.11",
+        "npm:prettier@3.5.3",
+        "npm:prisma-erd-generator@^2.0.4",
+        "npm:prisma@^6.7.0",
+        "npm:react-dom@^18.2.0",
+        "npm:react@^18.2.0",
+        "npm:remix-hono@^0.0.16",
+        "npm:rss-parser@^3.13.0",
+        "npm:tailwind-merge@^3.1.0",
+        "npm:tailwindcss@^4.0.8",
+        "npm:tw-animate-css@^1.2.5",
+        "npm:typescript@^5.7.3",
+        "npm:uuid@^11.0.5",
+        "npm:vite@^5.4.19",
+        "npm:vitest-mock-extended@^3.1.0",
+        "npm:vitest@^3.0.4",
+        "npm:wrangler@^3.114.7",
+        "npm:zod@^3.24.1"
+      ]
+    }
+  }
+}
