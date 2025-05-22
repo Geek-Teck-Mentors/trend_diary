@@ -102,16 +102,4 @@ export default class AccountService {
       throw ServerError.handle(error);
     }
   }
-
-  // // アカウントの削除
-  // async deactivateAccount(accountId: bigint): Promise<void> {
-  //   const account = await this.accountRepository.findById(accountId);
-  //   if (isNull(account)) throw ACCOUNT_NOT_FOUND;
-
-  //   try {
-  //     await this.accountRepository.delete(account);
-  //   } catch (error) {
-  //     throw ServerError.handle(error);
-  //   }
-  // }
 }
