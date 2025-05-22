@@ -1,6 +1,7 @@
 import { createMiddleware } from 'hono/factory';
 import { getCookie } from 'hono/cookie';
 import { HTTPException } from 'hono/http-exception';
+import { z } from 'zod';
 import { Env } from '../env';
 import CONTEXT_KEY from './context';
 import getRdbClient from '@/infrastructure/rdb';
@@ -13,6 +14,13 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
 
   const sessionId = getCookie(c, SESSION_NAME);
   if (!sessionId) throw new HTTPException(401, { message: 'login required' });
+
+  // SQLインジェクション対策
+  const valid = z.string().uuid().safeParse(sessionId);
+  if (!valid.success) {
+    logger.warn('invalid sid format', { sessionId });
+    throw new HTTPException(401, { message: 'login required' });
+  }
 
   const rdb = getRdbClient(c.env.DATABASE_URL);
   const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb));
