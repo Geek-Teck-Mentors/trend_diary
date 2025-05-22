@@ -37,7 +37,11 @@ const menuItems = [
   },
 ];
 
-export default function AppSidebar() {
+type Props = {
+  displayName: string;
+};
+
+export default function AppSidebar({ displayName }: Props) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -81,6 +85,9 @@ export default function AppSidebar() {
           <SidebarGroupLabel>User</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem className='w-full'>
+                <SidebarMenuButton>ユーザー名：{displayName}</SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout}>ログアウト</SidebarMenuButton>
               </SidebarMenuItem>

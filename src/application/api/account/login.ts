@@ -27,7 +27,6 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
     setCookie(c, SESSION_NAME, result.sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      path: '/',
       expires: result.expiredAt,
       sameSite: 'lax',
     });

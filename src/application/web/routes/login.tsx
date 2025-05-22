@@ -92,7 +92,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
-    const client = getApiClient();
+    const client = getApiClient(process.env.API_BASE_URL);
     const res = await client.account.login.$post({
       json: {
         email,

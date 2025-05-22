@@ -1,17 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { json, Outlet, redirect, useLoaderData } from '@remix-run/react';
+import { toast } from 'sonner';
 import AppSidebar from '../components/Sidebar';
 import { SidebarProvider } from '../components/ui/sidebar';
 import getApiClient from '@/infrastructure/api';
 
 export async function loader() {
-  const client = getApiClient(process.env.API_BASE_URL);
-  const res = await client.account.me.$get();
-
-  if (res.status >= 400 && res.status < 500) {
-    return redirect('/login');
-  }
-
   return json({
     ENV: {
       API_BASE_URL: process.env.API_BASE_URL,
@@ -22,10 +16,37 @@ export async function loader() {
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
   const data = useLoaderData<typeof loader>();
+  const [displayName, setDisplayName] = useState('未設定');
+
+  useEffect(() => {
+    let isMounted = true;
+    const client = getApiClient(data.ENV.API_BASE_URL);
+
+    const f = async () => {
+      const res = await client.account.me.$get(
+        {},
+        { init: { credentials: 'include', mode: 'cors' } },
+      );
+      if (res.status === 200) {
+        const resJson = await res.json();
+        setDisplayName(resJson.user?.displayName ?? '未設定');
+      } else {
+        toast.error('ログインが必要です');
+        redirect('/login');
+      }
+    };
+
+    if (isMounted) {
+      f();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar displayName={displayName} />
       <div className='w-full'>
         <Outlet />
         <script
