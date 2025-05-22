@@ -100,7 +100,7 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
 
-    if (res.status === 200) return redirect('/trends');
+    if (res.status === 200) return redirect('/trends', { headers: res.headers });
     if (res.status === 401 || res.status === 404) {
       return json(
         {

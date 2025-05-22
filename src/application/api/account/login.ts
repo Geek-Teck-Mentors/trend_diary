@@ -29,6 +29,7 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
       secure: process.env.NODE_ENV === 'production',
       path: '/',
       expires: result.expiredAt,
+      sameSite: 'lax',
     });
 
     return c.json(
