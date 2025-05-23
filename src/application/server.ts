@@ -16,9 +16,8 @@ app.onError(errorHandler);
 app.use(
   '/api/*',
   cors({
-    // TODO: ここは環境変数から取得するようにする
-    origin: '*',
-    allowMethods: ['GET', 'POST', 'DELETE'],
+    origin: process.env.CORS_ORIGIN ?? 'localhost:5173',
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   }),
 );
