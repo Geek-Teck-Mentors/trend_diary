@@ -6,11 +6,12 @@ on:
       - main
     paths:
       - '.github/workflows/ci.yaml'
+      - '.github/workflows/cd.yaml'
       - 'src/**'
       - 'public/**'
       - 'prisma/**'
       - 'package.json'
-      - 'package-lock.json'
+      - 'package-lock.json''
   pull_request:
     branches:
       - main
