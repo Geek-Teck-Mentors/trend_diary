@@ -16,14 +16,6 @@ import {
 } from './ui/sidebar';
 import getApiClient from '@/infrastructure/api';
 
-declare global {
-  interface Window {
-    ENV: {
-      API_BASE_URL: string;
-    };
-  }
-}
-
 const menuItems = [
   {
     title: 'トレンド記事',
