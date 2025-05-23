@@ -17,17 +17,22 @@ on:
           - web
           - database
 
-env:
-  HAS_CI_SUCCEEDED: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' }}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
-  web:
+  setup:
     runs-on: ubuntu-latest
-    if: ${{ github.env.HAS_CI_SUCCEEDED || github.event.inputs.deploy_type == 'web' }}
+    steps:
+      - name: Check if CI succeeded
+        id: check_ci
+        run: echo "IS_CI_SUCCESS=${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' }}" >> $GITHUB_ENV
+
+  web:
+    needs: setup
+    runs-on: ubuntu-latest
+    if: ${{ github.env.IS_CI_SUCCESS || github.event.inputs.deploy_type == 'web' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -52,11 +57,12 @@ jobs:
         run: echo $CMD_OUTPUT
 
   database:
+    needs: setup
+    runs-on: ubuntu-latest
+    if: ${{ github.env.IS_CI_SUCCESS || github.event.inputs.deploy_type == 'database' }}
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_DATABASE_URL }}
-    runs-on: ubuntu-latest
-    if: ${{ github.env.HAS_CI_SUCCEEDED || github.event.inputs.deploy_type == 'database' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
