@@ -109,20 +109,20 @@ jobs:
         id: check-frontend
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/web src/application/web/components'
+          subdir: 'src/application/web src/application/web/components vitest/'
           exclude_pattern: 'src/application/web/components/ui'
 
       - name: サービスの差分チェック
         id: check-service
         uses: ./.github/actions/diff
         with:
-          subdir: src/domain
+          subdir: 'src/domain vitest/'
 
       - name: APIの差分チェック
         id: check-api
         uses: ./.github/actions/diff
         with:
-          subdir: src/application/api
+          subdir: 'src/application/api vitest/'
 
       - name: 差分結果の表示
         run: |
