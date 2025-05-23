@@ -27,7 +27,7 @@ concurrency:
 jobs:
   web:
     runs-on: ubuntu-latest
-    if: ${{ env.HAS_CI_SUCCEEDED || github.event.inputs.deploy_type == 'web' }}
+    if: ${{ github.env.HAS_CI_SUCCEEDED || github.event.inputs.deploy_type == 'web' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
