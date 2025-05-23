@@ -3,7 +3,7 @@ description: 'テストを実行し、テストカバレッジの可視化まで
 
 inputs:
   target:
-    description: 'テスト対象 (frontend または backend)'
+    description: 'テスト対象 (frontend, api, service)'
     required: true
 
 runs:
