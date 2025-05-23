@@ -16,7 +16,7 @@ app.onError(errorHandler);
 app.use(
   '/api/*',
   cors({
-    origin: process.env.CORS_ORIGIN ?? 'localhost:5173',
+    origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   }),
