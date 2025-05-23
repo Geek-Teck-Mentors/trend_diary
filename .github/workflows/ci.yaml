@@ -105,7 +105,8 @@ jobs:
     outputs:
       test_runner: ubuntu-latest
       run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-frontend.outputs.diff-count != 0 }}
-      run_backend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-backend.outputs.diff-count != 0 }}
+      run_service_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-service.outputs.diff-count != 0 }}
+      run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-api.outputs.diff-count != 0 }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -117,15 +118,20 @@ jobs:
         id: check-frontend
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/web src/application/web/components'
+          subdir: 'src/application/web src/application/web/components vitest/'
           exclude_pattern: 'src/application/web/components/ui'
 
-      - name: バックエンドの差分チェック
-        id: check-backend
+      - name: サービスの差分チェック
+        id: check-service
         uses: ./.github/actions/diff
         with:
-          subdir: src
-          exclude_pattern: 'src/application/web/ src/application/middleware/ src/logger/'
+          subdir: 'src/domain vitest/'
+
+      - name: APIの差分チェック
+        id: check-api
+        uses: ./.github/actions/diff
+        with:
+          subdir: 'src/application/api vitest/'
 
       - name: 差分結果の表示
         run: |
@@ -133,7 +139,8 @@ jobs:
             echo "メインブランチなので、リグレッションテストとして全て実行"
           else
             echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
-            echo "バックエンド差分: ${{ steps.check-backend.outputs.diff-count }} ファイル"
+            echo "サービス差分: ${{ steps.check-service.outputs.diff-count }} ファイル"
+            echo "API差分: ${{ steps.check-api.outputs.diff-count }} ファイル"
             echo "テストの準備完了"
           fi
         shell: bash
@@ -154,10 +161,26 @@ jobs:
         with:
           target: frontend
 
-  test-backend:
+  test-service:
     needs: setup-test
     runs-on: ${{ needs.setup-test.outputs.test_runner }}
-    if: ${{ needs.setup-test.outputs.run_backend_test == 'true' }}
+    if: ${{ needs.setup-test.outputs.run_service_test == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: バックエンドのテスト
+        uses: ./.github/actions/test_cov
+        with:
+          target: service
+
+  test-api:
+    needs: setup-test
+    runs-on: ${{ needs.setup-test.outputs.test_runner }}
+    if: ${{ needs.setup-test.outputs.run_api_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -187,4 +210,4 @@ jobs:
       - name: バックエンドのテスト
         uses: ./.github/actions/test_cov
         with:
-          target: backend
+          target: api
