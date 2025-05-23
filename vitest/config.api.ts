@@ -21,6 +21,7 @@ export default defineConfig({
     include: testInclude,
     coverage: {
       reporter: coverageReporter,
+      // ベタガキしないと、Github Actionsに閾値が反映されない
       thresholds: {
         statements: 60, // 命令網羅, ソースコードの全ての命令が実行されるかどうか
         branches: 60, // 分岐網羅, 処理のパスの通過率とほぼ同義
