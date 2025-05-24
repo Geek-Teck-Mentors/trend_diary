@@ -50,6 +50,7 @@
     "hono": "^4.6.18",
     "hono-remix-adapter": "^0.5.4",
     "lucide-react": "^0.487.0",
+    "neverthrow": "^8.2.0",
     "pino": "^9.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
