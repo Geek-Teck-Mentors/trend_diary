@@ -3,7 +3,7 @@ import { json, Outlet, redirect, useLoaderData } from '@remix-run/react';
 import { toast } from 'sonner';
 import AppSidebar from '../components/Sidebar';
 import { SidebarProvider } from '../components/ui/sidebar';
-import getApiClient from '@/infrastructure/api';
+import getApiClient, { LOCAL_API_URL } from '@/infrastructure/api';
 
 export async function loader() {
   return json({
@@ -20,7 +20,7 @@ export default function Layout() {
 
   useEffect(() => {
     let isMounted = true;
-    const client = getApiClient(data.ENV.API_BASE_URL);
+    const client = getApiClient(data.ENV.API_BASE_URL ?? LOCAL_API_URL);
 
     const f = async () => {
       const res = await client.account.me.$get(
