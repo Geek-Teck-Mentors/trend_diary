@@ -11,6 +11,7 @@ Status: Accepted
 Relevant PR:
 
 https://github.com/Geek-Teck-Mentors/trend_diary/pull/154
+
 <!-- reference できるプルリクがあればそのリンクを貼ってください -->
 
 # Context
