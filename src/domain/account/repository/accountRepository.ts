@@ -6,9 +6,9 @@ export interface AccountRepository {
   createAccount(email: string, hashedPassword: string): ResultAsync<Account, Error>;
   findById(accountId: bigint): ResultAsync<Nullable<Account>, Error>;
   findByEmail(email: string): ResultAsync<Nullable<Account>, Error>;
-  findBySessionId(sessionId: string): Promise<Nullable<Account>>;
+  findBySessionId(sessionId: string): ResultAsync<Nullable<Account>, Error>;
   save(account: Account): ResultAsync<Account, Error>;
   delete(account: Account): ResultAsync<Account, Error>;
-  addSession(accountId: bigint, expiresAt: Date): Promise<string>;
-  removeSession(sessionId: string): Promise<void>;
+  addSession(accountId: bigint, expiresAt: Date): ResultAsync<string, Error>;
+  removeSession(sessionId: string): ResultAsync<void, Error>;
 }

@@ -12,23 +12,26 @@ import { SESSION_NAME } from '@/common/constants/session';
 
 export default async function logout(c: Context<Env>) {
   const sessionId = c.get(CONTEXT_KEY.SESSION_ID);
+  const rdb = getRdbClient(c.env.DATABASE_URL);
+  const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb));
 
-  try {
-    const rdb = getRdbClient(c.env.DATABASE_URL);
-    const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb));
+  const result = await service.logout(sessionId);
 
-    await service.logout(sessionId);
+  return result.match(
+    () => {
+      deleteCookie(c, SESSION_NAME);
+      logger.info('logout success');
+      return c.body(null, 204);
+    },
+    (error) => {
+      if (error instanceof ClientError) {
+        throw new HTTPException(error.statusCode as ContentfulStatusCode, {
+          message: error.message,
+        });
+      }
 
-    deleteCookie(c, SESSION_NAME);
-
-    logger.info('logout success');
-    return c.body(null, 204);
-  } catch (error) {
-    if (error instanceof ClientError) {
-      throw new HTTPException(error.statusCode as ContentfulStatusCode, { message: error.message });
-    }
-
-    logger.error(error instanceof ServerError ? 'internal server error' : 'unknown error', error);
-    throw new HTTPException(500, { message: 'Internal server error' });
-  }
+      logger.error(error instanceof ServerError ? 'internal server error' : 'unknown error', error);
+      throw new HTTPException(500, { message: 'Internal server error' });
+    },
+  );
 }

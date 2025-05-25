@@ -86,33 +86,37 @@ export default class AccountRepositoryImpl implements AccountRepository {
     });
   }
 
-  async findBySessionId(sessionId: string): Promise<Nullable<Account>> {
-    const result = await this.db.$queryRaw<PrismaAccount[]>`
-    SELECT
-      accounts.account_id,
-      accounts.email,
-      accounts.last_login,
-      accounts.created_at,
-      accounts.updated_at
-    FROM
-      accounts
-      INNER JOIN sessions ON accounts.account_id = sessions.account_id
-    WHERE
-      accounts.deleted_at IS NULL
-      AND sessions.session_id = ${sessionId}`;
-    if (result.length === 0) return null;
+  findBySessionId(sessionId: string): ResultAsync<Nullable<Account>, Error> {
+    return ResultAsync.fromPromise(
+      this.db.$queryRaw<PrismaAccount[]>`
+      SELECT
+        accounts.account_id,
+        accounts.email,
+        accounts.last_login,
+        accounts.created_at,
+        accounts.updated_at
+      FROM
+        accounts
+        INNER JOIN sessions ON accounts.account_id = sessions.account_id
+      WHERE
+        accounts.deleted_at IS NULL
+        AND sessions.session_id = ${sessionId}`,
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map((result) => {
+      if (result.length === 0) return null;
 
-    const account = result.at(0);
-    if (!account) return null;
+      const account = result.at(0);
+      if (!account) return null;
 
-    return new Account(
-      account.accountId,
-      account.email,
-      '',
-      account.lastLogin ?? undefined,
-      account.createdAt,
-      account.updatedAt,
-    );
+      return new Account(
+        account.accountId,
+        account.email,
+        '',
+        account.lastLogin ?? undefined,
+        account.createdAt,
+        account.updatedAt,
+      );
+    });
   }
 
   save(account: Account): ResultAsync<Account, Error> {
@@ -168,22 +172,26 @@ export default class AccountRepositoryImpl implements AccountRepository {
     );
   }
 
-  async addSession(accountId: bigint, expiresAt: Date): Promise<string> {
-    const session = await this.db.session.create({
-      data: {
-        accountId,
-        expiresAt,
-      },
-    });
-
-    return session.sessionId;
+  addSession(accountId: bigint, expiresAt: Date): ResultAsync<string, Error> {
+    return ResultAsync.fromPromise(
+      this.db.session.create({
+        data: {
+          accountId,
+          expiresAt,
+        },
+      }),
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map((session) => session.sessionId);
   }
 
-  async removeSession(sessionId: string): Promise<void> {
-    await this.db.session.delete({
-      where: {
-        sessionId,
-      },
-    });
+  removeSession(sessionId: string): ResultAsync<void, Error> {
+    return ResultAsync.fromPromise(
+      this.db.session.delete({
+        where: {
+          sessionId,
+        },
+      }),
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map(() => undefined);
   }
 }

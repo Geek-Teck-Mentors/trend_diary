@@ -173,7 +173,7 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.account.findUnique.mockRejectedValue(new Error('Database error'));
 
-      expect(await service.login(email, password)).rejects.toThrow(ServerError);
+      expect(await service.login(email, password)).toEqual(err(new Error('Database error')));
     });
   });
 
@@ -183,21 +183,26 @@ describe('AccountService', () => {
     it('正常系', async () => {
       db.$queryRaw.mockResolvedValue([mockUser]);
 
-      const user = await service.getLoginUser(sessionId);
+      const result = await service.getLoginUser(sessionId);
 
-      expect(user).toBeDefined();
-      expect(user.accountId).toBe(mockUser.accountId);
-      expect(user.userId).toBe(mockUser.userId);
-      expect(user.createdAt).toBeDefined();
-      expect(user.updatedAt).toBeDefined();
+      expect(result).toBeDefined();
+      expect(result).toEqual(
+        ok({
+          userId: mockUser.userId,
+          accountId: mockUser.accountId,
+          displayName: undefined,
+          createdAt: expect.any(Date),
+          updatedAtValue: expect.any(Date),
+        }),
+      );
     });
 
     describe('準正常系', () => {
       it('存在しないセッションID', async () => {
         db.$queryRaw.mockResolvedValue([]);
 
-        await expect(service.getLoginUser(sessionId)).rejects.toThrow(
-          new NotFoundError('User not found'),
+        expect(await service.getLoginUser(sessionId)).toEqual(
+          err(new NotFoundError('User not found')),
         );
       });
     });
@@ -205,7 +210,7 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.$queryRaw.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.getLoginUser(sessionId)).rejects.toThrow(ServerError);
+      expect(await service.getLoginUser(sessionId)).toEqual(err(new Error('Database error')));
     });
   });
 
@@ -223,8 +228,8 @@ describe('AccountService', () => {
       it('存在しないセッションID', async () => {
         db.$queryRaw.mockResolvedValue([]);
 
-        await expect(service.logout(sessionId)).rejects.toThrow(
-          new NotFoundError('Account not found'),
+        expect(await service.logout(sessionId)).toEqual(
+          err(new NotFoundError('Account not found')),
         );
       });
     });
@@ -232,7 +237,7 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.$queryRaw.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.logout(sessionId)).toEqual(err(new Error('Database error')));
+      expect(await service.logout(sessionId)).toEqual(err(new Error('Database error')));
     });
   });
 });

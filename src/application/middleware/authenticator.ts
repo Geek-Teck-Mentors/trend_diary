@@ -25,24 +25,23 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   const rdb = getRdbClient(c.env.DATABASE_URL);
   const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb));
 
-  try {
-    const user = await service.getLoginUser(sessionId);
+  const result = await service.getLoginUser(sessionId);
 
-    c.set(CONTEXT_KEY.SESSION_USER, user);
-    c.set(CONTEXT_KEY.SESSION_ID, sessionId);
-    await next();
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      logger.error('Session not found', { sessionId });
-      throw new HTTPException(401, { message: 'login required' });
-    }
-    if (error instanceof Error) {
-      logger.error('Error occurred while authenticating', error);
+  result.match(
+    (user) => {
+      c.set(CONTEXT_KEY.SESSION_USER, user);
+      c.set(CONTEXT_KEY.SESSION_ID, sessionId);
+      return next();
+    },
+    (error) => {
+      if (error instanceof NotFoundError) {
+        logger.error('Session not found', { sessionId });
+        throw new HTTPException(401, { message: 'login required' });
+      }
+      logger.error('Error occurred while authenticating', { error });
       throw new HTTPException(500, { message: 'Internal Server Error' });
-    }
-    logger.error('Unknown error occurred', error);
-    throw new HTTPException(500, { message: 'Internal Server Error' });
-  }
+    },
+  );
 });
 
 export default authenticator;

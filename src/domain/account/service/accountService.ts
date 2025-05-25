@@ -80,30 +80,33 @@ export default class AccountService {
     if (isNull(user)) return err(new ServerError('User not found. this should not happen')); // signup時に作成されているはず
 
     const expiredAt = new Date(Date.now() + SESSION_EXPIRED);
-    const sessionId = await this.accountRepository.addSession(account.accountId, expiredAt);
+    const addSessionRes = await this.accountRepository.addSession(account.accountId, expiredAt);
+    if (addSessionRes.isErr()) return err(addSessionRes.error);
+    const sessionId = addSessionRes.value;
 
     return ok({ user, sessionId, expiredAt });
   }
 
-  async getLoginUser(sessionId: string): Promise<User> {
-    try {
-      const user = await this.userRepository.findBySessionId(sessionId);
-      if (isNull(user)) throw new NotFoundError('User not found');
-      return user;
-    } catch (error) {
-      if (error instanceof NotFoundError) throw error;
-      throw ServerError.handle(error);
-    }
+  async getLoginUser(sessionId: string): Promise<Result<User, Error>> {
+    const userRes = await this.userRepository.findBySessionId(sessionId);
+    if (userRes.isErr()) return err(userRes.error);
+
+    const user = userRes.value;
+    if (isNull(user)) return err(new NotFoundError('User not found'));
+
+    return ok(user);
   }
 
-  async logout(sessionId: string): Promise<void> {
-    try {
-      const account = await this.accountRepository.findBySessionId(sessionId);
-      if (isNull(account)) throw new NotFoundError('Account not found');
-      await this.accountRepository.removeSession(sessionId);
-    } catch (error) {
-      if (error instanceof NotFoundError) throw error;
-      throw ServerError.handle(error);
-    }
+  async logout(sessionId: string): Promise<Result<void, Error>> {
+    const accountRes = await this.accountRepository.findBySessionId(sessionId);
+    if (accountRes.isErr()) return err(accountRes.error);
+
+    const account = accountRes.value;
+    if (isNull(account)) return err(new NotFoundError('Account not found'));
+
+    const removeRes = await this.accountRepository.removeSession(sessionId);
+    if (removeRes.isErr()) return err(removeRes.error);
+
+    return removeRes;
   }
 }

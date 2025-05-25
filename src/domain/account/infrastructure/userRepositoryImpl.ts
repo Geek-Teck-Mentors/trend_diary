@@ -51,33 +51,36 @@ export default class UserRepositoryImpl implements UserRepository {
     });
   }
 
-  async findBySessionId(sessionId: string): Promise<Nullable<User>> {
-    const result = await this.db.$queryRaw<PrismaUser[]>`
-    SELECT
-      users.user_id,
-      users.account_id,
-      users.display_name,
-      users.created_at,
-      users.updated_at
-    FROM
-      users
-      INNER JOIN sessions ON users.account_id = sessions.account_id
-      AND sessions.session_id = ${sessionId}
-    WHERE
-      users.deleted_at IS NULL
-      AND sessions.expires_at > ${new Date()}`;
+  findBySessionId(sessionId: string): ResultAsync<Nullable<User>, Error> {
+    return ResultAsync.fromPromise(
+      this.db.$queryRaw<PrismaUser[]>`
+      SELECT
+        users.user_id,
+        users.account_id,
+        users.display_name,
+        users.created_at,
+        users.updated_at
+      FROM
+        users
+        INNER JOIN sessions ON users.account_id = sessions.account_id
+        AND sessions.session_id = ${sessionId}
+      WHERE
+        users.deleted_at IS NULL
+        AND sessions.expires_at > ${new Date()}`,
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map((result) => {
+      if (result.length === 0) return null;
 
-    if (result.length === 0) return null;
+      const user = result.at(0);
+      if (!user) return null;
 
-    const user = result.at(0);
-    if (!user) return null;
-
-    return new User(
-      user.userId,
-      user.accountId,
-      user.displayName ?? undefined,
-      user.createdAt,
-      user.updatedAt,
-    );
+      return new User(
+        user.userId,
+        user.accountId,
+        user.displayName ?? undefined,
+        user.createdAt,
+        user.updatedAt,
+      );
+    });
   }
 }
