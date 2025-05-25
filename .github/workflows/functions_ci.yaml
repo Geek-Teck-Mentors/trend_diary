@@ -69,5 +69,5 @@ jobs:
         run: |
           for function_name in $(ls supabase/functions); do
             # サブシェルで実行することで、cdの影響を局所化
-            (cd supabase/functions/$function_name && deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json)
+            (cd supabase/functions/$function_name && deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --env-file=.env.test)
           done
