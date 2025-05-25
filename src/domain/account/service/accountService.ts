@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { err, ok, Result } from 'neverthrow';
 import { AccountRepository } from '../repository/accountRepository';
 import {
   AlreadyExistsError,
@@ -8,62 +9,68 @@ import {
 } from '../../../common/errors';
 import { UserRepository } from '../repository/userRepository';
 import Account from '../model/account';
-import { isNull, Nullable } from '@/common/types/utility';
+import { isNull } from '@/common/types/utility';
 import User from '../model/user';
+import { TransactionClient } from '@/infrastructure/rdb';
 
 export default class AccountService {
   constructor(
     private accountRepository: AccountRepository,
     private userRepository: UserRepository,
+    private transaction: TransactionClient,
   ) {}
 
-  async signup(email: string, plainPassword: string): Promise<Account> {
+  async signup(email: string, plainPassword: string): Promise<Result<Account, Error>> {
     // 既にアカウントがあるかチェック
-    const existingAccount = await this.accountRepository.findByEmail(email);
-    if (existingAccount) throw new AlreadyExistsError('Account already exists');
+    const res = await this.accountRepository.findByEmail(email);
+    if (res.isOk() && !isNull(res.value))
+      return err(new AlreadyExistsError('Account already exists'));
+    if (res.isErr()) return err(ServerError.handle(res.error));
 
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
     // アカウント作成 & ユーザー作成
-    try {
-      return await this.accountRepository.transaction(async () => {
-        const account = await this.accountRepository.createAccount(email, hashedPassword);
-        await this.userRepository.create(account.accountId);
-
-        return account;
-      });
-    } catch (error) {
-      throw ServerError.handle(error);
+    await this.transaction.begin();
+    const createResult = await this.accountRepository
+      .createAccount(email, hashedPassword)
+      .andTee((account) => this.userRepository.create(account.accountId));
+    if (createResult.isErr()) {
+      await this.transaction.rollback();
+      return err(ServerError.handle(createResult.error));
     }
+    await this.transaction.commit();
+
+    const account = createResult.value;
+    if (isNull(account)) return err(new NotFoundError('Account not found'));
+
+    return createResult;
   }
 
-  async login(email: string, plainPassword: string): Promise<User> {
-    let account: Nullable<Account>;
-    try {
-      account = await this.accountRepository.findByEmail(email);
-    } catch (error) {
-      if (error instanceof NotFoundError) throw error;
-      throw new ServerError('Failed to find account');
-    }
-    if (isNull(account)) throw new NotFoundError('Account not found');
+  async login(email: string, plainPassword: string): Promise<Result<User, Error>> {
+    // アカウントを検索
+    const accountRes = await this.accountRepository.findByEmail(email);
+    if (accountRes.isErr()) return err(accountRes.error);
 
+    const account = accountRes.value;
+    if (isNull(account)) return err(new NotFoundError('Account not found'));
+
+    // パスワードの照合
     const isPasswordMatch = await bcrypt.compare(plainPassword, account.password);
-    if (!isPasswordMatch) throw new ClientError('Invalid password');
+    if (!isPasswordMatch) return err(new ClientError('Invalid password'));
 
+    // ログイン記録の更新
     account.recordLogin();
-    try {
-      await this.accountRepository.save(account);
-    } catch (error) {
-      throw ServerError.handle(error);
-    }
+    const saveRes = await this.accountRepository.save(account);
+    if (saveRes.isErr()) return err(saveRes.error);
 
-    try {
-      const user = await this.userRepository.findByAccountId(account.accountId);
-      if (isNull(user)) throw new ServerError('User not found'); // signup時に作成されているはず
-      return user;
-    } catch (error) {
-      throw ServerError.handle(error);
-    }
+    // ユーザー情報の取得
+    const userRes = await this.userRepository.findByAccountId(account.accountId);
+    if (userRes.isErr()) return err(userRes.error);
+
+    const user = userRes.value;
+    if (isNull(user)) return err(new ServerError('User not found. this should not happen')); // signup時に作成されているはず
+
+    return ok(user);
   }
 
   // // ログアウト

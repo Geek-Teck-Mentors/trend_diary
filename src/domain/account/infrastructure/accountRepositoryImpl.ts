@@ -1,16 +1,14 @@
 import { Prisma } from '@prisma/client';
 import { ResultAsync } from 'neverthrow';
 import { Nullable } from '@/common/types/utility';
-import { RdbClient, TransactionManager } from '@/infrastructure/rdb';
+import { RdbClient } from '@/infrastructure/rdb';
 import { AlreadyExistsError } from '@/common/errors';
 
 import { AccountRepository } from '../repository/accountRepository';
 import Account from '../model/account';
 
-export default class AccountRepositoryImpl extends TransactionManager implements AccountRepository {
-  constructor(private db: RdbClient) {
-    super(db);
-  }
+export default class AccountRepositoryImpl implements AccountRepository {
+  constructor(private db: RdbClient) {}
 
   createAccount(email: string, hashedPassword: string): ResultAsync<Account, Error> {
     return ResultAsync.fromPromise(
