@@ -33,7 +33,9 @@ export default class AccountService {
     await this.transaction.begin();
     const createResult = await this.accountRepository
       .createAccount(email, hashedPassword)
-      .andTee((account) => this.userRepository.create(account.accountId));
+      .andTee(async (account) => {
+        await this.userRepository.create(account.accountId);
+      });
     if (createResult.isErr()) {
       await this.transaction.rollback();
       return err(ServerError.handle(createResult.error));
