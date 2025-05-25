@@ -1,4 +1,7 @@
-import { assert, assertEquals } from "https://deno.land/std@0.83.0/testing/asserts.ts";
+import {
+  assert,
+  assertEquals,
+} from "https://deno.land/std@0.83.0/testing/asserts.ts";
 
 import {
   assertSpyCallArgs,
@@ -42,5 +45,4 @@ Deno.test("戻り値がParser.prototype.parseURLのから取得した<T[]>が返
   assert(result.length > 0);
   assertEquals(result, mockItems);
   parserStub.restore();
-}
-);
+});

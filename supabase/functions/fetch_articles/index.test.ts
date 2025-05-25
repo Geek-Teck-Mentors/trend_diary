@@ -30,23 +30,62 @@ async function sendRequest(method: string, path: string, body?: unknown) {
 
 // 正常系のモック記事データ
 const mockArticles: Article[] = [
-  new Article(1n, "media", "title", "author", "content", "https://article1.example.com", new Date()),
-  new Article(2n, "media", "title", "author", "content", "https://article1.example.com", new Date()),
-  new Article(3n, "media", "title", "author", "content", "https://article1.example.com", new Date()),
-]
+  new Article(
+    1n,
+    "media",
+    "title",
+    "author",
+    "content",
+    "https://article1.example.com",
+    new Date(),
+  ),
+  new Article(
+    2n,
+    "media",
+    "title",
+    "author",
+    "content",
+    "https://article1.example.com",
+    new Date(),
+  ),
+  new Article(
+    3n,
+    "media",
+    "title",
+    "author",
+    "content",
+    "https://article1.example.com",
+    new Date(),
+  ),
+];
 
 Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
   await t.step("正常系", async (t) => {
     await t.step("Qiitaの記事を正常に取得できること", async () => {
-      const fetcherStub = stub(QiitaFetcher.prototype, "fetch", () =>
-        Promise.resolve([
-          { title: "title 1", author: "author", description: "content", url: "https://article1.example.com" },
-          { title: "title 2", author: "author", description: "content", url: "https://article2.example.com" },
-        ])
+      const fetcherStub = stub(
+        QiitaFetcher.prototype,
+        "fetch",
+        () =>
+          Promise.resolve([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://article1.example.com",
+            },
+            {
+              title: "title 2",
+              author: "author",
+              description: "content",
+              url: "https://article2.example.com",
+            },
+          ]),
       );
 
-      const repositoryStub = stub(ArticleRepositoryImpl.prototype, "bulkCreateArticle", () =>
-        Promise.resolve(mockArticles.slice(0, 2))
+      const repositoryStub = stub(
+        ArticleRepositoryImpl.prototype,
+        "bulkCreateArticle",
+        () => Promise.resolve(mockArticles.slice(0, 2)),
       );
 
       const loggerStub = stub(logger, "info");
@@ -67,15 +106,27 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
     });
 
     await t.step("DBエラーが発生した場合、500エラーを返すこと", async () => {
-      const fetcherStub = stub(QiitaFetcher.prototype, "fetch", () =>
-        Promise.resolve([
-          { title: "title 1", author: "author", description: "content", url: "https://article1.example.com" },
-        ])
+      const fetcherStub = stub(
+        QiitaFetcher.prototype,
+        "fetch",
+        () =>
+          Promise.resolve([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://article1.example.com",
+            },
+          ]),
       );
 
-      const repositoryStub = stub(ArticleRepositoryImpl.prototype, "bulkCreateArticle", () => {
-        throw new DatabaseError("Failed to save to database");
-      });
+      const repositoryStub = stub(
+        ArticleRepositoryImpl.prototype,
+        "bulkCreateArticle",
+        () => {
+          throw new DatabaseError("Failed to save to database");
+        },
+      );
 
       const loggerErrorStub = stub(logger, "error");
 
@@ -86,7 +137,10 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
       assertEquals(jsonRes.message, "internal server error");
 
       assertSpyCalls(loggerErrorStub, 1);
-      assertSpyCallArgs(loggerErrorStub, 0, ["DatabaseError", "Failed to save to database"]);
+      assertSpyCallArgs(loggerErrorStub, 0, [
+        "DatabaseError",
+        "Failed to save to database",
+      ]);
 
       fetcherStub.restore();
       repositoryStub.restore();
@@ -95,60 +149,84 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
   });
 
   await t.step("準正常系", async (t) => {
-    await t.step("Qiitaの記事の取得でエラーが発生した場合、500エラーを返すこと", async () => {
-      const fetcherStub = stub(QiitaFetcher.prototype, "fetch", () => {
-        throw new MediaFetchError("Failed to fetch Qiita articles");
-      });
+    await t.step(
+      "Qiitaの記事の取得でエラーが発生した場合、500エラーを返すこと",
+      async () => {
+        const fetcherStub = stub(QiitaFetcher.prototype, "fetch", () => {
+          throw new MediaFetchError("Failed to fetch Qiita articles");
+        });
 
-      const loggerErrorStub = stub(logger, "error");
+        const loggerErrorStub = stub(logger, "error");
 
-      const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
+        const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "internal server error");
+        assertEquals(res.status, 500);
+        const jsonRes = await res.json();
+        assertEquals(jsonRes.message, "internal server error");
 
-      assertSpyCalls(loggerErrorStub, 1);
-      assertSpyCallArgs(loggerErrorStub, 0, ["MediaFetchError", "Failed to fetch Qiita articles"]);
+        assertSpyCalls(loggerErrorStub, 1);
+        assertSpyCallArgs(loggerErrorStub, 0, [
+          "MediaFetchError",
+          "Failed to fetch Qiita articles",
+        ]);
 
-      fetcherStub.restore();
-      loggerErrorStub.restore();
-    });
+        fetcherStub.restore();
+        loggerErrorStub.restore();
+      },
+    );
   });
 
   await t.step("異常系", async (t) => {
-    await t.step("予期せぬエラーが発生した場合、500エラーを返すこと", async () => {
-      const executorStub = stub(Executor.prototype, "do", () => {
-        throw new Error();
-      });
-      const loggerErrorStub = stub(logger, "error");
+    await t.step(
+      "予期せぬエラーが発生した場合、500エラーを返すこと",
+      async () => {
+        const executorStub = stub(Executor.prototype, "do", () => {
+          throw new Error();
+        });
+        const loggerErrorStub = stub(logger, "error");
 
-      const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
+        const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "unknown error");
+        assertEquals(res.status, 500);
+        const jsonRes = await res.json();
+        assertEquals(jsonRes.message, "unknown error");
 
-      assertSpyCalls(loggerErrorStub, 1);
+        assertSpyCalls(loggerErrorStub, 1);
 
-      executorStub.restore();
-      loggerErrorStub.restore();
-    });
-  })
-})
+        executorStub.restore();
+        loggerErrorStub.restore();
+      },
+    );
+  });
+});
 
 Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
   await t.step("正常系", async (t) => {
     await t.step("Zennの記事を正常に取得できること", async () => {
-      const fetcherStub = stub(ZennFetcher.prototype, "fetch", () =>
-        Promise.resolve([
-          { title: "title 1", author: "author", description: "content", url: "https://article1.example.com" },
-          { title: "title 2", author: "author", description: "content", url: "https://article2.example.com" },
-        ])
+      const fetcherStub = stub(
+        ZennFetcher.prototype,
+        "fetch",
+        () =>
+          Promise.resolve([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://article1.example.com",
+            },
+            {
+              title: "title 2",
+              author: "author",
+              description: "content",
+              url: "https://article2.example.com",
+            },
+          ]),
       );
 
-      const repositoryStub = stub(ArticleRepositoryImpl.prototype, "bulkCreateArticle", () =>
-        Promise.resolve(mockArticles.slice(0, 2))
+      const repositoryStub = stub(
+        ArticleRepositoryImpl.prototype,
+        "bulkCreateArticle",
+        () => Promise.resolve(mockArticles.slice(0, 2)),
       );
 
       const loggerStub = stub(logger, "info");
@@ -170,35 +248,53 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
   });
 
   await t.step("凖正常系", async (t) => {
-    await t.step("Zennの記事のでエラーが発生した場合、500エラーを返すこと", async () => {
-      const fetcherStub = stub(ZennFetcher.prototype, "fetch", () => {
-        throw new MediaFetchError("Failed to fetch Zenn articles");
-      });
+    await t.step(
+      "Zennの記事のでエラーが発生した場合、500エラーを返すこと",
+      async () => {
+        const fetcherStub = stub(ZennFetcher.prototype, "fetch", () => {
+          throw new MediaFetchError("Failed to fetch Zenn articles");
+        });
 
-      const loggerErrorStub = stub(logger, "error");
+        const loggerErrorStub = stub(logger, "error");
 
-      const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
+        const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "internal server error");
+        assertEquals(res.status, 500);
+        const jsonRes = await res.json();
+        assertEquals(jsonRes.message, "internal server error");
 
-      assertSpyCalls(loggerErrorStub, 1);
-      assertSpyCallArgs(loggerErrorStub, 0, ["MediaFetchError", "Failed to fetch Zenn articles"]);
+        assertSpyCalls(loggerErrorStub, 1);
+        assertSpyCallArgs(loggerErrorStub, 0, [
+          "MediaFetchError",
+          "Failed to fetch Zenn articles",
+        ]);
 
-      fetcherStub.restore();
-      loggerErrorStub.restore();
-    });
+        fetcherStub.restore();
+        loggerErrorStub.restore();
+      },
+    );
 
     await t.step("DBエラーが発生した場合、500エラーを返すこと", async () => {
-      const fetcherStub = stub(ZennFetcher.prototype, "fetch", () =>
-        Promise.resolve([
-          { title: "title 1", author: "author", description: "content", url: "https://article1.example.com" },
-        ])
+      const fetcherStub = stub(
+        ZennFetcher.prototype,
+        "fetch",
+        () =>
+          Promise.resolve([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://article1.example.com",
+            },
+          ]),
       );
-      const repositoryStub = stub(ArticleRepositoryImpl.prototype, "bulkCreateArticle", () => {
-        throw new DatabaseError("Failed to save to database");
-      });
+      const repositoryStub = stub(
+        ArticleRepositoryImpl.prototype,
+        "bulkCreateArticle",
+        () => {
+          throw new DatabaseError("Failed to save to database");
+        },
+      );
 
       const loggerErrorStub = stub(logger, "error");
 
@@ -209,34 +305,40 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
       assertEquals(jsonRes.message, "internal server error");
 
       assertSpyCalls(loggerErrorStub, 1);
-      assertSpyCallArgs(loggerErrorStub, 0, ["DatabaseError", "Failed to save to database"]);
+      assertSpyCallArgs(loggerErrorStub, 0, [
+        "DatabaseError",
+        "Failed to save to database",
+      ]);
 
       fetcherStub.restore();
       repositoryStub.restore();
       loggerErrorStub.restore();
     });
-  })
+  });
 
   await t.step("異常系", async (t) => {
-    await t.step("予期せぬエラーが発生した場合、500エラーを返すこと", async () => {
-      const executorStub = stub(Executor.prototype, "do", () => {
-        throw new Error();
-      });
-      const loggerErrorStub = stub(logger, "error");
+    await t.step(
+      "予期せぬエラーが発生した場合、500エラーを返すこと",
+      async () => {
+        const executorStub = stub(Executor.prototype, "do", () => {
+          throw new Error();
+        });
+        const loggerErrorStub = stub(logger, "error");
 
-      const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
+        const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "unknown error");
+        assertEquals(res.status, 500);
+        const jsonRes = await res.json();
+        assertEquals(jsonRes.message, "unknown error");
 
-      assertSpyCalls(loggerErrorStub, 1);
+        assertSpyCalls(loggerErrorStub, 1);
 
-      executorStub.restore();
-      loggerErrorStub.restore();
-    });
-  })
-})
+        executorStub.restore();
+        loggerErrorStub.restore();
+      },
+    );
+  });
+});
 
 Deno.test("API - 存在しないエンドポイントは404を返すこと", async () => {
   const res = await sendRequest("POST", "/fetch_articles/articles/unknown");

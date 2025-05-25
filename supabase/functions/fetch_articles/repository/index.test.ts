@@ -1,4 +1,7 @@
-import { assertEquals, assertThrowsAsync } from "https://deno.land/std@0.83.0/testing/asserts.ts";
+import {
+  assertEquals,
+  assertThrowsAsync,
+} from "https://deno.land/std@0.83.0/testing/asserts.ts";
 import {
   assertSpyCallArgs,
   assertSpyCalls,
@@ -21,7 +24,7 @@ Deno.test("bulkCreateArticle - 正常にarticleを作成できること", async 
       "Test Article 1",
       "Test Author 1",
       "Test Description 1",
-      "https://example.com/1"
+      "https://example.com/1",
     ),
     new Article(
       2n,
@@ -29,7 +32,7 @@ Deno.test("bulkCreateArticle - 正常にarticleを作成できること", async 
       "Test Article 2",
       "Test Author 2",
       "Test Description 2",
-      "https://example.com/2"
+      "https://example.com/2",
     ),
   ];
 
@@ -68,7 +71,9 @@ Deno.test("bulkCreateArticle - 正常にarticleを作成できること", async 
 
   assertEquals(result, mockData);
   assertSpyCalls(loggerStub, 1);
-  assertSpyCallArgs(loggerStub, 0, ["Inserted articles into Supabase successfully"]);
+  assertSpyCallArgs(loggerStub, 0, [
+    "Inserted articles into Supabase successfully",
+  ]);
 
   loggerStub.restore();
 });
@@ -81,7 +86,7 @@ Deno.test("bulkCreateArticle - 文字数制限による正規化が正常に動�
       "a".repeat(100), // 100文字に制限される
       "a".repeat(30), // 30文字に制限される
       "a".repeat(255), // 255文字に制限される
-      "https://example.com/1"
+      "https://example.com/1",
     ),
   ];
 
@@ -140,7 +145,9 @@ Deno.test("bulkCreateArticle - 空の配列を渡した場合も正常に処理�
 
   assertEquals(result, mockData);
   assertSpyCalls(loggerStub, 1);
-  assertSpyCallArgs(loggerStub, 0, ["Inserted articles into Supabase successfully"]);
+  assertSpyCallArgs(loggerStub, 0, [
+    "Inserted articles into Supabase successfully",
+  ]);
 
   loggerStub.restore();
 });
@@ -181,7 +188,7 @@ Deno.test("bulkCreateArticle - データベースエラーが発生した場合�
       await repository.bulkCreateArticle(inputData);
     },
     DatabaseError,
-    'Failed to create article: {"message":"Database connection failed","code":"CONNECTION_ERROR"}'
+    'Failed to create article: {"message":"Database connection failed","code":"CONNECTION_ERROR"}',
   );
 
   assertSpyCalls(loggerStub, 0); // エラー時はlogが呼ばれない
@@ -219,11 +226,10 @@ Deno.test("bulkCreateArticle - データが返されない場合にDatabaseError
       await repository.bulkCreateArticle(inputData);
     },
     DatabaseError,
-    "No data returned from Supabase"
+    "No data returned from Supabase",
   );
 
   assertSpyCalls(loggerStub, 0); // エラー時はlogが呼ばれない
 
   loggerStub.restore();
 });
-
