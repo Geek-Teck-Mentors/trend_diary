@@ -1,4 +1,4 @@
-# Title
+# neverthrowの運用
 
 <!-- Title という文字を消してこの ADR のタイトルを書いてください -->
 
@@ -10,6 +10,7 @@ Status: Accepted
 
 Relevant PR:
 
+https://github.com/Geek-Teck-Mentors/trend_diary/pull/154
 <!-- reference できるプルリクがあればそのリンクを貼ってください -->
 
 # Context
