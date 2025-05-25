@@ -1,21 +1,25 @@
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
+import { err, ok } from 'neverthrow';
 import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl';
 import { AlreadyExistsError, NotFoundError, ClientError, ServerError } from '@/common/errors';
 
 import AccountService from './accountService';
 import UserRepositoryImpl from '../infrastructure/userRepositoryImpl';
 import db from '@/test/__mocks__/prisma';
+import { Transaction } from '@/infrastructure/rdb';
 
 describe('AccountService', () => {
   const accountRepo = new AccountRepositoryImpl(db);
   const userRepo = new UserRepositoryImpl(db);
-  const service = new AccountService(accountRepo, userRepo);
+  const service = new AccountService(accountRepo, userRepo, new Transaction(db));
 
   describe('signup', () => {
     it('正常系', async () => {
       const email = faker.internet.email();
       const plainPassword = 'password';
+
+      db.account.findUnique.mockResolvedValue(null);
 
       db.account.create.mockResolvedValue({
         email,
@@ -38,15 +42,17 @@ describe('AccountService', () => {
       const res = await service.signup(email, plainPassword);
 
       expect(res).toBeDefined();
-      expect(res.email).toBe(email);
-      expect(res.password).not.toBe(plainPassword); // パスワードはハッシュ化されているはず
-      expect(res.password).not.toBeNull();
-      expect(res.accountId).toBeDefined();
-      expect(res.accountId).not.toBeNull();
-      expect(res.createdAt).toBeDefined();
-      expect(res.createdAt).not.toBeNull();
-      expect(res.updatedAt).toBeDefined();
-      expect(res.updatedAt).not.toBeNull();
+      expect(res).toEqual(
+        ok({
+          email,
+          password: expect.any(String),
+          accountId: expect.any(BigInt),
+          createdAt: expect.any(Date),
+          lastLogin: undefined,
+          updatedAtValue: expect.any(Date),
+          deletedAt: undefined,
+        }),
+      );
     });
 
     it('準正常系: 既に存在するメールアドレス', async () => {
@@ -63,16 +69,20 @@ describe('AccountService', () => {
         deletedAt: null,
       });
 
-      await expect(service.signup(email, plainPassword)).rejects.toThrow(AlreadyExistsError);
+      expect(await service.signup(email, plainPassword)).toEqual(
+        err(new AlreadyExistsError('Account already exists')),
+      );
     });
 
     it('異常系: 意図しないDBエラー', async () => {
       const email = faker.internet.email();
       const plainPassword = 'password';
 
-      db.account.create.mockRejectedValue(new Error('Database error'));
+      db.account.findUnique.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.signup(email, plainPassword)).rejects.toThrow(ServerError);
+      expect(await service.signup(email, plainPassword)).toEqual(
+        err(new ServerError('Database error')),
+      );
     });
   });
 
@@ -113,12 +123,14 @@ describe('AccountService', () => {
 
       const user = await service.login(email, plainPassword);
       expect(user).toBeDefined();
-      expect(user.accountId).toBeDefined();
-      expect(user.accountId).not.toBeNull();
-      expect(user.userId).toBeDefined();
-      expect(user.userId).not.toBeNull();
-      expect(user.createdAt).toBeDefined();
-      expect(user.updatedAt).toBeDefined();
+      expect(user).toEqual(
+        ok({
+          userId: expect.any(BigInt),
+          accountId: expect.any(BigInt),
+          createdAt: expect.any(Date),
+          updatedAtValue: expect.any(Date),
+        }),
+      );
     });
 
     describe('準正常系', () => {
@@ -126,8 +138,11 @@ describe('AccountService', () => {
         db.account.findUnique.mockResolvedValue(null);
 
         const nonExistentEmail = 'non_existent_test@example.com';
-        await expect(service.login(nonExistentEmail, plainPassword)).rejects.toThrow(NotFoundError);
+        expect(await service.login(nonExistentEmail, plainPassword)).toEqual(
+          err(new NotFoundError('Account not found')),
+        );
       });
+
       it('パスワードが間違っている', async () => {
         db.account.findUnique.mockResolvedValue({
           email,
@@ -139,8 +154,8 @@ describe('AccountService', () => {
           deletedAt: null,
         });
 
-        await expect(service.login(email, wrongPassword)).rejects.toThrow(
-          new ClientError('Invalid password'),
+        expect(await service.login(email, wrongPassword)).toEqual(
+          err(new ClientError('Invalid password')),
         );
       });
     });
@@ -148,7 +163,7 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.account.findUnique.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.login(email, plainPassword)).rejects.toThrow(ServerError);
+      expect(await service.login(email, plainPassword)).toEqual(err(new Error('Database error')));
     });
   });
 });

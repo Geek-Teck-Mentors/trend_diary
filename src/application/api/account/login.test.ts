@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
-import getRdbClient from '@/infrastructure/rdb';
+import getRdbClient, { Transaction } from '@/infrastructure/rdb';
 import app from '../../server';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import TEST_ENV from '@/test/env';
@@ -39,7 +39,11 @@ describe('POST /api/account/login', () => {
 
   beforeAll(() => {
     db = getRdbClient(TEST_ENV.DATABASE_URL);
-    service = new AccountService(new AccountRepositoryImpl(db), new UserRepositoryImpl(db));
+    service = new AccountService(
+      new AccountRepositoryImpl(db),
+      new UserRepositoryImpl(db),
+      new Transaction(db),
+    );
   });
 
   afterAll(async () => {
