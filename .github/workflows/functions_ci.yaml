@@ -65,8 +65,9 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: テストの実行
-        # deno testはdeno.jsonのある環境でしか実行できないため、各関数のdeno.jsonを指定する
-        run:  |
+        # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
+        run: |
           for function_name in $(ls supabase/functions); do
-            find supabase -name "*.ts" | xargs deno test -c supabase/functions/$function_name/deno.json
+            # サブシェルで実行することで、cdの影響を局所化
+            (cd supabase/functions/$function_name && deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json)
           done
