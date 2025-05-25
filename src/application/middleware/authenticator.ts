@@ -27,7 +27,7 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
 
   const result = await service.getLoginUser(sessionId);
 
-  result.match(
+  return result.match(
     (user) => {
       c.set(CONTEXT_KEY.SESSION_USER, user);
       c.set(CONTEXT_KEY.SESSION_ID, sessionId);

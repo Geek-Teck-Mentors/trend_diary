@@ -1,12 +1,10 @@
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
-import { vi, beforeEach } from 'vitest';
 import getRdbClient, { Transaction } from '@/infrastructure/rdb';
 import app from '../../server';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import TEST_ENV from '@/test/env';
 import { SESSION_NAME } from '@/common/constants/session';
-import { ClientError } from '@/common/errors';
 
 describe('DELETE /api/account/logout', () => {
   let db: PrismaClient;
@@ -100,18 +98,15 @@ describe('DELETE /api/account/logout', () => {
       expect(data).toEqual({ message: 'login required' });
     });
 
-    it('ClientErrorが発生した場合は400番台エラーが返される', async () => {
-      // AccountServiceのlogoutメソッドをスパイしてClientErrorをスローするようにする
-      const logoutSpy = vi.spyOn(AccountService.prototype, 'logout');
-      const clientError = new ClientError('Bad Request', 400);
-      logoutSpy.mockRejectedValueOnce(clientError);
+    it('アカウントがない場合、404', async () => {
+      // アカウントを削除して存在しない状態にする
+      await db.account.deleteMany();
 
       const res = await requestLogout();
 
-      expect(logoutSpy).toHaveBeenCalled();
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(404);
       const data = await res.json();
-      expect(data).toEqual({ message: 'Bad Request' });
+      expect(data).toEqual({ message: 'Account not found' });
     });
   });
 
