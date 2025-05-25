@@ -9,7 +9,7 @@ import {
   AccountInput,
 } from '@/domain/account';
 import { logger } from '@/logger/logger';
-import getRdbClient, { Transaction } from '@/infrastructure/rdb';
+import getRdbClient from '@/infrastructure/rdb';
 import { ZodValidatedContext } from '@/application/middleware/zodValidator';
 import { SESSION_NAME } from '@/common/constants/session';
 
@@ -19,8 +19,7 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
   const rdb = getRdbClient(c.env.DATABASE_URL);
   const accountRepository = new AccountRepositoryImpl(rdb);
   const userRepository = new UserRepositoryImpl(rdb);
-  const transaction = new Transaction(rdb);
-  const service = new AccountService(accountRepository, userRepository, transaction);
+  const service = new AccountService(accountRepository, userRepository);
 
   const result = await service.login(valid.email, valid.password);
 

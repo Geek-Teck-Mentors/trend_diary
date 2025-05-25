@@ -24,10 +24,13 @@ export default class AccountService {
   constructor(
     private accountRepository: AccountRepository,
     private userRepository: UserRepository,
-    private transaction: TransactionClient,
   ) {}
 
-  async signup(email: string, plainPassword: string): Promise<Result<Account, Error>> {
+  async signup(
+    transaction: TransactionClient,
+    email: string,
+    plainPassword: string,
+  ): Promise<Result<Account, Error>> {
     // 既にアカウントがあるかチェック
     const res = await this.accountRepository.findByEmail(email);
     if (res.isOk() && !isNull(res.value))
@@ -37,17 +40,17 @@ export default class AccountService {
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
     // アカウント作成 & ユーザー作成
-    await this.transaction.begin();
+    await transaction.begin();
     const createResult = await this.accountRepository
       .createAccount(email, hashedPassword)
       .andTee(async (account) => {
         await this.userRepository.create(account.accountId);
       });
     if (createResult.isErr()) {
-      await this.transaction.rollback();
+      await transaction.rollback();
       return err(ServerError.handle(createResult.error));
     }
-    await this.transaction.commit();
+    await transaction.commit();
 
     return createResult;
   }

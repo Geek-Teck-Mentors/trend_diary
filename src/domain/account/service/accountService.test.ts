@@ -42,7 +42,8 @@ const mockSession: Session = {
 describe('AccountService', () => {
   const accountRepo = new AccountRepositoryImpl(db);
   const userRepo = new UserRepositoryImpl(db);
-  const service = new AccountService(accountRepo, userRepo, new Transaction(db));
+  const service = new AccountService(accountRepo, userRepo);
+  const transaction = new Transaction(db);
 
   describe('signup', () => {
     it('正常系', async () => {
@@ -69,7 +70,7 @@ describe('AccountService', () => {
         deletedAt: null,
       });
 
-      const res = await service.signup(email, plainPassword);
+      const res = await service.signup(transaction, email, plainPassword);
 
       expect(res).toBeDefined();
       expect(res).toEqual(
@@ -91,7 +92,7 @@ describe('AccountService', () => {
 
       db.account.findUnique.mockResolvedValue(mockAccount);
 
-      expect(await service.signup(email, password)).toEqual(
+      expect(await service.signup(transaction, email, password)).toEqual(
         err(new AlreadyExistsError('Account already exists')),
       );
     });
@@ -102,7 +103,9 @@ describe('AccountService', () => {
 
       db.account.findUnique.mockRejectedValue(new Error('Database error'));
 
-      expect(await service.signup(email, password)).toEqual(err(new ServerError('Database error')));
+      expect(await service.signup(transaction, email, password)).toEqual(
+        err(new ServerError('Database error')),
+      );
     });
   });
 
