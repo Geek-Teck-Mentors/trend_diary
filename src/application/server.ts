@@ -17,7 +17,7 @@ app.use(
   '/api/*',
   cors({
     origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   }),
 );
