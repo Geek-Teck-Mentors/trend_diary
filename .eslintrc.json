@@ -6,6 +6,7 @@
     "warnOnUnsupportedTypeScriptVersion": false
   },
   "extends": ["airbnb", "airbnb-typescript", "prettier"],
+  "plugins": ["eslint-plugin-neverthrow"],
   "rules": {
     "consistent-return": "off",
     "import/extensions": "off",
