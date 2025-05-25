@@ -42,9 +42,6 @@ export default class AccountService {
     }
     await this.transaction.commit();
 
-    const account = createResult.value;
-    if (isNull(account)) return err(new NotFoundError('Account not found'));
-
     return createResult;
   }
 
