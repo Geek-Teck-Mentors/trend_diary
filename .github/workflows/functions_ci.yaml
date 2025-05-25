@@ -54,3 +54,19 @@ jobs:
           for function_name in $(ls supabase/functions); do
             find supabase -name "*.ts" | xargs deno check -c supabase/functions/$function_name/deno.json
           done
+
+  test:
+    needs: [lint, format, type-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Denoの構築
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: テストの実行
+        # deno testはdeno.jsonのある環境でしか実行できないため、各関数のdeno.jsonを指定する
+        run:  |
+          for function_name in $(ls supabase/functions); do
+            find supabase -name "*.ts" | xargs deno test -c supabase/functions/$function_name/deno.json
+          done
