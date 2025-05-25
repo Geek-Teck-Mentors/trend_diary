@@ -24,6 +24,7 @@ Deno.test("ParserのparseURLが呼び出されること", async () => {
   const fetcher = new ZennFetcher();
   await fetcher.fetch();
   assertSpyCalls(parserStub, 1);
+  parserStub.restore();
 });
 
 Deno.test("戻り値が、FeedItem[]であること", async () => {
