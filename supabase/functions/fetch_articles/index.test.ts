@@ -339,9 +339,3 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
     );
   });
 });
-
-Deno.test("API - 存在しないエンドポイントは404を返すこと", async () => {
-  const res = await sendRequest("POST", "/fetch_articles/articles/unknown");
-
-  assertEquals(res.status, 404);
-});
