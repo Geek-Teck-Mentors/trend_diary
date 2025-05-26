@@ -2,7 +2,7 @@ import { Hono } from "jsr:@hono/hono";
 import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
 import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import { Executor } from "./executor.ts";
-import ArticleRepositoryImpl from "./repository/index.ts";
+import ArticleRepositoryImpl from "./repository.ts";
 import { InternalServerError } from "./error.ts";
 import { rdbClient } from "../../infrastructure/supabase_client.ts";
 import { logger } from "../../logger/logger.ts";

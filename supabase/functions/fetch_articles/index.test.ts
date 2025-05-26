@@ -13,7 +13,7 @@ import { Article } from "./model/model.ts";
 import { logger } from "../../logger/logger.ts";
 import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
 import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
-import ArticleRepositoryImpl from "./repository/index.ts";
+import ArticleRepositoryImpl from "./repository.ts";
 import { DatabaseError, MediaFetchError } from "./error.ts";
 
 // テストヘルパー関数
