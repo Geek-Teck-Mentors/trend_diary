@@ -1,5 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
+import { setCookie } from 'hono/cookie';
 import { ClientError, ServerError } from '@/common/errors';
 import {
   AccountService,
@@ -8,8 +9,9 @@ import {
   AccountInput,
 } from '@/domain/account';
 import { logger } from '@/logger/logger';
-import getRdbClient, { Transaction } from '@/infrastructure/rdb';
+import getRdbClient from '@/infrastructure/rdb';
 import { ZodValidatedContext } from '@/application/middleware/zodValidator';
+import { SESSION_NAME } from '@/common/constants/session';
 
 export default async function login(c: ZodValidatedContext<AccountInput>) {
   const valid = c.req.valid('json');
@@ -17,17 +19,25 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
   const rdb = getRdbClient(c.env.DATABASE_URL);
   const accountRepository = new AccountRepositoryImpl(rdb);
   const userRepository = new UserRepositoryImpl(rdb);
-  const transaction = new Transaction(rdb);
-  const service = new AccountService(accountRepository, userRepository, transaction);
+  const service = new AccountService(accountRepository, userRepository);
 
   const result = await service.login(valid.email, valid.password);
 
   return result.match(
-    (user) => {
-      logger.info('login success', { userId: user.userId.toString() });
+    (res) => {
+      logger.info('login success', { userId: res.user.userId.toString() });
+
+      // セッションIDをCookieにセット
+      setCookie(c, SESSION_NAME, res.sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        expires: res.expiredAt,
+        sameSite: 'lax',
+      });
+
       return c.json(
         {
-          displayName: user.displayName,
+          displayName: res.user.displayName,
         },
         200,
       );

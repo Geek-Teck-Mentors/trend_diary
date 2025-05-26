@@ -12,15 +12,25 @@ import Account from '../model/account';
 import { isNull } from '@/common/types/utility';
 import User from '../model/user';
 import { TransactionClient } from '@/infrastructure/rdb';
+import { SESSION_DURATION } from '@/common/constants/session';
+
+type LoginResult = {
+  user: User;
+  sessionId: string;
+  expiredAt: Date;
+};
 
 export default class AccountService {
   constructor(
     private accountRepository: AccountRepository,
     private userRepository: UserRepository,
-    private transaction: TransactionClient,
   ) {}
 
-  async signup(email: string, plainPassword: string): Promise<Result<Account, Error>> {
+  async signup(
+    transaction: TransactionClient,
+    email: string,
+    plainPassword: string,
+  ): Promise<Result<Account, Error>> {
     // 既にアカウントがあるかチェック
     const res = await this.accountRepository.findByEmail(email);
     if (res.isOk() && !isNull(res.value))
@@ -30,22 +40,22 @@ export default class AccountService {
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
     // アカウント作成 & ユーザー作成
-    await this.transaction.begin();
+    await transaction.begin();
     const createResult = await this.accountRepository
       .createAccount(email, hashedPassword)
       .andTee(async (account) => {
         await this.userRepository.create(account.accountId);
       });
     if (createResult.isErr()) {
-      await this.transaction.rollback();
+      await transaction.rollback();
       return err(ServerError.handle(createResult.error));
     }
-    await this.transaction.commit();
+    await transaction.commit();
 
     return createResult;
   }
 
-  async login(email: string, plainPassword: string): Promise<Result<User, Error>> {
+  async login(email: string, plainPassword: string): Promise<Result<LoginResult, Error>> {
     // アカウントを検索
     const accountRes = await this.accountRepository.findByEmail(email);
     if (accountRes.isErr()) return err(accountRes.error);
@@ -69,26 +79,34 @@ export default class AccountService {
     const user = userRes.value;
     if (isNull(user)) return err(new ServerError('User not found. this should not happen')); // signup時に作成されているはず
 
+    const expiredAt = new Date(Date.now() + SESSION_DURATION);
+    const addSessionRes = await this.accountRepository.addSession(account.accountId, expiredAt);
+    if (addSessionRes.isErr()) return err(addSessionRes.error);
+    const sessionId = addSessionRes.value;
+
+    return ok({ user, sessionId, expiredAt });
+  }
+
+  async getLoginUser(sessionId: string): Promise<Result<User, Error>> {
+    const userRes = await this.userRepository.findBySessionId(sessionId);
+    if (userRes.isErr()) return err(userRes.error);
+
+    const user = userRes.value;
+    if (isNull(user)) return err(new NotFoundError('User not found'));
+
     return ok(user);
   }
 
-  // // ログアウト
-  // async logout(accountId: bigint): Promise<void> {
-  //   const account = await this.accountRepository.findById(accountId);
-  //   if (isNull(account)) throw ACCOUNT_NOT_FOUND;
+  async logout(sessionId: string): Promise<Result<void, Error>> {
+    const accountRes = await this.accountRepository.findBySessionId(sessionId);
+    if (accountRes.isErr()) return err(accountRes.error);
 
-  //   // TODO: 後でセッションの削除処理を追加
-  // }
+    const account = accountRes.value;
+    if (isNull(account)) return err(new NotFoundError('Account not found'));
 
-  // // アカウントの削除
-  // async deactivateAccount(accountId: bigint): Promise<void> {
-  //   const account = await this.accountRepository.findById(accountId);
-  //   if (isNull(account)) throw ACCOUNT_NOT_FOUND;
+    const removeRes = await this.accountRepository.removeSession(sessionId);
+    if (removeRes.isErr()) return err(removeRes.error);
 
-  //   try {
-  //     await this.accountRepository.delete(account);
-  //   } catch (error) {
-  //     throw ServerError.handle(error);
-  //   }
-  // }
+    return removeRes;
+  }
 }

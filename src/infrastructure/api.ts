@@ -1,9 +1,8 @@
 import { hc } from 'hono/client';
 import app from '@/application/api/route';
 
-export default function getApiClient() {
-  const url = process.env.API_BASE_URL ?? 'http://localhost:5173';
-  const apiClient = hc<typeof app>(`${url}/api`);
+export const LOCAL_API_URL = 'http://localhost:5173';
 
-  return apiClient;
-}
+// クライアント呼び出しの場合はapiUrlが必須
+export const getApiClient = (url: string) => hc<typeof app>(`${url}/api`);
+export default getApiClient;

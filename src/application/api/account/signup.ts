@@ -39,9 +39,9 @@ export default async function signup(c: Context<Env>) {
   const accountRepository = new AccountRepositoryImpl(rdb);
   const userRepository = new UserRepositoryImpl(rdb);
   const transaction = new Transaction(rdb);
-  const service = new AccountService(accountRepository, userRepository, transaction);
+  const service = new AccountService(accountRepository, userRepository);
 
-  const result = await service.signup(valid.data.email, valid.data.password);
+  const result = await service.signup(transaction, valid.data.email, valid.data.password);
 
   return result.match(
     (account) => {

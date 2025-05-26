@@ -13,7 +13,7 @@ import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
 import { accountSchema } from '@/domain/account';
-import getApiClient from '@/infrastructure/api';
+import getApiClient, { LOCAL_API_URL } from '@/infrastructure/api';
 
 export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }];
 
@@ -92,7 +92,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
-    const client = getApiClient();
+    const client = getApiClient(process.env.API_BASE_URL ?? LOCAL_API_URL);
     const res = await client.account.login.$post({
       json: {
         email,
@@ -100,7 +100,7 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
 
-    if (res.status === 200) return redirect('/trends');
+    if (res.status === 200) return redirect('/trends', { headers: res.headers });
     if (res.status === 401 || res.status === 404) {
       return json(
         {

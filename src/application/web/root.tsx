@@ -10,6 +10,7 @@ import {
 } from '@remix-run/react';
 
 import './styles.css';
+import { Toaster } from './components/ui/sonner';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +25,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <ScrollRestoration />
         <Scripts />
+        <Toaster />
       </body>
     </html>
   );

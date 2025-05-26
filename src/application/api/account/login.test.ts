@@ -39,11 +39,7 @@ describe('POST /api/account/login', () => {
 
   beforeAll(() => {
     db = getRdbClient(TEST_ENV.DATABASE_URL);
-    service = new AccountService(
-      new AccountRepositoryImpl(db),
-      new UserRepositoryImpl(db),
-      new Transaction(db),
-    );
+    service = new AccountService(new AccountRepositoryImpl(db), new UserRepositoryImpl(db));
   });
 
   afterAll(async () => {
@@ -51,7 +47,7 @@ describe('POST /api/account/login', () => {
   });
 
   beforeEach(async () => {
-    await service.signup(TEST_EMAIL, TEST_PASSWORD);
+    await service.signup(new Transaction(db), TEST_EMAIL, TEST_PASSWORD);
   });
 
   afterEach(async () => {

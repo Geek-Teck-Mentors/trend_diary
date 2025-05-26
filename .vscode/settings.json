@@ -30,7 +30,8 @@
     "qiita",
     "Supabase",
     "Timestamptz",
-    "zenn"
+    "zenn",
+    "neverthrow"
   ],
   "[markdown]":  {
       "editor.wordWrap": "on",
