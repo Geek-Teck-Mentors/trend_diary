@@ -12,7 +12,7 @@ import Account from '../model/account';
 import { isNull } from '@/common/types/utility';
 import User from '../model/user';
 import { TransactionClient } from '@/infrastructure/rdb';
-import { SESSION_EXPIRED } from '@/common/constants/session';
+import { SESSION_DURATION } from '@/common/constants/session';
 
 type LoginResult = {
   user: User;
@@ -79,7 +79,7 @@ export default class AccountService {
     const user = userRes.value;
     if (isNull(user)) return err(new ServerError('User not found. this should not happen')); // signup時に作成されているはず
 
-    const expiredAt = new Date(Date.now() + SESSION_EXPIRED);
+    const expiredAt = new Date(Date.now() + SESSION_DURATION);
     const addSessionRes = await this.accountRepository.addSession(account.accountId, expiredAt);
     if (addSessionRes.isErr()) return err(addSessionRes.error);
     const sessionId = addSessionRes.value;
