@@ -134,7 +134,7 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
     });
   });
 
-  await t.step("準正常系", async (t) => {
+  await t.step("異常系", async (t) => {
     await t.step(
       "Qiitaの記事の取得でエラーが発生した場合、500エラーを返すこと",
       async () => {
@@ -151,9 +151,37 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
         fetcherStub.restore();
       },
     );
-  });
+    await t.step("DBエラーが発生した場合、500エラーを返すこと", async () => {
+      const fetcherStub = stub(
+        QiitaFetcher.prototype,
+        "fetch",
+        () =>
+          Promise.resolve([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://article1.example.com",
+            },
+          ]),
+      );
+      const repositoryStub = stub(
+        ArticleRepositoryImpl.prototype,
+        "bulkCreateArticle",
+        () => {
+          throw new DatabaseError("Failed to save to database");
+        },
+      );
 
-  await t.step("異常系", async (t) => {
+      const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
+
+      assertEquals(res.status, 500);
+      const jsonRes = await res.json();
+      assertEquals(jsonRes.message, "internal server error");
+
+      fetcherStub.restore();
+      repositoryStub.restore();
+    });
     await t.step(
       "予期せぬエラーが発生した場合、500エラーを返すこと",
       async () => {
@@ -215,7 +243,7 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
     });
   });
 
-  await t.step("凖正常系", async (t) => {
+  await t.step("異常系", async (t) => {
     await t.step(
       "Zennの記事のでエラーが発生した場合、500エラーを返すこと",
       async () => {
@@ -232,7 +260,6 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
         fetcherStub.restore();
       },
     );
-
     await t.step("DBエラーが発生した場合、500エラーを返すこと", async () => {
       const fetcherStub = stub(
         ZennFetcher.prototype,
@@ -264,9 +291,7 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
       fetcherStub.restore();
       repositoryStub.restore();
     });
-  });
 
-  await t.step("異常系", async (t) => {
     await t.step(
       "予期せぬエラーが発生した場合、500エラーを返すこと",
       async () => {
