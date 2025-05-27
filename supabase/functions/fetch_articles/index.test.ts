@@ -61,7 +61,7 @@ const mockArticles: Article[] = [
 
 Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
   await t.step("正常系", async (t) => {
-    await t.step("Qiitaの記事を正常に取得できること", async () => {
+    await t.step("Qiitaの記事を取得できること", async () => {
       const fetcherStub = stub(
         QiitaFetcher.prototype,
         "fetch",
@@ -202,7 +202,7 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
 
 Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
   await t.step("正常系", async (t) => {
-    await t.step("Zennの記事を正常に取得できること", async () => {
+    await t.step("Zennの記事を取得できること", async () => {
       const fetcherStub = stub(
         ZennFetcher.prototype,
         "fetch",
