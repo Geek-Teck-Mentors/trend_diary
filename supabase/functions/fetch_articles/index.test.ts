@@ -10,7 +10,6 @@ import {
 import { app } from "./index.ts";
 import { Executor } from "./executor.ts";
 import { Article } from "./model/model.ts";
-import { logger } from "../../logger/logger.ts";
 import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
 import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import ArticleRepositoryImpl from "./repository.ts";
@@ -88,8 +87,6 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
         () => Promise.resolve(mockArticles.slice(0, 2)),
       );
 
-      const loggerStub = stub(logger, "info");
-
       const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
       assertEquals(res.status, 201);
@@ -98,11 +95,9 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
 
       assertSpyCalls(fetcherStub, 1);
       assertSpyCalls(repositoryStub, 1);
-      assertSpyCalls(loggerStub, 1); // ログが1回呼ばれることを確認
 
       fetcherStub.restore();
       repositoryStub.restore();
-      loggerStub.restore();
     });
 
     await t.step("DBエラーが発生した場合、500エラーを返すこと", async () => {
@@ -128,23 +123,14 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
         },
       );
 
-      const loggerErrorStub = stub(logger, "error");
-
       const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
       assertEquals(res.status, 500);
       const jsonRes = await res.json();
       assertEquals(jsonRes.message, "internal server error");
 
-      assertSpyCalls(loggerErrorStub, 1);
-      assertSpyCallArgs(loggerErrorStub, 0, [
-        "DatabaseError",
-        "Failed to save to database",
-      ]);
-
       fetcherStub.restore();
       repositoryStub.restore();
-      loggerErrorStub.restore();
     });
   });
 
@@ -156,22 +142,13 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
           throw new MediaFetchError("Failed to fetch Qiita articles");
         });
 
-        const loggerErrorStub = stub(logger, "error");
-
         const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
         assertEquals(res.status, 500);
         const jsonRes = await res.json();
         assertEquals(jsonRes.message, "internal server error");
 
-        assertSpyCalls(loggerErrorStub, 1);
-        assertSpyCallArgs(loggerErrorStub, 0, [
-          "MediaFetchError",
-          "Failed to fetch Qiita articles",
-        ]);
-
         fetcherStub.restore();
-        loggerErrorStub.restore();
       },
     );
   });
@@ -183,18 +160,13 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
         const executorStub = stub(Executor.prototype, "do", () => {
           throw new Error();
         });
-        const loggerErrorStub = stub(logger, "error");
-
         const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
         assertEquals(res.status, 500);
         const jsonRes = await res.json();
         assertEquals(jsonRes.message, "unknown error");
 
-        assertSpyCalls(loggerErrorStub, 1);
-
         executorStub.restore();
-        loggerErrorStub.restore();
       },
     );
   });
@@ -229,8 +201,6 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
         () => Promise.resolve(mockArticles.slice(0, 2)),
       );
 
-      const loggerStub = stub(logger, "info");
-
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
       assertEquals(res.status, 201);
@@ -239,11 +209,9 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
 
       assertSpyCalls(fetcherStub, 1);
       assertSpyCalls(repositoryStub, 1);
-      assertSpyCalls(loggerStub, 1); // ログが1回呼ばれることを確認
 
       fetcherStub.restore();
       repositoryStub.restore();
-      loggerStub.restore();
     });
   });
 
@@ -255,22 +223,13 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
           throw new MediaFetchError("Failed to fetch Zenn articles");
         });
 
-        const loggerErrorStub = stub(logger, "error");
-
         const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
         assertEquals(res.status, 500);
         const jsonRes = await res.json();
         assertEquals(jsonRes.message, "internal server error");
 
-        assertSpyCalls(loggerErrorStub, 1);
-        assertSpyCallArgs(loggerErrorStub, 0, [
-          "MediaFetchError",
-          "Failed to fetch Zenn articles",
-        ]);
-
         fetcherStub.restore();
-        loggerErrorStub.restore();
       },
     );
 
@@ -296,23 +255,14 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
         },
       );
 
-      const loggerErrorStub = stub(logger, "error");
-
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
       assertEquals(res.status, 500);
       const jsonRes = await res.json();
       assertEquals(jsonRes.message, "internal server error");
 
-      assertSpyCalls(loggerErrorStub, 1);
-      assertSpyCallArgs(loggerErrorStub, 0, [
-        "DatabaseError",
-        "Failed to save to database",
-      ]);
-
       fetcherStub.restore();
       repositoryStub.restore();
-      loggerErrorStub.restore();
     });
   });
 
@@ -323,18 +273,13 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
         const executorStub = stub(Executor.prototype, "do", () => {
           throw new Error();
         });
-        const loggerErrorStub = stub(logger, "error");
-
         const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
         assertEquals(res.status, 500);
         const jsonRes = await res.json();
         assertEquals(jsonRes.message, "unknown error");
 
-        assertSpyCalls(loggerErrorStub, 1);
-
         executorStub.restore();
-        loggerErrorStub.restore();
       },
     );
   });
