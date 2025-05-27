@@ -12,37 +12,38 @@ import {
 import Parser from "npm:rss-parser@3.13.0";
 import { fetchRssFeed } from "./fetch.ts";
 
-// 正常系
-Deno.test("Parser.prototype.parseURLが呼び出されること", async () => {
-  const url = "https://example.com/rss";
-  const mockItems = [
-    { title: "Item 1", link: "https://example.com/item1" },
-    { title: "Item 2", link: "https://example.com/item2" },
-  ];
-  const mockFeed = { items: mockItems };
-  const parserStub = stub(Parser.prototype, "parseURL", () => {
-    return Promise.resolve(mockFeed);
+Deno.test("正常系", async (t) => {
+  await t.step("Parser.prototype.parseURLが呼び出されること", async () => {
+    const url = "https://example.com/rss";
+    const mockItems = [
+      { title: "Item 1", link: "https://example.com/item1" },
+      { title: "Item 2", link: "https://example.com/item2" },
+    ];
+    const mockFeed = { items: mockItems };
+    const parserStub = stub(Parser.prototype, "parseURL", () => {
+      return Promise.resolve(mockFeed);
+    });
+
+    await fetchRssFeed(url);
+    assertSpyCalls(parserStub, 1);
+    assertSpyCallArgs(parserStub, 0, [url]);
+    parserStub.restore();
   });
 
-  await fetchRssFeed(url);
-  assertSpyCalls(parserStub, 1);
-  assertSpyCallArgs(parserStub, 0, [url]);
-  parserStub.restore();
-});
+  await t.step("戻り値がParser.prototype.parseURLから取得した<T[]>が返ってくること", async () => {
+    const url = "https://example.com/rss";
+    const mockItems = [
+      { title: "Item 1", link: "https://example.com/item1" },
+      { title: "Item 2", link: "https://example.com/item2" },
+    ];
+    const mockFeed = { items: mockItems };
+    const parserStub = stub(Parser.prototype, "parseURL", () => {
+      return Promise.resolve(mockFeed);
+    });
 
-Deno.test("戻り値がParser.prototype.parseURLのから取得した<T[]>が返ってくること", async () => {
-  const url = "https://example.com/rss";
-  const mockItems = [
-    { title: "Item 1", link: "https://example.com/item1" },
-    { title: "Item 2", link: "https://example.com/item2" },
-  ];
-  const mockFeed = { items: mockItems };
-  const parserStub = stub(Parser.prototype, "parseURL", () => {
-    return Promise.resolve(mockFeed);
+    const result = await fetchRssFeed(url);
+    assert(result.length > 0);
+    assertEquals(result, mockItems);
+    parserStub.restore();
   });
-
-  const result = await fetchRssFeed(url);
-  assert(result.length > 0);
-  assertEquals(result, mockItems);
-  parserStub.restore();
 });
