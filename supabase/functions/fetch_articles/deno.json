@@ -1,4 +1,10 @@
 {
   "imports": {},
-  "nodeModulesDir": "auto"
+  "nodeModulesDir": "auto",
+  "test": {
+    "exclude": [
+      "repository.ts",
+      "executor.ts"
+    ]
+  }
 }
