@@ -67,7 +67,30 @@ jobs:
       - name: テストの実行
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
+          # 共通のcoverageを格納するファイルを作成
+          touch coverage.txt
+          COVERAGE_DIR=$(pwd)/coverage.txt
+
           for function_name in $(ls supabase/functions); do
             # サブシェルで実行することで、cdの影響を局所化
-            (cd supabase/functions/$function_name && deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --env-file=.env.test)
+            (
+              cd supabase/functions/$function_name
+
+              # deno testの実行
+              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage
+
+
+              # カバレッジの対象外ファイルを取得
+              EXCLUDE_FILES=$(yq '.exclude[]' coverage_config.yml | xargs | sed 's/ /|/g')
+
+              # カバレッジの結果を共通のファイルにコピー
+              echo "Coverage for $function_name" >> "$COVERAGE_DIR"
+              deno coverage ./coverage --exclude="$EXCLUDE_FILES" >> "$COVERAGE_DIR"
+            )
           done
+
+          # 共通のカバレッジファイルを出力
+          gh pr comments ${{ github.event.pull_request.number }} -b "$(cat $COVERAGE_DIR)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
