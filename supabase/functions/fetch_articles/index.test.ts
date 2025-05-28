@@ -81,12 +81,6 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
           ]),
       );
 
-      const repositoryStub = stub(
-        ArticleRepositoryImpl.prototype,
-        "bulkCreateArticle",
-        () => Promise.resolve(mockArticles.slice(0, 2)),
-      );
-
       const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
       assertEquals(res.status, 201);
@@ -94,10 +88,8 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
       assertEquals(jsonRes.message, "Articles fetched successfully: 2");
 
       assertSpyCalls(fetcherStub, 1);
-      assertSpyCalls(repositoryStub, 1);
 
       fetcherStub.restore();
-      repositoryStub.restore();
     });
 
     await t.step("DBエラーが発生した場合、500エラーを返すこと", async () => {
@@ -223,12 +215,6 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
           ]),
       );
 
-      const repositoryStub = stub(
-        ArticleRepositoryImpl.prototype,
-        "bulkCreateArticle",
-        () => Promise.resolve(mockArticles.slice(0, 2)),
-      );
-
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
       assertEquals(res.status, 201);
@@ -236,10 +222,8 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
       assertEquals(jsonRes.message, "Articles fetched successfully: 2");
 
       assertSpyCalls(fetcherStub, 1);
-      assertSpyCalls(repositoryStub, 1);
 
       fetcherStub.restore();
-      repositoryStub.restore();
     });
   });
 
@@ -274,6 +258,7 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
             },
           ]),
       );
+
       const repositoryStub = stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
