@@ -189,6 +189,54 @@ Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
         executorStub.restore();
       },
     );
+    await t.step(
+      "QiitaFetcherのfetchで予期せぬエラーが発生した場合、500エラーを返すこと",
+      async () => {
+        const fetcherStub = stub(QiitaFetcher.prototype, "fetch", () => {
+          throw new Error("unexpected error");
+        });
+        const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
+
+        assertEquals(res.status, 500);
+        const jsonRes = await res.json();
+        assertEquals(jsonRes.message, "unknown error");
+
+        fetcherStub.restore();
+      },
+    );
+    await t.step(
+      "ArticleRepositoryImplのbulkCreateArticleで予期せぬエラーが発生した場合、500エラーを返すこと",
+      async () => {
+        const fetcherStub = stub(
+          QiitaFetcher.prototype,
+          "fetch",
+          () =>
+            Promise.resolve([
+              {
+                title: "title 1",
+                author: "author",
+                description: "content",
+                url: "https://article1.example.com",
+              },
+            ]),
+        );
+        const repositoryStub = stub(
+          ArticleRepositoryImpl.prototype,
+          "bulkCreateArticle",
+          () => {
+            throw new Error("unexpected error");
+          },
+        );
+        const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
+
+        assertEquals(res.status, 500);
+        const jsonRes = await res.json();
+        assertEquals(jsonRes.message, "unknown error");
+
+        fetcherStub.restore();
+        repositoryStub.restore();
+      },
+    );
   });
 });
 
@@ -290,6 +338,54 @@ Deno.test("POST /fetch_articles/articles/zenn", async (t) => {
         assertEquals(jsonRes.message, "unknown error");
 
         executorStub.restore();
+      },
+    );
+    await t.step(
+      "ZennFetcherのfetchで予期せぬエラーが発生した場合、500エラーを返すこと",
+      async () => {
+        const fetcherStub = stub(ZennFetcher.prototype, "fetch", () => {
+          throw new Error("unexpected error");
+        });
+        const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
+
+        assertEquals(res.status, 500);
+        const jsonRes = await res.json();
+        assertEquals(jsonRes.message, "unknown error");
+
+        fetcherStub.restore();
+      },
+    );
+    await t.step(
+      "ArticleRepositoryImplのbulkCreateArticleで予期せぬエラーが発生した場合、500エラーを返すこと",
+      async () => {
+        const fetcherStub = stub(
+          ZennFetcher.prototype,
+          "fetch",
+          () =>
+            Promise.resolve([
+              {
+                title: "title 1",
+                author: "author",
+                description: "content",
+                url: "https://article1.example.com",
+              },
+            ]),
+        );
+        const repositoryStub = stub(
+          ArticleRepositoryImpl.prototype,
+          "bulkCreateArticle",
+          () => {
+            throw new Error("unexpected error");
+          },
+        );
+        const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
+
+        assertEquals(res.status, 500);
+        const jsonRes = await res.json();
+        assertEquals(jsonRes.message, "unknown error");
+
+        fetcherStub.restore();
+        repositoryStub.restore();
       },
     );
   });
