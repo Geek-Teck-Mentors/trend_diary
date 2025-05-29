@@ -60,20 +60,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Denoの構築
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
+
       - name: setup supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
+
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: .node-version
+
       - name: supabase start
         run: supabase start -x storage-api,imgproxy,edge-runtime,realtime,vector,studio,postgres-meta,mailpit,logflare,supavisor
+
       - name: setup env
         run: |
           echo "SUPABASE_URL=$(supabase status --output json | jq -r '.API_URL')" >> $GITHUB_ENV
           echo "SUPABASE_ANON_KEY=$(supabase status --output json | jq -r '.ANON_KEY')" >> $GITHUB_ENV
+          echo "DB_URL=$(supabase status --output json | jq -r '.DB_URL')" >> $GITHUB_ENV
+
+      - name: migrate database
+        run: npm run db:migrate
+        env:
+          DIRECT_URL: ${{ env.DB_URL }}
+
       - name: exec tests
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
@@ -105,6 +121,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+
       - name: Output coverage
         # カバレッジの結果をGitHubのPRコメントに出力
         run: |
