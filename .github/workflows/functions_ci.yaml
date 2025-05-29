@@ -75,8 +75,10 @@ jobs:
       - name: exec tests
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
+          echo "Running tests for Supabase Functions"
           echo $SUPABASE_URL
           echo $SUPABASE_ANON_KEY
+          echo "RUNNING TESTS"
           # 共通のcoverageを格納するファイルを作成
           touch coverage.txt
           COVERAGE_DIR=$(pwd)/coverage.txt
