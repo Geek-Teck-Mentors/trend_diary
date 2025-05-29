@@ -69,7 +69,7 @@ jobs:
         with:
           version: latest
       - name: supabase start
-        run: supabase start
+        run: supabase start -x storage-api,imgproxy,edge-runtime,realtime,vector,studio,postgres-meta,mailpit,logflare,supavisor
       - name: setup env
         run: |
           echo "SUPABASE_URL=$(supabase status --output json | jq -r '.API_URL')" >> $GITHUB_ENV
