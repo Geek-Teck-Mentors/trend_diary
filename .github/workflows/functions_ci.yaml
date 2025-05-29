@@ -119,6 +119,8 @@ jobs:
               deno coverage ./coverage --exclude="$EXCLUDE_FILES" >> "$COVERAGE_DIR"
             )
           done
+
+          echo "COVERAGE_DIR=$COVERAGE_DIR" >> $GITHUB_ENV
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
@@ -127,7 +129,10 @@ jobs:
         # カバレッジの結果をGitHubのPRコメントに出力
         run: |
           # 共通のカバレッジファイルを出力
+          echo $COVERAGE_DIR
+          cat $COVERAGE_DIR
           gh pr comment ${{ github.event.pull_request.number }} -b "$(cat $COVERAGE_DIR)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERAGE_DIR: ${{ env.COVERAGE_DIR }}
 
