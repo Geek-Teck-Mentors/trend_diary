@@ -64,7 +64,15 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
-      - name: テストの実行
+      - name: setup supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: setup env
+        run: |
+          echo "SUPABASE_URL=$(supabase status --output json | jq -r '.API_URL')" >> $GITHUB_ENV
+          echo "SUPABASE_ANON_KEY=$(supabase status --output json | jq -r '.ANON_KEY')" >> $GITHUB_ENV
+      - name: exec tests
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
           # 共通のcoverageを格納するファイルを作成
@@ -88,7 +96,9 @@ jobs:
               deno coverage ./coverage --exclude="$EXCLUDE_FILES" >> "$COVERAGE_DIR"
             )
           done
-
+      - name: Output coverage
+        # カバレッジの結果をGitHubのPRコメントに出力
+        run: |
           # 共通のカバレッジファイルを出力
           gh pr comments ${{ github.event.pull_request.number }} -b "$(cat $COVERAGE_DIR)"
         env:
