@@ -116,9 +116,9 @@ jobs:
 
               # カバレッジの結果を共通のファイルにコピー
               echo "Coverage for $function_name" >> "$COVERAGE_DIR"
-              echo "```" >> "$COVERAGE_DIR"
+              echo "\`\`\`" >> "$COVERAGE_DIR"
               deno coverage ./coverage --exclude="$EXCLUDE_FILES" >> "$COVERAGE_DIR"
-              echo "```" >> "$COVERAGE_DIR"
+              echo "\`\`\`" >> "$COVERAGE_DIR"
             )
           done
 
