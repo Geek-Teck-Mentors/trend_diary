@@ -127,7 +127,7 @@ jobs:
         # カバレッジの結果をGitHubのPRコメントに出力
         run: |
           # 共通のカバレッジファイルを出力
-          gh pr comments ${{ github.event.pull_request.number }} -b "$(cat $COVERAGE_DIR)"
+          gh pr comment ${{ github.event.pull_request.number }} -b "$(cat $COVERAGE_DIR)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
