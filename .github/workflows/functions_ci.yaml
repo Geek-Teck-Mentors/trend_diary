@@ -89,6 +89,7 @@ jobs:
         run: npm run db:migrate
         env:
           DIRECT_URL: ${{ env.DB_URL }}
+          DATABASE_URL: ${{ env.DB_URL }}
 
       - name: exec tests
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
