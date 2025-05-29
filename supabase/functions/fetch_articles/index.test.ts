@@ -3,13 +3,11 @@
 
 import { assertEquals } from "https://deno.land/std@0.83.0/testing/asserts.ts";
 import {
-  assertSpyCallArgs,
   assertSpyCalls,
   stub,
 } from "https://deno.land/std@0.152.0/testing/mock.ts";
 import { app } from "./index.ts";
 import { Executor } from "./executor.ts";
-import { Article } from "./model/model.ts";
 import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
 import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import ArticleRepositoryImpl from "./repository.ts";
@@ -26,37 +24,6 @@ async function sendRequest(method: string, path: string, body?: unknown) {
   });
   return await app.fetch(req);
 }
-
-// 正常系のモック記事データ
-const mockArticles: Article[] = [
-  new Article(
-    1n,
-    "media",
-    "title",
-    "author",
-    "content",
-    "https://article1.example.com",
-    new Date(),
-  ),
-  new Article(
-    2n,
-    "media",
-    "title",
-    "author",
-    "content",
-    "https://article1.example.com",
-    new Date(),
-  ),
-  new Article(
-    3n,
-    "media",
-    "title",
-    "author",
-    "content",
-    "https://article1.example.com",
-    new Date(),
-  ),
-];
 
 Deno.test("POST /fetch_articles/articles/qiita", async (t) => {
   await t.step("正常系", async (t) => {

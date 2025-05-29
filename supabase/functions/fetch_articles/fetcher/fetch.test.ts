@@ -30,20 +30,23 @@ Deno.test("正常系", async (t) => {
     parserStub.restore();
   });
 
-  await t.step("戻り値がParser.prototype.parseURLから取得した<T[]>が返ってくること", async () => {
-    const url = "https://example.com/rss";
-    const mockItems = [
-      { title: "Item 1", link: "https://example.com/item1" },
-      { title: "Item 2", link: "https://example.com/item2" },
-    ];
-    const mockFeed = { items: mockItems };
-    const parserStub = stub(Parser.prototype, "parseURL", () => {
-      return Promise.resolve(mockFeed);
-    });
+  await t.step(
+    "戻り値がParser.prototype.parseURLから取得した<T[]>が返ってくること",
+    async () => {
+      const url = "https://example.com/rss";
+      const mockItems = [
+        { title: "Item 1", link: "https://example.com/item1" },
+        { title: "Item 2", link: "https://example.com/item2" },
+      ];
+      const mockFeed = { items: mockItems };
+      const parserStub = stub(Parser.prototype, "parseURL", () => {
+        return Promise.resolve(mockFeed);
+      });
 
-    const result = await fetchRssFeed(url);
-    assert(result.length > 0);
-    assertEquals(result, mockItems);
-    parserStub.restore();
-  });
+      const result = await fetchRssFeed(url);
+      assert(result.length > 0);
+      assertEquals(result, mockItems);
+      parserStub.restore();
+    },
+  );
 });
