@@ -124,6 +124,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          NO_COLOR: true
 
       - name: Output coverage
         # カバレッジの結果をGitHubのPRコメントに出力
