@@ -92,6 +92,10 @@ jobs:
           DATABASE_URL: ${{ env.DB_URL }}
 
       - name: exec tests
+        env:
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          NO_COLOR: true
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
           # 共通のcoverageを格納するファイルを作成
@@ -119,10 +123,6 @@ jobs:
           done
 
           echo "COVERAGE_DIR=$COVERAGE_DIR" >> $GITHUB_ENV
-        env:
-          SUPABASE_URL: ${{ env.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
-          NO_COLOR: true
 
       - name: Output coverage
         # カバレッジの結果をGitHubのPRコメントに出力
