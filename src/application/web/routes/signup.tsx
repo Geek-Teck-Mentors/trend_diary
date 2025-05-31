@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { MetaFunction } from '@remix-run/cloudflare';
-import { useNavigate } from '@remix-run/react';
 import { Button } from '@/application/web/components/ui/button';
 import {
   Card,
@@ -13,8 +12,7 @@ import {
 import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
-import { getApiClientForClient } from '@/infrastructure/api';
-import { accountSchema } from '@/domain/account';
+import useSignup from '../features/authenticate/useSignup';
 
 export const meta: MetaFunction = () => [{ title: 'アカウント作成 | TrendDiary' }];
 
@@ -23,60 +21,7 @@ export async function action() {
 }
 
 export default function Signup() {
-  const navigate = useNavigate();
-  const [errors, setErrors] = useState<{ email?: string[]; password?: string[] }>({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    // バリデーション
-    const result = accountSchema.pick({ email: true, password: true }).safeParse({
-      email,
-      password,
-    });
-
-    if (!result.success) {
-      setErrors(result.error.flatten().fieldErrors);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const client = getApiClientForClient();
-
-      const res = await client.account.$post({
-        json: {
-          email: result.data.email,
-          password: result.data.password,
-        },
-      });
-
-      if (res.status === 201) {
-        navigate('/login');
-      } else if (res.status === 409) {
-        setErrors({
-          email: ['このメールアドレスは既に使用されています'],
-        });
-      } else {
-        setErrors({
-          email: ['サインアップに失敗しました'],
-        });
-      }
-    } catch (error) {
-      setErrors({
-        email: ['ネットワークエラーが発生しました'],
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { handleSubmit, errors, isLoading } = useSignup();
 
   return (
     <div className='bg-background flex min-h-screen items-center justify-center p-4'>

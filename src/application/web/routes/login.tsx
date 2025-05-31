@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { MetaFunction } from '@remix-run/cloudflare';
-import { useNavigate } from '@remix-run/react';
 import { Button } from '@/application/web/components/ui/button';
 import {
   Card,
@@ -12,8 +11,7 @@ import {
 import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
-import { accountSchema } from '@/domain/account';
-import { getApiClientForClient } from '@/infrastructure/api';
+import useLogin from '../features/authenticate/useLogin';
 
 export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }];
 
@@ -22,61 +20,7 @@ export async function action() {
 }
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [errors, setErrors] = useState<{ email?: string[]; password?: string[] }>({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    // バリデーション
-    const result = accountSchema.pick({ email: true, password: true }).safeParse({
-      email,
-      password,
-    });
-
-    if (!result.success) {
-      setErrors(result.error.flatten().fieldErrors);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const client = getApiClientForClient();
-
-      const res = await client.account.login.$post({
-        json: {
-          email: result.data.email,
-          password: result.data.password,
-        },
-      });
-
-      if (res.status === 200) {
-        // Cookieは自動で設定されるため、リダイレクトのみ
-        navigate('/trends');
-      } else if (res.status === 401 || res.status === 404) {
-        setErrors({
-          email: ['メールアドレスまたはパスワードが正しくありません。'],
-        });
-      } else {
-        setErrors({
-          email: ['ログインに失敗しました。'],
-        });
-      }
-    } catch (error) {
-      setErrors({
-        email: ['ネットワークエラーが発生しました'],
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { handleSubmit, errors, isLoading } = useLogin();
 
   return (
     <div className='bg-background flex min-h-screen items-center justify-center p-4'>
