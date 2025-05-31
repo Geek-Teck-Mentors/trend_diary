@@ -26,7 +26,7 @@ export default function SignupPage({ handleSubmit, errors, isLoading }: Props) {
           <CardTitle className='text-2xl font-bold'>アカウント作成</CardTitle>
           <CardDescription>以下の情報を入力してアカウントを作成してください</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit} action='/api/account' className='flex flex-1 flex-col'>
+        <form onSubmit={handleSubmit} className='flex flex-1 flex-col'>
           <CardContent className='flex flex-1 flex-col gap-6'>
             <div className='space-y-2'>
               <Label htmlFor='email'>メールアドレス</Label>
