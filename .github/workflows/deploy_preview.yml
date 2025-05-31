@@ -6,10 +6,11 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/deploy_preview.yml'
       - 'src/**'
       - 'public/**'
       - 'prisma/**'
-      - 'functions'
+      - 'functions/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
