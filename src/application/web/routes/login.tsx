@@ -5,10 +5,6 @@ import LoginPage from '../features/authenticate/login.page';
 
 export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }];
 
-export async function action() {
-  return null;
-}
-
 export default function Login() {
   const { handleSubmit, errors, isLoading } = useLogin();
 

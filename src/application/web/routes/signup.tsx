@@ -5,10 +5,6 @@ import SignupPage from '../features/authenticate/signup.page';
 
 export const meta: MetaFunction = () => [{ title: 'アカウント作成 | TrendDiary' }];
 
-export async function action() {
-  return null;
-}
-
 export default function Signup() {
   const { handleSubmit, errors, isLoading } = useSignup();
 
