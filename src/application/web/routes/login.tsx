@@ -13,7 +13,7 @@ import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
 import { accountSchema } from '@/domain/account';
-import getApiClient from '@/infrastructure/api';
+import { getApiClientForClient } from '@/infrastructure/api';
 
 export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }];
 
@@ -48,8 +48,7 @@ export default function Login() {
     }
 
     try {
-      const apiBaseUrl = `${window.location.protocol}//${window.location.host}`;
-      const client = getApiClient(apiBaseUrl);
+      const client = getApiClientForClient();
 
       const res = await client.account.login.$post({
         json: {
