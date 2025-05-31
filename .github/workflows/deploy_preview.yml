@@ -1,0 +1,72 @@
+name: Deploy Preview
+description: Preview環境のデプロイ
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'prisma/**'
+      - 'functions'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: .node-version
+
+      - name: ビルド
+        run: npm run build
+
+      - name: デプロイ
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy
+
+      - name: PRコメントを作成・更新する
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: deploy-preview
+          message: |
+            ## 🚀 Preview デプロイ
+
+            **デプロイURL**: ${{ steps.deploy.outputs.url }}
+
+            **デプロイ時間**: ${{ github.event.repository.updated_at }}
+
+            <details>
+              <summary>デプロイ出力の詳細</summary>
+              
+              ```
+              ${{ steps.deploy.outputs.command-output }}
+              ```
+            </details>
+
+  database:
+    runs-on: ubuntu-latest
+    environment: preview
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: .node-version
+
+      - name: Prismaのマイグレーション
+        run: npm run db:migrate:deploy
