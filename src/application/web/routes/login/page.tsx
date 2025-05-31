@@ -1,9 +1,9 @@
 import React from 'react';
-import { Label } from '@radix-ui/react-label';
 import { Separator } from '@radix-ui/react-separator';
 import { Button } from '../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
 
 type Props = {
   handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
