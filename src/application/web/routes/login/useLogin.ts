@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from '@remix-run/react';
-import { Errors, validateForm } from './validation';
 import getApiClientForClient from '../../infrastructure/api';
+import { AuthenticateErrors, validateAuthenticateForm } from '../../validation/authenticateForm';
 
 export default function useLogin() {
   const navigate = useNavigate();
-  const [errors, setErrors] = useState<Errors>({});
+  const [errors, setErrors] = useState<AuthenticateErrors>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -14,7 +14,7 @@ export default function useLogin() {
     setErrors({});
 
     const formData = new FormData(e.currentTarget);
-    const validation = validateForm(formData);
+    const validation = validateAuthenticateForm(formData);
 
     if (!validation.isValid) {
       setErrors(validation.errors);

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { MetaFunction } from '@remix-run/cloudflare';
-import useLogin from '../features/authenticate/useLogin';
-import LoginPage from '../features/authenticate/login.page';
+import LoginPage from './page';
+import useLogin from './useLogin';
 
 export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }];
 

@@ -1,6 +1,6 @@
 import { accountSchema } from '@/domain/account';
 
-export type Errors = {
+export type AuthenticateErrors = {
   email?: string[];
   password?: string[];
 };
@@ -12,10 +12,10 @@ type ValidationResult =
     }
   | {
       isValid: false;
-      errors: Errors;
+      errors: AuthenticateErrors;
     };
 
-export function validateForm(formData: FormData): ValidationResult {
+export function validateAuthenticateForm(formData: FormData): ValidationResult {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
