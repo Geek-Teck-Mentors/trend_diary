@@ -13,10 +13,7 @@ import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import ArticleRepositoryImpl from "./repository.ts";
 import { DatabaseError, MediaFetchError } from "./error.ts";
 
-import {
-  describe,
-  it,
-} from "jsr:@std/testing/bdd";
+import { describe, it } from "jsr:@std/testing/bdd";
 
 // using構文用のStubManagerクラス
 class StubManager {
