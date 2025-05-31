@@ -1,6 +1,6 @@
-import React from 'react';
-import type { MetaFunction, ActionFunctionArgs } from '@remix-run/cloudflare';
-import { Form, useActionData, redirect, json } from '@remix-run/react';
+import React, { useState } from 'react';
+import type { MetaFunction } from '@remix-run/cloudflare';
+import { useNavigate } from '@remix-run/react';
 import { Button } from '@/application/web/components/ui/button';
 import {
   Card,
@@ -13,13 +13,71 @@ import {
 import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
-import getApiClient, { LOCAL_API_URL } from '@/infrastructure/api';
+import getApiClient from '@/infrastructure/api';
 import { accountSchema } from '@/domain/account';
 
 export const meta: MetaFunction = () => [{ title: 'アカウント作成 | TrendDiary' }];
 
+export async function action() {
+  return null;
+}
+
 export default function Signup() {
-  const actionData = useActionData<typeof action>();
+  const navigate = useNavigate();
+  const [errors, setErrors] = useState<{ email?: string[]; password?: string[] }>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    // バリデーション
+    const result = accountSchema.pick({ email: true, password: true }).safeParse({
+      email,
+      password,
+    });
+
+    if (!result.success) {
+      setErrors(result.error.flatten().fieldErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const apiBaseUrl = `${window.location.protocol}//${window.location.host}`;
+      const client = getApiClient(apiBaseUrl);
+
+      const res = await client.account.$post({
+        json: {
+          email: result.data.email,
+          password: result.data.password,
+        },
+      });
+
+      if (res.status === 201) {
+        navigate('/login');
+      } else if (res.status === 409) {
+        setErrors({
+          email: ['このメールアドレスは既に使用されています'],
+        });
+      } else {
+        setErrors({
+          email: ['サインアップに失敗しました'],
+        });
+      }
+    } catch (error) {
+      setErrors({
+        email: ['ネットワークエラーが発生しました'],
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className='bg-background flex min-h-screen items-center justify-center p-4'>
@@ -28,7 +86,7 @@ export default function Signup() {
           <CardTitle className='text-2xl font-bold'>アカウント作成</CardTitle>
           <CardDescription>以下の情報を入力してアカウントを作成してください</CardDescription>
         </CardHeader>
-        <Form method='post' className='flex flex-1 flex-col'>
+        <form onSubmit={handleSubmit} action='/api/account' className='flex flex-1 flex-col'>
           <CardContent className='flex flex-1 flex-col gap-6'>
             <div className='space-y-2'>
               <Label htmlFor='email'>メールアドレス</Label>
@@ -37,11 +95,10 @@ export default function Signup() {
                 name='email'
                 type='email'
                 placeholder='taro@example.com'
-                aria-invalid={actionData?.errors?.email ? true : undefined}
+                aria-invalid={errors?.email ? true : undefined}
+                disabled={isLoading}
               />
-              {actionData?.errors?.email && (
-                <p className='text-destructive text-sm'>{actionData.errors.email.at(0)}</p>
-              )}
+              {errors?.email && <p className='text-destructive text-sm'>{errors.email.at(0)}</p>}
             </div>
             <div className='space-y-2'>
               <Label htmlFor='password'>パスワード</Label>
@@ -49,16 +106,17 @@ export default function Signup() {
                 id='password'
                 name='password'
                 type='password'
-                aria-invalid={actionData?.errors?.password ? true : undefined}
+                aria-invalid={errors?.password ? true : undefined}
+                disabled={isLoading}
               />
-              {actionData?.errors?.password && (
-                <p className='text-destructive text-sm'>{actionData.errors.password.at(0)}</p>
+              {errors?.password && (
+                <p className='text-destructive text-sm'>{errors.password.at(0)}</p>
               )}
             </div>
           </CardContent>
           <CardFooter className='flex flex-col gap-4 border-t pt-6'>
-            <Button type='submit' className='w-full'>
-              アカウントを作成
+            <Button type='submit' className='w-full' disabled={isLoading}>
+              {isLoading ? 'アカウント作成中...' : 'アカウントを作成'}
             </Button>
             <Separator />
             <div className='text-muted-foreground text-center text-sm'>
@@ -68,71 +126,8 @@ export default function Signup() {
               </a>
             </div>
           </CardFooter>
-        </Form>
+        </form>
       </Card>
     </div>
   );
-}
-
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
-  const result = accountSchema.pick({ email: true, password: true }).safeParse({
-    email,
-    password,
-  });
-
-  if (!result.success) {
-    // Response.jsonを使った実装例があまりにも少ないため、deprecatedでも利用する
-    return json(
-      {
-        errors: result.error.flatten().fieldErrors,
-      },
-      { status: 400 },
-    );
-  }
-
-  try {
-    const client = getApiClient(process.env.API_BASE_URL ?? LOCAL_API_URL);
-    const res = await client.account.$post({
-      json: {
-        email,
-        password,
-      },
-    });
-    if (res.status === 201) return redirect('/login');
-    if (res.status === 409) {
-      return json(
-        {
-          errors: {
-            email: ['このメールアドレスは既に使用されています'],
-            password: undefined,
-          },
-        },
-        { status: res.status },
-      );
-    }
-
-    return json(
-      {
-        errors: {
-          email: undefined,
-          password: undefined,
-        },
-      },
-      { status: res.status },
-    );
-  } catch (error) {
-    return json(
-      {
-        errors: {
-          email: undefined,
-          password: undefined,
-        },
-      },
-      { status: 500 },
-    );
-  }
 }

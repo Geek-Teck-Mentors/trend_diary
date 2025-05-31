@@ -1,6 +1,6 @@
-import React from 'react';
-import type { MetaFunction, ActionFunctionArgs } from '@remix-run/cloudflare';
-import { Form, useActionData, json, redirect } from '@remix-run/react';
+import React, { useState } from 'react';
+import type { MetaFunction } from '@remix-run/cloudflare';
+import { useNavigate } from '@remix-run/react';
 import { Button } from '@/application/web/components/ui/button';
 import {
   Card,
@@ -13,12 +13,71 @@ import { Input } from '@/application/web/components/ui/input';
 import { Label } from '@/application/web/components/ui/label';
 import { Separator } from '@/application/web/components/ui/separator';
 import { accountSchema } from '@/domain/account';
-import getApiClient, { LOCAL_API_URL } from '@/infrastructure/api';
+import getApiClient from '@/infrastructure/api';
 
 export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }];
 
+export async function action() {
+  return null;
+}
+
 export default function Login() {
-  const actionData = useActionData<typeof action>();
+  const navigate = useNavigate();
+  const [errors, setErrors] = useState<{ email?: string[]; password?: string[] }>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    // バリデーション
+    const result = accountSchema.pick({ email: true, password: true }).safeParse({
+      email,
+      password,
+    });
+
+    if (!result.success) {
+      setErrors(result.error.flatten().fieldErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const apiBaseUrl = `${window.location.protocol}//${window.location.host}`;
+      const client = getApiClient(apiBaseUrl);
+
+      const res = await client.account.login.$post({
+        json: {
+          email: result.data.email,
+          password: result.data.password,
+        },
+      });
+
+      if (res.status === 200) {
+        // Cookieは自動で設定されるため、リダイレクトのみ
+        navigate('/trends');
+      } else if (res.status === 401 || res.status === 404) {
+        setErrors({
+          email: ['メールアドレスまたはパスワードが正しくありません。'],
+        });
+      } else {
+        setErrors({
+          email: ['ログインに失敗しました。'],
+        });
+      }
+    } catch (error) {
+      setErrors({
+        email: ['ネットワークエラーが発生しました'],
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className='bg-background flex min-h-screen items-center justify-center p-4'>
@@ -26,7 +85,7 @@ export default function Login() {
         <CardHeader className='space-y-1'>
           <CardTitle className='text-2xl font-bold'>ログイン</CardTitle>
         </CardHeader>
-        <Form method='post' className='flex flex-1 flex-col'>
+        <form onSubmit={handleSubmit} className='flex flex-1 flex-col'>
           <CardContent className='flex flex-1 flex-col gap-6'>
             <div className='space-y-2'>
               <Label htmlFor='email'>メールアドレス</Label>
@@ -35,11 +94,10 @@ export default function Login() {
                 name='email'
                 type='email'
                 placeholder='taro@example.com'
-                aria-invalid={actionData?.errors?.email ? true : undefined}
+                aria-invalid={errors?.email ? true : undefined}
+                disabled={isLoading}
               />
-              {actionData?.errors?.email && (
-                <p className='text-destructive text-sm'>{actionData.errors.email.at(0)}</p>
-              )}
+              {errors?.email && <p className='text-destructive text-sm'>{errors.email.at(0)}</p>}
             </div>
             <div className='space-y-2'>
               <Label htmlFor='password'>パスワード</Label>
@@ -47,16 +105,17 @@ export default function Login() {
                 id='password'
                 name='password'
                 type='password'
-                aria-invalid={actionData?.errors?.password ? true : undefined}
+                aria-invalid={errors?.password ? true : undefined}
+                disabled={isLoading}
               />
-              {actionData?.errors?.password && (
-                <p className='text-destructive text-sm'>{actionData.errors.password.at(0)}</p>
+              {errors?.password && (
+                <p className='text-destructive text-sm'>{errors.password.at(0)}</p>
               )}
             </div>
           </CardContent>
           <CardFooter className='flex flex-col gap-4 border-t pt-6'>
-            <Button type='submit' className='w-full'>
-              ログイン
+            <Button type='submit' className='w-full' disabled={isLoading}>
+              {isLoading ? 'ログイン中...' : 'ログイン'}
             </Button>
             <Separator />
             <div className='text-muted-foreground text-center text-sm'>
@@ -66,71 +125,8 @@ export default function Login() {
               </a>
             </div>
           </CardFooter>
-        </Form>
+        </form>
       </Card>
     </div>
   );
-}
-
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
-  const result = accountSchema.pick({ email: true, password: true }).safeParse({
-    email,
-    password,
-  });
-
-  if (!result.success) {
-    return json(
-      {
-        errors: result.error.flatten().fieldErrors,
-      },
-      { status: 400 },
-    );
-  }
-
-  try {
-    const client = getApiClient(process.env.API_BASE_URL ?? LOCAL_API_URL);
-    const res = await client.account.login.$post({
-      json: {
-        email,
-        password,
-      },
-    });
-
-    if (res.status === 200) return redirect('/trends', { headers: res.headers });
-    if (res.status === 401 || res.status === 404) {
-      return json(
-        {
-          errors: {
-            email: ['メールアドレスまたはパスワードが正しくありません。'],
-            password: undefined,
-          },
-        },
-        { status: res.status },
-      );
-    }
-
-    return json(
-      {
-        errors: {
-          email: ['ログインに失敗しました。'],
-          password: undefined,
-        },
-      },
-      { status: res.status },
-    );
-  } catch (error) {
-    return json(
-      {
-        errors: {
-          email: undefined,
-          password: undefined,
-        },
-      },
-      { status: 500 },
-    );
-  }
 }
