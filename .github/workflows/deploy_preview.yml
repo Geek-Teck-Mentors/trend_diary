@@ -44,7 +44,7 @@ jobs:
           message: |
             ## 🚀 Preview デプロイ
 
-            **デプロイURL**: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+            **デプロイURL**: ${{ steps.deploy.outputs.deployment-url }}
 
             **デプロイ時間**: ${{ github.event.repository.updated_at }}
 
