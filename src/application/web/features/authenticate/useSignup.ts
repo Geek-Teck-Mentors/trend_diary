@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from '@remix-run/react';
-import getApiClient from '@/infrastructure/api';
 import { Errors, validateForm } from './validation';
+import getApiClientForClient from '../../infrastructure/api';
 
 export default function useSignup() {
   const navigate = useNavigate();
@@ -23,8 +23,7 @@ export default function useSignup() {
     }
 
     try {
-      const currentOrigin = `${window.location.protocol}//${window.location.host}`;
-      const client = getApiClient(currentOrigin);
+      const client = getApiClientForClient();
 
       const res = await client.account.$post({
         json: validation.data,

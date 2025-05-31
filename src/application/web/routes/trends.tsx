@@ -3,7 +3,7 @@ import { Outlet, redirect } from '@remix-run/react';
 import { toast } from 'sonner';
 import AppSidebar from '../components/Sidebar';
 import { SidebarProvider } from '../components/ui/sidebar';
-import { getApiClientForClient } from '@/infrastructure/api';
+import getApiClientForClient from '../infrastructure/api';
 
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
