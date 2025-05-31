@@ -46,6 +46,8 @@ jobs:
 
             **デプロイURL**: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
 
+            **デプロイ時間**: ${{ github.event.repository.updated_at }}
+
             <details>
               <summary>デプロイ出力の詳細</summary>
               
