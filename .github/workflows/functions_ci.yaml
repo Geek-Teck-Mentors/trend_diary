@@ -112,7 +112,7 @@ jobs:
 
 
               # カバレッジの対象外ファイルを取得
-              EXCLUDE_FILES=$(yq '.exclude[]' coverage_config.yml | xargs | sed 's/ /|/g')
+              EXCLUDE_FILES=$(yq '.exclude[]' coverage.config.yml | xargs | sed 's/ /|/g')
 
               # カバレッジの結果を共通のファイルにコピー
               echo "Coverage for $function_name" >> "$COVERAGE_DIR"
