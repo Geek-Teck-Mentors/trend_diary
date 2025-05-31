@@ -26,6 +26,10 @@ jobs:
         with:
           node-version-file: .node-version
 
+      - name: ブランチ名を取得
+        id: branch-name
+        run: echo "branch_name=${GITHUB_HEAD_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
       - name: ビルド
         run: npm run build
 
@@ -35,7 +39,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy
+          command: pages deploy --branch=${{ steps.branch-name.outputs.branch_name }}
 
       - name: PRコメントを作成・更新する
         uses: marocchino/sticky-pull-request-comment@v2
