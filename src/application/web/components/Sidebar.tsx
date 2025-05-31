@@ -1,5 +1,7 @@
 import React from 'react';
 import { BookOpen, Newspaper, TrendingUp } from 'lucide-react';
+import { useNavigate } from '@remix-run/react';
+import { toast } from 'sonner';
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from './ui/sidebar';
+import getApiClient from '@/infrastructure/api';
 
 const menuItems = [
   {
@@ -26,7 +29,24 @@ const menuItems = [
   },
 ];
 
-export default function AppSidebar() {
+type Props = {
+  displayName: string;
+};
+
+export default function AppSidebar({ displayName }: Props) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const client = getApiClient(window.ENV.API_BASE_URL);
+    const res = await client.account.logout.$delete();
+    if (res.status === 204) {
+      navigate('/login');
+      toast.success('ログアウトしました');
+    } else {
+      toast.error('ログアウトに失敗しました');
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -35,7 +55,7 @@ export default function AppSidebar() {
           <span className='text-xl font-semibold'>TrendDiary</span>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className='relative'>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -50,6 +70,19 @@ export default function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup className='absolute bottom-0 left-0 w-full'>
+          <SidebarGroupLabel>User</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem className='w-full'>
+                <SidebarMenuButton>ユーザー名：{displayName}</SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleLogout}>ログアウト</SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

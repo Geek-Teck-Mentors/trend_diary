@@ -1,7 +1,8 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
-import { coverageReporter, srcAlias } from './config';
+import { srcAlias } from '../config';
+import { coverageReporter } from './config';
 
 const testInclude = ['src/application/web/**/*.test.ts'];
 

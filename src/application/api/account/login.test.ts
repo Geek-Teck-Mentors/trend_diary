@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
-import getRdbClient from '@/infrastructure/rdb';
+import getRdbClient, { Transaction } from '@/infrastructure/rdb';
 import app from '../../server';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import TEST_ENV from '@/test/env';
@@ -47,7 +47,7 @@ describe('POST /api/account/login', () => {
   });
 
   beforeEach(async () => {
-    await service.signup(TEST_EMAIL, TEST_PASSWORD);
+    await service.signup(new Transaction(db), TEST_EMAIL, TEST_PASSWORD);
   });
 
   afterEach(async () => {

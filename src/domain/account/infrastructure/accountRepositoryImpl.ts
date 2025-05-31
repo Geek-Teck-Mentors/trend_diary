@@ -1,24 +1,55 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, Account as PrismaAccount } from '@prisma/client';
+import { ResultAsync } from 'neverthrow';
 import { Nullable } from '@/common/types/utility';
-import { RdbClient, TransactionManager } from '@/infrastructure/rdb';
+import { RdbClient } from '@/infrastructure/rdb';
 import { AlreadyExistsError } from '@/common/errors';
 
 import { AccountRepository } from '../repository/accountRepository';
 import Account from '../model/account';
 
-export default class AccountRepositoryImpl extends TransactionManager implements AccountRepository {
-  constructor(private db: RdbClient) {
-    super(db);
-  }
+export default class AccountRepositoryImpl implements AccountRepository {
+  constructor(private db: RdbClient) {}
 
-  async createAccount(email: string, hashedPassword: string): Promise<Account> {
-    try {
-      const account = await this.db.account.create({
+  createAccount(email: string, hashedPassword: string): ResultAsync<Account, Error> {
+    return ResultAsync.fromPromise(
+      this.db.account.create({
         data: {
           email,
           password: hashedPassword,
         },
-      });
+      }),
+      (error) => {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          if (error.code === 'P2002') {
+            return new AlreadyExistsError(error.message);
+          }
+        }
+        return error instanceof Error ? error : new Error(String(error));
+      },
+    ).map(
+      (account) =>
+        new Account(
+          account.accountId,
+          account.email,
+          account.password,
+          account.lastLogin ?? undefined,
+          account.createdAt,
+          account.updatedAt,
+          account.deletedAt ?? undefined,
+        ),
+    );
+  }
+
+  findById(accountId: bigint): ResultAsync<Nullable<Account>, Error> {
+    return ResultAsync.fromPromise(
+      this.db.account.findUnique({
+        where: {
+          accountId,
+        },
+      }),
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map((account) => {
+      if (!account) return null;
 
       return new Account(
         account.accountId,
@@ -29,98 +60,138 @@ export default class AccountRepositoryImpl extends TransactionManager implements
         account.updatedAt,
         account.deletedAt ?? undefined,
       );
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new AlreadyExistsError(error.message);
-        }
-      }
-      throw error;
-    }
+    });
   }
 
-  async findById(accountId: bigint): Promise<Nullable<Account>> {
-    const account = await this.db.account.findUnique({
-      where: {
-        accountId,
-      },
+  findByEmail(email: string): ResultAsync<Nullable<Account>, Error> {
+    return ResultAsync.fromPromise(
+      this.db.account.findUnique({
+        where: {
+          email,
+        },
+      }),
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map((account) => {
+      if (!account) return null;
+
+      return new Account(
+        account.accountId,
+        account.email,
+        account.password,
+        account.lastLogin ?? undefined,
+        account.createdAt,
+        account.updatedAt,
+        account.deletedAt ?? undefined,
+      );
     });
+  }
 
-    if (!account) return null;
+  findBySessionId(sessionId: string): ResultAsync<Nullable<Account>, Error> {
+    return ResultAsync.fromPromise(
+      this.db.$queryRaw<PrismaAccount[]>`
+      SELECT
+        accounts.account_id,
+        accounts.email,
+        accounts.last_login,
+        accounts.created_at,
+        accounts.updated_at
+      FROM
+        accounts
+        INNER JOIN sessions ON accounts.account_id = sessions.account_id
+      WHERE
+        accounts.deleted_at IS NULL
+        AND sessions.session_id = ${sessionId}`,
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map((result) => {
+      if (result.length === 0) return null;
 
-    return new Account(
-      account.accountId,
-      account.email,
-      account.password,
-      account.lastLogin ?? undefined,
-      account.createdAt,
-      account.updatedAt,
-      account.deletedAt ?? undefined,
+      const account = result.at(0);
+      if (!account) return null;
+
+      return new Account(
+        account.accountId,
+        account.email,
+        '',
+        account.lastLogin ?? undefined,
+        account.createdAt,
+        account.updatedAt,
+      );
+    });
+  }
+
+  save(account: Account): ResultAsync<Account, Error> {
+    return ResultAsync.fromPromise(
+      this.db.account.update({
+        where: {
+          accountId: account.accountId,
+        },
+        data: {
+          email: account.email,
+          password: account.password,
+          lastLogin: account.lastLogin,
+          updatedAt: new Date(),
+        },
+      }),
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map(
+      (updatedAccount) =>
+        new Account(
+          updatedAccount.accountId,
+          updatedAccount.email,
+          updatedAccount.password,
+          updatedAccount.lastLogin ?? undefined,
+          updatedAccount.createdAt,
+          updatedAccount.updatedAt,
+          updatedAccount.deletedAt ?? undefined,
+        ),
     );
   }
 
-  async findByEmail(email: string): Promise<Nullable<Account>> {
-    const account = await this.db.account.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (!account) return null;
-
-    return new Account(
-      account.accountId,
-      account.email,
-      account.password,
-      account.lastLogin ?? undefined,
-      account.createdAt,
-      account.updatedAt,
-      account.deletedAt ?? undefined,
+  delete(account: Account): ResultAsync<Account, Error> {
+    return ResultAsync.fromPromise(
+      this.db.account.update({
+        where: {
+          accountId: account.accountId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      }),
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map(
+      (updatedAccount) =>
+        new Account(
+          updatedAccount.accountId,
+          updatedAccount.email,
+          updatedAccount.password,
+          updatedAccount.lastLogin ?? undefined,
+          updatedAccount.createdAt,
+          updatedAccount.updatedAt,
+          updatedAccount.deletedAt ?? undefined,
+        ),
     );
   }
 
-  async save(account: Account): Promise<Account> {
-    const updatedAccount = await this.db.account.update({
-      where: {
-        accountId: account.accountId,
-      },
-      data: {
-        email: account.email,
-        password: account.password,
-        lastLogin: account.lastLogin,
-        updatedAt: new Date(),
-      },
-    });
-
-    return new Account(
-      updatedAccount.accountId,
-      updatedAccount.email,
-      updatedAccount.password,
-      updatedAccount.lastLogin ?? undefined,
-      updatedAccount.createdAt,
-      updatedAccount.updatedAt,
-      updatedAccount.deletedAt ?? undefined,
-    );
+  addSession(accountId: bigint, expiresAt: Date): ResultAsync<string, Error> {
+    return ResultAsync.fromPromise(
+      this.db.session.create({
+        data: {
+          accountId,
+          expiresAt,
+        },
+      }),
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map((session) => session.sessionId);
   }
 
-  async delete(account: Account): Promise<Account> {
-    const updatedAccount = await this.db.account.update({
-      where: {
-        accountId: account.accountId,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    });
-
-    return new Account(
-      updatedAccount.accountId,
-      updatedAccount.email,
-      updatedAccount.password,
-      updatedAccount.lastLogin ?? undefined,
-      updatedAccount.createdAt,
-      updatedAccount.updatedAt,
-      updatedAccount.deletedAt ?? undefined,
-    );
+  removeSession(sessionId: string): ResultAsync<void, Error> {
+    return ResultAsync.fromPromise(
+      this.db.session.delete({
+        where: {
+          sessionId,
+        },
+      }),
+      (error) => (error instanceof Error ? error : new Error(String(error))),
+    ).map(() => undefined);
   }
 }

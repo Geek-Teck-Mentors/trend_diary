@@ -30,7 +30,8 @@
     "qiita",
     "Supabase",
     "Timestamptz",
-    "zenn"
+    "zenn",
+    "neverthrow"
   ],
   "[markdown]":  {
       "editor.wordWrap": "on",
@@ -39,7 +40,8 @@
           "strings": "on",
           "other": "on"
       },
-      "editor.snippetSuggestions": "top"
+      "editor.snippetSuggestions": "top",
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "deno.enable": true,
   "deno.enablePaths": [
