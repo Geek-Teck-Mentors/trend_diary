@@ -1,6 +1,7 @@
 import { Executor } from "./executor.ts";
 import { assertRejects } from "jsr:@std/assert";
 import { assertEquals } from "https://deno.land/std@0.83.0/testing/asserts.ts";
+import { describe, it } from "jsr:@std/testing/bdd";
 import type { FeedItem } from "./model/types.ts";
 import type { ArticleInput } from "./model/model.ts";
 import type { ArticleFetcher, ArticleRepository } from "./model/interface.ts";
@@ -35,10 +36,9 @@ function createMockRepository(
   };
 }
 
-Deno.test("正常系", async (t) => {
-  await t.step(
-    "fetch結果が0件の場合、no itemsのメッセージが返り、記事は登録されないこと",
-    async () => {
+describe("Executor", () => {
+  describe("正常系", () => {
+    it("fetch結果が0件の場合、no itemsのメッセージが返り、記事は登録されないこと", async () => {
       const mockFetcher = createMockFetcher([]);
       const mockRepository = createMockRepository([]);
       const executor = new Executor("qiita", mockFetcher, mockRepository);
@@ -47,11 +47,9 @@ Deno.test("正常系", async (t) => {
         JSON.stringify(res),
         JSON.stringify({ message: "no items" }),
       );
-    },
-  );
-  await t.step(
-    "fetch結果が1件以上の場合、記事が登録され、成功メッセージが返ること",
-    async () => {
+    });
+
+    it("fetch結果が1件以上の場合、記事が登録され、成功メッセージが返ること", async () => {
       const items: FeedItem[] = [
         {
           title: "タイトル",
@@ -70,25 +68,20 @@ Deno.test("正常系", async (t) => {
         JSON.stringify(res),
         JSON.stringify({ message: "Articles fetched successfully: 1" }),
       );
-    },
-  );
-});
+    });
+  });
 
-Deno.test("異常系", async (t) => {
-  await t.step(
-    "fetcherでエラーが発生した場合、エラーがが発生すること",
-    async () => {
+  describe("異常系", () => {
+    it("fetcherでエラーが発生した場合、エラーがが発生すること", async () => {
       const mockFetcher = createMockFetcher(() => {
         throw new Error("fetch error");
       });
       const mockRepository = createMockRepository([]);
       const executor = new Executor("qiita", mockFetcher, mockRepository);
       await assertRejects(() => executor.do(), Error, "fetch error");
-    },
-  );
-  await t.step(
-    "repositoryでエラーが発生した場合、エラーがスローされること",
-    async () => {
+    });
+
+    it("repositoryでエラーが発生した場合、エラーがスローされること", async () => {
       const items: FeedItem[] = [
         {
           title: "タイトル",
@@ -103,6 +96,6 @@ Deno.test("異常系", async (t) => {
       });
       const executor = new Executor("zenn", mockFetcher, mockRepository);
       await assertRejects(() => executor.do(), Error, "db error");
-    },
-  );
+    });
+  });
 });
