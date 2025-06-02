@@ -79,6 +79,7 @@ jobs:
       - name: supabase start
         run: supabase start -x storage-api,imgproxy,edge-runtime,realtime,vector,studio,postgres-meta,mailpit,logflare,supavisor
 
+      # SUPABASE_URL, SUPABASE_ANON_KEY, DB_URLはSupabase CLIを起動した後に取得できるため、supabase startの後に設定
       - name: setup env
         run: |
           echo "SUPABASE_URL=$(supabase status --output json | jq -r '.API_URL')" >> $GITHUB_ENV
