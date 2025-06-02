@@ -10,7 +10,6 @@ import { rdbClient } from "../../infrastructure/supabase_client.ts";
 import { stub } from "https://deno.land/std@0.152.0/testing/mock.ts";
 import { Article } from "./model/model.ts";
 
-
 describe("Executor", () => {
   let fetcher: ArticleFetcher;
   let repository: ArticleRepository;
@@ -20,7 +19,7 @@ describe("Executor", () => {
       author: "著者",
       description: "説明",
       url: "https://example.com",
-    }
+    },
   ];
 
   let articles: Article[] = [
@@ -31,7 +30,7 @@ describe("Executor", () => {
       "説明",
       "https://example.com",
       "qiita",
-    )
+    ),
   ];
 
   beforeAll(() => {
@@ -72,7 +71,11 @@ describe("Executor", () => {
     });
 
     it("repositoryでエラーが発生した場合、エラーがスローされること", async () => {
-      stub(repository, "bulkCreateArticle", () => Promise.reject(new Error("db error")));
+      stub(
+        repository,
+        "bulkCreateArticle",
+        () => Promise.reject(new Error("db error")),
+      );
       const executor = new Executor("qiita", fetcher, repository);
       await assertRejects(() => executor.do(), Error, "db error");
     });
