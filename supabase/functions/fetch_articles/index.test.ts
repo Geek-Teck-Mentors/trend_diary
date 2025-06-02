@@ -15,7 +15,6 @@ import { DatabaseError, MediaFetchError } from "./error.ts";
 
 import { describe, it } from "jsr:@std/testing/bdd";
 
-// using構文用のStubManagerクラス
 class StubManager {
   private stubs: Array<{ restore: () => void }> = [];
 
@@ -30,7 +29,6 @@ class StubManager {
   }
 }
 
-// テストヘルパー関数
 async function sendRequest(method: string, path: string, body?: unknown) {
   const req = new Request(`http://localhost${path}`, {
     method,
