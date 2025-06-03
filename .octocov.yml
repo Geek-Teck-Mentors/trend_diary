@@ -1,5 +1,5 @@
 coverage:
-  path:
+  paths:
     - '**/*.lcov'
   acceptable: 80% # 最低限必要なカバレッジ率
   badge:
@@ -7,6 +7,7 @@ coverage:
 
 # プルリクエストにコメントを投稿
 comment:
+  if: is_pull_request # PRの時のみコメント
   deletePrevious: true # 前回コメント削除
   hideFooterLink: true # octocovリンクを非表示
 
