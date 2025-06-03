@@ -66,7 +66,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: setup supabase CLI
+      - name: setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
@@ -80,29 +80,25 @@ jobs:
         run: supabase start -x storage-api,imgproxy,edge-runtime,realtime,vector,studio,postgres-meta,mailpit,logflare,supavisor
 
       # SUPABASE_URL, SUPABASE_ANON_KEY, DB_URLはSupabase CLIを起動した後に取得できるため、supabase startの後に設定
-      - name: setup env
+      - name: Setup ENV
         run: |
           echo "SUPABASE_URL=$(supabase status --output json | jq -r '.API_URL')" >> $GITHUB_ENV
           echo "SUPABASE_ANON_KEY=$(supabase status --output json | jq -r '.ANON_KEY')" >> $GITHUB_ENV
           echo "DB_URL=$(supabase status --output json | jq -r '.DB_URL')" >> $GITHUB_ENV
 
-      - name: migrate database
+      - name: DBのマイグレーション
         run: npm run db:migrate
         env:
           DIRECT_URL: ${{ env.DB_URL }}
           DATABASE_URL: ${{ env.DB_URL }}
 
-      - name: exec tests
+      - name: Deno testの実行
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
           NO_COLOR: true
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
-          # 共通のcoverageを格納するファイルを作成
-          touch coverage.txt
-          COVERAGE_DIR=$(pwd)/coverage.txt
-
           for function_name in $(ls supabase/functions); do
             # サブシェルで実行することで、cdの影響を局所化
             (
@@ -110,27 +106,17 @@ jobs:
 
               # deno testの実行
               deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage
-
-
-              # カバレッジの対象外ファイルを取得
-              EXCLUDE_FILES=$(yq '.exclude[]' coverage.config.yml | xargs | sed 's/ /|/g')
-
-              # カバレッジの結果を共通のファイルにコピー
-              echo "Coverage for $function_name" >> "$COVERAGE_DIR"
-              echo "\`\`\`" >> "$COVERAGE_DIR"
-              deno coverage ./coverage --exclude="$EXCLUDE_FILES" >> "$COVERAGE_DIR"
-              echo "\`\`\`" >> "$COVERAGE_DIR"
             )
           done
-
-          echo "COVERAGE_DIR=$COVERAGE_DIR" >> $GITHUB_ENV
-
-      - name: Output coverage
-        # カバレッジの結果をGitHubのPRコメントに出力
+      - name: coverageをlcov形式で出力
         run: |
-          # 共通のカバレッジファイルを出力
-          gh pr comment ${{ github.event.pull_request.number }} -b "$(cat $COVERAGE_DIR)"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERAGE_DIR: ${{ env.COVERAGE_DIR }}
-
+          for function_name in $(ls supabase/functions); do
+            (
+              cd supabase/functions/$function_name
+              deno coverage --lcov --output=coverage/${function_name}.lcov
+            )
+          done
+      - name: Octocovでカバレッジを報告
+        uses: k1LoW/octocov-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

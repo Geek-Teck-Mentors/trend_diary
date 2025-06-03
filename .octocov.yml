@@ -1,0 +1,15 @@
+coverage:
+  path:
+    - '**/*.lcov'
+  acceptable: 80% # 最低限必要なカバレッジ率
+  badge:
+    path: docs/coverage.svg # バッジを生成する場合
+
+# プルリクエストにコメントを投稿
+comment:
+  deletePrevious: true # 前回コメント削除
+  hideFooterLink: true # octocovリンクを非表示
+
+# GitHub Actions Job Summaryに追加
+summary:
+  hideFooterLink: false
