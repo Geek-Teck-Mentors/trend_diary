@@ -1,7 +1,7 @@
 import { Executor } from "./executor.ts";
 import { assertRejects } from "jsr:@std/assert";
 import { assertEquals } from "https://deno.land/std@0.83.0/testing/asserts.ts";
-import { beforeEach, afterEach, describe, it } from "jsr:@std/testing/bdd";
+import { afterEach, beforeEach, describe, it } from "jsr:@std/testing/bdd";
 import type { ArticleFetcher, ArticleRepository } from "./model/interface.ts";
 import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
 import ArticleRepositoryImpl from "./repository.ts";
@@ -57,7 +57,11 @@ describe("Executor", () => {
 
     it("fetch結果が1件以上の場合、記事が登録され、成功メッセージが返ること", async () => {
       stub(fetcher, "fetch", () => Promise.resolve(defaultItems));
-      stub(repository, "bulkCreateArticle", () => Promise.resolve(defaultArticles));
+      stub(
+        repository,
+        "bulkCreateArticle",
+        () => Promise.resolve(defaultArticles),
+      );
       const executor = new Executor("qiita", fetcher, repository);
       const res = await executor.do();
       assertEquals(
@@ -74,7 +78,11 @@ describe("Executor", () => {
         url: "https://mocked.url",
         fetch: () => Promise.reject(new Error("fetch error")),
       };
-      stub(repository, "bulkCreateArticle", () => Promise.resolve(defaultArticles));
+      stub(
+        repository,
+        "bulkCreateArticle",
+        () => Promise.resolve(defaultArticles),
+      );
       const executor = new Executor("qiita", errorFetcher, repository);
       await assertRejects(() => executor.do(), Error, "fetch error");
     });
