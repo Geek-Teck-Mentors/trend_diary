@@ -97,45 +97,31 @@ jobs:
           DIRECT_URL: ${{ env.DB_URL }}
           DATABASE_URL: ${{ env.DB_URL }}
 
-      - name: Deno testの実行とカバレッジ収集
+      - name: Deno testの実行
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
           NO_COLOR: true
+        # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
-          # プロジェクトルートにカバレッジディレクトリを作成
-          mkdir -p coverage
-          
-          # 全関数のテストファイルを確認
-          echo "=== 検出されたテストファイル ==="
-          find supabase/functions -name "*.test.ts" | tee test_files.txt
-          
-          # 各関数のディレクトリでテスト実行
           for function_name in $(ls supabase/functions); do
-            echo "Testing function: $function_name"
+            # サブシェルで実行することで、cdの影響を局所化
             (
               cd supabase/functions/$function_name
-              
-              # テスト実行
-              deno test \
-                --allow-read --allow-env --allow-net --allow-write --allow-run \
-                -c deno.json \
-                --coverage=coverage
-              
-              # LCOVをプロジェクトルートのcoverageディレクトリに出力
-              deno coverage coverage \
-                --lcov \
-                --output=../../../coverage/${function_name}.lcov
+
+              # deno testの実行
+              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage
+            )
+      - name: coverageをlcov形式で出力
+        run: |
+          # 共通のカバレッジディレクトリを作成
+          mkdir -p coverage
+          for function_name in $(ls supabase/functions); do
+            (
+              cd supabase/functions/$function_name
+              deno coverage --lcov --output=../../../coverage/${function_name}.lcov coverage
             )
           done
-          
-          # デバッグ: 生成されたファイルを確認
-          echo "=== 生成されたカバレッジファイル ==="
-          ls -la coverage/
-          
-          echo "=== octocovが検出するファイル ==="
-          find . -name "*.lcov" -type f
-
       - name: Octocovでカバレッジを報告
         uses: k1LoW/octocov-action@v1
         with:
