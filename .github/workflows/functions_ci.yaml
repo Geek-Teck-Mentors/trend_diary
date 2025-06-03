@@ -58,6 +58,11 @@ jobs:
   test:
     needs: [lint, format, type-check]
     runs-on: ubuntu-latest
+    # octocov用の権限を追加
+    permissions:
+      contents: write             # バッジプッシュ用
+      pull-requests: write        # PRコメント用
+      actions: write              # Actions Summary用
     steps:
       - uses: actions/checkout@v4
 
