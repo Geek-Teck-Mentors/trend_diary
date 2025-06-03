@@ -2,8 +2,6 @@ coverage:
   paths:
     - 'coverage/*.lcov' # プロジェクトルートのcoverageディレクトリ
   acceptable: 80% # 最低限必要なカバレッジ率
-  badge:
-    path: docs/coverage.svg # バッジを生成する場所
 
 # プルリクエストにコメントを投稿
 comment:
@@ -14,3 +12,10 @@ comment:
 # GitHub Actions Job Summaryに追加
 summary:
   hideFooterLink: false
+
+codeToTestRatio:
+  code:
+    - 'supabase/functions/**/*.ts'
+  test:
+    - 'supabase/functions/**/*.test.ts'
+  acceptable: 1:1.2
