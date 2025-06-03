@@ -112,6 +112,7 @@ jobs:
               # deno testの実行
               deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage
             )
+          done
       - name: coverageをlcov形式で出力
         run: |
           # 共通のカバレッジディレクトリを作成
