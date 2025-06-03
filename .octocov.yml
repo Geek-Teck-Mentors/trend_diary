@@ -1,9 +1,9 @@
 coverage:
   paths:
-    - '**/*.lcov'
+    - 'supabase/functions/**/coverage/*.lcov' # 各関数ディレクトリのcoverage
   acceptable: 80% # 最低限必要なカバレッジ率
   badge:
-    path: docs/coverage.svg # バッジを生成する場合
+    path: docs/coverage.svg # バッジを生成する場所
 
 # プルリクエストにコメントを投稿
 comment:
