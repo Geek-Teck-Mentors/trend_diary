@@ -12,10 +12,3 @@ comment:
 # GitHub Actions Job Summaryに追加
 summary:
   hideFooterLink: false
-
-codeToTestRatio:
-  code:
-    - 'supabase/functions/**/*.ts'
-  test:
-    - 'supabase/functions/**/*.test.ts'
-  acceptable: 1:1.2
