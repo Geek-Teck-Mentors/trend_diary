@@ -120,7 +120,7 @@ jobs:
           for function_name in $(ls supabase/functions); do
             (
               cd supabase/functions/$function_name
-              deno coverage --lcov --output=../../../coverage/${function_name}.lcov coverage
+              deno coverage --detailed --lcov --output=../../../coverage/${function_name}.lcov coverage
             )
           done
       - name: Octocovでカバレッジを報告
