@@ -8,8 +8,8 @@
   "scripts": {
     "dev": "remix vite:dev",
     "build": "remix vite:build",
-    "preview": "wrangler pages dev",
-    "deploy": "npm run build && wrangler pages deploy",
+    "preview": "wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
     "test": "vitest run",
     "test:frontend:coverage": "vitest run -c vitest/config.frontend.ts --coverage",
     "test:service:coverage": "vitest run -c vitest/config.service.ts --coverage",
