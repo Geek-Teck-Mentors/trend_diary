@@ -1,7 +1,7 @@
 name = "trend-diary"
 compatibility_date = "2025-04-01"
 compatibility_flags = [ "nodejs_compat" ]
-main = "./dist/server/index.js"
+main = "./src/application/worker.ts"
 preview_urls = true
 
 # ES Module形式を明示的に指定
