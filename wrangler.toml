@@ -1,23 +1,11 @@
 name = "trend-diary"
-compatibility_date = "2025-01-25"
-pages_build_output_dir = "./dist/client" # ビルド設定の「ビルド出力ディレクトリ」のこと。clientを設定しないとCSS, JSファイルを読み込めない
+compatibility_date = "2025-04-01"
 compatibility_flags = [ "nodejs_compat" ]
+main = "./functions/[[path]].ts"
+preview_urls = true
 
-# [vars]
-# MY_VAR = "my-variable"
+[assets]
+directory = "./dist/client"
 
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
-
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "my-database"
-# database_id = ""
-
-# [ai]
-# binding = "AI"
+[observability.logs]
+enabled = true
