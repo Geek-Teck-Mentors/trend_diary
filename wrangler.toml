@@ -1,14 +1,9 @@
 name = "trend-diary"
 compatibility_date = "2025-04-01"
 compatibility_flags = [ "nodejs_compat" ]
-main = "./src/application/worker.ts"
+main = "./functions/[[path]].ts"
 preview_urls = true
 
-# ES Module形式を明示的に指定
-[build]
-format = "modules"
-
 [assets]
-directory = "./dist/client/"
-binding = "ASSETS"
+directory = "./dist/client"
 run_worker_first = true # ミドルウェアを挟むため
