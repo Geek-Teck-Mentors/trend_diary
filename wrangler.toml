@@ -4,6 +4,10 @@ compatibility_flags = [ "nodejs_compat" ]
 main = "./dist/server/index.js"
 preview_urls = true
 
+# ES Module形式を明示的に指定
+[build]
+format = "modules"
+
 [assets]
 directory = "./dist/client/"
 binding = "ASSETS"
