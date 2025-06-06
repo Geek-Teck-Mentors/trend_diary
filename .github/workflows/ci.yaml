@@ -18,8 +18,7 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/ci.yaml'
-      - 'vitest.config.frontend.ts'
-      - 'vitest.config.backend.ts'
+      - 'vitest/**'
       - 'package.json'
       - 'package-lock.json'
 
