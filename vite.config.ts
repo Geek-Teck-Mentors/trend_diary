@@ -31,7 +31,10 @@ export default defineConfig({
     }),
     serverAdapter({
       adapter,
-      entry: 'src/application/server.ts',
+      entry:
+        process.env.NODE_ENV === 'production'
+          ? 'src/application/worker.ts'
+          : 'src/application/server.ts',
       exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/web/**'],
     }),
   ],

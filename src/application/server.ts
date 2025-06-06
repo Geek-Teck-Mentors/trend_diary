@@ -29,10 +29,4 @@ if (process.env.NODE_ENV === 'development')
     return handler(c.req.raw, remixContext);
   });
 
-export default process.env.NODE_ENV === 'development'
-  ? app
-  : ({
-      async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-        return app.fetch(request, env, ctx);
-      },
-    } satisfies ExportedHandler<Env>);
+export default app;
