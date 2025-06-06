@@ -16,7 +16,6 @@ export default defineConfig({
     resolve: {
       externalConditions: ['workerd', 'worker'],
     },
-    external: ['crypto', 'node:events', 'node:net', 'node:perf_hooks', 'node:stream', 'node:tty'],
   },
   resolve: {
     alias: [
