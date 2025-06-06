@@ -18,8 +18,7 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/ci.yaml'
-      - 'vitest.config.frontend.ts'
-      - 'vitest.config.backend.ts'
+      - 'vitest/**'
       - 'package.json'
       - 'package-lock.json'
 
@@ -173,7 +172,7 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-      - name: バックエンドのテスト
+      - name: サービスのテスト
         uses: ./.github/actions/test_cov
         with:
           target: service
@@ -208,7 +207,7 @@ jobs:
           DIRECT_URL: ${{ env.DATABASE_URL }}
         run: npm run db:migrate
 
-      - name: バックエンドのテスト
+      - name: APIのテスト
         uses: ./.github/actions/test_cov
         with:
           target: api

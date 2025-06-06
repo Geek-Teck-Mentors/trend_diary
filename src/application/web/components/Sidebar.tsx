@@ -14,7 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from './ui/sidebar';
-import getApiClient from '@/infrastructure/api';
+import getApiClientForClient from '../infrastructure/api';
 
 const menuItems = [
   {
@@ -37,7 +37,7 @@ export default function AppSidebar({ displayName }: Props) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const client = getApiClient(window.ENV.API_BASE_URL);
+    const client = getApiClientForClient();
     const res = await client.account.logout.$delete();
     if (res.status === 204) {
       navigate('/login');

@@ -2,7 +2,6 @@ import type { AppLoadContext } from '@remix-run/cloudflare';
 import { createRequestHandler } from '@remix-run/cloudflare';
 import { Hono } from 'hono';
 import { timeout } from 'hono/timeout';
-import { cors } from 'hono/cors';
 import loggerMiddleware from './middleware/requestLogger';
 import errorHandler from './middleware/errorHandler';
 import { Env } from './env';
@@ -13,14 +12,6 @@ const app = new Hono<Env>();
 app.use(loggerMiddleware);
 app.onError(errorHandler);
 
-app.use(
-  '/api/*',
-  cors({
-    origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
-  }),
-);
 app.use('/api', timeout(5000));
 app.route('/api', apiApp);
 
