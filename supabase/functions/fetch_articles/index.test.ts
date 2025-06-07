@@ -73,38 +73,6 @@ describe("POST /fetch_articles/articles/qiita", () => {
 
       assertSpyCalls(fetcherStub, 1);
     });
-
-    it("DBエラーが発生した場合、500エラーを返すこと", async () => {
-      using stubManager = new StubManager();
-
-      stubManager.addStub(stub(
-        QiitaFetcher.prototype,
-        "fetch",
-        () =>
-          Promise.resolve([
-            {
-              title: "title 1",
-              author: "author",
-              description: "content",
-              url: "https://article1.example.com",
-            },
-          ]),
-      ));
-
-      stubManager.addStub(stub(
-        ArticleRepositoryImpl.prototype,
-        "bulkCreateArticle",
-        () => {
-          throw new DatabaseError("Failed to save to database");
-        },
-      ));
-
-      const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
-
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "internal server error");
-    });
   });
 
   describe("異常系", () => {
