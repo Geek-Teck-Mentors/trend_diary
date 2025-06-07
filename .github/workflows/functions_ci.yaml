@@ -111,6 +111,8 @@ jobs:
             )
           done
       - name: カバレッジの出力
+        env:
+          NO_COLOR: true
         run: |
           mkdir -p coverage
           for function_name in $(ls supabase/functions); do
@@ -137,12 +139,9 @@ jobs:
             echo "" >> coverage_report.md
             echo "</details>" >> coverage_report.md
           done
-        env:
-          NO_COLOR: true
       - name: PRにカバレッジをコメント
         if: github.event_name == 'pull_request'
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat coverage/coverage_report.md)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NO_COLOR: true
