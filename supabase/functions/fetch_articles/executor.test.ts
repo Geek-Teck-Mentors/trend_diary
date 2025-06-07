@@ -72,7 +72,7 @@ describe("Executor", () => {
   });
 
   describe("異常系", () => {
-    it("fetcherでエラーが発生した場合、エラーがが発生すること", async () => {
+    it("fetcherでエラーが発生した場合、エラーが発生すること", async () => {
       // モックfetcherを用意してfetchでエラーを投げる
       const errorFetcher: ArticleFetcher = {
         url: "https://mocked.url",
