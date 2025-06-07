@@ -15,19 +15,7 @@ import { DatabaseError, MediaFetchError } from "./error.ts";
 
 import { describe, it } from "jsr:@std/testing/bdd";
 
-class StubManager {
-  private stubs: Array<{ restore: () => void }> = [];
-
-  addStub<T extends { restore: () => void }>(stubInstance: T): T {
-    this.stubs.push(stubInstance);
-    return stubInstance;
-  }
-
-  [Symbol.dispose]() {
-    this.stubs.forEach((stub) => stub.restore());
-    this.stubs.length = 0;
-  }
-}
+import StubManager from "../test/utils/stub_manager.ts"
 
 async function sendRequest(method: string, path: string, body?: unknown) {
   const req = new Request(`http://localhost${path}`, {
