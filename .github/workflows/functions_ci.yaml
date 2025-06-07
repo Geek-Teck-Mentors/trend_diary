@@ -101,14 +101,27 @@ jobs:
           NO_COLOR: true
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
-          mkdir -p coverage
           for function_name in $(ls supabase/functions); do
             # サブシェルで実行することで、cdの影響を局所化
             (
               cd supabase/functions/$function_name
 
               # deno testの実行
-              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage > ../../../coverage/${function_name}
+              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage
+            )
+          done
+      - name: カバレッジの出力
+        run: |
+          mkdir -p coverage
+          for function_name in $(ls supabase/functions); do
+            (
+              cd supabase/functions/$function_name
+
+              # カバレッジの対象外ファイルを取得
+              EXCLUDE_FILES=$(yq '.exclude[]' coverage.config.yml | xargs | sed 's/ /|/g')
+
+              # カバレッジの出力
+              deno coverage ./coverage --exclude="$EXCLUDE_FILES" > ../../../coverage/${function_name}
             )
           done
       - name: カバレッジをまとめる
