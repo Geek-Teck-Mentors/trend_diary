@@ -116,10 +116,12 @@ jobs:
         working-directory: coverage
         run: |
           for function_name in $(ls); do
-            echo "<details><summary>## ${function_name}のテストカバレッジ</summary>\n" >> coverage_report.md
+            echo "<details><summary>${function_name}のテストカバレッジ</summary>" >> coverage_report.md
+            echo "" >> coverage_report.md
             echo "\`\`\`" >> coverage_report.md
             cat ${function_name} >> coverage_report.md
             echo "\`\`\`" >> coverage_report.md
+            echo "" >> coverage_report.md
             echo "</details>" >> coverage_report.md
           done
         env:
