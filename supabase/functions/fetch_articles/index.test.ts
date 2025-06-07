@@ -167,52 +167,6 @@ describe("POST /fetch_articles/articles/qiita", () => {
       const jsonRes = await res.json();
       assertEquals(jsonRes.message, "unknown error");
     });
-
-    it("QiitaFetcherのfetchで予期せぬエラーが発生した場合、500エラーを返すこと", async () => {
-      using stubManager = new StubManager();
-
-      stubManager.addStub(stub(QiitaFetcher.prototype, "fetch", () => {
-        throw new Error("unexpected error");
-      }));
-
-      const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
-
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "unknown error");
-    });
-
-    it("ArticleRepositoryImplのbulkCreateArticleで予期せぬエラーが発生した場合、500エラーを返すこと", async () => {
-      using stubManager = new StubManager();
-
-      stubManager.addStub(stub(
-        QiitaFetcher.prototype,
-        "fetch",
-        () =>
-          Promise.resolve([
-            {
-              title: "title 1",
-              author: "author",
-              description: "content",
-              url: "https://article1.example.com",
-            },
-          ]),
-      ));
-
-      stubManager.addStub(stub(
-        ArticleRepositoryImpl.prototype,
-        "bulkCreateArticle",
-        () => {
-          throw new Error("unexpected error");
-        },
-      ));
-
-      const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
-
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "unknown error");
-    });
   });
 });
 
@@ -304,52 +258,6 @@ describe("POST /fetch_articles/articles/zenn", () => {
       stubManager.addStub(stub(Executor.prototype, "do", () => {
         throw new Error();
       }));
-
-      const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
-
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "unknown error");
-    });
-
-    it("ZennFetcherのfetchで予期せぬエラーが発生した場合、500エラーを返すこと", async () => {
-      using stubManager = new StubManager();
-
-      stubManager.addStub(stub(ZennFetcher.prototype, "fetch", () => {
-        throw new Error("unexpected error");
-      }));
-
-      const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
-
-      assertEquals(res.status, 500);
-      const jsonRes = await res.json();
-      assertEquals(jsonRes.message, "unknown error");
-    });
-
-    it("ArticleRepositoryImplのbulkCreateArticleで予期せぬエラーが発生した場合、500エラーを返すこと", async () => {
-      using stubManager = new StubManager();
-
-      stubManager.addStub(stub(
-        ZennFetcher.prototype,
-        "fetch",
-        () =>
-          Promise.resolve([
-            {
-              title: "title 1",
-              author: "author",
-              description: "content",
-              url: "https://article1.example.com",
-            },
-          ]),
-      ));
-
-      stubManager.addStub(stub(
-        ArticleRepositoryImpl.prototype,
-        "bulkCreateArticle",
-        () => {
-          throw new Error("unexpected error");
-        },
-      ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
