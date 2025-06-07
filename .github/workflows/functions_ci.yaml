@@ -108,7 +108,7 @@ jobs:
               cd supabase/functions/$function_name
 
               # deno testの実行
-              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage > ../../../coverage/${function_name}.txt
+              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage > ../../../coverage/${function_name}
             )
           done
       - name: PRにカバレッジをコメント
@@ -118,7 +118,7 @@ jobs:
           for function_name in $(ls); do
             echo "<details><summary>## ${function_name}のテストカバレッジ</summary>\n" >> coverage_report.md
             echo "\`\`\`" >> coverage_report.md
-            cat ${function_name}.txt >> coverage_report.md
+            cat ${function_name} >> coverage_report.md
             echo "\`\`\`" >> coverage_report.md
             echo "</details>" >> coverage_report.md
           done
