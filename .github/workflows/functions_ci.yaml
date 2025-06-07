@@ -58,11 +58,8 @@ jobs:
   test:
     needs: [lint, format, type-check]
     runs-on: ubuntu-latest
-    # octocov用の権限を追加
     permissions:
-      contents: write             # バッジプッシュ用
-      pull-requests: write        # PRコメント用
-      actions: write              # Actions Summary用
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
@@ -104,26 +101,27 @@ jobs:
           NO_COLOR: true
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
+          mkdir -p coverage
           for function_name in $(ls supabase/functions); do
             # サブシェルで実行することで、cdの影響を局所化
             (
               cd supabase/functions/$function_name
 
               # deno testの実行
-              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage
+              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage > ../../../coverage/${function_name}.txt
             )
           done
-      - name: coverageをlcov形式で出力
+      - name: PRにカバレッジをコメント
+        if: github.event_name == 'pull_request'
+        working-directory: coverage
         run: |
-          # 共通のカバレッジディレクトリを作成
-          mkdir -p coverage
-          for function_name in $(ls supabase/functions); do
-            (
-              cd supabase/functions/$function_name
-              deno coverage --detailed --lcov --output=../../../coverage/${function_name}.lcov coverage
-            )
+          for function_name in $(ls); do
+            echo "<details><summary>## ${function_name}のテストカバレッジ</summary>\n" >> coverage_report.md
+            echo "\`\`\`" >> coverage_report.md
+            cat ${function_name}.txt >> coverage_report.md
+            echo "\`\`\`" >> coverage_report.md
+            echo "</details>" >> coverage_report.md
           done
-      - name: Octocovでカバレッジを報告
-        uses: k1LoW/octocov-action@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NO_COLOR: true
