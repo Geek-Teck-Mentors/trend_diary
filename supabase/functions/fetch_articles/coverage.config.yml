@@ -1,0 +1,4 @@
+exclude:
+  - repository.ts
+  - fetcher/qiita_fetcher.ts
+  - fetcher/zenn_fetcher.ts
