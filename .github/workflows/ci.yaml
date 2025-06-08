@@ -126,7 +126,7 @@ jobs:
         id: check-e2e
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/e2e'
+          subdir: 'src/e2e src/application/web/routes'
 
       - name: サービスの差分チェック
         id: check-service
