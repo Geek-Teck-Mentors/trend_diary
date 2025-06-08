@@ -126,7 +126,7 @@ jobs:
         id: check-e2e
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/e2e src/application/web/routes'
+          subdir: 'src/test/e2e src/application/web/routes'
 
       - name: サービスの差分チェック
         id: check-service
@@ -184,6 +184,26 @@ jobs:
 
       - name: Playwrightのセットアップ
         run: npx playwright install --with-deps
+
+      # ページの結合、シナリオテスト実施のためにDBが必要
+      - name: PostgreSQLのセットアップ
+        run: docker compose build && docker compose up -d
+
+      - name: PostgreSQLが起動するまで待機
+        uses: ./.github/actions/backoff
+        with:
+          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
+          fail_command: docker compose down
+
+      - name: Prismaキャッシュのセットアップ
+        uses: ./.github/actions/setup_prisma_cache
+        with:
+          schema-path: prisma/main.prisma
+
+      - name: DB Migration
+        env:
+          DIRECT_URL: ${{ env.DATABASE_URL }}
+        run: npm run db:migrate
 
       - name: E2Eテストの実行
         run: npm run test:e2e
