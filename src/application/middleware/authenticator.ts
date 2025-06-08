@@ -8,6 +8,7 @@ import getRdbClient from '@/infrastructure/rdb';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import { NotFoundError } from '@/common/errors';
 import { SESSION_NAME } from '@/common/constants/session';
+import { isError } from '@/common/types/utility';
 
 const authenticator = createMiddleware<Env>(async (c, next) => {
   const logger = c.get(CONTEXT_KEY.APP_LOG);
@@ -26,22 +27,18 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb));
 
   const result = await service.getLoginUser(sessionId);
+  if (isError(result)) {
+    if (result.error instanceof NotFoundError) {
+      logger.error('Session not found', { sessionId });
+      throw new HTTPException(401, { message: 'login required' });
+    }
+    logger.error('Error occurred while authenticating', { error: result });
+    throw new HTTPException(500, { message: 'Internal Server Error' });
+  }
 
-  return result.match(
-    (user) => {
-      c.set(CONTEXT_KEY.SESSION_USER, user);
-      c.set(CONTEXT_KEY.SESSION_ID, sessionId);
-      return next();
-    },
-    (error) => {
-      if (error instanceof NotFoundError) {
-        logger.error('Session not found', { sessionId });
-        throw new HTTPException(401, { message: 'login required' });
-      }
-      logger.error('Error occurred while authenticating', { error });
-      throw new HTTPException(500, { message: 'Internal Server Error' });
-    },
-  );
+  c.set(CONTEXT_KEY.SESSION_USER, result.data);
+  c.set(CONTEXT_KEY.SESSION_ID, sessionId);
+  return next();
 });
 
 export default authenticator;
