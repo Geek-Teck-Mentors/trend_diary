@@ -177,7 +177,7 @@ jobs:
 
       - name: E2Eテストの実行
         run: npx playwright test
-      
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
