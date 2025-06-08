@@ -29,7 +29,7 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   const result = await service.getLoginUser(sessionId);
   if (isError(result)) {
     if (result.error instanceof NotFoundError) {
-      logger.error('Session not found', { sessionId });
+      logger.error('Session not found', result.error, { sessionId });
       throw new HTTPException(401, { message: 'login required' });
     }
     logger.error('Error occurred while authenticating', { error: result });
