@@ -52,6 +52,7 @@ export default class UserRepositoryImpl implements UserRepository {
   }
 
   async findBySessionId(sessionId: string): AsyncResult<Nullable<User>, Error> {
+    const currentTimestamp = new Date();
     try {
       const result = await this.db.$queryRaw<PrismaUser[]>`
       SELECT
@@ -66,7 +67,7 @@ export default class UserRepositoryImpl implements UserRepository {
         AND sessions.session_id = ${sessionId}
       WHERE
         users.deleted_at IS NULL
-        AND sessions.expires_at > ${new Date()}`;
+        AND sessions.expires_at > ${currentTimestamp}`;
       if (result.length === 0) return resultSuccess(null);
 
       const user = result.at(0);
