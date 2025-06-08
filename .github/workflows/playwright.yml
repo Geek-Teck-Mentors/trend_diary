@@ -1,0 +1,42 @@
+name: E2E Test
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+    paths:
+      - '.github/workflows/playwright.yml'
+      - 'src/application/web/**'
+      - 'src/e2e/**'
+
+env:
+  NODE_VERSION_FILE: .node-version
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
