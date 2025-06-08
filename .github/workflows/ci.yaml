@@ -105,6 +105,7 @@ jobs:
     outputs:
       test_runner: ubuntu-latest
       run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-frontend.outputs.diff-count != 0 }}
+      run_e2e_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-e2e.outputs.diff-count != 0 }}
       run_service_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-service.outputs.diff-count != 0 }}
       run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-api.outputs.diff-count != 0 }}
     steps:
@@ -120,6 +121,12 @@ jobs:
         with:
           subdir: 'src/application/web src/application/web/components vitest/'
           exclude_pattern: 'src/application/web/components/ui'
+
+      - name: E2Eの差分チェック
+        id: check-e2e
+        uses: ./.github/actions/diff
+        with:
+          subdir: 'src/e2e'
 
       - name: サービスの差分チェック
         id: check-service
@@ -164,7 +171,7 @@ jobs:
   test-e2e:
     needs: setup-test
     runs-on: ${{ needs.setup-test.outputs.test_runner }}
-    if: ${{ needs.setup-test.outputs.run_frontend_test == 'true' }}
+    if: ${{ needs.setup-test.outputs.run_e2e_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
