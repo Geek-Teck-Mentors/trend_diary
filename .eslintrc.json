@@ -20,7 +20,8 @@
           "**/test/**",
           "**/__tests__/**",
           "**/__mocks__/**",
-          "**/e2e/**"
+          "**/e2e/**",
+          "playwright.config.ts"
         ]
       }
     ]
