@@ -206,7 +206,7 @@ jobs:
         run: npm run db:migrate
 
       - name: E2Eテストの実行
-        run: npm run test:e2e
+        run: npm run e2e
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
