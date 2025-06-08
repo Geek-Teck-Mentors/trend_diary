@@ -24,7 +24,9 @@
           "playwright.config.ts"
         ]
       }
-    ]
+    ],
+    // Playwrightのベストプラクティス参考: https://playwright.dev/docs/best-practices#lint-your-tests
+    "@typescript-eslint/no-floating-promises": "error"
   },
   "ignorePatterns": [
     "node_modules/",
