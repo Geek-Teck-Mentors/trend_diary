@@ -186,7 +186,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: E2Eテストの実行
-        run: npx playwright test
+        run: npm run test:e2e
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
