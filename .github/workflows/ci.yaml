@@ -161,6 +161,30 @@ jobs:
         with:
           target: frontend
 
+  test-e2e:
+    needs: setup-test
+    runs-on: ${{ needs.setup-test.outputs.test_runner }}
+    if: ${{ needs.setup-test.outputs.run_frontend_test == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: Playwrightのセットアップ
+        run: npx playwright install --with-deps
+
+      - name: E2Eテストの実行
+        run: npx playwright test
+      
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
   test-service:
     needs: setup-test
     runs-on: ${{ needs.setup-test.outputs.test_runner }}
