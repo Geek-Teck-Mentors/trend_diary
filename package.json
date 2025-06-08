@@ -16,6 +16,7 @@
     "test:api:coverage": "vitest run -c vitest/config.api.ts --coverage",
     "e2e": "npx playwright test",
     "e2e:report": "npx playwright show-report",
+    "e2e:gen": "npx playwright codegen",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext .ts,.tsx .",
     "lint:fix": "eslint --ext .ts,.tsx . --fix",
