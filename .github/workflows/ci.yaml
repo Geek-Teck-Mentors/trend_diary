@@ -170,6 +170,8 @@ jobs:
           target: frontend
 
   test-e2e:
+    # E2Eテストは時間がかかるため、タイムアウトを設定
+    timeout-minutes: 10
     needs: setup-test
     runs-on: ${{ needs.setup-test.outputs.test_runner }}
     if: ${{ needs.setup-test.outputs.run_e2e_test == 'true' }}
