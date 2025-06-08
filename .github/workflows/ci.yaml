@@ -146,6 +146,7 @@ jobs:
             echo "メインブランチなので、リグレッションテストとして全て実行"
           else
             echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
+            echo "E2E差分: ${{ steps.check-e2e.outputs.diff-count }} ファイル"
             echo "サービス差分: ${{ steps.check-service.outputs.diff-count }} ファイル"
             echo "API差分: ${{ steps.check-api.outputs.diff-count }} ファイル"
             echo "テストの準備完了"
