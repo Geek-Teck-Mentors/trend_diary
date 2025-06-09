@@ -18,11 +18,24 @@
           "**/*.spec.ts",
           "**/test/**",
           "**/__tests__/**",
-          "**/__mocks__/**"
+          "**/__mocks__/**",
+          "**/e2e/**",
+          "playwright.config.ts"
         ]
       }
-    ]
+    ],
+    // Playwrightのベストプラクティス参考: https://playwright.dev/docs/best-practices#lint-your-tests
+    "@typescript-eslint/no-floating-promises": "error"
   },
+  // no-floating-promisesがReactのuseEffect内でのasyncに過剰に反応するため
+  "overrides": [
+    {
+      "files": ["**/*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-floating-promises": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "node_modules/",
     "dist/",
