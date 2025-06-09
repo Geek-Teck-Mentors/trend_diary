@@ -9,6 +9,7 @@ import AccountService from './accountService';
 import UserRepositoryImpl from '../infrastructure/userRepositoryImpl';
 import db from '@/test/__mocks__/prisma';
 import { Transaction } from '@/infrastructure/rdb';
+import { resultError, resultSuccess } from '@/common/types/utility';
 
 const mockAccount: Account = {
   accountId: BigInt(1),
@@ -187,12 +188,13 @@ describe('AccountService', () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual(
-        ok({
+        resultSuccess({
           userId: mockUser.userId,
           accountId: mockUser.accountId,
           displayName: undefined,
           createdAt: expect.any(Date),
           updatedAtValue: expect.any(Date),
+          deletedAtValue: undefined,
         }),
       );
     });
@@ -202,7 +204,7 @@ describe('AccountService', () => {
         db.$queryRaw.mockResolvedValue([]);
 
         expect(await service.getLoginUser(sessionId)).toEqual(
-          err(new NotFoundError('User not found')),
+          resultError(new NotFoundError('User not found')),
         );
       });
     });
@@ -210,7 +212,9 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.$queryRaw.mockRejectedValue(new Error('Database error'));
 
-      expect(await service.getLoginUser(sessionId)).toEqual(err(new Error('Database error')));
+      expect(await service.getLoginUser(sessionId)).toEqual(
+        resultError(new Error('Database error')),
+      );
     });
   });
 

@@ -3,7 +3,7 @@ import { User as PrismaUser } from '@prisma/client';
 import { RdbClient } from '@/infrastructure/rdb';
 import { UserRepository } from '../repository/userRepository';
 import User from '../model/user';
-import { Nullable } from '@/common/types/utility';
+import { AsyncResult, Nullable, resultSuccess, resultError } from '@/common/types/utility';
 
 export default class UserRepositoryImpl implements UserRepository {
   constructor(private db: RdbClient) {}
@@ -51,9 +51,10 @@ export default class UserRepositoryImpl implements UserRepository {
     });
   }
 
-  findBySessionId(sessionId: string): ResultAsync<Nullable<User>, Error> {
-    return ResultAsync.fromPromise(
-      this.db.$queryRaw<PrismaUser[]>`
+  async findBySessionId(sessionId: string): AsyncResult<Nullable<User>, Error> {
+    const currentTimestamp = new Date();
+    try {
+      const result = await this.db.$queryRaw<PrismaUser[]>`
       SELECT
         users.user_id,
         users.account_id,
@@ -66,21 +67,23 @@ export default class UserRepositoryImpl implements UserRepository {
         AND sessions.session_id = ${sessionId}
       WHERE
         users.deleted_at IS NULL
-        AND sessions.expires_at > ${new Date()}`,
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map((result) => {
-      if (result.length === 0) return null;
+        AND sessions.expires_at > ${currentTimestamp}`;
+      if (result.length === 0) return resultSuccess(null);
 
       const user = result.at(0);
-      if (!user) return null;
+      if (!user) return resultSuccess(null);
 
-      return new User(
-        user.userId,
-        user.accountId,
-        user.displayName ?? undefined,
-        user.createdAt,
-        user.updatedAt,
+      return resultSuccess(
+        new User(
+          user.userId,
+          user.accountId,
+          user.displayName ?? undefined,
+          user.createdAt,
+          user.updatedAt,
+        ),
       );
-    });
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 }

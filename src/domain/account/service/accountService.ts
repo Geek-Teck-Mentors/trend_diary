@@ -9,7 +9,7 @@ import {
 } from '../../../common/errors';
 import { UserRepository } from '../repository/userRepository';
 import Account from '../model/account';
-import { isNull } from '@/common/types/utility';
+import { AsyncResult, isError, isNull, resultError, resultSuccess } from '@/common/types/utility';
 import User from '../model/user';
 import { TransactionClient } from '@/infrastructure/rdb';
 import { SESSION_DURATION } from '@/common/constants/session';
@@ -87,14 +87,14 @@ export default class AccountService {
     return ok({ user, sessionId, expiredAt });
   }
 
-  async getLoginUser(sessionId: string): Promise<Result<User, Error>> {
+  async getLoginUser(sessionId: string): AsyncResult<User, Error> {
     const userRes = await this.userRepository.findBySessionId(sessionId);
-    if (userRes.isErr()) return err(userRes.error);
+    if (isError(userRes)) return userRes;
 
-    const user = userRes.value;
-    if (isNull(user)) return err(new NotFoundError('User not found'));
+    const user = userRes.data;
+    if (isNull(user)) return resultError(new NotFoundError('User not found'));
 
-    return ok(user);
+    return resultSuccess(user);
   }
 
   async logout(sessionId: string): Promise<Result<void, Error>> {
