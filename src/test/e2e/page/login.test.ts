@@ -32,9 +32,9 @@ test.describe('ログインページ', () => {
     });
 
     test.describe('入力フォームの検証', () => {
-      test.skip('メールアドレスの入力検証', async ({ page }) => {});
-      test.skip('パスワードの入力検証', async ({ page }) => {});
-      test.skip('ログインボタンの有効化/無効化', async ({ page }) => {});
+      test.skip('メールアドレスの入力検証', async () => {});
+      test.skip('パスワードの入力検証', async () => {});
+      test.skip('ログインボタンの有効化/無効化', async () => {});
     });
   });
 
