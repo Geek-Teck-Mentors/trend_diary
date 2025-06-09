@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 // ページに対して、単体・結合テストを実施します
-// 単体テストでは、ページの表示と基本要素の確認を行います
-// 結合テストでは、ログイン機能のフローを確認します
+// 単体テストでは、API関連のページの表示と基本要素を確認します
+// 結合テストでは、画面遷移に伴うAPIを含む挙動を確認します
 test.describe('ログインページ', () => {
   test.describe('単体テスト', () => {
     test('表示と基本要素の確認', async ({ page }) => {
@@ -29,6 +29,12 @@ test.describe('ログインページ', () => {
       // アカウント作成ページのタイトルを確認
       await expect(page).toHaveTitle(/.*アカウント作成.*/);
       await expect(page.getByText('アカウント作成')).toBeVisible();
+    });
+
+    test.describe('入力フォームの検証', () => {
+      test.skip('メールアドレスの入力検証', async ({ page }) => {});
+      test.skip('パスワードの入力検証', async ({ page }) => {});
+      test.skip('ログインボタンの有効化/無効化', async ({ page }) => {});
     });
   });
 
