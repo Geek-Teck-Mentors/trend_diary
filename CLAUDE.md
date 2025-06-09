@@ -9,25 +9,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Build and Deployment
+
 - `npm run dev` - Start development server with Remix
 - `npm run preview` - Preview with Wrangler (Cloudflare Workers)
 - `npm run build` - Build for production
 - `npm run deploy` - Build and deploy to Cloudflare Workers
 
 ### Testing
+
 - `npm run test:service:coverage` - Test domain/service layer with coverage
-- `npm run test:api:coverage` - Test API layer with coverage  
+- `npm run test:api:coverage` - Test API layer with coverage
 - `npm run test:frontend:coverage` - Test frontend components with coverage
 - `npm run test` - Run all tests with coverage
 - Individual test files can be run with `npx vitest run <path/to/test>`
 
 ### Database Management
+
 - `npm run db:generate` - Generate Prisma client
 - `npm run db:push` - Push schema to database
 - `npm run db:migrate` - Run database migrations
 - `npm run db:reset` - Reset database and run seeds
 
 ### Code Quality
+
 - `npm run lint` - Run ESLint
 - `npm run typecheck` - Run TypeScript checks
 
@@ -38,14 +42,16 @@ This is a **Domain-Driven Design (DDD)** application with clean architecture pri
 ### Key Architectural Patterns
 
 **Error Handling**: Uses `neverthrow` library for functional error handling
+
 - Service layer returns `Promise<Result<T, E>>`
 - Lower layers use `ResultAsync<T, E>`
 - Custom error types in `src/common/errors/`
 
 **Domain Layer Structure**:
+
 ```
 src/domain/{aggregate}/
-├── model/           # Domain entities  
+├── model/           # Domain entities
 ├── service/         # Domain business logic
 ├── repository/      # Repository interfaces
 ├── schema/          # Zod validation schemas
@@ -53,8 +59,9 @@ src/domain/{aggregate}/
 ```
 
 **Testing Strategy** (multi-tier):
+
 - **Service layer**: Unit tests with mocked Prisma client
-- **API layer**: Integration tests with real database  
+- **API layer**: Integration tests with real database
 - **Frontend**: Component and hook testing
 - Coverage requirement: 60% across all metrics
 
@@ -75,6 +82,7 @@ src/domain/{aggregate}/
 ### Database Schema
 
 Prisma models are split across files in `prisma/models/`:
+
 - User authentication system with accounts and sessions
 - Article aggregation system
 - All models extend base schema with consistent ID/timestamp patterns
