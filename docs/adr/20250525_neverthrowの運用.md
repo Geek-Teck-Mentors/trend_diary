@@ -2,7 +2,7 @@
 
 <!-- Title という文字を消してこの ADR のタイトルを書いてください -->
 
-Status: Accepted
+Status: Deprecated
 
 <!-- プルリクベースで開発するので、プルリクを作る段で Accepted の状態でOK -->
 <!-- 別のADRによって置き換えられた場合 Replaced by #{ADR No.} に変更 -->
