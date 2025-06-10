@@ -12,6 +12,7 @@ const notifyDiscord = (err: Error, webhookUrl: string, requestInfo: RequestInfo)
   const notifier = new DiscordNotifier(webhookUrl);
 
   // Discord通知をバックグラウンドで実行
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   notifier.error(err, requestInfo);
 };
 
