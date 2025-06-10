@@ -3,3 +3,6 @@ DATABASE_URL=postgresql://postgres:password@localhost:5432/postgres
 
 # Direct connection to the database. Used for migrations
 DIRECT_URL=postgres://postgres:password@localhost:5432/postgres 
+
+# Discord webhook URL for alert
+DISCORD_WEBHOOK_URL=
