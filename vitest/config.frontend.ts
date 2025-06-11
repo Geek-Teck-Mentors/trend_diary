@@ -7,7 +7,10 @@ import { coverageReporter } from './function';
 
 const testInclude = ['src/application/web/**/*.test.ts'];
 
-const coverageInclude = ['src/application/web/validation/*', 'src/application/web/components/**/*.ts'];
+const coverageInclude = [
+  'src/application/web/validation/*',
+  'src/application/web/components/**/*.ts',
+];
 const exclude = ['src/application/web/components/ui/**/*'];
 
 export default defineConfig({
