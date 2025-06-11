@@ -5,12 +5,7 @@
     // TODO: SUPPORTED TYPESCRIPT VERSIONS: >=4.7.4 <5.6.0の解消
     "warnOnUnsupportedTypeScriptVersion": false
   },
-  "extends": [
-    "airbnb",
-    "airbnb-typescript",
-    "prettier",
-    "plugin:storybook/recommended"
-  ],
+  "extends": ["airbnb", "airbnb-typescript", "prettier", "plugin:storybook/recommended"],
   "rules": {
     "consistent-return": "off",
     "import/extensions": "off",
@@ -40,9 +35,7 @@
   // no-floating-promisesがReactのuseEffect内でのasyncに過剰に反応するため
   "overrides": [
     {
-      "files": [
-        "**/*.tsx"
-      ],
+      "files": ["**/*.tsx"],
       "rules": {
         "@typescript-eslint/no-floating-promises": "off"
       }
