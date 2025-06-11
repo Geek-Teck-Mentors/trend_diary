@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
-import { coverageReporter } from './config';
+import { coverageReporter } from './function';
 import tailwindcss from '@tailwindcss/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 

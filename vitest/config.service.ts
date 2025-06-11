@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
-import { coverageReporter, generateIncludes } from './config';
+import { coverageReporter, generateIncludes } from './function';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 const { testInclude, coverageInclude } = generateIncludes('src/domain', 'src/common');
