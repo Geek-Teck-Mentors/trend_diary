@@ -1,4 +1,5 @@
 {
+  "root": true, // ローカルのgit worktreeで複数モジュール認識されるのを防ぐ
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.json",
