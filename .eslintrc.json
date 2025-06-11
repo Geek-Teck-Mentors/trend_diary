@@ -27,7 +27,8 @@
           "**/e2e/**",
           "playwright.config.ts",
           "vite.config.ts",
-          "vitest/**/*.ts"
+          "vitest/**/*.ts",
+          "vitest.workspace.ts"
         ]
       }
     ],

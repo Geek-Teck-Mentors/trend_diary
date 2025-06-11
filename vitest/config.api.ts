@@ -1,8 +1,8 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
-import { coverageReporter, generateIncludes } from './function';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { coverageReporter, generateIncludes } from './function';
 
 // ci環境ではDATABASE_URLが設定されているため
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';

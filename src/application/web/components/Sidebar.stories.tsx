@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import AppSidebar from './Sidebar';
 import { SidebarProvider } from './ui/sidebar';
@@ -23,6 +24,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+// eslint-disable-next-line no-console
 const handleLogout = () => console.log('ログアウトしました');
 
 // デフォルトのストーリー
