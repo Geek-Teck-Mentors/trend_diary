@@ -1,7 +1,5 @@
 import React from 'react';
 import { BookOpen, Newspaper, TrendingUp } from 'lucide-react';
-import { useNavigate } from '@remix-run/react';
-import { toast } from 'sonner';
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +12,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from './ui/sidebar';
-import getApiClientForClient from '../infrastructure/api';
 
 const menuItems = [
   {
@@ -31,22 +28,10 @@ const menuItems = [
 
 type Props = {
   displayName: string;
+  handleLogout: () => void;
 };
 
-export default function AppSidebar({ displayName }: Props) {
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    const client = getApiClientForClient();
-    const res = await client.account.logout.$delete();
-    if (res.status === 204) {
-      navigate('/login');
-      toast.success('ログアウトしました');
-    } else {
-      toast.error('ログアウトに失敗しました');
-    }
-  };
-
+export default function AppSidebar({ displayName, handleLogout }: Props) {
   return (
     <Sidebar>
       <SidebarHeader>
