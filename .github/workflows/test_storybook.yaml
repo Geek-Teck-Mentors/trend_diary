@@ -34,9 +34,8 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-        # 👇 This will run all Vitest tests, including Storybook tests
       - name: Storybookのテスト実行
-        run: npm run test-storybook -- --coverage --reporter=text --reporter=json --reporter=json-summary
+        run: npm run test-storybook
 
       - name: カバレッジの可視化
         if: github.event_name == 'pull_request'
