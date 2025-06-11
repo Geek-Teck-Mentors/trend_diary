@@ -16,6 +16,14 @@ on:
 env:
   NODE_VERSION_FILE: .node-version
 
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
