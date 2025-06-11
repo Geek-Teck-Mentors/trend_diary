@@ -3,6 +3,7 @@
 import { defineConfig } from 'vite';
 import { srcAlias } from '../config';
 import { coverageReporter } from './config';
+import tailwindcss from '@tailwindcss/vite';
 
 const testInclude = ['src/application/web/**/*.test.ts'];
 
@@ -13,6 +14,7 @@ export default defineConfig({
   resolve: {
     alias: [srcAlias],
   },
+  plugins: [tailwindcss()],
   test: {
     globals: true,
     include: testInclude,
