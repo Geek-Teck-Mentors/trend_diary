@@ -21,7 +21,9 @@
           "**/__tests__/**",
           "**/__mocks__/**",
           "**/e2e/**",
-          "playwright.config.ts"
+          "playwright.config.ts",
+          "vitest/**",
+          "vite.config.ts"
         ]
       }
     ],
