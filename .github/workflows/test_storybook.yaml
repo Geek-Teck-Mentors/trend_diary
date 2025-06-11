@@ -1,0 +1,38 @@
+name: Storybook Tests
+description: 'Storybookのテストを実行し、カバレッジを可視化するワークフロー'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.storybook/**'
+      - '.github/workflows/test_storybook.yaml'
+      - 'src/application/web/**/*.stories.{ts,tsx}'
+
+env:
+  NODE_VERSION_FILE: .node-version
+
+jobs:
+  test:
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+        # 👇 This will run all Vitest tests, including Storybook tests
+      - name: Storybookのテスト実行
+        run: npm run test-storybook -- --coverage --reporter=text --reporter=json --reporter=json-summary
+
+      - name: カバレッジの可視化
+        if: github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: storybook
+          vite-config-path: vitest/config.storybook.ts
+          comment-on: ${{ github.event_name == 'pull_request' && 'pr' || 'commit' }}
