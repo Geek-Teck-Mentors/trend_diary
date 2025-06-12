@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
-import getRdbClient, { Transaction } from '@/infrastructure/rdb';
-import TEST_ENV from '@/test/env';
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
+import accountTestHelper from '@/test/helper/accountTestHelper';
 
 // ページに対して、単体・結合テストを実施します
 // 単体テストでは、API関連のページの表示と基本要素を確認します
@@ -189,31 +187,18 @@ test.describe('ログインページ', () => {
   });
 
   test.describe('結合テスト', () => {
-    process.env.NODE_ENV = 'test';
-    const rdb = getRdbClient(TEST_ENV.DATABASE_URL);
-
-    async function cleanUp(): Promise<void> {
-      await rdb.$queryRaw`TRUNCATE TABLE "accounts";`;
-      await rdb.$queryRaw`TRUNCATE TABLE "users";`;
-    }
-
     // テストアカウントの情報
     const testEmail = 'test@example.com';
     const testPassword = 'password123';
 
     test.beforeAll(async () => {
-      await cleanUp();
-      const accountRepository = new AccountRepositoryImpl(rdb);
-      const userRepository = new UserRepositoryImpl(rdb);
-      const transaction = new Transaction(rdb);
-
-      const service = new AccountService(accountRepository, userRepository);
-      await service.signup(transaction, testEmail, testPassword);
+      await accountTestHelper.cleanUp();
+      await accountTestHelper.createTestAccount(testEmail, testPassword);
     });
 
     test.afterAll(async () => {
-      await cleanUp();
-      await rdb.$disconnect();
+      await accountTestHelper.cleanUp();
+      await accountTestHelper.disconnect();
     });
 
     test('アカウント作成ページへの遷移', async ({ page }) => {
