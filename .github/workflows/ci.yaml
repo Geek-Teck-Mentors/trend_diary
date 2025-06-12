@@ -177,6 +177,8 @@ jobs:
     if: ${{ needs.setup-test.outputs.run_e2e_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 完全な履歴を取得して差分比較できるようにする
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
@@ -214,7 +216,13 @@ jobs:
 
       - name: E2Eテストの差分実行
         if: github.event_name == 'pull_request'
-        run: npm run e2e -- --only-changed=$GITHUB_BASE_REF
+        run: |
+          if git rev-parse --verify $GITHUB_BASE_REF &>/dev/null; then
+            npm run e2e -- --only-changed=$GITHUB_BASE_REF
+          else
+            echo "ベースブランチが見つからないため、全てのテストを実行します"
+            npm run e2e
+          fi
 
       - name: E2Eテストの実行
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
