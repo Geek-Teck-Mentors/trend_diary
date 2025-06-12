@@ -234,7 +234,7 @@ test.describe('ログインページ', () => {
       await page.getByRole('button', { name: 'ログイン' }).click();
 
       // ログイン処理の完了を待機（ページ遷移を確認）
-      await expect(page).not.toHaveURL('/login', { timeout: 5000 });
+      await expect(page).not.toHaveURL('/login', { timeout: process.env.CI ? 10000 : 5000 }); // CI環境ではタイムアウトを長く設定
 
       // 認証が必要なページ要素が表示されることを確認
       await expect(page.locator('body')).not.toContainText('メールアドレス');
