@@ -85,7 +85,7 @@ test.describe('ログインページ', () => {
         // 各テストケースを順次実行
         await testCases.reduce(async (previousPromise, testCase) => {
           await previousPromise;
-          
+
           await emailInput.fill(testCase.email);
           await passwordInput.fill('password123');
           await loginButton.click();
@@ -157,7 +157,7 @@ test.describe('ログインページ', () => {
         // 各テストケースを順次実行
         await testCases.reduce(async (previousPromise, testCase) => {
           await previousPromise;
-          
+
           await emailInput.fill('test@example.com'); // 有効なメールアドレス
           await passwordInput.fill(testCase.password);
           await loginButton.click();
@@ -178,7 +178,6 @@ test.describe('ログインページ', () => {
           await passwordInput.clear();
         }, Promise.resolve());
       });
-      test.skip('ログインボタンの有効化/無効化', async () => {});
     });
   });
 
