@@ -236,9 +236,6 @@ test.describe('ログインページ', () => {
       // ログイン処理の完了を待機（ページ遷移を確認）
       await expect(page).not.toHaveURL('/login', { timeout: 5000 });
 
-      // ログイン成功の場合：ログインページから離脱することを確認
-      await expect(page).not.toHaveURL('/login');
-
       // 認証が必要なページ要素が表示されることを確認
       await expect(page.locator('body')).not.toContainText('メールアドレス');
       await expect(page.locator('body')).not.toContainText('パスワード');
