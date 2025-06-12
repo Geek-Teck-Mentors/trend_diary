@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import getRdbClient, { Transaction } from '@/infrastructure/rdb';
+import TEST_ENV from '@/test/env';
+import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 
 // ページに対して、単体・結合テストを実施します
 // 単体テストでは、API関連のページの表示と基本要素を確認します
@@ -182,6 +185,33 @@ test.describe('ログインページ', () => {
   });
 
   test.describe('結合テスト', () => {
+    process.env.NODE_ENV = 'test';
+    const rdb = getRdbClient(TEST_ENV.DATABASE_URL);
+
+    async function cleanUp(): Promise<void> {
+      await rdb.$queryRaw`TRUNCATE TABLE "accounts";`;
+      await rdb.$queryRaw`TRUNCATE TABLE "users";`;
+    }
+
+    // テストアカウントの情報
+    const testEmail = 'test@example.com';
+    const testPassword = 'password123';
+
+    test.beforeAll(async () => {
+      await cleanUp();
+      const accountRepository = new AccountRepositoryImpl(rdb);
+      const userRepository = new UserRepositoryImpl(rdb);
+      const transaction = new Transaction(rdb);
+
+      const service = new AccountService(accountRepository, userRepository);
+      await service.signup(transaction, testEmail, testPassword);
+    });
+
+    test.afterAll(async () => {
+      await cleanUp();
+      await rdb.$disconnect();
+    });
+
     test('アカウント作成ページへの遷移', async ({ page }) => {
       // アカウント作成リンクをクリック
       await page.getByText('アカウント作成').click();
@@ -192,10 +222,6 @@ test.describe('ログインページ', () => {
     });
 
     test('ログイン成功時の挙動', async ({ page }) => {
-      // テストアカウントの情報
-      const testEmail = 'test@example.com';
-      const testPassword = 'password123';
-
       // フォームに入力
       await page.getByLabel('メールアドレス').fill(testEmail);
       await page.getByLabel('パスワード').fill(testPassword);
@@ -205,19 +231,6 @@ test.describe('ログインページ', () => {
 
       // ログイン処理の完了を待機（エラーメッセージまたは成功遷移）
       await page.waitForTimeout(2000);
-
-      // エラーメッセージが表示されているかチェック
-      const hasLoginError = await page
-        .getByText(/メールアドレス.*正しくありません|ログインに失敗/)
-        .isVisible();
-
-      if (hasLoginError) {
-        // テストアカウントが存在しない場合はテストをスキップ
-        // eslint-disable-next-line no-console
-        console.log('Test account not found. Please run: npm run db:seed');
-        test.skip();
-        return;
-      }
 
       // ログイン成功の場合：ログインページから離脱することを確認
       await expect(page).not.toHaveURL('/login');
