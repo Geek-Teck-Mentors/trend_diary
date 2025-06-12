@@ -92,13 +92,14 @@ test.describe('ログインページ', () => {
           await emailInput.fill(testCase.email);
           await passwordInput.fill('password123');
           await loginButton.click();
-          await page.waitForTimeout(500);
 
           if (testCase.shouldShowError) {
             await expect(page.getByText('Invalid email')).toBeVisible({
               timeout: 3000,
             });
           } else {
+            // ログインボタンが再度押せる状態になることを待機
+            await expect(loginButton).toBeEnabled({ timeout: 3000 });
             await expect(page.getByText('Invalid email')).not.toBeVisible({
               timeout: 3000,
             });
@@ -164,16 +165,19 @@ test.describe('ログインページ', () => {
           await emailInput.fill('test@example.com'); // 有効なメールアドレス
           await passwordInput.fill(testCase.password);
           await loginButton.click();
-          await page.waitForTimeout(500);
 
           if (testCase.shouldShowError) {
             // Zodのパスワードバリデーションエラーが表示されることを確認
-            const hasPasswordError = await page.getByText(/Required|at least|at most/i).isVisible();
-            expect(hasPasswordError).toBe(true);
+            await expect(page.getByText(/Required|at least|at most/i)).toBeVisible({
+              timeout: 3000,
+            });
           } else {
+            // ログインボタンが再度押せる状態になることを待機
+            await expect(loginButton).toBeEnabled({ timeout: 3000 });
             // パスワードバリデーションエラーは表示されない（認証エラーは別）
-            const hasPasswordError = await page.getByText(/Required|at least|at most/i).isVisible();
-            expect(hasPasswordError).toBe(false);
+            await expect(page.getByText(/Required|at least|at most/i)).not.toBeVisible({
+              timeout: 3000,
+            });
           }
 
           // フォームをクリアして次のテストケースの準備
@@ -229,8 +233,8 @@ test.describe('ログインページ', () => {
       // ログインボタンをクリック
       await page.getByRole('button', { name: 'ログイン' }).click();
 
-      // ログイン処理の完了を待機（エラーメッセージまたは成功遷移）
-      await page.waitForTimeout(2000);
+      // ログイン処理の完了を待機（ページ遷移を確認）
+      await expect(page).not.toHaveURL('/login', { timeout: 5000 });
 
       // ログイン成功の場合：ログインページから離脱することを確認
       await expect(page).not.toHaveURL('/login');
