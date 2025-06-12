@@ -17,23 +17,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Testing
 
+- `npm run test` - Run all tests
 - `npm run test:service:coverage` - Test domain/service layer with coverage
 - `npm run test:api:coverage` - Test API layer with coverage
 - `npm run test:frontend:coverage` - Test frontend components with coverage
-- `npm run test` - Run all tests with coverage
+- `npm run e2e` - Run E2E tests with Playwright
+- `npm run e2e:report` - Show Playwright test report
+- `npm run e2e:gen` - Generate Playwright test code
 - Individual test files can be run with `npx vitest run <path/to/test>`
 
 ### Database Management
 
-- `npm run db:generate` - Generate Prisma client
-- `npm run db:push` - Push schema to database
+- `npm run db:gen` - Generate Prisma client 
 - `npm run db:migrate` - Run database migrations
+- `npm run db:migrate:sql-only` - Run migrations without generating client
+- `npm run db:migrate:deploy` - Deploy migrations to production
 - `npm run db:reset` - Reset database and run seeds
+- `npm run db:studio` - Open Prisma Studio
+- `npm run supabase:db:type-gen` - Generate Supabase database types
 
 ### Code Quality
 
 - `npm run lint` - Run ESLint
-- `npm run typecheck` - Run TypeScript checks
+- `npm run lint:fix` - Run ESLint with auto-fix
+- `npm run check-types` - Run TypeScript checks
+- `npm run format` - Check code formatting with Prettier
+- `npm run format:fix` - Fix code formatting with Prettier
 
 ## Architecture Overview
 
@@ -60,10 +69,10 @@ src/domain/{aggregate}/
 
 **Testing Strategy** (multi-tier):
 
-- **Service layer**: Unit tests with mocked Prisma client
-- **API layer**: Integration tests with real database
-- **Frontend**: Component and hook testing
-- Coverage requirement: 60% across all metrics
+- **Service layer**: Unit tests with mocked Prisma client using `vitest/config.service.ts`
+- **API layer**: Integration tests with real database using `vitest/config.api.ts`
+- **Frontend**: Component and hook testing using `vitest/config.frontend.ts`
+- **E2E tests**: Playwright tests for end-to-end scenarios
 
 ### Technology Stack
 
@@ -83,8 +92,10 @@ src/domain/{aggregate}/
 
 Prisma models are split across files in `prisma/models/`:
 
-- User authentication system with accounts and sessions
-- Article aggregation system
+- `user.prisma` - User management
+- `account.prisma` - Account management  
+- `session.prisma` - Session management
+- `article.prisma` - Article aggregation system
 - All models extend base schema with consistent ID/timestamp patterns
 
 ### Important Conventions
