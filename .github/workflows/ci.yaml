@@ -216,7 +216,7 @@ jobs:
 
       - name: E2Eテストの差分実行
         if: github.event_name == 'pull_request'
-        run: npm run e2e -- --only-changed=$GITHUB_BASE_REF
+        run: npm run e2e -- --reporter=github --only-changed=origin/$GITHUB_BASE_REF
 
       - name: E2Eテストの実行
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
