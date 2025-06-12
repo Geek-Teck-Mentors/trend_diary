@@ -105,7 +105,79 @@ test.describe('ログインページ', () => {
           await emailInput.clear();
         }, Promise.resolve());
       });
-      test.skip('パスワードの入力検証', async () => {});
+      test('パスワードの入力検証', async ({ page }) => {
+        const emailInput = page.getByLabel('メールアドレス');
+        const passwordInput = page.getByLabel('パスワード');
+        const loginButton = page.getByRole('button', { name: 'ログイン' });
+
+        // テストケースのテーブル定義
+        const testCases = [
+          {
+            description: '空文字',
+            password: '',
+            shouldShowError: true,
+          },
+          {
+            description: '7文字以下',
+            password: 'short',
+            shouldShowError: true,
+          },
+          {
+            description: '1文字',
+            password: 'a',
+            shouldShowError: true,
+          },
+          {
+            description: '51文字以上',
+            password: 'a'.repeat(51),
+            shouldShowError: true,
+          },
+          {
+            description: '8文字（有効な最小）',
+            password: 'password',
+            shouldShowError: false,
+          },
+          {
+            description: '50文字（有効な最大）',
+            password: 'a'.repeat(50),
+            shouldShowError: false,
+          },
+          {
+            description: '英数字記号混合',
+            password: 'Password123!',
+            shouldShowError: false,
+          },
+          {
+            description: '日本語を含む',
+            password: 'パスワード123',
+            shouldShowError: false,
+          },
+        ];
+
+        // 各テストケースを順次実行
+        await testCases.reduce(async (previousPromise, testCase) => {
+          await previousPromise;
+          
+          await emailInput.fill('test@example.com'); // 有効なメールアドレス
+          await passwordInput.fill(testCase.password);
+          await loginButton.click();
+          await page.waitForTimeout(500);
+
+          if (testCase.shouldShowError) {
+            // Zodのパスワードバリデーションエラーが表示されることを確認
+            const hasPasswordError = await page.getByText(/Required|at least|at most/i).isVisible();
+            expect(hasPasswordError).toBe(true);
+          } else {
+            // パスワードバリデーションエラーは表示されない（認証エラーは別）
+            const hasPasswordError = await page.getByText(/Required|at least|at most/i).isVisible();
+            expect(hasPasswordError).toBe(false);
+          }
+
+          // フォームをクリアして次のテストケースの準備
+          await emailInput.clear();
+          await passwordInput.clear();
+        }, Promise.resolve());
+      });
       test.skip('ログインボタンの有効化/無効化', async () => {});
     });
   });
