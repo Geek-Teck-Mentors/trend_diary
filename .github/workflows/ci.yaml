@@ -212,7 +212,12 @@ jobs:
           DIRECT_URL: ${{ env.DATABASE_URL }}
         run: npm run db:migrate
 
+      - name: E2Eテストの差分実行
+        if: github.event_name == 'pull_request'
+        run: npm run e2e -- --only-changed=$GITHUB_BASE_REF
+
       - name: E2Eテストの実行
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: npm run e2e
 
       - uses: actions/upload-artifact@v4
