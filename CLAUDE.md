@@ -28,7 +28,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Database Management
 
-- `npm run db:gen` - Generate Prisma client 
+- `npm run db:gen` - Generate Prisma client
 - `npm run db:migrate` - Run database migrations
 - `npm run db:migrate:sql-only` - Run migrations without generating client
 - `npm run db:migrate:deploy` - Deploy migrations to production
@@ -93,7 +93,7 @@ src/domain/{aggregate}/
 Prisma models are split across files in `prisma/models/`:
 
 - `user.prisma` - User management
-- `account.prisma` - Account management  
+- `account.prisma` - Account management
 - `session.prisma` - Session management
 - `article.prisma` - Article aggregation system
 - All models extend base schema with consistent ID/timestamp patterns
