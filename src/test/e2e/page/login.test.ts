@@ -240,7 +240,7 @@ test.describe('ログインページ', () => {
       await expect(page.locator('body')).not.toContainText('パスワード');
     });
 
-    test.skip('ログイン失敗時の挙動', async ({ page }) => {
+    test('ログイン失敗時の挙動', async ({ page }) => {
       // 無効な認証情報でテスト
       const invalidEmail = 'invalid@example.com';
       const invalidPassword = 'wrongpassword';
