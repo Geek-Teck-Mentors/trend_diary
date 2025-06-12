@@ -216,13 +216,7 @@ jobs:
 
       - name: E2Eテストの差分実行
         if: github.event_name == 'pull_request'
-        run: |
-          if git rev-parse --verify $GITHUB_BASE_REF &>/dev/null; then
-            npm run e2e -- --only-changed=$GITHUB_BASE_REF
-          else
-            echo "ベースブランチが見つからないため、全てのテストを実行します"
-            npm run e2e
-          fi
+        run: npm run e2e -- --only-changed=$GITHUB_BASE_REF
 
       - name: E2Eテストの実行
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
