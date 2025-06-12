@@ -62,7 +62,7 @@ test.describe('ログインページ', () => {
           },
           {
             description: '有効な標準形式',
-            email: 'test@example.com',
+            email: 'dummy-test@example.com',
             shouldShowError: false,
           },
           {
