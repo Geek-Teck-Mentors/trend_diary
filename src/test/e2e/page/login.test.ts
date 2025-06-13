@@ -5,6 +5,7 @@ import accountTestHelper from '@/test/helper/accountTestHelper';
 // 単体テストでは、API関連のページの表示と基本要素を確認します
 // 結合テストでは、画面遷移に伴うAPIを含む挙動を確認します
 test.describe('ログインページ', () => {
+  test.describe.configure({ mode: 'default' });
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
   });
