@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'prisma/schema.prisma'
+      - 'prisma/**/*.prisma'
       - '.github/workflows/check_prisma.yaml'
 
 env:
