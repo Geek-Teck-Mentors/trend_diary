@@ -9,6 +9,7 @@ import getRdbClient from '@/infrastructure/rdb';
 import { logger } from '@/logger/logger';
 import CONTEXT_KEY from '@/application/middleware/context';
 import { SESSION_NAME } from '@/common/constants/session';
+import { isSuccess, isError } from '@/common/types/utility';
 
 export default async function logout(c: Context<Env>) {
   const sessionId = c.get(CONTEXT_KEY.SESSION_ID);
@@ -17,21 +18,21 @@ export default async function logout(c: Context<Env>) {
 
   const result = await service.logout(sessionId);
 
-  return result.match(
-    () => {
-      deleteCookie(c, SESSION_NAME);
-      logger.info('logout success');
-      return c.body(null, 204);
-    },
-    (error) => {
-      if (error instanceof NotFoundError) {
-        throw new HTTPException(error.statusCode as ContentfulStatusCode, {
-          message: error.message,
-        });
-      }
+  if (isSuccess(result)) {
+    deleteCookie(c, SESSION_NAME);
+    logger.info('logout success');
+    return c.body(null, 204);
+  }
 
-      logger.error(error instanceof ServerError ? 'internal server error' : 'unknown error', error);
-      throw new HTTPException(500, { message: 'Internal server error' });
-    },
-  );
+  if (isError(result)) {
+    const { error } = result;
+    if (error instanceof NotFoundError) {
+      throw new HTTPException(error.statusCode as ContentfulStatusCode, {
+        message: error.message,
+      });
+    }
+
+    logger.error(error instanceof ServerError ? 'internal server error' : 'unknown error', error);
+    throw new HTTPException(500, { message: 'Internal server error' });
+  }
 }
