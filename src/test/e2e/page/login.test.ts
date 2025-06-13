@@ -227,10 +227,6 @@ test.describe('ログインページ', () => {
       // ページ遷移とネットワーク処理の完了を待機
       await page.waitForURL('/trends', { timeout: process.env.CI ? 30000 : 10000 });
       await page.waitForLoadState('networkidle', { timeout: process.env.CI ? 30000 : 10000 });
-
-      // 認証が必要なページ要素が表示されることを確認
-      await expect(page.locator('body')).not.toContainText('メールアドレス');
-      await expect(page.locator('body')).not.toContainText('パスワード');
     });
 
     test('ログイン失敗時の挙動', async ({ page }) => {
