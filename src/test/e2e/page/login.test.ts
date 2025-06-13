@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import accountTestHelper from '@/test/helper/accountTestHelper';
+import { runTestCasesSequentially } from '@/test/helper/sequential';
 
 // ページに対して、単体・結合テストを実施します
 // 単体テストでは、API関連のページの表示と基本要素を確認します
@@ -85,9 +86,7 @@ test.describe('ログインページ', () => {
         ];
 
         // 各テストケースを順次実行
-        await testCases.reduce(async (previousPromise, testCase) => {
-          await previousPromise;
-
+        await runTestCasesSequentially(testCases, async (testCase) => {
           await emailInput.fill(testCase.email);
           await passwordInput.fill('password123');
           await loginButton.click();
@@ -106,8 +105,9 @@ test.describe('ログインページ', () => {
 
           // フォームをクリアして次のテストケースの準備
           await emailInput.clear();
-        }, Promise.resolve());
+        });
       });
+
       test('パスワードの入力検証', async ({ page }) => {
         const emailInput = page.getByLabel('メールアドレス');
         const passwordInput = page.getByLabel('パスワード');
@@ -158,9 +158,7 @@ test.describe('ログインページ', () => {
         ];
 
         // 各テストケースを順次実行
-        await testCases.reduce(async (previousPromise, testCase) => {
-          await previousPromise;
-
+        await runTestCasesSequentially(testCases, async (testCase) => {
           await emailInput.fill('test@example.com'); // 有効なメールアドレス
           await passwordInput.fill(testCase.password);
           await loginButton.click();
@@ -182,7 +180,7 @@ test.describe('ログインページ', () => {
           // フォームをクリアして次のテストケースの準備
           await emailInput.clear();
           await passwordInput.clear();
-        }, Promise.resolve());
+        });
       });
     });
   });
