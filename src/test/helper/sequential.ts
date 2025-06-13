@@ -3,7 +3,7 @@
  */
 export async function runTestCasesSequentially<T>(
   testCases: T[],
-  testFunction: (testCase: T) => Promise<void>
+  testFunction: (testCase: T) => Promise<void>,
 ): Promise<void> {
   await testCases.reduce(async (previousPromise, testCase) => {
     await previousPromise;
