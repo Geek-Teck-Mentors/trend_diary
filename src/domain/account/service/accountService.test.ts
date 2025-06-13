@@ -173,7 +173,9 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.account.findUnique.mockRejectedValue(new Error('Database error'));
 
-      expect(await service.login(email, password)).toEqual(resultError(new Error('Database error')));
+      expect(await service.login(email, password)).toEqual(
+        resultError(new Error('Database error')),
+      );
     });
   });
 

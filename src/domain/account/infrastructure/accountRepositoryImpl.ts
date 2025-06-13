@@ -17,7 +17,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           password: hashedPassword,
         },
       });
-      
+
       return resultSuccess(
         new Account(
           account.accountId,
@@ -46,7 +46,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           accountId,
         },
       });
-      
+
       if (!account) return resultSuccess(null);
 
       return resultSuccess(
@@ -72,7 +72,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           email,
         },
       });
-      
+
       if (!account) return resultSuccess(null);
 
       return resultSuccess(
@@ -106,7 +106,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
       WHERE
         accounts.deleted_at IS NULL
         AND sessions.session_id = ${sessionId}`;
-        
+
       if (result.length === 0) return resultSuccess(null);
 
       const account = result.at(0);
@@ -140,7 +140,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           updatedAt: new Date(),
         },
       });
-      
+
       return resultSuccess(
         new Account(
           updatedAccount.accountId,
@@ -167,7 +167,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           deletedAt: new Date(),
         },
       });
-      
+
       return resultSuccess(
         new Account(
           updatedAccount.accountId,
@@ -192,7 +192,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           expiresAt,
         },
       });
-      
+
       return resultSuccess(session.sessionId);
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error(String(error)));
@@ -206,7 +206,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           sessionId,
         },
       });
-      
+
       return resultSuccess(undefined);
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error(String(error)));

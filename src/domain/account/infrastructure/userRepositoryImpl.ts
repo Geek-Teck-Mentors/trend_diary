@@ -15,7 +15,7 @@ export default class UserRepositoryImpl implements UserRepository {
           displayName,
         },
       });
-      
+
       return resultSuccess(
         new User(
           newUser.userId,
@@ -38,7 +38,7 @@ export default class UserRepositoryImpl implements UserRepository {
           deletedAt: null,
         },
       });
-      
+
       if (!user) return resultSuccess(null);
 
       return resultSuccess(

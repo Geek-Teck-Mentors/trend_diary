@@ -8,7 +8,15 @@ import {
 } from '../../../common/errors';
 import { UserRepository } from '../repository/userRepository';
 import Account from '../model/account';
-import { AsyncResult, isError, isNull, resultError, resultSuccess, Result, isSuccess } from '@/common/types/utility';
+import {
+  AsyncResult,
+  isError,
+  isNull,
+  resultError,
+  resultSuccess,
+  Result,
+  isSuccess,
+} from '@/common/types/utility';
 import User from '../model/user';
 import { TransactionClient } from '@/infrastructure/rdb';
 import { SESSION_DURATION } from '@/common/constants/session';
@@ -45,13 +53,13 @@ export default class AccountService {
       await transaction.rollback();
       return resultError(ServerError.handle(createResult.error));
     }
-    
+
     const userResult = await this.userRepository.create(createResult.data.accountId);
     if (isError(userResult)) {
       await transaction.rollback();
       return resultError(ServerError.handle(userResult.error));
     }
-    
+
     await transaction.commit();
 
     return resultSuccess(createResult.data);
