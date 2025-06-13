@@ -25,7 +25,7 @@ export default async function logout(c: Context<Env>) {
   }
 
   if (isError(result)) {
-    const error = result.error;
+    const { error } = result;
     if (error instanceof NotFoundError) {
       throw new HTTPException(error.statusCode as ContentfulStatusCode, {
         message: error.message,

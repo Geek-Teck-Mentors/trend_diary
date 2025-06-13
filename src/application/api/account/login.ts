@@ -45,7 +45,7 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
   }
 
   if (isError(result)) {
-    const error = result.error;
+    const { error } = result;
     if (error instanceof ClientError) {
       throw new HTTPException(error.statusCode as ContentfulStatusCode, {
         message: error.message,
