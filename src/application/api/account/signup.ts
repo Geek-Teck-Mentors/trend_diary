@@ -7,6 +7,7 @@ import { accountSchema } from '@/domain/account/schema/accountSchema';
 import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
+import { isSuccess, isError } from '@/common/types/utility';
 
 export default async function signup(c: Context<Env>) {
   let body;
@@ -43,29 +44,30 @@ export default async function signup(c: Context<Env>) {
 
   const result = await service.signup(transaction, valid.data.email, valid.data.password);
 
-  return result.match(
-    (account) => {
-      logger.info('sign up success', { accountId: account.accountId.toString() });
-      return c.json({}, 201);
-    },
-    (e) => {
-      if (e instanceof AlreadyExistsError) {
-        throw new HTTPException(409, {
-          message: e.message,
-        });
-      }
+  if (isSuccess(result)) {
+    const account = result.data;
+    logger.info('sign up success', { accountId: account.accountId.toString() });
+    return c.json({}, 201);
+  }
 
-      if (e instanceof ServerError) {
-        logger.error('internal server error', e);
-        throw new HTTPException(500, {
-          message: e.message,
-        });
-      }
-
-      logger.error('unknown error', e);
-      throw new HTTPException(500, {
-        message: 'unknown error',
+  if (isError(result)) {
+    const e = result.error;
+    if (e instanceof AlreadyExistsError) {
+      throw new HTTPException(409, {
+        message: e.message,
       });
-    },
-  );
+    }
+
+    if (e instanceof ServerError) {
+      logger.error('internal server error', e);
+      throw new HTTPException(500, {
+        message: e.message,
+      });
+    }
+
+    logger.error('unknown error', e);
+    throw new HTTPException(500, {
+      message: 'unknown error',
+    });
+  }
 }
