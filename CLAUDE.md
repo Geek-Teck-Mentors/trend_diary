@@ -4,93 +4,104 @@
 - 敬語は使用しないこと
 - TDDで進めること
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+このファイルはClaude Code (claude.ai/code) がこのリポジトリで作業する際のガイダンスを提供する。
 
-## Development Commands
+## 開発コマンド
 
-### Build and Deployment
+### ビルドとデプロイ
 
-- `npm run dev` - Start development server with Remix
-- `npm run preview` - Preview with Wrangler (Cloudflare Workers)
-- `npm run build` - Build for production
-- `npm run deploy` - Build and deploy to Cloudflare Workers
+- `npm run dev` - Remixで開発サーバーを起動
+- `npm run preview` - Wrangler（Cloudflare Workers）でプレビュー
+- `npm run build` - 本番用ビルド
+- `npm run deploy` - ビルドしてCloudflare Workersにデプロイ
 
-### Testing
+### テスト
 
-- `npm run test:service:coverage` - Test domain/service layer with coverage
-- `npm run test:api:coverage` - Test API layer with coverage
-- `npm run test:frontend:coverage` - Test frontend components with coverage
-- `npm run test` - Run all tests with coverage
-- Individual test files can be run with `npx vitest run <path/to/test>`
+- `npm run test` - 全てのテストを実行
+- `npm run test:service:coverage` - ドメイン/サービス層のテストをカバレッジ付きで実行
+- `npm run test:api:coverage` - API層のテストをカバレッジ付きで実行
+- `npm run test:frontend:coverage` - フロントエンドコンポーネントのテストをカバレッジ付きで実行
+- `npm run e2e` - PlaywrightでE2Eテストを実行
+- `npm run e2e:report` - Playwrightテストレポートを表示
+- `npm run e2e:gen` - Playwrightテストコードを生成
+- 個別テストファイルは `npx vitest run <path/to/test>` で実行可能
 
-### Database Management
+### データベース管理
 
-- `npm run db:generate` - Generate Prisma client
-- `npm run db:push` - Push schema to database
-- `npm run db:migrate` - Run database migrations
-- `npm run db:reset` - Reset database and run seeds
+- `npm run db:gen` - Prismaクライアントを生成
+- `npm run db:migrate` - データベースマイグレーションを実行
+- `npm run db:migrate:sql-only` - クライアント生成なしでマイグレーションを実行
+- `npm run db:migrate:deploy` - 本番環境にマイグレーションをデプロイ
+- `npm run db:reset` - データベースをリセットしてシードを実行
+- `npm run db:studio` - Prisma Studioを開く
+- `npm run supabase:db:type-gen` - Supabaseデータベース型を生成
 
-### Code Quality
+### コード品質
 
-- `npm run lint` - Run ESLint
-- `npm run typecheck` - Run TypeScript checks
+- `npm run lint` - ESLintを実行
+- `npm run lint:fix` - ESLintを自動修正付きで実行
+- `npm run check-types` - TypeScript型チェックを実行
+- `npm run format` - Prettierでコードフォーマットをチェック
+- `npm run format:fix` - Prettierでコードフォーマットを修正
 
-## Architecture Overview
+## アーキテクチャ概要
 
-This is a **Domain-Driven Design (DDD)** application with clean architecture principles, deployed as a **hybrid Cloudflare Workers + Supabase Functions** setup.
+これは**ドメイン駆動設計（DDD）**とクリーンアーキテクチャの原則に基づく、**Cloudflare Workers + Supabase Functions**のハイブリッド構成でデプロイされるアプリケーション。
 
-### Key Architectural Patterns
+### 主要なアーキテクチャパターン
 
-**Error Handling**: Uses `neverthrow` library for functional error handling
+**エラーハンドリング**: 関数型エラーハンドリングに`neverthrow`ライブラリを使用
 
-- Service layer returns `Promise<Result<T, E>>`
-- Lower layers use `ResultAsync<T, E>`
-- Custom error types in `src/common/errors/`
+- サービス層は`Promise<Result<T, E>>`を返す
+- 下位層は`ResultAsync<T, E>`を使用
+- カスタムエラー型は`src/common/errors/`に定義
 
-**Domain Layer Structure**:
+**ドメイン層構造**:
 
 ```
 src/domain/{aggregate}/
-├── model/           # Domain entities
-├── service/         # Domain business logic
-├── repository/      # Repository interfaces
-├── schema/          # Zod validation schemas
-└── infrastructure/  # Repository implementations
+├── model/           # ドメインエンティティ
+├── service/         # ドメインビジネスロジック
+├── repository/      # リポジトリインターフェース
+├── schema/          # Zodバリデーションスキーマ
+└── infrastructure/  # リポジトリ実装
 ```
 
-**Testing Strategy** (multi-tier):
+**テスト戦略**（多層構造）:
 
-- **Service layer**: Unit tests with mocked Prisma client
-- **API layer**: Integration tests with real database
-- **Frontend**: Component and hook testing
-- Coverage requirement: 60% across all metrics
+- **サービス層**: `vitest/config.service.ts`でモックPrismaクライアントを使用したユニットテスト
+- **API層**: `vitest/config.api.ts`で実際のデータベースを使用した統合テスト
+- **フロントエンド**: `vitest/config.frontend.ts`でコンポーネントとフックのテスト
+- **E2Eテスト**: エンドツーエンドシナリオのPlaywrightテスト
 
-### Technology Stack
+### 技術スタック
 
-**Runtime**: Cloudflare Workers (main app) + Supabase Functions (background jobs)
-**Backend**: Hono web framework with Remix adapter
-**Frontend**: Remix with React + TailwindCSS v4 + Radix UI
-**Database**: PostgreSQL with Prisma ORM
-**Testing**: Vitest with separate configs per layer
+**ランタイム**: Cloudflare Workers（メインアプリ）+ Supabase Functions（バックグラウンドジョブ）
+**バックエンド**: HonoウェブフレームワークとRemixアダプター
+**フロントエンド**: Remix + React + TailwindCSS v4 + Radix UI
+**データベース**: PostgreSQL + Prisma ORM
+**テスト**: 各層で個別設定のVitest
 
-### Entry Points
+### エントリーポイント
 
-- **Main Application**: `/functions/[[path]].ts` (Cloudflare Workers entry)
-- **Development Server**: `/src/application/server.ts` (Hono + Remix)
-- **Background Jobs**: `/supabase/functions/*/index.ts`
+- **メインアプリケーション**: `/functions/[[path]].ts`（Cloudflare Workersエントリー）
+- **開発サーバー**: `/src/application/server.ts`（Hono + Remix）
+- **バックグラウンドジョブ**: `/supabase/functions/*/index.ts`
 
-### Database Schema
+### データベーススキーマ
 
-Prisma models are split across files in `prisma/models/`:
+Prismaモデルは`prisma/models/`内のファイルに分割:
 
-- User authentication system with accounts and sessions
-- Article aggregation system
-- All models extend base schema with consistent ID/timestamp patterns
+- `user.prisma` - ユーザー管理
+- `account.prisma` - アカウント管理
+- `session.prisma` - セッション管理
+- `article.prisma` - 記事集約システム
+- 全モデルは統一されたID/タイムスタンプパターンでベーススキーマを拡張
 
-### Important Conventions
+### 重要な規約
 
-**Imports**: Use absolute imports from `src/` root
-**Error Handling**: Always use Result types in service layer, throw errors only in infrastructure layer
-**Testing**: Mock Prisma client using `src/test/__mocks__/prisma.ts`
-**Validation**: Use Zod schemas in domain layer for all data validation
-**Logging**: Use structured logging with Pino logger
+**インポート**: `src/`ルートからの絶対インポートを使用
+**エラーハンドリング**: サービス層では常にResult型を使用、エラーのthrowはインフラ層のみ
+**テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック
+**バリデーション**: 全データ検証にドメイン層のZodスキーマを使用
+**ログ**: Pinoロガーで構造化ログを使用
