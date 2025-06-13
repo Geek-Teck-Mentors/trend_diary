@@ -1,6 +1,5 @@
 import { Prisma, Account as PrismaAccount } from '@prisma/client';
-import { ResultAsync } from 'neverthrow';
-import { Nullable } from '@/common/types/utility';
+import { Nullable, AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
 import { RdbClient } from '@/infrastructure/rdb';
 import { AlreadyExistsError } from '@/common/errors';
 
@@ -10,24 +9,16 @@ import Account from '../model/account';
 export default class AccountRepositoryImpl implements AccountRepository {
   constructor(private db: RdbClient) {}
 
-  createAccount(email: string, hashedPassword: string): ResultAsync<Account, Error> {
-    return ResultAsync.fromPromise(
-      this.db.account.create({
+  async createAccount(email: string, hashedPassword: string): AsyncResult<Account, Error> {
+    try {
+      const account = await this.db.account.create({
         data: {
           email,
           password: hashedPassword,
         },
-      }),
-      (error) => {
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          if (error.code === 'P2002') {
-            return new AlreadyExistsError(error.message);
-          }
-        }
-        return error instanceof Error ? error : new Error(String(error));
-      },
-    ).map(
-      (account) =>
+      });
+      
+      return resultSuccess(
         new Account(
           account.accountId,
           account.email,
@@ -37,58 +28,72 @@ export default class AccountRepositoryImpl implements AccountRepository {
           account.updatedAt,
           account.deletedAt ?? undefined,
         ),
-    );
+      );
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          return resultError(new AlreadyExistsError(error.message));
+        }
+      }
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  findById(accountId: bigint): ResultAsync<Nullable<Account>, Error> {
-    return ResultAsync.fromPromise(
-      this.db.account.findUnique({
+  async findById(accountId: bigint): AsyncResult<Nullable<Account>, Error> {
+    try {
+      const account = await this.db.account.findUnique({
         where: {
           accountId,
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map((account) => {
-      if (!account) return null;
+      });
+      
+      if (!account) return resultSuccess(null);
 
-      return new Account(
-        account.accountId,
-        account.email,
-        account.password,
-        account.lastLogin ?? undefined,
-        account.createdAt,
-        account.updatedAt,
-        account.deletedAt ?? undefined,
+      return resultSuccess(
+        new Account(
+          account.accountId,
+          account.email,
+          account.password,
+          account.lastLogin ?? undefined,
+          account.createdAt,
+          account.updatedAt,
+          account.deletedAt ?? undefined,
+        ),
       );
-    });
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  findByEmail(email: string): ResultAsync<Nullable<Account>, Error> {
-    return ResultAsync.fromPromise(
-      this.db.account.findUnique({
+  async findByEmail(email: string): AsyncResult<Nullable<Account>, Error> {
+    try {
+      const account = await this.db.account.findUnique({
         where: {
           email,
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map((account) => {
-      if (!account) return null;
+      });
+      
+      if (!account) return resultSuccess(null);
 
-      return new Account(
-        account.accountId,
-        account.email,
-        account.password,
-        account.lastLogin ?? undefined,
-        account.createdAt,
-        account.updatedAt,
-        account.deletedAt ?? undefined,
+      return resultSuccess(
+        new Account(
+          account.accountId,
+          account.email,
+          account.password,
+          account.lastLogin ?? undefined,
+          account.createdAt,
+          account.updatedAt,
+          account.deletedAt ?? undefined,
+        ),
       );
-    });
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  findBySessionId(sessionId: string): ResultAsync<Nullable<Account>, Error> {
-    return ResultAsync.fromPromise(
-      this.db.$queryRaw<PrismaAccount[]>`
+  async findBySessionId(sessionId: string): AsyncResult<Nullable<Account>, Error> {
+    try {
+      const result = await this.db.$queryRaw<PrismaAccount[]>`
       SELECT
         accounts.account_id,
         accounts.email,
@@ -100,28 +105,31 @@ export default class AccountRepositoryImpl implements AccountRepository {
         INNER JOIN sessions ON accounts.account_id = sessions.account_id
       WHERE
         accounts.deleted_at IS NULL
-        AND sessions.session_id = ${sessionId}`,
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map((result) => {
-      if (result.length === 0) return null;
+        AND sessions.session_id = ${sessionId}`;
+        
+      if (result.length === 0) return resultSuccess(null);
 
       const account = result.at(0);
-      if (!account) return null;
+      if (!account) return resultSuccess(null);
 
-      return new Account(
-        account.accountId,
-        account.email,
-        '',
-        account.lastLogin ?? undefined,
-        account.createdAt,
-        account.updatedAt,
+      return resultSuccess(
+        new Account(
+          account.accountId,
+          account.email,
+          '',
+          account.lastLogin ?? undefined,
+          account.createdAt,
+          account.updatedAt,
+        ),
       );
-    });
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  save(account: Account): ResultAsync<Account, Error> {
-    return ResultAsync.fromPromise(
-      this.db.account.update({
+  async save(account: Account): AsyncResult<Account, Error> {
+    try {
+      const updatedAccount = await this.db.account.update({
         where: {
           accountId: account.accountId,
         },
@@ -131,10 +139,9 @@ export default class AccountRepositoryImpl implements AccountRepository {
           lastLogin: account.lastLogin,
           updatedAt: new Date(),
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map(
-      (updatedAccount) =>
+      });
+      
+      return resultSuccess(
         new Account(
           updatedAccount.accountId,
           updatedAccount.email,
@@ -144,22 +151,24 @@ export default class AccountRepositoryImpl implements AccountRepository {
           updatedAccount.updatedAt,
           updatedAccount.deletedAt ?? undefined,
         ),
-    );
+      );
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  delete(account: Account): ResultAsync<Account, Error> {
-    return ResultAsync.fromPromise(
-      this.db.account.update({
+  async delete(account: Account): AsyncResult<Account, Error> {
+    try {
+      const updatedAccount = await this.db.account.update({
         where: {
           accountId: account.accountId,
         },
         data: {
           deletedAt: new Date(),
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map(
-      (updatedAccount) =>
+      });
+      
+      return resultSuccess(
         new Account(
           updatedAccount.accountId,
           updatedAccount.email,
@@ -169,29 +178,38 @@ export default class AccountRepositoryImpl implements AccountRepository {
           updatedAccount.updatedAt,
           updatedAccount.deletedAt ?? undefined,
         ),
-    );
+      );
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  addSession(accountId: bigint, expiresAt: Date): ResultAsync<string, Error> {
-    return ResultAsync.fromPromise(
-      this.db.session.create({
+  async addSession(accountId: bigint, expiresAt: Date): AsyncResult<string, Error> {
+    try {
+      const session = await this.db.session.create({
         data: {
           accountId,
           expiresAt,
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map((session) => session.sessionId);
+      });
+      
+      return resultSuccess(session.sessionId);
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  removeSession(sessionId: string): ResultAsync<void, Error> {
-    return ResultAsync.fromPromise(
-      this.db.session.delete({
+  async removeSession(sessionId: string): AsyncResult<void, Error> {
+    try {
+      await this.db.session.delete({
         where: {
           sessionId,
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map(() => undefined);
+      });
+      
+      return resultSuccess(undefined);
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 }

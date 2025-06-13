@@ -1,4 +1,3 @@
-import { ResultAsync } from 'neverthrow';
 import { User as PrismaUser } from '@prisma/client';
 import { RdbClient } from '@/infrastructure/rdb';
 import { UserRepository } from '../repository/userRepository';
@@ -8,17 +7,16 @@ import { AsyncResult, Nullable, resultSuccess, resultError } from '@/common/type
 export default class UserRepositoryImpl implements UserRepository {
   constructor(private db: RdbClient) {}
 
-  create(accountId: bigint, displayName?: string): ResultAsync<User, Error> {
-    return ResultAsync.fromPromise(
-      this.db.user.create({
+  async create(accountId: bigint, displayName?: string): AsyncResult<User, Error> {
+    try {
+      const newUser = await this.db.user.create({
         data: {
           accountId,
           displayName,
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map(
-      (newUser) =>
+      });
+      
+      return resultSuccess(
         new User(
           newUser.userId,
           newUser.accountId,
@@ -26,29 +24,35 @@ export default class UserRepositoryImpl implements UserRepository {
           newUser.createdAt,
           newUser.updatedAt,
         ),
-    );
+      );
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  findByAccountId(accountId: bigint): ResultAsync<Nullable<User>, Error> {
-    return ResultAsync.fromPromise(
-      this.db.user.findFirst({
+  async findByAccountId(accountId: bigint): AsyncResult<Nullable<User>, Error> {
+    try {
+      const user = await this.db.user.findFirst({
         where: {
           accountId,
           deletedAt: null,
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map((user) => {
-      if (!user) return null;
+      });
+      
+      if (!user) return resultSuccess(null);
 
-      return new User(
-        user.userId,
-        user.accountId,
-        user.displayName ?? undefined,
-        user.createdAt,
-        user.updatedAt,
+      return resultSuccess(
+        new User(
+          user.userId,
+          user.accountId,
+          user.displayName ?? undefined,
+          user.createdAt,
+          user.updatedAt,
+        ),
       );
-    });
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
   async findBySessionId(sessionId: string): AsyncResult<Nullable<User>, Error> {
