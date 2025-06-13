@@ -203,6 +203,10 @@ test.describe('ログインページ', () => {
       await accountTestHelper.disconnect();
     });
 
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login');
+    });
+
     test('アカウント作成ページへの遷移', async ({ page }) => {
       // アカウント作成リンクをクリック
       await page.getByText('アカウント作成').click();
