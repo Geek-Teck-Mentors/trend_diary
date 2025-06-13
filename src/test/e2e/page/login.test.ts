@@ -187,6 +187,7 @@ test.describe('ログインページ', () => {
   });
 
   test.describe('結合テスト', () => {
+    test.describe.configure({ mode: 'default' });
     // テストアカウントの情報
     const testEmail = 'test@example.com';
     const testPassword = 'password123';
