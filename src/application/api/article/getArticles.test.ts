@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import getRdbClient from '@/infrastructure/rdb';
 import app from '../../server';
 import TEST_ENV from '@/test/env';
+import { ArticleListResponse } from './types/response';
 
 type GetArticlesTestCase = {
   name: string;
@@ -65,7 +66,7 @@ describe('GET /api/articles', () => {
       const res = await requestGetArticles();
 
       expect(res.status).toBe(200);
-      const data = (await res.json()) as any[];
+      const data: ArticleListResponse = await res.json();
       expect(data).toHaveLength(2);
       expect(data[0].title).toBe('TypeScriptの応用');
       expect(data[1].title).toBe('Reactの基礎');
