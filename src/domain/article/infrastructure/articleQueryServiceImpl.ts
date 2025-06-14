@@ -5,6 +5,7 @@ import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
 import { fromPrismaToArticle } from '@/domain/article/mapper/articleMapper';
+import { getErrorMessage } from '@/common/utils/errorUtils';
 
 export default class ArticleQueryServiceImpl implements ArticleQueryService {
   constructor(private readonly db: PrismaClient) {}
@@ -18,7 +19,7 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
 
       return resultSuccess(articles.map(fromPrismaToArticle));
     } catch (error) {
-      return resultError(new ServerError((error as Error).message));
+      return resultError(new ServerError(getErrorMessage(error)));
     }
   }
 
