@@ -4,8 +4,21 @@ import { ServerError, ClientError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
 import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
-import { createArticleService } from '@/domain/article';
+import { createArticleService, Article } from '@/domain/article';
 import { isSuccess, isError } from '@/common/types/utility';
+import { ArticleListResponse, ArticleResponse } from './types/response';
+
+function convertToResponse(article: Article): ArticleResponse {
+  return {
+    articleId: article.articleId.toString(),
+    media: article.media,
+    title: article.title,
+    author: article.author,
+    description: article.description,
+    url: article.url,
+    createdAt: article.createdAt.toISOString(),
+  };
+}
 
 export default async function getArticles(c: Context<Env>) {
   const query = c.req.query();
@@ -18,17 +31,8 @@ export default async function getArticles(c: Context<Env>) {
   if (isSuccess(result)) {
     const articles = result.data;
     logger.info('articles retrieved successfully', { count: articles.length });
-    return c.json(
-      articles.map((article) => ({
-        articleId: article.articleId.toString(),
-        media: article.media,
-        title: article.title,
-        author: article.author,
-        description: article.description,
-        url: article.url,
-        createdAt: article.createdAt.toISOString(),
-      })),
-    );
+    const response: ArticleListResponse = articles.map(convertToResponse);
+    return c.json(response);
   }
 
   if (isError(result)) {
