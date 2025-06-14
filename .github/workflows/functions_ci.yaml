@@ -54,3 +54,94 @@ jobs:
           for function_name in $(ls supabase/functions); do
             find supabase -name "*.ts" | xargs deno check -c supabase/functions/$function_name/deno.json
           done
+
+  test:
+    needs: [lint, format, type-check]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Denoの構築
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - name: setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Node.jsの構築(DBのマイグレーション用)
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: .node-version
+
+      - name: supabase start
+        run: supabase start -x storage-api,imgproxy,edge-runtime,realtime,vector,studio,postgres-meta,mailpit,logflare,supavisor
+
+      # SUPABASE_URL, SUPABASE_ANON_KEY, DB_URLはSupabase CLIを起動した後に取得できるため、supabase startの後に設定
+      - name: Setup ENV
+        run: |
+          echo "SUPABASE_URL=$(supabase status --output json | jq -r '.API_URL')" >> $GITHUB_ENV
+          echo "SUPABASE_ANON_KEY=$(supabase status --output json | jq -r '.ANON_KEY')" >> $GITHUB_ENV
+          echo "DB_URL=$(supabase status --output json | jq -r '.DB_URL')" >> $GITHUB_ENV
+
+      - name: DBのマイグレーション
+        run: npm run db:migrate
+        env:
+          DIRECT_URL: ${{ env.DB_URL }}
+          DATABASE_URL: ${{ env.DB_URL }}
+
+      - name: Deno testの実行
+        env:
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          NO_COLOR: true
+        # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
+        run: |
+          for function_name in $(ls supabase/functions); do
+            # サブシェルで実行することで、cdの影響を局所化
+            (
+              cd supabase/functions/$function_name
+
+              # deno testの実行
+              deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage
+            )
+          done
+      - name: カバレッジの出力
+        env:
+          NO_COLOR: true
+        run: |
+          mkdir -p coverage
+          for function_name in $(ls supabase/functions); do
+            (
+              cd supabase/functions/$function_name
+
+              # カバレッジの対象外ファイルを取得
+              EXCLUDE_FILES=$(yq '.exclude[]' coverage.config.yml | xargs | sed 's/ /|/g')
+
+              # カバレッジの出力
+              deno coverage ./coverage --exclude="$EXCLUDE_FILES" > ../../../coverage/${function_name}
+            )
+          done
+      - name: カバレッジをまとめる
+        if: github.event_name == 'pull_request'
+        working-directory: coverage
+        run: |
+          for function_name in $(ls); do
+            echo "<details><summary>${function_name}</summary>" >> coverage_report.md
+            echo "" >> coverage_report.md
+            echo "\`\`\`" >> coverage_report.md
+            cat ${function_name} >> coverage_report.md
+            echo "\`\`\`" >> coverage_report.md
+            echo "" >> coverage_report.md
+            echo "</details>" >> coverage_report.md
+          done
+      - name: PRにカバレッジをコメント
+        if: github.event_name == 'pull_request'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "$(cat coverage/coverage_report.md)" --edit-last
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

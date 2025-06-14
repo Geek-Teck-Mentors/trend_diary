@@ -8,7 +8,7 @@ import { rdbClient } from "../../infrastructure/supabase_client.ts";
 import { logger } from "../../logger/logger.ts";
 // functionNameはsupabase functionsの名前に一致させないとsupabaseがリクエストを振り分けない
 const functionName = "fetch_articles";
-const app = new Hono().basePath(`/${functionName}`);
+export const app = new Hono().basePath(`/${functionName}`);
 
 app.post("/articles/qiita", async (c) => {
   logger.info("Request to fetch Qiita articles");

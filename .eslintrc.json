@@ -1,4 +1,5 @@
 {
+  "root": true, // ローカルのgit worktreeで複数モジュール認識されるのを防ぐ
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.json",
@@ -6,7 +7,6 @@
     "warnOnUnsupportedTypeScriptVersion": false
   },
   "extends": ["airbnb", "airbnb-typescript", "prettier"],
-  "plugins": ["eslint-plugin-neverthrow"],
   "rules": {
     "consistent-return": "off",
     "import/extensions": "off",
@@ -19,11 +19,26 @@
           "**/*.spec.ts",
           "**/test/**",
           "**/__tests__/**",
-          "**/__mocks__/**"
+          "**/__mocks__/**",
+          "**/e2e/**",
+          "playwright.config.ts",
+          "vitest/**",
+          "vite.config.ts"
         ]
       }
-    ]
+    ],
+    // Playwrightのベストプラクティス参考: https://playwright.dev/docs/best-practices#lint-your-tests
+    "@typescript-eslint/no-floating-promises": "error"
   },
+  // no-floating-promisesがReactのuseEffect内でのasyncに過剰に反応するため
+  "overrides": [
+    {
+      "files": ["**/*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-floating-promises": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "node_modules/",
     "dist/",

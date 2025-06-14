@@ -1,8 +1,8 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { coverageReporter, generateIncludes } from './config';
-import { srcAlias } from '../config';
 
 const { testInclude, coverageInclude } = generateIncludes('src/domain', 'src/common');
 
@@ -13,9 +13,7 @@ const testExclude = ['src/domain/**/infrastructure/*'];
 const coverageExclude = [...testExclude];
 
 export default defineConfig({
-  resolve: {
-    alias: [srcAlias],
-  },
+  plugins: [tsconfigPaths()],
   test: {
     globals: true,
     include: testInclude,

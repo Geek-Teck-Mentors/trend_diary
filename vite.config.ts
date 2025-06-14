@@ -9,19 +9,13 @@ import { defineConfig } from 'vite';
 import { vitePlugin as remix } from '@remix-run/dev';
 import tailwindcss from '@tailwindcss/vite';
 import serverAdapter from 'hono-remix-adapter/vite';
-import { srcAlias } from './config';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   ssr: {
     resolve: {
       externalConditions: ['workerd', 'worker'],
     },
-  },
-  resolve: {
-    alias: [
-      // viteではtsconfigに加えて、以下の設定も必要
-      srcAlias,
-    ],
   },
   plugins: [
     tailwindcss(),
@@ -34,6 +28,7 @@ export default defineConfig({
       entry: 'src/application/server.ts',
       exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/web/**'],
     }),
+    tsconfigPaths(),
   ],
   optimizeDeps: {
     entries: [],

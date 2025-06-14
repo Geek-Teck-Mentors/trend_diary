@@ -1,12 +1,11 @@
-name: CI
+name: Test
 
 on:
   push:
     branches:
       - main
     paths:
-      - '.github/workflows/ci.yaml'
-      - '.github/workflows/cd.yaml'
+      - '.github/workflows/test.yaml'
       - 'src/**'
       - 'public/**'
       - 'prisma/**'
@@ -17,8 +16,9 @@ on:
       - main
     paths:
       - 'src/**'
-      - '.github/workflows/ci.yaml'
+      - '.github/workflows/test.yaml'
       - 'vitest/**'
+      - 'prisma/**'
       - 'package.json'
       - 'package-lock.json'
 
@@ -38,73 +38,12 @@ env:
   DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
 
 jobs:
-  setup-config:
-    runs-on: ubuntu-latest
-    outputs:
-      runner: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Node.jsの構築
-        uses: ./.github/actions/setup_node
-        with:
-          node-version-file: ${{ env.NODE_VERSION_FILE }}
-      - name: Prismaキャッシュのセットアップ
-        uses: ./.github/actions/setup_prisma_cache
-        with:
-          schema-path: prisma/main.prisma
-      - run: echo "Setup completed"
-
-  lint:
-    needs: setup-config
-    runs-on: ${{ needs.setup-config.outputs.runner }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Node.jsの構築
-        uses: ./.github/actions/setup_node
-        with:
-          node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: Lint
-        run: npm run lint
-
-  format:
-    needs: setup-config
-    runs-on: ${{ needs.setup-config.outputs.runner }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Node.jsの構築
-        uses: ./.github/actions/setup_node
-        with:
-          node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: Format
-        run: npm run format
-
-  # 本来であれば、概念的にコンパイルはLint/Formatと同列ではないが、実行時間短縮のために並列実行にしている
-  ts-compile-check:
-    needs: setup-config
-    runs-on: ${{ needs.setup-config.outputs.runner }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Node.jsの構築
-        uses: ./.github/actions/setup_node
-        with:
-          node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: Prismaキャッシュのセットアップ
-        uses: ./.github/actions/setup_prisma_cache
-        with:
-          schema-path: prisma/main.prisma
-
-      - name: TypeScript型チェック
-        run: npm run check-types
-
-  setup-test:
-    needs: [lint, format, ts-compile-check]
+  setup:
     runs-on: ubuntu-latest
     outputs:
       test_runner: ubuntu-latest
       run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-frontend.outputs.diff-count != 0 }}
+      run_e2e_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-e2e.outputs.diff-count != 0 }}
       run_service_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-service.outputs.diff-count != 0 }}
       run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-api.outputs.diff-count != 0 }}
     steps:
@@ -114,12 +53,23 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
+      - name: Prismaキャッシュのセットアップ
+        uses: ./.github/actions/setup_prisma_cache
+        with:
+          schema-path: prisma/main.prisma
+
       - name: フロントエンドの差分チェック
         id: check-frontend
         uses: ./.github/actions/diff
         with:
           subdir: 'src/application/web src/application/web/components vitest/'
           exclude_pattern: 'src/application/web/components/ui'
+
+      - name: E2Eの差分チェック
+        id: check-e2e
+        uses: ./.github/actions/diff
+        with:
+          subdir: 'src/test/e2e src/application/web/routes'
 
       - name: サービスの差分チェック
         id: check-service
@@ -139,16 +89,17 @@ jobs:
             echo "メインブランチなので、リグレッションテストとして全て実行"
           else
             echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
+            echo "E2E差分: ${{ steps.check-e2e.outputs.diff-count }} ファイル"
             echo "サービス差分: ${{ steps.check-service.outputs.diff-count }} ファイル"
             echo "API差分: ${{ steps.check-api.outputs.diff-count }} ファイル"
             echo "テストの準備完了"
           fi
         shell: bash
 
-  test-frontend:
-    needs: setup-test
-    runs-on: ${{ needs.setup-test.outputs.test_runner }}
-    if: ${{ needs.setup-test.outputs.run_frontend_test == 'true' }}
+  frontend:
+    needs: setup
+    runs-on: ${{ needs.setup.outputs.test_runner }}
+    if: ${{ needs.setup.outputs.run_frontend_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -161,10 +112,70 @@ jobs:
         with:
           target: frontend
 
-  test-service:
-    needs: setup-test
-    runs-on: ${{ needs.setup-test.outputs.test_runner }}
-    if: ${{ needs.setup-test.outputs.run_service_test == 'true' }}
+  e2e:
+    # E2Eテストは時間がかかるため、タイムアウトを設定
+    timeout-minutes: 10
+    needs: setup
+    runs-on: ${{ needs.setup.outputs.test_runner }}
+    if: ${{ needs.setup.outputs.run_e2e_test == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 完全な履歴を取得して差分比較できるようにする
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: Playwrightブラウザのキャッシュ
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+      - name: Playwrightのセットアップ
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      # ページの結合、シナリオテスト実施のためにDBが必要
+      - name: PostgreSQLのセットアップ
+        run: docker compose build && docker compose up -d
+
+      - name: PostgreSQLが起動するまで待機
+        uses: ./.github/actions/backoff
+        with:
+          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
+          fail_command: docker compose down
+
+      - name: Prismaキャッシュのセットアップ
+        uses: ./.github/actions/setup_prisma_cache
+        with:
+          schema-path: prisma/main.prisma
+
+      - name: DB Migration
+        env:
+          DIRECT_URL: ${{ env.DATABASE_URL }}
+        run: npm run db:migrate
+
+      - name: E2Eテストの差分実行
+        if: github.event_name == 'pull_request'
+        run: npm run e2e -- --reporter=github --only-changed=origin/$GITHUB_BASE_REF
+
+      - name: E2Eテストの実行
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npm run e2e
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !cancelled()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  service:
+    needs: setup
+    runs-on: ${{ needs.setup.outputs.test_runner }}
+    if: ${{ needs.setup.outputs.run_service_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -177,10 +188,10 @@ jobs:
         with:
           target: service
 
-  test-api:
-    needs: setup-test
-    runs-on: ${{ needs.setup-test.outputs.test_runner }}
-    if: ${{ needs.setup-test.outputs.run_api_test == 'true' }}
+  api:
+    needs: setup
+    runs-on: ${{ needs.setup.outputs.test_runner }}
+    if: ${{ needs.setup.outputs.run_api_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築

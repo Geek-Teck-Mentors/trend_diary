@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
-import { err, ok } from 'neverthrow';
 import { Account, Session, User } from '@prisma/client';
 import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl';
 import { AlreadyExistsError, NotFoundError, ClientError, ServerError } from '@/common/errors';
@@ -9,6 +8,7 @@ import AccountService from './accountService';
 import UserRepositoryImpl from '../infrastructure/userRepositoryImpl';
 import db from '@/test/__mocks__/prisma';
 import { Transaction } from '@/infrastructure/rdb';
+import { resultError, resultSuccess } from '@/common/types/utility';
 
 const mockAccount: Account = {
   accountId: BigInt(1),
@@ -74,7 +74,7 @@ describe('AccountService', () => {
 
       expect(res).toBeDefined();
       expect(res).toEqual(
-        ok({
+        resultSuccess({
           email,
           password: expect.any(String),
           accountId: expect.any(BigInt),
@@ -93,7 +93,7 @@ describe('AccountService', () => {
       db.account.findUnique.mockResolvedValue(mockAccount);
 
       expect(await service.signup(transaction, email, password)).toEqual(
-        err(new AlreadyExistsError('Account already exists')),
+        resultError(new AlreadyExistsError('Account already exists')),
       );
     });
 
@@ -104,7 +104,7 @@ describe('AccountService', () => {
       db.account.findUnique.mockRejectedValue(new Error('Database error'));
 
       expect(await service.signup(transaction, email, password)).toEqual(
-        err(new ServerError('Database error')),
+        resultError(new ServerError('Database error')),
       );
     });
   });
@@ -130,7 +130,7 @@ describe('AccountService', () => {
       const result = await service.login(email, password);
       expect(result).toBeDefined();
       expect(result).toEqual(
-        ok({
+        resultSuccess({
           user: {
             userId: expect.any(BigInt),
             accountId: expect.any(BigInt),
@@ -149,7 +149,7 @@ describe('AccountService', () => {
 
         const nonExistentEmail = 'non_existent_test@example.com';
         expect(await service.login(nonExistentEmail, password)).toEqual(
-          err(new NotFoundError('Account not found')),
+          resultError(new NotFoundError('Account not found')),
         );
       });
 
@@ -165,7 +165,7 @@ describe('AccountService', () => {
         });
 
         expect(await service.login(email, wrongPassword)).toEqual(
-          err(new ClientError('Invalid password')),
+          resultError(new ClientError('Invalid password')),
         );
       });
     });
@@ -173,7 +173,9 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.account.findUnique.mockRejectedValue(new Error('Database error'));
 
-      expect(await service.login(email, password)).toEqual(err(new Error('Database error')));
+      expect(await service.login(email, password)).toEqual(
+        resultError(new Error('Database error')),
+      );
     });
   });
 
@@ -187,12 +189,13 @@ describe('AccountService', () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual(
-        ok({
+        resultSuccess({
           userId: mockUser.userId,
           accountId: mockUser.accountId,
           displayName: undefined,
           createdAt: expect.any(Date),
           updatedAtValue: expect.any(Date),
+          deletedAtValue: undefined,
         }),
       );
     });
@@ -202,7 +205,7 @@ describe('AccountService', () => {
         db.$queryRaw.mockResolvedValue([]);
 
         expect(await service.getLoginUser(sessionId)).toEqual(
-          err(new NotFoundError('User not found')),
+          resultError(new NotFoundError('User not found')),
         );
       });
     });
@@ -210,7 +213,9 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.$queryRaw.mockRejectedValue(new Error('Database error'));
 
-      expect(await service.getLoginUser(sessionId)).toEqual(err(new Error('Database error')));
+      expect(await service.getLoginUser(sessionId)).toEqual(
+        resultError(new Error('Database error')),
+      );
     });
   });
 
@@ -229,7 +234,7 @@ describe('AccountService', () => {
         db.$queryRaw.mockResolvedValue([]);
 
         expect(await service.logout(sessionId)).toEqual(
-          err(new NotFoundError('Account not found')),
+          resultError(new NotFoundError('Account not found')),
         );
       });
     });
@@ -237,7 +242,7 @@ describe('AccountService', () => {
     it('異常系: 意図しないDBエラー', async () => {
       db.$queryRaw.mockRejectedValue(new Error('Database error'));
 
-      expect(await service.logout(sessionId)).toEqual(err(new Error('Database error')));
+      expect(await service.logout(sessionId)).toEqual(resultError(new Error('Database error')));
     });
   });
 });

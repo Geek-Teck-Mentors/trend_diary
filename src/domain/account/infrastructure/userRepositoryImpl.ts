@@ -1,24 +1,22 @@
-import { ResultAsync } from 'neverthrow';
 import { User as PrismaUser } from '@prisma/client';
 import { RdbClient } from '@/infrastructure/rdb';
 import { UserRepository } from '../repository/userRepository';
 import User from '../model/user';
-import { Nullable } from '@/common/types/utility';
+import { AsyncResult, Nullable, resultSuccess, resultError } from '@/common/types/utility';
 
 export default class UserRepositoryImpl implements UserRepository {
   constructor(private db: RdbClient) {}
 
-  create(accountId: bigint, displayName?: string): ResultAsync<User, Error> {
-    return ResultAsync.fromPromise(
-      this.db.user.create({
+  async create(accountId: bigint, displayName?: string): AsyncResult<User, Error> {
+    try {
+      const newUser = await this.db.user.create({
         data: {
           accountId,
           displayName,
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map(
-      (newUser) =>
+      });
+
+      return resultSuccess(
         new User(
           newUser.userId,
           newUser.accountId,
@@ -26,34 +24,41 @@ export default class UserRepositoryImpl implements UserRepository {
           newUser.createdAt,
           newUser.updatedAt,
         ),
-    );
+      );
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  findByAccountId(accountId: bigint): ResultAsync<Nullable<User>, Error> {
-    return ResultAsync.fromPromise(
-      this.db.user.findFirst({
+  async findByAccountId(accountId: bigint): AsyncResult<Nullable<User>, Error> {
+    try {
+      const user = await this.db.user.findFirst({
         where: {
           accountId,
           deletedAt: null,
         },
-      }),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map((user) => {
-      if (!user) return null;
+      });
 
-      return new User(
-        user.userId,
-        user.accountId,
-        user.displayName ?? undefined,
-        user.createdAt,
-        user.updatedAt,
+      if (!user) return resultSuccess(null);
+
+      return resultSuccess(
+        new User(
+          user.userId,
+          user.accountId,
+          user.displayName ?? undefined,
+          user.createdAt,
+          user.updatedAt,
+        ),
       );
-    });
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
-  findBySessionId(sessionId: string): ResultAsync<Nullable<User>, Error> {
-    return ResultAsync.fromPromise(
-      this.db.$queryRaw<PrismaUser[]>`
+  async findBySessionId(sessionId: string): AsyncResult<Nullable<User>, Error> {
+    const currentTimestamp = new Date();
+    try {
+      const result = await this.db.$queryRaw<PrismaUser[]>`
       SELECT
         users.user_id,
         users.account_id,
@@ -66,21 +71,23 @@ export default class UserRepositoryImpl implements UserRepository {
         AND sessions.session_id = ${sessionId}
       WHERE
         users.deleted_at IS NULL
-        AND sessions.expires_at > ${new Date()}`,
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    ).map((result) => {
-      if (result.length === 0) return null;
+        AND sessions.expires_at > ${currentTimestamp}`;
+      if (result.length === 0) return resultSuccess(null);
 
       const user = result.at(0);
-      if (!user) return null;
+      if (!user) return resultSuccess(null);
 
-      return new User(
-        user.userId,
-        user.accountId,
-        user.displayName ?? undefined,
-        user.createdAt,
-        user.updatedAt,
+      return resultSuccess(
+        new User(
+          user.userId,
+          user.accountId,
+          user.displayName ?? undefined,
+          user.createdAt,
+          user.updatedAt,
+        ),
       );
-    });
+    } catch (error) {
+      return resultError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 }
