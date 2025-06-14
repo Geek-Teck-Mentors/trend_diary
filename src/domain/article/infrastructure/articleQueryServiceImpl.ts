@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import Article from '@/domain/article/article';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
@@ -34,8 +34,8 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
     }
   }
 
-  private static buildWhereClause(params: ArticleQueryParams) {
-    const where: any = {};
+  private static buildWhereClause(params: ArticleQueryParams): Prisma.ArticleWhereInput {
+    const where: Prisma.ArticleWhereInput = {};
 
     if (params.title) {
       where.title = {
