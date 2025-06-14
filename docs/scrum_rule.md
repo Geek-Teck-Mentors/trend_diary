@@ -18,7 +18,6 @@
 - Fun Done Learnをベースに適応
 <details><summary>Fun Done Learnとは</summary>
 
-
 Fun Done Learnとは、「Fun(楽しかったこと)」「Done(やったこと)」「Learn(学びを得たこと)」の３つの観点から考えるフレームワーク
 ![fun done learn](./scrum_rule/fun_done_learn.png)
 
