@@ -4,20 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '.github/workflows/lint.yaml'
-      - 'src/**'
-      - 'public/**'
-      - 'package.json'
-      - 'package-lock.json'
   pull_request:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - '.github/workflows/lint.yaml'
-      - 'package.json'
-      - 'package-lock.json'
 
 # カバレッジの可視化で、コメントを残すための権限
 permissions:
