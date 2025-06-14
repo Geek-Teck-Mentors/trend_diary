@@ -3,6 +3,7 @@ import Article from '@/domain/article/article';
 import { ArticleRepository } from '@/domain/article/repository/articleRepository';
 import { ServerError } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
+import { fromPrismaToArticle } from '@/domain/article/mapper/articleMapper';
 
 export default class ArticleRepositoryImpl implements ArticleRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -13,19 +14,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
         where: { articleId: id },
       });
 
-      return resultSuccess(
-        article
-          ? new Article(
-              article.articleId,
-              article.media,
-              article.title,
-              article.author,
-              article.description,
-              article.url,
-              article.createdAt,
-            )
-          : null,
-      );
+      return resultSuccess(article ? fromPrismaToArticle(article) : null);
     } catch (error) {
       return resultError(new ServerError((error as Error).message));
     }
@@ -37,20 +26,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
         orderBy: { createdAt: 'desc' },
       });
 
-      return resultSuccess(
-        articles.map(
-          (article) =>
-            new Article(
-              article.articleId,
-              article.media,
-              article.title,
-              article.author,
-              article.description,
-              article.url,
-              article.createdAt,
-            ),
-        ),
-      );
+      return resultSuccess(articles.map(fromPrismaToArticle));
     } catch (error) {
       return resultError(new ServerError((error as Error).message));
     }
@@ -70,17 +46,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
         },
       });
 
-      return resultSuccess(
-        new Article(
-          article.articleId,
-          article.media,
-          article.title,
-          article.author,
-          article.description,
-          article.url,
-          article.createdAt,
-        ),
-      );
+      return resultSuccess(fromPrismaToArticle(article));
     } catch (error) {
       return resultError(new ServerError((error as Error).message));
     }
@@ -99,17 +65,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
         },
       });
 
-      return resultSuccess(
-        new Article(
-          article.articleId,
-          article.media,
-          article.title,
-          article.author,
-          article.description,
-          article.url,
-          article.createdAt,
-        ),
-      );
+      return resultSuccess(fromPrismaToArticle(article));
     } catch (error) {
       return resultError(new ServerError((error as Error).message));
     }
