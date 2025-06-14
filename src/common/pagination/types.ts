@@ -1,18 +1,18 @@
-export interface CursorPaginationParams {
+export type CursorPaginationParams = {
   cursor?: string;
   limit?: number;
   direction?: 'next' | 'prev';
-}
+};
 
-export interface CursorPaginationResult<T> {
+export type CursorPaginationResult<T> = {
   data: T[];
   nextCursor?: string;
   prevCursor?: string;
   hasNext: boolean;
   hasPrev: boolean;
-}
+};
 
-export interface CursorInfo {
+export type CursorInfo = {
   id: bigint;
   createdAt: Date;
-}
+};
