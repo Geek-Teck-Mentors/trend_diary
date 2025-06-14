@@ -4,16 +4,14 @@ import { ServerError, ClientError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
 import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
-import ArticleQueryServiceImpl from '@/domain/article/infrastructure/articleQueryServiceImpl';
-import ArticleService from '@/domain/article/service/articleService';
+import { createArticleService } from '@/domain/article';
 import { isSuccess, isError } from '@/common/types/utility';
 
 export default async function getArticles(c: Context<Env>) {
   const query = c.req.query();
 
   const rdb = getRdbClient(c.env.DATABASE_URL);
-  const articleQueryService = new ArticleQueryServiceImpl(rdb);
-  const service = new ArticleService(articleQueryService);
+  const service = createArticleService(rdb);
 
   const result = await service.searchArticles(query);
 
