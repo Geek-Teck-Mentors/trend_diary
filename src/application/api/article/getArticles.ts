@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { ServerError } from '@/common/errors';
+import { ServerError, ClientError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
 import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
@@ -35,6 +35,13 @@ export default async function getArticles(c: Context<Env>) {
 
   if (isError(result)) {
     const e = result.error;
+    if (e instanceof ClientError) {
+      logger.warn('client error in search', e);
+      throw new HTTPException(400, {
+        message: e.message,
+      });
+    }
+    
     if (e instanceof ServerError) {
       logger.error('internal server error', e);
       throw new HTTPException(500, {
