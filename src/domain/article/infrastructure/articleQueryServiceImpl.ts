@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import Article from '@/domain/article/model/article';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
@@ -6,9 +6,10 @@ import { ServerError } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
 import fromPrismaToArticle from '@/domain/article/mapper/articleMapper';
 import getErrorMessage from '@/common/utils/errorUtils';
+import { RdbClient } from '@/infrastructure/rdb';
 
 export default class ArticleQueryServiceImpl implements ArticleQueryService {
-  constructor(private readonly db: PrismaClient) {}
+  constructor(private readonly db: RdbClient) {}
 
   async searchArticles(params: ArticleQueryParams): AsyncResult<Article[], ServerError> {
     try {

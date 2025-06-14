@@ -1,13 +1,13 @@
-import { PrismaClient } from '@prisma/client';
 import Article from '@/domain/article/model/article';
 import { ArticleRepository } from '@/domain/article/repository/articleRepository';
 import { ServerError } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
 import fromPrismaToArticle from '@/domain/article/mapper/articleMapper';
 import getErrorMessage from '@/common/utils/errorUtils';
+import { RdbClient } from '@/infrastructure/rdb';
 
 export default class ArticleRepositoryImpl implements ArticleRepository {
-  constructor(private readonly db: PrismaClient) {}
+  constructor(private readonly db: RdbClient) {}
 
   async findById(id: bigint): AsyncResult<Article | null, ServerError> {
     try {

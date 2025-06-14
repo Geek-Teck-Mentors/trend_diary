@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-import getRdbClient from '@/infrastructure/rdb';
+import getRdbClient, { RdbClient } from '@/infrastructure/rdb';
 import app from '../../server';
 import TEST_ENV from '@/test/env';
 import { ArticleListResponse } from './types/response';
@@ -11,7 +10,7 @@ type GetArticlesTestCase = {
 };
 
 describe('GET /api/articles', () => {
-  let db: PrismaClient;
+  let db: RdbClient;
 
   const testArticles = [
     {
