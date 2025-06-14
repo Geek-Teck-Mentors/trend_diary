@@ -8,4 +8,10 @@ export interface ArticleResponse {
   createdAt: string;
 }
 
-export type ArticleListResponse = ArticleResponse[];
+export interface ArticleListResponse {
+  data: ArticleResponse[];
+  nextCursor?: string;
+  prevCursor?: string;
+  hasNext: boolean;
+  hasPrev: boolean;
+}

@@ -29,9 +29,15 @@ export default async function getArticles(c: Context<Env>) {
   const result = await service.searchArticles(query);
 
   if (isSuccess(result)) {
-    const articles = result.data;
-    logger.info('articles retrieved successfully', { count: articles.length });
-    const response: ArticleListResponse = articles.map(convertToResponse);
+    const paginationResult = result.data;
+    logger.info('articles retrieved successfully', { count: paginationResult.data.length });
+    const response: ArticleListResponse = {
+      data: paginationResult.data.map(convertToResponse),
+      nextCursor: paginationResult.nextCursor,
+      prevCursor: paginationResult.prevCursor,
+      hasNext: paginationResult.hasNext,
+      hasPrev: paginationResult.hasPrev,
+    };
     return c.json(response);
   }
 
