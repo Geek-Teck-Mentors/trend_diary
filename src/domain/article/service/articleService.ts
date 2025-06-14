@@ -3,13 +3,14 @@ import { ArticleQueryService } from '@/domain/article/repository/articleQuerySer
 import { ArticleQueryParams, articleQuerySchema } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError, ClientError } from '@/common/errors';
 import { AsyncResult, resultError } from '@/common/types/utility';
+import { CursorPaginationResult } from '@/common/pagination';
 
 export default class ArticleService {
   constructor(private readonly articleQueryService: ArticleQueryService) {}
 
   async searchArticles(
-    params: ArticleQueryParams,
-  ): AsyncResult<Article[], ServerError | ClientError> {
+    params: any,
+  ): AsyncResult<CursorPaginationResult<Article>, ServerError | ClientError> {
     // ビジネスロジック: パラメータのバリデーション
     const validationResult = articleQuerySchema.safeParse(params);
     if (!validationResult.success) {
@@ -26,7 +27,11 @@ export default class ArticleService {
 
   private static optimizeSearchParams(params: ArticleQueryParams): ArticleQueryParams {
     // 空文字列を除去
-    const optimized: ArticleQueryParams = {};
+    const optimized: Partial<ArticleQueryParams> = {
+      limit: params.limit,
+      direction: params.direction,
+      cursor: params.cursor,
+    };
 
     if (params.title && params.title.trim()) {
       optimized.title = params.title.trim();
@@ -48,6 +53,6 @@ export default class ArticleService {
       optimized.read_status = params.read_status;
     }
 
-    return optimized;
+    return optimized as ArticleQueryParams;
   }
 }

@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { cursorPaginationSchema } from '@/common/pagination';
 
 const mediaEnum = z.enum(['qiita', 'zenn']);
 const readStatusEnum = z.enum(['0', '1']);
 
-export const articleQuerySchema = z.object({
+const articleSearchSchema = z.object({
   title: z.string().optional(),
   author: z.string().optional(),
   media: mediaEnum.optional(),
@@ -13,5 +14,7 @@ export const articleQuerySchema = z.object({
     .optional(),
   read_status: readStatusEnum.optional(),
 });
+
+export const articleQuerySchema = articleSearchSchema.merge(cursorPaginationSchema);
 
 export type ArticleQueryParams = z.infer<typeof articleQuerySchema>;
