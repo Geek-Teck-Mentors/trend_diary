@@ -13,7 +13,7 @@ const mockArticle = (id: number, createdAt: Date) => ({
 
 describe('Pagination Utils', () => {
   describe('encodeCursor/decodeCursor', () => {
-    it('正常系: cursorの正常なエンコード/デコード', () => {
+    it('cursorの正常なエンコード/デコード', () => {
       const cursorInfo = {
         id: BigInt(123),
         createdAt: new Date('2024-01-01T00:00:00Z'),
@@ -26,7 +26,7 @@ describe('Pagination Utils', () => {
       expect(decoded.createdAt).toEqual(cursorInfo.createdAt);
     });
 
-    it('異常系: 不正なcursorでエラー', () => {
+    it('不正なcursorでエラー', () => {
       expect(() => decodeCursor('invalid-cursor')).toThrow('Invalid cursor format');
     });
   });
@@ -34,7 +34,7 @@ describe('Pagination Utils', () => {
   describe('createPaginationResult', () => {
     const baseDate = new Date('2024-01-01T00:00:00Z');
 
-    it('正常系: 次ページ方向の結果生成（hasMore = true, hasCursor = true）', () => {
+    it('次ページ方向の結果生成（hasMore = true, hasCursor = true）', () => {
       const articles = Array.from({ length: 3 }, (_, i) =>
         mockArticle(i + 1, new Date(baseDate.getTime() + i * 1000)),
       );
@@ -48,7 +48,7 @@ describe('Pagination Utils', () => {
       expect(result.prevCursor).toBeDefined();
     });
 
-    it('正常系: 初回ページ（hasCursor = false）', () => {
+    it('初回ページ（hasCursor = false）', () => {
       const articles = [mockArticle(1, baseDate)];
 
       const result = createPaginationResult(articles, 2, 'next', false);
@@ -60,7 +60,7 @@ describe('Pagination Utils', () => {
       expect(result.prevCursor).toBeUndefined();
     });
 
-    it('正常系: 次ページ方向の結果生成（hasMore = false, hasCursor = true）', () => {
+    it('次ページ方向の結果生成（hasMore = false, hasCursor = true）', () => {
       const articles = [mockArticle(1, baseDate)];
 
       const result = createPaginationResult(articles, 2, 'next', true);
@@ -72,7 +72,7 @@ describe('Pagination Utils', () => {
       expect(result.prevCursor).toBeDefined();
     });
 
-    it('正常系: 前ページ方向の結果生成', () => {
+    it('前ページ方向の結果生成', () => {
       const articles = Array.from({ length: 3 }, (_, i) =>
         mockArticle(i + 1, new Date(baseDate.getTime() + i * 1000)),
       );
@@ -86,7 +86,7 @@ describe('Pagination Utils', () => {
       expect(result.prevCursor).toBeDefined();
     });
 
-    it('正常系: 空配列の場合', () => {
+    it('空配列の場合', () => {
       const result = createPaginationResult([], 2, 'next');
 
       expect(result.data).toHaveLength(0);
