@@ -3,8 +3,8 @@ import Article from '@/domain/article/article';
 import { ArticleRepository } from '@/domain/article/repository/articleRepository';
 import { ServerError } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
-import { fromPrismaToArticle } from '@/domain/article/mapper/articleMapper';
-import { getErrorMessage } from '@/common/utils/errorUtils';
+import fromPrismaToArticle from '@/domain/article/mapper/articleMapper';
+import getErrorMessage from '@/common/utils/errorUtils';
 
 export default class ArticleRepositoryImpl implements ArticleRepository {
   constructor(private readonly db: PrismaClient) {}
