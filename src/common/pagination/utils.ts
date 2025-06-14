@@ -1,4 +1,4 @@
-import { CursorInfo, CursorPaginationResult } from './types';
+import { CursorDirection, CursorInfo, CursorPaginationResult } from './types';
 
 export function encodeCursor(info: CursorInfo): string {
   return Buffer.from(
@@ -24,7 +24,7 @@ export function decodeCursor(cursor: string): CursorInfo {
 export function createPaginationResult<T extends { articleId: bigint; createdAt: Date }>(
   data: T[],
   limit: number,
-  direction: 'next' | 'prev' = 'next',
+  direction: CursorDirection = 'next',
   hasCursor: boolean = false,
 ): CursorPaginationResult<T> {
   const hasMore = data.length > limit;

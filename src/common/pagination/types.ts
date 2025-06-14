@@ -1,7 +1,9 @@
+export type CursorDirection = 'next' | 'prev';
+
 export type CursorPaginationParams = {
   cursor?: string;
   limit?: number;
-  direction?: 'next' | 'prev';
+  direction?: CursorDirection;
 };
 
 export type CursorPaginationResult<T> = {

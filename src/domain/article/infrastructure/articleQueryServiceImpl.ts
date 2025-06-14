@@ -7,7 +7,12 @@ import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/mapper/articleMapper';
 import getErrorMessage from '@/common/utils/errorUtils';
 import { RdbClient } from '@/infrastructure/rdb';
-import { CursorPaginationResult, decodeCursor, createPaginationResult } from '@/common/pagination';
+import {
+  CursorPaginationResult,
+  decodeCursor,
+  createPaginationResult,
+  CursorDirection,
+} from '@/common/pagination';
 
 export default class ArticleQueryServiceImpl implements ArticleQueryService {
   constructor(private readonly db: RdbClient) {}
@@ -56,7 +61,7 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
 
   private static buildCursorCondition(
     cursor: string | undefined,
-    direction: 'next' | 'prev',
+    direction: CursorDirection,
   ): Prisma.ArticleWhereInput | null {
     if (!cursor) return null;
 
