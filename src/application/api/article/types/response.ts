@@ -1,17 +1,6 @@
-export interface ArticleResponse {
-  articleId: string;
-  media: string;
-  title: string;
-  author: string;
-  description: string;
-  url: string;
-  createdAt: string;
-}
+import { CursorPaginationResult } from '@/common/pagination';
+import { ArticleOutput } from '@/domain/article/schema/articleSchema';
 
-export interface ArticleListResponse {
-  data: ArticleResponse[];
-  nextCursor?: string;
-  prevCursor?: string;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
+export type ArticleResponse = ArticleOutput;
+
+export type ArticleListResponse = CursorPaginationResult<ArticleResponse>;

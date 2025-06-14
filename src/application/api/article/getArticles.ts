@@ -10,13 +10,13 @@ import { ArticleListResponse, ArticleResponse } from './types/response';
 
 function convertToResponse(article: Article): ArticleResponse {
   return {
-    articleId: article.articleId.toString(),
+    articleId: article.articleId,
     media: article.media,
     title: article.title,
     author: article.author,
     description: article.description,
     url: article.url,
-    createdAt: article.createdAt.toISOString(),
+    createdAt: article.createdAt,
   };
 }
 
