@@ -1,0 +1,71 @@
+import { PrismaClient } from '@prisma/client';
+import Article from '@/domain/article/article';
+import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
+import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
+import { ServerError } from '@/common/errors';
+import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
+
+export default class ArticleQueryServiceImpl implements ArticleQueryService {
+  constructor(private readonly db: PrismaClient) {}
+
+  async searchArticles(params: ArticleQueryParams): AsyncResult<Article[], ServerError> {
+    try {
+      const articles = await this.db.article.findMany({
+        where: ArticleQueryServiceImpl.buildWhereClause(params),
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return resultSuccess(
+        articles.map(
+          (article) =>
+            new Article(
+              article.articleId,
+              article.media,
+              article.title,
+              article.author,
+              article.description,
+              article.url,
+              article.createdAt,
+            ),
+        ),
+      );
+    } catch (error) {
+      return resultError(new ServerError((error as Error).message));
+    }
+  }
+
+  private static buildWhereClause(params: ArticleQueryParams) {
+    const where: any = {};
+
+    if (params.title) {
+      where.title = {
+        contains: params.title,
+        mode: 'insensitive',
+      };
+    }
+
+    if (params.author) {
+      where.author = {
+        contains: params.author,
+        mode: 'insensitive',
+      };
+    }
+
+    if (params.media) {
+      where.media = params.media;
+    }
+
+    if (params.date) {
+      const startDate = new Date(`${params.date}T00:00:00Z`);
+      const endDate = new Date(`${params.date}T00:00:00Z`);
+      endDate.setDate(endDate.getDate() + 1);
+
+      where.createdAt = {
+        gte: startDate,
+        lt: endDate,
+      };
+    }
+
+    return where;
+  }
+}

@@ -1,0 +1,127 @@
+import { PrismaClient } from '@prisma/client';
+import Article from '@/domain/article/article';
+import { ArticleRepository } from '@/domain/article/repository/articleRepository';
+import { ServerError } from '@/common/errors';
+import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
+
+export default class ArticleRepositoryImpl implements ArticleRepository {
+  constructor(private readonly db: PrismaClient) {}
+
+  async findById(id: bigint): AsyncResult<Article | null, ServerError> {
+    try {
+      const article = await this.db.article.findUnique({
+        where: { articleId: id },
+      });
+      
+      return resultSuccess(
+        article
+          ? new Article(
+              article.articleId,
+              article.media,
+              article.title,
+              article.author,
+              article.description,
+              article.url,
+              article.createdAt,
+            )
+          : null,
+      );
+    } catch (error) {
+      return resultError(new ServerError((error as Error).message));
+    }
+  }
+
+  async findAll(): AsyncResult<Article[], ServerError> {
+    try {
+      const articles = await this.db.article.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+      
+      return resultSuccess(
+        articles.map(
+          (article) =>
+            new Article(
+              article.articleId,
+              article.media,
+              article.title,
+              article.author,
+              article.description,
+              article.url,
+              article.createdAt,
+            ),
+        ),
+      );
+    } catch (error) {
+      return resultError(new ServerError((error as Error).message));
+    }
+  }
+
+  async create(articleData: Omit<Article, 'articleId' | 'createdAt'>): AsyncResult<Article, ServerError> {
+    try {
+      const article = await this.db.article.create({
+        data: {
+          media: articleData.media,
+          title: articleData.title,
+          author: articleData.author,
+          description: articleData.description,
+          url: articleData.url,
+        },
+      });
+      
+      return resultSuccess(
+        new Article(
+          article.articleId,
+          article.media,
+          article.title,
+          article.author,
+          article.description,
+          article.url,
+          article.createdAt,
+        ),
+      );
+    } catch (error) {
+      return resultError(new ServerError((error as Error).message));
+    }
+  }
+
+  async update(id: bigint, updateData: Partial<Article>): AsyncResult<Article, ServerError> {
+    try {
+      const article = await this.db.article.update({
+        where: { articleId: id },
+        data: {
+          ...(updateData.media && { media: updateData.media }),
+          ...(updateData.title && { title: updateData.title }),
+          ...(updateData.author && { author: updateData.author }),
+          ...(updateData.description && { description: updateData.description }),
+          ...(updateData.url && { url: updateData.url }),
+        },
+      });
+      
+      return resultSuccess(
+        new Article(
+          article.articleId,
+          article.media,
+          article.title,
+          article.author,
+          article.description,
+          article.url,
+          article.createdAt,
+        ),
+      );
+    } catch (error) {
+      return resultError(new ServerError((error as Error).message));
+    }
+  }
+
+  async delete(id: bigint): AsyncResult<void, ServerError> {
+    try {
+      await this.db.article.delete({
+        where: { articleId: id },
+      });
+      
+      return resultSuccess(undefined);
+    } catch (error) {
+      return resultError(new ServerError((error as Error).message));
+    }
+  }
+}
