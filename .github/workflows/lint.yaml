@@ -1,15 +1,6 @@
 name: Lint
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-
-# カバレッジの可視化で、コメントを残すための権限
-permissions:
-  contents: read
-  pull-requests: write
+on: push
 
 # 連続push時に同じジョブが並列で実行されるのを防ぐ
 concurrency:
@@ -19,7 +10,6 @@ concurrency:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
-  DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
 
 jobs:
   setup:
