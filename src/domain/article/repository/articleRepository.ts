@@ -1,4 +1,4 @@
-import Article from '@/domain/article/article';
+import Article from '@/domain/article/model/article';
 import { ServerError } from '@/common/errors';
 import { AsyncResult } from '@/common/types/utility';
 

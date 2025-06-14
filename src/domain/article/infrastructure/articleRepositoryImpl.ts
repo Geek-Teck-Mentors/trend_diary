@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import Article from '@/domain/article/article';
+import Article from '@/domain/article/model/article';
 import { ArticleRepository } from '@/domain/article/repository/articleRepository';
 import { ServerError } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';

@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import Article from '@/domain/article/article';
+import Article from '@/domain/article/model/article';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError } from '@/common/errors';

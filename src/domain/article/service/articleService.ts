@@ -1,4 +1,4 @@
-import Article from '@/domain/article/article';
+import Article from '@/domain/article/model/article';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
 import { ArticleQueryParams, articleQuerySchema } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError, ClientError } from '@/common/errors';

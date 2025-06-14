@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { mockDeep } from 'vitest-mock-extended';
-import Article from '@/domain/article/article';
+import Article from '@/domain/article/model/article';
 import ArticleService from './articleService';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
