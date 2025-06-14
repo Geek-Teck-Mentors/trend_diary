@@ -6,6 +6,7 @@ import { ArticleQueryService } from '@/domain/article/repository/articleQuerySer
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError, ClientError } from '@/common/errors';
 import { resultError, resultSuccess, isError } from '@/common/types/utility';
+import { CursorPaginationResult } from '@/common/pagination';
 
 const mockArticle: Article = new Article(
   BigInt(1),
@@ -16,6 +17,14 @@ const mockArticle: Article = new Article(
   faker.internet.url(),
   new Date(),
 );
+
+const mockPaginationResult: CursorPaginationResult<Article> = {
+  data: [mockArticle],
+  nextCursor: undefined,
+  prevCursor: undefined,
+  hasNext: false,
+  hasPrev: false,
+};
 
 const mockArticleQueryService = mockDeep<ArticleQueryService>();
 
@@ -28,7 +37,7 @@ describe('ArticleService', () => {
 
   describe('searchArticles', () => {
     it('正常系: 有効なパラメータで記事検索成功', async () => {
-      const params: ArticleQueryParams = {
+      const params: Partial<ArticleQueryParams> = {
         title: 'test title',
         author: 'test author',
         media: 'qiita',
@@ -36,55 +45,71 @@ describe('ArticleService', () => {
         read_status: '0',
       };
 
-      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess([mockArticle]));
+      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult));
 
       const result = await service.searchArticles(params);
 
-      expect(result).toEqual(resultSuccess([mockArticle]));
-      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith(params);
+      expect(result).toEqual(resultSuccess(mockPaginationResult));
+      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+        ...params,
+        limit: 20,
+        direction: 'next',
+      });
     });
 
     it('正常系: titleパラメータのみで検索', async () => {
-      const params: ArticleQueryParams = {
+      const params: Partial<ArticleQueryParams> = {
         title: 'test title',
       };
 
-      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess([mockArticle]));
+      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult));
 
       const result = await service.searchArticles(params);
 
-      expect(result).toEqual(resultSuccess([mockArticle]));
-      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith(params);
+      expect(result).toEqual(resultSuccess(mockPaginationResult));
+      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+        title: 'test title',
+        limit: 20,
+        direction: 'next',
+      });
     });
 
     it('正常系: authorパラメータのみで検索', async () => {
-      const params: ArticleQueryParams = {
+      const params: Partial<ArticleQueryParams> = {
         author: 'test author',
       };
 
-      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess([mockArticle]));
+      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult));
 
       const result = await service.searchArticles(params);
 
-      expect(result).toEqual(resultSuccess([mockArticle]));
-      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith(params);
+      expect(result).toEqual(resultSuccess(mockPaginationResult));
+      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+        author: 'test author',
+        limit: 20,
+        direction: 'next',
+      });
     });
 
     it('正常系: mediaパラメータのみで検索', async () => {
-      const params: ArticleQueryParams = {
+      const params: Partial<ArticleQueryParams> = {
         media: 'zenn',
       };
 
-      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess([mockArticle]));
+      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult));
 
       const result = await service.searchArticles(params);
 
-      expect(result).toEqual(resultSuccess([mockArticle]));
-      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith(params);
+      expect(result).toEqual(resultSuccess(mockPaginationResult));
+      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+        media: 'zenn',
+        limit: 20,
+        direction: 'next',
+      });
     });
 
     it('正常系: 空文字列パラメータの最適化処理', async () => {
-      const params: ArticleQueryParams = {
+      const params: Partial<ArticleQueryParams> = {
         title: '  test title  ',
         author: '  test author  ',
         media: 'qiita',
@@ -94,18 +119,20 @@ describe('ArticleService', () => {
         title: 'test title',
         author: 'test author',
         media: 'qiita',
+        limit: 20,
+        direction: 'next',
       };
 
-      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess([mockArticle]));
+      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult));
 
       const result = await service.searchArticles(params);
 
-      expect(result).toEqual(resultSuccess([mockArticle]));
+      expect(result).toEqual(resultSuccess(mockPaginationResult));
       expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith(optimizedParams);
     });
 
     it('正常系: 空文字列や空白のみのパラメータは除去される', async () => {
-      const params: ArticleQueryParams = {
+      const params: Partial<ArticleQueryParams> = {
         title: '',
         author: '   ',
         media: 'qiita',
@@ -113,14 +140,37 @@ describe('ArticleService', () => {
 
       const optimizedParams: ArticleQueryParams = {
         media: 'qiita',
+        limit: 20,
+        direction: 'next',
       };
 
-      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess([mockArticle]));
+      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult));
 
       const result = await service.searchArticles(params);
 
-      expect(result).toEqual(resultSuccess([mockArticle]));
+      expect(result).toEqual(resultSuccess(mockPaginationResult));
       expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith(optimizedParams);
+    });
+
+    it('正常系: cursor paginationパラメータ', async () => {
+      const params: Partial<ArticleQueryParams> = {
+        title: 'test',
+        cursor: 'test-cursor',
+        limit: 10,
+        direction: 'prev',
+      };
+
+      mockArticleQueryService.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult));
+
+      const result = await service.searchArticles(params);
+
+      expect(result).toEqual(resultSuccess(mockPaginationResult));
+      expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+        title: 'test',
+        cursor: 'test-cursor',
+        limit: 10,
+        direction: 'prev',
+      });
     });
 
     describe('準正常系', () => {
@@ -140,7 +190,7 @@ describe('ArticleService', () => {
     });
 
     it('異常系: リポジトリ層でのDBエラー', async () => {
-      const params: ArticleQueryParams = {
+      const params: Partial<ArticleQueryParams> = {
         title: 'test title',
       };
 
