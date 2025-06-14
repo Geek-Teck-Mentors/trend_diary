@@ -6,7 +6,6 @@ import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
 import ArticleQueryServiceImpl from '@/domain/article/infrastructure/articleQueryServiceImpl';
 import ArticleService from '@/domain/article/service/articleService';
-import Article from '@/domain/article/article';
 import { isSuccess, isError } from '@/common/types/utility';
 
 export default async function getArticles(c: Context<Env>) {
@@ -19,10 +18,10 @@ export default async function getArticles(c: Context<Env>) {
   const result = await service.searchArticles(query);
 
   if (isSuccess(result)) {
-    const articles = result.data as Article[];
+    const articles = result.data;
     logger.info('articles retrieved successfully', { count: articles.length });
     return c.json(
-      articles.map((article: Article) => ({
+      articles.map((article) => ({
         articleId: article.articleId.toString(),
         media: article.media,
         title: article.title,
