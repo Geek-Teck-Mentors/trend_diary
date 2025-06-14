@@ -36,9 +36,7 @@ describe('GET /api/articles', () => {
   }
 
   async function setupTestData(): Promise<void> {
-    await Promise.all(
-      testArticles.map((article) => db.article.create({ data: article }))
-    );
+    await Promise.all(testArticles.map((article) => db.article.create({ data: article })));
   }
 
   async function requestGetArticles(query: string = '') {
@@ -67,7 +65,7 @@ describe('GET /api/articles', () => {
       const res = await requestGetArticles();
 
       expect(res.status).toBe(200);
-      const data = await res.json() as any[];
+      const data = (await res.json()) as any[];
       expect(data).toHaveLength(2);
       expect(data[0].title).toBe('TypeScriptの応用');
       expect(data[1].title).toBe('Reactの基礎');
@@ -77,7 +75,7 @@ describe('GET /api/articles', () => {
       const res = await requestGetArticles('title=React');
 
       expect(res.status).toBe(200);
-      const data = await res.json() as any[];
+      const data = (await res.json()) as any[];
       expect(data).toHaveLength(1);
       expect(data[0].title).toBe('Reactの基礎');
     });
@@ -86,7 +84,7 @@ describe('GET /api/articles', () => {
       const res = await requestGetArticles('author=山田');
 
       expect(res.status).toBe(200);
-      const data = await res.json() as any[];
+      const data = (await res.json()) as any[];
       expect(data).toHaveLength(1);
       expect(data[0].author).toBe('山田太郎');
     });
@@ -95,7 +93,7 @@ describe('GET /api/articles', () => {
       const res = await requestGetArticles('media=qiita');
 
       expect(res.status).toBe(200);
-      const data = await res.json() as any[];
+      const data = (await res.json()) as any[];
       expect(data).toHaveLength(1);
       expect(data[0].media).toBe('qiita');
     });
@@ -104,7 +102,7 @@ describe('GET /api/articles', () => {
       const res = await requestGetArticles('date=2025-05-11');
 
       expect(res.status).toBe(200);
-      const data = await res.json() as any[];
+      const data = (await res.json()) as any[];
       expect(data).toHaveLength(1);
       expect(data[0].title).toBe('Reactの基礎');
     });
@@ -113,7 +111,7 @@ describe('GET /api/articles', () => {
       const res = await requestGetArticles('read_status=1');
 
       expect(res.status).toBe(200);
-      const data = await res.json() as any[];
+      const data = (await res.json()) as any[];
       expect(data).toHaveLength(2);
     });
 
@@ -121,7 +119,7 @@ describe('GET /api/articles', () => {
       const res = await requestGetArticles('media=qiita&author=山田');
 
       expect(res.status).toBe(200);
-      const data = await res.json() as any[];
+      const data = (await res.json()) as any[];
       expect(data).toHaveLength(1);
       expect(data[0].title).toBe('Reactの基礎');
     });

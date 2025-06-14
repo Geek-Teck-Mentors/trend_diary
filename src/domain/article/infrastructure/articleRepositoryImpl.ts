@@ -12,7 +12,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       const article = await this.db.article.findUnique({
         where: { articleId: id },
       });
-      
+
       return resultSuccess(
         article
           ? new Article(
@@ -36,7 +36,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       const articles = await this.db.article.findMany({
         orderBy: { createdAt: 'desc' },
       });
-      
+
       return resultSuccess(
         articles.map(
           (article) =>
@@ -56,7 +56,9 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
     }
   }
 
-  async create(articleData: Omit<Article, 'articleId' | 'createdAt'>): AsyncResult<Article, ServerError> {
+  async create(
+    articleData: Omit<Article, 'articleId' | 'createdAt'>,
+  ): AsyncResult<Article, ServerError> {
     try {
       const article = await this.db.article.create({
         data: {
@@ -67,7 +69,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
           url: articleData.url,
         },
       });
-      
+
       return resultSuccess(
         new Article(
           article.articleId,
@@ -96,7 +98,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
           ...(updateData.url && { url: updateData.url }),
         },
       });
-      
+
       return resultSuccess(
         new Article(
           article.articleId,
@@ -118,7 +120,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       await this.db.article.delete({
         where: { articleId: id },
       });
-      
+
       return resultSuccess(undefined);
     } catch (error) {
       return resultError(new ServerError((error as Error).message));

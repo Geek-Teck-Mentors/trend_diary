@@ -43,7 +43,7 @@ export default async function getArticles(c: Context<Env>) {
         message: e.message,
       });
     }
-    
+
     if (e instanceof ServerError) {
       logger.error('internal server error', e);
       throw new HTTPException(500, {
