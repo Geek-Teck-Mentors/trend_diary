@@ -16,30 +16,6 @@ import {
 export default class ArticleQueryServiceImpl implements ArticleQueryService {
   constructor(private readonly db: RdbClient) {}
 
-  async findById(id: bigint): AsyncResult<Nullable<Article>, ServerError> {
-    try {
-      const article = await this.db.article.findUnique({
-        where: { articleId: id },
-      });
-
-      return resultSuccess(article ? fromPrismaToArticle(article) : null);
-    } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)));
-    }
-  }
-
-  async findAll(): AsyncResult<Article[], ServerError> {
-    try {
-      const articles = await this.db.article.findMany({
-        orderBy: { createdAt: 'desc' },
-      });
-
-      return resultSuccess(articles.map(fromPrismaToArticle));
-    } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)));
-    }
-  }
-
   async searchArticles(
     params: ArticleQueryParams,
   ): AsyncResult<CursorPaginationResult<Article>, ServerError> {
