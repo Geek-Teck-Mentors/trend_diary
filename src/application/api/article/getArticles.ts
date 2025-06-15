@@ -10,7 +10,7 @@ import { ArticleListResponse, ArticleResponse } from './types/response';
 
 function convertToResponse(article: Article): ArticleResponse {
   return {
-    articleId: article.articleId,
+    articleId: article.articleId.toString(),
     media: article.media,
     title: article.title,
     author: article.author,
