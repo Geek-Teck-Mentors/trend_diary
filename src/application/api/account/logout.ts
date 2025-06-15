@@ -6,12 +6,12 @@ import { Env } from '@/application/env';
 import { NotFoundError, ServerError } from '@/common/errors';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import getRdbClient from '@/infrastructure/rdb';
-import { logger } from '@/logger/logger';
 import CONTEXT_KEY from '@/application/middleware/context';
 import { SESSION_NAME } from '@/common/constants/session';
 import { isSuccess, isError } from '@/common/types/utility';
 
 export default async function logout(c: Context<Env>) {
+  const logger = c.get(CONTEXT_KEY.APP_LOG);
   const sessionId = c.get(CONTEXT_KEY.SESSION_ID);
   const rdb = getRdbClient(c.env.DATABASE_URL);
   const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb));
@@ -27,6 +27,7 @@ export default async function logout(c: Context<Env>) {
   if (isError(result)) {
     const { error } = result;
     if (error instanceof NotFoundError) {
+      logger.warn('session not found', { sessionId });
       throw new HTTPException(error.statusCode as ContentfulStatusCode, {
         message: error.message,
       });

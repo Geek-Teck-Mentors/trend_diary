@@ -8,14 +8,15 @@ import {
   AccountRepositoryImpl,
   AccountInput,
 } from '@/domain/account';
-import { logger } from '@/logger/logger';
 import getRdbClient from '@/infrastructure/rdb';
 import { ZodValidatedContext } from '@/application/middleware/zodValidator';
 import { SESSION_NAME } from '@/common/constants/session';
 import { isSuccess, isError } from '@/common/types/utility';
+import CONTEXT_KEY from '@/application/middleware/context';
 
 export default async function login(c: ZodValidatedContext<AccountInput>) {
   const valid = c.req.valid('json');
+  const logger = c.get(CONTEXT_KEY.APP_LOG);
 
   const rdb = getRdbClient(c.env.DATABASE_URL);
   const accountRepository = new AccountRepositoryImpl(rdb);

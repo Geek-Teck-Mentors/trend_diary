@@ -4,12 +4,13 @@ import { AlreadyExistsError, ServerError } from '@/common/errors';
 import getRdbClient, { Transaction } from '@/infrastructure/rdb';
 
 import { accountSchema } from '@/domain/account/schema/accountSchema';
-import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import { isSuccess, isError } from '@/common/types/utility';
+import CONTEXT_KEY from '@/application/middleware/context';
 
 export default async function signup(c: Context<Env>) {
+  const logger = c.get(CONTEXT_KEY.APP_LOG);
   let body;
   try {
     body = await c.req.json();
