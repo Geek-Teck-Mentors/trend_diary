@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import 'zod-openapi/extend';
 import baseSchema from '@/common/schema/baseSchema';
 import deletedAtSchema from '@/common/schema/deletedAtSchema';
 
