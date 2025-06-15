@@ -2,13 +2,13 @@ import Article from '@/domain/article/model/article';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
 import { ArticleQueryParams, articleQuerySchema } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError, ClientError } from '@/common/errors';
-import { AsyncResult, resultError } from '@/common/types/utility';
+import { AsyncResult, resultError, Nullable } from '@/common/types/utility';
 import { CursorPaginationResult } from '@/common/pagination';
 
 export default class ArticleService {
   constructor(private readonly articleQueryService: ArticleQueryService) {}
 
-  async findById(id: bigint): AsyncResult<Article | null, ServerError> {
+  async findById(id: bigint): AsyncResult<Nullable<Article>, ServerError> {
     return this.articleQueryService.findById(id);
   }
 
