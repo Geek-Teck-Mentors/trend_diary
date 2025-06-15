@@ -56,6 +56,7 @@
 - サービス層は`Promise<Result<T, E>>`を返す
 - 下位層は`ResultAsync<T, E>`を使用
 - カスタムエラー型は`src/common/errors/`に定義
+- utilsの作成は禁止
 
 **ドメイン層構造**:
 

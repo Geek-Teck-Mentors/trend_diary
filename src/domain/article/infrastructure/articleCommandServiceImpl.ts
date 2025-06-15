@@ -1,9 +1,8 @@
 import Article from '@/domain/article/model/article';
 import { ArticleCommandService } from '@/domain/article/repository/articleCommandService';
-import { ServerError } from '@/common/errors';
+import { ServerError, getErrorMessage } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
 import fromPrismaToArticle from '@/domain/article/mapper/articleMapper';
-import getErrorMessage from '@/common/utils/errorUtils';
 import { RdbClient } from '@/infrastructure/rdb';
 
 export default class ArticleCommandServiceImpl implements ArticleCommandService {

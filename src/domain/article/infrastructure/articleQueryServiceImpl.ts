@@ -2,10 +2,9 @@ import { Prisma } from '@prisma/client';
 import Article from '@/domain/article/model/article';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
-import { ServerError } from '@/common/errors';
+import { ServerError, getErrorMessage } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError, Nullable } from '@/common/types/utility';
 import fromPrismaToArticle from '@/domain/article/mapper/articleMapper';
-import getErrorMessage from '@/common/utils/errorUtils';
 import { RdbClient } from '@/infrastructure/rdb';
 import {
   CursorPaginationResult,
