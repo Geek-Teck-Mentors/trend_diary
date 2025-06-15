@@ -100,12 +100,14 @@ describe('ArticleService', () => {
   describe('searchArticles', () => {
     describe('正常系', () => {
       it('有効なパラメータで記事検索成功', async () => {
-        const params: Partial<ArticleQueryParams> = {
+        const params: ArticleQueryParams = {
           title: 'test title',
           author: 'test author',
           media: 'qiita',
           date: '2024-01-01',
           read_status: '0',
+          limit: 20,
+          direction: 'next',
         };
 
         mockArticleQueryService.searchArticles.mockResolvedValue(
@@ -123,8 +125,10 @@ describe('ArticleService', () => {
       });
 
       it('titleパラメータのみで検索', async () => {
-        const params: Partial<ArticleQueryParams> = {
+        const params: ArticleQueryParams = {
           title: 'test title',
+          limit: 20,
+          direction: 'next',
         };
 
         mockArticleQueryService.searchArticles.mockResolvedValue(
@@ -142,8 +146,10 @@ describe('ArticleService', () => {
       });
 
       it('authorパラメータのみで検索', async () => {
-        const params: Partial<ArticleQueryParams> = {
+        const params: ArticleQueryParams = {
           author: 'test author',
+          limit: 20,
+          direction: 'next',
         };
 
         mockArticleQueryService.searchArticles.mockResolvedValue(
@@ -161,8 +167,10 @@ describe('ArticleService', () => {
       });
 
       it('mediaパラメータのみで検索', async () => {
-        const params: Partial<ArticleQueryParams> = {
+        const params: ArticleQueryParams = {
           media: 'zenn',
+          limit: 20,
+          direction: 'next',
         };
 
         mockArticleQueryService.searchArticles.mockResolvedValue(
@@ -180,10 +188,12 @@ describe('ArticleService', () => {
       });
 
       it('空文字列パラメータの最適化処理', async () => {
-        const params: Partial<ArticleQueryParams> = {
+        const params: ArticleQueryParams = {
           title: '  test title  ',
           author: '  test author  ',
           media: 'qiita',
+          limit: 20,
+          direction: 'next',
         };
 
         const optimizedParams: ArticleQueryParams = {
@@ -205,10 +215,12 @@ describe('ArticleService', () => {
       });
 
       it('空文字列や空白のみのパラメータは除去される', async () => {
-        const params: Partial<ArticleQueryParams> = {
+        const params: ArticleQueryParams = {
           title: '',
           author: '   ',
           media: 'qiita',
+          limit: 20,
+          direction: 'next',
         };
 
         const optimizedParams: ArticleQueryParams = {
@@ -228,7 +240,7 @@ describe('ArticleService', () => {
       });
 
       it('cursor paginationパラメータ', async () => {
-        const params: Partial<ArticleQueryParams> = {
+        const params: ArticleQueryParams = {
           title: 'test',
           cursor: 'test-cursor',
           limit: 10,
@@ -252,8 +264,10 @@ describe('ArticleService', () => {
     });
 
     it('異常系: リポジトリ層でのDBエラー', async () => {
-      const params: Partial<ArticleQueryParams> = {
+      const params: ArticleQueryParams = {
         title: 'test title',
+        limit: 20,
+        direction: 'next',
       };
 
       const dbError = new ServerError('Database error');
