@@ -35,6 +35,68 @@ describe('ArticleService', () => {
     vi.clearAllMocks();
   });
 
+  describe('findById', () => {
+    it('IDで記事を取得', async () => {
+      const articleId = BigInt(1);
+      mockArticleQueryService.findById.mockResolvedValue(resultSuccess(mockArticle));
+
+      const result = await service.findById(articleId);
+
+      expect(result).toEqual(resultSuccess(mockArticle));
+      expect(mockArticleQueryService.findById).toHaveBeenCalledWith(articleId);
+    });
+
+    it('存在しないIDの場合はnullを返す', async () => {
+      const articleId = BigInt(999);
+      mockArticleQueryService.findById.mockResolvedValue(resultSuccess(null));
+
+      const result = await service.findById(articleId);
+
+      expect(result).toEqual(resultSuccess(null));
+      expect(mockArticleQueryService.findById).toHaveBeenCalledWith(articleId);
+    });
+
+    it('DBエラーの場合', async () => {
+      const articleId = BigInt(1);
+      const dbError = new ServerError('Database error');
+      mockArticleQueryService.findById.mockResolvedValue(resultError(dbError));
+
+      const result = await service.findById(articleId);
+
+      expect(result).toEqual(resultError(dbError));
+    });
+  });
+
+  describe('findAll', () => {
+    it('全記事を取得', async () => {
+      const articles = [mockArticle];
+      mockArticleQueryService.findAll.mockResolvedValue(resultSuccess(articles));
+
+      const result = await service.findAll();
+
+      expect(result).toEqual(resultSuccess(articles));
+      expect(mockArticleQueryService.findAll).toHaveBeenCalled();
+    });
+
+    it('記事が存在しない場合は空配列を返す', async () => {
+      mockArticleQueryService.findAll.mockResolvedValue(resultSuccess([]));
+
+      const result = await service.findAll();
+
+      expect(result).toEqual(resultSuccess([]));
+      expect(mockArticleQueryService.findAll).toHaveBeenCalled();
+    });
+
+    it('DBエラーの場合', async () => {
+      const dbError = new ServerError('Database error');
+      mockArticleQueryService.findAll.mockResolvedValue(resultError(dbError));
+
+      const result = await service.findAll();
+
+      expect(result).toEqual(resultError(dbError));
+    });
+  });
+
   describe('searchArticles', () => {
     describe('正常系', () => {
       it('有効なパラメータで記事検索成功', async () => {

@@ -8,6 +8,14 @@ import { CursorPaginationResult } from '@/common/pagination';
 export default class ArticleService {
   constructor(private readonly articleQueryService: ArticleQueryService) {}
 
+  async findById(id: bigint): AsyncResult<Article | null, ServerError> {
+    return this.articleQueryService.findById(id);
+  }
+
+  async findAll(): AsyncResult<Article[], ServerError> {
+    return this.articleQueryService.findAll();
+  }
+
   async searchArticles(
     params: any,
   ): AsyncResult<CursorPaginationResult<Article>, ServerError | ClientError> {

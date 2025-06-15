@@ -1,37 +1,13 @@
 import Article from '@/domain/article/model/article';
-import { ArticleRepository } from '@/domain/article/repository/articleRepository';
+import { ArticleCommandService } from '@/domain/article/repository/articleCommandService';
 import { ServerError } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
 import fromPrismaToArticle from '@/domain/article/mapper/articleMapper';
 import getErrorMessage from '@/common/utils/errorUtils';
 import { RdbClient } from '@/infrastructure/rdb';
 
-export default class ArticleRepositoryImpl implements ArticleRepository {
+export default class ArticleCommandServiceImpl implements ArticleCommandService {
   constructor(private readonly db: RdbClient) {}
-
-  async findById(id: bigint): AsyncResult<Article | null, ServerError> {
-    try {
-      const article = await this.db.article.findUnique({
-        where: { articleId: id },
-      });
-
-      return resultSuccess(article ? fromPrismaToArticle(article) : null);
-    } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)));
-    }
-  }
-
-  async findAll(): AsyncResult<Article[], ServerError> {
-    try {
-      const articles = await this.db.article.findMany({
-        orderBy: { createdAt: 'desc' },
-      });
-
-      return resultSuccess(articles.map(fromPrismaToArticle));
-    } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)));
-    }
-  }
 
   async create(
     articleData: Omit<Article, 'articleId' | 'createdAt'>,
