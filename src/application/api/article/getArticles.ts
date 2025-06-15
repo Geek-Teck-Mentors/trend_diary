@@ -1,11 +1,9 @@
-import { HTTPException } from 'hono/http-exception';
-import { ServerError, ClientError } from '@/common/errors';
+import { handleError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
 import { createArticleService, Article, ArticleQueryParams } from '@/domain/article';
 import { isError } from '@/common/types/utility';
 import { ArticleListResponse, ArticleResponse } from './types/response';
 import CONTEXT_KEY from '@/application/middleware/context';
-import { LoggerType } from '@/logger/logger';
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator';
 
 function convertToResponse(article: Article): ArticleResponse {
@@ -18,27 +16,6 @@ function convertToResponse(article: Article): ArticleResponse {
     url: article.url,
     createdAt: article.createdAt,
   };
-}
-
-function handleError(error: unknown, logger: LoggerType): HTTPException {
-  if (error instanceof ClientError) {
-    logger.warn('client error in search', error);
-    return new HTTPException(400, {
-      message: error.message,
-    });
-  }
-
-  if (error instanceof ServerError) {
-    logger.error('internal server error', error);
-    return new HTTPException(500, {
-      message: error.message,
-    });
-  }
-
-  logger.error('unknown error', error);
-  return new HTTPException(500, {
-    message: 'unknown error',
-  });
 }
 
 export default async function getArticles(c: ZodValidatedQueryContext<ArticleQueryParams>) {
