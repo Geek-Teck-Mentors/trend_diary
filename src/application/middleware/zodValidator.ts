@@ -34,3 +34,16 @@ export type ZodValidatedContext<T, P extends string = ''> = Context<
     };
   }
 >;
+
+export type ZodValidatedQueryContext<T, P extends string = ''> = Context<
+  Env,
+  P,
+  {
+    in: {
+      query: T;
+    };
+    out: {
+      query: T;
+    };
+  }
+>;

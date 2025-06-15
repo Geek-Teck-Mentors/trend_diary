@@ -1,13 +1,12 @@
-import { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { ServerError, ClientError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
-import { Env } from '@/application/env';
-import { createArticleService, Article } from '@/domain/article';
+import { createArticleService, Article, ArticleQueryParams } from '@/domain/article';
 import { isError } from '@/common/types/utility';
 import { ArticleListResponse, ArticleResponse } from './types/response';
 import CONTEXT_KEY from '@/application/middleware/context';
 import { LoggerType } from '@/logger/logger';
+import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator';
 
 function convertToResponse(article: Article): ArticleResponse {
   return {
@@ -42,14 +41,14 @@ function handleError(error: unknown, logger: LoggerType): HTTPException {
   });
 }
 
-export default async function getArticles(c: Context<Env>) {
-  const query = c.req.query();
+export default async function getArticles(c: ZodValidatedQueryContext<ArticleQueryParams>) {
+  const valid = c.req.valid('query');
   const logger = c.get(CONTEXT_KEY.APP_LOG);
 
   const rdb = getRdbClient(c.env.DATABASE_URL);
   const service = createArticleService(rdb);
 
-  const result = await service.searchArticles(query);
+  const result = await service.searchArticles(valid);
   if (isError(result)) {
     throw handleError(result.error, logger);
   }

@@ -4,8 +4,8 @@ import Article from '@/domain/article/model/article';
 import ArticleService from './articleService';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
-import { ServerError, ClientError } from '@/common/errors';
-import { resultError, resultSuccess, isError } from '@/common/types/utility';
+import { ServerError } from '@/common/errors';
+import { resultError, resultSuccess } from '@/common/types/utility';
 import { CursorPaginationResult } from '@/common/pagination';
 
 const mockArticle: Article = new Article(
@@ -248,22 +248,6 @@ describe('ArticleService', () => {
           limit: 10,
           direction: 'prev',
         });
-      });
-    });
-
-    describe('準正常系', () => {
-      it('無効なdate形式', async () => {
-        const params = {
-          date: 'invalid-date',
-        };
-
-        const result = await service.searchArticles(params);
-
-        expect(isError(result)).toBe(true);
-        if (isError(result)) {
-          expect(result.error).toBeInstanceOf(ClientError);
-          expect(result.error.message).toContain('Invalid search parameters');
-        }
       });
     });
 
