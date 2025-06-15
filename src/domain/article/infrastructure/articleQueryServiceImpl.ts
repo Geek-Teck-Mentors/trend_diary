@@ -48,7 +48,7 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
       const { cursor, limit = 20, direction = 'next', ...searchParams } = params;
 
       const where = ArticleQueryServiceImpl.buildWhereClause(searchParams);
-      const cursorCondition = ArticleQueryServiceImpl.buildCursorCondition(cursor, direction);
+      const cursorCondition = ArticleQueryServiceImpl.buildCursorCondition(direction, cursor);
 
       if (cursorCondition) {
         let existingAnd: any[] = [];
@@ -84,8 +84,8 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
   }
 
   private static buildCursorCondition(
-    cursor: string | undefined,
     direction: CursorDirection,
+    cursor?: string,
   ): Nullable<Prisma.ArticleWhereInput> {
     if (!cursor) return null;
 
