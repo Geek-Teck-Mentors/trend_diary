@@ -28,7 +28,7 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
     }
   }
 
-  async update(id: bigint, updateData: Partial<Article>): AsyncResult<Article, ServerError> {
+  async save(id: bigint, updateData: Partial<Article>): AsyncResult<Article, ServerError> {
     try {
       const article = await this.db.article.update({
         where: { articleId: id },
