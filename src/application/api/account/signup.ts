@@ -4,12 +4,13 @@ import { AlreadyExistsError, ServerError } from '@/common/errors';
 import getRdbClient, { Transaction } from '@/infrastructure/rdb';
 
 import { accountSchema } from '@/domain/account/schema/accountSchema';
-import { logger } from '@/logger/logger';
 import { Env } from '@/application/env';
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
-import { isSuccess, isError } from '@/common/types/utility';
+import { isError } from '@/common/types/utility';
+import CONTEXT_KEY from '@/application/middleware/context';
 
 export default async function signup(c: Context<Env>) {
+  const logger = c.get(CONTEXT_KEY.APP_LOG);
   let body;
   try {
     body = await c.req.json();
@@ -43,13 +44,6 @@ export default async function signup(c: Context<Env>) {
   const service = new AccountService(accountRepository, userRepository);
 
   const result = await service.signup(transaction, valid.data.email, valid.data.password);
-
-  if (isSuccess(result)) {
-    const account = result.data;
-    logger.info('sign up success', { accountId: account.accountId.toString() });
-    return c.json({}, 201);
-  }
-
   if (isError(result)) {
     const e = result.error;
     if (e instanceof AlreadyExistsError) {
@@ -70,4 +64,8 @@ export default async function signup(c: Context<Env>) {
       message: 'unknown error',
     });
   }
+
+  const account = result.data;
+  logger.info('sign up success', { accountId: account.accountId.toString() });
+  return c.json({}, 201);
 }
