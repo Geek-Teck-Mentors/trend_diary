@@ -4,7 +4,7 @@ import { ArticleQueryService } from '@/domain/article/repository/articleQuerySer
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError, getErrorMessage } from '@/common/errors';
 import { AsyncResult, resultSuccess, resultError, Nullable } from '@/common/types/utility';
-import fromPrismaToArticle from '@/domain/article/mapper/articleMapper';
+import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper';
 import { RdbClient } from '@/infrastructure/rdb';
 import {
   CursorPaginationResult,
