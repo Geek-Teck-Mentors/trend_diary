@@ -100,7 +100,7 @@ describe('GET /api/articles', () => {
       expect(data.data[0].media).toBe('qiita');
     });
 
-    it.skip('read_statusパラメータを受け取る', async () => {
+    it('read_statusパラメータを受け取る', async () => {
       const res = await requestGetArticles('read_status=1');
 
       expect(res.status).toBe(200);

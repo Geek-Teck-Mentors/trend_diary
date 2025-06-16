@@ -44,7 +44,7 @@ describe('ArticleService', () => {
           media: 'qiita',
           from: '2024-01-01',
           to: '2024-01-31',
-          read_status: '0',
+          readStatus: '0',
           limit: 20,
           direction: 'next',
         };
@@ -70,7 +70,7 @@ describe('ArticleService', () => {
           media: 'qiita',
           from: '2024-01-01',
           to: '2024-01-31',
-          read_status: '0',
+          readStatus: '0',
           limit: 10,
           direction: 'prev',
           cursor: 'test-cursor',
@@ -216,9 +216,9 @@ describe('ArticleService', () => {
         });
       });
 
-      it('read_statusパラメータのみで検索', async () => {
+      it('readStatusパラメータのみで検索', async () => {
         const params: ArticleQueryParams = {
-          read_status: '1',
+          readStatus: '1',
           limit: 20,
           direction: 'next',
         };
@@ -231,7 +231,7 @@ describe('ArticleService', () => {
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
-          read_status: '1',
+          readStatus: '1',
           limit: 20,
           direction: 'next',
         });

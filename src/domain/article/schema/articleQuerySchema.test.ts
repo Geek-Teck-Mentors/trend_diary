@@ -9,7 +9,7 @@ describe('記事検索スキーマ', () => {
         media: 'qiita',
         from: '2024-01-01',
         to: '2024-01-31',
-        read_status: '0',
+        readStatus: '0',
       });
     }).not.toThrow();
   });
@@ -102,37 +102,37 @@ describe('記事検索スキーマ', () => {
     });
   });
 
-  describe('read_status のバリデーション', () => {
-    it('有効なread_status値を受け入れること', () => {
+  describe('readStatus のバリデーション', () => {
+    it('有効なreadStatus値を受け入れること', () => {
       expect(() => {
         articleQuerySchema.parse({
-          read_status: '0',
+          readStatus: '0',
         });
       }).not.toThrow();
 
       expect(() => {
         articleQuerySchema.parse({
-          read_status: '1',
+          readStatus: '1',
         });
       }).not.toThrow();
     });
 
-    it('無効なread_status値を拒否すること', () => {
+    it('無効なreadStatus値を拒否すること', () => {
       expect(() => {
         articleQuerySchema.parse({
-          read_status: '2',
+          readStatus: '2',
         });
       }).toThrow();
 
       expect(() => {
         articleQuerySchema.parse({
-          read_status: 'true',
+          readStatus: 'true',
         });
       }).toThrow();
 
       expect(() => {
         articleQuerySchema.parse({
-          read_status: 0,
+          readStatus: 0,
         });
       }).toThrow();
     });
@@ -228,7 +228,7 @@ describe('記事検索スキーマ', () => {
         articleQuerySchema.parse({
           title: 'React入門',
           media: 'qiita',
-          read_status: '0',
+          readStatus: '0',
         });
       }).not.toThrow();
     });
@@ -238,7 +238,7 @@ describe('記事検索スキーマ', () => {
         articleQuerySchema.parse({
           title: 'React入門',
           media: 'invalid',
-          read_status: '0',
+          readStatus: '0',
         });
       }).toThrow();
     });

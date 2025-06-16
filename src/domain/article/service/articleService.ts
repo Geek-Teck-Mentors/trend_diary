@@ -4,7 +4,7 @@ import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError } from '@/common/errors';
 import { AsyncResult } from '@/common/types/utility';
 import { CursorPaginationResult } from '@/common/pagination';
-import extractTrimmed from '@/common/sanitize';
+import extractTrimmed from '@/common/sanitization';
 
 export default class ArticleService {
   constructor(private readonly articleQueryService: ArticleQueryService) {}
@@ -40,8 +40,8 @@ export default class ArticleService {
       optimizedParams.media = params.media;
     }
 
-    if (params.read_status) {
-      optimizedParams.read_status = params.read_status;
+    if (params.readStatus) {
+      optimizedParams.readStatus = params.readStatus;
     }
 
     return this.articleQueryService.searchArticles(optimizedParams as ArticleQueryParams);
