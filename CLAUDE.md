@@ -18,7 +18,6 @@
 
 ### テスト
 
-- `npm run test` - 全てのテストを実行
 - `npm run test:service:coverage` - ドメイン/サービス層のテストをカバレッジ付きで実行
 - `npm run test:api:coverage` - API層のテストをカバレッジ付きで実行
 - `npm run test:frontend:coverage` - フロントエンドコンポーネントのテストをカバレッジ付きで実行
