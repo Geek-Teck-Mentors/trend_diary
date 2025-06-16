@@ -42,7 +42,8 @@ describe('ArticleService', () => {
           title: 'test title',
           author: 'test author',
           media: 'qiita',
-          date: '2024-01-01',
+          from: '2024-01-01',
+          to: '2024-01-31',
           read_status: '0',
           limit: 20,
           direction: 'next',
@@ -150,27 +151,6 @@ describe('ArticleService', () => {
         });
       });
 
-      it('dateパラメータのみで検索', async () => {
-        const params: ArticleQueryParams = {
-          date: '2024-01-01',
-          limit: 20,
-          direction: 'next',
-        };
-
-        mockArticleQueryService.searchArticles.mockResolvedValue(
-          resultSuccess(mockPaginationResult),
-        );
-
-        const result = await service.searchArticles(params as ArticleQueryParams);
-
-        expect(result).toEqual(resultSuccess(mockPaginationResult));
-        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
-          date: '2024-01-01',
-          limit: 20,
-          direction: 'next',
-        });
-      });
-
       it('fromパラメータのみで検索', async () => {
         const params: ArticleQueryParams = {
           from: '2024-01-01',
@@ -256,7 +236,6 @@ describe('ArticleService', () => {
           direction: 'next',
         });
       });
-
     });
 
     it('異常系: リポジトリ層でのDBエラー', async () => {

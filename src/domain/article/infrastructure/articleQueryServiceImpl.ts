@@ -120,16 +120,7 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
       where.media = params.media;
     }
 
-    if (params.date) {
-      const startDate = new Date(`${params.date}T00:00:00Z`);
-      const endDate = new Date(`${params.date}T00:00:00Z`);
-      endDate.setDate(endDate.getDate() + 1);
-
-      where.createdAt = {
-        gte: startDate,
-        lt: endDate,
-      };
-    } else if (params.from || params.to) {
+    if (params.from || params.to) {
       const dateRange: { gte?: Date; lt?: Date } = {};
 
       if (params.from) {

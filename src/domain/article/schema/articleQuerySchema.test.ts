@@ -7,7 +7,8 @@ describe('記事検索スキーマ', () => {
         title: 'テスト記事',
         author: 'テスト著者',
         media: 'qiita',
-        date: '2024-01-01',
+        from: '2024-01-01',
+        to: '2024-01-31',
         read_status: '0',
       });
     }).not.toThrow();
@@ -96,48 +97,6 @@ describe('記事検索スキーマ', () => {
       expect(() => {
         articleQuerySchema.parse({
           media: 'hatena',
-        });
-      }).toThrow();
-    });
-  });
-
-  describe('date のバリデーション', () => {
-    it('有効な日付形式を受け入れること', () => {
-      expect(() => {
-        articleQuerySchema.parse({
-          date: '2024-01-01',
-        });
-      }).not.toThrow();
-
-      expect(() => {
-        articleQuerySchema.parse({
-          date: '2023-12-31',
-        });
-      }).not.toThrow();
-    });
-
-    it('無効な日付形式を拒否すること', () => {
-      expect(() => {
-        articleQuerySchema.parse({
-          date: '2024/01/01',
-        });
-      }).toThrow();
-
-      expect(() => {
-        articleQuerySchema.parse({
-          date: '24-01-01',
-        });
-      }).toThrow();
-
-      expect(() => {
-        articleQuerySchema.parse({
-          date: '2024-1-1',
-        });
-      }).toThrow();
-
-      expect(() => {
-        articleQuerySchema.parse({
-          date: 'invalid-date',
         });
       }).toThrow();
     });
@@ -307,34 +266,6 @@ describe('記事検索スキーマ', () => {
           to: '2024-01-31',
         });
       }).not.toThrow();
-    });
-
-    it('date と from の併用を拒否すること', () => {
-      expect(() => {
-        articleQuerySchema.parse({
-          date: '2024-01-01',
-          from: '2024-01-01',
-        });
-      }).toThrow();
-    });
-
-    it('date と to の併用を拒否すること', () => {
-      expect(() => {
-        articleQuerySchema.parse({
-          date: '2024-01-01',
-          to: '2024-01-31',
-        });
-      }).toThrow();
-    });
-
-    it('date と from, to の併用を拒否すること', () => {
-      expect(() => {
-        articleQuerySchema.parse({
-          date: '2024-01-01',
-          from: '2024-01-01',
-          to: '2024-01-31',
-        });
-      }).toThrow();
     });
 
     it('from が to より後の日付の場合を拒否すること', () => {

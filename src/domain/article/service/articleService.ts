@@ -28,10 +28,6 @@ export default class ArticleService {
       optimizedParams.author = trimmedAuthor;
     }
 
-    if (params.date) {
-      optimizedParams.date = params.date;
-    }
-
     if (params.from) {
       optimizedParams.from = params.from;
     }
