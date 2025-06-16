@@ -125,6 +125,40 @@ describe('GET /api/articles', () => {
       expect(data.data).toHaveLength(1);
       expect(data.data[0].title).toBe('Reactの基礎');
     });
+
+    it('fromパラメータで検索', async () => {
+      const res = await requestGetArticles('from=2025-05-12');
+
+      expect(res.status).toBe(200);
+      const data: ArticleListResponse = await res.json();
+      expect(data.data).toHaveLength(1);
+      expect(data.data[0].title).toBe('TypeScriptの応用');
+    });
+
+    it('toパラメータで検索', async () => {
+      const res = await requestGetArticles('to=2025-05-11');
+
+      expect(res.status).toBe(200);
+      const data: ArticleListResponse = await res.json();
+      expect(data.data).toHaveLength(1);
+      expect(data.data[0].title).toBe('Reactの基礎');
+    });
+
+    it('from/toパラメータの範囲検索', async () => {
+      const res = await requestGetArticles('from=2025-05-11&to=2025-05-12');
+
+      expect(res.status).toBe(200);
+      const data: ArticleListResponse = await res.json();
+      expect(data.data).toHaveLength(2);
+    });
+
+    it('from/toパラメータの範囲検索（該当なし）', async () => {
+      const res = await requestGetArticles('from=2025-05-13&to=2025-05-14');
+
+      expect(res.status).toBe(200);
+      const data: ArticleListResponse = await res.json();
+      expect(data.data).toHaveLength(0);
+    });
   });
 
   describe('準正常系', () => {
@@ -142,6 +176,31 @@ describe('GET /api/articles', () => {
       {
         name: '不正なread_status値',
         query: 'read_status=2',
+        status: 422,
+      },
+      {
+        name: '不正なfrom形式',
+        query: 'from=2025/05/11',
+        status: 422,
+      },
+      {
+        name: '不正なto形式',
+        query: 'to=2025/05/11',
+        status: 422,
+      },
+      {
+        name: 'dateとfromの併用',
+        query: 'date=2025-05-11&from=2025-05-12',
+        status: 422,
+      },
+      {
+        name: 'dateとtoの併用',
+        query: 'date=2025-05-11&to=2025-05-12',
+        status: 422,
+      },
+      {
+        name: 'fromがtoより後の日付',
+        query: 'from=2025-05-12&to=2025-05-11',
         status: 422,
       },
     ];

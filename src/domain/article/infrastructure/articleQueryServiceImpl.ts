@@ -129,6 +129,20 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
         gte: startDate,
         lt: endDate,
       };
+    } else if (params.from || params.to) {
+      const dateRange: { gte?: Date; lt?: Date } = {};
+
+      if (params.from) {
+        dateRange.gte = new Date(`${params.from}T00:00:00Z`);
+      }
+
+      if (params.to) {
+        const toDate = new Date(`${params.to}T00:00:00Z`);
+        toDate.setDate(toDate.getDate() + 1);
+        dateRange.lt = toDate;
+      }
+
+      where.createdAt = dateRange;
     }
 
     return where;

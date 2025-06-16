@@ -4,6 +4,7 @@ import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError } from '@/common/errors';
 import { AsyncResult } from '@/common/types/utility';
 import { CursorPaginationResult } from '@/common/pagination';
+import extractTrimmed from '@/common/sanitize';
 
 export default class ArticleService {
   constructor(private readonly articleQueryService: ArticleQueryService) {}
@@ -11,27 +12,36 @@ export default class ArticleService {
   async searchArticles(
     params: ArticleQueryParams,
   ): AsyncResult<CursorPaginationResult<Article>, ServerError> {
-    // 空文字列を除去
     const optimizedParams: Partial<ArticleQueryParams> = {
       limit: params.limit ?? 20,
       direction: params.direction ?? 'next',
       cursor: params.cursor,
     };
 
-    if (params.title && params.title.trim()) {
-      optimizedParams.title = params.title.trim();
+    const trimmedTitle = extractTrimmed(params.title);
+    if (trimmedTitle) {
+      optimizedParams.title = trimmedTitle;
     }
 
-    if (params.author && params.author.trim()) {
-      optimizedParams.author = params.author.trim();
-    }
-
-    if (params.media) {
-      optimizedParams.media = params.media;
+    const trimmedAuthor = extractTrimmed(params.author);
+    if (trimmedAuthor) {
+      optimizedParams.author = trimmedAuthor;
     }
 
     if (params.date) {
       optimizedParams.date = params.date;
+    }
+
+    if (params.from) {
+      optimizedParams.from = params.from;
+    }
+
+    if (params.to) {
+      optimizedParams.to = params.to;
+    }
+
+    if (params.media) {
+      optimizedParams.media = params.media;
     }
 
     if (params.read_status) {

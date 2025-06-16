@@ -52,13 +52,38 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         );
 
-        const result = await service.searchArticles(params);
+        const result = await service.searchArticles(params as ArticleQueryParams);
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
           ...params,
           limit: 20,
           direction: 'next',
+        });
+      });
+
+      it('全てのパラメータが含まれるfrom/to検索', async () => {
+        const params: ArticleQueryParams = {
+          title: 'test title',
+          author: 'test author',
+          media: 'qiita',
+          from: '2024-01-01',
+          to: '2024-01-31',
+          read_status: '0',
+          limit: 10,
+          direction: 'prev',
+          cursor: 'test-cursor',
+        };
+
+        mockArticleQueryService.searchArticles.mockResolvedValue(
+          resultSuccess(mockPaginationResult),
+        );
+
+        const result = await service.searchArticles(params as ArticleQueryParams);
+
+        expect(result).toEqual(resultSuccess(mockPaginationResult));
+        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+          ...params,
         });
       });
 
@@ -73,7 +98,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         );
 
-        const result = await service.searchArticles(params);
+        const result = await service.searchArticles(params as ArticleQueryParams);
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -94,7 +119,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         );
 
-        const result = await service.searchArticles(params);
+        const result = await service.searchArticles(params as ArticleQueryParams);
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -115,7 +140,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         );
 
-        const result = await service.searchArticles(params);
+        const result = await service.searchArticles(params as ArticleQueryParams);
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -125,19 +150,9 @@ describe('ArticleService', () => {
         });
       });
 
-      it('空文字列パラメータの最適化処理', async () => {
+      it('dateパラメータのみで検索', async () => {
         const params: ArticleQueryParams = {
-          title: '  test title  ',
-          author: '  test author  ',
-          media: 'qiita',
-          limit: 20,
-          direction: 'next',
-        };
-
-        const optimizedParams: ArticleQueryParams = {
-          title: 'test title',
-          author: 'test author',
-          media: 'qiita',
+          date: '2024-01-01',
           limit: 20,
           direction: 'next',
         };
@@ -146,59 +161,102 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         );
 
-        const result = await service.searchArticles(params);
-
-        expect(result).toEqual(resultSuccess(mockPaginationResult));
-        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith(optimizedParams);
-      });
-
-      it('空文字列や空白のみのパラメータは除去される', async () => {
-        const params: ArticleQueryParams = {
-          title: '',
-          author: '   ',
-          media: 'qiita',
-          limit: 20,
-          direction: 'next',
-        };
-
-        const optimizedParams: ArticleQueryParams = {
-          media: 'qiita',
-          limit: 20,
-          direction: 'next',
-        };
-
-        mockArticleQueryService.searchArticles.mockResolvedValue(
-          resultSuccess(mockPaginationResult),
-        );
-
-        const result = await service.searchArticles(params);
-
-        expect(result).toEqual(resultSuccess(mockPaginationResult));
-        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith(optimizedParams);
-      });
-
-      it('cursor paginationパラメータ', async () => {
-        const params: ArticleQueryParams = {
-          title: 'test',
-          cursor: 'test-cursor',
-          limit: 10,
-          direction: 'prev',
-        };
-
-        mockArticleQueryService.searchArticles.mockResolvedValue(
-          resultSuccess(mockPaginationResult),
-        );
-
-        const result = await service.searchArticles(params);
+        const result = await service.searchArticles(params as ArticleQueryParams);
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
-          title: 'test',
-          cursor: 'test-cursor',
-          limit: 10,
-          direction: 'prev',
+          date: '2024-01-01',
+          limit: 20,
+          direction: 'next',
         });
       });
+
+      it('fromパラメータのみで検索', async () => {
+        const params: ArticleQueryParams = {
+          from: '2024-01-01',
+          limit: 20,
+          direction: 'next',
+        };
+
+        mockArticleQueryService.searchArticles.mockResolvedValue(
+          resultSuccess(mockPaginationResult),
+        );
+
+        const result = await service.searchArticles(params as ArticleQueryParams);
+
+        expect(result).toEqual(resultSuccess(mockPaginationResult));
+        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+          from: '2024-01-01',
+          limit: 20,
+          direction: 'next',
+        });
+      });
+
+      it('toパラメータのみで検索', async () => {
+        const params: ArticleQueryParams = {
+          to: '2024-01-31',
+          limit: 20,
+          direction: 'next',
+        };
+
+        mockArticleQueryService.searchArticles.mockResolvedValue(
+          resultSuccess(mockPaginationResult),
+        );
+
+        const result = await service.searchArticles(params as ArticleQueryParams);
+
+        expect(result).toEqual(resultSuccess(mockPaginationResult));
+        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+          to: '2024-01-31',
+          limit: 20,
+          direction: 'next',
+        });
+      });
+
+      it('from/toパラメータの組み合わせで検索', async () => {
+        const params: ArticleQueryParams = {
+          from: '2024-01-01',
+          to: '2024-01-31',
+          limit: 20,
+          direction: 'next',
+        };
+
+        mockArticleQueryService.searchArticles.mockResolvedValue(
+          resultSuccess(mockPaginationResult),
+        );
+
+        const result = await service.searchArticles(params as ArticleQueryParams);
+
+        expect(result).toEqual(resultSuccess(mockPaginationResult));
+        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+          from: '2024-01-01',
+          to: '2024-01-31',
+          limit: 20,
+          direction: 'next',
+        });
+      });
+
+      it('read_statusパラメータのみで検索', async () => {
+        const params: ArticleQueryParams = {
+          read_status: '1',
+          limit: 20,
+          direction: 'next',
+        };
+
+        mockArticleQueryService.searchArticles.mockResolvedValue(
+          resultSuccess(mockPaginationResult),
+        );
+
+        const result = await service.searchArticles(params as ArticleQueryParams);
+
+        expect(result).toEqual(resultSuccess(mockPaginationResult));
+        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
+          read_status: '1',
+          limit: 20,
+          direction: 'next',
+        });
+      });
+
     });
 
     it('異常系: リポジトリ層でのDBエラー', async () => {
