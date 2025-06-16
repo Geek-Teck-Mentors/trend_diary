@@ -29,6 +29,14 @@ erDiagram
     }
   
 
+  "read_histories" {
+    BigInt user_id 
+    BigInt article_id 
+    DateTime read_at 
+    DateTime created_at 
+    }
+  
+
   "sessions" {
     String session_id "🗝️"
     BigInt account_id 
@@ -49,4 +57,6 @@ erDiagram
     DateTime deleted_at "❓"
     }
   
+    "read_histories" o|--|| "users" : "user"
+    "users" o{--}o "read_histories" : "readHistories"
 ```
