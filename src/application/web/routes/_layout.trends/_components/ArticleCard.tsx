@@ -22,7 +22,7 @@ export default function ArticleCard({ article, onCardClick }: Props) {
       tabIndex={0}
     >
       <CardContent className="p-0 h-full flex flex-col">
-        <h3 className="text-sm font-bold text-gray-700 leading-relaxed flex-1 overflow-hidden">
+        <h3 className="text-sm font-bold text-gray-700 leading-relaxed flex-1 overflow-hidden text-ellipsis">
           {article.title}
         </h3>
 
