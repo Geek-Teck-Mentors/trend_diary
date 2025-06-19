@@ -45,7 +45,8 @@ export default function ArticleModal({ article, isOpen, onClose }: Props) {
 
       <button
         type="button"
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+        onClick={() => window.open(article.url, '_blank')}
+        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
       >
         <ExternalLink className="w-4 h-4" />
         記事を読む
