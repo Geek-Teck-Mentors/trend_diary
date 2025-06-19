@@ -23,7 +23,7 @@ export default function TrendsPage({
   return (
     <div className="min-h-screen bg-gray-50 relative">
       <div className="p-6 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
-        <h1 className="text-xl font-medium pb-4">トレンド {date.toLocaleDateString()}</h1>
+        <h1 className="text-xl font-medium pb-4">トレンド {date.toLocaleDateString('ja-JP')}</h1>
         <div className="flex flex-wrap gap-4">
           {articles.map((article) => (
             <ArticleCard
