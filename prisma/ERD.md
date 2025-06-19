@@ -30,6 +30,7 @@ erDiagram
   
 
   "read_histories" {
+    BigInt read_history_id "🗝️"
     BigInt user_id 
     BigInt article_id 
     DateTime read_at 
