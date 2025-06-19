@@ -11,23 +11,23 @@ type Props = {
 export default function ArticleCard({ article, onCardClick }: Props) {
   return (
     <Card
-      className="p-6 w-64 h-32 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white/30 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl"
+      className='h-32 w-64 cursor-pointer rounded-3xl border border-white/40 bg-white/30 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:shadow-xl'
       onClick={() => onCardClick(article)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           onCardClick(article);
         }
       }}
-      role="button"
+      role='button'
       tabIndex={0}
     >
-      <CardContent className="p-0 h-full flex flex-col">
-        <h3 className="text-sm font-bold text-gray-700 leading-relaxed flex-1 overflow-hidden text-ellipsis">
+      <CardContent className='flex h-full flex-col p-0'>
+        <h3 className='flex-1 overflow-hidden text-sm leading-relaxed font-bold text-ellipsis text-gray-700'>
           {article.title}
         </h3>
 
-        <div className="flex justify-between items-end mt-3">
-          <span className="text-sm text-gray-600">{article.author}</span>
+        <div className='mt-3 flex items-end justify-between'>
+          <span className='text-sm text-gray-600'>{article.author}</span>
           <MediaTag media={article.media} />
         </div>
       </CardContent>

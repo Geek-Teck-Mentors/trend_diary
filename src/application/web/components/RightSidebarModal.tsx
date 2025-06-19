@@ -12,7 +12,7 @@ export default function RightSidebarModal({
   isOpen,
   onClose,
   children,
-  showCloseButton = true
+  showCloseButton = true,
 }: Props) {
   const [shouldRender, setShouldRender] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -38,7 +38,7 @@ export default function RightSidebarModal({
     <>
       {/* Modal Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${
+        className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
           isAnimating ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={onClose}
@@ -47,25 +47,27 @@ export default function RightSidebarModal({
             onClose();
           }
         }}
-        role="button"
+        role='button'
         tabIndex={0}
-        aria-label="モーダルを閉じる"
+        aria-label='モーダルを閉じる'
       />
 
       {/* Right Sidebar Modal */}
-      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
-        isAnimating ? 'translate-x-0' : 'translate-x-full'
-      }`}>
-        <div className="p-6 h-full overflow-y-auto">
+      <div
+        className={`fixed top-0 right-0 z-50 h-full w-96 transform bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
+          isAnimating ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className='h-full overflow-y-auto p-6'>
           {/* Header */}
-          <div className="flex justify-between items-start mb-6">
+          <div className='mb-6 flex items-start justify-between'>
             {showCloseButton && (
               <button
-                type="button"
+                type='button'
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className='rounded-full p-2 transition-colors hover:bg-gray-100'
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className='h-5 w-5 text-gray-500' />
               </button>
             )}
           </div>
