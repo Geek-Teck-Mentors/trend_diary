@@ -2,7 +2,7 @@ import { handleError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
 import { createArticleService, Article } from '@/domain/article';
 import { isError } from '@/common/types/utility';
-import { ArticleListResponse, ArticleResponse } from './types/response';
+import { ArticleListResponse, ArticleResponse } from './response';
 import CONTEXT_KEY from '@/application/middleware/context';
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator';
 import { ApiArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
