@@ -1,11 +1,12 @@
 import { handleError } from '@/common/errors';
 import getRdbClient from '@/infrastructure/rdb';
-import { createArticleService, Article, ArticleQueryParams } from '@/domain/article';
+import { createArticleService, Article } from '@/domain/article';
 import { isError } from '@/common/types/utility';
 import { ArticleListResponse, ArticleResponse } from './types/response';
 import CONTEXT_KEY from '@/application/middleware/context';
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator';
 import { ApiArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
+import { convertApiArticleQueryParams } from './request';
 
 function convertToResponse(article: Article): ArticleResponse {
   return {
@@ -26,7 +27,7 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   const rdb = getRdbClient(c.env.DATABASE_URL);
   const service = createArticleService(rdb);
 
-  const result = await service.searchArticles(transformedParams as ArticleQueryParams);
+  const result = await service.searchArticles(convertApiArticleQueryParams(transformedParams));
   if (isError(result)) {
     throw handleError(result.error, logger);
   }

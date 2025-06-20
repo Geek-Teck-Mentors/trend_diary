@@ -18,10 +18,6 @@ const baseArticleSearchSchema = z.object({
     .optional(),
 });
 
-const articleSearchSchema = baseArticleSearchSchema.extend({
-  readStatus: readStatusEnum.optional(),
-});
-
 // 日付の範囲チェック用のrefine関数
 const dateRangeRefine = <T extends { from?: string; to?: string }>(data: T) => {
   if (data.from && data.to) {
@@ -33,7 +29,10 @@ const dateRangeRefine = <T extends { from?: string; to?: string }>(data: T) => {
 // エラーメッセージ
 const DATE_RANGE_ERROR_MESSAGE = 'fromはtoより前の日付を指定してください';
 
-export const articleQuerySchema = articleSearchSchema
+export const articleQuerySchema = baseArticleSearchSchema
+  .extend({
+    readStatus: readStatusEnum.optional(),
+  })
   .merge(cursorPaginationSchema)
   .refine(dateRangeRefine, {
     message: DATE_RANGE_ERROR_MESSAGE,
@@ -41,7 +40,7 @@ export const articleQuerySchema = articleSearchSchema
 
 export type ArticleQueryParams = z.infer<typeof articleQuerySchema>;
 
-export const apiArticleQuerySchema = articleSearchSchema
+export const apiArticleQuerySchema = baseArticleSearchSchema
   .extend({
     read_status: readStatusEnum.optional(),
   })
