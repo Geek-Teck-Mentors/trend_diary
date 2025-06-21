@@ -3,6 +3,7 @@
 - 必ず日本語で回答すること
 - 敬語は使用しないこと
 - TDDで進めること
+- リファクタリング時は必ずlint, format, testコマンドを実行すること
 
 このファイルはClaude Code (claude.ai/code) がこのリポジトリで作業する際のガイダンスを提供する。
 
@@ -17,7 +18,6 @@
 
 ### テスト
 
-- `npm run test` - 全てのテストを実行
 - `npm run test:service:coverage` - ドメイン/サービス層のテストをカバレッジ付きで実行
 - `npm run test:api:coverage` - API層のテストをカバレッジ付きで実行
 - `npm run test:frontend:coverage` - フロントエンドコンポーネントのテストをカバレッジ付きで実行
@@ -55,6 +55,7 @@
 - サービス層は`Promise<Result<T, E>>`を返す
 - 下位層は`ResultAsync<T, E>`を使用
 - カスタムエラー型は`src/common/errors/`に定義
+- utilsの作成は禁止
 
 **ドメイン層構造**:
 
