@@ -13,5 +13,5 @@ export function convertApiArticleQueryParams(params: ApiArticleQueryParams): Art
     from: params.from,
     to: params.to,
     readStatus: params.read_status,
-  }
+  };
 }
