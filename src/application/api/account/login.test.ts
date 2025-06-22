@@ -1,9 +1,7 @@
 import { faker } from '@faker-js/faker';
-import { PrismaClient } from '@prisma/client';
-import getRdbClient, { Transaction } from '@/infrastructure/rdb';
 import app from '../../server';
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import TEST_ENV from '@/test/env';
+import accountTestHelper from '@/test/helper/accountTestHelper';
 
 type LoginTestCase = {
   name: string;
@@ -12,16 +10,8 @@ type LoginTestCase = {
 };
 
 describe('POST /api/account/login', () => {
-  let db: PrismaClient;
-  let service: AccountService;
-
   const TEST_EMAIL = faker.internet.email();
   const TEST_PASSWORD = 'test_password';
-
-  async function cleanUp(): Promise<void> {
-    await db.$queryRaw`TRUNCATE TABLE "accounts";`;
-    await db.$queryRaw`TRUNCATE TABLE "users";`;
-  }
 
   async function requestLogin(body: string) {
     return app.request(
@@ -38,20 +28,20 @@ describe('POST /api/account/login', () => {
   }
 
   beforeAll(() => {
-    db = getRdbClient(TEST_ENV.DATABASE_URL);
-    service = new AccountService(new AccountRepositoryImpl(db), new UserRepositoryImpl(db));
+    // accountTestHelperを使用
   });
 
   afterAll(async () => {
-    await db.$disconnect();
+    await accountTestHelper.cleanUp();
+    await accountTestHelper.disconnect();
   });
 
   beforeEach(async () => {
-    await service.signup(new Transaction(db), TEST_EMAIL, TEST_PASSWORD);
+    await accountTestHelper.createTestAccount(TEST_EMAIL, TEST_PASSWORD);
   });
 
   afterEach(async () => {
-    await cleanUp();
+    await accountTestHelper.cleanUp();
   });
 
   describe('正常系', () => {
