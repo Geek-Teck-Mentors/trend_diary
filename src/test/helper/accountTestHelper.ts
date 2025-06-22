@@ -14,8 +14,12 @@ class AccountTestHelper {
   private service = new AccountService(this.accountRepository, this.userRepository);
 
   async cleanUp(): Promise<void> {
-    await this.rdb.$queryRaw`TRUNCATE TABLE "accounts";`;
-    await this.rdb.$queryRaw`TRUNCATE TABLE "users";`;
+    // 外部キー制約を考慮した順序でTRUNCATE
+    // read_histories → sessions → accounts → users
+    await this.rdb.$queryRaw`TRUNCATE TABLE "read_histories" CASCADE;`;
+    await this.rdb.$queryRaw`TRUNCATE TABLE "sessions" CASCADE;`;
+    await this.rdb.$queryRaw`TRUNCATE TABLE "accounts" CASCADE;`;
+    await this.rdb.$queryRaw`TRUNCATE TABLE "users" CASCADE;`;
   }
 
   async createTestAccount(email: string, password: string): Promise<void> {
