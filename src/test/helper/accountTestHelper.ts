@@ -27,6 +27,14 @@ class AccountTestHelper {
     await this.service.signup(transaction, email, password);
   }
 
+  async deleteAllSessions(): Promise<void> {
+    await this.rdb.session.deleteMany();
+  }
+
+  async deleteAllAccounts(): Promise<void> {
+    await this.rdb.account.deleteMany();
+  }
+
   async disconnect(): Promise<void> {
     await this.rdb.$disconnect();
   }

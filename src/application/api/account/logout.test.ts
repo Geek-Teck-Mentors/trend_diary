@@ -3,7 +3,6 @@ import app from '../../server';
 import TEST_ENV from '@/test/env';
 import { SESSION_NAME } from '@/common/constants/session';
 import accountTestHelper from '@/test/helper/accountTestHelper';
-import getRdbClient from '@/infrastructure/rdb';
 import { AccountService } from '@/domain/account';
 
 describe('DELETE /api/account/logout', () => {
@@ -78,10 +77,8 @@ describe('DELETE /api/account/logout', () => {
         throw new Error('セッションCookieが見つかりません');
       }
 
-      // DBのセッションを直接削除
-      const db = getRdbClient(TEST_ENV.DATABASE_URL);
-      await db.session.deleteMany();
-      await db.$disconnect();
+      // DBのセッションを削除
+      await accountTestHelper.deleteAllSessions();
 
       // セッションが存在しないのでauthenticatorミドルウェアで401エラーになる
       const res = await requestLogout();
@@ -93,9 +90,7 @@ describe('DELETE /api/account/logout', () => {
 
     it('アカウントがない場合、404', async () => {
       // アカウントを削除して存在しない状態にする
-      const db = getRdbClient(TEST_ENV.DATABASE_URL);
-      await db.account.deleteMany();
-      await db.$disconnect();
+      await accountTestHelper.deleteAllAccounts();
 
       const res = await requestLogout();
 
