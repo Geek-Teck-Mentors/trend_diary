@@ -11,7 +11,7 @@ runs:
   steps:
     - name: テストの実行
       shell: bash
-      run: npm run test:${{ inputs.target }}:coverage
+      run: npm run test:${{ inputs.target }} -- --coverage
 
     - name: カバレッジの可視化
       if: github.event_name == 'pull_request'
