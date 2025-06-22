@@ -1,24 +1,15 @@
 import { faker } from '@faker-js/faker';
-import { PrismaClient } from '@prisma/client';
-import getRdbClient, { Transaction } from '@/infrastructure/rdb';
 import app from '../../server';
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import TEST_ENV from '@/test/env';
 import { SESSION_NAME } from '@/common/constants/session';
+import accountTestHelper from '@/test/helper/accountTestHelper';
+import { AccountService } from '@/domain/account';
 
 describe('DELETE /api/account/logout', () => {
-  let db: PrismaClient;
-  let service: AccountService;
   let setCookie: string[];
 
   const TEST_EMAIL = faker.internet.email();
   const TEST_PASSWORD = 'test_password';
-
-  async function cleanUp(): Promise<void> {
-    await db.$queryRaw`TRUNCATE TABLE "accounts";`;
-    await db.$queryRaw`TRUNCATE TABLE "users";`;
-    await db.$queryRaw`TRUNCATE TABLE "sessions";`;
-  }
 
   async function requestLogout() {
     return app.request(
@@ -35,21 +26,20 @@ describe('DELETE /api/account/logout', () => {
   }
 
   beforeAll(() => {
-    db = getRdbClient(TEST_ENV.DATABASE_URL);
-    service = new AccountService(new AccountRepositoryImpl(db), new UserRepositoryImpl(db));
+    // accountTestHelperを使用
   });
 
   afterAll(async () => {
-    await cleanUp();
-    await db.$disconnect();
+    await accountTestHelper.cleanUp();
+    await accountTestHelper.disconnect();
   });
 
   beforeEach(async () => {
-    await cleanUp();
+    await accountTestHelper.cleanUp();
     // モックをリセット
     vi.clearAllMocks();
 
-    await service.signup(new Transaction(db), TEST_EMAIL, TEST_PASSWORD);
+    await accountTestHelper.createTestAccount(TEST_EMAIL, TEST_PASSWORD);
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD });
 
     const res = await app.request(
@@ -87,8 +77,8 @@ describe('DELETE /api/account/logout', () => {
         throw new Error('セッションCookieが見つかりません');
       }
 
-      // DBのセッションを直接削除
-      await db.session.deleteMany();
+      // DBのセッションを削除
+      await accountTestHelper.deleteAllSessions();
 
       // セッションが存在しないのでauthenticatorミドルウェアで401エラーになる
       const res = await requestLogout();
@@ -100,7 +90,7 @@ describe('DELETE /api/account/logout', () => {
 
     it('アカウントがない場合、404', async () => {
       // アカウントを削除して存在しない状態にする
-      await db.account.deleteMany();
+      await accountTestHelper.deleteAllAccounts();
 
       const res = await requestLogout();
 

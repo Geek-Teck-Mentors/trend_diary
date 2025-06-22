@@ -12,29 +12,15 @@
 ### ビルドとデプロイ
 
 - `npm run dev` - Remixで開発サーバーを起動
-- `npm run preview` - Wrangler（Cloudflare Workers）でプレビュー
 - `npm run build` - 本番用ビルド
-- `npm run deploy` - ビルドしてCloudflare Workersにデプロイ
 
 ### テスト
 
-- `npm run test:service:coverage` - ドメイン/サービス層のテストをカバレッジ付きで実行
-- `npm run test:api:coverage` - API層のテストをカバレッジ付きで実行
-- `npm run test:frontend:coverage` - フロントエンドコンポーネントのテストをカバレッジ付きで実行
+- `npm run test:service` - ドメイン/サービス層のテストを実行
+- `npm run test:api` - API層のテストを実行
+- `npm run test:frontend` - フロントエンドコンポーネントのテストを実行
 - `npm run e2e` - PlaywrightでE2Eテストを実行
-- `npm run e2e:report` - Playwrightテストレポートを表示
-- `npm run e2e:gen` - Playwrightテストコードを生成
-- 個別テストファイルは `npx vitest run <path/to/test>` で実行可能
-
-### データベース管理
-
-- `npm run db:gen` - Prismaクライアントを生成
-- `npm run db:migrate` - データベースマイグレーションを実行
-- `npm run db:migrate:sql-only` - クライアント生成なしでマイグレーションを実行
-- `npm run db:migrate:deploy` - 本番環境にマイグレーションをデプロイ
-- `npm run db:reset` - データベースをリセットしてシードを実行
-- `npm run db:studio` - Prisma Studioを開く
-- `npm run supabase:db:type-gen` - Supabaseデータベース型を生成
+- 個別テストファイルは 各種適切なコマンドで`-- <path/to/file>`で実行可能
 
 ### コード品質
 
@@ -43,6 +29,7 @@
 - `npm run check-types` - TypeScript型チェックを実行
 - `npm run format` - Prettierでコードフォーマットをチェック
 - `npm run format:fix` - Prettierでコードフォーマットを修正
+- `npm run lint:ci` - lint、format、型チェックを一括実行（基本的にこれを使用する）
 
 ## アーキテクチャ概要
 
@@ -50,11 +37,21 @@
 
 ### 主要なアーキテクチャパターン
 
-**エラーハンドリング**: 関数型エラーハンドリングに`neverthrow`ライブラリを使用
+**エラーハンドリング**: 関数型エラーハンドリングパターンを使用
 
-- サービス層は`Promise<Result<T, E>>`を返す
-- 下位層は`ResultAsync<T, E>`を使用
-- カスタムエラー型は`src/common/errors/`に定義
+- サービス層は`Result<T, E>`型を返す（`src/common/types/utility.ts`で定義）
+- 非同期処理では`AsyncResult<T, E>`型を使用
+- エラーハンドリングヘルパー関数を活用:
+  - `resultSuccess<T>(value: T)`: 成功結果を作成
+  - `resultError<T, E>(error: E)`: エラー結果を作成
+  - `isSuccess<T, E>(result)`: 成功かどうかを判定
+  - `isError<T, E>(result)`: エラーかどうかを判定
+- カスタムエラー型は`src/common/errors/`に定義:
+  - `ClientError`: クライアントエラー（400系）
+  - `ServerError`: サーバーエラー（500系）
+  - `NotFoundError`: リソースが見つからない
+  - `AlreadyExistsError`: リソースが既に存在
+- API層では`handleError`関数でHTTPExceptionに変換
 - utilsの作成は禁止
 
 **ドメイン層構造**:
@@ -102,7 +99,7 @@ Prismaモデルは`prisma/models/`内のファイルに分割:
 ### 重要な規約
 
 **インポート**: `src/`ルートからの絶対インポートを使用
-**エラーハンドリング**: サービス層では常にResult型を使用、エラーのthrowはインフラ層のみ
+**エラーハンドリング**: サービス層では`Result<T, E>`型を使用し、API層でHTTPExceptionに変換
 **テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック
 **バリデーション**: 全データ検証にドメイン層のZodスキーマを使用
 **ログ**: Pinoロガーで構造化ログを使用
