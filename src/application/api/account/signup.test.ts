@@ -3,7 +3,6 @@ import TEST_ENV from '@/test/env';
 import accountTestHelper from '@/test/helper/accountTestHelper';
 
 describe('POST /api/account', () => {
-
   beforeAll(async () => {
     await accountTestHelper.cleanUp();
   });
