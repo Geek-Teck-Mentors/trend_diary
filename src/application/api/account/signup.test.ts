@@ -1,21 +1,15 @@
-import getRdbClient from '@/infrastructure/rdb';
 import app from '../../server';
 import TEST_ENV from '@/test/env';
+import accountTestHelper from '@/test/helper/accountTestHelper';
 
 describe('POST /api/account', () => {
-  const db = getRdbClient(TEST_ENV.DATABASE_URL ?? '');
-
-  async function cleanUp() {
-    await db.$queryRaw`TRUNCATE TABLE "accounts";`;
-    await db.$queryRaw`TRUNCATE TABLE "users";`;
-  }
-
   beforeAll(async () => {
-    await cleanUp();
+    await accountTestHelper.cleanUp();
   });
 
   afterAll(async () => {
-    await cleanUp();
+    await accountTestHelper.cleanUp();
+    await accountTestHelper.disconnect();
   });
 
   async function requestShort(body: string) {

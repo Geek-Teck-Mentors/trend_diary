@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm run check-types:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run format:fix:*)",
+      "Bash(npm run test:api:*)",
+      "Bash(npm run test:api:coverage:*)",
+      "Bash(npm run e2e:*)"
+    ],
+    "deny": [
+      // サーバ起動しても確認しないことが多く、不毛なため
+      "Bash(npm run dev:*)"
+    ]
+  }
+}

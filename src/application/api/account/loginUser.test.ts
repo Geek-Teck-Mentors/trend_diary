@@ -1,23 +1,13 @@
 import { faker } from '@faker-js/faker';
-import { PrismaClient } from '@prisma/client';
-import getRdbClient, { Transaction } from '@/infrastructure/rdb';
 import app from '../../server';
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account';
 import TEST_ENV from '@/test/env';
+import accountTestHelper from '@/test/helper/accountTestHelper';
 
 describe('GET /api/account/me', () => {
-  let db: PrismaClient;
-  let service: AccountService;
   let setCookie: string[];
 
   const TEST_EMAIL = faker.internet.email();
   const TEST_PASSWORD = 'test_password';
-
-  async function cleanUp(): Promise<void> {
-    await db.$queryRaw`TRUNCATE TABLE "accounts";`;
-    await db.$queryRaw`TRUNCATE TABLE "users";`;
-    await db.$queryRaw`TRUNCATE TABLE "sessions";`;
-  }
 
   async function requestLoginUser() {
     return app.request(
@@ -34,20 +24,19 @@ describe('GET /api/account/me', () => {
   }
 
   beforeAll(() => {
-    db = getRdbClient(TEST_ENV.DATABASE_URL);
-    service = new AccountService(new AccountRepositoryImpl(db), new UserRepositoryImpl(db));
+    // accountTestHelperを使用
   });
 
   afterAll(async () => {
-    await cleanUp();
-    await db.$disconnect();
+    await accountTestHelper.cleanUp();
+    await accountTestHelper.disconnect();
   });
 
   beforeEach(async () => {
-    await cleanUp();
+    await accountTestHelper.cleanUp();
 
     // ユーザーを作成してログインする
-    await service.signup(new Transaction(db), TEST_EMAIL, TEST_PASSWORD);
+    await accountTestHelper.createTestAccount(TEST_EMAIL, TEST_PASSWORD);
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD });
 
     const res = await app.request(
