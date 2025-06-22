@@ -55,7 +55,7 @@ export function createPaginationResult<T extends { createdAt: Date }>(
       });
     }
 
-    if (hasCursor) {
+    if (result.hasPrev) {
       const firstItem = items[0];
       result.prevCursor = encodeCursor({
         id: getId(firstItem),
