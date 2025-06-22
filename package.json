@@ -10,7 +10,6 @@
     "build": "remix vite:build",
     "preview": "wrangler dev",
     "deploy": "npm run build && wrangler deploy",
-    "test": "vitest run",
     "test:frontend:coverage": "vitest run -c vitest/config.frontend.ts --coverage",
     "test:service:coverage": "vitest run -c vitest/config.service.ts --coverage",
     "test:api:coverage": "vitest run -c vitest/config.api.ts --coverage",

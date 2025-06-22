@@ -6,6 +6,6 @@ export default class Article {
     public author: string,
     public description: string,
     public url: string,
-    public readonly createdAt: Date = new Date(),
+    public readonly createdAt: Date,
   ) {}
 }
