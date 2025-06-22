@@ -15,14 +15,6 @@ runs:
       with:
         node-version-file: ${{ inputs.node-version-file }}
 
-    - name: 依存関係のキャッシュ
-      uses: actions/cache@v4
-      id: node-modules-cache
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
     - name: ライブラリのインストール
-      if: steps.node-modules-cache.outputs.cache-hit != 'true'
       shell: bash
       run: npm ci
