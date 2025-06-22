@@ -39,7 +39,13 @@ describe('Pagination Utils', () => {
         mockArticle(i + 1, new Date(baseDate.getTime() + i * 1000)),
       );
 
-      const result = createPaginationResult(articles, 2, 'next', true);
+      const result = createPaginationResult(
+        articles,
+        2,
+        (article) => article.articleId,
+        'next',
+        true,
+      );
 
       expect(result.data).toHaveLength(2);
       expect(result.hasNext).toBe(true);
@@ -51,7 +57,13 @@ describe('Pagination Utils', () => {
     it('初回ページ（hasCursor = false）', () => {
       const articles = [mockArticle(1, baseDate)];
 
-      const result = createPaginationResult(articles, 2, 'next', false);
+      const result = createPaginationResult(
+        articles,
+        2,
+        (article) => article.articleId,
+        'next',
+        false,
+      );
 
       expect(result.data).toHaveLength(1);
       expect(result.hasNext).toBe(false);
@@ -63,7 +75,13 @@ describe('Pagination Utils', () => {
     it('次ページ方向の結果生成（hasMore = false, hasCursor = true）', () => {
       const articles = [mockArticle(1, baseDate)];
 
-      const result = createPaginationResult(articles, 2, 'next', true);
+      const result = createPaginationResult(
+        articles,
+        2,
+        (article) => article.articleId,
+        'next',
+        true,
+      );
 
       expect(result.data).toHaveLength(1);
       expect(result.hasNext).toBe(false);
@@ -77,7 +95,7 @@ describe('Pagination Utils', () => {
         mockArticle(i + 1, new Date(baseDate.getTime() + i * 1000)),
       );
 
-      const result = createPaginationResult(articles, 2, 'prev');
+      const result = createPaginationResult(articles, 2, (article) => article.articleId, 'prev');
 
       expect(result.data).toHaveLength(2);
       expect(result.hasPrev).toBe(true);
@@ -87,7 +105,12 @@ describe('Pagination Utils', () => {
     });
 
     it('空配列の場合', () => {
-      const result = createPaginationResult([], 2, 'next');
+      const result = createPaginationResult<ReturnType<typeof mockArticle>>(
+        [],
+        2,
+        (article) => article.articleId,
+        'next',
+      );
 
       expect(result.data).toHaveLength(0);
       expect(result.hasNext).toBe(false);

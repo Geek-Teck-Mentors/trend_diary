@@ -50,7 +50,13 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
         mappedArticles = mappedArticles.reverse();
       }
 
-      const paginationResult = createPaginationResult(mappedArticles, limit, direction, !!cursor);
+      const paginationResult = createPaginationResult(
+        mappedArticles,
+        limit,
+        (article) => article.articleId,
+        direction,
+        !!cursor,
+      );
 
       return resultSuccess(paginationResult);
     } catch (error) {
