@@ -42,12 +42,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       test_runner: ubuntu-latest
-      run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-frontend.outputs.diff-count != 0 }}
-      run_e2e_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-e2e.outputs.diff-count != 0 }}
-      run_service_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-service.outputs.diff-count != 0 }}
-      run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-api.outputs.diff-count != 0 }}
+      run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-frontend.outputs.diff-count != 0 }}
+      run_e2e_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-e2e.outputs.diff-count != 0 }}
+      run_service_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-service.outputs.diff-count != 0 }}
+      run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-api.outputs.diff-count != 0 }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: テスト設定ファイルの差分チェック
+        id: check-test-config
+        uses: ./.github/actions/diff
+        with:
+          subdir: '.github/workflows/test.yaml vitest/'
 
       - name: フロントエンドの差分チェック
         id: check-frontend
@@ -79,10 +85,14 @@ jobs:
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "メインブランチなので、リグレッションテストとして全て実行"
           else
+            echo "テスト設定差分: ${{ steps.check-test-config.outputs.diff-count }} ファイル"
             echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
             echo "E2E差分: ${{ steps.check-e2e.outputs.diff-count }} ファイル"
             echo "サービス差分: ${{ steps.check-service.outputs.diff-count }} ファイル"
             echo "API差分: ${{ steps.check-api.outputs.diff-count }} ファイル"
+            if [[ "${{ steps.check-test-config.outputs.diff-count }}" != "0" ]]; then
+              echo "テスト設定ファイルに変更があるため、全テストを実行"
+            fi
             echo "テストの準備完了"
           fi
         shell: bash
