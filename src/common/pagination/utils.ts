@@ -47,7 +47,7 @@ export function createPaginationResult<T extends { createdAt: Date }>(
     result.hasNext = hasMore;
     result.hasPrev = hasCursor;
 
-    if (hasMore) {
+    if (result.hasNext) {
       const lastItem = items[items.length - 1];
       result.nextCursor = encodeCursor({
         id: getId(lastItem),
@@ -66,7 +66,7 @@ export function createPaginationResult<T extends { createdAt: Date }>(
     result.hasPrev = hasMore;
     result.hasNext = true;
 
-    if (hasMore) {
+    if (result.hasPrev) {
       const firstItem = items[0];
       result.prevCursor = encodeCursor({
         id: getId(firstItem),
