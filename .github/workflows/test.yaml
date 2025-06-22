@@ -47,6 +47,8 @@ jobs:
       run_service_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-service.outputs.diff-count != 0 }}
       run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-api.outputs.diff-count != 0 }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: フロントエンドの差分チェック
         id: check-frontend
         uses: ./.github/actions/diff
