@@ -40,7 +40,7 @@ export default class ArticleService {
       optimizedParams.media = params.media;
     }
 
-    if (params.readStatus) {
+    if (params.readStatus !== undefined) {
       optimizedParams.readStatus = params.readStatus;
     }
 

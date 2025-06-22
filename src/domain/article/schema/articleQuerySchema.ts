@@ -31,7 +31,7 @@ const DATE_RANGE_ERROR_MESSAGE = 'fromはtoより前の日付を指定してく�
 
 export const articleQuerySchema = baseArticleSearchSchema
   .extend({
-    readStatus: readStatusEnum.optional(),
+    readStatus: z.boolean().optional(),
   })
   .merge(cursorPaginationSchema)
   .refine(dateRangeRefine, {
