@@ -44,9 +44,10 @@ describe('ArticleService', () => {
           media: 'qiita',
           from: '2024-01-01',
           to: '2024-01-31',
-          readStatus: '0',
+          readStatus: false,
           limit: 20,
           direction: 'next',
+          cursor: undefined,
         };
 
         mockArticleQueryService.searchArticles.mockResolvedValue(
@@ -56,11 +57,9 @@ describe('ArticleService', () => {
         const result = await service.searchArticles(params as ArticleQueryParams);
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
-        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
-          ...params,
-          limit: 20,
-          direction: 'next',
-        });
+        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledTimes(1);
+        const calledArgs = mockArticleQueryService.searchArticles.mock.calls[0][0];
+        expect(calledArgs).toEqual(params);
       });
 
       it('全てのパラメータが含まれるfrom/to検索', async () => {
@@ -70,7 +69,7 @@ describe('ArticleService', () => {
           media: 'qiita',
           from: '2024-01-01',
           to: '2024-01-31',
-          readStatus: '0',
+          readStatus: false,
           limit: 10,
           direction: 'prev',
           cursor: 'test-cursor',
@@ -83,9 +82,9 @@ describe('ArticleService', () => {
         const result = await service.searchArticles(params as ArticleQueryParams);
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
-        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
-          ...params,
-        });
+        expect(mockArticleQueryService.searchArticles).toHaveBeenCalledTimes(1);
+        const calledArgs = mockArticleQueryService.searchArticles.mock.calls[0][0];
+        expect(calledArgs).toEqual(params);
       });
 
       it('titleパラメータのみで検索', async () => {
@@ -218,7 +217,7 @@ describe('ArticleService', () => {
 
       it('readStatusパラメータのみで検索', async () => {
         const params: ArticleQueryParams = {
-          readStatus: '1',
+          readStatus: true,
           limit: 20,
           direction: 'next',
         };
@@ -231,7 +230,7 @@ describe('ArticleService', () => {
 
         expect(result).toEqual(resultSuccess(mockPaginationResult));
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
-          readStatus: '1',
+          readStatus: true,
           limit: 20,
           direction: 'next',
         });

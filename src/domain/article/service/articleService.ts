@@ -13,36 +13,16 @@ export default class ArticleService {
     params: ArticleQueryParams,
   ): AsyncResult<CursorPaginationResult<Article>, ServerError> {
     const optimizedParams: Partial<ArticleQueryParams> = {
+      title: extractTrimmed(params.title),
+      author: extractTrimmed(params.author),
       limit: params.limit ?? 20,
       direction: params.direction ?? 'next',
       cursor: params.cursor,
+      from: params.from,
+      to: params.to,
+      media: params.media,
+      readStatus: params.readStatus,
     };
-
-    const trimmedTitle = extractTrimmed(params.title);
-    if (trimmedTitle) {
-      optimizedParams.title = trimmedTitle;
-    }
-
-    const trimmedAuthor = extractTrimmed(params.author);
-    if (trimmedAuthor) {
-      optimizedParams.author = trimmedAuthor;
-    }
-
-    if (params.from) {
-      optimizedParams.from = params.from;
-    }
-
-    if (params.to) {
-      optimizedParams.to = params.to;
-    }
-
-    if (params.media) {
-      optimizedParams.media = params.media;
-    }
-
-    if (params.readStatus) {
-      optimizedParams.readStatus = params.readStatus;
-    }
 
     return this.articleQueryService.searchArticles(optimizedParams as ArticleQueryParams);
   }
