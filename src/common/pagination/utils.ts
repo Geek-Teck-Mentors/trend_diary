@@ -21,9 +21,10 @@ export function decodeCursor(cursor: string): CursorInfo {
   }
 }
 
-export function createPaginationResult<T extends { articleId: bigint; createdAt: Date }>(
+export function createPaginationResult<T extends { createdAt: Date }>(
   data: T[],
   limit: number,
+  getId: (item: T) => bigint,
   direction: CursorDirection = 'next',
   hasCursor: boolean = false,
 ): CursorPaginationResult<T> {
@@ -46,18 +47,18 @@ export function createPaginationResult<T extends { articleId: bigint; createdAt:
     result.hasNext = hasMore;
     result.hasPrev = hasCursor;
 
-    if (hasMore) {
+    if (result.hasNext) {
       const lastItem = items[items.length - 1];
       result.nextCursor = encodeCursor({
-        id: lastItem.articleId,
+        id: getId(lastItem),
         createdAt: lastItem.createdAt,
       });
     }
 
-    if (hasCursor) {
+    if (result.hasPrev) {
       const firstItem = items[0];
       result.prevCursor = encodeCursor({
-        id: firstItem.articleId,
+        id: getId(firstItem),
         createdAt: firstItem.createdAt,
       });
     }
@@ -65,17 +66,17 @@ export function createPaginationResult<T extends { articleId: bigint; createdAt:
     result.hasPrev = hasMore;
     result.hasNext = true;
 
-    if (hasMore) {
+    if (result.hasPrev) {
       const firstItem = items[0];
       result.prevCursor = encodeCursor({
-        id: firstItem.articleId,
+        id: getId(firstItem),
         createdAt: firstItem.createdAt,
       });
     }
 
     const lastItem = items[items.length - 1];
     result.nextCursor = encodeCursor({
-      id: lastItem.articleId,
+      id: getId(lastItem),
       createdAt: lastItem.createdAt,
     });
   }
