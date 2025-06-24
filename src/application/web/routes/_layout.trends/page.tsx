@@ -1,10 +1,11 @@
 import React from 'react';
 import ArticleCard from './components/ArticleCard';
 import ArticleModal from './components/ArticleModal';
-import { Article } from './types';
+import { Article, Direction } from './types';
 
 type Props = {
   articles: Article[];
+  fetchArticles: (direction?: Direction) => Promise<void>;
   date: Date;
   selectedArticle: Article | null;
   isModalOpen: boolean;
@@ -14,6 +15,7 @@ type Props = {
 
 export default function TrendsPage({
   articles,
+  fetchArticles,
   date,
   selectedArticle,
   isModalOpen,
@@ -26,7 +28,7 @@ export default function TrendsPage({
         <h1 className='pb-4 text-xl italic'>- {date.toLocaleDateString('ja-JP')} -</h1>
         <div className='flex flex-wrap gap-4'>
           {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} onCardClick={openModal} />
+            <ArticleCard key={article.articleId} article={article} onCardClick={openModal} />
           ))}
         </div>
       </div>

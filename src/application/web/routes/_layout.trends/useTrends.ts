@@ -1,94 +1,52 @@
 import { useState } from 'react';
-import { Article } from './types';
-
-const articles: Article[] = [
-  {
-    id: 1,
-    title: 'テストタイトル1',
-    author: '@test',
-    media: 'zenn',
-    description:
-      'テストタイトル1の内容です。WebSocketを使用したリアルタイム通信の実装について詳しく解説します。',
-    url: 'https://example.com/article1',
-    createdAt: new Date('2023-10-01T12:00:00Z'),
-  },
-  {
-    id: 2,
-    title: 'テストタイトル2',
-    author: '@test',
-    media: 'zenn',
-    description:
-      'テストタイトル2の内容です。WebSocketを使用したリアルタイム通信の実装について詳しく解説します。',
-    url: 'https://example.com/article1',
-    createdAt: new Date('2023-10-01T12:00:00Z'),
-  },
-  {
-    id: 3,
-    title: 'テストタイトル3',
-    author: '@test',
-    media: 'zenn',
-    description:
-      'テストタイトル3の内容です。WebSocketを使用したリアルタイム通信の実装について詳しく解説します。',
-    url: 'https://example.com/article1',
-    createdAt: new Date('2023-10-01T12:00:00Z'),
-  },
-  {
-    id: 4,
-    title: 'テストタイトル4',
-    author: '@test',
-    media: 'qiita',
-    description:
-      'テストタイトル4の内容です。WebSocketを使用したリアルタイム通信の実装について詳しく解説します。',
-    url: 'https://example.com/article1',
-    createdAt: new Date('2023-10-01T12:00:00Z'),
-  },
-  {
-    id: 5,
-    title: 'テストタイトル5',
-    author: '@test',
-    media: 'qiita',
-    description:
-      'テストタイトル5の内容です。WebSocketを使用したリアルタイム通信の実装について詳しく解説します。',
-    url: 'https://example.com/article1',
-    createdAt: new Date('2023-10-01T12:00:00Z'),
-  },
-  {
-    id: 6,
-    title: 'テストタイトル6',
-    author: '@test',
-    media: 'qiita',
-    description:
-      'テストタイトル6の内容です。WebSocketを使用したリアルタイム通信の実装について詳しく解説します。',
-    url: 'https://example.com/article1',
-    createdAt: new Date('2023-10-01T12:00:00Z'),
-  },
-  {
-    id: 7,
-    title: 'テストタイトル7',
-    author: '@test',
-    media: 'zenn',
-    description:
-      'テストタイトル7の内容です。WebSocketを使用したリアルタイム通信の実装について詳しく解説します。',
-    url: 'https://example.com/article1',
-    createdAt: new Date('2023-10-01T12:00:00Z'),
-  },
-  {
-    id: 8,
-    title: 'テストタイトル888888888888888888888888888888888888888888',
-    author: '@test',
-    media: 'zenn',
-    description:
-      'テストタイトル8の内容です。WebSocketを使用したリアルタイム通信の実装について詳しく解説します。',
-    url: 'https://example.com/article1',
-    createdAt: new Date('2023-10-01T12:00:00Z'),
-  },
-];
+import { toast } from 'sonner';
+import { Article, Cursor, Direction } from './types';
+import getApiClientForClient from '../../infrastructure/api';
 
 const date = new Date();
 
 export default function useTrends() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [cursor, setCursor] = useState<Cursor>({});
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchArticles = async (direction: Direction = 'next') => {
+    try {
+      const client = getApiClientForClient();
+
+      const res = await client.articles.$get({
+        query: {
+          direction,
+          cursor: cursor[direction],
+          limit: 10,
+        }
+      })
+      if (res.status === 200) {
+        const resJson = await res.json();
+        setArticles([
+          ...articles,
+          ...resJson.data.map((data) => ({
+            articleId: Number(data.articleId),
+            media: data.media,
+            title: data.title,
+            author: data.author,
+            description: data.description,
+            url: data.url,
+            createdAt: new Date(data.createdAt),
+          }))
+        ]);
+        setCursor({
+          next: resJson.nextCursor,
+          prev: resJson.prevCursor,
+        });
+      } else {
+        toast.error('エラーが発生しました')
+      }
+    } catch (error) {
+      toast.error('エラーが発生しました')
+    }
+  };
 
   const openModal = (article: Article) => {
     setSelectedArticle(article);
@@ -102,6 +60,7 @@ export default function useTrends() {
 
   return {
     articles,
+    fetchArticles,
     date,
     selectedArticle,
     isModalOpen,

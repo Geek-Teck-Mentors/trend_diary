@@ -6,11 +6,12 @@ import useTrends from './useTrends';
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }];
 
 export default function Trends() {
-  const { articles, date, selectedArticle, isModalOpen, openModal, closeModal } = useTrends();
+  const { articles, fetchArticles, date, selectedArticle, isModalOpen, openModal, closeModal } = useTrends();
 
   return (
     <TrendsPage
       articles={articles}
+      fetchArticles={fetchArticles}
       selectedArticle={selectedArticle}
       date={date}
       isModalOpen={isModalOpen}
