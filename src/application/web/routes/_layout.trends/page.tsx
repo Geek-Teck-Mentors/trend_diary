@@ -1,6 +1,6 @@
 import React from 'react';
-import ArticleCard from './_components/ArticleCard';
-import ArticleModal from './_components/ArticleModal';
+import ArticleCard from './components/ArticleCard';
+import ArticleModal from './components/ArticleModal';
 import { Article } from './types';
 
 type Props = {

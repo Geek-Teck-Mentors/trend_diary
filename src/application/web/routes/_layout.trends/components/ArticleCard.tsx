@@ -1,0 +1,36 @@
+import React from 'react';
+import { Card, CardContent } from '@/application/web/components/ui/card';
+import MediaTag from './MediaTag';
+import { Article } from '../types';
+
+type Props = {
+  article: Article;
+  onCardClick: (article: Article) => void;
+};
+
+export default function ArticleCard({ article, onCardClick }: Props) {
+  return (
+    <Card
+      className='h-32 w-64 cursor-pointer rounded-3xl border border-white/40 bg-white/30 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:shadow-xl'
+      onClick={() => onCardClick(article)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onCardClick(article);
+        }
+      }}
+      role='button'
+      tabIndex={0}
+    >
+      <CardContent className='flex h-full flex-col p-0'>
+        <h3 className='flex-1 overflow-hidden text-sm leading-relaxed font-bold text-ellipsis text-gray-700'>
+          {article.title}
+        </h3>
+
+        <div className='mt-3 flex items-end justify-between'>
+          <span className='text-sm text-gray-600'>{article.author}</span>
+          <MediaTag media={article.media} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
