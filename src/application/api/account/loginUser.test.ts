@@ -60,11 +60,14 @@ describe('GET /api/account/me', () => {
       expect(res.status).toBe(200);
 
       // Hono公式のテスト方法に準拠して、レスポンスデータ構造を検証
-      const data = await res.json();
+      const data = (await res.json()) as { user: { userId: bigint; displayName?: string } };
 
       // 実際のプロパティ構造に合わせてテスト
       expect(typeof data).toBe('object');
       expect(data).not.toBeNull();
+      expect(data).toHaveProperty('user');
+      expect(data.user).toHaveProperty('userId');
+      expect(data.user).toHaveProperty('displayName');
     });
   });
 });
