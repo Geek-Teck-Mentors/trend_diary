@@ -9,7 +9,7 @@ describe('記事検索スキーマ', () => {
         media: 'qiita',
         from: '2024-01-01',
         to: '2024-01-31',
-        readStatus: '0',
+        readStatus: false,
       });
     }).not.toThrow();
   });
@@ -106,13 +106,13 @@ describe('記事検索スキーマ', () => {
     it('有効なreadStatus値を受け入れること', () => {
       expect(() => {
         articleQuerySchema.parse({
-          readStatus: '0',
+          readStatus: false,
         });
       }).not.toThrow();
 
       expect(() => {
         articleQuerySchema.parse({
-          readStatus: '1',
+          readStatus: true,
         });
       }).not.toThrow();
     });
@@ -228,7 +228,7 @@ describe('記事検索スキーマ', () => {
         articleQuerySchema.parse({
           title: 'React入門',
           media: 'qiita',
-          readStatus: '0',
+          readStatus: false,
         });
       }).not.toThrow();
     });
@@ -238,7 +238,7 @@ describe('記事検索スキーマ', () => {
         articleQuerySchema.parse({
           title: 'React入門',
           media: 'invalid',
-          readStatus: '0',
+          readStatus: false,
         });
       }).toThrow();
     });

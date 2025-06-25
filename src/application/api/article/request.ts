@@ -3,6 +3,15 @@ import { ApiArticleQueryParams } from '@/domain/article/schema/articleQuerySchem
 
 // eslint-disable-next-line import/prefer-default-export
 export function convertApiArticleQueryParams(params: ApiArticleQueryParams): ArticleQueryParams {
+  let readStatus: boolean | undefined;
+  if (params.read_status === '1') {
+    readStatus = true;
+  } else if (params.read_status === '0') {
+    readStatus = false;
+  } else {
+    readStatus = undefined;
+  }
+
   return {
     limit: params.limit,
     direction: params.direction,
@@ -12,6 +21,6 @@ export function convertApiArticleQueryParams(params: ApiArticleQueryParams): Art
     media: params.media,
     from: params.from,
     to: params.to,
-    readStatus: params.read_status,
+    readStatus,
   };
 }
