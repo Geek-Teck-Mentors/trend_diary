@@ -1,7 +1,8 @@
 import React from 'react';
 import { Calendar, ExternalLink } from 'lucide-react';
 import RightSidebarModal from '../../../components/RightSidebarModal';
-import MediaTag from './MediaTag';
+import QiitaTag from './QiitaTag';
+import ZennTag from './ZennTag';
 import { Article } from '../types';
 
 type Props = {
@@ -17,7 +18,7 @@ export default function ArticleModal({ article, isOpen, onClose }: Props) {
     <RightSidebarModal isOpen={isOpen} onClose={onClose} showCloseButton>
       <div className='mb-6 flex items-start justify-between'>
         <div className='flex-1'>
-          <MediaTag media={article.media} />
+          {article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}
         </div>
       </div>
 

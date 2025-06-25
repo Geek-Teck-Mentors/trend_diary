@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/application/web/components/ui/card';
-import MediaTag from './MediaTag';
+import QiitaTag from './QiitaTag';
+import ZennTag from './ZennTag';
 import { Article } from '../types';
 
 type Props = {
@@ -28,7 +29,7 @@ export default function ArticleCard({ article, onCardClick }: Props) {
 
         <div className='mt-3 flex items-end justify-between'>
           <span className='text-sm text-gray-600'>{article.author}</span>
-          <MediaTag media={article.media} />
+          {article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}
         </div>
       </CardContent>
     </Card>
