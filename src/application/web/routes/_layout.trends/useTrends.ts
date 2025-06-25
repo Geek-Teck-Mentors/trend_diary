@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Article, Cursor, Direction } from './types';
 import getApiClientForClient from '../../infrastructure/api';
@@ -11,8 +11,11 @@ export default function useTrends() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const observerTargetRef = useRef<HTMLDivElement>(null);
 
-  const fetchArticles = async (direction: Direction = 'next') => {
+  const fetchArticles = useCallback(async (direction: Direction = 'next') => {
+    if (isLoading) return;
+
     setIsLoading(true);
     try {
       const client = getApiClientForClient();
@@ -26,8 +29,8 @@ export default function useTrends() {
       })
       if (res.status === 200) {
         const resJson = await res.json();
-        setArticles([
-          ...articles,
+        setArticles(prevArticles => [
+          ...prevArticles,
           ...resJson.data.map((data) => ({
             articleId: Number(data.articleId),
             media: data.media,
@@ -50,7 +53,7 @@ export default function useTrends() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [cursor, isLoading]);
 
   const openModal = (article: Article) => {
     setSelectedArticle(article);
@@ -62,6 +65,26 @@ export default function useTrends() {
     setTimeout(() => setSelectedArticle(null), 300);
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !isLoading && cursor.next) {
+          // INFO: 自動読み込みなので結果を待つ必要がないためあえてawaitしない
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          fetchArticles('next');
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTargetRef.current) {
+      observer.observe(observerTargetRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [fetchArticles, isLoading, cursor.next]);
+
   return {
     articles,
     fetchArticles,
@@ -71,5 +94,6 @@ export default function useTrends() {
     openModal,
     closeModal,
     isLoading,
+    observerTargetRef,
   };
 }

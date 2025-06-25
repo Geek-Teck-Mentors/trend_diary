@@ -6,20 +6,20 @@ import useTrends from './useTrends';
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }];
 
 export default function Trends() {
-  const { articles, fetchArticles, date, selectedArticle, isModalOpen, openModal, closeModal, isLoading } = useTrends();
+  const { articles, fetchArticles, date, selectedArticle, isModalOpen, openModal, closeModal, isLoading, observerTargetRef } = useTrends();
 
   useEffect(() => { fetchArticles() }, [])
 
   return (
     <TrendsPage
       articles={articles}
-      fetchArticles={fetchArticles}
       selectedArticle={selectedArticle}
       date={date}
       isModalOpen={isModalOpen}
       openModal={openModal}
       closeModal={closeModal}
       isLoading={isLoading}
+      observerTargetRef={observerTargetRef}
     />
   );
 }

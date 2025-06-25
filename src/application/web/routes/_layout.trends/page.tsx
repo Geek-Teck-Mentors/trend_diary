@@ -1,29 +1,29 @@
 import React from 'react';
 import ArticleCard from './components/ArticleCard';
 import ArticleModal from './components/ArticleModal';
-import { Article, Direction } from './types';
+import { Article } from './types';
 import SpinnerCircle3 from '../../components/customized/spinner/spinner-09';
 
 type Props = {
   articles: Article[];
-  fetchArticles: (direction?: Direction) => Promise<void>;
   date: Date;
   selectedArticle: Article | null;
   isModalOpen: boolean;
   openModal: (article: Article) => void;
   closeModal: () => void;
   isLoading: boolean;
+  observerTargetRef: React.RefObject<HTMLDivElement>;
 };
 
 export default function TrendsPage({
   articles,
-  fetchArticles,
   date,
   selectedArticle,
   isModalOpen,
   openModal,
   closeModal,
   isLoading,
+  observerTargetRef,
 }: Props) {
   return (
     <div className='relative min-h-screen bg-gray-50'>
@@ -38,6 +38,7 @@ export default function TrendsPage({
             ))
           )}
         </div>
+        <div ref={observerTargetRef} className='h-4 w-full' />
       </div>
       {isLoading && (
         <div className='absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-75'>
