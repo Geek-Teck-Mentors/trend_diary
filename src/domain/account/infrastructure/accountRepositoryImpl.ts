@@ -95,11 +95,11 @@ export default class AccountRepositoryImpl implements AccountRepository {
     try {
       const result = await this.db.$queryRaw<PrismaAccount[]>`
       SELECT
-        accounts.account_id,
-        accounts.email,
-        accounts.last_login,
-        accounts.created_at,
-        accounts.updated_at
+        accounts.account_id AS "accountId",
+        accounts.email AS "email",
+        accounts.last_login AS "lastLogin",
+        accounts.created_at AS "createdAt",
+        accounts.updated_at AS "updatedAt"
       FROM
         accounts
         INNER JOIN sessions ON accounts.account_id = sessions.account_id

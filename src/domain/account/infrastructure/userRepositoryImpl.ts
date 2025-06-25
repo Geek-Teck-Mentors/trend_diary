@@ -60,11 +60,11 @@ export default class UserRepositoryImpl implements UserRepository {
     try {
       const result = await this.db.$queryRaw<PrismaUser[]>`
       SELECT
-        users.user_id,
-        users.account_id,
-        users.display_name,
-        users.created_at,
-        users.updated_at
+        users.user_id AS "userId",
+        users.account_id AS "accountId",
+        users.display_name AS "displayName",
+        users.created_at AS "createdAt",
+        users.updated_at AS "updatedAt"
       FROM
         users
         INNER JOIN sessions ON users.account_id = sessions.account_id
