@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { MetaFunction } from '@remix-run/cloudflare';
 import TrendsPage from './page';
 import useTrends from './useTrends';
@@ -6,7 +6,9 @@ import useTrends from './useTrends';
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }];
 
 export default function Trends() {
-  const { articles, fetchArticles, date, selectedArticle, isModalOpen, openModal, closeModal } = useTrends();
+  const { articles, fetchArticles, date, selectedArticle, isModalOpen, openModal, closeModal, isLoading } = useTrends();
+
+  useEffect(() => { fetchArticles() }, [])
 
   return (
     <TrendsPage
@@ -17,6 +19,7 @@ export default function Trends() {
       isModalOpen={isModalOpen}
       openModal={openModal}
       closeModal={closeModal}
+      isLoading={isLoading}
     />
   );
 }

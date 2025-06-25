@@ -10,8 +10,10 @@ export default function useTrends() {
   const [cursor, setCursor] = useState<Cursor>({});
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchArticles = async (direction: Direction = 'next') => {
+    setIsLoading(true);
     try {
       const client = getApiClientForClient();
 
@@ -45,6 +47,8 @@ export default function useTrends() {
       }
     } catch (error) {
       toast.error('エラーが発生しました')
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,5 +70,6 @@ export default function useTrends() {
     isModalOpen,
     openModal,
     closeModal,
+    isLoading,
   };
 }
