@@ -9,7 +9,7 @@ export default async function loginUser(c: Context<Env>) {
     {
       user: {
         userId: sessionUser.userId.toString(),
-        displayName: sessionUser.displayName ?? "",
+        displayName: sessionUser.displayName ?? '',
       },
     },
     200,
