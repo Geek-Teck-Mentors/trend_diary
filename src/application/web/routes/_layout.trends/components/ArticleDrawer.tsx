@@ -11,7 +11,7 @@ type Props = {
   onClose: () => void;
 };
 
-export default function ArticleModal({ article, isOpen, onClose }: Props) {
+export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
   return (
     <RightSidebarModal isOpen={isOpen} onClose={onClose} showCloseButton>
       <div className='mb-6 flex items-start justify-between'>

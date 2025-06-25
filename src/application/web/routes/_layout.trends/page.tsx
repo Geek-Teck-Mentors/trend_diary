@@ -1,6 +1,6 @@
 import React from 'react';
 import ArticleCard from './components/ArticleCard';
-import ArticleModal from './components/ArticleModal';
+import ArticleDrawer from './components/ArticleDrawer';
 import { Article } from './types';
 import SpinnerCircle3 from '../../components/customized/spinner/spinner-09';
 
@@ -45,7 +45,7 @@ export default function TrendsPage({
           <SpinnerCircle3 />
         </div>
       )}
-      <ArticleModal article={selectedArticle!} isOpen={isModalOpen} onClose={closeModal} />
+      <ArticleDrawer article={selectedArticle!} isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 }
