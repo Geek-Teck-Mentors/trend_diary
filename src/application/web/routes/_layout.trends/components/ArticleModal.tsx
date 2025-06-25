@@ -6,14 +6,12 @@ import ZennTag from './ZennTag';
 import { Article } from '../types';
 
 type Props = {
-  article: Article | null;
+  article: Article;
   isOpen: boolean;
   onClose: () => void;
 };
 
 export default function ArticleModal({ article, isOpen, onClose }: Props) {
-  if (!article) return null;
-
   return (
     <RightSidebarModal isOpen={isOpen} onClose={onClose} showCloseButton>
       <div className='mb-6 flex items-start justify-between'>

@@ -45,7 +45,7 @@ export default function TrendsPage({
           <SpinnerCircle3 />
         </div>
       )}
-      <ArticleModal article={selectedArticle} isOpen={isModalOpen} onClose={closeModal} />
+      <ArticleModal article={selectedArticle!} isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 }
