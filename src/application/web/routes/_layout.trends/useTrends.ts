@@ -8,8 +8,6 @@ const date = new Date();
 export default function useTrends() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [cursor, setCursor] = useState<Cursor>({});
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const observerTargetRef = useRef<HTMLDivElement>(null);
 
@@ -58,16 +56,6 @@ export default function useTrends() {
     [cursor, isLoading],
   );
 
-  const openDrawer = (article: Article) => {
-    setSelectedArticle(article);
-    setIsDrawerOpen(true);
-  };
-
-  const closeDrawer = () => {
-    setIsDrawerOpen(false);
-    setTimeout(() => setSelectedArticle(null), 300);
-  };
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -92,10 +80,6 @@ export default function useTrends() {
     articles,
     fetchArticles,
     date,
-    selectedArticle,
-    isDrawerOpen,
-    openDrawer,
-    closeDrawer,
     isLoading,
     observerTargetRef,
   };
