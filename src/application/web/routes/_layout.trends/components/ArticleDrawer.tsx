@@ -61,14 +61,15 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
         </div>
 
         <div className='border-t p-4'>
-          <button
-            type='button'
-            onClick={() => window.open(article.url, '_blank')}
+          <a
+            href={article.url}
+            target='_blank'
+            rel='noopener noreferrer'
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
           >
             <ExternalLink className='h-4 w-4' />
             記事を読む
-          </button>
+          </a>
         </div>
       </DrawerContent>
     </Drawer>,
