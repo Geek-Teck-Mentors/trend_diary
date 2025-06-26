@@ -9,7 +9,7 @@ export default function useTrends() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [cursor, setCursor] = useState<Cursor>({});
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const observerTargetRef = useRef<HTMLDivElement>(null);
 
@@ -57,11 +57,11 @@ export default function useTrends() {
 
   const openModal = (article: Article) => {
     setSelectedArticle(article);
-    setIsModalOpen(true);
+    setIsDrawerOpen(true);
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
+    setIsDrawerOpen(false);
     setTimeout(() => setSelectedArticle(null), 300);
   };
 
@@ -90,7 +90,7 @@ export default function useTrends() {
     fetchArticles,
     date,
     selectedArticle,
-    isModalOpen,
+    isDrawerOpen,
     openModal,
     closeModal,
     isLoading,

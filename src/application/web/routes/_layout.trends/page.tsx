@@ -8,7 +8,7 @@ type Props = {
   articles: Article[];
   date: Date;
   selectedArticle: Article | null;
-  isModalOpen: boolean;
+  isDrawerOpen: boolean;
   openModal: (article: Article) => void;
   closeModal: () => void;
   isLoading: boolean;
@@ -19,7 +19,7 @@ export default function TrendsPage({
   articles,
   date,
   selectedArticle,
-  isModalOpen,
+  isDrawerOpen,
   openModal,
   closeModal,
   isLoading,
@@ -45,7 +45,7 @@ export default function TrendsPage({
           <SpinnerCircle3 />
         </div>
       )}
-      <ArticleDrawer article={selectedArticle!} isOpen={isModalOpen} onClose={closeModal} />
+      <ArticleDrawer article={selectedArticle!} isOpen={isDrawerOpen} onClose={closeModal} />
     </div>
   );
 }
