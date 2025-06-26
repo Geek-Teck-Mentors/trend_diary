@@ -25,6 +25,9 @@ export default function TrendsPage({
   isLoading,
   observerTargetRef,
 }: Props) {
+  const handleCardClick = (article: Article) => {
+    openDrawer(article);
+  }
   return (
     <div className='relative min-h-screen bg-gray-50'>
       <div className='min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
@@ -34,7 +37,7 @@ export default function TrendsPage({
             <p className='text-gray-500'>記事がありません</p>
           ) : (
             articles.map((article) => (
-              <ArticleCard key={article.articleId} article={article} onCardClick={openDrawer} />
+              <ArticleCard key={article.articleId} article={article} onCardClick={handleCardClick} />
             ))
           )}
         </div>
