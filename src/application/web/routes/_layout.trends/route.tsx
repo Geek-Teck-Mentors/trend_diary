@@ -6,7 +6,7 @@ import useTrends from './useTrends';
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }];
 
 export default function Trends() {
-  const { articles, fetchArticles, date, selectedArticle, isDrawerOpen, openModal, closeModal, isLoading, observerTargetRef } = useTrends();
+  const { articles, fetchArticles, date, selectedArticle, isDrawerOpen, openDrawer, closeDrawer, isLoading, observerTargetRef } = useTrends();
 
   useEffect(() => { fetchArticles() }, [])
 
@@ -16,8 +16,8 @@ export default function Trends() {
       selectedArticle={selectedArticle}
       date={date}
       isDrawerOpen={isDrawerOpen}
-      openModal={openModal}
-      closeModal={closeModal}
+      openDrawer={openDrawer}
+      closeDrawer={closeDrawer}
       isLoading={isLoading}
       observerTargetRef={observerTargetRef}
     />

@@ -9,8 +9,8 @@ type Props = {
   date: Date;
   selectedArticle: Article | null;
   isDrawerOpen: boolean;
-  openModal: (article: Article) => void;
-  closeModal: () => void;
+  openDrawer: (article: Article) => void;
+  closeDrawer: () => void;
   isLoading: boolean;
   observerTargetRef: React.RefObject<HTMLDivElement>;
 };
@@ -20,8 +20,8 @@ export default function TrendsPage({
   date,
   selectedArticle,
   isDrawerOpen,
-  openModal,
-  closeModal,
+  openDrawer,
+  closeDrawer,
   isLoading,
   observerTargetRef,
 }: Props) {
@@ -34,7 +34,7 @@ export default function TrendsPage({
             <p className='text-gray-500'>記事がありません</p>
           ) : (
             articles.map((article) => (
-              <ArticleCard key={article.articleId} article={article} onCardClick={openModal} />
+              <ArticleCard key={article.articleId} article={article} onCardClick={openDrawer} />
             ))
           )}
         </div>
@@ -45,7 +45,7 @@ export default function TrendsPage({
           <SpinnerCircle3 />
         </div>
       )}
-      <ArticleDrawer article={selectedArticle!} isOpen={isDrawerOpen} onClose={closeModal} />
+      <ArticleDrawer article={selectedArticle!} isOpen={isDrawerOpen} onClose={closeDrawer} />
     </div>
   );
 }

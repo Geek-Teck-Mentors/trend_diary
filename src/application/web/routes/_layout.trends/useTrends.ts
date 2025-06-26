@@ -55,12 +55,12 @@ export default function useTrends() {
     }
   }, [cursor, isLoading]);
 
-  const openModal = (article: Article) => {
+  const openDrawer = (article: Article) => {
     setSelectedArticle(article);
     setIsDrawerOpen(true);
   };
 
-  const closeModal = () => {
+  const closeDrawer = () => {
     setIsDrawerOpen(false);
     setTimeout(() => setSelectedArticle(null), 300);
   };
@@ -91,8 +91,8 @@ export default function useTrends() {
     date,
     selectedArticle,
     isDrawerOpen,
-    openModal,
-    closeModal,
+    openDrawer,
+    closeDrawer,
     isLoading,
     observerTargetRef,
   };
