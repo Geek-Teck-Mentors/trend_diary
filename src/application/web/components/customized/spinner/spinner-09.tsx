@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react';
 
 function SpinnerCircle3() {
   return (
-    <div className="w-7 h-7 border-[3px] border-secondary border-t-primary rounded-full animate-spin" />
-  )
+    <div className='border-secondary border-t-primary h-7 w-7 animate-spin rounded-full border-[3px]' />
+  );
 }
 
 export default SpinnerCircle3;

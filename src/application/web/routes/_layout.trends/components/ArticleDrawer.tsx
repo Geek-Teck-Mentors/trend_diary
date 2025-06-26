@@ -5,7 +5,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerClose
+  DrawerClose,
 } from '../../../components/ui/drawer';
 import QiitaTag from './QiitaTag';
 import ZennTag from './ZennTag';
@@ -25,19 +25,17 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
   };
 
   return (
-    <Drawer open={isOpen} onOpenChange={openOpenChange} direction="right">
-      <DrawerContent className="h-full">
-        <DrawerHeader className="flex flex-row items-center justify-between pb-4">
-          <div className="flex-1">
-            {article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}
-          </div>
-          <DrawerClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
+    <Drawer open={isOpen} onOpenChange={openOpenChange} direction='right'>
+      <DrawerContent className='h-full'>
+        <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
+          <div className='flex-1'>{article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}</div>
+          <DrawerClose className='ring-offset-background focus:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'>
+            <X className='h-4 w-4' />
+            <span className='sr-only'>Close</span>
           </DrawerClose>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-4">
+        <div className='flex-1 overflow-y-auto px-4'>
           <DrawerTitle className='mb-4 text-xl leading-relaxed font-bold text-gray-900'>
             {article.title}
           </DrawerTitle>
@@ -59,7 +57,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           </div>
         </div>
 
-        <div className="p-4 border-t">
+        <div className='border-t p-4'>
           <button
             type='button'
             onClick={() => window.open(article.url, '_blank')}

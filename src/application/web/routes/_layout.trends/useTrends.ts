@@ -13,47 +13,50 @@ export default function useTrends() {
   const [isLoading, setIsLoading] = useState(false);
   const observerTargetRef = useRef<HTMLDivElement>(null);
 
-  const fetchArticles = useCallback(async (direction: Direction = 'next') => {
-    if (isLoading) return;
+  const fetchArticles = useCallback(
+    async (direction: Direction = 'next') => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      const client = getApiClientForClient();
+      setIsLoading(true);
+      try {
+        const client = getApiClientForClient();
 
-      const res = await client.articles.$get({
-        query: {
-          direction,
-          cursor: cursor[direction],
-          limit: 10,
-        }
-      })
-      if (res.status === 200) {
-        const resJson = await res.json();
-        setArticles(prevArticles => [
-          ...prevArticles,
-          ...resJson.data.map((data) => ({
-            articleId: Number(data.articleId),
-            media: data.media,
-            title: data.title,
-            author: data.author,
-            description: data.description,
-            url: data.url,
-            createdAt: new Date(data.createdAt),
-          }))
-        ]);
-        setCursor({
-          next: resJson.nextCursor,
-          prev: resJson.prevCursor,
+        const res = await client.articles.$get({
+          query: {
+            direction,
+            cursor: cursor[direction],
+            limit: 10,
+          },
         });
-      } else {
-        toast.error('エラーが発生しました')
+        if (res.status === 200) {
+          const resJson = await res.json();
+          setArticles((prevArticles) => [
+            ...prevArticles,
+            ...resJson.data.map((data) => ({
+              articleId: Number(data.articleId),
+              media: data.media,
+              title: data.title,
+              author: data.author,
+              description: data.description,
+              url: data.url,
+              createdAt: new Date(data.createdAt),
+            })),
+          ]);
+          setCursor({
+            next: resJson.nextCursor,
+            prev: resJson.prevCursor,
+          });
+        } else {
+          toast.error('エラーが発生しました');
+        }
+      } catch (error) {
+        toast.error('エラーが発生しました');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      toast.error('エラーが発生しました')
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cursor, isLoading]);
+    },
+    [cursor, isLoading],
+  );
 
   const openDrawer = (article: Article) => {
     setSelectedArticle(article);
@@ -75,7 +78,7 @@ export default function useTrends() {
           fetchArticles('next');
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (observerTargetRef.current) {

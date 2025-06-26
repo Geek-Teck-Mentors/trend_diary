@@ -41,7 +41,7 @@ export default function TrendsPage({
         <div ref={observerTargetRef} className='h-4 w-full' />
       </div>
       {isLoading && (
-        <div className='absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-75'>
+        <div className='bg-opacity-75 absolute inset-0 flex items-center justify-center bg-gray-50'>
           <SpinnerCircle3 />
         </div>
       )}
