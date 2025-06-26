@@ -6,7 +6,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerClose,
-} from '../../../components/ui/drawer';
+} from '@/application/web/components/ui/drawer';
 import QiitaTag from './QiitaTag';
 import ZennTag from './ZennTag';
 import { Article } from '../types';
