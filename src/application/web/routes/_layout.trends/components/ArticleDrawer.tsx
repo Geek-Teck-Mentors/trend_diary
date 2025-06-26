@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar, ExternalLink, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import {
   Drawer,
   DrawerContent,
@@ -24,7 +25,9 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
     }
   };
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <Drawer open={isOpen} onOpenChange={openOpenChange} direction='right'>
       <DrawerContent className='h-full'>
         <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
@@ -68,6 +71,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           </button>
         </div>
       </DrawerContent>
-    </Drawer>
+    </Drawer>,
+    document.body,
   );
 }
