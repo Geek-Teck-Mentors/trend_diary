@@ -29,8 +29,8 @@ export default function TrendsPage({
     openDrawer(article);
   }
   return (
-    <div className='relative min-h-screen bg-gray-50'>
-      <div className='min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
+    <>
+      <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
         <h1 className='pb-4 text-xl italic'>- {date.toLocaleDateString('ja-JP')} -</h1>
         <div className='flex flex-wrap gap-4'>
           {articles.length === 0 ? (
@@ -42,13 +42,13 @@ export default function TrendsPage({
           )}
         </div>
         <div ref={observerTargetRef} className='h-4 w-full' />
+        {isLoading && (
+          <div className='bg-opacity-75 absolute inset-0 flex items-center justify-center bg-gray-50'>
+            <SpinnerCircle3 />
+          </div>
+        )}
       </div>
-      {isLoading && (
-        <div className='bg-opacity-75 absolute inset-0 flex items-center justify-center bg-gray-50'>
-          <SpinnerCircle3 />
-        </div>
-      )}
       <ArticleDrawer article={selectedArticle!} isOpen={isDrawerOpen} onClose={closeDrawer} />
-    </div>
+    </>
   );
 }
