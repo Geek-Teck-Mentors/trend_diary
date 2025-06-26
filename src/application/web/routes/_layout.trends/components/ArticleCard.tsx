@@ -14,11 +14,6 @@ export default function ArticleCard({ article, onCardClick }: Props) {
     <Card
       className='h-32 w-64 cursor-pointer rounded-3xl border border-white/40 bg-white/30 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:shadow-xl'
       onClick={() => onCardClick(article)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onCardClick(article);
-        }
-      }}
       role='button'
       tabIndex={0}
     >
