@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Card, CardContent } from '@/application/web/components/ui/card';
 import QiitaTag from './QiitaTag';
 import ZennTag from './ZennTag';
@@ -9,11 +9,15 @@ type Props = {
   onCardClick: (article: Article) => void;
 };
 
-export default function ArticleCard({ article, onCardClick }: Props) {
+export default React.memo(({ article, onCardClick }: Props) =>{
+  const handleClick = useCallback(() => {
+    onCardClick(article);
+  }, [article, onCardClick]);
+
   return (
     <Card
       className='h-32 w-64 cursor-pointer rounded-3xl border border-white/40 bg-white/30 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:shadow-xl'
-      onClick={() => onCardClick(article)}
+      onClick={handleClick}
       role='button'
       tabIndex={0}
     >
@@ -29,4 +33,4 @@ export default function ArticleCard({ article, onCardClick }: Props) {
       </CardContent>
     </Card>
   );
-}
+});
