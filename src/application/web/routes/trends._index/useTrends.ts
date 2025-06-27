@@ -11,7 +11,7 @@ const formatDate = (rawDate: Date) => {
 };
 
 
-const date = new Date();
+const date = new Date('2025-06-27');
 
 export default function useTrends() {
   const [articles, setArticles] = useState<Article[]>([]);
