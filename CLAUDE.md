@@ -20,7 +20,19 @@
 - `npm run test:api` - API層のテストを実行
 - `npm run test:frontend` - フロントエンドコンポーネントのテストを実行
 - `npm run e2e` - PlaywrightでE2Eテストを実行
+- `npm run e2e:report` - PlaywrightのHTMLレポートを表示
+- `npm run e2e:gen` - Playwrightのコード生成ツールを起動
 - 個別テストファイルは 各種適切なコマンドで`-- <path/to/file>`で実行可能
+
+### データベース
+
+- `npm run db:gen` - Prisma型生成
+- `npm run db:migrate` - Prismaマイグレーション実行（開発用）
+- `npm run db:migrate:sql-only` - SQLのみのマイグレーション実行
+- `npm run db:migrate:deploy` - 本番用マイグレーション実行
+- `npm run db:reset` - データベースリセット
+- `npm run db:studio` - Prisma Studio起動
+- `npm run supabase:db:type-gen` - Supabase型生成
 
 ### コード品質
 
@@ -30,6 +42,17 @@
 - `npm run format` - Prettierでコードフォーマットをチェック
 - `npm run format:fix` - Prettierでコードフォーマットを修正
 - `npm run lint:ci` - lint、format、型チェックを一括実行（基本的にこれを使用する）
+
+## 開発環境設定
+
+### ローカル開発サーバー
+
+- **開発サーバー**: `http://localhost:5173` (Vite + Remix)
+- **E2Eテスト**: `http://localhost:5173` (Playwright baseURL)
+
+### 環境変数
+
+必要な環境変数については`.dev.vars.example`を参照すること
 
 ## アーキテクチャ概要
 
@@ -58,11 +81,13 @@
 
 ```
 src/domain/{aggregate}/
+├── factory/         # ドメインサービスファクトリ
 ├── model/           # ドメインエンティティ
 ├── service/         # ドメインビジネスロジック
 ├── repository/      # リポジトリインターフェース
 ├── schema/          # Zodバリデーションスキーマ
-└── infrastructure/  # リポジトリ実装
+├── infrastructure/  # リポジトリ実装
+└── index.ts         # 集約エクスポート
 ```
 
 **テスト戦略**（多層構造）:
@@ -76,9 +101,11 @@ src/domain/{aggregate}/
 
 **ランタイム**: Cloudflare Workers（メインアプリ）+ Supabase Functions（バックグラウンドジョブ）
 **バックエンド**: HonoウェブフレームワークとRemixアダプター
-**フロントエンド**: Remix + React + TailwindCSS v4 + Radix UI
+**フロントエンド**: Remix + React + TailwindCSS v4 + shadcn/ui
 **データベース**: PostgreSQL + Prisma ORM
-**テスト**: 各層で個別設定のVitest
+**テスト**: 各層で個別設定のVitest + Playwright E2E
+**ビルドツール**: Vite
+**コード品質**: ESLint (Airbnb) + Prettier + TypeScript
 
 ### エントリーポイント
 
@@ -98,8 +125,29 @@ Prismaモデルは`prisma/models/`内のファイルに分割:
 
 ### 重要な規約
 
-**インポート**: `src/`ルートからの絶対インポートを使用
+**インポート**: `src/`ルートからの絶対インポートを使用（TypeScript path mapping: `@/*`）
 **エラーハンドリング**: サービス層では`Result<T, E>`型を使用し、API層でHTTPExceptionに変換
-**テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック
-**バリデーション**: 全データ検証にドメイン層のZodスキーマを使用
+**テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック, serviceテストのみで利用
+**バリデーション**: データ検証にドメイン層のZodスキーマを使用
 **ログ**: Pinoロガーで構造化ログを使用
+
+### コード品質設定詳細
+
+**ESLint設定**:
+
+- Airbnb設定をベースとした厳格なルール
+- 循環的複雑度: 最大10（非常に良いレベル）
+- `@typescript-eslint/no-floating-promises`: 非同期処理の適切な処理を強制
+- UI コンポーネントディレクトリは除外
+
+**Prettier設定**:
+
+- シングルクォート使用
+- 行幅: 100文字
+- TailwindCSS プラグイン適用
+
+**TypeScript設定**:
+
+- strict モード有効
+- パス解決: `@/*` → `./src/*`
+- ESNext ターゲット
