@@ -3,6 +3,14 @@ import { toast } from 'sonner';
 import { Article, Cursor, Direction } from './types';
 import getApiClientForClient from '../../infrastructure/api';
 
+const formatDate = (rawDate: Date) => {
+  const year = rawDate.getFullYear();
+  const month = String(rawDate.getMonth() + 1).padStart(2, '0');
+  const day = String(rawDate.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`;
+};
+
+
 const date = new Date();
 
 export default function useTrends() {
@@ -19,8 +27,12 @@ export default function useTrends() {
       try {
         const client = getApiClientForClient();
 
+        const queryDate = formatDate(date);
+
         const res = await client.articles.$get({
           query: {
+            to: queryDate,
+            from: queryDate,
             direction,
             cursor: cursor[direction],
             limit: 10,
