@@ -26,7 +26,7 @@ export default function Trends() {
         observerTargetRef={observerTargetRef}
       />
       {selectedArticle && (
-        <ArticleDrawer article={selectedArticle!} isOpen={isDrawerOpen} onClose={closeDrawer} />
+        <ArticleDrawer article={selectedArticle} isOpen={isDrawerOpen} onClose={closeDrawer} />
       )}
     </>
   );

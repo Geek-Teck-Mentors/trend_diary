@@ -19,7 +19,7 @@ type Props = {
 };
 
 export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
-  const openOpenChange = (open: boolean) => {
+  const handleOpenChange = (open: boolean) => {
     if (!open) {
       onClose();
     }
@@ -28,7 +28,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <Drawer open={isOpen} onOpenChange={openOpenChange} direction='right'>
+    <Drawer open={isOpen} onOpenChange={handleOpenChange} direction='right'>
       <DrawerContent className='h-full'>
         <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
           <div className='flex-1'>{article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}</div>
@@ -64,7 +64,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           <a
             href={article.url}
             target='_blank'
-            rel='noopener noreferrer'
+            rel='noopener noreferrer nofollow'
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
           >
             <ExternalLink className='h-4 w-4' />
