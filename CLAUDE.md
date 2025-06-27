@@ -2,10 +2,117 @@
 
 - 必ず日本語で回答すること
 - 敬語は使用しないこと
-- TDDで進めること
+- 必ずTDD（テスト駆動開発）で進めること
 - リファクタリング時は必ずlint, format, testコマンドを実行すること
 
 このファイルはClaude Code (claude.ai/code) がこのリポジトリで作業する際のガイダンスを提供する。
+
+## 開発フロー
+
+### TDD (テスト駆動開発) 必須
+
+新機能・バグ修正時は**RED-GREEN-REFACTOR**サイクルで進めること：
+
+1. **🔴 RED** - 失敗するテストを先に書く
+
+   - サービス層: `npm run test:service -- path/to/file.test.ts`
+   - API層: `npm run test:api -- path/to/file.test.ts`
+   - フロントエンド: `npm run test:frontend -- path/to/file.test.ts`
+   - テストが失敗（RED）することを確認
+
+2. **🟢 GREEN** - テストが通る最小限の実装
+
+   - 最小限のコードでテストを通す
+   - テストが成功（GREEN）することを確認
+
+3. **🔵 REFACTOR** - テストが通ることを確認しながらコード改善
+   - 必ず `npm run lint:ci` を実行
+   - 全テストがGreenを維持することを確認
+   - コード品質を向上させる
+   - **必須**: サイクル完了時にコミット実行
+
+#### 🔄 コミット（サイクル完了時必須）
+
+```bash
+# 1. 全テスト実行で確認
+npm run test:service && npm run test:api
+
+# 2. コード品質チェック
+npm run lint:ci
+
+# 3. 全て成功後にコミット（Conventional Commitsに従う）
+git add .
+git commit -m "[type]: [機能名] TDD cycle complete
+
+🔴 RED: [テスト内容]
+🟢 GREEN: [実装内容]
+🔵 REFACTOR: [改善内容]"
+```
+
+**コミットタイプ（Conventional Commits）:**
+
+- `feat:` - 新機能追加
+- `fix:` - バグ修正
+- `refactor:` - リファクタリング（機能変更なし）
+- `test:` - テスト追加・修正
+- `docs:` - ドキュメント更新
+- `style:` - コードスタイル修正（フォーマット等）
+- `perf:` - パフォーマンス改善
+- `chore:` - ビルドプロセス・補助ツール等の変更
+
+**使用例:**
+
+```bash
+# 新機能の場合
+git commit -m "feat: add user authentication TDD cycle complete"
+
+# バグ修正の場合
+git commit -m "fix: resolve login validation issue TDD cycle complete"
+
+# リファクタリングの場合
+git commit -m "refactor: improve article service structure TDD cycle complete"
+```
+
+RED-GREEN-REFACTORを1サイクルとして繰り返す
+
+### タスク管理
+
+#### 開発中に発見されるタスクの扱い
+
+**即座にTODOに記録する対象:**
+
+- リファクタリングが必要な箇所
+- 発見したバグや改善点
+- 追加で必要になった機能
+- テストが不足している箇所
+- パフォーマンス改善が必要な箇所
+
+**記録方法:**
+
+```typescript
+// TODO: [優先度] 説明 - 発見した理由/背景
+// 例:
+// TODO: [HIGH] UserService.validateEmail()のリファクタリング - 複雑度10超過
+// TODO: [MEDIUM] ArticleRepository.findByDate()のテスト追加 - エッジケース未カバー
+// TODO: [LOW] ログ出力の統一 - 現在バラバラな形式
+```
+
+**優先度ガイドライン:**
+
+- **HIGH**: セキュリティ、バグ、ブロッカー
+- **MEDIUM**: パフォーマンス、テスト不足、リファクタリング
+- **LOW**: 改善、統一性、ドキュメント
+
+#### 現在のタスク中断ルール
+
+- RED-GREEN-REFACTORサイクル完了後にTODO追加
+- 緊急度が高い場合は現在のサイクルを一旦停止してTODO記録
+- サイクル途中で発見した場合はメモとして残し、サイクル完了後に整理
+
+### テスト実行順序
+
+- 単体テスト (service層) → 統合テスト (api層) → E2Eテスト
+- 各層のテストが通ってから次の層へ進む
 
 ## 開発コマンド
 
@@ -20,7 +127,19 @@
 - `npm run test:api` - API層のテストを実行
 - `npm run test:frontend` - フロントエンドコンポーネントのテストを実行
 - `npm run e2e` - PlaywrightでE2Eテストを実行
+- `npm run e2e:report` - PlaywrightのHTMLレポートを表示
+- `npm run e2e:gen` - Playwrightのコード生成ツールを起動
 - 個別テストファイルは 各種適切なコマンドで`-- <path/to/file>`で実行可能
+
+### データベース
+
+- `npm run db:gen` - Prisma型生成
+- `npm run db:migrate` - Prismaマイグレーション実行（開発用）
+- `npm run db:migrate:sql-only` - SQLのみのマイグレーション実行
+- `npm run db:migrate:deploy` - 本番用マイグレーション実行
+- `npm run db:reset` - データベースリセット
+- `npm run db:studio` - Prisma Studio起動
+- `npm run supabase:db:type-gen` - Supabase型生成
 
 ### コード品質
 
@@ -30,6 +149,17 @@
 - `npm run format` - Prettierでコードフォーマットをチェック
 - `npm run format:fix` - Prettierでコードフォーマットを修正
 - `npm run lint:ci` - lint、format、型チェックを一括実行（基本的にこれを使用する）
+
+## 開発環境設定
+
+### ローカル開発サーバー
+
+- **開発サーバー**: `http://localhost:5173` (Vite + Remix)
+- **E2Eテスト**: `http://localhost:5173` (Playwright baseURL)
+
+### 環境変数
+
+必要な環境変数については`.dev.vars.example`を参照すること
 
 ## アーキテクチャ概要
 
@@ -58,11 +188,13 @@
 
 ```
 src/domain/{aggregate}/
+├── factory/         # ドメインサービスファクトリ
 ├── model/           # ドメインエンティティ
 ├── service/         # ドメインビジネスロジック
 ├── repository/      # リポジトリインターフェース
 ├── schema/          # Zodバリデーションスキーマ
-└── infrastructure/  # リポジトリ実装
+├── infrastructure/  # リポジトリ実装
+└── index.ts         # 集約エクスポート
 ```
 
 **テスト戦略**（多層構造）:
@@ -76,9 +208,11 @@ src/domain/{aggregate}/
 
 **ランタイム**: Cloudflare Workers（メインアプリ）+ Supabase Functions（バックグラウンドジョブ）
 **バックエンド**: HonoウェブフレームワークとRemixアダプター
-**フロントエンド**: Remix + React + TailwindCSS v4 + Radix UI
+**フロントエンド**: Remix + React + TailwindCSS v4 + shadcn/ui
 **データベース**: PostgreSQL + Prisma ORM
-**テスト**: 各層で個別設定のVitest
+**テスト**: 各層で個別設定のVitest + Playwright E2E
+**ビルドツール**: Vite
+**コード品質**: ESLint (Airbnb) + Prettier + TypeScript
 
 ### エントリーポイント
 
@@ -98,8 +232,29 @@ Prismaモデルは`prisma/models/`内のファイルに分割:
 
 ### 重要な規約
 
-**インポート**: `src/`ルートからの絶対インポートを使用
+**インポート**: `src/`ルートからの絶対インポートを使用（TypeScript path mapping: `@/*`）
 **エラーハンドリング**: サービス層では`Result<T, E>`型を使用し、API層でHTTPExceptionに変換
-**テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック
-**バリデーション**: 全データ検証にドメイン層のZodスキーマを使用
+**テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック, serviceテストのみで利用
+**バリデーション**: データ検証にドメイン層のZodスキーマを使用
 **ログ**: Pinoロガーで構造化ログを使用
+
+### コード品質設定詳細
+
+**ESLint設定**:
+
+- Airbnb設定をベースとした厳格なルール
+- 循環的複雑度: 最大10（非常に良いレベル）
+- `@typescript-eslint/no-floating-promises`: 非同期処理の適切な処理を強制
+- UI コンポーネントディレクトリは除外
+
+**Prettier設定**:
+
+- シングルクォート使用
+- 行幅: 100文字
+- TailwindCSS プラグイン適用
+
+**TypeScript設定**:
+
+- strict モード有効
+- パス解決: `@/*` → `./src/*`
+- ESNext ターゲット
