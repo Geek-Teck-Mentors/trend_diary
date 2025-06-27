@@ -22,7 +22,7 @@ const zodValidator = <Target extends keyof ValidationTargets, T extends ZodSchem
 export default zodValidator;
 
 // zodValidatorの型は自動推論が厳しかったため、何度も書きそうなベタガキを共通化
-type ZodValidatedContextBase<T, K extends 'json' | 'query', P extends string = ''> = Context<
+type ZodValidatedContextBase<T, K extends keyof ValidationTargets, P extends string = ''> = Context<
   Env,
   P,
   {
@@ -40,5 +40,11 @@ export type ZodValidatedContext<T, P extends string = ''> = ZodValidatedContextB
 export type ZodValidatedQueryContext<T, P extends string = ''> = ZodValidatedContextBase<
   T,
   'query',
+  P
+>;
+
+export type ZodValidatedParamContext<T, P extends string = ''> = ZodValidatedContextBase<
+  T,
+  'param',
   P
 >;

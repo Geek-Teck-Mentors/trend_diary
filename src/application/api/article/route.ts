@@ -6,7 +6,7 @@ import getArticles from './getArticles';
 import readArticle from './readArticle';
 import unreadArticle from './unreadArticle';
 import { apiArticleQuerySchema } from '@/domain/article/schema/articleQuerySchema';
-import { createReadHistoryApiSchema } from '@/domain/article';
+import { articleIdParamSchema, createReadHistoryApiSchema } from '@/domain/article';
 
 const app = new Hono<Env>()
   .get('/', zodValidator('query', apiArticleQuerySchema), getArticles)
@@ -16,6 +16,11 @@ const app = new Hono<Env>()
     zodValidator('json', createReadHistoryApiSchema),
     readArticle,
   )
-  .delete('/:article_id/unread', authenticator, unreadArticle);
+  .delete(
+    '/:article_id/unread',
+    authenticator,
+    zodValidator('param', articleIdParamSchema),
+    unreadArticle,
+  );
 
 export default app;

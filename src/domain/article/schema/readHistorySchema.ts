@@ -9,7 +9,7 @@ export const readHistorySchema = z.object({
 });
 
 export const createReadHistoryApiSchema = z.object({
-  readAt: z.string().datetime(),
+  read_at: z.string().datetime(),
 });
 
 export const articleIdParamSchema = z.object({

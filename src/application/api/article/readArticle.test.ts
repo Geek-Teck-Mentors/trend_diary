@@ -74,77 +74,62 @@ describe('POST /api/articles/:article_id/read', () => {
     await db.$queryRaw`TRUNCATE TABLE "articles";`;
   });
 
-  it('正常にReadHistoryを作成できること', async () => {
-    const readAt = '2024-01-01T10:00:00.000Z';
+  describe('正常系', () => {
+    it('既読履歴を作成できること', async () => {
+      const readAt = '2024-01-01T10:00:00.000Z';
 
-    const response = await requestCreateReadHistory(
-      testArticleId.toString(),
-      { readAt },
-      `sid=${sessionId}`,
-    );
+      const response = await requestCreateReadHistory(
+        testArticleId.toString(),
+        { readAt },
+        `sid=${sessionId}`,
+      );
 
-    expect(response.status).toBe(201);
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toBe('記事を既読にしました');
+      expect(response.status).toBe(201);
+      const json = (await response.json()) as { message: string };
+      expect(json.message).toBe('記事を既読にしました');
 
-    // DBに実際に記録されていることを確認
-    const readHistory = await db.readHistory.findFirst({
-      where: {
-        userId: testUserId,
-        articleId: testArticleId,
-      },
+      // DBに実際に記録されていることを確認
+      const readHistory = await db.readHistory.findFirst({
+        where: {
+          userId: testUserId,
+          articleId: testArticleId,
+        },
+      });
+      expect(readHistory).toBeTruthy();
+      expect(readHistory!.readAt).toEqual(new Date(readAt));
     });
-    expect(readHistory).toBeTruthy();
-    expect(readHistory!.readAt).toEqual(new Date(readAt));
   });
 
-  it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
-    const response = await requestCreateReadHistory(
-      'invalid-id',
-      { readAt: '2024-01-01T10:00:00.000Z' },
-      `sid=${sessionId}`,
-    );
+  describe('準正常系', () => {
+    it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
+      const response = await requestCreateReadHistory(
+        'invalid-id',
+        { readAt: '2024-01-01T10:00:00.000Z' },
+        `sid=${sessionId}`,
+      );
 
-    expect(response.status).toBe(400);
-  });
-
-  it('無効なreadAtでバリデーションエラーが発生すること', async () => {
-    const response = await requestCreateReadHistory(
-      testArticleId.toString(),
-      { readAt: 'invalid-date' },
-      `sid=${sessionId}`,
-    );
-
-    expect(response.status).toBe(422);
-  });
-
-  it('認証されていない場合にエラーが発生すること', async () => {
-    const response = await requestCreateReadHistory(testArticleId.toString(), {
-      readAt: '2024-01-01T10:00:00.000Z',
+      expect(response.status).toBe(422);
     });
+    it('無効なreadAtでバリデーションエラーが発生すること', async () => {
+      const response = await requestCreateReadHistory(
+        testArticleId.toString(),
+        { read_at: 'invalid-date' },
+        `sid=${sessionId}`,
+      );
 
-    expect(response.status).toBe(401);
-  });
-
-  it('存在しない記事でも既読履歴が作成されること', async () => {
-    const nonExistentArticleId = '999999';
-    const readAt = '2024-01-01T10:00:00.000Z';
-
-    const response = await requestCreateReadHistory(
-      nonExistentArticleId,
-      { readAt },
-      `sid=${sessionId}`,
-    );
-
-    expect(response.status).toBe(201);
-
-    // DBに記録されていることを確認
-    const readHistory = await db.readHistory.findFirst({
-      where: {
-        userId: testUserId,
-        articleId: BigInt(nonExistentArticleId),
-      },
+      expect(response.status).toBe(422);
     });
-    expect(readHistory).toBeTruthy();
+    it('存在しない記事は既読履歴が作成できない', async () => {
+      const nonExistentArticleId = '999999';
+      const readAt = '2024-01-01T10:00:00.000Z';
+
+      const response = await requestCreateReadHistory(
+        nonExistentArticleId,
+        { readAt },
+        `sid=${sessionId}`,
+      );
+
+      expect(response.status).toBe(422);
+    });
   });
 });

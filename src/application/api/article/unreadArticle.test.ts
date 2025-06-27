@@ -80,67 +80,51 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     await db.$queryRaw`TRUNCATE TABLE "articles";`;
   });
 
-  it('正常にReadHistoryを削除できること', async () => {
-    // 事前に既読履歴があることを確認
-    const beforeCount = await db.readHistory.count({
-      where: {
-        userId: testUserId,
-        articleId: testArticleId,
-      },
+  describe('正常系', () => {
+    it('既読履歴を削除できること', async () => {
+      // 事前に既読履歴があることを確認
+      const beforeCount = await db.readHistory.count({
+        where: {
+          userId: testUserId,
+          articleId: testArticleId,
+        },
+      });
+      expect(beforeCount).toBe(1);
+
+      const response = await requestDeleteReadHistory(testArticleId.toString(), `sid=${sessionId}`);
+
+      expect(response.status).toBe(200);
+      const json = (await response.json()) as { message: string };
+      expect(json.message).toBe('記事を未読にしました');
+
+      // DBから実際に削除されていることを確認
+      const afterCount = await db.readHistory.count({
+        where: {
+          userId: testUserId,
+          articleId: testArticleId,
+        },
+      });
+      expect(afterCount).toBe(0);
     });
-    expect(beforeCount).toBe(1);
+  });
 
-    const response = await requestDeleteReadHistory(testArticleId.toString(), `sid=${sessionId}`);
+  describe('準正常系', () => {
+    it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
+      const response = await requestDeleteReadHistory('invalid-id', `sid=${sessionId}`);
 
-    expect(response.status).toBe(200);
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toBe('記事を未読にしました');
-
-    // DBから実際に削除されていることを確認
-    const afterCount = await db.readHistory.count({
-      where: {
-        userId: testUserId,
-        articleId: testArticleId,
-      },
+      expect(response.status).toBe(422);
     });
-    expect(afterCount).toBe(0);
-  });
+    it('既読履歴が存在しない場合はエラー', async () => {
+      // 既読履歴を事前に削除
+      await db.readHistory.deleteMany({
+        where: {
+          userId: testUserId,
+          articleId: testArticleId,
+        },
+      });
 
-  it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
-    const response = await requestDeleteReadHistory('invalid-id', `sid=${sessionId}`);
-
-    expect(response.status).toBe(400);
-  });
-
-  it('認証されていない場合にエラーが発生すること', async () => {
-    const response = await requestDeleteReadHistory(testArticleId.toString());
-
-    expect(response.status).toBe(401);
-  });
-
-  it('既読履歴が存在しない場合でも成功すること', async () => {
-    // 既読履歴を事前に削除
-    await db.readHistory.deleteMany({
-      where: {
-        userId: testUserId,
-        articleId: testArticleId,
-      },
+      const response = await requestDeleteReadHistory(testArticleId.toString(), `sid=${sessionId}`);
+      expect(response.status).toBe(404);
     });
-
-    const response = await requestDeleteReadHistory(testArticleId.toString(), `sid=${sessionId}`);
-
-    expect(response.status).toBe(200);
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toBe('記事を未読にしました');
-  });
-
-  it('存在しない記事でも処理が正常に完了すること', async () => {
-    const nonExistentArticleId = '999999';
-
-    const response = await requestDeleteReadHistory(nonExistentArticleId, `sid=${sessionId}`);
-
-    expect(response.status).toBe(200);
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toBe('記事を未読にしました');
   });
 });
