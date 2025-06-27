@@ -27,6 +27,46 @@
    - 必ず `npm run lint:ci` を実行
    - 全テストがGreenを維持することを確認
    - コード品質を向上させる
+   - **必須**: サイクル完了時にコミット実行
+
+#### 🔄 コミット（サイクル完了時必須）
+```bash
+# 1. 全テスト実行で確認
+npm run test:service && npm run test:api
+
+# 2. コード品質チェック  
+npm run lint:ci
+
+# 3. 全て成功後にコミット（Conventional Commitsに従う）
+git add .
+git commit -m "[type]: [機能名] TDD cycle complete
+
+🔴 RED: [テスト内容]
+🟢 GREEN: [実装内容] 
+🔵 REFACTOR: [改善内容]"
+```
+
+**コミットタイプ（Conventional Commits）:**
+- `feat:` - 新機能追加
+- `fix:` - バグ修正
+- `refactor:` - リファクタリング（機能変更なし）
+- `test:` - テスト追加・修正
+- `docs:` - ドキュメント更新
+- `style:` - コードスタイル修正（フォーマット等）
+- `perf:` - パフォーマンス改善
+- `chore:` - ビルドプロセス・補助ツール等の変更
+
+**使用例:**
+```bash
+# 新機能の場合
+git commit -m "feat: add user authentication TDD cycle complete"
+
+# バグ修正の場合  
+git commit -m "fix: resolve login validation issue TDD cycle complete"
+
+# リファクタリングの場合
+git commit -m "refactor: improve article service structure TDD cycle complete"
+```
 
 RED-GREEN-REFACTORを1サイクルとして繰り返す
 
