@@ -14,12 +14,14 @@
 新機能・バグ修正時は**RED-GREEN-REFACTOR**サイクルで進めること：
 
 1. **🔴 RED** - 失敗するテストを先に書く
+
    - サービス層: `npm run test:service -- path/to/file.test.ts`
    - API層: `npm run test:api -- path/to/file.test.ts`
    - フロントエンド: `npm run test:frontend -- path/to/file.test.ts`
    - テストが失敗（RED）することを確認
 
 2. **🟢 GREEN** - テストが通る最小限の実装
+
    - 最小限のコードでテストを通す
    - テストが成功（GREEN）することを確認
 
@@ -30,11 +32,12 @@
    - **必須**: サイクル完了時にコミット実行
 
 #### 🔄 コミット（サイクル完了時必須）
+
 ```bash
 # 1. 全テスト実行で確認
 npm run test:service && npm run test:api
 
-# 2. コード品質チェック  
+# 2. コード品質チェック
 npm run lint:ci
 
 # 3. 全て成功後にコミット（Conventional Commitsに従う）
@@ -42,11 +45,12 @@ git add .
 git commit -m "[type]: [機能名] TDD cycle complete
 
 🔴 RED: [テスト内容]
-🟢 GREEN: [実装内容] 
+🟢 GREEN: [実装内容]
 🔵 REFACTOR: [改善内容]"
 ```
 
 **コミットタイプ（Conventional Commits）:**
+
 - `feat:` - 新機能追加
 - `fix:` - バグ修正
 - `refactor:` - リファクタリング（機能変更なし）
@@ -57,11 +61,12 @@ git commit -m "[type]: [機能名] TDD cycle complete
 - `chore:` - ビルドプロセス・補助ツール等の変更
 
 **使用例:**
+
 ```bash
 # 新機能の場合
 git commit -m "feat: add user authentication TDD cycle complete"
 
-# バグ修正の場合  
+# バグ修正の場合
 git commit -m "fix: resolve login validation issue TDD cycle complete"
 
 # リファクタリングの場合
@@ -75,6 +80,7 @@ RED-GREEN-REFACTORを1サイクルとして繰り返す
 #### 開発中に発見されるタスクの扱い
 
 **即座にTODOに記録する対象:**
+
 - リファクタリングが必要な箇所
 - 発見したバグや改善点
 - 追加で必要になった機能
@@ -82,6 +88,7 @@ RED-GREEN-REFACTORを1サイクルとして繰り返す
 - パフォーマンス改善が必要な箇所
 
 **記録方法:**
+
 ```typescript
 // TODO: [優先度] 説明 - 発見した理由/背景
 // 例:
@@ -91,16 +98,19 @@ RED-GREEN-REFACTORを1サイクルとして繰り返す
 ```
 
 **優先度ガイドライン:**
+
 - **HIGH**: セキュリティ、バグ、ブロッカー
 - **MEDIUM**: パフォーマンス、テスト不足、リファクタリング
 - **LOW**: 改善、統一性、ドキュメント
 
 #### 現在のタスク中断ルール
+
 - RED-GREEN-REFACTORサイクル完了後にTODO追加
 - 緊急度が高い場合は現在のサイクルを一旦停止してTODO記録
 - サイクル途中で発見した場合はメモとして残し、サイクル完了後に整理
 
 ### テスト実行順序
+
 - 単体テスト (service層) → 統合テスト (api層) → E2Eテスト
 - 各層のテストが通ってから次の層へ進む
 
