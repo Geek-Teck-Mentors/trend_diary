@@ -1,5 +1,7 @@
 import Article from '@/domain/article/model/article';
+import ReadHistory from '@/domain/article/model/readHistory';
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
+import { ArticleCommandService } from '@/domain/article/repository/articleCommandService';
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
 import { ServerError } from '@/common/errors';
 import { AsyncResult } from '@/common/types/utility';
@@ -7,7 +9,10 @@ import { CursorPaginationResult } from '@/common/pagination';
 import extractTrimmed from '@/common/sanitization';
 
 export default class ArticleService {
-  constructor(private readonly articleQueryService: ArticleQueryService) {}
+  constructor(
+    private readonly articleQueryService: ArticleQueryService,
+    private readonly articleCommandService: ArticleCommandService,
+  ) {}
 
   async searchArticles(
     params: ArticleQueryParams,
@@ -25,5 +30,17 @@ export default class ArticleService {
     };
 
     return this.articleQueryService.searchArticles(optimizedParams as ArticleQueryParams);
+  }
+
+  async createReadHistory(
+    userId: bigint,
+    articleId: bigint,
+    readAt: Date,
+  ): AsyncResult<ReadHistory, Error> {
+    return this.articleCommandService.createReadHistory(userId, articleId, readAt);
+  }
+
+  async deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error> {
+    return this.articleCommandService.deleteAllReadHistory(userId, articleId);
   }
 }
