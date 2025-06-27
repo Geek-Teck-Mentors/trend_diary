@@ -9,7 +9,7 @@ type Props = {
   onCardClick: (article: Article) => void;
 };
 
-export default React.memo(({ article, onCardClick }: Props) =>{
+export default React.memo(({ article, onCardClick }: Props) => {
   const handleClick = useCallback(() => {
     onCardClick(article);
   }, [article, onCardClick]);
