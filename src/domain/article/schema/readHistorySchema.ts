@@ -6,7 +6,6 @@ export const readHistorySchema = z.object({
   articleId: z.bigint(),
   readAt: z.date(),
   createdAt: z.date(),
-  updatedAt: z.date(),
 });
 
 export const createReadHistoryApiSchema = z.object({

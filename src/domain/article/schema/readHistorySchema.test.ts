@@ -13,7 +13,6 @@ describe('ReadHistoryスキーマ', () => {
       articleId: 200n,
       readAt: new Date('2024-01-01T10:00:00Z'),
       createdAt: new Date('2024-01-01T10:00:00Z'),
-      updatedAt: new Date('2024-01-01T10:00:00Z'),
     };
 
     it('有効なReadHistoryデータを受け入れること', () => {
