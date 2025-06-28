@@ -20,12 +20,8 @@ type Props = {
 
 export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-    }
+    if (!open) onClose();
   };
-
-  if (typeof document === 'undefined') return null;
 
   return createPortal(
     <Drawer open={isOpen} onOpenChange={handleOpenChange} direction='right'>

@@ -1,72 +1,25 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Article, Cursor, Direction } from './types';
-import getApiClientForClient from '../../infrastructure/api';
+import { useEffect, useRef } from "react";
+import { Cursor, Direction } from "./types"
 
-const formatDate = (rawDate: Date) => {
-  const year = rawDate.getFullYear();
-  const month = String(rawDate.getMonth() + 1).padStart(2, '0');
-  const day = String(rawDate.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+type Params = {
+  fetchArticles: (params: { date?: Date; direction?: Direction; }) => Promise<void>;
+  cursor: Cursor;
+  isLoading: boolean;
 };
 
-const date = new Date('2025-06-27');
-
-export default function useTrends() {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [cursor, setCursor] = useState<Cursor>({});
-  const [isLoading, setIsLoading] = useState(false);
+export default function useTrends(params: Params) {
+  const { fetchArticles, cursor, isLoading } = params;
   const observerTargetRef = useRef<HTMLDivElement>(null);
 
-  const fetchArticles = useCallback(
-    async (direction: Direction = 'next') => {
-      if (isLoading) return;
+    const date = new Date();
 
-      setIsLoading(true);
-      try {
-        const client = getApiClientForClient();
+  // INFO: 初回読み込み時に今日の日付で記事を取得
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    fetchArticles({date});
+  });
 
-        const queryDate = formatDate(date);
-
-        const res = await client.articles.$get({
-          query: {
-            to: queryDate,
-            from: queryDate,
-            direction,
-            cursor: cursor[direction],
-            limit: 10,
-          },
-        });
-        if (res.status === 200) {
-          const resJson = await res.json();
-          setArticles((prevArticles) => [
-            ...prevArticles,
-            ...resJson.data.map((data) => ({
-              articleId: Number(data.articleId),
-              media: data.media,
-              title: data.title,
-              author: data.author,
-              description: data.description,
-              url: data.url,
-              createdAt: new Date(data.createdAt),
-            })),
-          ]);
-          setCursor({
-            next: resJson.nextCursor,
-            prev: resJson.prevCursor,
-          });
-        } else {
-          toast.error('エラーが発生しました');
-        }
-      } catch (error) {
-        toast.error('エラーが発生しました');
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [cursor, isLoading],
-  );
-
+  // INFO: IntersectionObserverを使ってスクロールで記事を自動読み込み
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -74,7 +27,7 @@ export default function useTrends() {
         if (entry.isIntersecting && !isLoading && cursor.next) {
           // INFO: 自動読み込みなので結果を待つ必要がないためあえてawaitしない
           // eslint-disable-next-line @typescript-eslint/no-floating-promises
-          fetchArticles('next');
+          fetchArticles({ direction: 'next' });
         }
       },
       { threshold: 0.1 },
@@ -88,10 +41,7 @@ export default function useTrends() {
   }, [fetchArticles, isLoading, cursor.next]);
 
   return {
-    articles,
-    fetchArticles,
     date,
-    isLoading,
     observerTargetRef,
-  };
+  }
 }
