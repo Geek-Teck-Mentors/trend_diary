@@ -1,4 +1,3 @@
-
 export type PaginationDirection = 'next' | 'prev';
 
 export type PaginationCursor = {

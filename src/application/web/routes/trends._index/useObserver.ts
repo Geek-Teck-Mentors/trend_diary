@@ -1,11 +1,11 @@
-import { useEffect, useRef } from "react";
-import { PaginationCursor, PaginationDirection } from "../../types/paginations";
+import { useEffect, useRef } from 'react';
+import { PaginationCursor, PaginationDirection } from '../../types/paginations';
 
 type Params = {
-  fetchArticles: (params: { date?: Date; direction?: PaginationDirection; }) => Promise<void>;
+  fetchArticles: (params: { date?: Date; direction?: PaginationDirection }) => Promise<void>;
   cursor: PaginationCursor;
   isLoading: boolean;
-}
+};
 export default function useObserver(params: Params) {
   const { fetchArticles, cursor, isLoading } = params;
   const observerTargetRef = useRef<HTMLDivElement>(null);
@@ -32,5 +32,5 @@ export default function useObserver(params: Params) {
 
   return {
     observerTargetRef,
-  }
+  };
 }
