@@ -24,7 +24,7 @@ export default function TrendsPage({
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
       <h1 className='pb-4 text-xl italic'>- {date.toLocaleDateString('ja-JP')} -</h1>
-      <div className='flex flex-wrap gap-4'>
+      <div className='flex flex-wrap gap-6'>
         {articles.length === 0 ? (
           <p className='text-gray-500'>記事がありません</p>
         ) : (
