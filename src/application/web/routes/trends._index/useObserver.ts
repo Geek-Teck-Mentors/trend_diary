@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
-import { Direction, Cursor } from "./types";
+import { PaginationCursor, PaginationDirection } from "../../types/paginations";
 
 type Params = {
-  fetchArticles: (params: { date?: Date; direction?: Direction; }) => Promise<void>;
-  cursor: Cursor;
+  fetchArticles: (params: { date?: Date; direction?: PaginationDirection; }) => Promise<void>;
+  cursor: PaginationCursor;
   isLoading: boolean;
 }
 export default function useObserver(params: Params) {

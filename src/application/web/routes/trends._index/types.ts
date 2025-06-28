@@ -7,9 +7,3 @@ export type Article = {
   url: string;
   createdAt: Date;
 };
-
-export type Direction = 'next' | 'prev';
-
-export type Cursor = {
-  [key in Direction]?: string;
-};

@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Article, Cursor, Direction } from './types';
+import { Article } from './types';
 import getApiClientForClient from '../../infrastructure/api';
+import { PaginationCursor, PaginationDirection } from '../../types/paginations';
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear();
@@ -12,7 +13,7 @@ const formatDate = (rawDate: Date) => {
 
 export default function useTrendsState() {
   const [articles, setArticles] = useState<Article[]>([]);
-  const [cursor, setCursor] = useState<Cursor>({});
+  const [cursor, setCursor] = useState<PaginationCursor>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchArticles = useCallback(
@@ -22,7 +23,7 @@ export default function useTrendsState() {
       limit = 100,
     }: {
       date?: Date;
-      direction?: Direction;
+      direction?: PaginationDirection;
       limit?: number;
     }) => {
       if (isLoading) return;

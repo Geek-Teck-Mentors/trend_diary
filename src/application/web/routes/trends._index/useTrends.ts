@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from "react";
-import { Direction } from "./types"
+import { PaginationDirection } from '../../types/paginations';
 
 type Params = {
-  fetchArticles: (params: { date?: Date; direction?: Direction; limit?: number; }) => Promise<void>;
+  fetchArticles: (params: { date?: Date; direction?: PaginationDirection; limit?: number; }) => Promise<void>;
 };
 
 export default function useTrends(params: Params) {
