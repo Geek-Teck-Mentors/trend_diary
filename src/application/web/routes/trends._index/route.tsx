@@ -5,16 +5,14 @@ import useTrendsState from './useTrendsState';
 import useDrawerState from './useDrawerState';
 import ArticleDrawer from './components/ArticleDrawer';
 import useTrends from './useTrends';
+import useObserver from './useObserver';
 
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }];
 
 export default function Trends() {
   const { articles, fetchArticles, isLoading, cursor } = useTrendsState();
-  const { date, observerTargetRef } = useTrends({
-    fetchArticles,
-    cursor,
-    isLoading,
-  })
+  const { date } = useTrends({ fetchArticles });
+  const { observerTargetRef } = useObserver({ fetchArticles, cursor, isLoading });
   const { isDrawerOpen, selectedArticle, openDrawer, closeDrawer } = useDrawerState();
 
   return (
