@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Card, CardContent } from '@/application/web/components/ui/card';
+import { Card, CardContent, CardTitle, CardDescription } from '@/application/web/components/ui/card';
 import QiitaTag from './QiitaTag';
 import ZennTag from './ZennTag';
 import { Article } from '../types';
@@ -22,14 +22,14 @@ export default function ArticleCard({ article, onCardClick }: Props) {
       tabIndex={0}
     >
       <CardContent className='flex h-full flex-col p-0'>
-        <h3 className='flex-1 overflow-hidden text-sm leading-relaxed font-bold text-ellipsis text-gray-700'>
+        <CardTitle className='flex-1 overflow-hidden text-sm leading-relaxed font-bold line-clamp-2 text-gray-700'>
           {article.title}
-        </h3>
+        </CardTitle>
 
-        <div className='mt-3 flex items-end justify-between'>
+        <CardDescription className='mt-3 flex items-end justify-between'>
           <span className='text-sm text-gray-600'>{article.author}</span>
           {article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}
-        </div>
+        </CardDescription>
       </CardContent>
     </Card>
   );
