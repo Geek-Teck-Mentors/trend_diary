@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Direction } from "./types"
 
 type Params = {
-  fetchArticles: (params: { date?: Date; direction?: Direction; }) => Promise<void>;
+  fetchArticles: (params: { date?: Date; direction?: Direction; limit?: number; }) => Promise<void>;
 };
 
 export default function useTrends(params: Params) {

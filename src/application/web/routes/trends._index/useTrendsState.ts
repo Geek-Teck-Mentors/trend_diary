@@ -23,7 +23,7 @@ export default function useTrendsState() {
     }: {
       date?: Date;
       direction?: Direction;
-      limit: number;
+      limit?: number;
     }) => {
       if (isLoading) return;
 
