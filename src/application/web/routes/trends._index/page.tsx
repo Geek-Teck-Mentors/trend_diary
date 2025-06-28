@@ -1,7 +1,7 @@
 import React from 'react';
 import ArticleCard from './components/ArticleCard';
 import { Article } from './types';
-import SpinnerCircle3 from '../../components/customized/spinner/spinner-09';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 type Props = {
   articles: Article[];
@@ -34,11 +34,7 @@ export default function TrendsPage({
         )}
       </div>
       <div ref={observerTargetRef} className='h-4 w-full' />
-      {isLoading && (
-        <div className='bg-opacity-75 fixed inset-0 flex items-center justify-center bg-gray-50 backdrop-blur-sm'>
-          <SpinnerCircle3 />
-        </div>
-      )}
+      <LoadingSpinner isLoading={isLoading} />
     </div>
   );
 }
