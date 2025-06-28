@@ -25,7 +25,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
 
   return createPortal(
     <Drawer open={isOpen} onOpenChange={handleOpenChange} direction='right'>
-      <DrawerContent className='h-full'>
+      <DrawerContent className='h-full w-1/2'>
         <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
           <div className='flex-1'>{article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}</div>
           <DrawerClose className='ring-offset-background focus:ring-ring cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'>
