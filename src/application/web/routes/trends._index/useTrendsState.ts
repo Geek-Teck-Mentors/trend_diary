@@ -16,7 +16,15 @@ export default function useTrendsState() {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchArticles = useCallback(
-    async ({ date = new Date(), direction = 'next' }: { date?: Date; direction?: Direction }) => {
+    async ({
+      date = new Date(),
+      direction = 'next',
+      limit = 100,
+    }: {
+      date?: Date;
+      direction?: Direction;
+      limit: number;
+    }) => {
       if (isLoading) return;
 
       setIsLoading(true);
@@ -31,7 +39,7 @@ export default function useTrendsState() {
             from: queryDate,
             direction,
             cursor: cursor[direction],
-            limit: 10,
+            limit,
           },
         });
         if (res.status === 200) {
@@ -63,7 +71,6 @@ export default function useTrendsState() {
     },
     [cursor, isLoading],
   );
-
 
   return {
     articles,
