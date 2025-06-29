@@ -1,8 +1,8 @@
-import { User as PrismaUser } from '@prisma/client';
-import { RdbClient } from '@/infrastructure/rdb';
-import { UserRepository } from '../repository/userRepository';
-import User from '../model/user';
-import { AsyncResult, Nullable, resultSuccess, resultError } from '@/common/types/utility';
+import { User as PrismaUser } from '@prisma/client'
+import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
+import { RdbClient } from '@/infrastructure/rdb'
+import User from '../model/user'
+import { UserRepository } from '../repository/userRepository'
 
 export default class UserRepositoryImpl implements UserRepository {
   constructor(private db: RdbClient) {}
@@ -14,7 +14,7 @@ export default class UserRepositoryImpl implements UserRepository {
           accountId,
           displayName,
         },
-      });
+      })
 
       return resultSuccess(
         new User(
@@ -24,9 +24,9 @@ export default class UserRepositoryImpl implements UserRepository {
           newUser.createdAt,
           newUser.updatedAt,
         ),
-      );
+      )
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -37,9 +37,9 @@ export default class UserRepositoryImpl implements UserRepository {
           accountId,
           deletedAt: null,
         },
-      });
+      })
 
-      if (!user) return resultSuccess(null);
+      if (!user) return resultSuccess(null)
 
       return resultSuccess(
         new User(
@@ -49,14 +49,14 @@ export default class UserRepositoryImpl implements UserRepository {
           user.createdAt,
           user.updatedAt,
         ),
-      );
+      )
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
   async findBySessionId(sessionId: string): AsyncResult<Nullable<User>, Error> {
-    const currentTimestamp = new Date();
+    const currentTimestamp = new Date()
     try {
       const result = await this.db.$queryRaw<PrismaUser[]>`
       SELECT
@@ -71,11 +71,11 @@ export default class UserRepositoryImpl implements UserRepository {
         AND sessions.session_id = ${sessionId}
       WHERE
         users.deleted_at IS NULL
-        AND sessions.expires_at > ${currentTimestamp}`;
-      if (result.length === 0) return resultSuccess(null);
+        AND sessions.expires_at > ${currentTimestamp}`
+      if (result.length === 0) return resultSuccess(null)
 
-      const user = result.at(0);
-      if (!user) return resultSuccess(null);
+      const user = result.at(0)
+      if (!user) return resultSuccess(null)
 
       return resultSuccess(
         new User(
@@ -85,9 +85,9 @@ export default class UserRepositoryImpl implements UserRepository {
           user.createdAt,
           user.updatedAt,
         ),
-      );
+      )
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 }

@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import baseSchema from '@/common/schema/baseSchema';
-import deletedAtSchema from '@/common/schema/deletedAtSchema';
+import { z } from 'zod'
+import baseSchema from '@/common/schema/baseSchema'
+import deletedAtSchema from '@/common/schema/deletedAtSchema'
 
 export const userSchema = z
   .object({
@@ -9,7 +9,7 @@ export const userSchema = z
     displayName: z.string().optional(),
   })
   .merge(baseSchema)
-  .merge(deletedAtSchema);
+  .merge(deletedAtSchema)
 
-export type UserInput = Pick<z.infer<typeof userSchema>, 'accountId' | 'displayName'>;
-export type UserOutput = z.output<typeof userSchema>;
+export type UserInput = Pick<z.infer<typeof userSchema>, 'accountId' | 'displayName'>
+export type UserOutput = z.output<typeof userSchema>

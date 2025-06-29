@@ -1,4 +1,4 @@
-import { userSchema } from './userSchema';
+import { userSchema } from './userSchema'
 
 describe('ユーザースキーマ', () => {
   const validUser = {
@@ -8,13 +8,13 @@ describe('ユーザースキーマ', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: undefined,
-  };
+  }
 
   it('有効なユーザーデータを受け入れること', () => {
     expect(() => {
-      userSchema.parse(validUser);
-    }).not.toThrow();
-  });
+      userSchema.parse(validUser)
+    }).not.toThrow()
+  })
 
   describe('userId のバリデーション', () => {
     it('有効なbigint型のuserIdを受け入れること', () => {
@@ -22,26 +22,26 @@ describe('ユーザースキーマ', () => {
         userSchema.parse({
           ...validUser,
           userId: BigInt(567890123),
-        });
-      }).not.toThrow();
-    });
+        })
+      }).not.toThrow()
+    })
 
     it('bigint型でないuserIdを拒否すること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
           userId: '123456789',
-        });
-      }).toThrow();
+        })
+      }).toThrow()
 
       expect(() => {
         userSchema.parse({
           ...validUser,
           userId: 123456789,
-        });
-      }).toThrow();
-    });
-  });
+        })
+      }).toThrow()
+    })
+  })
 
   describe('accountId のバリデーション', () => {
     it('有効なbigint型のaccountIdを受け入れること', () => {
@@ -49,26 +49,26 @@ describe('ユーザースキーマ', () => {
         userSchema.parse({
           ...validUser,
           accountId: BigInt(567890123),
-        });
-      }).not.toThrow();
-    });
+        })
+      }).not.toThrow()
+    })
 
     it('bigint型でないaccountIdを拒否すること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
           accountId: '987654321',
-        });
-      }).toThrow();
+        })
+      }).toThrow()
 
       expect(() => {
         userSchema.parse({
           ...validUser,
           accountId: 987654321,
-        });
-      }).toThrow();
-    });
-  });
+        })
+      }).toThrow()
+    })
+  })
 
   describe('displayName のバリデーション', () => {
     it('displayNameが提供されている場合に受け入れること', () => {
@@ -76,24 +76,24 @@ describe('ユーザースキーマ', () => {
         userSchema.parse({
           ...validUser,
           displayName: 'テスト名前',
-        });
-      }).not.toThrow();
-    });
+        })
+      }).not.toThrow()
+    })
 
     it('displayNameが提供されていない場合も受け入れること', () => {
-      const { displayName, ...userWithoutDisplayName } = validUser;
+      const { ...userWithoutDisplayName } = validUser
       expect(() => {
-        userSchema.parse(userWithoutDisplayName);
-      }).not.toThrow();
-    });
+        userSchema.parse(userWithoutDisplayName)
+      }).not.toThrow()
+    })
 
     it('文字列でないdisplayNameを拒否すること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
           displayName: 123,
-        });
-      }).toThrow();
-    });
-  });
-});
+        })
+      }).toThrow()
+    })
+  })
+})

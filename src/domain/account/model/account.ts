@@ -1,4 +1,4 @@
-import BaseModel from '@/common/model/baseModel';
+import BaseModel from '@/common/model/baseModel'
 
 export default class Account extends BaseModel {
   constructor(
@@ -10,10 +10,10 @@ export default class Account extends BaseModel {
     updatedAt: Date = new Date(),
     deletedAt?: Date,
   ) {
-    super(createdAt, updatedAt, deletedAt);
+    super(createdAt, updatedAt, deletedAt)
   }
 
   recordLogin(): void {
-    this.lastLogin = new Date();
+    this.lastLogin = new Date()
   }
 }

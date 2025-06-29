@@ -23,4 +23,4 @@ const app = new Hono<Env>()
     unreadArticle,
   );
 
-export default app;
+export default app

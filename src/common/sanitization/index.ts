@@ -1,3 +1,3 @@
-import extractTrimmedString from './string';
+import extractTrimmedString from './string'
 
-export default extractTrimmedString;
+export default extractTrimmedString

@@ -1,29 +1,29 @@
 export default class BaseModel {
-  public readonly createdAt: Date;
+  public readonly createdAt: Date
 
-  private updatedAtValue: Date;
+  private updatedAtValue: Date
 
-  private deletedAtValue?: Date;
+  private deletedAtValue?: Date
 
   protected constructor(createdAt: Date, updatedAt: Date, deletedAt?: Date) {
-    this.createdAt = createdAt;
-    this.updatedAtValue = updatedAt;
-    this.deletedAtValue = deletedAt;
+    this.createdAt = createdAt
+    this.updatedAtValue = updatedAt
+    this.deletedAtValue = deletedAt
   }
 
   get updatedAt(): Date {
-    return this.updatedAtValue;
+    return this.updatedAtValue
   }
 
   get deletedAt(): Date | undefined {
-    return this.deletedAtValue;
+    return this.deletedAtValue
   }
 
   protected updateTimestamp(): void {
-    this.updatedAtValue = new Date();
+    this.updatedAtValue = new Date()
   }
 
   protected deactivate(): void {
-    this.deletedAtValue = new Date();
+    this.deletedAtValue = new Date()
   }
 }

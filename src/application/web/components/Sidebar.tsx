@@ -1,7 +1,8 @@
-import React from 'react';
-import { BookOpen, Newspaper, TrendingUp } from 'lucide-react';
-import { useNavigate } from '@remix-run/react';
-import { toast } from 'sonner';
+import { useNavigate } from '@remix-run/react'
+import { BookOpen, Newspaper, TrendingUp } from 'lucide-react'
+import React from 'react'
+import { toast } from 'sonner'
+import getApiClientForClient from '../infrastructure/api'
 import {
   Sidebar,
   SidebarContent,
@@ -13,8 +14,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from './ui/sidebar';
-import getApiClientForClient from '../infrastructure/api';
+} from './ui/sidebar'
 
 const menuItems = [
   {
@@ -27,25 +27,25 @@ const menuItems = [
     url: '#',
     icon: Newspaper,
   },
-];
+]
 
 type Props = {
-  displayName: string;
-};
+  displayName: string
+}
 
 export default function AppSidebar({ displayName }: Props) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleLogout = async () => {
-    const client = getApiClientForClient();
-    const res = await client.account.logout.$delete();
+    const client = getApiClientForClient()
+    const res = await client.account.logout.$delete()
     if (res.status === 204) {
-      navigate('/login');
-      toast.success('ログアウトしました');
+      navigate('/login')
+      toast.success('ログアウトしました')
     } else {
-      toast.error('ログアウトに失敗しました');
+      toast.error('ログアウトに失敗しました')
     }
-  };
+  }
 
   return (
     <Sidebar>
@@ -62,7 +62,7 @@ export default function AppSidebar({ displayName }: Props) {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild={true}>
                     <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -89,5 +89,5 @@ export default function AppSidebar({ displayName }: Props) {
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>
-  );
+  )
 }

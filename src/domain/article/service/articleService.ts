@@ -1,12 +1,12 @@
-import Article from '@/domain/article/model/article';
-import ReadHistory from '@/domain/article/model/readHistory';
-import { ArticleQueryService } from '@/domain/article/repository/articleQueryService';
-import { ArticleCommandService } from '@/domain/article/repository/articleCommandService';
-import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
-import { ServerError } from '@/common/errors';
-import { AsyncResult } from '@/common/types/utility';
-import { CursorPaginationResult } from '@/common/pagination';
-import extractTrimmed from '@/common/sanitization';
+import { ServerError } from '@/common/errors'
+import { CursorPaginationResult } from '@/common/pagination'
+import extractTrimmed from '@/common/sanitization'
+import { AsyncResult } from '@/common/types/utility'
+import Article from '@/domain/article/model/article'
+import ReadHistory from '@/domain/article/model/readHistory'
+import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
+import { ArticleQueryService } from '@/domain/article/repository/articleQueryService'
+import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 
 export default class ArticleService {
   constructor(
@@ -27,9 +27,9 @@ export default class ArticleService {
       to: params.to,
       media: params.media,
       readStatus: params.readStatus,
-    };
+    }
 
-    return this.articleQueryService.searchArticles(optimizedParams as ArticleQueryParams);
+    return this.articleQueryService.searchArticles(optimizedParams as ArticleQueryParams)
   }
 
   async createReadHistory(
@@ -37,10 +37,10 @@ export default class ArticleService {
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
-    return this.articleCommandService.createReadHistory(userId, articleId, readAt);
+    return this.articleCommandService.createReadHistory(userId, articleId, readAt)
   }
 
   async deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error> {
-    return this.articleCommandService.deleteAllReadHistory(userId, articleId);
+    return this.articleCommandService.deleteAllReadHistory(userId, articleId)
   }
 }

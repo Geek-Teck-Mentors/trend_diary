@@ -2,6 +2,6 @@ const CONTEXT_KEY = {
   APP_LOG: 'appLog',
   SESSION_USER: 'sessionUser',
   SESSION_ID: 'sessionId',
-} as const;
+} as const
 
-export default CONTEXT_KEY;
+export default CONTEXT_KEY
