@@ -143,12 +143,14 @@ RED-GREEN-REFACTORを1サイクルとして繰り返す
 
 ### コード品質
 
-- `npm run lint` - ESLintを実行
-- `npm run lint:fix` - ESLintを自動修正付きで実行
+- `npm run lint` - Biomeでlintを実行
+- `npm run lint:fix` - Biomeでlintを自動修正付きで実行
 - `npm run check-types` - TypeScript型チェックを実行
-- `npm run format` - Prettierでコードフォーマットをチェック
-- `npm run format:fix` - Prettierでコードフォーマットを修正
-- `npm run lint:ci` - lint、format、型チェックを一括実行（基本的にこれを使用する）
+- `npm run format` - Biomeでコードフォーマットをチェック
+- `npm run format:fix` - Biomeでコードフォーマットを修正
+- `npm run check` - Biomeで総合チェック
+- `npm run check:fix` - Biomeで総合チェック・修正
+- `npm run lint:ci` - biome ci実行 + 型チェック（基本的にこれを使用する）
 
 ## 開発環境設定
 
@@ -212,7 +214,7 @@ src/domain/{aggregate}/
 **データベース**: PostgreSQL + Prisma ORM
 **テスト**: 各層で個別設定のVitest + Playwright E2E
 **ビルドツール**: Vite
-**コード品質**: ESLint (Airbnb) + Prettier + TypeScript
+**コード品質**: Biome + TypeScript
 
 ### エントリーポイント
 
@@ -240,18 +242,16 @@ Prismaモデルは`prisma/models/`内のファイルに分割:
 
 ### コード品質設定詳細
 
-**ESLint設定**:
+**Biome設定**:
 
-- Airbnb設定をベースとした厳格なルール
-- 循環的複雑度: 最大10（非常に良いレベル）
-- `@typescript-eslint/no-floating-promises`: 非同期処理の適切な処理を強制
-- UI コンポーネントディレクトリは除外
-
-**Prettier設定**:
-
+- Airbnb風の厳格なルールを統合適用
+- lintとformatを一元管理
+- アクセシビリティルールを強化
+- TypeScript完全対応
 - シングルクォート使用
 - 行幅: 100文字
-- TailwindCSS プラグイン適用
+- セキュリティルール適用
+- UI コンポーネントディレクトリは除外
 
 **TypeScript設定**:
 

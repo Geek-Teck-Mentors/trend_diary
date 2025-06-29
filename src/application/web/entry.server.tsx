@@ -4,15 +4,16 @@
  * but if you ever want it revealed again, you can run `npx remix reveal` ✨
  * For more information, see https://remix.run/file-conventions/entry.server
  */
-import React from 'react';
+
 import type {
   ActionFunctionArgs,
   AppLoadContext,
   EntryContext,
   LoaderFunctionArgs,
-} from '@remix-run/cloudflare';
-import { isRouteErrorResponse, RemixServer } from '@remix-run/react';
-import { renderToReadableStream } from 'react-dom/server';
+} from '@remix-run/cloudflare'
+import { isRouteErrorResponse, RemixServer } from '@remix-run/react'
+import React from 'react'
+import { renderToReadableStream } from 'react-dom/server'
 
 export default async function handleRequest(
   request: Request,
@@ -21,36 +22,33 @@ export default async function handleRequest(
   remixContext: EntryContext,
   // This is ignored so we can keep it in the template for visibility.  Feel
   // free to delete this parameter in your app if you're not using it!
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   loadContext: AppLoadContext,
 ) {
+  let statusCode = responseStatusCode
   const body = await renderToReadableStream(
     <RemixServer context={remixContext} url={request.url} />,
     {
       signal: request.signal,
       onError(error: unknown) {
         // Log streaming rendering errors from inside the shell
-        // eslint-disable-next-line no-console
-        console.error(error);
-        // eslint-disable-next-line no-param-reassign
-        responseStatusCode = 500;
+        // biome-ignore lint/suspicious/noConsole: Remixのエラーを一応出す
+        console.error(error)
+        statusCode = 500
       },
     },
-  );
+  )
 
-  responseHeaders.set('Content-Type', 'text/html');
+  responseHeaders.set('Content-Type', 'text/html')
   return new Response(body, {
     headers: responseHeaders,
-    status: responseStatusCode,
-  });
+    status: statusCode,
+  })
 }
 
 // 404エラー, abortされたリクエストの場合は不要なのでログ出力しない
 // 参考: https://zenn.dev/mkizka/articles/0db9bc30e1f707#(1)-error%3A-no-route-matches-url-%22%2Ffoo%22
 export function handleError(error: unknown, { request }: LoaderFunctionArgs | ActionFunctionArgs) {
   if ((isRouteErrorResponse(error) && error.status === 404) || request.signal.aborted) {
-    return;
+    return
   }
-  // eslint-disable-next-line no-console
-  console.error(error);
 }

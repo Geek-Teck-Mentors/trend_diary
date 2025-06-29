@@ -1,9 +1,9 @@
 export type RequestInfo = {
-  url: string;
-  method: string;
-  userAgent: string;
-};
+  url: string
+  method: string
+  userAgent: string
+}
 
 export interface ChatNotifier {
-  error(error: Error, requestInfo: RequestInfo): Promise<void>;
+  error(error: Error, requestInfo: RequestInfo): Promise<void>
 }

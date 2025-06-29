@@ -1,8 +1,8 @@
-import { z } from 'zod';
-import { cursorPaginationSchema } from '@/common/pagination';
+import { z } from 'zod'
+import { cursorPaginationSchema } from '@/common/pagination'
 
-const mediaEnum = z.enum(['qiita', 'zenn']);
-const readStatusEnum = z.enum(['0', '1']);
+const mediaEnum = z.enum(['qiita', 'zenn'])
+const readStatusEnum = z.enum(['0', '1'])
 
 const baseArticleSearchSchema = z.object({
   title: z.string().optional(),
@@ -16,18 +16,18 @@ const baseArticleSearchSchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
-});
+})
 
 // 日付の範囲チェック用のrefine関数
 const dateRangeRefine = <T extends { from?: string; to?: string }>(data: T) => {
   if (data.from && data.to) {
-    return data.from <= data.to;
+    return data.from <= data.to
   }
-  return true;
-};
+  return true
+}
 
 // エラーメッセージ
-const DATE_RANGE_ERROR_MESSAGE = 'fromはtoより前の日付を指定してください';
+const DATE_RANGE_ERROR_MESSAGE = 'fromはtoより前の日付を指定してください'
 
 export const articleQuerySchema = baseArticleSearchSchema
   .extend({
@@ -36,9 +36,9 @@ export const articleQuerySchema = baseArticleSearchSchema
   .merge(cursorPaginationSchema)
   .refine(dateRangeRefine, {
     message: DATE_RANGE_ERROR_MESSAGE,
-  });
+  })
 
-export type ArticleQueryParams = z.infer<typeof articleQuerySchema>;
+export type ArticleQueryParams = z.infer<typeof articleQuerySchema>
 
 export const apiArticleQuerySchema = baseArticleSearchSchema
   .extend({
@@ -47,6 +47,6 @@ export const apiArticleQuerySchema = baseArticleSearchSchema
   .merge(cursorPaginationSchema)
   .refine(dateRangeRefine, {
     message: DATE_RANGE_ERROR_MESSAGE,
-  });
+  })
 
-export type ApiArticleQueryParams = z.infer<typeof apiArticleQuerySchema>;
+export type ApiArticleQueryParams = z.infer<typeof apiArticleQuerySchema>
