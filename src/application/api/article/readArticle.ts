@@ -14,7 +14,7 @@ export default async function readArticle(
   // パスパラメータとリクエストボディの取得
   const param = c.req.valid('param')
   const body = c.req.valid('json')
-  
+
   const { article_id: articleId } = param
   const { read_at: readAt } = body
 
