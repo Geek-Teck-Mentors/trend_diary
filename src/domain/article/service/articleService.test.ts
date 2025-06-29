@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker'
 import { mockDeep } from 'vitest-mock-extended'
+import { ServerError } from '@/common/errors'
+import { CursorPaginationResult } from '@/common/pagination'
+import { resultError, resultSuccess } from '@/common/types/utility'
 import Article from '@/domain/article/model/article'
-import ArticleService from './articleService'
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import { ServerError } from '@/common/errors'
-import { resultError, resultSuccess } from '@/common/types/utility'
-import { CursorPaginationResult } from '@/common/pagination'
+import ArticleService from './articleService'
 
 const mockArticle: Article = new Article(
   BigInt(1),

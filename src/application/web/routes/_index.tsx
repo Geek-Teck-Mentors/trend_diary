@@ -1,5 +1,5 @@
-import React from 'react'
 import type { MetaFunction } from '@remix-run/cloudflare'
+import React from 'react'
 
 export const meta: MetaFunction = () => [{ title: 'Remix and Hono on Vite' }]
 

@@ -1,6 +1,6 @@
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
-import app from '../../server'
 import TEST_ENV from '@/test/env'
+import app from '../../server'
 import { ArticleListResponse } from './response'
 
 type GetArticlesTestCase = {

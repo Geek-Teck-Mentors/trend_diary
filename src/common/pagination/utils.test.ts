@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { encodeCursor, decodeCursor, createPaginationResult } from './utils'
+import { describe, expect, it } from 'vitest'
+import { createPaginationResult, decodeCursor, encodeCursor } from './utils'
 
 const mockArticle = (id: number, createdAt: Date) => ({
   articleId: BigInt(id),

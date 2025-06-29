@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
-import app from '../../server'
 import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
+import app from '../../server'
 
 type LoginTestCase = {
   name: string

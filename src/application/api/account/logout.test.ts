@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
-import app from '../../server'
-import TEST_ENV from '@/test/env'
 import { SESSION_NAME } from '@/common/constants/session'
-import accountTestHelper from '@/test/helper/accountTestHelper'
 import { AccountService } from '@/domain/account'
+import TEST_ENV from '@/test/env'
+import accountTestHelper from '@/test/helper/accountTestHelper'
+import app from '../../server'
 
 describe('DELETE /api/account/logout', () => {
   let setCookie: string[]

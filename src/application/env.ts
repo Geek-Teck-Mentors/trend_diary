@@ -1,6 +1,6 @@
+import User from '@/domain/account/model/user'
 import { logger } from '@/logger/logger'
 import CONTEXT_KEY from './middleware/context'
-import User from '@/domain/account/model/user'
 
 export type Env = {
   Bindings: {

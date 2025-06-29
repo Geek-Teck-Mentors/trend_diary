@@ -1,4 +1,4 @@
-import { Nullable, AsyncResult } from '../../../common/types/utility'
+import { AsyncResult, Nullable } from '../../../common/types/utility'
 import Account from '../model/account'
 
 export interface AccountRepository {

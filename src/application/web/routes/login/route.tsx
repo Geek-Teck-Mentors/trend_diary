@@ -1,5 +1,5 @@
-import React from 'react'
 import type { MetaFunction } from '@remix-run/cloudflare'
+import React from 'react'
 import LoginPage from './page'
 import useLogin from './useLogin'
 

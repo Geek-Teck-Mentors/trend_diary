@@ -2,10 +2,10 @@ import type { AppLoadContext } from '@remix-run/cloudflare'
 import { createRequestHandler } from '@remix-run/cloudflare'
 import { Hono } from 'hono'
 import { timeout } from 'hono/timeout'
-import loggerMiddleware from './middleware/requestLogger'
-import errorHandler from './middleware/errorHandler'
-import { Env } from './env'
 import apiApp from './api/route'
+import { Env } from './env'
+import errorHandler from './middleware/errorHandler'
+import loggerMiddleware from './middleware/requestLogger'
 
 const app = new Hono<Env>()
 

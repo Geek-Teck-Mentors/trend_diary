@@ -1,20 +1,20 @@
 import bcrypt from 'bcryptjs'
-import { AccountRepository } from '../repository/accountRepository'
-import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '../../../common/errors'
-import { UserRepository } from '../repository/userRepository'
-import Account from '../model/account'
+import { SESSION_DURATION } from '@/common/constants/session'
 import {
   AsyncResult,
   isError,
   isNull,
+  isSuccess,
+  Result,
   resultError,
   resultSuccess,
-  Result,
-  isSuccess,
 } from '@/common/types/utility'
-import User from '../model/user'
 import { TransactionClient } from '@/infrastructure/rdb'
-import { SESSION_DURATION } from '@/common/constants/session'
+import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '../../../common/errors'
+import Account from '../model/account'
+import User from '../model/user'
+import { AccountRepository } from '../repository/accountRepository'
+import { UserRepository } from '../repository/userRepository'
 
 type LoginResult = {
   user: User

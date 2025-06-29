@@ -5,8 +5,8 @@
  * For more information, see https://remix.run/file-conventions/entry.client
  */
 
-import React, { startTransition, StrictMode } from 'react'
 import { RemixBrowser } from '@remix-run/react'
+import React, { StrictMode, startTransition } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 
 startTransition(() => {

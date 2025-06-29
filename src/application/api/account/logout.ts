@@ -1,14 +1,14 @@
-import { deleteCookie } from 'hono/cookie'
 import { Context } from 'hono'
+import { deleteCookie } from 'hono/cookie'
 import { HTTPException } from 'hono/http-exception'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
 import { Env } from '@/application/env'
-import { NotFoundError, ServerError } from '@/common/errors'
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
-import getRdbClient from '@/infrastructure/rdb'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { SESSION_NAME } from '@/common/constants/session'
+import { NotFoundError, ServerError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
+import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
+import getRdbClient from '@/infrastructure/rdb'
 
 export default async function logout(c: Context<Env>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)

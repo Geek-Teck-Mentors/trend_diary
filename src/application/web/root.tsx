@@ -1,13 +1,13 @@
-import React from 'react'
 import {
+  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  isRouteErrorResponse,
   useRouteError,
 } from '@remix-run/react'
+import React from 'react'
 
 import './styles.css'
 import { Toaster } from './components/ui/sonner'

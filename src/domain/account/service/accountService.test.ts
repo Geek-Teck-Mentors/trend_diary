@@ -1,14 +1,13 @@
 import { faker } from '@faker-js/faker'
-import bcrypt from 'bcryptjs'
 import { Account, Session, User } from '@prisma/client'
-import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl'
-import { AlreadyExistsError, NotFoundError, ClientError, ServerError } from '@/common/errors'
-
-import AccountService from './accountService'
-import UserRepositoryImpl from '../infrastructure/userRepositoryImpl'
-import db from '@/test/__mocks__/prisma'
-import { Transaction } from '@/infrastructure/rdb'
+import bcrypt from 'bcryptjs'
+import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
 import { resultError, resultSuccess } from '@/common/types/utility'
+import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl'
+import { Transaction } from '@/infrastructure/rdb'
+import db from '@/test/__mocks__/prisma'
+import UserRepositoryImpl from '../infrastructure/userRepositoryImpl'
+import AccountService from './accountService'
 
 const mockAccount: Account = {
   accountId: BigInt(1),

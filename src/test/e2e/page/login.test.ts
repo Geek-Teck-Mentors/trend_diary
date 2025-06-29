@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import { runTestCasesSequentially } from '@/test/helper/sequential'
 

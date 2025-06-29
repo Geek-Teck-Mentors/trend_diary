@@ -1,10 +1,9 @@
 import { Prisma, Account as PrismaAccount } from '@prisma/client'
-import { Nullable, AsyncResult, resultSuccess, resultError } from '@/common/types/utility'
-import { RdbClient } from '@/infrastructure/rdb'
 import { AlreadyExistsError } from '@/common/errors'
-
-import { AccountRepository } from '../repository/accountRepository'
+import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
+import { RdbClient } from '@/infrastructure/rdb'
 import Account from '../model/account'
+import { AccountRepository } from '../repository/accountRepository'
 
 export default class AccountRepositoryImpl implements AccountRepository {
   constructor(private db: RdbClient) {}

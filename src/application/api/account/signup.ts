@@ -1,13 +1,12 @@
 import { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
-import { AlreadyExistsError, ServerError } from '@/common/errors'
-import getRdbClient, { Transaction } from '@/infrastructure/rdb'
-
-import { accountSchema } from '@/domain/account/schema/accountSchema'
 import { Env } from '@/application/env'
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
-import { isError } from '@/common/types/utility'
 import CONTEXT_KEY from '@/application/middleware/context'
+import { AlreadyExistsError, ServerError } from '@/common/errors'
+import { isError } from '@/common/types/utility'
+import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
+import { accountSchema } from '@/domain/account/schema/accountSchema'
+import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 
 export default async function signup(c: Context<Env>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)

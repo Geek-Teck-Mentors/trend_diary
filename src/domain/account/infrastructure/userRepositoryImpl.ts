@@ -1,8 +1,8 @@
 import { User as PrismaUser } from '@prisma/client'
+import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
-import { UserRepository } from '../repository/userRepository'
 import User from '../model/user'
-import { AsyncResult, Nullable, resultSuccess, resultError } from '@/common/types/utility'
+import { UserRepository } from '../repository/userRepository'
 
 export default class UserRepositoryImpl implements UserRepository {
   constructor(private db: RdbClient) {}
