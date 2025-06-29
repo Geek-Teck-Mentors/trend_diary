@@ -64,7 +64,7 @@ describe('ReadHistoryスキーマ', () => {
   describe('createReadHistoryApiSchema', () => {
     it('有効なISO8601文字列を受け入れること', () => {
       const validRequest = {
-        readAt: '2024-01-01T10:00:00.000Z',
+        read_at: '2024-01-01T10:00:00.000Z',
       }
 
       expect(() => {
@@ -75,13 +75,13 @@ describe('ReadHistoryスキーマ', () => {
     it('無効な日時文字列を拒否すること', () => {
       expect(() => {
         createReadHistoryApiSchema.parse({
-          readAt: 'invalid-date',
+          read_at: 'invalid-date',
         })
       }).toThrow()
 
       expect(() => {
         createReadHistoryApiSchema.parse({
-          readAt: '2024-01-01',
+          read_at: '2024-01-01',
         })
       }).toThrow()
     })
