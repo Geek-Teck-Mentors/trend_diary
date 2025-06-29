@@ -227,7 +227,11 @@
               { "selector": { "kind": "typeLike" }, "formats": ["PascalCase"] },
               {
                 "selector": { "kind": "objectLiteralProperty" },
-                "formats": ["CONSTANT_CASE", "camelCase"]
+                "formats": ["CONSTANT_CASE", "camelCase", "snake_case", "PascalCase"]
+              },
+              {
+                "selector": { "kind": "typeProperty"},
+                "formats": ["PascalCase", "camelCase", "CONSTANT_CASE"]
               }
             ]
           }
