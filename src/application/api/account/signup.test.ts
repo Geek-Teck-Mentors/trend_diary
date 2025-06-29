@@ -1,16 +1,16 @@
-import app from '../../server';
-import TEST_ENV from '@/test/env';
-import accountTestHelper from '@/test/helper/accountTestHelper';
+import TEST_ENV from '@/test/env'
+import accountTestHelper from '@/test/helper/accountTestHelper'
+import app from '../../server'
 
 describe('POST /api/account', () => {
   beforeAll(async () => {
-    await accountTestHelper.cleanUp();
-  });
+    await accountTestHelper.cleanUp()
+  })
 
   afterAll(async () => {
-    await accountTestHelper.cleanUp();
-    await accountTestHelper.disconnect();
-  });
+    await accountTestHelper.cleanUp()
+    await accountTestHelper.disconnect()
+  })
 
   async function requestShort(body: string) {
     return app.request(
@@ -20,24 +20,24 @@ describe('POST /api/account', () => {
         body,
       },
       TEST_ENV,
-    );
+    )
   }
 
   it('正常系', async () => {
     const res = await requestShort(
       JSON.stringify({ email: 'signup@test.com', password: 'test_password' }),
-    );
+    )
 
-    expect(res.status).toBe(201);
-    const body = await res.json();
-    expect(body).toEqual({});
-  });
+    expect(res.status).toBe(201)
+    const body = await res.json()
+    expect(body).toEqual({})
+  })
 
   describe('準正常系', async () => {
     const testCases: Array<{
-      name: string;
-      input: string | { email: string; password: string };
-      status: number;
+      name: string
+      input: string | { email: string; password: string }
+      status: number
     }> = [
       {
         name: '不正なメールアドレス',
@@ -49,25 +49,25 @@ describe('POST /api/account', () => {
         input: { email: 'test@test.com', password: 'abc' },
         status: 422,
       },
-    ];
+    ]
 
     testCases.forEach((testCase) => {
       it(testCase.name, async () => {
-        const res = await requestShort(JSON.stringify(testCase.input));
-        expect(res.status).toBe(testCase.status);
-      });
-    });
+        const res = await requestShort(JSON.stringify(testCase.input))
+        expect(res.status).toBe(testCase.status)
+      })
+    })
 
     it('既に存在するメールアドレスの場合', async () => {
-      const email = 'test@example.com';
+      const email = 'test@example.com'
 
       // 1回目の登録
-      const res1 = await requestShort(JSON.stringify({ email, password: 'test_password' }));
-      expect(res1.status).toBe(201);
+      const res1 = await requestShort(JSON.stringify({ email, password: 'test_password' }))
+      expect(res1.status).toBe(201)
 
       // 2回目の登録
-      const res2 = await requestShort(JSON.stringify({ email, password: 'test_password' }));
-      expect(res2.status).toBe(409);
-    });
-  });
-});
+      const res2 = await requestShort(JSON.stringify({ email, password: 'test_password' }))
+      expect(res2.status).toBe(409)
+    })
+  })
+})
