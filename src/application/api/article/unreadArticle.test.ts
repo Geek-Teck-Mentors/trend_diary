@@ -106,6 +106,31 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       })
       expect(afterCount).toBe(0)
     })
+
+    it("既読履歴がなくてもOK", async () => {
+      // 既読履歴を削除
+      await db.readHistory.deleteMany({
+        where: {
+          userId: testUserId,
+          articleId: testArticleId,
+        },
+      })
+
+      const response = await requestDeleteReadHistory(testArticleId.toString(), `sid=${sessionId}`)
+
+      expect(response.status).toBe(200)
+      const json = (await response.json()) as { message: string }
+      expect(json.message).toBe('記事を未読にしました')
+
+      // DBから実際に削除されていることを確認
+      const afterCount = await db.readHistory.count({
+        where: {
+          userId: testUserId,
+          articleId: testArticleId,
+        },
+      })
+      expect(afterCount).toBe(0)
+    })
   })
 
   describe('準正常系', () => {
@@ -114,11 +139,11 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
       expect(response.status).toBe(422)
     })
-    it('既読履歴が存在しない場合はエラー', async () => {
+
+    it('記事が存在しない場合はエラー', async () => {
       // 既読履歴を事前に削除
-      await db.readHistory.deleteMany({
+      await db.article.deleteMany({
         where: {
-          userId: testUserId,
           articleId: testArticleId,
         },
       })

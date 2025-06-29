@@ -1,7 +1,7 @@
-import { ServerError } from '@/common/errors'
+import { NotFoundError, ServerError } from '@/common/errors'
 import { CursorPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
-import { AsyncResult } from '@/common/types/utility'
+import { AsyncResult, isError, isNull, isSuccess, resultError } from '@/common/types/utility'
 import Article from '@/domain/article/model/article'
 import ReadHistory from '@/domain/article/model/readHistory'
 import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
@@ -41,6 +41,14 @@ export default class ArticleService {
   }
 
   async deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error> {
-    return this.articleCommandService.deleteAllReadHistory(userId, articleId)
+    // 存在確認
+    const res = await this.articleQueryService.findArticleById(articleId)
+    if (isError(res)) return res
+
+    if (isNull(res.data)) {
+      return resultError(new NotFoundError(`Article with ID ${articleId} not found`))
+    }
+
+    return this.articleCommandService.deleteAllReadHistory(userId, res.data.articleId)
   }
 }
