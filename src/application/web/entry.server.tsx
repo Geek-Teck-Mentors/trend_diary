@@ -25,6 +25,7 @@ export default async function handleRequest(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   loadContext: AppLoadContext,
 ) {
+  let statusCode = responseStatusCode
   const body = await renderToReadableStream(
     <RemixServer context={remixContext} url={request.url} />,
     {
@@ -33,7 +34,7 @@ export default async function handleRequest(
         // Log streaming rendering errors from inside the shell
         // biome-ignore lint/suspicious/noConsole: Remixのエラーを一応出す
         console.error(error)
-        responseStatusCode = 500
+        statusCode = 500
       },
     },
   )
@@ -41,7 +42,7 @@ export default async function handleRequest(
   responseHeaders.set('Content-Type', 'text/html')
   return new Response(body, {
     headers: responseHeaders,
-    status: responseStatusCode,
+    status: statusCode,
   })
 }
 
