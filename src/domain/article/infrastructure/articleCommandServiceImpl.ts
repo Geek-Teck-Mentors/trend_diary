@@ -1,8 +1,8 @@
-import { ArticleCommandService } from '@/domain/article/repository/articleCommandService';
-import ReadHistory from '@/domain/article/model/readHistory';
-import { AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
-import { ServerError, getErrorMessage } from '@/common/errors';
-import { RdbClient } from '@/infrastructure/rdb';
+import { getErrorMessage, ServerError } from '@/common/errors'
+import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
+import ReadHistory from '@/domain/article/model/readHistory'
+import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
+import { RdbClient } from '@/infrastructure/rdb'
 
 export default class ArticleCommandServiceImpl implements ArticleCommandService {
   constructor(private readonly db: RdbClient) {}
@@ -19,7 +19,7 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
           articleId,
           readAt,
         },
-      });
+      })
 
       const readHistory = new ReadHistory(
         createdReadHistory.readHistoryId,
@@ -27,11 +27,11 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
         createdReadHistory.articleId,
         createdReadHistory.readAt,
         createdReadHistory.createdAt,
-      );
+      )
 
-      return resultSuccess(readHistory);
+      return resultSuccess(readHistory)
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)));
+      return resultError(new ServerError(getErrorMessage(error)))
     }
   }
 
@@ -42,11 +42,11 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
           userId,
           articleId,
         },
-      });
+      })
 
-      return resultSuccess(undefined);
+      return resultSuccess(undefined)
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)));
+      return resultError(new ServerError(getErrorMessage(error)))
     }
   }
 }
