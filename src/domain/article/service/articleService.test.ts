@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { mockDeep } from 'vitest-mock-extended'
-import { ServerError } from '@/common/errors'
+import { NotFoundError, ServerError } from '@/common/errors'
 import { CursorPaginationResult } from '@/common/pagination'
 import { isError, isSuccess, resultError, resultSuccess } from '@/common/types/utility'
 import Article from '@/domain/article/model/article'
@@ -262,6 +262,9 @@ describe('ArticleService', () => {
       const articleId = 200n
       const readAt = new Date('2024-01-01T10:00:00Z')
 
+      // 記事存在確認のモック
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+
       const mockReadHistory = new ReadHistory(1n, userId, articleId, readAt, new Date())
       mockArticleCommandService.createReadHistory.mockResolvedValue(resultSuccess(mockReadHistory))
 
@@ -274,6 +277,7 @@ describe('ArticleService', () => {
         expect(result.data.readAt).toBe(readAt)
       }
 
+      expect(mockArticleQueryService.findArticleById).toHaveBeenCalledWith(articleId)
       expect(mockArticleCommandService.createReadHistory).toHaveBeenCalledWith(
         userId,
         articleId,
@@ -286,6 +290,9 @@ describe('ArticleService', () => {
       const articleId = 200n
       const readAt = new Date('2024-01-01T10:00:00Z')
 
+      // 記事存在確認のモック
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+
       const dbError = new ServerError('Database error')
       mockArticleCommandService.createReadHistory.mockResolvedValue(resultError(dbError))
 
@@ -295,6 +302,26 @@ describe('ArticleService', () => {
       if (isError(result)) {
         expect(result.error).toBe(dbError)
       }
+    })
+
+    it('存在しない記事でNotFoundErrorを返すこと', async () => {
+      const userId = 100n
+      const articleId = 999n
+      const readAt = new Date('2024-01-01T10:00:00Z')
+
+      // 記事が存在しない場合のモック
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(null))
+
+      const result = await service.createReadHistory(userId, articleId, readAt)
+
+      expect(isError(result)).toBe(true)
+      if (isError(result)) {
+        expect(result.error).toBeInstanceOf(NotFoundError)
+        expect(result.error.message).toBe('Article with ID 999 not found')
+      }
+
+      expect(mockArticleQueryService.findArticleById).toHaveBeenCalledWith(articleId)
+      expect(mockArticleCommandService.createReadHistory).not.toHaveBeenCalled()
     })
   })
 

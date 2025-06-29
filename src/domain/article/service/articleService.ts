@@ -37,6 +37,14 @@ export default class ArticleService {
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
+    // 存在確認
+    const res = await this.articleQueryService.findArticleById(articleId)
+    if (isError(res)) return res
+
+    if (isNull(res.data)) {
+      return resultError(new NotFoundError(`Article with ID ${articleId} not found`))
+    }
+
     return this.articleCommandService.createReadHistory(userId, articleId, readAt)
   }
 
