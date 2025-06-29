@@ -1,4 +1,4 @@
-import BaseModel from '@/common/model/baseModel';
+import BaseModel from '@/common/model/baseModel'
 
 export default class User extends BaseModel {
   constructor(
@@ -9,6 +9,6 @@ export default class User extends BaseModel {
     updatedAt: Date = new Date(),
     deletedAt?: Date,
   ) {
-    super(createdAt, updatedAt, deletedAt);
+    super(createdAt, updatedAt, deletedAt)
   }
 }

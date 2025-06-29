@@ -4,7 +4,7 @@
     "source.fixAll.biome": "always"
   },
   // 参考: https://zenn.dev/prog_hallelujah/articles/b57ddf2c6763ce
-  "github.copilot.chat.commitMessageGeneration.instructions":[
+  "github.copilot.chat.commitMessageGeneration.instructions": [
     {
       "text": "Use conventional commit message format."
     },
@@ -26,26 +26,19 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "cSpell.words": [
-    "qiita",
-    "Supabase",
-    "Timestamptz",
-    "zenn"
-  ],
-  "[markdown]":  {
-      "editor.wordWrap": "on",
-      "editor.quickSuggestions": {
-          "comments": "on",
-          "strings": "on",
-          "other": "on"
-      },
-      "editor.snippetSuggestions": "top",
-      "editor.defaultFormatter": "biomejs.biome"
+  "cSpell.words": ["qiita", "Supabase", "Timestamptz", "zenn"],
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "on",
+      "strings": "on",
+      "other": "on"
+    },
+    "editor.snippetSuggestions": "top",
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "deno.enable": true,
-  "deno.enablePaths": [
-    "supabase"
-  ],
+  "deno.enablePaths": ["supabase"],
   "deno.lint": true,
   "deno.unstable": [
     "bare-node-builtins",

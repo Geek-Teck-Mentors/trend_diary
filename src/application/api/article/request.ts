@@ -1,15 +1,15 @@
-import { ArticleQueryParams } from '@/domain/article';
-import { ApiArticleQueryParams } from '@/domain/article/schema/articleQuerySchema';
+import { ArticleQueryParams } from '@/domain/article'
+import { ApiArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 
 // eslint-disable-next-line import/prefer-default-export
 export function convertApiArticleQueryParams(params: ApiArticleQueryParams): ArticleQueryParams {
-  let readStatus: boolean | undefined;
+  let readStatus: boolean | undefined
   if (params.read_status === '1') {
-    readStatus = true;
+    readStatus = true
   } else if (params.read_status === '0') {
-    readStatus = false;
+    readStatus = false
   } else {
-    readStatus = undefined;
+    readStatus = undefined
   }
 
   return {
@@ -22,5 +22,5 @@ export function convertApiArticleQueryParams(params: ApiArticleQueryParams): Art
     from: params.from,
     to: params.to,
     readStatus,
-  };
+  }
 }

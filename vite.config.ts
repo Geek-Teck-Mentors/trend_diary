@@ -1,15 +1,15 @@
 /// <reference types="vitest" />
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { defaultOptions } from '@hono/vite-dev-server';
-import adapter from '@hono/vite-dev-server/cloudflare';
+import { defaultOptions } from '@hono/vite-dev-server'
+import adapter from '@hono/vite-dev-server/cloudflare'
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vite'
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { vitePlugin as remix } from '@remix-run/dev';
-import tailwindcss from '@tailwindcss/vite';
-import serverAdapter from 'hono-remix-adapter/vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { vitePlugin as remix } from '@remix-run/dev'
+import tailwindcss from '@tailwindcss/vite'
+import serverAdapter from 'hono-remix-adapter/vite'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
   ssr: {
@@ -36,4 +36,4 @@ export default defineConfig({
   test: {
     globals: true,
   },
-});
+})

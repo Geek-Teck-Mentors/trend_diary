@@ -1,13 +1,13 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import { coverageReporter } from './config';
+import { defineConfig } from 'vite'
+import tsconfigPaths from 'vite-tsconfig-paths'
+import { coverageReporter } from './config'
 
-const testInclude = ['src/application/web/**/*.test.ts'];
+const testInclude = ['src/application/web/**/*.test.ts']
 
-const coverageInclude = ['src/application/web/**/*', 'src/application/web/components/**/*'];
-const exclude = ['src/application/web/components/ui/**/*'];
+const coverageInclude = ['src/application/web/**/*', 'src/application/web/components/**/*']
+const exclude = ['src/application/web/components/ui/**/*']
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
@@ -23,4 +23,4 @@ export default defineConfig({
       exclude,
     },
   },
-});
+})

@@ -1,10 +1,10 @@
-import { Prisma, Account as PrismaAccount } from '@prisma/client';
-import { Nullable, AsyncResult, resultSuccess, resultError } from '@/common/types/utility';
-import { RdbClient } from '@/infrastructure/rdb';
-import { AlreadyExistsError } from '@/common/errors';
+import { Prisma, Account as PrismaAccount } from '@prisma/client'
+import { Nullable, AsyncResult, resultSuccess, resultError } from '@/common/types/utility'
+import { RdbClient } from '@/infrastructure/rdb'
+import { AlreadyExistsError } from '@/common/errors'
 
-import { AccountRepository } from '../repository/accountRepository';
-import Account from '../model/account';
+import { AccountRepository } from '../repository/accountRepository'
+import Account from '../model/account'
 
 export default class AccountRepositoryImpl implements AccountRepository {
   constructor(private db: RdbClient) {}
@@ -16,7 +16,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           email,
           password: hashedPassword,
         },
-      });
+      })
 
       return resultSuccess(
         new Account(
@@ -28,14 +28,14 @@ export default class AccountRepositoryImpl implements AccountRepository {
           account.updatedAt,
           account.deletedAt ?? undefined,
         ),
-      );
+      )
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          return resultError(new AlreadyExistsError(error.message));
+          return resultError(new AlreadyExistsError(error.message))
         }
       }
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -45,9 +45,9 @@ export default class AccountRepositoryImpl implements AccountRepository {
         where: {
           accountId,
         },
-      });
+      })
 
-      if (!account) return resultSuccess(null);
+      if (!account) return resultSuccess(null)
 
       return resultSuccess(
         new Account(
@@ -59,9 +59,9 @@ export default class AccountRepositoryImpl implements AccountRepository {
           account.updatedAt,
           account.deletedAt ?? undefined,
         ),
-      );
+      )
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -71,9 +71,9 @@ export default class AccountRepositoryImpl implements AccountRepository {
         where: {
           email,
         },
-      });
+      })
 
-      if (!account) return resultSuccess(null);
+      if (!account) return resultSuccess(null)
 
       return resultSuccess(
         new Account(
@@ -85,9 +85,9 @@ export default class AccountRepositoryImpl implements AccountRepository {
           account.updatedAt,
           account.deletedAt ?? undefined,
         ),
-      );
+      )
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -105,12 +105,12 @@ export default class AccountRepositoryImpl implements AccountRepository {
         INNER JOIN sessions ON accounts.account_id = sessions.account_id
       WHERE
         accounts.deleted_at IS NULL
-        AND sessions.session_id = ${sessionId}`;
+        AND sessions.session_id = ${sessionId}`
 
-      if (result.length === 0) return resultSuccess(null);
+      if (result.length === 0) return resultSuccess(null)
 
-      const account = result.at(0);
-      if (!account) return resultSuccess(null);
+      const account = result.at(0)
+      if (!account) return resultSuccess(null)
 
       return resultSuccess(
         new Account(
@@ -121,9 +121,9 @@ export default class AccountRepositoryImpl implements AccountRepository {
           account.createdAt,
           account.updatedAt,
         ),
-      );
+      )
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -139,7 +139,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
           lastLogin: account.lastLogin,
           updatedAt: new Date(),
         },
-      });
+      })
 
       return resultSuccess(
         new Account(
@@ -151,9 +151,9 @@ export default class AccountRepositoryImpl implements AccountRepository {
           updatedAccount.updatedAt,
           updatedAccount.deletedAt ?? undefined,
         ),
-      );
+      )
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -166,7 +166,7 @@ export default class AccountRepositoryImpl implements AccountRepository {
         data: {
           deletedAt: new Date(),
         },
-      });
+      })
 
       return resultSuccess(
         new Account(
@@ -178,9 +178,9 @@ export default class AccountRepositoryImpl implements AccountRepository {
           updatedAccount.updatedAt,
           updatedAccount.deletedAt ?? undefined,
         ),
-      );
+      )
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -191,11 +191,11 @@ export default class AccountRepositoryImpl implements AccountRepository {
           accountId,
           expiresAt,
         },
-      });
+      })
 
-      return resultSuccess(session.sessionId);
+      return resultSuccess(session.sessionId)
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -205,11 +205,11 @@ export default class AccountRepositoryImpl implements AccountRepository {
         where: {
           sessionId,
         },
-      });
+      })
 
-      return resultSuccess(undefined);
+      return resultSuccess(undefined)
     } catch (error) {
-      return resultError(error instanceof Error ? error : new Error(String(error)));
+      return resultError(error instanceof Error ? error : new Error(String(error)))
     }
   }
 }

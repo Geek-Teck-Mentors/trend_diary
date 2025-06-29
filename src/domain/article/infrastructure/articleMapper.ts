@@ -1,5 +1,5 @@
-import { Article as PrismaArticle } from '@prisma/client';
-import Article from '@/domain/article/model/article';
+import { Article as PrismaArticle } from '@prisma/client'
+import Article from '@/domain/article/model/article'
 
 export default function fromPrismaToArticle(prismaArticle: PrismaArticle): Article {
   return new Article(
@@ -10,5 +10,5 @@ export default function fromPrismaToArticle(prismaArticle: PrismaArticle): Artic
     prismaArticle.description,
     prismaArticle.url,
     prismaArticle.createdAt,
-  );
+  )
 }

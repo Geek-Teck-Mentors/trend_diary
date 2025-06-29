@@ -1,35 +1,35 @@
-import { ChatNotifier, RequestInfo } from '@/common/adapters/notification';
+import { ChatNotifier, RequestInfo } from '@/common/adapters/notification'
 
 type DiscordEmbed = {
-  title: string;
-  color: number;
+  title: string
+  color: number
   fields: Array<{
-    name: string;
-    value: string;
-    inline: boolean;
-  }>;
-  timestamp: string;
-};
+    name: string
+    value: string
+    inline: boolean
+  }>
+  timestamp: string
+}
 
 type DiscordWebhookPayload = {
-  content: string | null;
-  embeds: DiscordEmbed[];
-};
+  content: string | null
+  embeds: DiscordEmbed[]
+}
 
 class DiscordNotifier implements ChatNotifier {
-  private readonly webhookUrl: string;
+  private readonly webhookUrl: string
 
-  private readonly maxFieldLength = 1018; // Discord field limit (1024) minus code block chars (6)
+  private readonly maxFieldLength = 1018 // Discord field limit (1024) minus code block chars (6)
 
   constructor(webhookUrl: string) {
-    this.webhookUrl = webhookUrl;
+    this.webhookUrl = webhookUrl
   }
 
   async error(error: Error, requestInfo: RequestInfo): Promise<void> {
-    if (this.webhookUrl === '') return;
+    if (this.webhookUrl === '') return
 
     try {
-      const payload = this.createErrorPayload(error, requestInfo);
+      const payload = this.createErrorPayload(error, requestInfo)
 
       await fetch(this.webhookUrl, {
         method: 'POST',
@@ -37,16 +37,16 @@ class DiscordNotifier implements ChatNotifier {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-      });
+      })
     } catch (notificationError) {
       // Discord通知の失敗は元のエラー処理に影響させない
       // biome-ignore lint/suspicious/noConsole: Discord通知の失敗はログに出力する
-      console.error('Failed to send error notification to Discord', notificationError);
+      console.error('Failed to send error notification to Discord', notificationError)
     }
   }
 
   private createErrorPayload(error: Error, requestInfo: RequestInfo): DiscordWebhookPayload {
-    const stackTrace = this.truncateField(error.stack || 'No stack trace available');
+    const stackTrace = this.truncateField(error.stack || 'No stack trace available')
 
     return {
       content: null,
@@ -74,20 +74,20 @@ class DiscordNotifier implements ChatNotifier {
           timestamp: new Date().toISOString(),
         },
       ],
-    };
+    }
   }
 
   private truncateField(text: string): string {
-    const codeBlockChars = 8; // ```\n + \n```
-    const truncatedSuffix = '...(truncated)';
-    const maxContentLength = this.maxFieldLength - codeBlockChars - truncatedSuffix.length;
+    const codeBlockChars = 8 // ```\n + \n```
+    const truncatedSuffix = '...(truncated)'
+    const maxContentLength = this.maxFieldLength - codeBlockChars - truncatedSuffix.length
 
     if (text.length <= maxContentLength) {
-      return text;
+      return text
     }
 
-    return text.substring(0, maxContentLength) + truncatedSuffix;
+    return text.substring(0, maxContentLength) + truncatedSuffix
   }
 }
 
-export default DiscordNotifier;
+export default DiscordNotifier

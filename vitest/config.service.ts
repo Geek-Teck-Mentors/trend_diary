@@ -1,16 +1,16 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import { coverageReporter, generateIncludes } from './config';
+import { defineConfig } from 'vite'
+import tsconfigPaths from 'vite-tsconfig-paths'
+import { coverageReporter, generateIncludes } from './config'
 
-const { testInclude, coverageInclude } = generateIncludes('src/domain', 'src/common');
+const { testInclude, coverageInclude } = generateIncludes('src/domain', 'src/common')
 
 // リポジトリの詳細実装での単体テストには担保できる品質特性がないため、除外
-const testExclude = ['src/domain/**/infrastructure/*'];
+const testExclude = ['src/domain/**/infrastructure/*']
 
 // カバレッジ対象のファイルパスを生成（.test.tsファイル以外全部）
-const coverageExclude = [...testExclude];
+const coverageExclude = [...testExclude]
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
@@ -31,4 +31,4 @@ export default defineConfig({
       exclude: coverageExclude,
     },
   },
-});
+})

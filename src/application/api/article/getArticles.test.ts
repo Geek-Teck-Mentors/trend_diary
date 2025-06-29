@@ -1,16 +1,16 @@
-import getRdbClient, { RdbClient } from '@/infrastructure/rdb';
-import app from '../../server';
-import TEST_ENV from '@/test/env';
-import { ArticleListResponse } from './response';
+import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
+import app from '../../server'
+import TEST_ENV from '@/test/env'
+import { ArticleListResponse } from './response'
 
 type GetArticlesTestCase = {
-  name: string;
-  query: string;
-  status: number;
-};
+  name: string
+  query: string
+  status: number
+}
 
 describe('GET /api/articles', () => {
-  let db: RdbClient;
+  let db: RdbClient
 
   const testArticles = [
     {
@@ -29,128 +29,128 @@ describe('GET /api/articles', () => {
       url: 'https://zenn.dev/test2',
       createdAt: new Date('2025-05-12'),
     },
-  ];
+  ]
 
   async function cleanUp(): Promise<void> {
-    await db.$queryRaw`TRUNCATE TABLE "articles";`;
+    await db.$queryRaw`TRUNCATE TABLE "articles";`
   }
 
   async function setupTestData(): Promise<void> {
-    await Promise.all(testArticles.map((article) => db.article.create({ data: article })));
+    await Promise.all(testArticles.map((article) => db.article.create({ data: article })))
   }
 
   async function requestGetArticles(query: string = '') {
-    const url = query ? `/api/articles?${query}` : '/api/articles';
-    return app.request(url, { method: 'GET' }, TEST_ENV);
+    const url = query ? `/api/articles?${query}` : '/api/articles'
+    return app.request(url, { method: 'GET' }, TEST_ENV)
   }
 
   beforeAll(() => {
-    db = getRdbClient(TEST_ENV.DATABASE_URL);
-  });
+    db = getRdbClient(TEST_ENV.DATABASE_URL)
+  })
 
   afterAll(async () => {
-    await db.$disconnect();
-  });
+    await db.$disconnect()
+  })
 
   beforeEach(async () => {
-    await setupTestData();
-  });
+    await setupTestData()
+  })
 
   afterEach(async () => {
-    await cleanUp();
-  });
+    await cleanUp()
+  })
 
   describe('正常系', () => {
     it('全件取得', async () => {
-      const res = await requestGetArticles();
+      const res = await requestGetArticles()
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(2);
-      expect(data.data[0].title).toBe('TypeScriptの応用');
-      expect(data.data[1].title).toBe('Reactの基礎');
-      expect(data.hasNext).toBe(false);
-      expect(data.hasPrev).toBe(false);
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(2)
+      expect(data.data[0].title).toBe('TypeScriptの応用')
+      expect(data.data[1].title).toBe('Reactの基礎')
+      expect(data.hasNext).toBe(false)
+      expect(data.hasPrev).toBe(false)
+    })
 
     it('titleで検索', async () => {
-      const res = await requestGetArticles('title=React');
+      const res = await requestGetArticles('title=React')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(1);
-      expect(data.data[0].title).toBe('Reactの基礎');
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(1)
+      expect(data.data[0].title).toBe('Reactの基礎')
+    })
 
     it('authorで検索', async () => {
-      const res = await requestGetArticles('author=山田');
+      const res = await requestGetArticles('author=山田')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(1);
-      expect(data.data[0].author).toBe('山田太郎');
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(1)
+      expect(data.data[0].author).toBe('山田太郎')
+    })
 
     it('mediaで検索', async () => {
-      const res = await requestGetArticles('media=qiita');
+      const res = await requestGetArticles('media=qiita')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(1);
-      expect(data.data[0].media).toBe('qiita');
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(1)
+      expect(data.data[0].media).toBe('qiita')
+    })
 
     it('read_statusパラメータを受け取る', async () => {
-      const res = await requestGetArticles('read_status=1');
+      const res = await requestGetArticles('read_status=1')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(2);
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(2)
+    })
 
     it('複数条件での検索', async () => {
-      const res = await requestGetArticles('media=qiita&author=山田');
+      const res = await requestGetArticles('media=qiita&author=山田')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(1);
-      expect(data.data[0].title).toBe('Reactの基礎');
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(1)
+      expect(data.data[0].title).toBe('Reactの基礎')
+    })
 
     it('fromパラメータで検索', async () => {
-      const res = await requestGetArticles('from=2025-05-12');
+      const res = await requestGetArticles('from=2025-05-12')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(1);
-      expect(data.data[0].title).toBe('TypeScriptの応用');
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(1)
+      expect(data.data[0].title).toBe('TypeScriptの応用')
+    })
 
     it('toパラメータで検索', async () => {
-      const res = await requestGetArticles('to=2025-05-11');
+      const res = await requestGetArticles('to=2025-05-11')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(1);
-      expect(data.data[0].title).toBe('Reactの基礎');
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(1)
+      expect(data.data[0].title).toBe('Reactの基礎')
+    })
 
     it('from/toパラメータの範囲検索', async () => {
-      const res = await requestGetArticles('from=2025-05-11&to=2025-05-12');
+      const res = await requestGetArticles('from=2025-05-11&to=2025-05-12')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(2);
-    });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(2)
+    })
 
     it('from/toパラメータの範囲検索（該当なし）', async () => {
-      const res = await requestGetArticles('from=2025-05-13&to=2025-05-14');
+      const res = await requestGetArticles('from=2025-05-13&to=2025-05-14')
 
-      expect(res.status).toBe(200);
-      const data: ArticleListResponse = await res.json();
-      expect(data.data).toHaveLength(0);
-    });
-  });
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(0)
+    })
+  })
 
   describe('準正常系', () => {
     const testCases: GetArticlesTestCase[] = [
@@ -179,13 +179,13 @@ describe('GET /api/articles', () => {
         query: 'from=2025-05-12&to=2025-05-11',
         status: 422,
       },
-    ];
+    ]
 
     testCases.forEach((testCase) => {
       it(testCase.name, async () => {
-        const res = await requestGetArticles(testCase.query);
-        expect(res.status).toBe(testCase.status);
-      });
-    });
-  });
-});
+        const res = await requestGetArticles(testCase.query)
+        expect(res.status).toBe(testCase.status)
+      })
+    })
+  })
+})

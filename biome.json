@@ -230,7 +230,7 @@
                 "formats": ["CONSTANT_CASE", "camelCase", "snake_case", "PascalCase"]
               },
               {
-                "selector": { "kind": "typeProperty"},
+                "selector": { "kind": "typeProperty" },
                 "formats": ["PascalCase", "camelCase", "CONSTANT_CASE"]
               }
             ]

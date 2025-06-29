@@ -1,7 +1,7 @@
-import React from 'react';
-import type { MetaFunction } from '@remix-run/cloudflare';
+import React from 'react'
+import type { MetaFunction } from '@remix-run/cloudflare'
 
-export const meta: MetaFunction = () => [{ title: 'トレンド記事 | TrendDiary' }];
+export const meta: MetaFunction = () => [{ title: 'トレンド記事 | TrendDiary' }]
 
 export default function TrendIndex() {
   return (
@@ -11,5 +11,5 @@ export default function TrendIndex() {
         <li>Remixトレンド</li>
       </ul>
     </div>
-  );
+  )
 }

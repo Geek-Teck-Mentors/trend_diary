@@ -1,14 +1,14 @@
-import { faker } from '@faker-js/faker';
-import bcrypt from 'bcryptjs';
-import { Account, Session, User } from '@prisma/client';
-import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl';
-import { AlreadyExistsError, NotFoundError, ClientError, ServerError } from '@/common/errors';
+import { faker } from '@faker-js/faker'
+import bcrypt from 'bcryptjs'
+import { Account, Session, User } from '@prisma/client'
+import AccountRepositoryImpl from '@/domain/account/infrastructure/accountRepositoryImpl'
+import { AlreadyExistsError, NotFoundError, ClientError, ServerError } from '@/common/errors'
 
-import AccountService from './accountService';
-import UserRepositoryImpl from '../infrastructure/userRepositoryImpl';
-import db from '@/test/__mocks__/prisma';
-import { Transaction } from '@/infrastructure/rdb';
-import { resultError, resultSuccess } from '@/common/types/utility';
+import AccountService from './accountService'
+import UserRepositoryImpl from '../infrastructure/userRepositoryImpl'
+import db from '@/test/__mocks__/prisma'
+import { Transaction } from '@/infrastructure/rdb'
+import { resultError, resultSuccess } from '@/common/types/utility'
 
 const mockAccount: Account = {
   accountId: BigInt(1),
@@ -18,7 +18,7 @@ const mockAccount: Account = {
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null,
-};
+}
 
 const mockUser: User = {
   userId: BigInt(1),
@@ -27,7 +27,7 @@ const mockUser: User = {
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null,
-};
+}
 
 const mockSession: Session = {
   sessionId: faker.string.uuid(),
@@ -37,20 +37,20 @@ const mockSession: Session = {
   ipAddress: faker.internet.ipv4(),
   expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   createdAt: new Date(),
-};
+}
 
 describe('AccountService', () => {
-  const accountRepo = new AccountRepositoryImpl(db);
-  const userRepo = new UserRepositoryImpl(db);
-  const service = new AccountService(accountRepo, userRepo);
-  const transaction = new Transaction(db);
+  const accountRepo = new AccountRepositoryImpl(db)
+  const userRepo = new UserRepositoryImpl(db)
+  const service = new AccountService(accountRepo, userRepo)
+  const transaction = new Transaction(db)
 
   describe('signup', () => {
     it('正常系', async () => {
-      const { email } = mockAccount;
-      const plainPassword = 'password';
+      const { email } = mockAccount
+      const plainPassword = 'password'
 
-      db.account.findUnique.mockResolvedValue(null);
+      db.account.findUnique.mockResolvedValue(null)
 
       db.account.create.mockResolvedValue({
         email,
@@ -60,7 +60,7 @@ describe('AccountService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
+      })
       db.user.create.mockResolvedValue({
         userId: BigInt(1),
         accountId: BigInt(1),
@@ -68,11 +68,11 @@ describe('AccountService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
+      })
 
-      const res = await service.signup(transaction, email, plainPassword);
+      const res = await service.signup(transaction, email, plainPassword)
 
-      expect(res).toBeDefined();
+      expect(res).toBeDefined()
       expect(res).toEqual(
         resultSuccess({
           email,
@@ -83,52 +83,52 @@ describe('AccountService', () => {
           updatedAtValue: expect.any(Date),
           deletedAt: undefined,
         }),
-      );
-    });
+      )
+    })
 
     it('準正常系: 既に存在するメールアドレス', async () => {
-      const { email } = mockAccount;
-      const { password } = mockAccount;
+      const { email } = mockAccount
+      const { password } = mockAccount
 
-      db.account.findUnique.mockResolvedValue(mockAccount);
+      db.account.findUnique.mockResolvedValue(mockAccount)
 
       expect(await service.signup(transaction, email, password)).toEqual(
         resultError(new AlreadyExistsError('Account already exists')),
-      );
-    });
+      )
+    })
 
     it('異常系: 意図しないDBエラー', async () => {
-      const { email } = mockAccount;
-      const { password } = mockAccount;
+      const { email } = mockAccount
+      const { password } = mockAccount
 
-      db.account.findUnique.mockRejectedValue(new Error('Database error'));
+      db.account.findUnique.mockRejectedValue(new Error('Database error'))
 
       expect(await service.signup(transaction, email, password)).toEqual(
         resultError(new ServerError('Database error')),
-      );
-    });
-  });
+      )
+    })
+  })
 
   describe('login', () => {
-    const { email } = mockAccount;
-    const { password } = mockAccount;
-    const wrongPassword = 'wrong_password';
+    const { email } = mockAccount
+    const { password } = mockAccount
+    const wrongPassword = 'wrong_password'
 
     it('正常系', async () => {
       db.account.findUnique.mockResolvedValue({
         ...mockAccount,
         password: await bcrypt.hash(password, 10),
-      });
-      db.user.findFirst.mockResolvedValue(mockUser);
+      })
+      db.user.findFirst.mockResolvedValue(mockUser)
       db.account.update.mockResolvedValue({
         ...mockAccount,
         lastLogin: new Date(),
         updatedAt: new Date(),
-      });
-      db.session.create.mockResolvedValue(mockSession);
+      })
+      db.session.create.mockResolvedValue(mockSession)
 
-      const result = await service.login(email, password);
-      expect(result).toBeDefined();
+      const result = await service.login(email, password)
+      expect(result).toBeDefined()
       expect(result).toEqual(
         resultSuccess({
           user: {
@@ -140,18 +140,18 @@ describe('AccountService', () => {
           sessionId: mockSession.sessionId,
           expiredAt: expect.any(Date),
         }),
-      );
-    });
+      )
+    })
 
     describe('準正常系', () => {
       it('存在しないメールアドレス', async () => {
-        db.account.findUnique.mockResolvedValue(null);
+        db.account.findUnique.mockResolvedValue(null)
 
-        const nonExistentEmail = 'non_existent_test@example.com';
+        const nonExistentEmail = 'non_existent_test@example.com'
         expect(await service.login(nonExistentEmail, password)).toEqual(
           resultError(new NotFoundError('Account not found')),
-        );
-      });
+        )
+      })
 
       it('パスワードが間違っている', async () => {
         db.account.findUnique.mockResolvedValue({
@@ -162,32 +162,30 @@ describe('AccountService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           deletedAt: null,
-        });
+        })
 
         expect(await service.login(email, wrongPassword)).toEqual(
           resultError(new ClientError('Invalid password')),
-        );
-      });
-    });
+        )
+      })
+    })
 
     it('異常系: 意図しないDBエラー', async () => {
-      db.account.findUnique.mockRejectedValue(new Error('Database error'));
+      db.account.findUnique.mockRejectedValue(new Error('Database error'))
 
-      expect(await service.login(email, password)).toEqual(
-        resultError(new Error('Database error')),
-      );
-    });
-  });
+      expect(await service.login(email, password)).toEqual(resultError(new Error('Database error')))
+    })
+  })
 
   describe('getLoginUser', () => {
-    const { sessionId } = mockSession;
+    const { sessionId } = mockSession
 
     it('正常系', async () => {
-      db.$queryRaw.mockResolvedValue([mockUser]);
+      db.$queryRaw.mockResolvedValue([mockUser])
 
-      const result = await service.getLoginUser(sessionId);
+      const result = await service.getLoginUser(sessionId)
 
-      expect(result).toBeDefined();
+      expect(result).toBeDefined()
       expect(result).toEqual(
         resultSuccess({
           userId: mockUser.userId,
@@ -197,52 +195,52 @@ describe('AccountService', () => {
           updatedAtValue: expect.any(Date),
           deletedAtValue: undefined,
         }),
-      );
-    });
+      )
+    })
 
     describe('準正常系', () => {
       it('存在しないセッションID', async () => {
-        db.$queryRaw.mockResolvedValue([]);
+        db.$queryRaw.mockResolvedValue([])
 
         expect(await service.getLoginUser(sessionId)).toEqual(
           resultError(new NotFoundError('User not found')),
-        );
-      });
-    });
+        )
+      })
+    })
 
     it('異常系: 意図しないDBエラー', async () => {
-      db.$queryRaw.mockRejectedValue(new Error('Database error'));
+      db.$queryRaw.mockRejectedValue(new Error('Database error'))
 
       expect(await service.getLoginUser(sessionId)).toEqual(
         resultError(new Error('Database error')),
-      );
-    });
-  });
+      )
+    })
+  })
 
   describe('logout', () => {
-    const { sessionId } = mockSession;
+    const { sessionId } = mockSession
 
     it('正常系', async () => {
-      db.$queryRaw.mockResolvedValue([mockAccount]);
-      db.session.delete.mockResolvedValue(mockSession);
+      db.$queryRaw.mockResolvedValue([mockAccount])
+      db.session.delete.mockResolvedValue(mockSession)
 
-      await expect(service.logout(sessionId)).resolves.not.toThrow();
-    });
+      await expect(service.logout(sessionId)).resolves.not.toThrow()
+    })
 
     describe('準正常系', () => {
       it('存在しないセッションID', async () => {
-        db.$queryRaw.mockResolvedValue([]);
+        db.$queryRaw.mockResolvedValue([])
 
         expect(await service.logout(sessionId)).toEqual(
           resultError(new NotFoundError('Account not found')),
-        );
-      });
-    });
+        )
+      })
+    })
 
     it('異常系: 意図しないDBエラー', async () => {
-      db.$queryRaw.mockRejectedValue(new Error('Database error'));
+      db.$queryRaw.mockRejectedValue(new Error('Database error'))
 
-      expect(await service.logout(sessionId)).toEqual(resultError(new Error('Database error')));
-    });
-  });
-});
+      expect(await service.logout(sessionId)).toEqual(resultError(new Error('Database error')))
+    })
+  })
+})

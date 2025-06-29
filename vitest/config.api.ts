@@ -1,13 +1,13 @@
 /// <reference types="vitest" />
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import { coverageReporter, generateIncludes } from './config';
+import { defineConfig } from 'vite'
+import tsconfigPaths from 'vite-tsconfig-paths'
+import { coverageReporter, generateIncludes } from './config'
 
 // ci環境ではDATABASE_URLが設定されているため
-const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test';
+const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test'
 
-const { testInclude, coverageInclude } = generateIncludes('src/application/api');
+const { testInclude, coverageInclude } = generateIncludes('src/application/api')
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
@@ -37,4 +37,4 @@ export default defineConfig({
       include: coverageInclude,
     },
   },
-});
+})

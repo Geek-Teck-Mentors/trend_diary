@@ -1,13 +1,13 @@
-import { faker } from '@faker-js/faker';
-import app from '../../server';
-import TEST_ENV from '@/test/env';
-import accountTestHelper from '@/test/helper/accountTestHelper';
+import { faker } from '@faker-js/faker'
+import app from '../../server'
+import TEST_ENV from '@/test/env'
+import accountTestHelper from '@/test/helper/accountTestHelper'
 
 describe('GET /api/account/me', () => {
-  let setCookie: string[];
+  let setCookie: string[]
 
-  const TEST_EMAIL = faker.internet.email();
-  const TEST_PASSWORD = 'test_password';
+  const TEST_EMAIL = faker.internet.email()
+  const TEST_PASSWORD = 'test_password'
 
   async function requestLoginUser() {
     return app.request(
@@ -20,24 +20,24 @@ describe('GET /api/account/me', () => {
         },
       },
       TEST_ENV,
-    );
+    )
   }
 
   beforeAll(() => {
     // accountTestHelperを使用
-  });
+  })
 
   afterAll(async () => {
-    await accountTestHelper.cleanUp();
-    await accountTestHelper.disconnect();
-  });
+    await accountTestHelper.cleanUp()
+    await accountTestHelper.disconnect()
+  })
 
   beforeEach(async () => {
-    await accountTestHelper.cleanUp();
+    await accountTestHelper.cleanUp()
 
     // ユーザーを作成してログインする
-    await accountTestHelper.createTestAccount(TEST_EMAIL, TEST_PASSWORD);
-    const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD });
+    await accountTestHelper.createTestAccount(TEST_EMAIL, TEST_PASSWORD)
+    const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(
       '/api/account/login',
@@ -49,25 +49,25 @@ describe('GET /api/account/me', () => {
         body,
       },
       TEST_ENV,
-    );
-    setCookie = res.headers.getSetCookie();
-  });
+    )
+    setCookie = res.headers.getSetCookie()
+  })
 
   describe('正常系', () => {
     it('ログインユーザーの情報を取得できる', async () => {
-      const res = await requestLoginUser();
+      const res = await requestLoginUser()
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(200)
 
       // Hono公式のテスト方法に準拠して、レスポンスデータ構造を検証
-      const data = (await res.json()) as { user: { userId: string; displayName?: string } };
+      const data = (await res.json()) as { user: { userId: string; displayName?: string } }
 
       // 実際のプロパティ構造に合わせてテスト
-      expect(typeof data).toBe('object');
-      expect(data).not.toBeNull();
-      expect(data).toHaveProperty('user');
-      expect(data.user).toHaveProperty('userId');
-      expect(data.user).toHaveProperty('displayName');
-    });
-  });
-});
+      expect(typeof data).toBe('object')
+      expect(data).not.toBeNull()
+      expect(data).toHaveProperty('user')
+      expect(data.user).toHaveProperty('userId')
+      expect(data.user).toHaveProperty('displayName')
+    })
+  })
+})
