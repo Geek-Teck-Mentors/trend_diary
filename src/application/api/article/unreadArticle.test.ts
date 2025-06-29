@@ -107,7 +107,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       expect(afterCount).toBe(0)
     })
 
-    it("既読履歴がなくてもOK", async () => {
+    it('既読履歴がなくてもOK', async () => {
       // 既読履歴を削除
       await db.readHistory.deleteMany({
         where: {

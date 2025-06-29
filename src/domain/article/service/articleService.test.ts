@@ -303,18 +303,23 @@ describe('ArticleService', () => {
       const userId = 100n
       const articleId = 200n
 
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
       mockArticleCommandService.deleteAllReadHistory.mockResolvedValue(resultSuccess(undefined))
 
       const result = await service.deleteAllReadHistory(userId, articleId)
 
       expect(isSuccess(result)).toBe(true)
-      expect(mockArticleCommandService.deleteAllReadHistory).toHaveBeenCalledWith(userId, articleId)
+      expect(mockArticleCommandService.deleteAllReadHistory).toHaveBeenCalledWith(
+        userId,
+        mockArticle.articleId,
+      )
     })
 
     it('データベースエラー時にServerErrorを返すこと', async () => {
       const userId = 100n
       const articleId = 200n
 
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
       const dbError = new ServerError('Database error')
       mockArticleCommandService.deleteAllReadHistory.mockResolvedValue(resultError(dbError))
 

@@ -8,7 +8,5 @@ export interface ArticleQueryService {
   searchArticles(
     params: ArticleQueryParams,
   ): AsyncResult<CursorPaginationResult<Article>, ServerError>
-  findArticleById(
-    articleId: bigint,
-  ): AsyncResult<Nullable<Article> , ServerError>
+  findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError>
 }
