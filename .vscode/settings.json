@@ -1,7 +1,7 @@
 {
   "editor.tabSize": 2,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "always"
+    "source.fixAll.biome": "always"
   },
   // 参考: https://zenn.dev/prog_hallelujah/articles/b57ddf2c6763ce
   "github.copilot.chat.commitMessageGeneration.instructions":[
@@ -20,11 +20,11 @@
   ],
   "[json]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[yaml]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "cSpell.words": [
     "qiita",
@@ -40,7 +40,7 @@
           "other": "on"
       },
       "editor.snippetSuggestions": "top",
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "editor.defaultFormatter": "biomejs.biome"
   },
   "deno.enable": true,
   "deno.enablePaths": [
@@ -61,5 +61,5 @@
     "fs",
     "http",
     "net"
-  ],
+  ]
 }
