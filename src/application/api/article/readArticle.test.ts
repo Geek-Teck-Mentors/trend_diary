@@ -104,7 +104,7 @@ describe('POST /api/articles/:article_id/read', () => {
     it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
       const response = await requestCreateReadHistory(
         'invalid-id',
-        { readAt: '2024-01-01T10:00:00.000Z' },
+        { read_at: '2024-01-01T10:00:00.000Z' },
         `sid=${sessionId}`,
       )
 
