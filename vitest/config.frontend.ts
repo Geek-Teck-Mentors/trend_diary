@@ -1,5 +1,4 @@
 /// <reference types="vitest" />
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { coverageReporter } from './config'

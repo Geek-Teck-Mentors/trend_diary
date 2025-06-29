@@ -1,13 +1,10 @@
 /// <reference types="vitest" />
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { defaultOptions } from '@hono/vite-dev-server'
 import adapter from '@hono/vite-dev-server/cloudflare'
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { vitePlugin as remix } from '@remix-run/dev'
 import tailwindcss from '@tailwindcss/vite'
 import serverAdapter from 'hono-remix-adapter/vite'
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 

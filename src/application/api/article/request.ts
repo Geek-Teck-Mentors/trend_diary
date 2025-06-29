@@ -1,7 +1,6 @@
 import { ArticleQueryParams } from '@/domain/article'
 import { ApiArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 
-// eslint-disable-next-line import/prefer-default-export
 export function convertApiArticleQueryParams(params: ApiArticleQueryParams): ArticleQueryParams {
   let readStatus: boolean | undefined
   if (params.read_status === '1') {
