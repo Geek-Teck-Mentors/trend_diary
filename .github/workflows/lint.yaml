@@ -12,7 +12,7 @@ env:
   NODE_VERSION_FILE: .node-version
 
 jobs:
-  lint:
+  biome:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
