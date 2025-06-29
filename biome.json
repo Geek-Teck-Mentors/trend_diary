@@ -1,7 +1,16 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
-  "vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
-  "files": { "ignoreUnknown": false },
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!**/.vscode/",
+      "!prisma/ERD.md",
+      "!src/application/web/components/ui",
+      "!**/supabase"
+    ]
+  },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
@@ -13,14 +22,7 @@
     "bracketSameLine": false,
     "bracketSpacing": true,
     "expand": "auto",
-    "useEditorconfig": true,
-    "includes": [
-      "**",
-      "!**/.vscode/",
-      "!prisma/ERD.md",
-      "!src/application/web/components/ui",
-      "!**/supabase"
-    ]
+    "useEditorconfig": true
   },
   "linter": {
     "enabled": true,
@@ -284,16 +286,7 @@
         "useGetterReturn": "error",
         "useGuardForIn": "error"
       }
-    },
-    "includes": [
-      "**",
-      "!**/node_modules/",
-      "!**/dist/",
-      "!**/coverage/",
-      "!**/build/",
-      "!src/application/web/components/ui",
-      "!**/supabase"
-    ]
+    }
   },
   "javascript": {
     "globals": [
