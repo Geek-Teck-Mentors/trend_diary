@@ -80,7 +80,7 @@ describe('POST /api/articles/:article_id/read', () => {
 
       const response = await requestCreateReadHistory(
         testArticleId.toString(),
-        { readAt },
+        { read_at: readAt },
         `sid=${sessionId}`,
       )
 
