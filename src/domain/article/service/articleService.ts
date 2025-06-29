@@ -1,7 +1,7 @@
 import { NotFoundError, ServerError } from '@/common/errors'
 import { CursorPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
-import { AsyncResult, isError, isNull, isSuccess, resultError } from '@/common/types/utility'
+import { AsyncResult, isError, isNull, resultError, resultSuccess } from '@/common/types/utility'
 import Article from '@/domain/article/model/article'
 import ReadHistory from '@/domain/article/model/readHistory'
 import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
@@ -37,19 +37,20 @@ export default class ArticleService {
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
-    // 存在確認
-    const res = await this.articleQueryService.findArticleById(articleId)
-    if (isError(res)) return res
-
-    if (isNull(res.data)) {
-      return resultError(new NotFoundError(`Article with ID ${articleId} not found`))
-    }
+    const articleValidation = await this.validateArticleExists(articleId)
+    if (isError(articleValidation)) return articleValidation
 
     return this.articleCommandService.createReadHistory(userId, articleId, readAt)
   }
 
   async deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error> {
-    // 存在確認
+    const articleValidation = await this.validateArticleExists(articleId)
+    if (isError(articleValidation)) return articleValidation
+
+    return this.articleCommandService.deleteAllReadHistory(userId, articleValidation.data.articleId)
+  }
+
+  private async validateArticleExists(articleId: bigint): AsyncResult<Article, Error> {
     const res = await this.articleQueryService.findArticleById(articleId)
     if (isError(res)) return res
 
@@ -57,6 +58,6 @@ export default class ArticleService {
       return resultError(new NotFoundError(`Article with ID ${articleId} not found`))
     }
 
-    return this.articleCommandService.deleteAllReadHistory(userId, res.data.articleId)
+    return resultSuccess(res.data)
   }
 }
