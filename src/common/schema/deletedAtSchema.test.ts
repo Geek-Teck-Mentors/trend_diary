@@ -13,7 +13,7 @@ describe('deletedAtSchema', () => {
     });
 
     it('deletedAtがundefinedの場合に受け入れること', () => {
-      const { deletedAt, ...withoutDeletedAt } = validBase;
+      const { ...withoutDeletedAt } = validBase;
       expect(() => {
         deletedAtSchema.parse(withoutDeletedAt);
       }).not.toThrow();

@@ -14,7 +14,7 @@ export default async function signup(c: Context<Env>) {
   let body;
   try {
     body = await c.req.json();
-  } catch (error) {
+  } catch {
     throw new HTTPException(400, {
       message: 'Invalid JSON',
     });

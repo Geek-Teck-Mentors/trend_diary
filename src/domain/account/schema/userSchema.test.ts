@@ -81,7 +81,7 @@ describe('ユーザースキーマ', () => {
     });
 
     it('displayNameが提供されていない場合も受け入れること', () => {
-      const { displayName, ...userWithoutDisplayName } = validUser;
+      const { ...userWithoutDisplayName } = validUser;
       expect(() => {
         userSchema.parse(userWithoutDisplayName);
       }).not.toThrow();

@@ -40,7 +40,7 @@ export default function useLogin() {
           email: ['ログインに失敗しました。'],
         });
       }
-    } catch (error) {
+    } catch {
       setErrors({
         email: ['ネットワークエラーが発生しました'],
       });

@@ -41,7 +41,7 @@ export default function useSignup() {
           email: ['サインアップに失敗しました'],
         });
       }
-    } catch (error) {
+    } catch {
       setErrors({
         email: ['ネットワークエラーが発生しました'],
       });

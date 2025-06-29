@@ -110,7 +110,7 @@ describe('アカウントスキーマ', () => {
     });
 
     it('lastLoginが提供されていない場合も受け入れること', () => {
-      const { lastLogin, ...accountWithoutLastLogin } = {
+      const { ...accountWithoutLastLogin } = {
         ...validAccount,
         lastLogin: new Date(),
       };
