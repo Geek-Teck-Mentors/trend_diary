@@ -125,11 +125,11 @@ describe('POST /api/articles/:article_id/read', () => {
 
       const response = await requestCreateReadHistory(
         nonExistentArticleId,
-        { readAt },
+        { read_at: readAt },
         `sid=${sessionId}`,
       )
 
-      expect(response.status).toBe(422)
+      expect(response.status).toBe(404)
     })
   })
 })

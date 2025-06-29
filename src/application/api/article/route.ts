@@ -13,6 +13,7 @@ const app = new Hono<Env>()
   .post(
     '/:article_id/read',
     authenticator,
+    zodValidator('param', articleIdParamSchema),
     zodValidator('json', createReadHistoryApiSchema),
     readArticle,
   )
