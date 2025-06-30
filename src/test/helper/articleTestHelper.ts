@@ -19,6 +19,14 @@ class ArticleTestHelper {
     })
   }
 
+  async deleteArticle(articleId: bigint): Promise<void> {
+    await this.rdb.article.deleteMany({
+      where: {
+        articleId,
+      },
+    })
+  }
+
   async createReadHistory(userId: bigint, articleId: bigint, readAt?: Date) {
     return await this.rdb.readHistory.create({
       data: {
@@ -36,6 +44,16 @@ class ArticleTestHelper {
         articleId,
       },
     })
+  }
+
+  async countReadHistories(userId: bigint, articleId: bigint): Promise<number> {
+    const count = await this.rdb.readHistory.count({
+      where: {
+        userId,
+        articleId,
+      },
+    })
+    return count
   }
 
   async cleanUpArticles(): Promise<void> {

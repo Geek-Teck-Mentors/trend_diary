@@ -5,7 +5,6 @@ import accountTestHelper from '@/test/helper/accountTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 describe('DELETE /api/articles/:article_id/unread', () => {
-  let db: RdbClient
   let testUserId: bigint
   let testArticleId: bigint
   let sessionId: string
@@ -29,7 +28,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     )
   }
 
-    async function requestUnreadArticle(articleId: string, sessionId: string) {
+  async function requestUnreadArticle(articleId: string, sessionId: string) {
     const headers: Record<string, string> = {
       Cookie: `sid=${sessionId}`,
     }
@@ -44,10 +43,6 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     )
   }
 
-  beforeAll(() => {
-    db = getRdbClient(TEST_ENV.DATABASE_URL)
-  })
-
   beforeEach(async () => {
     await accountTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
@@ -57,36 +52,22 @@ describe('DELETE /api/articles/:article_id/unread', () => {
   afterAll(async () => {
     await accountTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
-    await db.$disconnect()
   })
 
   describe('正常系', () => {
     it('既読履歴を削除できること', async () => {
       // 事前に既読履歴があることを確認
-      const beforeCount = await db.readHistory.count({
-        where: {
-          userId: testUserId,
-          articleId: testArticleId,
-        },
-      })
+      const beforeCount = await articleTestHelper.countReadHistories(testUserId, testArticleId)
       expect(beforeCount).toBe(1)
 
-      const response = await requestUnreadArticle(
-        testArticleId.toString(),
-        sessionId,
-      )
+      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
 
       expect(response.status).toBe(200)
       const json = (await response.json()) as { message: string }
       expect(json.message).toBe('記事を未読にしました')
 
       // DBから実際に削除されていることを確認
-      const afterCount = await db.readHistory.count({
-        where: {
-          userId: testUserId,
-          articleId: testArticleId,
-        },
-      })
+      const afterCount = await articleTestHelper.countReadHistories(testUserId, testArticleId)
       expect(afterCount).toBe(0)
     })
 
@@ -94,22 +75,14 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       // 既読履歴を削除
       await articleTestHelper.deleteReadHistory(testUserId, testArticleId)
 
-      const response = await requestUnreadArticle(
-        testArticleId.toString(),
-        sessionId,
-      )
+      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
 
       expect(response.status).toBe(200)
       const json = (await response.json()) as { message: string }
       expect(json.message).toBe('記事を未読にしました')
 
       // DBから実際に削除されていることを確認
-      const afterCount = await db.readHistory.count({
-        where: {
-          userId: testUserId,
-          articleId: testArticleId,
-        },
-      })
+      const afterCount = await articleTestHelper.countReadHistories(testUserId, testArticleId)
       expect(afterCount).toBe(0)
     })
   })
@@ -123,16 +96,9 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
     it('記事が存在しない場合はエラー', async () => {
       // 既読履歴を事前に削除
-      await db.article.deleteMany({
-        where: {
-          articleId: testArticleId,
-        },
-      })
+      await articleTestHelper.deleteArticle(testArticleId)
 
-      const response = await requestUnreadArticle(
-        testArticleId.toString(),
-        sessionId,
-      )
+      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
       expect(response.status).toBe(404)
     })
   })

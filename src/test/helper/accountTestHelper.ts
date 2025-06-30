@@ -29,10 +29,7 @@ class AccountTestHelper {
     await this.service.signup(transaction, email, password)
   }
 
-  async login(
-    email: string,
-    password: string,
-  ): Promise<{ userId: bigint; sessionId: string }> {
+  async login(email: string, password: string): Promise<{ userId: bigint; sessionId: string }> {
     const loginResult = await this.service.login(email, password)
     if (isError(loginResult)) {
       throw new Error(`Failed to login: ${loginResult.error.message}`)
