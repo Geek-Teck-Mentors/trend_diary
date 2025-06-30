@@ -6,10 +6,8 @@ export { articleQuerySchema } from './schema/articleQuerySchema'
 export type {
   ArticleIdParam,
   CreateReadHistoryApiInput,
-  ReadHistoryOutput,
 } from './schema/readHistorySchema'
 export {
   articleIdParamSchema,
   createReadHistoryApiSchema,
-  readHistorySchema,
 } from './schema/readHistorySchema'
