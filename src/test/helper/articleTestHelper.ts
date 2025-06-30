@@ -27,6 +27,23 @@ class ArticleTestHelper {
     })
   }
 
+  async findReadHistory(
+    userId: bigint,
+    articleId: bigint,
+  ): Promise<{ readHistoryId: bigint; readAt: Date } | null> {
+    const readHistory = await this.rdb.readHistory.findFirst({
+      where: {
+        userId,
+        articleId,
+      },
+      select: {
+        readHistoryId: true,
+        readAt: true,
+      },
+    })
+    return readHistory
+  }
+
   async createReadHistory(userId: bigint, articleId: bigint, readAt?: Date) {
     return await this.rdb.readHistory.create({
       data: {

@@ -1,5 +1,4 @@
 import app from '@/application/server'
-import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'

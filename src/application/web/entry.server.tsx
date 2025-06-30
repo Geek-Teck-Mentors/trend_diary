@@ -12,7 +12,6 @@ import type {
   LoaderFunctionArgs,
 } from '@remix-run/cloudflare'
 import { isRouteErrorResponse, RemixServer } from '@remix-run/react'
-import React from 'react'
 import { renderToReadableStream } from 'react-dom/server'
 
 export default async function handleRequest(

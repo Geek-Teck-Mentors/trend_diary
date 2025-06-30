@@ -1,5 +1,4 @@
-import { faker } from '@faker-js/faker'
-import { isError, isSuccess } from '@/common/types/utility'
+import { isError } from '@/common/types/utility'
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'

@@ -1,12 +1,10 @@
 import { faker } from '@faker-js/faker'
 import app from '@/application/server'
-import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 describe('POST /api/articles/:article_id/read', () => {
-  let db: RdbClient
   let testUserId: bigint
   let testArticleId: bigint
   let sessionId: string
@@ -42,10 +40,6 @@ describe('POST /api/articles/:article_id/read', () => {
     )
   }
 
-  beforeAll(() => {
-    db = getRdbClient(TEST_ENV.DATABASE_URL)
-  })
-
   beforeEach(async () => {
     await accountTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
@@ -55,7 +49,6 @@ describe('POST /api/articles/:article_id/read', () => {
   afterAll(async () => {
     await accountTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
-    await db.$disconnect()
   })
 
   describe('正常系', () => {
@@ -68,12 +61,7 @@ describe('POST /api/articles/:article_id/read', () => {
       expect(json.message).toBe('記事を既読にしました')
 
       // DBに実際に記録されていることを確認
-      const readHistory = await db.readHistory.findFirst({
-        where: {
-          userId: testUserId,
-          articleId: testArticleId,
-        },
-      })
+      const readHistory = await articleTestHelper.findReadHistory(testUserId, testArticleId)
       expect(readHistory).toBeTruthy()
       expect(readHistory!.readAt).toEqual(new Date(fixedReadAt))
     })

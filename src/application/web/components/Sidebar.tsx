@@ -1,6 +1,5 @@
 import { useNavigate } from '@remix-run/react'
 import { BookOpen, Newspaper, TrendingUp } from 'lucide-react'
-import React from 'react'
 import { toast } from 'sonner'
 import getApiClientForClient from '../infrastructure/api'
 import {
