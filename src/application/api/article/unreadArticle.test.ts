@@ -1,3 +1,4 @@
+import app from '@/application/server'
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
@@ -28,6 +29,21 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     )
   }
 
+    async function requestUnreadArticle(articleId: string, sessionId: string) {
+    const headers: Record<string, string> = {
+      Cookie: `sid=${sessionId}`,
+    }
+
+    return app.request(
+      `/api/articles/${articleId}/unread`,
+      {
+        method: 'DELETE',
+        headers,
+      },
+      TEST_ENV,
+    )
+  }
+
   beforeAll(() => {
     db = getRdbClient(TEST_ENV.DATABASE_URL)
   })
@@ -55,7 +71,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       })
       expect(beforeCount).toBe(1)
 
-      const response = await articleTestHelper.requestUnreadArticle(
+      const response = await requestUnreadArticle(
         testArticleId.toString(),
         sessionId,
       )
@@ -78,7 +94,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       // 既読履歴を削除
       await articleTestHelper.deleteReadHistory(testUserId, testArticleId)
 
-      const response = await articleTestHelper.requestUnreadArticle(
+      const response = await requestUnreadArticle(
         testArticleId.toString(),
         sessionId,
       )
@@ -100,7 +116,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
   describe('準正常系', () => {
     it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
-      const response = await articleTestHelper.requestUnreadArticle('invalid-id', sessionId)
+      const response = await requestUnreadArticle('invalid-id', sessionId)
 
       expect(response.status).toBe(422)
     })
@@ -113,7 +129,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
         },
       })
 
-      const response = await articleTestHelper.requestUnreadArticle(
+      const response = await requestUnreadArticle(
         testArticleId.toString(),
         sessionId,
       )

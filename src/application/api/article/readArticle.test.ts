@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker'
+import app from '@/application/server'
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
@@ -21,6 +23,26 @@ describe('POST /api/articles/:article_id/read', () => {
     testArticleId = article.articleId
   }
 
+
+    async function requestReadArticle(articleId: string, sessionId: string, readAt?: string) {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Cookie: `sid=${sessionId}`,
+    }
+
+    return app.request(
+      `/api/articles/${articleId}/read`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          read_at: readAt || faker.date.recent().toISOString(),
+        }),
+      },
+      TEST_ENV,
+    )
+  }
+
   beforeAll(() => {
     db = getRdbClient(TEST_ENV.DATABASE_URL)
   })
@@ -40,7 +62,7 @@ describe('POST /api/articles/:article_id/read', () => {
   describe('正常系', () => {
     it('既読履歴を作成できること', async () => {
       const fixedReadAt = '2024-01-01T10:00:00.000Z'
-      const response = await articleTestHelper.requestReadArticle(
+      const response = await requestReadArticle(
         testArticleId.toString(),
         sessionId,
         fixedReadAt,
@@ -64,12 +86,12 @@ describe('POST /api/articles/:article_id/read', () => {
 
   describe('準正常系', () => {
     it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
-      const response = await articleTestHelper.requestReadArticle('invalid-id', sessionId)
+      const response = await requestReadArticle('invalid-id', sessionId)
 
       expect(response.status).toBe(422)
     })
     it('無効なreadAtでバリデーションエラーが発生すること', async () => {
-      const response = await articleTestHelper.requestReadArticle(
+      const response = await requestReadArticle(
         testArticleId.toString(),
         sessionId,
         'invalid-date',
@@ -80,7 +102,7 @@ describe('POST /api/articles/:article_id/read', () => {
     it('存在しない記事は既読履歴が作成できない', async () => {
       const nonExistentArticleId = '999999'
 
-      const response = await articleTestHelper.requestReadArticle(nonExistentArticleId, sessionId)
+      const response = await requestReadArticle(nonExistentArticleId, sessionId)
 
       expect(response.status).toBe(404)
     })

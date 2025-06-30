@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker'
-import app from '@/application/server'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
@@ -45,40 +44,6 @@ class ArticleTestHelper {
 
   async cleanUpArticles(): Promise<void> {
     await this.rdb.$queryRaw`TRUNCATE TABLE "articles" CASCADE;`
-  }
-
-  async requestReadArticle(articleId: string, sessionId: string, readAt?: string) {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Cookie: `sid=${sessionId}`,
-    }
-
-    return app.request(
-      `/api/articles/${articleId}/read`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          read_at: readAt || faker.date.recent().toISOString(),
-        }),
-      },
-      TEST_ENV,
-    )
-  }
-
-  async requestUnreadArticle(articleId: string, sessionId: string) {
-    const headers: Record<string, string> = {
-      Cookie: `sid=${sessionId}`,
-    }
-
-    return app.request(
-      `/api/articles/${articleId}/unread`,
-      {
-        method: 'DELETE',
-        headers,
-      },
-      TEST_ENV,
-    )
   }
 
   async disconnect(): Promise<void> {
