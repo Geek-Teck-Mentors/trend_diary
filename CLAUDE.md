@@ -451,6 +451,50 @@ Prismaモデルは`prisma/models/`内のファイルに分割:
 **バリデーション**: データ検証にドメイン層のZodスキーマを使用
 **ログ**: Pinoロガーで構造化ログを使用
 
+**API層バリデーション**: 全てのAPI層エンドポイントで`zodValidator`の使用が必須
+
+- **必須ルール**: 全APIエンドポイントでリクエストデータのバリデーションにzodValidatorを使用する
+- **バリデーション対象**: 
+  - `query`: クエリパラメータのバリデーション
+  - `param`: パスパラメータのバリデーション  
+  - `json`: リクエストボディのバリデーション
+- **エラーハンドリング**: バリデーション失敗時は自動的に422ステータスで返却
+- **型安全性**: `ZodValidatedContext`系の型を使用してハンドラー関数で型安全にデータアクセス
+
+**使用例**:
+```typescript
+// route.ts
+import zodValidator from '@/application/middleware/zodValidator'
+import { articleIdParamSchema, createReadHistoryApiSchema } from '@/domain/article'
+
+const app = new Hono<Env>()
+  .post(
+    '/:article_id/read',
+    authenticator,
+    zodValidator('param', articleIdParamSchema),     // パスパラメータ検証
+    zodValidator('json', createReadHistoryApiSchema), // リクエストボディ検証
+    readArticle,
+  )
+
+// handler.ts
+import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
+
+export default async function readArticle(
+  c: ZodValidatedParamJsonContext<ArticleIdParam, CreateReadHistoryApiInput>,
+) {
+  // 型安全にバリデーション済みデータを取得
+  const param = c.req.valid('param')  // ArticleIdParam型
+  const body = c.req.valid('json')    // CreateReadHistoryApiInput型
+  
+  const { article_id: articleId } = param
+  const { read_at: readAt } = body
+  
+  // 処理続行...
+}
+```
+
+**バリデーション順序**: authenticator → zodValidator(param) → zodValidator(json) → handler
+
 ### コード品質設定詳細
 
 **Biome設定**:
