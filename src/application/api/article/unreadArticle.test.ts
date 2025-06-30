@@ -18,7 +18,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     sessionId = loginData.sessionId
 
     // テスト記事作成
-    const article = await articleTestHelper.createTestArticle()
+    const article = await articleTestHelper.createArticle()
     testArticleId = article.articleId
 
     // 既読履歴を事前に作成（削除テスト用）

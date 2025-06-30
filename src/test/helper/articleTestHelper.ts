@@ -7,7 +7,7 @@ process.env.NODE_ENV = 'test'
 class ArticleTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  async createTestArticle() {
+  async createArticle() {
     return await this.rdb.article.create({
       data: {
         media: faker.helpers.arrayElement(['qiita', 'zenn']),
