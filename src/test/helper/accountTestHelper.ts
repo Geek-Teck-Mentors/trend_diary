@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker'
+import { isError, isSuccess } from '@/common/types/utility'
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
@@ -25,6 +27,42 @@ class AccountTestHelper {
   async createTestAccount(email: string, password: string): Promise<void> {
     const transaction = new Transaction(this.rdb)
     await this.service.signup(transaction, email, password)
+  }
+
+  async createRandomTestAccount(): Promise<{ email: string; password: string }> {
+    const email = faker.internet.email()
+    const password = faker.internet.password({ length: 12 })
+
+    const transaction = new Transaction(this.rdb)
+    await this.service.signup(transaction, email, password)
+
+    return { email, password }
+  }
+
+  async loginTestAccount(
+    email: string,
+    password: string,
+  ): Promise<{ userId: bigint; sessionId: string }> {
+    const loginResult = await this.service.login(email, password)
+    if (isError(loginResult)) {
+      throw new Error(`Failed to login: ${loginResult.error.message}`)
+    }
+    return {
+      userId: loginResult.data.user.userId,
+      sessionId: loginResult.data.sessionId,
+    }
+  }
+
+  async createAndLoginRandomTestAccount(): Promise<{
+    email: string
+    password: string
+    userId: bigint
+    sessionId: string
+  }> {
+    const { email, password } = await this.createRandomTestAccount()
+    const { userId, sessionId } = await this.loginTestAccount(email, password)
+
+    return { email, password, userId, sessionId }
   }
 
   async deleteAllSessions(): Promise<void> {
