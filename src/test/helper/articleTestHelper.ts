@@ -38,10 +38,6 @@ class ArticleTestHelper {
     })
   }
 
-  async deleteAllReadHistories(): Promise<void> {
-    await this.rdb.readHistory.deleteMany()
-  }
-
   async cleanUpArticles(): Promise<void> {
     await this.rdb.$queryRaw`TRUNCATE TABLE "articles" CASCADE;`
   }

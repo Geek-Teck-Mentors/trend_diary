@@ -24,22 +24,12 @@ class AccountTestHelper {
     await this.rdb.$queryRaw`TRUNCATE TABLE "users" CASCADE;`
   }
 
-  async createTestAccount(email: string, password: string): Promise<void> {
+  async create(email: string, password: string): Promise<void> {
     const transaction = new Transaction(this.rdb)
     await this.service.signup(transaction, email, password)
   }
 
-  async createRandomTestAccount(): Promise<{ email: string; password: string }> {
-    const email = faker.internet.email()
-    const password = faker.internet.password({ length: 12 })
-
-    const transaction = new Transaction(this.rdb)
-    await this.service.signup(transaction, email, password)
-
-    return { email, password }
-  }
-
-  async loginTestAccount(
+  async login(
     email: string,
     password: string,
   ): Promise<{ userId: bigint; sessionId: string }> {
@@ -51,18 +41,6 @@ class AccountTestHelper {
       userId: loginResult.data.user.userId,
       sessionId: loginResult.data.sessionId,
     }
-  }
-
-  async createAndLoginRandomTestAccount(): Promise<{
-    email: string
-    password: string
-    userId: bigint
-    sessionId: string
-  }> {
-    const { email, password } = await this.createRandomTestAccount()
-    const { userId, sessionId } = await this.loginTestAccount(email, password)
-
-    return { email, password, userId, sessionId }
   }
 
   async deleteAllSessions(): Promise<void> {

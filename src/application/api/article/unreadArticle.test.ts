@@ -12,8 +12,8 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
-    await accountTestHelper.createTestAccount('test@example.com', 'password123')
-    const loginData = await accountTestHelper.loginTestAccount('test@example.com', 'password123')
+    await accountTestHelper.create('test@example.com', 'password123')
+    const loginData = await accountTestHelper.login('test@example.com', 'password123')
     testUserId = loginData.userId
     sessionId = loginData.sessionId
 
