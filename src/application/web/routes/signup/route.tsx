@@ -1,5 +1,4 @@
 import type { MetaFunction } from '@remix-run/cloudflare'
-import React from 'react'
 import SignupPage from './page'
 import useSignup from './useSignup'
 

@@ -39,7 +39,7 @@ describe('DELETE /api/account/logout', () => {
     // モックをリセット
     vi.clearAllMocks()
 
-    await accountTestHelper.createTestAccount(TEST_EMAIL, TEST_PASSWORD)
+    await accountTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(

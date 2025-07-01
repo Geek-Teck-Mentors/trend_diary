@@ -37,7 +37,7 @@ describe('POST /api/account/login', () => {
   })
 
   beforeEach(async () => {
-    await accountTestHelper.createTestAccount(TEST_EMAIL, TEST_PASSWORD)
+    await accountTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
   })
 
   afterEach(async () => {

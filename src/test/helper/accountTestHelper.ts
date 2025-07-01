@@ -1,3 +1,4 @@
+import { isError } from '@/common/types/utility'
 import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
@@ -22,9 +23,20 @@ class AccountTestHelper {
     await this.rdb.$queryRaw`TRUNCATE TABLE "users" CASCADE;`
   }
 
-  async createTestAccount(email: string, password: string): Promise<void> {
+  async create(email: string, password: string): Promise<void> {
     const transaction = new Transaction(this.rdb)
     await this.service.signup(transaction, email, password)
+  }
+
+  async login(email: string, password: string): Promise<{ userId: bigint; sessionId: string }> {
+    const loginResult = await this.service.login(email, password)
+    if (isError(loginResult)) {
+      throw new Error(`Failed to login: ${loginResult.error.message}`)
+    }
+    return {
+      userId: loginResult.data.user.userId,
+      sessionId: loginResult.data.sessionId,
+    }
   }
 
   async deleteAllSessions(): Promise<void> {
