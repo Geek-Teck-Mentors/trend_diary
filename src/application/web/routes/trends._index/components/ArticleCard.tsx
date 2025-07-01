@@ -7,6 +7,7 @@ import {
 } from '@/application/web/components/ui/card';
 import QiitaTag from './QiitaTag';
 import ZennTag from './ZennTag';
+import MediaIcon from './MediaIcon';
 import { Article } from '../types';
 
 type Props = {
@@ -28,12 +29,12 @@ export default function ArticleCard({ article, onCardClick }: Props) {
     >
       <CardContent className='flex h-full flex-col p-0'>
         <CardTitle className='line-clamp-2 flex-1 overflow-hidden text-sm leading-relaxed font-bold text-gray-700'>
+          <MediaIcon media={article.media === 'qiita' ? 'qiita' : 'zenn'} />
           {article.title}
         </CardTitle>
 
         <CardDescription className='mt-3 flex items-end justify-between'>
           <span className='text-sm text-gray-600'>{article.author}</span>
-          {article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}
         </CardDescription>
       </CardContent>
     </Card>
