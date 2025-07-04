@@ -2,34 +2,12 @@
 
 - 必ず日本語で回答すること
 - 敬語は使用しないこと
-- 必ずTDD（テスト駆動開発）で進めること
+- 必ず t-wada のTDDで進めること
 - リファクタリング時は必ずlint, format, testコマンドを実行すること
 
 このファイルはClaude Code (claude.ai/code) がこのリポジトリで作業する際のガイダンスを提供する。
 
 ## 開発フロー
-
-### TDD (テスト駆動開発) 必須
-
-新機能・バグ修正時は**RED-GREEN-REFACTOR**サイクルで進めること：
-
-1. **🔴 RED** - 失敗するテストを先に書く
-
-   - サービス層: `npm run test:service -- path/to/file.test.ts`
-   - API層: `npm run test:api -- path/to/file.test.ts`
-   - フロントエンド: `npm run test:frontend -- path/to/file.test.ts`
-   - テストが失敗（RED）することを確認
-
-2. **🟢 GREEN** - テストが通る最小限の実装
-
-   - 最小限のコードでテストを通す
-   - テストが成功（GREEN）することを確認
-
-3. **🔵 REFACTOR** - テストが通ることを確認しながらコード改善
-   - 必ず `npm run lint:ci` を実行
-   - 全テストがGreenを維持することを確認
-   - コード品質を向上させる
-   - **必須**: サイクル完了時にコミット実行
 
 #### 🔄 コミット（サイクル完了時必須）
 
@@ -74,40 +52,6 @@ git commit -m "refactor: improve article service structure TDD cycle complete"
 ```
 
 RED-GREEN-REFACTORを1サイクルとして繰り返す
-
-### タスク管理
-
-#### 開発中に発見されるタスクの扱い
-
-**即座にTODOに記録する対象:**
-
-- リファクタリングが必要な箇所
-- 発見したバグや改善点
-- 追加で必要になった機能
-- テストが不足している箇所
-- パフォーマンス改善が必要な箇所
-
-**記録方法:**
-
-```typescript
-// TODO: [優先度] 説明 - 発見した理由/背景
-// 例:
-// TODO: [HIGH] UserService.validateEmail()のリファクタリング - 複雑度10超過
-// TODO: [MEDIUM] ArticleRepository.findByDate()のテスト追加 - エッジケース未カバー
-// TODO: [LOW] ログ出力の統一 - 現在バラバラな形式
-```
-
-**優先度ガイドライン:**
-
-- **HIGH**: セキュリティ、バグ、ブロッカー
-- **MEDIUM**: パフォーマンス、テスト不足、リファクタリング
-- **LOW**: 改善、統一性、ドキュメント
-
-#### 現在のタスク中断ルール
-
-- RED-GREEN-REFACTORサイクル完了後にTODO追加
-- 緊急度が高い場合は現在のサイクルを一旦停止してTODO記録
-- サイクル途中で発見した場合はメモとして残し、サイクル完了後に整理
 
 ### テスト実行順序
 
