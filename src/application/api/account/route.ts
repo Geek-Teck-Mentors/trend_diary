@@ -10,7 +10,7 @@ import signup from './signup'
 
 const app = new Hono<Env>()
   .get('/me', authenticator, loginUser)
-  .post('/', signup)
+  .post('/', zodValidator('json', accountSchema.pick({ email: true, password: true })), signup)
   .post('/login', zodValidator('json', accountSchema.pick({ email: true, password: true })), login)
   .delete('/logout', authenticator, logout)
 

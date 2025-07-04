@@ -1,40 +1,18 @@
-import { Context } from 'hono'
-import { HTTPException } from 'hono/http-exception'
-import { Env } from '@/application/env'
 import CONTEXT_KEY from '@/application/middleware/context'
-import { AlreadyExistsError, ServerError } from '@/common/errors'
+import { ZodValidatedContext } from '@/application/middleware/zodValidator'
+import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
-import { accountSchema } from '@/domain/account/schema/accountSchema'
+import {
+  AccountInput,
+  AccountRepositoryImpl,
+  AccountService,
+  UserRepositoryImpl,
+} from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 
-export default async function signup(c: Context<Env>) {
+export default async function signup(c: ZodValidatedContext<AccountInput>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
-  let body
-  try {
-    body = await c.req.json()
-  } catch {
-    throw new HTTPException(400, {
-      message: 'Invalid JSON',
-    })
-  }
-
-  const valid = accountSchema
-    .pick({
-      email: true,
-      password: true,
-    })
-    .safeParse({
-      email: body.email,
-      password: body.password,
-    })
-  if (!valid.success) {
-    const errorMessages = valid.error.flatten().fieldErrors
-    throw new HTTPException(422, {
-      message: 'Invalid input',
-      cause: errorMessages,
-    })
-  }
+  const valid = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const accountRepository = new AccountRepositoryImpl(rdb)
@@ -42,27 +20,8 @@ export default async function signup(c: Context<Env>) {
   const transaction = new Transaction(rdb)
   const service = new AccountService(accountRepository, userRepository)
 
-  const result = await service.signup(transaction, valid.data.email, valid.data.password)
-  if (isError(result)) {
-    const e = result.error
-    if (e instanceof AlreadyExistsError) {
-      throw new HTTPException(409, {
-        message: e.message,
-      })
-    }
-
-    if (e instanceof ServerError) {
-      logger.error('internal server error', e)
-      throw new HTTPException(500, {
-        message: e.message,
-      })
-    }
-
-    logger.error('unknown error', e)
-    throw new HTTPException(500, {
-      message: 'unknown error',
-    })
-  }
+  const result = await service.signup(transaction, valid.email, valid.password)
+  if (isError(result)) throw handleError(result.error, logger)
 
   const account = result.data
   logger.info('sign up success', { accountId: account.accountId.toString() })
