@@ -1,7 +1,15 @@
-import React from 'react';
-import ArticleCard from './components/ArticleCard';
-import { Article } from './types';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import React from "react";
+import ArticleCard from "./components/ArticleCard";
+import { Article } from "./types";
+import LoadingSpinner from "../../components/LoadingSpinner";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationItem,
+} from "@/application/web/components/ui/pagination";
 
 type Props = {
   articles: Article[];
@@ -33,7 +41,16 @@ export default function TrendsPage({
           ))
         )}
       </div>
-      <div ref={observerTargetRef} className='h-4 w-full' />
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious className="border-solid border-1 border-b-slate-400" />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext className="border-solid border-1 border-b-slate-400" />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
       <LoadingSpinner isLoading={isLoading} />
     </div>
   );
