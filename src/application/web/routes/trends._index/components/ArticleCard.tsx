@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react'
-import { Card, CardContent, CardTitle, CardDescription } from '@/application/web/components/ui/card'
+import { Card, CardContent, CardDescription, CardTitle } from '@/application/web/components/ui/card'
+import { Article } from '../types'
+import MediaIcon from './MediaIcon'
 import QiitaTag from './QiitaTag'
 import ZennTag from './ZennTag'
-import MediaIcon from './MediaIcon'
-import { Article } from '../types'
 
 type Props = {
   article: Article

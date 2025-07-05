@@ -1,16 +1,16 @@
-import React from 'react'
 import { Calendar, ExternalLink, X } from 'lucide-react'
+import React from 'react'
 import { createPortal } from 'react-dom'
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerClose,
 } from '@/application/web/components/ui/drawer'
+import { Article } from '../types'
 import QiitaTag from './QiitaTag'
 import ZennTag from './ZennTag'
-import { Article } from '../types'
 
 type Props = {
   article: Article

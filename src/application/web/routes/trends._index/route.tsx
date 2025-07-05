@@ -1,10 +1,10 @@
-import React from 'react'
 import type { MetaFunction } from '@remix-run/cloudflare'
-import TrendsPage from './page'
-import useTrendsState from './useTrendsState'
-import useDrawerState from './useDrawerState'
+import React from 'react'
 import ArticleDrawer from './components/ArticleDrawer'
+import TrendsPage from './page'
+import useDrawerState from './useDrawerState'
 import useTrends from './useTrends'
+import useTrendsState from './useTrendsState'
 
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
 

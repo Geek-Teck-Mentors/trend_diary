@@ -1,5 +1,5 @@
-import { useEffect, useCallback, useMemo } from 'react'
-import { PaginationDirection, PaginationCursor } from '../../types/paginations'
+import { useCallback, useEffect, useMemo } from 'react'
+import { PaginationCursor, PaginationDirection } from '../../types/paginations'
 
 type Params = {
   fetchArticles: (params: {

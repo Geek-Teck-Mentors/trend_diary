@@ -1,16 +1,15 @@
 import React from 'react'
-import ArticleCard from './components/ArticleCard'
-import { Article } from './types'
-import LoadingSpinner from '../../components/LoadingSpinner'
-import { PaginationCursor } from '../../types/paginations'
-
 import {
   Pagination,
   PaginationContent,
+  PaginationItem,
   PaginationNext,
   PaginationPrevious,
-  PaginationItem,
 } from '@/application/web/components/ui/pagination'
+import LoadingSpinner from '../../components/LoadingSpinner'
+import { PaginationCursor } from '../../types/paginations'
+import ArticleCard from './components/ArticleCard'
+import { Article } from './types'
 
 type Props = {
   articles: Article[]
