@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { PaginationDirection } from '../../types/paginations';
+import { useEffect, useCallback } from 'react';
+import { PaginationDirection, PaginationCursor } from '../../types/paginations';
 
 type Params = {
   fetchArticles: (params: {
@@ -7,10 +7,11 @@ type Params = {
     direction?: PaginationDirection;
     limit?: number;
   }) => Promise<void>;
+  cursor: PaginationCursor;
 };
 
 export default function useTrends(params: Params) {
-  const { fetchArticles } = params;
+  const { fetchArticles, cursor } = params;
 
   const date = useMemo(() => new Date(), []);
 
@@ -20,7 +21,21 @@ export default function useTrends(params: Params) {
     fetchArticles({ date });
   }, []);
 
+  const handleNextPage = useCallback(async () => {
+    if (cursor.next) {
+      await fetchArticles({ date, direction: 'next' });
+    }
+  }, [fetchArticles, cursor.next, date]);
+
+  const handlePrevPage = useCallback(async () => {
+    if (cursor.prev) {
+      await fetchArticles({ date, direction: 'prev' });
+    }
+  }, [fetchArticles, cursor.prev, date]);
+
   return {
     date,
+    handleNextPage,
+    handlePrevPage,
   };
 }

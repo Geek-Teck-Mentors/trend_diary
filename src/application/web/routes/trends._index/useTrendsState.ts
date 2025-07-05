@@ -20,7 +20,7 @@ export default function useTrendsState() {
     async ({
       date = new Date(),
       direction = 'next',
-      limit = 100,
+      limit = 20,
     }: {
       date?: Date;
       direction?: PaginationDirection;
@@ -45,18 +45,15 @@ export default function useTrendsState() {
         });
         if (res.status === 200) {
           const resJson = await res.json();
-          setArticles((prevArticles) => [
-            ...prevArticles,
-            ...resJson.data.map((data) => ({
-              articleId: Number(data.articleId),
-              media: data.media,
-              title: data.title,
-              author: data.author,
-              description: data.description,
-              url: data.url,
-              createdAt: new Date(data.createdAt),
-            })),
-          ]);
+          setArticles(resJson.data.map((data) => ({
+            articleId: Number(data.articleId),
+            media: data.media,
+            title: data.title,
+            author: data.author,
+            description: data.description,
+            url: data.url,
+            createdAt: new Date(data.createdAt),
+          })));
           setCursor({
             next: resJson.nextCursor,
             prev: resJson.prevCursor,
