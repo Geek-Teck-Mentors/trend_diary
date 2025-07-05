@@ -1,5 +1,3 @@
-import React from 'react'
-
 type MediaType = 'qiita' | 'zenn'
 const mediaIconImages = {
   qiita: '/images/qiita-icon.png',

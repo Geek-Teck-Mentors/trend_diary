@@ -1,9 +1,7 @@
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardTitle } from '@/application/web/components/ui/card'
 import { Article } from '../types'
 import MediaIcon from './MediaIcon'
-import QiitaTag from './QiitaTag'
-import ZennTag from './ZennTag'
 
 type Props = {
   article: Article

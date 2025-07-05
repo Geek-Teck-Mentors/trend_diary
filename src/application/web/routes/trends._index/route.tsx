@@ -1,5 +1,4 @@
 import type { MetaFunction } from '@remix-run/cloudflare'
-import React from 'react'
 import ArticleDrawer from './components/ArticleDrawer'
 import TrendsPage from './page'
 import useDrawerState from './useDrawerState'

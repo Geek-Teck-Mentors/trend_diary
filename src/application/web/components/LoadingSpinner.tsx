@@ -1,4 +1,3 @@
-import React from 'react'
 import SpinnerCircle3 from './customized/spinner/spinner-09'
 
 type Props = {
