@@ -1,5 +1,5 @@
 import { Outlet, redirect } from '@remix-run/react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import AppSidebar from '../components/Sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'

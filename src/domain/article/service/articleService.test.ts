@@ -1,9 +1,11 @@
 import { faker } from '@faker-js/faker'
 import { mockDeep } from 'vitest-mock-extended'
-import { ServerError } from '@/common/errors'
+import { NotFoundError, ServerError } from '@/common/errors'
 import { CursorPaginationResult } from '@/common/pagination'
-import { resultError, resultSuccess } from '@/common/types/utility'
+import { isError, isSuccess, resultError, resultSuccess } from '@/common/types/utility'
 import Article from '@/domain/article/model/article'
+import ReadHistory from '@/domain/article/model/readHistory'
+import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import ArticleService from './articleService'
@@ -27,9 +29,10 @@ const mockPaginationResult: CursorPaginationResult<Article> = {
 }
 
 const mockArticleQueryService = mockDeep<ArticleQueryService>()
+const mockArticleCommandService = mockDeep<ArticleCommandService>()
 
 describe('ArticleService', () => {
-  const service = new ArticleService(mockArticleQueryService)
+  const service = new ArticleService(mockArticleQueryService, mockArticleCommandService)
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -250,6 +253,109 @@ describe('ArticleService', () => {
       const result = await service.searchArticles(params)
 
       expect(result).toEqual(resultError(dbError))
+    })
+  })
+
+  describe('createReadHistory', () => {
+    it('正常にReadHistoryを作成できること', async () => {
+      const userId = 100n
+      const articleId = 200n
+      const readAt = new Date('2024-01-01T10:00:00Z')
+
+      // 記事存在確認のモック
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+
+      const mockReadHistory = new ReadHistory(1n, userId, articleId, readAt, new Date())
+      mockArticleCommandService.createReadHistory.mockResolvedValue(resultSuccess(mockReadHistory))
+
+      const result = await service.createReadHistory(userId, articleId, readAt)
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data.userId).toBe(userId)
+        expect(result.data.articleId).toBe(articleId)
+        expect(result.data.readAt).toBe(readAt)
+      }
+
+      expect(mockArticleQueryService.findArticleById).toHaveBeenCalledWith(articleId)
+      expect(mockArticleCommandService.createReadHistory).toHaveBeenCalledWith(
+        userId,
+        articleId,
+        readAt,
+      )
+    })
+
+    it('データベースエラー時にServerErrorを返すこと', async () => {
+      const userId = 100n
+      const articleId = 200n
+      const readAt = new Date('2024-01-01T10:00:00Z')
+
+      // 記事存在確認のモック
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+
+      const dbError = new ServerError('Database error')
+      mockArticleCommandService.createReadHistory.mockResolvedValue(resultError(dbError))
+
+      const result = await service.createReadHistory(userId, articleId, readAt)
+
+      expect(isError(result)).toBe(true)
+      if (isError(result)) {
+        expect(result.error).toBe(dbError)
+      }
+    })
+
+    it('存在しない記事でNotFoundErrorを返すこと', async () => {
+      const userId = 100n
+      const articleId = 999n
+      const readAt = new Date('2024-01-01T10:00:00Z')
+
+      // 記事が存在しない場合のモック
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(null))
+
+      const result = await service.createReadHistory(userId, articleId, readAt)
+
+      expect(isError(result)).toBe(true)
+      if (isError(result)) {
+        expect(result.error).toBeInstanceOf(NotFoundError)
+        expect(result.error.message).toBe('Article with ID 999 not found')
+      }
+
+      expect(mockArticleQueryService.findArticleById).toHaveBeenCalledWith(articleId)
+      expect(mockArticleCommandService.createReadHistory).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('deleteAllReadHistory', () => {
+    it('正常にReadHistoryを全削除できること', async () => {
+      const userId = 100n
+      const articleId = 200n
+
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+      mockArticleCommandService.deleteAllReadHistory.mockResolvedValue(resultSuccess(undefined))
+
+      const result = await service.deleteAllReadHistory(userId, articleId)
+
+      expect(isSuccess(result)).toBe(true)
+      expect(mockArticleCommandService.deleteAllReadHistory).toHaveBeenCalledWith(
+        userId,
+        mockArticle.articleId,
+      )
+    })
+
+    it('データベースエラー時にServerErrorを返すこと', async () => {
+      const userId = 100n
+      const articleId = 200n
+
+      mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+      const dbError = new ServerError('Database error')
+      mockArticleCommandService.deleteAllReadHistory.mockResolvedValue(resultError(dbError))
+
+      const result = await service.deleteAllReadHistory(userId, articleId)
+
+      expect(isError(result)).toBe(true)
+      if (isError(result)) {
+        expect(result.error).toBe(dbError)
+      }
     })
   })
 })

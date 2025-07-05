@@ -18,6 +18,9 @@ describe('POST /api/account', () => {
       {
         method: 'POST',
         body,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
       TEST_ENV,
     )

@@ -36,7 +36,7 @@ describe('GET /api/account/me', () => {
     await accountTestHelper.cleanUp()
 
     // ユーザーを作成してログインする
-    await accountTestHelper.createTestAccount(TEST_EMAIL, TEST_PASSWORD)
+    await accountTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(

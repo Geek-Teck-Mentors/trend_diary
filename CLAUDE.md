@@ -2,34 +2,12 @@
 
 - 必ず日本語で回答すること
 - 敬語は使用しないこと
-- 必ずTDD（テスト駆動開発）で進めること
+- 必ず t-wada のTDDで進めること
 - リファクタリング時は必ずlint, format, testコマンドを実行すること
 
 このファイルはClaude Code (claude.ai/code) がこのリポジトリで作業する際のガイダンスを提供する。
 
 ## 開発フロー
-
-### TDD (テスト駆動開発) 必須
-
-新機能・バグ修正時は**RED-GREEN-REFACTOR**サイクルで進めること：
-
-1. **🔴 RED** - 失敗するテストを先に書く
-
-   - サービス層: `npm run test:service -- path/to/file.test.ts`
-   - API層: `npm run test:api -- path/to/file.test.ts`
-   - フロントエンド: `npm run test:frontend -- path/to/file.test.ts`
-   - テストが失敗（RED）することを確認
-
-2. **🟢 GREEN** - テストが通る最小限の実装
-
-   - 最小限のコードでテストを通す
-   - テストが成功（GREEN）することを確認
-
-3. **🔵 REFACTOR** - テストが通ることを確認しながらコード改善
-   - 必ず `npm run lint:ci` を実行
-   - 全テストがGreenを維持することを確認
-   - コード品質を向上させる
-   - **必須**: サイクル完了時にコミット実行
 
 #### 🔄 コミット（サイクル完了時必須）
 
@@ -75,44 +53,221 @@ git commit -m "refactor: improve article service structure TDD cycle complete"
 
 RED-GREEN-REFACTORを1サイクルとして繰り返す
 
-### タスク管理
-
-#### 開発中に発見されるタスクの扱い
-
-**即座にTODOに記録する対象:**
-
-- リファクタリングが必要な箇所
-- 発見したバグや改善点
-- 追加で必要になった機能
-- テストが不足している箇所
-- パフォーマンス改善が必要な箇所
-
-**記録方法:**
-
-```typescript
-// TODO: [優先度] 説明 - 発見した理由/背景
-// 例:
-// TODO: [HIGH] UserService.validateEmail()のリファクタリング - 複雑度10超過
-// TODO: [MEDIUM] ArticleRepository.findByDate()のテスト追加 - エッジケース未カバー
-// TODO: [LOW] ログ出力の統一 - 現在バラバラな形式
-```
-
-**優先度ガイドライン:**
-
-- **HIGH**: セキュリティ、バグ、ブロッカー
-- **MEDIUM**: パフォーマンス、テスト不足、リファクタリング
-- **LOW**: 改善、統一性、ドキュメント
-
-#### 現在のタスク中断ルール
-
-- RED-GREEN-REFACTORサイクル完了後にTODO追加
-- 緊急度が高い場合は現在のサイクルを一旦停止してTODO記録
-- サイクル途中で発見した場合はメモとして残し、サイクル完了後に整理
-
 ### テスト実行順序
 
 - 単体テスト (service層) → 統合テスト (api層) → E2Eテスト
 - 各層のテストが通ってから次の層へ進む
+
+## テスト作成ガイドライン
+
+### 必須テスト構造
+
+**サービス層・API層**では必ず以下の3段階構造でテストを作成すること：
+
+#### 3段階テスト構造（必須）
+
+**1. 正常系** (`describe('正常系')`)
+- 期待通りの動作をするケース
+- 成功パス、ハッピーパスのテスト
+- レスポンス内容とステータスコードの確認
+
+**2. 準正常系** (`describe('準正常系')`)
+- バリデーションエラー、リソース不存在など予期されるエラー
+- クライアントの入力ミスや業務ルール違反
+- HTTPステータス: 400, 404, 422など
+
+**3. 異常系** (`describe('異常系')`)
+- システムエラー、DBエラーなど予期しないエラー
+- インフラ障害やシステム異常
+- HTTPステータス: 500, 503など
+
+### 層別テストテンプレート
+
+#### サービス層テストテンプレート
+
+```typescript
+describe('ServiceName', () => {
+  describe('methodName', () => {
+    describe('正常系', () => {
+      it('具体的な成功ケース', async () => {
+        // モック設定
+        mockRepository.method.mockResolvedValue(mockData)
+        
+        const result = await service.method(params)
+        
+        expect(result).toEqual(resultSuccess(expectedData))
+      })
+    })
+    
+    describe('準正常系', () => {
+      it('既に存在するリソース', async () => {
+        mockRepository.findUnique.mockResolvedValue(existingData)
+        
+        const result = await service.method(params)
+        
+        expect(result).toEqual(resultError(new AlreadyExistsError('Resource already exists')))
+      })
+      
+      it('存在しないリソース', async () => {
+        mockRepository.findUnique.mockResolvedValue(null)
+        
+        const result = await service.method(params)
+        
+        expect(result).toEqual(resultError(new NotFoundError('Resource not found')))
+      })
+    })
+    
+    describe('異常系', () => {
+      it('異常系: 意図しないDBエラー', async () => {
+        mockRepository.method.mockRejectedValue(new Error('Database error'))
+        
+        const result = await service.method(params)
+        
+        expect(result).toEqual(resultError(new ServerError('Database error')))
+      })
+    })
+  })
+})
+```
+
+#### API層テストテンプレート
+
+```typescript
+describe('HTTP_METHOD /api/path', () => {
+  describe('正常系', () => {
+    it('正常な処理が成功する', async () => {
+      const response = await app.request('/api/path', {
+        method: 'POST',
+        body: JSON.stringify(validData)
+      })
+      
+      expect(response.status).toBe(200)
+      const data = await response.json()
+      expect(data).toBeDefined()
+    })
+  })
+  
+  describe('準正常系', () => {
+    const testCases = [
+      {
+        name: '不正な形式のパラメータ',
+        input: { invalidField: 'invalid' },
+        status: 422,
+      },
+      {
+        name: '存在しないリソース',
+        input: { id: 'nonexistent' },
+        status: 404,
+      },
+    ]
+    
+    testCases.forEach((testCase) => {
+      it(testCase.name, async () => {
+        const response = await app.request('/api/path', {
+          method: 'POST',
+          body: JSON.stringify(testCase.input)
+        })
+        
+        expect(response.status).toBe(testCase.status)
+      })
+    })
+  })
+  
+  describe('異常系', () => {
+    it('異常系: データベース接続エラー', async () => {
+      // データベース接続を切断するなどのセットアップ
+      
+      const response = await app.request('/api/path', {
+        method: 'POST',
+        body: JSON.stringify(validData)
+      })
+      
+      expect(response.status).toBe(500)
+    })
+  })
+})
+```
+
+### テストケース命名規約
+
+#### 正常系
+- 具体的な動作を説明
+- 例: `it('ユーザー登録に成功する', async () => {})`
+- 例: `it('記事検索結果を取得できる', async () => {})`
+
+#### 準正常系
+- エラー内容を明記
+- 例: `it('不正なメールアドレス', async () => {})`
+- 例: `it('存在しないarticle_id', async () => {})`
+
+#### 異常系
+- `異常系: 具体的なエラー種類`で開始
+- 例: `it('異常系: 意図しないDBエラー', async () => {})`
+- 例: `it('異常系: ネットワーク接続エラー', async () => {})`
+
+### HTTPステータスコード対応表
+
+| 系統 | ステータスコード | 説明 | 使用場面 |
+|------|----------------|------|----------|
+| 正常系 | 200 | OK | 正常な取得・更新 |
+| 正常系 | 201 | Created | 正常な作成 |
+| 正常系 | 204 | No Content | 正常な削除 |
+| 準正常系 | 400 | Bad Request | リクエスト形式エラー |
+| 準正常系 | 404 | Not Found | リソース不存在 |
+| 準正常系 | 422 | Unprocessable Entity | バリデーションエラー |
+| 異常系 | 500 | Internal Server Error | サーバー内部エラー |
+| 異常系 | 503 | Service Unavailable | サービス利用不可 |
+
+### セットアップ・クリーンアップパターン
+
+#### サービス層（モック使用）
+```typescript
+beforeEach(() => {
+  vi.clearAllMocks()  // vitestモックをリセット
+})
+```
+
+#### API層（実DB使用）
+```typescript
+beforeAll(() => {
+  db = getRdbClient(TEST_ENV.DATABASE_URL)
+})
+
+beforeEach(async () => {
+  await testHelper.cleanUp()
+  await setupTestData()
+})
+
+afterAll(async () => {
+  await testHelper.cleanUp()
+  await db.$disconnect()
+})
+```
+
+### テーブル駆動テストパターン
+
+準正常系でのバリデーションテストには配列を活用：
+
+```typescript
+const testCases = [
+  {
+    name: '不正なメールアドレス',
+    input: { email: 'invalid-email' },
+    status: 422,
+  },
+  {
+    name: '必須フィールド不足',
+    input: { email: '' },
+    status: 422,
+  },
+]
+
+testCases.forEach((testCase) => {
+  it(testCase.name, async () => {
+    // テスト実行
+  })
+})
+```
 
 ## 開発コマンド
 
@@ -239,6 +394,50 @@ Prismaモデルは`prisma/models/`内のファイルに分割:
 **テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック, serviceテストのみで利用
 **バリデーション**: データ検証にドメイン層のZodスキーマを使用
 **ログ**: Pinoロガーで構造化ログを使用
+
+**API層バリデーション**: 全てのAPI層エンドポイントで`zodValidator`の使用が必須
+
+- **必須ルール**: 全APIエンドポイントでリクエストデータのバリデーションにzodValidatorを使用する
+- **バリデーション対象**: 
+  - `query`: クエリパラメータのバリデーション
+  - `param`: パスパラメータのバリデーション  
+  - `json`: リクエストボディのバリデーション
+- **エラーハンドリング**: バリデーション失敗時は自動的に422ステータスで返却
+- **型安全性**: `ZodValidatedContext`系の型を使用してハンドラー関数で型安全にデータアクセス
+
+**使用例**:
+```typescript
+// route.ts
+import zodValidator from '@/application/middleware/zodValidator'
+import { articleIdParamSchema, createReadHistoryApiSchema } from '@/domain/article'
+
+const app = new Hono<Env>()
+  .post(
+    '/:article_id/read',
+    authenticator,
+    zodValidator('param', articleIdParamSchema),     // パスパラメータ検証
+    zodValidator('json', createReadHistoryApiSchema), // リクエストボディ検証
+    readArticle,
+  )
+
+// handler.ts
+import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
+
+export default async function readArticle(
+  c: ZodValidatedParamJsonContext<ArticleIdParam, CreateReadHistoryApiInput>,
+) {
+  // 型安全にバリデーション済みデータを取得
+  const param = c.req.valid('param')  // ArticleIdParam型
+  const body = c.req.valid('json')    // CreateReadHistoryApiInput型
+  
+  const { article_id: articleId } = param
+  const { read_at: readAt } = body
+  
+  // 処理続行...
+}
+```
+
+**バリデーション順序**: authenticator → zodValidator(param) → zodValidator(json) → handler
 
 ### コード品質設定詳細
 

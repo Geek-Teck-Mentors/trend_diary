@@ -193,7 +193,7 @@ test.describe('ログインページ', () => {
 
     test.beforeAll(async () => {
       await accountTestHelper.cleanUp()
-      await accountTestHelper.createTestAccount(testEmail, testPassword)
+      await accountTestHelper.create(testEmail, testPassword)
     })
 
     test.afterAll(async () => {

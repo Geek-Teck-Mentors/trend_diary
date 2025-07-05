@@ -117,7 +117,8 @@
         "useJsxKeyInIterable": "off",
         "useValidForDirection": "error",
         "useValidTypeof": "error",
-        "useYield": "error"
+        "useYield": "error",
+        "noUnusedImports": "error"
       },
       "security": {
         "noBlankTarget": "error",

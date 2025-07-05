@@ -64,6 +64,18 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
     }
   }
 
+  async findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError> {
+    try {
+      const article = await this.db.article.findUnique({
+        where: { articleId },
+      })
+      if (!article) return resultSuccess(null)
+      return resultSuccess(fromPrismaToArticle(article))
+    } catch (error) {
+      return resultError(new ServerError(getErrorMessage(error)))
+    }
+  }
+
   private static buildCursorCondition(
     direction: CursorDirection,
     cursor?: string,
