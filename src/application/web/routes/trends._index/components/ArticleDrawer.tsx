@@ -1,27 +1,27 @@
-import React from 'react';
-import { Calendar, ExternalLink, X } from 'lucide-react';
-import { createPortal } from 'react-dom';
+import React from 'react'
+import { Calendar, ExternalLink, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerClose,
-} from '@/application/web/components/ui/drawer';
-import QiitaTag from './QiitaTag';
-import ZennTag from './ZennTag';
-import { Article } from '../types';
+} from '@/application/web/components/ui/drawer'
+import QiitaTag from './QiitaTag'
+import ZennTag from './ZennTag'
+import { Article } from '../types'
 
 type Props = {
-  article: Article;
-  isOpen: boolean;
-  onClose: () => void;
-};
+  article: Article
+  isOpen: boolean
+  onClose: () => void
+}
 
 export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
   const handleOpenChange = (open: boolean) => {
-    if (!open) onClose();
-  };
+    if (!open) onClose()
+  }
 
   return createPortal(
     <Drawer open={isOpen} onOpenChange={handleOpenChange} direction='right'>
@@ -70,5 +70,5 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
       </DrawerContent>
     </Drawer>,
     document.body,
-  );
+  )
 }

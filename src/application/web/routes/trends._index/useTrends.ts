@@ -1,41 +1,41 @@
-import { useEffect, useCallback } from 'react';
-import { PaginationDirection, PaginationCursor } from '../../types/paginations';
+import { useEffect, useCallback, useMemo } from 'react'
+import { PaginationDirection, PaginationCursor } from '../../types/paginations'
 
 type Params = {
   fetchArticles: (params: {
-    date?: Date;
-    direction?: PaginationDirection;
-    limit?: number;
-  }) => Promise<void>;
-  cursor: PaginationCursor;
-};
+    date?: Date
+    direction?: PaginationDirection
+    limit?: number
+  }) => Promise<void>
+  cursor: PaginationCursor
+}
 
 export default function useTrends(params: Params) {
-  const { fetchArticles, cursor } = params;
+  const { fetchArticles, cursor } = params
 
-  const date = useMemo(() => new Date(), []);
+  const date = useMemo(() => new Date(), [])
 
   // INFO: 初回読み込み時に今日の日付で記事を取得
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    fetchArticles({ date });
-  }, []);
+    fetchArticles({ date })
+  }, [])
 
   const handleNextPage = useCallback(async () => {
     if (cursor.next) {
-      await fetchArticles({ date, direction: 'next' });
+      await fetchArticles({ date, direction: 'next' })
     }
-  }, [fetchArticles, cursor.next, date]);
+  }, [fetchArticles, cursor.next, date])
 
   const handlePrevPage = useCallback(async () => {
     if (cursor.prev) {
-      await fetchArticles({ date, direction: 'prev' });
+      await fetchArticles({ date, direction: 'prev' })
     }
-  }, [fetchArticles, cursor.prev, date]);
+  }, [fetchArticles, cursor.prev, date])
 
   return {
     date,
     handleNextPage,
     handlePrevPage,
-  };
+  }
 }

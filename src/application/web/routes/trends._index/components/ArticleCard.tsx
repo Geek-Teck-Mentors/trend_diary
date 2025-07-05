@@ -1,24 +1,19 @@
-import React, { useCallback } from 'react';
-import {
-  Card,
-  CardContent,
-  CardTitle,
-  CardDescription,
-} from '@/application/web/components/ui/card';
-import QiitaTag from './QiitaTag';
-import ZennTag from './ZennTag';
-import MediaIcon from './MediaIcon';
-import { Article } from '../types';
+import React, { useCallback } from 'react'
+import { Card, CardContent, CardTitle, CardDescription } from '@/application/web/components/ui/card'
+import QiitaTag from './QiitaTag'
+import ZennTag from './ZennTag'
+import MediaIcon from './MediaIcon'
+import { Article } from '../types'
 
 type Props = {
-  article: Article;
-  onCardClick: (article: Article) => void;
-};
+  article: Article
+  onCardClick: (article: Article) => void
+}
 
 export default function ArticleCard({ article, onCardClick }: Props) {
   const handleClick = useCallback(() => {
-    onCardClick(article);
-  }, [article, onCardClick]);
+    onCardClick(article)
+  }, [article, onCardClick])
 
   return (
     <Card
@@ -38,5 +33,5 @@ export default function ArticleCard({ article, onCardClick }: Props) {
         </CardDescription>
       </CardContent>
     </Card>
-  );
+  )
 }

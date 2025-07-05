@@ -1,8 +1,8 @@
-import React from "react";
-import ArticleCard from "./components/ArticleCard";
-import { Article } from "./types";
-import LoadingSpinner from "../../components/LoadingSpinner";
-import { PaginationCursor } from "../../types/paginations";
+import React from 'react'
+import ArticleCard from './components/ArticleCard'
+import { Article } from './types'
+import LoadingSpinner from '../../components/LoadingSpinner'
+import { PaginationCursor } from '../../types/paginations'
 
 import {
   Pagination,
@@ -10,17 +10,17 @@ import {
   PaginationNext,
   PaginationPrevious,
   PaginationItem,
-} from "@/application/web/components/ui/pagination";
+} from '@/application/web/components/ui/pagination'
 
 type Props = {
-  articles: Article[];
-  date: Date;
-  openDrawer: (article: Article) => void;
-  isLoading: boolean;
-  cursor: PaginationCursor;
-  onNextPage: () => void;
-  onPrevPage: () => void;
-};
+  articles: Article[]
+  date: Date
+  openDrawer: (article: Article) => void
+  isLoading: boolean
+  cursor: PaginationCursor
+  onNextPage: () => void
+  onPrevPage: () => void
+}
 
 export default function TrendsPage({
   articles,
@@ -32,28 +32,26 @@ export default function TrendsPage({
   onPrevPage,
 }: Props) {
   const handleCardClick = (article: Article) => {
-    openDrawer(article);
-  };
+    openDrawer(article)
+  }
   const handleClickPrevPage = () => {
     if (cursor.prev) {
-      onPrevPage();
+      onPrevPage()
     }
-  };
+  }
   const handleClickNextPage = () => {
     if (cursor.next) {
-      onNextPage();
+      onNextPage()
     }
-  };
+  }
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6">
-      <h1 className="pb-4 text-xl italic">
-        - {date.toLocaleDateString("ja-JP")} -
-      </h1>
+    <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
+      <h1 className='pb-4 text-xl italic'>- {date.toLocaleDateString('ja-JP')} -</h1>
       {articles.length === 0 ? (
-        <div className="text-gray-500">記事がありません</div>
+        <div className='text-gray-500'>記事がありません</div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-6">
+          <div className='flex flex-wrap gap-6'>
             {articles.map((article) => (
               <ArticleCard
                 key={article.articleId}
@@ -62,17 +60,17 @@ export default function TrendsPage({
               />
             ))}
           </div>
-          <Pagination className="mt-6">
+          <Pagination className='mt-6'>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  className={`border-solid border-1 border-b-slate-400 ${!cursor.prev ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                  className={`border-solid border-1 border-b-slate-400 ${!cursor.prev ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   onClick={handleClickPrevPage}
                 />
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
-                  className={`border-solid border-1 border-b-slate-400 ${!cursor.next ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                  className={`border-solid border-1 border-b-slate-400 ${!cursor.next ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   onClick={handleClickNextPage}
                 />
               </PaginationItem>
@@ -82,5 +80,5 @@ export default function TrendsPage({
       )}
       <LoadingSpinner isLoading={isLoading} />
     </div>
-  );
+  )
 }

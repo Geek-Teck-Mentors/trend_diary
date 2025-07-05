@@ -1,5 +1,5 @@
-export type PaginationDirection = 'next' | 'prev';
+export type PaginationDirection = 'next' | 'prev'
 
 export type PaginationCursor = {
-  [key in PaginationDirection]?: string;
-};
+  [K in PaginationDirection]?: string
+}
