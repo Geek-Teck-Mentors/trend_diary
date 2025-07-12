@@ -15,19 +15,18 @@ class ArticleTestHelper {
         author: faker.person.fullName(),
         description: faker.lorem.paragraph(),
         url: faker.internet.url(),
-      }
+      },
     })
   }
 
   async createArticles(
-    params?:
-      | {
-          media: 'qiita' | 'zenn'
-          title: string
-          author: string
-          description: string
-          url: string
-        }[]
+    params?: {
+      media: 'qiita' | 'zenn'
+      title: string
+      author: string
+      description: string
+      url: string
+    }[],
   ) {
     const data = params ?? [
       {
