@@ -7,15 +7,28 @@ process.env.NODE_ENV = 'test'
 class ArticleTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  async createArticle() {
-    return await this.rdb.article.create({
-      data: {
+  async createArticles(
+    params:
+      | {
+          media: 'qiita' | 'zenn'
+          title: string
+          author: string
+          description: string
+          url: string
+        }[]
+      | null,
+  ) {
+    const data = params ?? [
+      {
         media: faker.helpers.arrayElement(['qiita', 'zenn']),
         title: faker.lorem.sentence(),
         author: faker.person.fullName(),
         description: faker.lorem.paragraph(),
         url: faker.internet.url(),
       },
+    ]
+    return await this.rdb.article.createMany({
+      data,
     })
   }
 
