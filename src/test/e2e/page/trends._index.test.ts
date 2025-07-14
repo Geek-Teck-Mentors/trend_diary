@@ -70,22 +70,25 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    // 1. まず記事データを作成し、完了を待つ
+    // 1. まずはアカウントを作成
+    await accountTestHelper.create(testEmail, testPassword)
+
+    // 2. まず記事データを作成し、完了を待つ
     await articleTestHelper.createArticles(seedArticleData)
 
-    // 2. セッションクリア
+    // 3. セッションクリア
     await page.context().clearCookies()
 
-    // 3. ログイン
+    // 4. ログイン
     await page.goto('/login')
     await page.getByLabel('メールアドレス').fill(testEmail)
     await page.getByLabel('パスワード').fill(testPassword)
     await page.getByRole('button', { name: 'ログイン' }).click()
 
-    // 4. ページ遷移を待機
+    // 5. ページ遷移を待機
     await page.waitForURL('/trends', { timeout: 10000 })
 
-    // 5. APIレスポンス待機を追加
+    // 6. APIレスポンス待機を追加
     await page.waitForResponse(
       (response) => response.url().includes('/api/articles') && response.status() === 200,
     )
@@ -93,6 +96,7 @@ test.describe('記事一覧ページ', () => {
 
   test.afterEach(async () => {
     await articleTestHelper.cleanUpArticles()
+    await accountTestHelper.cleanUp()
   })
 
   test.describe('単体テスト', () => {
