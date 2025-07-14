@@ -142,11 +142,11 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
       const dateRange: { gte?: Date; lt?: Date } = {}
 
       if (params.from) {
-        dateRange.gte = new Date(`${params.from}T00:00:00Z`)
+        dateRange.gte = new Date(`${params.from}T00:00:00+09:00`)
       }
 
       if (params.to) {
-        const toDate = new Date(`${params.to}T00:00:00Z`)
+        const toDate = new Date(`${params.to}T00:00:00+09:00`)
         toDate.setDate(toDate.getDate() + 1)
         dateRange.lt = toDate
       }
