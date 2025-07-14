@@ -104,7 +104,8 @@ test.describe('記事一覧ページ', () => {
 
       test('一覧表示の要素確認', async ({ page }) => {
         // 記事の読み込みを待機
-        await page.waitForLoadState()
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(1000)
         // ページタイトルを確認
         await expect(page).toHaveTitle(/.*トレンド一覧.*/)
 
@@ -128,7 +129,9 @@ test.describe('記事一覧ページ', () => {
     test.describe('記事がある場合', () => {
       test.describe.configure({ mode: 'default' })
       test('一覧表示の要素確認', async ({ page }) => {
-        await page.waitForTimeout(10000)
+        // 記事カードが表示されるまで待機
+        await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
+
         // ページタイトルを確認
         await expect(page).toHaveTitle(/.*トレンド一覧.*/)
 
@@ -155,23 +158,24 @@ test.describe('記事一覧ページ', () => {
 
       test.describe('記事クリックの検証', () => {
         test('カードのクリックの検証', async ({ page }) => {
-          await page.waitForSelector('[data-slot="card"]')
+          await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
           const articleCards = page.locator('[data-slot="card"]')
 
           await articleCards.first().click()
 
           // ドロワーが開いていることを確認
+          await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
           await expect(page.locator('[data-slot="drawer-content"]')).toBeVisible()
         })
 
         test.describe('ドロワーの検証', () => {
           test.beforeEach(async ({ page }) => {
-            await page.waitForSelector('[data-slot="card"]')
+            await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
             const articleCards = page.locator('[data-slot="card"]')
 
             await articleCards.first().click()
 
-            await page.waitForSelector('[data-slot="drawer-content"]')
+            await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
           })
 
           test('ドロワー外のクリックの検証', async ({ page }) => {
@@ -225,7 +229,8 @@ test.describe('記事一覧ページ', () => {
         // ページを再読み込みしてデータを反映
         await page.reload()
         // 記事の読み込みを待機
-        await page.waitForLoadState()
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(1000)
       })
 
       test('記事一覧の挙動', async ({ page }) => {
@@ -252,7 +257,7 @@ test.describe('記事一覧ページ', () => {
           }),
         ).toBeVisible()
 
-        await page.waitForSelector('[data-slot="card"]')
+        await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
 
         const articleCards = page.locator('[data-slot="card"]')
 
@@ -274,10 +279,11 @@ test.describe('記事一覧ページ', () => {
       })
 
       test('記事詳細ドロワーの挙動', async ({ page }) => {
+        await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
         const articleCards = page.locator('[data-slot="card"]')
         await articleCards.first().click()
 
-        await page.waitForSelector('[data-slot="drawer-content"]')
+        await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
 
         const drawer = page.locator('[data-slot="drawer-content"]')
 
