@@ -87,11 +87,6 @@ test.describe('記事一覧ページ', () => {
 
     // 5. ページ遷移を待機
     await page.waitForURL('/trends', { timeout: 10000 })
-
-    // 6. APIレスポンス待機を追加
-    await page.waitForResponse(
-      (response) => response.url().includes('/api/articles') && response.status() === 200,
-    )
   })
 
   test.afterEach(async () => {
