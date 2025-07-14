@@ -9,6 +9,7 @@ export default function MediaTag({ media }: { media: MediaType }) {
       src={mediaIconImages[media]}
       alt=''
       className='inline-block w-4 h-4 align-middle mr-1.5 mb-1'
+      data-slot='media-icon'
     />
   )
 }
