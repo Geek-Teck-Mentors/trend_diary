@@ -13,7 +13,7 @@ type Params = {
 export default function useTrends(params: Params) {
   const { fetchArticles, cursor } = params
 
-  const date = useMemo(() => new Date(), [])
+  const date = new Date();
 
   // INFO: 初回読み込み時に今日の日付で記事を取得
   useEffect(() => {
