@@ -1,7 +1,7 @@
 import type { MetaFunction } from '@remix-run/cloudflare'
 import ArticleDrawer from './components/ArticleDrawer'
 import TrendsPage from './page'
-import useDrawerState from './useDrawerState'
+import useArticleDrawerState from './useArticleDrawerState'
 import useTrends from './useTrends'
 import useTrendsState from './useTrendsState'
 
@@ -10,7 +10,7 @@ export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDia
 export default function Trends() {
   const { articles, fetchArticles, isLoading, cursor } = useTrendsState()
   const { date, handleNextPage, handlePrevPage } = useTrends({ fetchArticles, cursor })
-  const { isDrawerOpen, selectedArticle, openDrawer, closeDrawer } = useDrawerState()
+  const { isOpen: isDrawerOpen, selectedArticle, open: openDrawer, close: closeDrawer } = useArticleDrawerState()
 
   return (
     <>
