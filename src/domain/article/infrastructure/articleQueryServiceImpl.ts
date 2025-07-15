@@ -142,6 +142,7 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
       const dateRange: { gte?: Date; lt?: Date } = {}
 
       if (params.from) {
+        // INFO: 日付をJSTのoffsetをつけて変換
         dateRange.gte = new Date(`${params.from}T00:00:00+09:00`)
       }
 

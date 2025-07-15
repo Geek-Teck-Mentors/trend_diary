@@ -45,9 +45,6 @@ const seedArticleData = [
   },
 ]
 
-// ページに対して、単体・結合テストを実施します
-// 単体テストでは、API関連のページの表示と基本要素を確認します
-// 結合テストでは、画面遷移に伴うAPIを含む挙動を確認します
 test.describe('記事一覧ページ', () => {
   test.describe.configure({ mode: 'default' })
 
