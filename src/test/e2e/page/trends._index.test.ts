@@ -49,7 +49,7 @@ const seedArticleData = [
 // 単体テストでは、API関連のページの表示と基本要素を確認します
 // 結合テストでは、画面遷移に伴うAPIを含む挙動を確認します
 test.describe('記事一覧ページ', () => {
-  test.describe.configure({ mode: 'serial' })
+  test.describe.configure({ mode: 'default' })
 
   // テストアカウントの情報
   // loginのe2eと重複しないように、trendsテスト用のメールアドレスとパスワードを設定
@@ -127,7 +127,6 @@ test.describe('記事一覧ページ', () => {
     })
 
     test.describe('記事がある場合', () => {
-      test.describe.configure({ mode: 'default' })
       test('一覧表示の要素確認', async ({ page }) => {
         // 記事カードが表示されるまで待機
         await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
