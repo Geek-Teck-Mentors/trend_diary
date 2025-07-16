@@ -8,8 +8,7 @@ import {
   DrawerTitle,
 } from '@/application/web/components/ui/drawer'
 import { Article } from '../types'
-import QiitaTag from './QiitaTag'
-import ZennTag from './ZennTag'
+import MediaIcon from './MediaIcon';
 
 type Props = {
   article: Article
@@ -22,12 +21,14 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
     if (!open) onClose()
   }
 
+  const media = article.media === 'qiita' ? 'qiita' : 'zenn'
+
   return createPortal(
     <Drawer open={isOpen} onOpenChange={handleOpenChange} direction='right'>
       <DrawerContent className='h-full w-1/2'>
         <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
           <div className='flex-1' data-slot='drawer-header-icon'>
-            {article.media === 'qiita' ? <QiitaTag /> : <ZennTag />}
+            <MediaIcon media={media} />
           </div>
           <DrawerClose className='ring-offset-background focus:ring-ring cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'>
             <X className='h-4 w-4' data-slot='x-icon' />
