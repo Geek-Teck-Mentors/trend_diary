@@ -10,9 +10,10 @@ class ArticleTestHelper {
   async createArticle() {
     const data = {
       media: faker.helpers.arrayElement(['qiita', 'zenn']),
-      title: faker.lorem.sentence(),
-      author: faker.person.fullName(),
-      description: faker.lorem.paragraph(),
+      // DBに合わせて文字数を制限
+      title: faker.lorem.sentence().substring(0, 100),
+      author: faker.person.firstName(),
+      description: faker.lorem.paragraph().substring(0, 255),
       url: faker.internet.url(),
     }
     return await this.rdb.article.create({ data })
