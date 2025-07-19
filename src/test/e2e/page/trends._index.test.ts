@@ -172,44 +172,44 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.describe('結合テスト', () => {
-    test.describe('記事がある場合の検証', () => {
-      test.beforeAll(async () => {
-        // 記事を作成
-        await Promise.all(
-          Array.from({ length: ARTICLE_COUNT }, (_, i) => articleTestHelper.createArticle()),
-        )
-      })
-      test('ドロワーの記事へのリンクをクリックするとそのページに遷移', async ({ page }) => {
-        const ARTICLE_URL = 'https://example.com/article'
-        // 記事カードが表示されるまで待機
-        await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
-        // 記事カードをクリック
-        const articleCards = page.locator('[data-slot="card"]')
-        await articleCards.first().click()
-        // ドロワーが開くのを待機
-        await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
+    test.beforeAll(async () => {
+      // 記事を作成
+      await Promise.all(
+        Array.from({ length: ARTICLE_COUNT }, (_, i) => articleTestHelper.createArticle()),
+      )
+    })
+    test('ドロワーの記事へのリンクをクリックすると外部サイトの記事ページに遷移', async ({
+      page,
+    }) => {
+      const ARTICLE_URL = 'https://example.com/article'
+      // 記事カードが表示されるまで待機
+      await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
+      // 記事カードをクリック
+      const articleCards = page.locator('[data-slot="card"]')
+      await articleCards.first().click()
+      // ドロワーが開くのを待機
+      await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
 
-        const drawer = page.locator('[data-slot="drawer-content"]')
+      const drawer = page.locator('[data-slot="drawer-content"]')
 
-        // ドロワーの記事を読むボタンを取得
-        const drawerLink = drawer.locator('[data-slot="drawer-content-link"]')
+      // ドロワーの記事を読むボタンを取得
+      const drawerLink = drawer.locator('[data-slot="drawer-content-link"]')
 
-        // ドロワーの記事を読むリンクのURLを上書き
-        await drawerLink.evaluate((element, url) => {
-          ;(element as HTMLAnchorElement).href = url
-        }, ARTICLE_URL)
+      // ドロワーの記事を読むリンクのURLを上書き
+      await drawerLink.evaluate((element, url) => {
+        ;(element as HTMLAnchorElement).href = url
+      }, ARTICLE_URL)
 
-        // 記事を読むリンクをクリック
-        await drawer.locator('[data-slot="drawer-content-link"]').click()
+      // 記事を読むリンクをクリック
+      await drawer.locator('[data-slot="drawer-content-link"]').click()
 
-        // 新しいタブでそのリンクのページに遷移するのを検証
-        const [newPage] = await Promise.all([
-          page.context().waitForEvent('page'),
-          page.waitForLoadState('networkidle'),
-        ])
+      // 新しいタブでそのリンクのページに遷移するのを検証
+      const [newPage] = await Promise.all([
+        page.context().waitForEvent('page'),
+        page.waitForLoadState('networkidle'),
+      ])
 
-        await expect(newPage).toHaveURL(ARTICLE_URL)
-      })
+      await expect(newPage).toHaveURL(ARTICLE_URL)
     })
   })
 })
