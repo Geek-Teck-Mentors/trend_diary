@@ -29,31 +29,15 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    console.log('beforeEach開始')
-
-    // 2. ログイン処理の詳細化
+    // 2. ログイン
     await page.goto('/login')
-    console.log('ログインページに遷移完了')
-
     await page.getByLabel('メールアドレス').fill(testEmail)
     await page.getByLabel('パスワード').fill(testPassword)
-    console.log('フォーム入力完了')
-
     await page.getByRole('button', { name: 'ログイン' }).click()
-    console.log('ログインボタンクリック完了')
 
     // 3. ページ遷移とページ内容の読み込みを待機
-    try {
-      await page.waitForURL('/trends', { timeout: 15000 })
-      console.log('trendsページ遷移成功')
-    } catch (error) {
-      console.log('trendsページ遷移失敗:', error.message)
-      console.log('現在のURL:', page.url())
-      throw error
-    }
-
-    await page.waitForLoadState('networkidle', { timeout: 15000 })
-    console.log('beforeEach完了、現在のURL:', page.url())
+    await page.waitForURL('/trends', { timeout: 10000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
   })
 
   test.afterEach(async ({ page }) => {
