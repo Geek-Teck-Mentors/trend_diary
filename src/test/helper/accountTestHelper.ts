@@ -47,6 +47,30 @@ class AccountTestHelper {
     await this.rdb.account.deleteMany()
   }
 
+  async findAccountByEmail(email: string): Promise<{ accountId: bigint; email: string } | null> {
+    const account = await this.rdb.account.findUnique({
+      where: { email },
+      select: {
+        accountId: true,
+        email: true,
+      },
+    })
+    return account
+  }
+
+  async findUserByEmail(email: string): Promise<{ userId: bigint; accountId: bigint } | null> {
+    const user = await this.rdb.user.findFirst({
+      where: {
+        account: { email },
+      },
+      select: {
+        userId: true,
+        accountId: true,
+      },
+    })
+    return user
+  }
+
   async disconnect(): Promise<void> {
     await this.rdb.$disconnect()
   }
