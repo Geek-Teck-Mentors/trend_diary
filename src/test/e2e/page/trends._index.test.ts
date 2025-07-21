@@ -54,7 +54,7 @@ test.describe('記事一覧ページ', () => {
       await expect(page).toHaveTitle(/.*トレンド一覧.*/)
     })
 
-    test.describe('記事がない場合の検証', () => {
+    test.describe('記事がない場合', () => {
       test.beforeAll(async () => {
         // 記事を削除
         await articleTestHelper.cleanUpArticles()
@@ -68,7 +68,7 @@ test.describe('記事一覧ページ', () => {
       })
     })
 
-    test.describe('記事がある場合の検証', () => {
+    test.describe('記事がある場合', () => {
       test.beforeAll(async () => {
         // 記事を作成
         await Promise.all(
@@ -85,7 +85,7 @@ test.describe('記事一覧ページ', () => {
         await expect(articleCard).toBeVisible()
       })
 
-      test.describe('記事カードの検証', () => {
+      test.describe('記事カード', () => {
         test('表示と要素の確認', async ({ page }) => {
           // 記事カードが表示されるまで待機
           await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
@@ -116,7 +116,7 @@ test.describe('記事一覧ページ', () => {
         })
       })
 
-      test.describe('ドロワーの検証', () => {
+      test.describe('ドロワー', () => {
         test.beforeEach(async ({ page }) => {
           await page.waitForSelector('[data-slot="card"]', {
             timeout: 10000,
@@ -203,7 +203,7 @@ test.describe('記事一覧ページ', () => {
       // 記事を読むリンクをクリック
       await drawer.locator('[data-slot="drawer-content-link"]').click()
 
-      // 新しいタブでそのリンクのページに遷移するのを検証
+      // 新しいタブでそのリンクのページに遷移する
       const [newPage] = await Promise.all([
         page.context().waitForEvent('page'),
         page.waitForLoadState('networkidle'),
