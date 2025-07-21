@@ -59,9 +59,16 @@ class AccountTestHelper {
   }
 
   async findUserByEmail(email: string): Promise<{ userId: bigint; accountId: bigint } | null> {
+    // accountIdを使用してaccountテーブルと結合
+    const account = await this.rdb.account.findUnique({
+      where: { email },
+    })
+
+    if (!account) return null
+
     const user = await this.rdb.user.findFirst({
       where: {
-        account: { email },
+        accountId: account.accountId,
       },
       select: {
         userId: true,
