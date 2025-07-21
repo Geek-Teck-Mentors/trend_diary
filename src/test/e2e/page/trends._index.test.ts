@@ -31,21 +31,6 @@ test.describe('記事一覧ページ', () => {
   test.beforeEach(async ({ page }) => {
     console.log('beforeEach開始')
 
-    // アカウント存在確認
-    const account = await accountTestHelper.findAccountByEmail(testEmail)
-    const user = await accountTestHelper.findUserByEmail(testEmail)
-    console.log('アカウント確認:', { account: !!account, user: !!user })
-
-    if (!account || !user) {
-      console.log('アカウントが存在しないため作成を試行')
-      try {
-        await accountTestHelper.create(testEmail, testPassword)
-        console.log('アカウント作成成功')
-      } catch (error) {
-        console.log('アカウント作成失敗:', error.message)
-      }
-    }
-
     // 2. ログイン処理の詳細化
     await page.goto('/login')
     console.log('ログインページに遷移完了')
