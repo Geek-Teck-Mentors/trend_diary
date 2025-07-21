@@ -33,8 +33,9 @@ test.describe('記事一覧ページ', () => {
     await page.getByLabel('パスワード').fill(testPassword)
     await page.getByRole('button', { name: 'ログイン' }).click()
 
-    // 3. ページ遷移を待機
+    // 3. ページ遷移とページ内容の読み込みを待機
     await page.waitForURL('/trends', { timeout: 10000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
   })
 
   test.afterEach(async ({ page }) => {
