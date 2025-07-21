@@ -45,6 +45,8 @@ test.describe('記事一覧ページ', () => {
 
   test.describe('単体テスト', () => {
     test('共通する表示と基本要素の確認', async ({ page }) => {
+      // ページのURLを確認
+      await expect(page).toHaveURL('/trends')
       // ページタイトルの確認
       await expect(page.locator('h1')).toBeVisible()
       await expect(page.locator('h1')).toContainText(/-.*-/)
