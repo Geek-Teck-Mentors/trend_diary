@@ -17,6 +17,9 @@ test.describe('記事一覧ページ', () => {
 
     // 1. まずはアカウントを作成
     await accountTestHelper.create(testEmail, testPassword)
+
+    // 2. アカウントがCI環境でも確実に存在するように1000ms待機
+    await new Promise((resolve) => setTimeout(resolve, 1000))
   })
 
   test.afterAll(async () => {
