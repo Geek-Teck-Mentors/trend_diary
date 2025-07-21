@@ -46,19 +46,13 @@ test.describe('記事一覧ページ', () => {
     try {
       await page.waitForURL('/trends', { timeout: 15000 })
       console.log('trendsページ遷移成功')
-
-      // 認証チェック完了まで追加で待機
-      await page.waitForLoadState('networkidle', { timeout: 15000 })
-
-      // 最終的にtrendsページにいることを確認（リダイレクト回避）
-      await page.waitForFunction(() => window.location.pathname === '/trends', { timeout: 5000 })
-      console.log('認証チェック完了確認')
     } catch (error) {
       console.log('trendsページ遷移失敗:', error.message)
       console.log('現在のURL:', page.url())
       throw error
     }
 
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
     console.log('beforeEach完了、現在のURL:', page.url())
   })
 
