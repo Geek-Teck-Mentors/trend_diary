@@ -13,14 +13,15 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './src/test/e2e',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
+  /* Run tests in files in parallel */
+  // INFO: 共通のDBを使うため同時に実行すると競合するので、テストファイルごとの並列実行をオフにする
+  fullyParallel: false,
   /* Opt out of parallel tests on CI. */
-  // INFO: Accountなどのテストは、同時に実行すると競合するため、並列実行をオフにする
+  // INFO: 共通のDBを使うため同時に実行すると競合するので、describeの並列実行をオフにする
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
