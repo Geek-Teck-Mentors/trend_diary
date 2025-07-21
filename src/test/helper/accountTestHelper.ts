@@ -25,14 +25,52 @@ class AccountTestHelper {
 
   async create(email: string, password: string): Promise<void> {
     const transaction = new Transaction(this.rdb)
-    await this.service.signup(transaction, email, password)
+    console.log(`アカウント作成開始: ${email}`)
+
+    try {
+      const result = await this.service.signup(transaction, email, password)
+      console.log(`サービス処理完了: ${email}`)
+
+      // トランザクションが正常に完了したか確認
+      const accountExists = await this.findAccountByEmail(email)
+      const userExists = await this.findUserByEmail(email)
+
+      console.log(`作成確認結果: account=${!!accountExists}, user=${!!userExists}`)
+
+      if (!accountExists || !userExists) {
+        throw new Error(
+          `アカウント作成が不完全です: account=${!!accountExists}, user=${!!userExists}`,
+        )
+      }
+
+      console.log(`アカウント作成成功: ${email}`)
+    } catch (error) {
+      console.log(`アカウント作成エラー: ${email}`, error.message)
+      throw error
+    }
   }
 
   async login(email: string, password: string): Promise<{ userId: bigint; sessionId: string }> {
+    console.log(`ログイン開始: ${email}`)
+
+    // 事前確認：アカウントとユーザーが存在するか
+    const account = await this.findAccountByEmail(email)
+    const user = await this.findUserByEmail(email)
+    console.log(`ログイン事前確認: account=${!!account}, user=${!!user}`)
+
+    if (!account || !user) {
+      throw new Error(`ログイン前確認失敗: account=${!!account}, user=${!!user}`)
+    }
+
     const loginResult = await this.service.login(email, password)
+    console.log(`ログインサービス処理完了: ${email}`)
+
     if (isError(loginResult)) {
+      console.log(`ログインエラー: ${email}`, loginResult.error.message)
       throw new Error(`Failed to login: ${loginResult.error.message}`)
     }
+
+    console.log(`ログイン成功: ${email}`)
     return {
       userId: loginResult.data.user.userId,
       sessionId: loginResult.data.sessionId,
