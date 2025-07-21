@@ -12,7 +12,7 @@ test.describe('記事一覧ページ', () => {
   const testPassword = faker.internet.password()
 
   test.beforeAll(async () => {
-    await accountTestHelper.cleanUp()
+    // 他のテストファイルのアカウントを削除しないよう、記事のみクリーンアップ
     await articleTestHelper.cleanUpArticles()
 
     // 1. まずはアカウントを作成
@@ -23,7 +23,6 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.afterAll(async () => {
-    await accountTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
     await accountTestHelper.disconnect()
     await articleTestHelper.disconnect()
