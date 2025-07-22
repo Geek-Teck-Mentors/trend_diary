@@ -76,44 +76,42 @@ test.describe('記事一覧ページ', () => {
           Array.from({ length: ARTICLE_COUNT }, (_, i) => articleTestHelper.createArticle()),
         )
       })
-      test('固有の表示と要素の確認', async ({ page }) => {
-        // 記事カードが表示されるまで待機
-        await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
-
-        // 記事が存在することを確認
-        const articleCards = page.locator('[data-slot="card"]')
-        const articleCard = articleCards.first()
-        await expect(articleCard).toBeVisible()
-      })
-
-      test.describe('記事カード', () => {
-        test('表示と要素の確認', async ({ page }) => {
+      test.describe('記事一覧', () => {
+        test.beforeEach(async ({ page }) => {
           // 記事カードが表示されるまで待機
           await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
-
+        })
+        test('記事の数だけカードが表示される', async ({ page }) => {
+          // 記事が存在することを確認
           const articleCards = page.locator('[data-slot="card"]')
-          const articleCard = articleCards.first()
-
-          // 記事カードにtitleが表示されているか
-          await expect(articleCard.locator('[data-slot="card-title"]')).toBeVisible()
-          await expect(articleCard.locator('[data-slot="media-icon"]')).toBeVisible()
-          await expect(articleCard.locator('[data-slot="card-title-content"]')).toBeVisible()
-          // 記事カードにauthorが表示されているか
-          await expect(articleCard.locator('[data-slot="card-description"]')).toBeVisible()
-          await expect(articleCard.locator('[data-slot="card-description-author"]')).toBeVisible()
+          await expect(articleCards).toHaveCount(ARTICLE_COUNT)
         })
 
-        test('カードのクリック後ドロワーが開く', async ({ page }) => {
-          await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
-          const articleCards = page.locator('[data-slot="card"]')
+        test.describe('記事カード', () => {
+          test('表示と要素の確認', async ({ page }) => {
+            const articleCards = page.locator('[data-slot="card"]')
+            const articleCard = articleCards.first()
 
-          await articleCards.first().click()
-
-          // ドロワーが開いていることを確認
-          await page.waitForSelector('[data-slot="drawer-content"]', {
-            timeout: 10000,
+            // 記事カードにtitleが表示されているか
+            await expect(articleCard.locator('[data-slot="card-title"]')).toBeVisible()
+            await expect(articleCard.locator('[data-slot="media-icon"]')).toBeVisible()
+            await expect(articleCard.locator('[data-slot="card-title-content"]')).toBeVisible()
+            // 記事カードにauthorが表示されているか
+            await expect(articleCard.locator('[data-slot="card-description"]')).toBeVisible()
+            await expect(articleCard.locator('[data-slot="card-description-author"]')).toBeVisible()
           })
-          await expect(page.locator('[data-slot="drawer-content"]')).toBeVisible()
+
+          test('カードのクリック後ドロワーが開く', async ({ page }) => {
+            const articleCards = page.locator('[data-slot="card"]')
+
+            await articleCards.first().click()
+
+            // ドロワーが開いていることを確認
+            await page.waitForSelector('[data-slot="drawer-content"]', {
+              timeout: 10000,
+            })
+            await expect(page.locator('[data-slot="drawer-content"]')).toBeVisible()
+          })
         })
       })
 
@@ -173,16 +171,12 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.describe('結合テスト', () => {
-    test.beforeAll(async () => {
+    test.beforeAll(async ({page}) => {
       // 記事を作成
       await Promise.all(
         Array.from({ length: ARTICLE_COUNT }, (_, i) => articleTestHelper.createArticle()),
       )
-    })
-    test('ドロワーの記事へのリンクをクリックすると外部サイトの記事ページに遷移', async ({
-      page,
-    }) => {
-      const ARTICLE_URL = 'https://example.com/article'
+
       // 記事カードが表示されるまで待機
       await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
       // 記事カードをクリック
@@ -190,6 +184,11 @@ test.describe('記事一覧ページ', () => {
       await articleCards.first().click()
       // ドロワーが開くのを待機
       await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
+    })
+    test('ドロワーの記事へのリンクをクリックすると外部サイトの記事ページに遷移', async ({
+      page,
+    }) => {
+      const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
 
       const drawer = page.locator('[data-slot="drawer-content"]')
 
