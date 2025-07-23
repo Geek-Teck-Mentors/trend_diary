@@ -2,8 +2,7 @@
   "name": "my-app",
   "type": "module",
   "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=8.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "dev": "remix vite:dev",
@@ -89,9 +88,5 @@
     "vitest": "^3.0.4",
     "vitest-mock-extended": "^3.1.0",
     "wrangler": "^3.114.7"
-  },
-  "overrides": {
-    "esbuild": "0.17.19",
-    "estree-util-value-to-estree": "3.3.3"
   }
-}
+ }
