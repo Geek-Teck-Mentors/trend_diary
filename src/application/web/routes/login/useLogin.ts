@@ -30,15 +30,12 @@ export default function useLogin() {
       })
 
       if (res.status === 200) {
-        console.log('Login success')
         navigate('/trends')
       } else if (res.status === 401 || res.status === 404) {
-        console.error('Login failed: Invalid credentials', { status: res.status })
         setErrors({
           email: ['メールアドレスまたはパスワードが正しくありません。'],
         })
       } else {
-        console.error('Login failed: Unexpected status', { status: res.status })
         setErrors({
           email: ['ログインに失敗しました。'],
         })
