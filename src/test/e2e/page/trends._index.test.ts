@@ -29,6 +29,9 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.beforeEach(async ({ page }) => {
+    // 1. データベースの遅延を避けるため、ページを開く前に少し待機
+    await page.waitForTimeout(1000)
+
     // 2. ログイン
     await page.goto('/login')
     await page.getByLabel('メールアドレス').fill(testEmail)
