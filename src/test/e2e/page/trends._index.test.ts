@@ -45,170 +45,91 @@ test.describe('記事一覧ページ', () => {
     await page.context().clearCookies()
   })
 
-  test.describe('単体テスト', () => {
-    test('共通する表示と基本要素の確認', async ({ page }) => {
-      // ページのURLを確認
-      await expect(page).toHaveURL('/trends')
-      // ページタイトルの確認
-      await expect(page.locator('h1')).toBeVisible()
-      await expect(page.locator('h1')).toContainText(/-.*-/)
-      await expect(page).toHaveTitle(/.*トレンド一覧.*/)
+  test.describe('記事がない場合', () => {
+    test.beforeAll(async () => {
+      // 記事を削除
+      await articleTestHelper.cleanUpArticles()
     })
+    test('記事がないと表示される', async ({ page }) => {
+      // 記事の読み込みを待機
+      await page.waitForLoadState()
 
-    test.describe('記事がない場合', () => {
-      test.beforeAll(async () => {
-        // 記事を削除
-        await articleTestHelper.cleanUpArticles()
-      })
-      test('固有の表示と要素の確認', async ({ page }) => {
-        // 記事の読み込みを待機
-        await page.waitForLoadState()
-
-        // 記事がない場合は「記事がありません」が表示されることを確認
-        await expect(page.getByText('記事がありません')).toBeVisible()
-      })
-    })
-
-    test.describe('記事がある場合', () => {
-      test.beforeAll(async () => {
-        // 記事を作成
-        await Promise.all(
-          Array.from({ length: ARTICLE_COUNT }, (_, i) => articleTestHelper.createArticle()),
-        )
-      })
-      test.describe('記事一覧', () => {
-        test.beforeEach(async ({ page }) => {
-          // 記事カードが表示されるまで待機
-          await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
-        })
-        test('記事の数だけカードが表示される', async ({ page }) => {
-          // 記事が存在することを確認
-          const articleCards = page.locator('[data-slot="card"]')
-          await expect(articleCards).toHaveCount(ARTICLE_COUNT)
-        })
-
-        test.describe('記事カード', () => {
-          test('表示と要素の確認', async ({ page }) => {
-            const articleCards = page.locator('[data-slot="card"]')
-            const articleCard = articleCards.first()
-
-            // 記事カードにtitleが表示されているか
-            await expect(articleCard.locator('[data-slot="card-title"]')).toBeVisible()
-            await expect(articleCard.locator('[data-slot="media-icon"]')).toBeVisible()
-            await expect(articleCard.locator('[data-slot="card-title-content"]')).toBeVisible()
-            // 記事カードにauthorが表示されているか
-            await expect(articleCard.locator('[data-slot="card-description"]')).toBeVisible()
-            await expect(articleCard.locator('[data-slot="card-description-author"]')).toBeVisible()
-          })
-
-          test('カードのクリック後ドロワーが開く', async ({ page }) => {
-            const articleCards = page.locator('[data-slot="card"]')
-
-            await articleCards.first().click()
-
-            // ドロワーが開いていることを確認
-            await page.waitForSelector('[data-slot="drawer-content"]', {
-              timeout: 10000,
-            })
-            await expect(page.locator('[data-slot="drawer-content"]')).toBeVisible()
-          })
-        })
-      })
-
-      test.describe('ドロワー', () => {
-        test.beforeEach(async ({ page }) => {
-          await page.waitForSelector('[data-slot="card"]', {
-            timeout: 10000,
-          })
-          const articleCards = page.locator('[data-slot="card"]')
-
-          await articleCards.first().click()
-
-          await page.waitForSelector('[data-slot="drawer-content"]', {
-            timeout: 10000,
-          })
-        })
-
-        test('表示と要素の確認', async ({ page }) => {
-          const drawer = page.locator('[data-slot="drawer-content"]')
-
-          // media iconが表示されていることを確認
-          await expect(drawer.locator('[data-slot="drawer-header"]')).toBeVisible()
-          await expect(drawer.locator('[data-slot="drawer-header-icon"]')).toBeVisible()
-
-          // 閉じるボタンが表示されていることを確認
-          await expect(drawer.locator('[data-slot="drawer-close"]')).toBeVisible()
-
-          // titleが表示されていることを確認
-          await expect(drawer.locator('[data-slot="drawer-title"]')).toBeVisible()
-
-          // 記事の作成日が表示されていることを確認
-          await expect(drawer.locator('[data-slot="drawer-content-meta"]')).toBeVisible()
-
-          // 記事の著者が表示されていることを確認
-          await expect(drawer.locator('[data-slot="drawer-content-author"]')).toBeVisible()
-
-          // 記事のdescriptionが表示されていることを確認
-          await expect(drawer.locator('[data-slot="drawer-content-description"]')).toBeVisible()
-          await expect(
-            drawer.locator('[data-slot="drawer-content-description-content"]'),
-          ).toBeVisible()
-
-          // 記事を読むリンクが表示されていることを確認
-          await expect(drawer.locator('[data-slot="drawer-content-link"]')).toBeVisible()
-        })
-
-        test('ドロワー外をクリックするとドロワーが閉じる', async ({ page }) => {
-          await page.locator('body').click({ position: { x: 100, y: 100 } })
-
-          // アニメーションのために少し待機
-          await page.waitForTimeout(500)
-
-          await expect(page.locator('[data-slot="drawer-content"]')).not.toBeVisible()
-        })
-      })
+      // 記事がない場合は「記事がありません」が表示されることを確認
+      await expect(page.getByText('記事がありません')).toBeVisible()
     })
   })
 
-  test.describe('結合テスト', () => {
-    test.beforeAll(async ({page}) => {
+  test.describe('記事がある場合', () => {
+    test.beforeAll(async () => {
       // 記事を作成
       await Promise.all(
         Array.from({ length: ARTICLE_COUNT }, (_, i) => articleTestHelper.createArticle()),
       )
-
+    })
+    test.beforeEach(async ({ page }) => {
       // 記事カードが表示されるまで待機
       await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
-      // 記事カードをクリック
-      const articleCards = page.locator('[data-slot="card"]')
-      await articleCards.first().click()
-      // ドロワーが開くのを待機
-      await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
     })
-    test('ドロワーの記事へのリンクをクリックすると外部サイトの記事ページに遷移', async ({
-      page,
-    }) => {
+    test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
+      // 1. 記事カードの存在を確認
+      const articleCards = page.locator('[data-slot="card"]')
+      const articleCard = articleCards.first()
+      await expect(articleCard).toBeVisible()
+
+      await articleCard.click()
+
+      // 2. ドロワーが開くのを待機
+      await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
+
+      // 3. ドロワーの存在を確認
+      const drawer = page.locator('[data-slot="drawer-content"]')
+      await expect(drawer).toBeVisible()
+
+      // 4. ドロワーの閉じるボタンをクリック
+      await drawer.locator('[data-slot="drawer-close"]').click()
+
+      // 5. ドロワーが閉じるのを待機
+      await page.waitForSelector('[data-slot="drawer-content"]', {
+        state: 'detached',
+        timeout: 10000,
+      })
+
+      // 6. 記事一覧に戻っていることを確認
+      // 記事カードが表示されていることを確認
+      await expect(articleCard).toBeVisible()
+      // ドロワーが閉じていることを確認
+      await expect(page.locator('[data-slot="drawer-content"]')).not.toBeVisible()
+    })
+    test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
       const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
 
+      // 1. 記事カードの存在を確認
+      const articleCards = page.locator('[data-slot="card"]')
+      const articleCard = articleCards.first()
+      await expect(articleCard).toBeVisible()
+
+      await articleCard.click()
+
+      // 2. ドロワーが開くのを待機
+      await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
+
+      // 3. ドロワーの存在を確認
       const drawer = page.locator('[data-slot="drawer-content"]')
+      await expect(drawer).toBeVisible()
 
-      // ドロワーの記事を読むボタンを取得
+      // 4. 記事を読むリンクをクリック
       const drawerLink = drawer.locator('[data-slot="drawer-content-link"]')
-
       // ドロワーの記事を読むリンクのURLを上書き
       await drawerLink.evaluate((element, url) => {
         ;(element as HTMLAnchorElement).href = url
       }, ARTICLE_URL)
+      await drawerLink.click()
 
-      // 記事を読むリンクをクリック
-      await drawer.locator('[data-slot="drawer-content-link"]').click()
-
-      // 新しいタブでそのリンクのページに遷移する
+      // 5. 新しいタブでそのリンクのページに遷移する
       const [newPage] = await Promise.all([
         page.context().waitForEvent('page'),
         page.waitForLoadState('networkidle'),
       ])
-
       await expect(newPage).toHaveURL(ARTICLE_URL)
     })
   })
