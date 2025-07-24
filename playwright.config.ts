@@ -14,9 +14,9 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: './src/test/e2e',
   /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
+  forbidOnly: true,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: 0,
   /* Run tests in files in parallel */
   // INFO: 共通のDBを使うため同時に実行すると競合するので、テストファイルごとの並列実行をオフにする
   fullyParallel: false,
@@ -76,6 +76,6 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
   },
 })
