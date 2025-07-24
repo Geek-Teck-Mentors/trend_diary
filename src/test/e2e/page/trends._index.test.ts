@@ -51,8 +51,10 @@ test.describe('記事一覧ページ', () => {
       await articleTestHelper.cleanUpArticles()
     })
     test('記事がないと表示される', async ({ page }) => {
+      // 数秒待機して記事が読み込まれるのを待つ
+      await page.waitForTimeout(2000)
       // 記事の読み込みを待機
-      await page.waitForLoadState()
+      await page.waitForLoadState('networkidle', { timeout: 10000 })
 
       // 記事がない場合は「記事がありません」が表示されることを確認
       await expect(page.getByText('記事がありません')).toBeVisible()
@@ -67,6 +69,8 @@ test.describe('記事一覧ページ', () => {
       )
     })
     test.beforeEach(async ({ page }) => {
+      // 数秒待機して記事が読み込まれるのを待つ
+      await page.waitForTimeout(2000)
       // 記事カードが表示されるまで待機
       await page.waitForSelector('[data-slot="card"]', { timeout: 10000 })
     })
