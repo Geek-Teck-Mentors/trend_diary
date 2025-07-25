@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Card,
   CardContent,
@@ -10,7 +9,7 @@ import {
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { Alert, AlertTitle, AlertDescription } from '../../components/ui/alert'
 import { AuthenticateForm } from '../../features/authenticate/AuthenticateForm'
-import { PageError } from '../../features/common/page'
+import { PageError } from '../../features/common/usePageError'
 
 type Props = {
   pageError?: PageError

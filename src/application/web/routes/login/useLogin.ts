@@ -1,14 +1,14 @@
 import { useNavigate } from '@remix-run/react'
-import { useState } from 'react'
 import getApiClientForClient from '../../infrastructure/api'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
-import { PageError } from '../../features/common/page'
+import { usePageError } from '../../features/common/usePageError'
 
 export default function useLogin() {
   const navigate = useNavigate()
-  const [pageError, setPageError] = useState<PageError>()
+  const { pageError, newPageError, clearPageError } = usePageError()
 
   const handleSubmit = async (data: AuthenticateFormData) => {
+    clearPageError()
     try {
       const client = getApiClientForClient()
 
@@ -22,21 +22,12 @@ export default function useLogin() {
       if (res.status === 200) {
         navigate('/trends')
       } else if (res.status === 401 || res.status === 404) {
-        setPageError({
-          title: '認証エラー',
-          description: 'メールアドレスまたはパスワードが正しくありません',
-        })
+        newPageError('認証エラー', 'メールアドレスまたはパスワードが正しくありません')
       } else if (res.status >= 500) {
-        setPageError({
-          title: 'サーバーエラー',
-          description: '不明なエラーが発生しました',
-        })
+        newPageError('サーバーエラー', '不明なエラーが発生しました')
       }
     } catch {
-      setPageError({
-        title: 'ネットワークエラー',
-        description: 'ネットワークエラーが発生しました',
-      })
+      newPageError('ネットワークエラー', 'ネットワークエラーが発生しました')
     }
   }
 
