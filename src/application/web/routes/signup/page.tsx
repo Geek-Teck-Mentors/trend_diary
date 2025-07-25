@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
 import {
   Card,
   CardContent,
@@ -6,9 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui/card'
-import { AuthenticateFormData } from '../../features/authenticate/validation'
-import { Alert, AlertTitle, AlertDescription } from '../../components/ui/alert'
 import { AuthenticateForm } from '../../features/authenticate/AuthenticateForm'
+import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { PageError } from '../../features/common/usePageError'
 
 type Props = {

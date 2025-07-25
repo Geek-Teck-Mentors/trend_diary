@@ -1,16 +1,17 @@
 /// <reference types="vitest/config" />
 /// <reference types="vitest" />
 
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defaultOptions } from '@hono/vite-dev-server'
 import adapter from '@hono/vite-dev-server/cloudflare'
 import { vitePlugin as remix } from '@remix-run/dev'
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import serverAdapter from 'hono-remix-adapter/vite'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
+
 const dirname =
   typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 

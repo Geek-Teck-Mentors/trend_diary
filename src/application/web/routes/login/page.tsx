@@ -1,8 +1,7 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
-
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
-import { AuthenticateFormData } from '../../features/authenticate/validation'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
 import { AuthenticateForm } from '../../features/authenticate/AuthenticateForm'
+import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { PageError } from '../../features/common/usePageError'
 
 type Props = {
