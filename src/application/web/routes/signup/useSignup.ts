@@ -1,57 +1,46 @@
-import { useNavigate } from "@remix-run/react";
-import { useState } from "react";
+import { useNavigate } from '@remix-run/react'
+import { useState } from 'react'
 
-import getApiClientForClient from "../../infrastructure/api";
+import getApiClientForClient from '../../infrastructure/api'
 import {
   AuthenticateErrors,
+  AuthenticateFormData,
   validateAuthenticateForm,
-} from "../../features/authenticate/authenticateForm";
+} from '../../features/authenticate/validation'
+import { PageError } from '../../features/common/page'
 
 export default function useSignup() {
-  const navigate = useNavigate();
-  const [errors, setErrors] = useState<AuthenticateErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate()
+  const [pageError, setPageError] = useState<PageError>()
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    const formData = new FormData(e.currentTarget);
-    const validation = validateAuthenticateForm(formData);
-
-    if (!validation.isValid) {
-      setErrors(validation.errors);
-      setIsLoading(false);
-      return;
-    }
-
+  const handleSubmit = async (data: AuthenticateFormData) => {
     try {
-      const client = getApiClientForClient();
+      const client = getApiClientForClient()
 
       const res = await client.account.$post({
-        json: validation.data,
-      });
+        json: data,
+      })
 
       if (res.status === 201) {
-        navigate("/login");
+        navigate('/login')
       } else if (res.status === 409) {
-        setErrors({
-          email: ["このメールアドレスは既に使用されています"],
-        });
-      } else {
-        setErrors({
-          email: ["サインアップに失敗しました"],
-        });
+        setPageError({
+          title: '認証エラー',
+          description: 'このメールアドレスは既に使用されています',
+        })
+      } else if (res.status >= 500) {
+        setPageError({
+          title: 'サーバーエラー',
+          description: 'サインアップに失敗しました',
+        })
       }
     } catch {
-      setErrors({
-        email: ["ネットワークエラーが発生しました"],
-      });
-    } finally {
-      setIsLoading(false);
+      setPageError({
+        title: 'ネットワークエラー',
+        description: 'ネットワークエラーが発生しました',
+      })
     }
-  };
+  }
 
-  return { handleSubmit, errors, isLoading };
+  return { handleSubmit, pageError }
 }
