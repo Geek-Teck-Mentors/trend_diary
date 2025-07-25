@@ -9,7 +9,9 @@ export type AuthenticateErrors = {
 
 export type AuthenticateFormData = Pick<z.infer<typeof accountSchema>, 'email' | 'password'>
 
-export function validateAuthenticateForm(formData: FormData): ValidationResult<AuthenticateFormData, AuthenticateErrors> {
+export function validateAuthenticateForm(
+  formData: FormData,
+): ValidationResult<AuthenticateFormData, AuthenticateErrors> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
@@ -19,8 +21,13 @@ export function validateAuthenticateForm(formData: FormData): ValidationResult<A
   })
 
   if (!result.success) {
-    return newValidationError<AuthenticateErrors>(result.error.flatten().fieldErrors as AuthenticateErrors)
+    return newValidationError<AuthenticateErrors>(
+      result.error.flatten().fieldErrors as AuthenticateErrors,
+    )
   }
 
-  return newValidationSuccess<AuthenticateFormData>({ email: result.data.email, password: result.data.password })
+  return newValidationSuccess<AuthenticateFormData>({
+    email: result.data.email,
+    password: result.data.password,
+  })
 }

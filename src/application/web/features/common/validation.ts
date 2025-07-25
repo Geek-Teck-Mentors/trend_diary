@@ -15,7 +15,9 @@ export function newValidationSuccess<T>(data: T): ValidationResult<T, never> {
   }
 }
 
-export function newValidationError<E extends Record<string, any>>(errors: E): ValidationResult<never, E> {
+export function newValidationError<E extends Record<string, any>>(
+  errors: E,
+): ValidationResult<never, E> {
   return {
     isValid: false,
     errors,
