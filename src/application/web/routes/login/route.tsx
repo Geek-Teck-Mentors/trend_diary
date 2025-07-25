@@ -1,11 +1,11 @@
-import type { MetaFunction } from '@remix-run/cloudflare'
-import LoginPage from './page'
-import useLogin from './useLogin'
+import type { MetaFunction } from "@remix-run/cloudflare";
+import LoginPage from "./page";
+import useLogin from "./useLogin";
 
-export const meta: MetaFunction = () => [{ title: 'ログイン | TrendDiary' }]
+export const meta: MetaFunction = () => [{ title: "ログイン | TrendDiary" }];
 
 export default function Login() {
-  const { handleSubmit, errors, isLoading } = useLogin()
+  const { handleSubmit, pageError } = useLogin();
 
-  return <LoginPage handleSubmit={handleSubmit} errors={errors} isLoading={isLoading} />
+  return <LoginPage pageError={pageError} handleSubmit={handleSubmit} />;
 }

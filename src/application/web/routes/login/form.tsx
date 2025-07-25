@@ -1,16 +1,40 @@
+import { useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import {
+  AuthenticateErrors,
+  AuthenticateFormData,
+  validateAuthenticateForm,
+} from "../../features/authenticate/authenticateForm";
 
 type Props = {
-  isLoading: boolean;
-  errors: Record<string, string[]>;
-  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleSubmit: (data: AuthenticateFormData) => void;
 };
 
-export const Form = ({ isLoading, errors, handleSubmit }: Props) => {
+export const Form = ({ handleSubmit }: Props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<AuthenticateErrors>({});
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
+
+    const formData = new FormData(e.currentTarget);
+    const validation = validateAuthenticateForm(formData);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      setIsLoading(false);
+      return;
+    }
+
+    handleSubmit(validation.data);
+    setIsLoading(false);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-6">
+    <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-6">
       <div className="space-y-2">
         <Label htmlFor="email">メールアドレス</Label>
         <Input
