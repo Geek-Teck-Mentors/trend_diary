@@ -18,6 +18,14 @@
       "text": "Write commit messages in Japanese instead of English."
     }
   ],
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "[json]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "biomejs.biome"
