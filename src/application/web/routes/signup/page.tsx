@@ -13,7 +13,7 @@ import { PageError } from '../../features/common/usePageError'
 
 type Props = {
   pageError?: PageError
-  handleSubmit: (data: AuthenticateFormData) => void
+  handleSubmit: (data: AuthenticateFormData) => Promise<void>
 }
 
 export default function SignupPage({ pageError, handleSubmit }: Props) {

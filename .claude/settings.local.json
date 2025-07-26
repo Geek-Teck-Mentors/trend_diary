@@ -18,7 +18,8 @@
       "Bash(git commit:*)",
       "Bash(rm:*)",
       "Bash(git add:*)",
-      "Bash(npm run check:fix:*)"
+      "Bash(npm run check:fix:*)",
+      "Bash(npm run test:frontend:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",

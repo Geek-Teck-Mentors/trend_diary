@@ -7,7 +7,7 @@ import { AuthenticateErrors, AuthenticateFormData, validateAuthenticateForm } fr
 type Props = {
   submitButtonText: string
   loadingSubmitButtonText: string
-  handleSubmit: (data: AuthenticateFormData) => void
+  handleSubmit: (data: AuthenticateFormData) => Promise<void>
 }
 
 export const AuthenticateForm = ({
@@ -18,7 +18,7 @@ export const AuthenticateForm = ({
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<AuthenticateErrors>({})
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     setErrors({})
@@ -31,7 +31,7 @@ export const AuthenticateForm = ({
       return
     }
 
-    handleSubmit(validation.data)
+    await handleSubmit(validation.data)
     setIsLoading(false)
   }
 
@@ -60,7 +60,7 @@ export const AuthenticateForm = ({
         />
         {errors?.password && <p className='text-destructive text-sm'>{errors.password.at(0)}</p>}
       </div>
-      <Button type='submit' className='w-full' disabled={isLoading}>
+      <Button role='button' type='submit' className='w-full' disabled={isLoading}>
         {isLoading ? loadingSubmitButtonText : submitButtonText}
       </Button>
     </form>
