@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       globals: true,
+      include: ['src/**/*.stories.tsx'],
       projects: [
         {
           extends: true,
