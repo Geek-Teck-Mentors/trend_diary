@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [tailwindcss(), tsconfigPaths()],
     optimizeDeps: {
-      include: ["markdown-to-jsx"]
+      include: ['markdown-to-jsx'],
     },
     test: {
       globals: true,
