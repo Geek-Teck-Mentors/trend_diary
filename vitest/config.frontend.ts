@@ -12,6 +12,8 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
     include: testInclude,
     exclude,
     // テストファイルがない場合にエラーになるため、テストファイルがない場合でも正常終了とする
