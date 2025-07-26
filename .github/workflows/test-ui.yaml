@@ -34,6 +34,9 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install chromium --with-deps
 
+      - name: インストールされたChromiumのパスを確認
+        run: ls /home/runner/.cache/ms-playwright/
+
       - name: Run tests
         env:
           CI: true
