@@ -5,7 +5,7 @@ import useSignup from './useSignup'
 export const meta: MetaFunction = () => [{ title: 'アカウント作成 | TrendDiary' }]
 
 export default function Signup() {
-  const { handleSubmit, errors, isLoading } = useSignup()
+  const { handleSubmit, pageError } = useSignup()
 
-  return <SignupPage handleSubmit={handleSubmit} errors={errors} isLoading={isLoading} />
+  return <SignupPage handleSubmit={handleSubmit} pageError={pageError} />
 }

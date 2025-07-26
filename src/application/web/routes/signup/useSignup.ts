@@ -1,54 +1,32 @@
 import { useNavigate } from '@remix-run/react'
-import { useState } from 'react'
-
+import { usePageError } from '../../components/PageError/usePageError'
+import { AuthenticateFormData } from '../../features/authenticate/validation'
 import getApiClientForClient from '../../infrastructure/api'
-import { AuthenticateErrors, validateAuthenticateForm } from '../../validation/authenticateForm'
 
 export default function useSignup() {
   const navigate = useNavigate()
-  const [errors, setErrors] = useState<AuthenticateErrors>({})
-  const [isLoading, setIsLoading] = useState(false)
+  const { pageError, newPageError, clearPageError } = usePageError()
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setErrors({})
-
-    const formData = new FormData(e.currentTarget)
-    const validation = validateAuthenticateForm(formData)
-
-    if (!validation.isValid) {
-      setErrors(validation.errors)
-      setIsLoading(false)
-      return
-    }
-
+  const handleSubmit = async (data: AuthenticateFormData) => {
+    clearPageError()
     try {
       const client = getApiClientForClient()
 
       const res = await client.account.$post({
-        json: validation.data,
+        json: data,
       })
 
       if (res.status === 201) {
         navigate('/login')
       } else if (res.status === 409) {
-        setErrors({
-          email: ['このメールアドレスは既に使用されています'],
-        })
-      } else {
-        setErrors({
-          email: ['サインアップに失敗しました'],
-        })
+        newPageError('認証エラー', 'このメールアドレスは既に使用されています')
+      } else if (res.status >= 500) {
+        newPageError('サーバーエラー', 'サインアップに失敗しました')
       }
     } catch {
-      setErrors({
-        email: ['ネットワークエラーが発生しました'],
-      })
-    } finally {
-      setIsLoading(false)
+      newPageError('ネットワークエラー', 'ネットワークエラーが発生しました')
     }
   }
 
-  return { handleSubmit, errors, isLoading }
+  return { handleSubmit, pageError }
 }
