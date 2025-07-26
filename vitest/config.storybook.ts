@@ -28,6 +28,11 @@ export default defineConfig(({ mode }) => {
                   browser: 'chromium',
                 },
               ],
+              providerOptions: {
+                launch: {
+                  executablePath: undefined, // デフォルトのchromiumを使用
+                }
+              }
             },
             setupFiles: ['.storybook/vitest.setup.ts'],
           },
