@@ -66,26 +66,32 @@ export default class AccountService {
     if (isError(accountRes)) return resultError(accountRes.error)
 
     const account = accountRes.data
+    console.log('account match:', !isNull(account))
     if (isNull(account)) return resultError(new NotFoundError('Account not found'))
 
     // パスワードの照合
     const isPasswordMatch = await bcrypt.compare(plainPassword, account.password)
+    console.log('password match:', isPasswordMatch)
     if (!isPasswordMatch) return resultError(new ClientError('Invalid password'))
 
     // ログイン記録の更新
     account.recordLogin()
     const saveRes = await this.accountRepository.save(account)
+    console.log('saveRes:', saveRes)
     if (isError(saveRes)) return resultError(saveRes.error)
 
     // ユーザー情報の取得
     const userRes = await this.userRepository.findByAccountId(account.accountId)
+    console.log('userRes:', userRes)
     if (isError(userRes)) return resultError(userRes.error)
 
     const user = userRes.data
+    console.log('user match:', !isNull(user))
     if (isNull(user)) return resultError(new ServerError('User not found. this should not happen')) // signup時に作成されているはず
 
     const expiredAt = new Date(Date.now() + SESSION_DURATION)
     const addSessionRes = await this.accountRepository.addSession(account.accountId, expiredAt)
+    console.log('addSessionRes:', addSessionRes)
     if (isError(addSessionRes)) return resultError(addSessionRes.error)
     const sessionId = addSessionRes.data
 
