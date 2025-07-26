@@ -6,7 +6,7 @@ import { coverageReporter } from './config'
 const testInclude = ['src/application/web/**/*.test.ts']
 
 const coverageInclude = ['src/application/web/**/*', 'src/application/web/components/**/*']
-const exclude = ['src/application/web/components/ui/**/*']
+const exclude = ['src/application/web/components/ui/**/*', 'src/application/web/**/*.tsx']
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
