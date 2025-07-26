@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
                 {
                   browser: 'chromium',
                   launch: {
-                    executablePath:  process.env.CI === 'true' ? "/home/runner/.cache/ms-playwright/chromium_headless_shell-1169/chrome-linux/chrome" : undefined
+                    executablePath:  process.env.CI === 'true' ? "/home/runner/.cache/ms-playwright/chromium_headless_shell-1169" : undefined
                   }
                 },
               ],

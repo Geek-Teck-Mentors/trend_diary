@@ -37,6 +37,9 @@ jobs:
       - name: インストールされたChromiumのパスを確認
         run: ls /home/runner/.cache/ms-playwright/
 
+      - name: Chromiumのパスを詳細に確認
+        run: ls /home/runner/.cache/ms-playwright/chromium_headless_shell-1169
+
       - name: Run tests
         env:
           CI: true
