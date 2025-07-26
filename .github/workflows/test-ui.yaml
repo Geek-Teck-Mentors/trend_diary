@@ -25,7 +25,9 @@ jobs:
         uses: ./.github/actions/setup_node
 
       - name: Playwrightのセットアップ
-        run: npx playwright install
+        run: npx playwright install chromium --with-deps
 
       - name: Run tests
+        env:
+          CI: true
         run: npm run test-storybook

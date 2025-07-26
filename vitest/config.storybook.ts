@@ -21,18 +21,13 @@ export default defineConfig(({ mode }) => {
             name: 'storybook',
             browser: {
               enabled: true,
-              headless: true,
+              headless: process.env.CI === 'true',
               provider: 'playwright',
               instances: [
                 {
                   browser: 'chromium',
                 },
               ],
-              providerOptions: {
-                launch: {
-                  executablePath: undefined, // デフォルトのchromiumを使用
-                }
-              }
             },
             setupFiles: ['.storybook/vitest.setup.ts'],
           },
