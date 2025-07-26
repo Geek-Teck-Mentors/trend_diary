@@ -14,9 +14,6 @@ export default defineConfig(({ mode }) => {
         {
           extends: true,
           plugins: [storybookTest()],
-          optimizeDeps: {
-            include: ['markdown-to-jsx']
-          },
           test: {
             name: 'storybook',
             browser: {
