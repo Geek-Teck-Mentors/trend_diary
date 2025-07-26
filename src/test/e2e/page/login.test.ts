@@ -27,7 +27,7 @@ test.describe('ログインページ', () => {
 
     // アカウント作成ページのタイトルを確認
     await expect(page).toHaveTitle(/.*アカウント作成.*/)
-    await expect(page.getByText('アカウント作成')).toBeVisible()
+    await expect(page.getByText('以下の情報を入力してアカウントを作成してください')).toBeVisible()
   })
 
   test('ログイン成功時の挙動', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('ログインページ', () => {
     await page.getByRole('button', { name: 'ログイン' }).click()
 
     // エラーメッセージが表示されることを確認
-    await expect(page.getByText('メールアドレスまたはパスワードが正しくありません。')).toBeVisible()
+    await expect(page.getByText('メールアドレスまたはパスワードが正しくありません')).toBeVisible()
 
     // ログインページに留まることを確認
     await expect(page).toHaveURL('/login')
