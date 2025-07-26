@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'src/application/web/**/*.tsx'
+      - 'vitest/config.storybook.ts'
       - '.github/workflows/test-ui.yaml'
 
 jobs:
