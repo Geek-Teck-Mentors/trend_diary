@@ -36,7 +36,9 @@ export const EmptyForm: Story = {
 
     // エラーメッセージが表示されていないことを確認
     await expect(canvas.queryByText('Invalid email')).not.toBeInTheDocument()
-    await expect(canvas.queryByText('String must contain at least 8 character(s)')).not.toBeInTheDocument()
+    await expect(
+      canvas.queryByText('String must contain at least 8 character(s)'),
+    ).not.toBeInTheDocument()
 
     // aria-invalid属性が設定されていないことを確認
     await expect(canvas.getByLabelText('メールアドレス')).not.toHaveAttribute('aria-invalid')
@@ -65,7 +67,7 @@ export const FormValidationError: Story = {
   play: async ({ canvas, userEvent }) => {
     // 有効なメールアドレスを入力
     await userEvent.type(canvas.getByLabelText('メールアドレス'), 'user@example.com')
-    
+
     // 短すぎるパスワードを入力（7文字）
     await userEvent.type(canvas.getByLabelText('パスワード'), '1234567')
 
@@ -73,7 +75,9 @@ export const FormValidationError: Story = {
     await userEvent.click(canvas.getByRole('button'))
 
     // バリデーションエラーメッセージが表示されることを確認
-    await expect(canvas.getByText('String must contain at least 8 character(s)')).toBeInTheDocument()
+    await expect(
+      canvas.getByText('String must contain at least 8 character(s)'),
+    ).toBeInTheDocument()
 
     // aria-invalid属性が正しく設定されることを確認
     await expect(canvas.getByLabelText('パスワード')).toHaveAttribute('aria-invalid', 'true')

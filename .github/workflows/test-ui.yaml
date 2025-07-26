@@ -1,0 +1,22 @@
+name: UI Test
+
+on: 
+  push:
+    paths:
+      - 'src/application/web/**/*.tsx'
+      - '.github/workflows/test.yaml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      # Make sure to grab the latest version of the Playwright image
+      # https://playwright.dev/docs/docker#pull-the-image
+      image: mcr.microsoft.com/playwright:v1.52.0-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+
+      - name: Run tests
+        run: npm run test-storybook
