@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...env }
   return {
     plugins: [tailwindcss(), tsconfigPaths()],
+    optimizeDeps: {
+      include: ["markdown-to-jsx"]
+    },
     test: {
       globals: true,
       projects: [

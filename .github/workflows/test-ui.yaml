@@ -19,20 +19,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    container:
+      # Make sure to grab the latest version of the Playwright image
+      # https://playwright.dev/docs/docker#pull-the-image
+      image: mcr.microsoft.com/playwright:v1.54.1-noble 
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
-
-      - name: Playwrightブラウザのキャッシュ
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-      - name: Playwrightのセットアップ
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium --with-deps
 
       - name: Run tests
         run: npm run test-storybook -- --coverage
