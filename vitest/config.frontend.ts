@@ -22,6 +22,10 @@ export default defineConfig({
       reporter: coverageReporter,
       include: coverageInclude,
       exclude,
+      thresholds: {
+        branches: 60, // 分岐網羅
+        functions: 60, // 関数網羅
+      }
     },
   },
 })
