@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
             name: 'storybook',
             browser: {
               enabled: true,
-              headless: process.env.CI === 'true',
+              headless: process.env.CI !== 'true',
               provider: 'playwright',
               instances: [
                 {
