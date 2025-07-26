@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
             name: 'storybook/ci',
             environment: 'happy-dom',
             setupFiles: ['.storybook/vitest.setup.ts'],
+            include: ['src/application/web/**/*.stories.tsx'],
           },
         }
       ],
