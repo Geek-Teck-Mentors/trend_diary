@@ -13,7 +13,6 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       globals: true,
-      include: ['src/**/*.stories.tsx'],
       projects: [
         {
           extends: true,
@@ -33,16 +32,6 @@ export default defineConfig(({ mode }) => {
             setupFiles: ['.storybook/vitest.setup.ts'],
           },
         },
-        {
-          extends: true,
-          plugins: [storybookTest()],
-          test: {
-            name: 'storybook/ci',
-            environment: 'happy-dom',
-            setupFiles: ['.storybook/vitest.setup.ts'],
-            include: ['src/application/web/**/*.stories.tsx'],
-          },
-        }
       ],
     },
   }

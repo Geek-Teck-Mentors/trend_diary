@@ -28,8 +28,5 @@ jobs:
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
 
-      - name: Install dependencies
-        run: npm install -D happy-dom
-
       - name: Run tests
-        run: npm run test-storybook:ci
+        run: npm run test-storybook

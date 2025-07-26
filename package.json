@@ -30,8 +30,7 @@
     "supabase:db:type-gen": "npx supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test-storybook": "vitest run -c vitest/config.storybook.ts --project=storybook",
-    "test-storybook:ci": "vitest run -c vitest/config.storybook.ts --project=storybook/ci"
+    "test-storybook": "vitest run -c vitest/config.storybook.ts --project=storybook"
   },
   "prisma": {
     "schema": "./prisma"
