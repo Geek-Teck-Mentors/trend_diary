@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => {
               ],
             },
             setupFiles: ['.storybook/vitest.setup.ts'],
+            include: ['src/application/web/**/*.tsx'],
           },
         },
       ],
