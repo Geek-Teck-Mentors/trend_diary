@@ -3,7 +3,7 @@ name: UI Test
 on: 
   push:
     paths:
-      - 'src/application/web/**/*.tsx'
+      - 'src/application/web/**/*'
       - '.github/workflows/test.yaml'
 
 jobs:
@@ -19,4 +19,4 @@ jobs:
         uses: ./.github/actions/setup_node
 
       - name: Run tests
-        run: npm run test-storybook
+        run: npm run test-storybook -- --coverage
