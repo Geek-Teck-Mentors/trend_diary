@@ -3,8 +3,8 @@ name: UI Test
 on: 
   push:
     paths:
-      - 'src/application/web/**/*'
-      - '.github/workflows/test.yaml'
+      - 'src/application/web/**/*.tsx'
+      - '.github/workflows/test-ui.yaml'
 
 jobs:
   test:
