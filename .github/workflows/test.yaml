@@ -128,14 +128,7 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-      - name: Playwrightブラウザのキャッシュ
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
       - name: Playwrightのセットアップ
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install chromium --with-deps
 
       # ページの結合、シナリオテスト実施のためにDBが必要
