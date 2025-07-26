@@ -32,6 +32,15 @@ export default defineConfig(({ mode }) => {
             setupFiles: ['.storybook/vitest.setup.ts'],
           },
         },
+        {
+          extends: true,
+          plugins: [storybookTest()],
+          test: {
+            name: 'storybook/ci',
+            environment: 'happy-dom',
+            setupFiles: ['.storybook/vitest.setup.ts'],
+          },
+        }
       ],
     },
   }

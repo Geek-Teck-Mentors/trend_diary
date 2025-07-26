@@ -33,4 +33,4 @@ jobs:
           npm install --no-save markdown-to-jsx
 
       - name: Run tests
-        run: npm run test-storybook
+        run: npm run test-storybook:ci
