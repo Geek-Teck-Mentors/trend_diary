@@ -269,6 +269,22 @@ testCases.forEach((testCase) => {
 })
 ```
 
+## フロントエンドテストガイドライン
+
+### Storybookテスト
+
+### フロントエンドテスト分類
+
+#### API接続なし（Storybook推奨）
+- **対象**: 純粋UIコンポーネント、ユーティリティ関数
+- **テストツール**: Storybook + vitest
+- **特徴**: モックなしでテスト可能
+
+#### API接続あり（Playwright推奨）
+- **対象**: フォーム送信、データフェッチコンポーネント
+- **テストツール**: Playwright E2E
+- **特徴**: 実際のAPI通信をテスト
+
 ## 開発コマンド
 
 ### ビルドとデプロイ
@@ -281,10 +297,16 @@ testCases.forEach((testCase) => {
 - `npm run test:service` - ドメイン/サービス層のテストを実行
 - `npm run test:api` - API層のテストを実行
 - `npm run test:frontend` - フロントエンドコンポーネントのテストを実行
+- `npm run test-storybook` - Storybookのテストを実行
 - `npm run e2e` - PlaywrightでE2Eテストを実行
 - `npm run e2e:report` - PlaywrightのHTMLレポートを表示
 - `npm run e2e:gen` - Playwrightのコード生成ツールを起動
 - 個別テストファイルは 各種適切なコマンドで`-- <path/to/file>`で実行可能
+
+### Storybook
+
+- `npm run storybook` - Storybookを開発モードで起動
+- `npm run build-storybook` - Storybookをビルド
 
 ### データベース
 
@@ -312,6 +334,7 @@ testCases.forEach((testCase) => {
 ### ローカル開発サーバー
 
 - **開発サーバー**: `http://localhost:5173` (Vite + Remix)
+- **Storybook**: `http://localhost:6006` (UIコンポーネント開発)
 - **E2Eテスト**: `http://localhost:5173` (Playwright baseURL)
 
 ### 環境変数
@@ -359,6 +382,7 @@ src/domain/{aggregate}/
 - **サービス層**: `vitest/config.service.ts`でモックPrismaクライアントを使用したユニットテスト
 - **API層**: `vitest/config.api.ts`で実際のデータベースを使用した統合テスト
 - **フロントエンド**: `vitest/config.frontend.ts`でコンポーネントとフックのテスト
+- **Storybook**: `vitest/config.storybook.ts`でUIコンポーネントのビジュアルテスト
 - **E2Eテスト**: エンドツーエンドシナリオのPlaywrightテスト
 
 ### 技術スタック
