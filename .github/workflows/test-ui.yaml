@@ -40,6 +40,9 @@ jobs:
       - name: Chromiumのパスを詳細に確認
         run: ls /home/runner/.cache/ms-playwright/chromium_headless_shell-1169
 
+      - name: Chromiumに実行権限を付与
+        run: chmod +x ~/.cache/ms-playwright/chromium*/chrome-linux/chrome
+
       - name: Run tests
         env:
           CI: true
