@@ -26,6 +26,9 @@ export default defineConfig(({ mode }) => {
               instances: [
                 {
                   browser: 'chromium',
+                  launch: {
+                    executablePath:  process.env.CI === 'true' ? "/home/runner/.cache/ms-playwright/chromium-1169/chrome-linux/chrome" : undefined
+                  }
                 },
               ],
             },
