@@ -28,5 +28,9 @@ jobs:
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
 
+      - name: Install missing dependencies
+        run: |
+          npm install --no-save markdown-to-jsx
+
       - name: Run tests
-        run: npm run test-storybook -- --coverage
+        run: npm run test-storybook
