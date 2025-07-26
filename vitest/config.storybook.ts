@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => {
         {
           extends: true,
           plugins: [storybookTest()],
+          optimizeDeps: {
+            include: ['markdown-to-jsx']
+          },
           test: {
             name: 'storybook',
             browser: {
@@ -27,7 +30,6 @@ export default defineConfig(({ mode }) => {
               ],
             },
             setupFiles: ['.storybook/vitest.setup.ts'],
-            include: ['src/application/web/**/*.tsx'],
           },
         },
       ],
