@@ -1,4 +1,5 @@
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
+import PageError from '../../components/PageError'
+import { PageErrorType } from '../../components/PageError/usePageError'
 import {
   Card,
   CardContent,
@@ -9,10 +10,9 @@ import {
 } from '../../components/ui/card'
 import { AuthenticateForm } from '../../features/authenticate/AuthenticateForm'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
-import { PageError } from '../../features/common/usePageError'
 
 type Props = {
-  pageError?: PageError
+  pageError?: PageErrorType
   handleSubmit: (data: AuthenticateFormData) => Promise<void>
 }
 
@@ -22,12 +22,7 @@ export default function SignupPage({ pageError, handleSubmit }: Props) {
       <Card className='flex w-full max-w-md flex-col'>
         <CardHeader className='space-y-1'>
           <CardTitle className='text-2xl font-bold'>アカウント作成</CardTitle>
-          {pageError && (
-            <Alert variant='destructive'>
-              <AlertTitle>{pageError.title}</AlertTitle>
-              <AlertDescription>{pageError.description}</AlertDescription>
-            </Alert>
-          )}
+          {pageError && <PageError pageError={pageError} />}
           <CardDescription>以下の情報を入力してアカウントを作成してください</CardDescription>
         </CardHeader>
         <CardContent>

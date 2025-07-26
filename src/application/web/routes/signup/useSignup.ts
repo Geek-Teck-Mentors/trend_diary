@@ -1,6 +1,6 @@
 import { useNavigate } from '@remix-run/react'
+import { usePageError } from '../../components/PageError/usePageError'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
-import { usePageError } from '../../features/common/usePageError'
 import getApiClientForClient from '../../infrastructure/api'
 
 export default function useSignup() {

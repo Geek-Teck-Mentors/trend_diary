@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { accountSchema } from '@/domain/account'
-import { newValidationError, newValidationSuccess, ValidationResult } from '../common/validation'
+import { newValidationError, newValidationSuccess, ValidationResult } from '../validation'
 
 export type AuthenticateErrors = {
   email?: string[]

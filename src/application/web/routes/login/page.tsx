@@ -1,11 +1,11 @@
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
+import PageError from '../../components/PageError'
+import { PageErrorType } from '../../components/PageError/usePageError'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
 import { AuthenticateForm } from '../../features/authenticate/AuthenticateForm'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
-import { PageError } from '../../features/common/usePageError'
 
 type Props = {
-  pageError?: PageError
+  pageError?: PageErrorType
   handleSubmit: (data: AuthenticateFormData) => Promise<void>
 }
 
@@ -15,12 +15,7 @@ export default function LoginPage({ handleSubmit, pageError }: Props) {
       <Card className='flex w-full max-w-md flex-col'>
         <CardHeader className='space-y-1'>
           <CardTitle className='text-2xl font-bold'>ログイン</CardTitle>
-          {pageError && (
-            <Alert variant='destructive'>
-              <AlertTitle>{pageError.title}</AlertTitle>
-              <AlertDescription>{pageError.description}</AlertDescription>
-            </Alert>
-          )}
+          {pageError && <PageError pageError={pageError} />}
         </CardHeader>
         <CardContent>
           <AuthenticateForm
