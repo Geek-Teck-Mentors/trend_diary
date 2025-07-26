@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { usePageError } from './usePageError'
 
 describe('usePageError', () => {
-  describe('正常系', () => {
+  describe('基本動作', () => {
     it('初期状態ではpageErrorがundefinedである', () => {
       const { result } = renderHook(() => usePageError())
 
@@ -40,7 +40,7 @@ describe('usePageError', () => {
     })
   })
 
-  describe('準正常系', () => {
+  describe('エッジケース', () => {
     it('複数回エラーを設定できる', () => {
       const { result } = renderHook(() => usePageError())
 
