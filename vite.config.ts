@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 /// <reference types="vitest" />
 
 import { defaultOptions } from '@hono/vite-dev-server'

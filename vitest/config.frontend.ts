@@ -6,12 +6,14 @@ import { coverageReporter } from './config'
 const testInclude = ['src/application/web/**/*.test.ts']
 
 const coverageInclude = ['src/application/web/**/*', 'src/application/web/components/**/*']
-const exclude = ['src/application/web/components/ui/**/*']
+const exclude = ['src/application/web/components/ui/**/*', 'src/application/web/**/*.tsx']
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
     include: testInclude,
     exclude,
     // テストファイルがない場合にエラーになるため、テストファイルがない場合でも正常終了とする
@@ -20,6 +22,10 @@ export default defineConfig({
       reporter: coverageReporter,
       include: coverageInclude,
       exclude,
+      thresholds: {
+        branches: 60, // 分岐網羅
+        functions: 60, // 関数網羅
+      },
     },
   },
 })

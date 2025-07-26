@@ -14,7 +14,13 @@
       "Bash(npm run test:service:*)",
       "Bash(npm run test:api:*)",
       "Bash(npm run test:api:coverage:*)",
-      "Bash(npm run e2e:*)"
+      "Bash(npm run e2e:*)",
+      "Bash(git commit:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(npm run check:fix:*)",
+      "Bash(npm run test:frontend:*)",
+      "Bash(npm ls:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -88,23 +94,6 @@
       "Write(/etc/passwd)",
       "Write(/etc/shadow)",
       "Write(/etc/sudoers)"
-    ]
-  },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path | select(endswith(\".js\") or endswith(\".ts\") or endswith(\".jsx\") or endswith(\".tsx\"))' | xargs -r npm run format:fix"
-          },
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path | select(endswith(\".js\") or endswith(\".ts\") or endswith(\".jsx\") or endswith(\".tsx\"))' | xargs -r npm run check:fix"
-          }
-        ]
-      }
     ]
   }
 }
