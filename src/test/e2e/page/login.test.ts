@@ -22,8 +22,8 @@ test.describe('ログインページ', () => {
   })
 
   test('アカウント作成ページへの遷移', async ({ page }) => {
-    // アカウント作成リンクをクリック
-    await page.getByText('アカウント作成').click()
+    // ログインフォーム内のアカウント作成リンクをクリック
+    await page.getByRole('link', { name: 'アカウント作成' }).nth(1).click()
 
     // アカウント作成ページのタイトルを確認
     await expect(page).toHaveTitle(/.*アカウント作成.*/)
