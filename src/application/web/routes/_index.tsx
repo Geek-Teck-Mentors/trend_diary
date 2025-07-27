@@ -1,5 +1,7 @@
 import type { MetaFunction } from '@remix-run/cloudflare'
 import { BookOpen, Calendar, Monitor, TrendingUp, Users } from 'lucide-react'
+import Footer from '../components/Footer'
+import Header from '../components/Header'
 
 export const meta: MetaFunction = () => [
   { title: 'TrendDiary | 技術トレンドを効率的に管理' },
@@ -31,31 +33,7 @@ export const meta: MetaFunction = () => [
 const TrendDiaryTopPage = () => {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
-      {/* Header */}
-      <header className='border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex justify-between items-center h-16'>
-            <div className='flex items-center space-x-2'>
-              <TrendingUp className='h-8 w-8 text-blue-600' />
-              <h1 className='text-2xl font-bold text-slate-900'>TrendDiary</h1>
-            </div>
-            <div className='flex items-center space-x-4'>
-              <a
-                href='/login'
-                className='inline-flex items-center px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors duration-200'
-              >
-                ログイン
-              </a>
-              <a
-                href='/signup'
-                className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors duration-200'
-              >
-                アカウント作成
-              </a>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className='relative overflow-hidden'>
@@ -210,28 +188,7 @@ const TrendDiaryTopPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className='bg-slate-900 text-white py-12'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex flex-col md:flex-row justify-between items-center'>
-            <div className='flex items-center space-x-2 mb-4 md:mb-0'>
-              <TrendingUp className='h-6 w-6 text-blue-400' />
-              <span className='text-xl font-bold'>TrendDiary</span>
-            </div>
-            <div className='flex space-x-6'>
-              <a href='/login' className='text-slate-300 hover:text-white transition-colors'>
-                ログイン
-              </a>
-              <a href='/signup' className='text-slate-300 hover:text-white transition-colors'>
-                アカウント作成
-              </a>
-            </div>
-          </div>
-          <div className='border-t border-slate-800 mt-8 pt-8 text-center text-slate-400'>
-            <p>&copy; 2025 TrendDiary. 技術トレンドを効率的に管理するツール</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
