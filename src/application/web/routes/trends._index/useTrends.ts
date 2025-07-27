@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { getErrorMessage } from '@/common/errors'
+import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 import { PaginationCursor, PaginationDirection } from '../../types/paginations'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import { getErrorMessage } from '@/common/errors'
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
@@ -26,11 +26,7 @@ export default function useTrends() {
   const date = new Date()
 
   const fetchArticles: FetchArticles = useCallback(
-    async ({
-      date,
-      direction = 'next',
-      limit = 20,
-    }) => {
+    async ({ date, direction = 'next', limit = 20 }) => {
       if (isLoading) return
 
       setIsLoading(true)

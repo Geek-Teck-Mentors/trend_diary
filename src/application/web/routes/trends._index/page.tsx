@@ -1,3 +1,4 @@
+import { twMerge } from 'tailwind-merge'
 import {
   Pagination,
   PaginationContent,
@@ -5,17 +6,16 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/application/web/components/ui/pagination'
+import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { PaginationCursor } from '../../types/paginations'
 import ArticleCard from './components/ArticleCard'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import { twMerge } from 'tailwind-merge'
 import { FetchArticles } from './useTrends'
 
 type Props = {
   date: Date
   articles: Article[]
-  fetchArticles: FetchArticles,
+  fetchArticles: FetchArticles
   openDrawer: (article: Article) => void
   isLoading: boolean
   cursor: PaginationCursor
@@ -44,10 +44,7 @@ export default function TrendsPage({
   }
   const getPaginationClass = (isDisabled: boolean) => {
     const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
-    return twMerge(
-      baseClass,
-      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-    )
+    return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')
   }
 
   return (
@@ -87,9 +84,7 @@ export default function TrendsPage({
         </div>
       )}
 
-      {
-        isLoading && <LoadingSpinner />
-      }
+      {isLoading && <LoadingSpinner />}
     </div>
   )
 }
