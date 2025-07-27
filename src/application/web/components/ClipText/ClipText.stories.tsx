@@ -51,7 +51,7 @@ export const CustomClassName: Story = {
   },
   play: async ({ canvas }) => {
     const span = canvas.getByText('カスタムスタイル')
-    
+
     // テキストが正しく表示されることを確認
     await expect(span).toBeInTheDocument()
 
@@ -73,8 +73,10 @@ export const LongText: Story = {
     text: '技術トレンドを効率的に追跡して、最新の情報をキャッチアップしよう',
   },
   play: async ({ canvas }) => {
-    const span = canvas.getByText('技術トレンドを効率的に追跡して、最新の情報をキャッチアップしよう')
-    
+    const span = canvas.getByText(
+      '技術トレンドを効率的に追跡して、最新の情報をキャッチアップしよう',
+    )
+
     // 長いテキストが正しく表示されることを確認
     await expect(span).toBeInTheDocument()
 
@@ -93,7 +95,7 @@ export const ShortText: Story = {
   },
   play: async ({ canvas }) => {
     const span = canvas.getByText('AI')
-    
+
     // 短いテキストが正しく表示されることを確認
     await expect(span).toBeInTheDocument()
 
@@ -130,7 +132,7 @@ export const SpecialCharacters: Story = {
   },
   play: async ({ canvas }) => {
     const span = canvas.getByText('日本語・English・数字123・記号!@#$%')
-    
+
     // 特殊文字を含むテキストが正しく表示されることを確認
     await expect(span).toBeInTheDocument()
 
@@ -150,7 +152,7 @@ export const WithCustomGradient: Story = {
   },
   play: async ({ canvas }) => {
     const span = canvas.getByText('カスタムグラデーション')
-    
+
     // テキストが正しく表示されることを確認
     await expect(span).toBeInTheDocument()
 
