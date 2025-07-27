@@ -18,22 +18,25 @@ export default function useSignup() {
         }),
       )
     },
+    {
+      onSuccess: () => {
+        navigate('/login')
+      },
+      onError: (error: Error) => {
+        if (error.message.includes('409')) {
+          newPageError('認証エラー', 'このメールアドレスは既に使用されています')
+        } else if (error.message.includes('500')) {
+          newPageError('サーバーエラー', 'サインアップに失敗しました')
+        } else {
+          newPageError('ネットワークエラー', 'ネットワークエラーが発生しました')
+        }
+      },
+    },
   )
 
   const handleSubmit = async (data: AuthenticateFormData) => {
     clearPageError()
-    try {
-      await trigger(data)
-      navigate('/login')
-    } catch (error: any) {
-      if (error.message.includes('409')) {
-        newPageError('認証エラー', 'このメールアドレスは既に使用されています')
-      } else if (error.message.includes('500')) {
-        newPageError('サーバーエラー', 'サインアップに失敗しました')
-      } else {
-        newPageError('ネットワークエラー', 'ネットワークエラーが発生しました')
-      }
-    }
+    trigger(data)
   }
 
   return { handleSubmit, pageError, isLoading: isMutating }

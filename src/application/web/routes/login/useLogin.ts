@@ -21,22 +21,25 @@ export default function useLogin() {
         }),
       )
     },
+    {
+      onSuccess: () => {
+        navigate('/trends')
+      },
+      onError: (error: Error) => {
+        if (error.message.includes('401') || error.message.includes('404')) {
+          newPageError('認証エラー', 'メールアドレスまたはパスワードが正しくありません')
+        } else if (error.message.includes('500')) {
+          newPageError('サーバーエラー', '不明なエラーが発生しました')
+        } else {
+          newPageError('ネットワークエラー', 'ネットワークエラーが発生しました')
+        }
+      },
+    },
   )
 
   const handleSubmit = async (data: AuthenticateFormData) => {
     clearPageError()
-    try {
-      await trigger(data)
-      navigate('/trends')
-    } catch (error: any) {
-      if (error.message.includes('401') || error.message.includes('404')) {
-        newPageError('認証エラー', 'メールアドレスまたはパスワードが正しくありません')
-      } else if (error.message.includes('500')) {
-        newPageError('サーバーエラー', '不明なエラーが発生しました')
-      } else {
-        newPageError('ネットワークエラー', 'ネットワークエラーが発生しました')
-      }
-    }
+    trigger(data)
   }
 
   return { handleSubmit, pageError, isLoading: isMutating }

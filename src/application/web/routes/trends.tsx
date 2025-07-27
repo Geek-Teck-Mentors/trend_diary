@@ -14,10 +14,7 @@ export default function Layout() {
     const client = getApiClientForClient()
 
     const f = async () => {
-      const res = await client.account.me.$get(
-        {},
-        { init: { credentials: 'include' } },
-      )
+      const res = await client.account.me.$get({}, { init: { credentials: 'include' } })
       if (res.status === 200) {
         const resJson = await res.json()
         setDisplayName(resJson.user?.displayName ?? '未設定')
