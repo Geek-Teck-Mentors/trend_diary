@@ -33,13 +33,13 @@ export default function TrendsPage({
   const handleCardClick = (article: Article) => {
     openDrawer(article)
   }
-  const handlePrevPageClick = () => {
-    if (cursor.prev) {
+  const handlePrevPageClick = (isDisabled: boolean) => {
+    if (cursor.prev && !isDisabled) {
       onPrevPage()
     }
   }
-  const handleNextPageClick = () => {
-    if (cursor.next) {
+  const handleNextPageClick = (isDisabled: boolean) => {
+    if (cursor.next && !isDisabled) {
       onNextPage()
     }
   }
@@ -71,14 +71,16 @@ export default function TrendsPage({
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
+                  aria-disabled={!cursor.prev}
                   className={getPaginationClass(!cursor.prev)}
-                  onClick={handlePrevPageClick}
+                  onClick={() => handlePrevPageClick(!cursor.prev)}
                 />
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
+                  aria-disabled={!cursor.next}
                   className={getPaginationClass(!cursor.next)}
-                  onClick={handleNextPageClick}
+                  onClick={() => handleNextPageClick(!cursor.next)}
                 />
               </PaginationItem>
             </PaginationContent>
