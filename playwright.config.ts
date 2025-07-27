@@ -14,11 +14,13 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: './src/test/e2e',
   /* Fail the build on CI if you accidentally left test.only in the source code. */
+  // INFO: CIに合わせる
   forbidOnly: true,
   /* Retry on CI only */
-  retries: 0,
+  // INFO: CIに合わせる
+  retries: 2,
   /* Run tests in files in parallel */
-  // INFO: 共通のDBを使うため同時に実行すると競合するので、テストファイルごとの並列実行をオフにする
+  // INFO: CIではスペックの問題で並列実行ができないので、オフにする
   fullyParallel: false,
   /* Opt out of parallel tests on CI. */
   // INFO: CIではスペックの問題で並列実行ができないので、オフにする
@@ -76,6 +78,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:5173',
+    // INFO: CIに合わせる
     reuseExistingServer: false,
   },
 })
