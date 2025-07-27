@@ -4,24 +4,13 @@ import Footer from '../components/Footer'
 import Header from '../components/Header'
 
 export const meta: MetaFunction = () => [
-  { title: 'TrendDiary | 技術トレンドを効率的に管理' },
-  {
-    name: 'description',
-    content:
-      'QiitaやZennの記事を日記のように管理し、技術トレンドを見逃さない。技術者向けのトレンド管理ブラウザアプリです。',
-  },
-  {
-    name: 'keywords',
-    content: 'TrendDiary,技術トレンド,Qiita,Zenn,記事管理,技術者,プログラミング,エンジニア',
-  },
   { property: 'og:title', content: 'TrendDiary | 技術トレンドを効率的に管理' },
   {
     property: 'og:description',
     content:
       'QiitaやZennの記事を日記のように管理し、技術トレンドを見逃さない。技術者向けのトレンド管理ブラウザアプリです。',
   },
-  { property: 'og:type', content: 'website' },
-  { name: 'twitter:card', content: 'summary_large_image' },
+  { property: 'og:url', content: '/' },
   { name: 'twitter:title', content: 'TrendDiary | 技術トレンドを効率的に管理' },
   {
     name: 'twitter:description',
