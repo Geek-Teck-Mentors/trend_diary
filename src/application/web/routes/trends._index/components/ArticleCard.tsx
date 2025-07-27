@@ -1,4 +1,3 @@
-import { useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardTitle } from '@/application/web/components/ui/card'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import MediaIcon from './MediaIcon'
