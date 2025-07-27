@@ -10,37 +10,36 @@ import { PaginationCursor } from '../../types/paginations'
 import ArticleCard from './components/ArticleCard'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import { twMerge } from 'tailwind-merge'
+import { FetchArticles } from './useTrends'
 
 type Props = {
-  articles: Article[]
   date: Date
+  articles: Article[]
+  fetchArticles: FetchArticles,
   openDrawer: (article: Article) => void
   isLoading: boolean
   cursor: PaginationCursor
-  onNextPage: () => void
-  onPrevPage: () => void
 }
 
 export default function TrendsPage({
-  articles,
   date,
+  articles,
+  fetchArticles,
   openDrawer,
   isLoading,
   cursor,
-  onNextPage,
-  onPrevPage,
 }: Props) {
   const handleCardClick = (article: Article) => {
     openDrawer(article)
   }
   const handlePrevPageClick = (isDisabled: boolean) => {
     if (cursor.prev && !isDisabled) {
-      onPrevPage()
+      fetchArticles({ date, direction: 'prev' })
     }
   }
   const handleNextPageClick = (isDisabled: boolean) => {
     if (cursor.next && !isDisabled) {
-      onNextPage()
+      fetchArticles({ date, direction: 'next' })
     }
   }
   const getPaginationClass = (isDisabled: boolean) => {

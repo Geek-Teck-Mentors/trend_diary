@@ -12,6 +12,12 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
+export type FetchArticles = (params: {
+  date: Date
+  direction?: PaginationDirection
+  limit?: number
+}) => Promise<void>
+
 export default function useTrends() {
   const [articles, setArticles] = useState<Article[]>([])
   const [cursor, setCursor] = useState<PaginationCursor>({})
@@ -19,15 +25,11 @@ export default function useTrends() {
 
   const date = new Date()
 
-  const fetchArticles = useCallback(
+  const fetchArticles: FetchArticles = useCallback(
     async ({
-      date = new Date(),
+      date,
       direction = 'next',
       limit = 20,
-    }: {
-      date?: Date
-      direction?: PaginationDirection
-      limit?: number
     }) => {
       if (isLoading) return
 
@@ -82,24 +84,11 @@ export default function useTrends() {
     fetchArticles({ date })
   }, [date])
 
-  const handleNextPage = useCallback(async () => {
-    if (cursor.next) {
-      await fetchArticles({ date, direction: 'next' })
-    }
-  }, [fetchArticles, cursor.next, date])
-
-  const handlePrevPage = useCallback(async () => {
-    if (cursor.prev) {
-      await fetchArticles({ date, direction: 'prev' })
-    }
-  }, [fetchArticles, cursor.prev, date])
-
   return {
     date,
     articles,
+    fetchArticles,
     cursor,
     isLoading,
-    handleNextPage,
-    handlePrevPage,
   }
 }
