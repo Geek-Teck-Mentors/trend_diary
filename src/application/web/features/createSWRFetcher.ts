@@ -6,7 +6,6 @@ export const createSWRFetcher = () => {
   const fetcher = async (url: string) => {
     const response = await fetch(url, {
       credentials: 'include',
-      mode: 'cors',
     })
 
     if (!response.ok) {

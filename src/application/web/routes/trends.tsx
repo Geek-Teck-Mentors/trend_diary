@@ -16,7 +16,7 @@ export default function Layout() {
     const f = async () => {
       const res = await client.account.me.$get(
         {},
-        { init: { credentials: 'include', mode: 'cors' } },
+        { init: { credentials: 'include' } },
       )
       if (res.status === 200) {
         const resJson = await res.json()
