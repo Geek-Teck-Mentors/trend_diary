@@ -1,7 +1,7 @@
 import type { MetaFunction } from '@remix-run/cloudflare'
 import ArticleDrawer from './components/ArticleDrawer'
 import TrendsPage from './page'
-import useArticleDrawerState from './useArticleDrawerState'
+import useArticleDrawer from './useArticleDrawer'
 import useTrends from './useTrends'
 
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
@@ -13,7 +13,7 @@ export default function Trends() {
     selectedArticle,
     open: openDrawer,
     close: closeDrawer,
-  } = useArticleDrawerState()
+  } = useArticleDrawer()
 
   return (
     <>

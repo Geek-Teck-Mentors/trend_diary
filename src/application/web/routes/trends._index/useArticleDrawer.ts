@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Article } from './types'
 
-export default function useArticleDrawerState() {
+export default function useArticleDrawer() {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
 
