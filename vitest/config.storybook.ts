@@ -23,9 +23,18 @@ export default defineConfig(({ mode }) => {
       },
       setupFiles: ['.storybook/vitest.setup.ts'],
       coverage: {
-        include: ['src/application/web/components/**/*.tsx', 'src/application/web/features/**/*.tsx'],
-        exclude: ['src/application/web/components/ui']
-      }
+        include: [
+          'src/application/web/components/**/*.tsx',
+          'src/application/web/features/**/*.tsx',
+        ],
+        exclude: ['src/application/web/components/ui'],
+        thresholds: {
+          statements: 80,
+          branches: 80,
+          functions: 80,
+          lines: 80,
+        },
+      },
     },
   }
 })
