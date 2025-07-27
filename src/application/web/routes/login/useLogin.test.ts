@@ -35,6 +35,7 @@ vi.mock('../../features/createSWRFetcher', () => {
       client: {
         account: {
           login: {
+            // biome-ignore lint/style/useNamingConvention: API client property
             $post: vi.fn(),
           },
         },

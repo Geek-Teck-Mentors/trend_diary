@@ -49,7 +49,7 @@ describe('api', () => {
 
     it('関数が呼び出し可能である', async () => {
       const { default: getApiClientForClient } = await import('./api')
-      
+
       expect(() => getApiClientForClient()).not.toThrow()
       expect(typeof getApiClientForClient).toBe('function')
     })
