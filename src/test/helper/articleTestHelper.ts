@@ -10,7 +10,7 @@ class ArticleTestHelper {
   async createArticle() {
     const data = {
       media: faker.helpers.arrayElement(['qiita', 'zenn']),
-      // DBに合わせて文字数を制限
+      // fakerの生成する文章はテーブルの制約を超えることがあるため、適切な長さに制限
       title: faker.lorem.sentence().substring(0, 100),
       author: faker.person.fullName(),
       description: faker.lorem.paragraph().substring(0, 255),
