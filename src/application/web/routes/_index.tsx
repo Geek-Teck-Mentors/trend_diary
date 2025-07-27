@@ -1,5 +1,6 @@
 import type { MetaFunction } from '@remix-run/cloudflare'
 import { BookOpen, Calendar, Monitor, TrendingUp, Users } from 'lucide-react'
+import { ClipText } from '../components/ClipText'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 
@@ -39,9 +40,7 @@ const TrendDiaryTopPage = () => {
 
             <h1 className='text-5xl sm:text-6xl font-bold text-slate-900 tracking-tight mb-6'>
               技術トレンドを
-              <span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block mt-2'>
-                効率的に追跡
-              </span>
+              <ClipText text='効率的に追跡' className='mt-2' />
             </h1>
 
             <p className='text-xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed'>
@@ -52,7 +51,7 @@ const TrendDiaryTopPage = () => {
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
               <a
                 href='/signup'
-                className='inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl'
+                className='inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl'
               >
                 無料で始める
               </a>
@@ -172,7 +171,7 @@ const TrendDiaryTopPage = () => {
             href='/signup'
             className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
-            無料でアカウントを作成
+            <ClipText text='無料でアカウントを作成' />
           </a>
         </div>
       </section>

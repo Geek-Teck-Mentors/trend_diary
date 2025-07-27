@@ -18,7 +18,7 @@ export default function Header() {
             </a>
             <a
               href='/signup'
-              className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors duration-200'
+              className='inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors duration-200'
             >
               アカウント作成
             </a>
