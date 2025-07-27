@@ -34,12 +34,13 @@ vi.mock('../../features/createSWRFetcher', () => {
   const mockClient = {
     account: {
       logout: {
+        // biome-ignore lint/style/useNamingConvention: API client property
         $delete: vi.fn(),
       },
     },
   }
   const mockApiCall = vi.fn()
-  
+
   return {
     createSWRFetcher: () => ({
       client: mockClient,
