@@ -87,7 +87,10 @@ export default function TrendsPage({
           </Pagination>
         </div>
       )}
-      <LoadingSpinner isLoading={isLoading} />
+
+      {
+        isLoading && <LoadingSpinner />
+      }
     </div>
   )
 }
