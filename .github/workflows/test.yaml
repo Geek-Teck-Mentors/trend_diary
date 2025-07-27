@@ -17,7 +17,7 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/test.yaml'
-      - 'vitest/**'
+      - 'vitest.config.ts'
       - 'prisma/**'
       - 'package.json'
       - 'package-lock.json'
@@ -53,13 +53,13 @@ jobs:
         id: check-test-config
         uses: ./.github/actions/diff
         with:
-          subdir: '.github/workflows/test.yaml vitest/'
+          subdir: '.github/workflows/test.yaml vitest.config.ts'
 
       - name: フロントエンドの差分チェック
         id: check-frontend
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/web src/application/web/components vitest/'
+          subdir: 'src/application/web src/application/web/components vitest.config.ts'
           exclude_pattern: 'src/application/web/components/ui'
 
       - name: E2Eの差分チェック
@@ -72,13 +72,13 @@ jobs:
         id: check-service
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/domain vitest/'
+          subdir: 'src/domain vitest.config.ts'
 
       - name: APIの差分チェック
         id: check-api
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/api vitest/'
+          subdir: 'src/application/api vitest.config.ts'
 
       - name: 差分結果の表示
         run: |
