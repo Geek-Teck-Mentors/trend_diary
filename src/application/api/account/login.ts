@@ -41,7 +41,7 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
   // セッションIDをCookieにセット
   setCookie(c, SESSION_NAME, res.sessionId, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV !== 'development', // ローカルだけHTTP
     expires: res.expiredAt,
     sameSite: 'lax',
   })
