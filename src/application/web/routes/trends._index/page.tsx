@@ -9,6 +9,7 @@ import LoadingSpinner from '../../components/LoadingSpinner'
 import { PaginationCursor } from '../../types/paginations'
 import ArticleCard from './components/ArticleCard'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
+import { twMerge } from 'tailwind-merge'
 
 type Props = {
   articles: Article[]
@@ -43,11 +44,13 @@ export default function TrendsPage({
     }
   }
   const getPaginationClass = (isDisabled: boolean) => {
-    const baseClass = 'border-solid border-1 border-b-slate-400'
-    const disabledClass = 'opacity-50 cursor-not-allowed'
-    const enabledClass = 'cursor-pointer'
-    return `${baseClass} ${isDisabled ? disabledClass : enabledClass}`
+    const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
+    return twMerge(
+      baseClass,
+      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+    )
   }
+
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
       <h1 className='pb-4 text-xl italic'>- {date.toLocaleDateString('ja-JP')} -</h1>
