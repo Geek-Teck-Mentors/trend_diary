@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import getApiClientForClient from '../../infrastructure/api'
 import { PaginationCursor, PaginationDirection } from '../../types/paginations'
 import { Article } from './types'
+import { getErrorMessage } from '@/common/errors'
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
@@ -32,11 +33,9 @@ export default function useTrends() {
 
       setIsLoading(true)
       try {
-        const client = getApiClientForClient()
-
         const queryDate = formatDate(date)
 
-        const res = await client.articles.$get({
+        const res = await getApiClientForClient().articles.$get({
           query: {
             to: queryDate,
             from: queryDate,
@@ -64,14 +63,13 @@ export default function useTrends() {
           })
           // 400番台
         } else if (res.status >= 400 && res.status < 500) {
-          toast.error('記事の取得に失敗しました')
+          throw new Error('不正なパラメータです')
         } else if (res.status >= 500) {
-          toast.error('サーバーエラーが発生しました')
-        } else {
-          toast.error('エラーが発生しました')
+          throw new Error('不明なエラーが発生しました')
         }
       } catch (_error) {
-        toast.error('エラーが発生しました')
+        const errorMessage = getErrorMessage(_error) || 'エラーが発生しました'
+        toast.error(errorMessage)
       } finally {
         setIsLoading(false)
       }
