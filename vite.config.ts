@@ -1,6 +1,3 @@
-/// <reference types="vitest/config" />
-/// <reference types="vitest" />
-
 import { defaultOptions } from '@hono/vite-dev-server'
 import adapter from '@hono/vite-dev-server/cloudflare'
 import { vitePlugin as remix } from '@remix-run/dev'
@@ -30,8 +27,5 @@ export default defineConfig({
   ],
   optimizeDeps: {
     entries: [],
-  },
-  test: {
-    globals: true,
   },
 })

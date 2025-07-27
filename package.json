@@ -7,9 +7,7 @@
   "scripts": {
     "dev": "remix vite:dev",
     "build": "remix vite:build",
-    "test:frontend": "vitest run -c vitest/config.frontend.ts",
-    "test:service": "vitest run -c vitest/config.service.ts",
-    "test:api": "vitest run -c vitest/config.api.ts",
+    "test": "vitest",
     "e2e": "npx playwright test",
     "e2e:report": "npx playwright show-report",
     "e2e:gen": "npx playwright codegen",
@@ -29,8 +27,7 @@
     "db:studio": "npx prisma studio",
     "supabase:db:type-gen": "npx supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "test-storybook": "vitest run -c vitest/config.storybook.ts --project=storybook"
+    "build-storybook": "storybook build"
   },
   "prisma": {
     "schema": "./prisma"
