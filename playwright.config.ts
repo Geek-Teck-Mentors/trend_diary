@@ -21,7 +21,7 @@ export default defineConfig({
   // INFO: 共通のDBを使うため同時に実行すると競合するので、テストファイルごとの並列実行をオフにする
   fullyParallel: false,
   /* Opt out of parallel tests on CI. */
-  // INFO: 共通のDBを使うため同時に実行すると競合するので、describeの並列実行をオフにする
+  // INFO: CIではスペックの問題で並列実行ができないので、オフにする
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
