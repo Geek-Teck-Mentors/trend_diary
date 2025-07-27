@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Article } from './types'
+import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 
 export default function useArticleDrawer() {
   const [isOpen, setIsOpen] = useState(false)

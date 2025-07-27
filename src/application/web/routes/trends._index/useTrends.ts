@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import getApiClientForClient from '../../infrastructure/api'
 import { PaginationCursor, PaginationDirection } from '../../types/paginations'
-import { Article } from './types'
+import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import { getErrorMessage } from '@/common/errors'
 
 const formatDate = (rawDate: Date) => {
@@ -48,7 +48,7 @@ export default function useTrends() {
           const resJson = await res.json()
           setArticles(
             resJson.data.map((data) => ({
-              articleId: Number(data.articleId),
+              articleId: BigInt(data.articleId),
               media: data.media,
               title: data.title,
               author: data.author,

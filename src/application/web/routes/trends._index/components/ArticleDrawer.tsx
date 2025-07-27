@@ -7,7 +7,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/application/web/components/ui/drawer'
-import { Article } from '../types'
+import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import MediaIcon from './MediaIcon'
 
 type Props = {

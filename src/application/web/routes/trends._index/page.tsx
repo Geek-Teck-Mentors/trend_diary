@@ -8,7 +8,7 @@ import {
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { PaginationCursor } from '../../types/paginations'
 import ArticleCard from './components/ArticleCard'
-import { Article } from './types'
+import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 
 type Props = {
   articles: Article[]
