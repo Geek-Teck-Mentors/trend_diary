@@ -8,15 +8,15 @@ class ArticleTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
   async createArticle() {
-    return await this.rdb.article.create({
-      data: {
-        media: faker.helpers.arrayElement(['qiita', 'zenn']),
-        title: faker.lorem.sentence(),
-        author: faker.person.fullName(),
-        description: faker.lorem.paragraph(),
-        url: faker.internet.url(),
-      },
-    })
+    const data = {
+      media: faker.helpers.arrayElement(['qiita', 'zenn']),
+      // fakerの生成する文章はテーブルの制約を超えることがあるため、適切な長さに制限
+      title: faker.lorem.sentence().substring(0, 100),
+      author: faker.person.fullName(),
+      description: faker.lorem.paragraph().substring(0, 255),
+      url: faker.internet.url(),
+    }
+    return await this.rdb.article.create({ data })
   }
 
   async deleteArticle(articleId: bigint): Promise<void> {
