@@ -2,6 +2,7 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
+  MetaFunction,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -12,12 +13,32 @@ import React from 'react'
 import './styles.css'
 import { Toaster } from './components/ui/sonner'
 
+export const meta: MetaFunction = () => [
+  { charSet: 'utf-8' },
+  { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+  { title: 'TrendDiary | 技術トレンドを効率的に管理' },
+  {
+    name: 'description',
+    content:
+      'QiitaやZennの記事を日記のように管理し、技術トレンドを見逃さない。技術者向けのトレンド管理ブラウザアプリです。',
+  },
+  {
+    name: 'keywords',
+    content: 'TrendDiary,技術トレンド,Qiita,Zenn,記事管理,技術者,プログラミング,エンジニア',
+  },
+  { property: 'og:site_name', content: 'TrendDiary' },
+  { property: 'og:type', content: 'website' },
+  { property: 'og:locale', content: 'ja_JP' },
+  { name: 'twitter:card', content: 'summary_large_image' },
+  { name: 'twitter:site', content: '@TrendDiary' },
+  { name: 'author', content: 'TrendDiary' },
+  { name: 'robots', content: 'index, follow' },
+]
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en'>
+    <html lang='ja'>
       <head>
-        <meta charSet='utf-8' />
-        <meta name='viewport' content='width=device-width, initial-scale=1' />
         <Meta />
         <Links />
       </head>
