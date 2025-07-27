@@ -28,7 +28,8 @@ export default defineConfig(({ mode }) => {
             globals: true,
             include: ['src/application/api/**/*.test.ts'],
             env: {
-              DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test',
+              DATABASE_URL:
+                process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test',
             },
             pool: 'threads',
             poolOptions: {
