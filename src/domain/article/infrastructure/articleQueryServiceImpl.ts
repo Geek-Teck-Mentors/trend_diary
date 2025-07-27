@@ -155,19 +155,6 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
       where.createdAt = dateRange
     }
 
-    // TODO: readStatusによるフィルタリングは将来実装予定
-    // if (params.readStatus !== undefined) {
-    //   if (params.readStatus === true) {
-    //     where.readHistories = {
-    //       some: {},
-    //     }
-    //   } else {
-    //     where.readHistories = {
-    //       none: {},
-    //     }
-    //   }
-    // }
-
     return where
   }
 }
