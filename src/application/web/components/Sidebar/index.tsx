@@ -1,7 +1,4 @@
-import { useNavigate } from '@remix-run/react'
 import { BookOpen, Newspaper, TrendingUp } from 'lucide-react'
-import { toast } from 'sonner'
-import getApiClientForClient from '../infrastructure/api'
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +10,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from './ui/sidebar'
+} from '../ui/sidebar'
+import useSidebar from './useSidebar'
 
 const menuItems = [
   {
@@ -33,18 +31,7 @@ type Props = {
 }
 
 export default function AppSidebar({ displayName }: Props) {
-  const navigate = useNavigate()
-
-  const handleLogout = async () => {
-    const client = getApiClientForClient()
-    const res = await client.account.logout.$delete()
-    if (res.status === 204) {
-      navigate('/login')
-      toast.success('ログアウトしました')
-    } else {
-      toast.error('ログアウトに失敗しました')
-    }
-  }
+  const { handleLogout, isLoading } = useSidebar()
 
   return (
     <Sidebar>
@@ -80,7 +67,9 @@ export default function AppSidebar({ displayName }: Props) {
                 <SidebarMenuButton>ユーザー名：{displayName}</SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleLogout}>ログアウト</SidebarMenuButton>
+                <SidebarMenuButton onClick={handleLogout} disabled={isLoading}>
+                  {isLoading ? 'ログアウト中...' : 'ログアウト'}
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

@@ -20,7 +20,8 @@
       "Bash(git add:*)",
       "Bash(npm run check:fix:*)",
       "Bash(npm run test:frontend:*)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(npm run test-storybook:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",

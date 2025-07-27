@@ -34,7 +34,7 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "cSpell.words": ["qiita", "Supabase", "Timestamptz", "zenn"],
+  "cSpell.words": ["qiita", "sonner", "Supabase", "Timestamptz", "zenn"],
   "[markdown]": {
     "editor.wordWrap": "on",
     "editor.quickSuggestions": {
