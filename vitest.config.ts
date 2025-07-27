@@ -19,6 +19,17 @@ export default defineConfig(({ mode }) => {
             globals: true,
             include: ['src/domain/**/*.test.ts', 'src/common/**/*.test.ts'],
             exclude: ['src/domain/**/infrastructure/*'],
+            coverage: {
+              reporter: ['text', 'json-summary', 'json'],
+              thresholds: {
+                statements: 60,
+                branches: 60,
+                functions: 60,
+                lines: 60,
+              },
+              include: ['src/domain/**/*', 'src/common/**/*'],
+              exclude: ['src/domain/**/infrastructure/*'],
+            },
           },
         },
         {
@@ -37,6 +48,16 @@ export default defineConfig(({ mode }) => {
                 singleThread: true,
               },
             },
+            coverage: {
+              reporter: ['text', 'json-summary', 'json'],
+              thresholds: {
+                statements: 60,
+                branches: 60,
+                functions: 60,
+                lines: 60,
+              },
+              include: ['src/application/api/**/*'],
+            },
           },
         },
         {
@@ -48,6 +69,15 @@ export default defineConfig(({ mode }) => {
             setupFiles: ['./src/test/setup.ts'],
             include: ['src/application/web/**/*.test.ts'],
             exclude: ['src/application/web/components/ui/**/*', 'src/application/web/**/*.tsx'],
+            coverage: {
+              reporter: ['text', 'json-summary', 'json'],
+              thresholds: {
+                branches: 60,
+                functions: 60,
+              },
+              include: ['src/application/web/**/*', 'src/application/web/components/**/*'],
+              exclude: ['src/application/web/components/ui/**/*', 'src/application/web/**/*.tsx'],
+            },
           },
         },
         {
