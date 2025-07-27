@@ -12,8 +12,8 @@ export default function useArticleDrawer() {
   }
 
   const close = () => {
-    setSelectedArticle(null)
     setIsOpen(false)
+    setSelectedArticle(null)
   }
 
   return {
