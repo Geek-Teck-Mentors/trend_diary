@@ -82,7 +82,7 @@ export default function useTrends() {
   // INFO: 初回読み込み時に今日の日付で記事を取得
   useEffect(() => {
     fetchArticles({ date })
-  }, [])
+  }, [date])
 
   const handleNextPage = useCallback(async () => {
     if (cursor.next) {
