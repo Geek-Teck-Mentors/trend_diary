@@ -11,6 +11,9 @@ export default defineConfig(({ mode }) => {
   return {
     test: {
       globals: true,
+      coverage: {
+        reporter: ['text', 'json-summary', 'json'],
+      },
       projects: [
         {
           plugins: [tsconfigPaths()],
@@ -20,7 +23,6 @@ export default defineConfig(({ mode }) => {
             include: ['src/domain/**/*.test.ts', 'src/common/**/*.test.ts'],
             exclude: ['src/domain/**/infrastructure/*'],
             coverage: {
-              reporter: ['text', 'json-summary', 'json'],
               thresholds: {
                 statements: 60,
                 branches: 60,
@@ -49,7 +51,6 @@ export default defineConfig(({ mode }) => {
               },
             },
             coverage: {
-              reporter: ['text', 'json-summary', 'json'],
               thresholds: {
                 statements: 60,
                 branches: 60,
@@ -70,7 +71,6 @@ export default defineConfig(({ mode }) => {
             include: ['src/application/web/**/*.test.ts'],
             exclude: ['src/application/web/components/ui/**/*', 'src/application/web/**/*.tsx'],
             coverage: {
-              reporter: ['text', 'json-summary', 'json'],
               thresholds: {
                 branches: 60,
                 functions: 60,
