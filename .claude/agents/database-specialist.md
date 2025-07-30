@@ -1,6 +1,6 @@
 ---
-name: database-design-specialist
-description: データベース設計、スキーマ最適化、データモデリング、データベースアーキテクチャの意思決定に関する専門的なガイダンスが必要な場合にこのエージェントを使用する。新しいデータベーススキーマの設計、既存のデータベース構造のレビュー、クエリの最適化、マイグレーションの計画、データモデリングの課題解決などが含まれる。例: <example>Context: ユーザーが新しいECサイトのデータベーススキーマを設計している。user: "商品、注文、ユーザー管理を含むECプラットフォームのデータベーススキーマを設計したい" assistant: "最適なECサイトのデータベーススキーマ設計を支援するためにdatabase-design-specialistエージェントを使用する" <commentary>ユーザーがデータベース設計の専門知識を必要としているため、包括的なスキーマ設計ガイダンスを提供するdatabase-design-specialistエージェントを使用する。</commentary></example> <example>Context: ユーザーが現在のデータベースでパフォーマンスの問題を抱えている。user: "データベースが大きくなるにつれてユーザークエリが遅くなっている。スキーマを最適化してもらえるか？" assistant: "データベーススキーマを分析・最適化するためにdatabase-design-specialistエージェントを使用する" <commentary>これはデータベースの最適化とスキーマ分析に関わるため、database-design-specialistエージェントが適切な選択である。</commentary></example>
+name: database-specialist
+description: データベース設計、スキーマ最適化、データモデリング、データベースアーキテクチャの意思決定に関する専門的なガイダンスが必要な場合にこのエージェントを使用する。新しいデータベーススキーマの設計、既存のデータベース構造のレビュー、クエリの最適化、マイグレーションの計画、データモデリングの課題解決などが含まれる。例: <example>Context: ユーザーが新しいECサイトのデータベーススキーマを設計している。user: "商品、注文、ユーザー管理を含むECプラットフォームのデータベーススキーマを設計したい" assistant: "最適なECサイトのデータベーススキーマ設計を支援するためにdatabase-specialistエージェントを使用する" <commentary>ユーザーがデータベース設計の専門知識を必要としているため、包括的なスキーマ設計ガイダンスを提供するdatabase-specialistエージェントを使用する。</commentary></example> <example>Context: ユーザーが現在のデータベースでパフォーマンスの問題を抱えている。user: "データベースが大きくなるにつれてユーザークエリが遅くなっている。スキーマを最適化してもらえるか？" assistant: "データベーススキーマを分析・最適化するためにdatabase-specialistエージェントを使用する" <commentary>これはデータベースの最適化とスキーマ分析に関わるため、database-specialistエージェントが適切な選択である。</commentary></example>
 color: orange
 ---
 
