@@ -7,7 +7,7 @@ export default class ActiveUser {
     public displayName?: string | null,
     public lastLogin?: Date,
     public readonly createdAt: Date = new Date(),
-    public updatedAt: Date = new Date()
+    public updatedAt: Date = new Date(),
   ) {
     // バリデーション（異常系テスト用）
     if (activeUserId <= 0n) {

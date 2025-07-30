@@ -5,9 +5,9 @@ import { isError } from '@/common/types/utility'
 import {
   ActiveUserInput,
   ActiveUserRepositoryImpl,
-  UserRepositoryImpl,
-  SessionRepositoryImpl,
   ActiveUserService,
+  SessionRepositoryImpl,
+  UserRepositoryImpl,
 } from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 

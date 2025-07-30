@@ -1,15 +1,14 @@
 import bcrypt from 'bcryptjs'
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { DeepMockProxy, mockDeep } from 'vitest-mock-extended'
-import { PrismaClient } from '@prisma/client'
-import { isError, isSuccess } from '@/common/types/utility'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError } from '@/common/errors'
+import { isError, isSuccess } from '@/common/types/utility'
 import { TransactionClient } from '@/infrastructure/rdb'
-import ActiveUserService from './activeUserService'
-import { ActiveUserRepository } from '../repository/activeUserRepository'
-import { UserRepository } from '../repository/userRepository'
 import Session from '../model/session'
+import { ActiveUserRepository } from '../repository/activeUserRepository'
 import { SessionRepository } from '../repository/sessionRepository'
+import { UserRepository } from '../repository/userRepository'
+import ActiveUserService from './activeUserService'
 
 // モックの設定
 const mockActiveUserRepository = mockDeep<ActiveUserRepository>()
@@ -50,7 +49,7 @@ describe('ActiveUserService', () => {
           },
         })
 
-        // ActiveUser作成  
+        // ActiveUser作成
         const mockActiveUser = {
           activeUserId: 2n,
           userId: 1n,
@@ -118,14 +117,20 @@ describe('ActiveUserService', () => {
           '192.168.1.1',
           'Mozilla/5.0',
           new Date(),
-          false
+          false,
         )
         mockSessionRepository.create.mockResolvedValue({
           data: mockSession,
         })
 
         // Act
-        const result = await service.login(mockTransaction, email, password, '192.168.1.1', 'Mozilla/5.0')
+        const result = await service.login(
+          mockTransaction,
+          email,
+          password,
+          '192.168.1.1',
+          'Mozilla/5.0',
+        )
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -227,7 +232,13 @@ describe('ActiveUserService', () => {
         })
 
         // Act
-        const result = await service.login(mockTransaction, email, password, '192.168.1.1', 'Mozilla/5.0')
+        const result = await service.login(
+          mockTransaction,
+          email,
+          password,
+          '192.168.1.1',
+          'Mozilla/5.0',
+        )
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -259,7 +270,13 @@ describe('ActiveUserService', () => {
         })
 
         // Act
-        const result = await service.login(mockTransaction, email, wrongPassword, '192.168.1.1', 'Mozilla/5.0')
+        const result = await service.login(
+          mockTransaction,
+          email,
+          wrongPassword,
+          '192.168.1.1',
+          'Mozilla/5.0',
+        )
 
         // Assert
         expect(isError(result)).toBe(true)

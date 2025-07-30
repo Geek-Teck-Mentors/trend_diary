@@ -1,9 +1,9 @@
 import { isError } from '@/common/types/utility'
-import { 
-  ActiveUserRepositoryImpl, 
-  UserRepositoryImpl, 
+import {
+  ActiveUserRepositoryImpl,
+  ActiveUserService,
   SessionRepositoryImpl,
-  ActiveUserService 
+  UserRepositoryImpl,
 } from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
@@ -18,9 +18,9 @@ class ActiveUserTestHelper {
   private sessionRepository = new SessionRepositoryImpl(this.rdb)
 
   private service = new ActiveUserService(
-    this.activeUserRepository, 
+    this.activeUserRepository,
     this.userRepository,
-    this.sessionRepository
+    this.sessionRepository,
   )
 
   async cleanUp(): Promise<void> {
@@ -34,7 +34,11 @@ class ActiveUserTestHelper {
     await this.rdb.$queryRaw`TRUNCATE TABLE "users" CASCADE;`
   }
 
-  async create(email: string, password: string, displayName?: string): Promise<{ userId: bigint; activeUserId: bigint }> {
+  async create(
+    email: string,
+    password: string,
+    displayName?: string,
+  ): Promise<{ userId: bigint; activeUserId: bigint }> {
     const transaction = new Transaction(this.rdb)
     const result = await this.service.signup(transaction, email, password, displayName)
     if (isError(result)) {
@@ -46,11 +50,16 @@ class ActiveUserTestHelper {
     }
   }
 
-  async login(email: string, password: string, ipAddress?: string, userAgent?: string): Promise<{ 
-    userId: bigint; 
-    activeUserId: bigint;
-    sessionId: string;
-    expiresAt: Date;
+  async login(
+    email: string,
+    password: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<{
+    userId: bigint
+    activeUserId: bigint
+    sessionId: string
+    expiresAt: Date
   }> {
     const transaction = new Transaction(this.rdb)
     const loginResult = await this.service.login(transaction, email, password, ipAddress, userAgent)
@@ -72,13 +81,15 @@ class ActiveUserTestHelper {
     }
   }
 
-  async findBySessionId(sessionId: string): Promise<{ userId: bigint; activeUserId: bigint } | null> {
+  async findBySessionId(
+    sessionId: string,
+  ): Promise<{ userId: bigint; activeUserId: bigint } | null> {
     const result = await this.service.findBySessionId(sessionId)
     if (isError(result)) {
       throw new Error(`Failed to find user by session: ${result.error.message}`)
     }
     if (!result.data) return null
-    
+
     return {
       userId: result.data.user.userId,
       activeUserId: result.data.activeUser.activeUserId,

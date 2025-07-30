@@ -7,7 +7,12 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { SESSION_NAME } from '@/common/constants/session'
 import { NotFoundError, ServerError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { ActiveUserRepositoryImpl, ActiveUserService, UserRepositoryImpl, SessionRepositoryImpl } from '@/domain/account'
+import {
+  ActiveUserRepositoryImpl,
+  ActiveUserService,
+  SessionRepositoryImpl,
+  UserRepositoryImpl,
+} from '@/domain/account'
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function logout(c: Context<Env>) {

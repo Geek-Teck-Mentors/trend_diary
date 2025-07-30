@@ -9,7 +9,7 @@ export default class Session {
     public ipAddress?: string,
     public userAgent?: string,
     public readonly createdAt: Date = new Date(),
-    forceExpired = false // テスト用のフラグ
+    forceExpired = false, // テスト用のフラグ
   ) {
     // バリデーション（異常系テスト用）
     if (!sessionId || sessionId.trim() === '') {

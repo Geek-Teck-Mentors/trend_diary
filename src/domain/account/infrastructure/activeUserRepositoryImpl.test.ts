@@ -1,6 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError } from '@/common/errors'
 import { isError, isSuccess } from '@/common/types/utility'
 import ActiveUserRepositoryImpl from './activeUserRepositoryImpl'
@@ -40,7 +40,12 @@ describe('ActiveUserRepositoryImpl', () => {
       mockDb.activeUser.create.mockResolvedValue(mockActiveUser)
 
       // Act
-      const result = await repository.createActiveUser(userId, input.email, input.password, input.displayName ?? undefined)
+      const result = await repository.createActiveUser(
+        userId,
+        input.email,
+        input.password,
+        input.displayName ?? undefined,
+      )
 
       // Assert
       expect(isSuccess(result)).toBe(true)
@@ -130,7 +135,12 @@ describe('ActiveUserRepositoryImpl', () => {
       mockDb.activeUser.create.mockResolvedValue(mockActiveUser)
 
       // Act
-      const result = await repository.createActiveUser(userId, input.email, input.password, input.displayName ?? undefined)
+      const result = await repository.createActiveUser(
+        userId,
+        input.email,
+        input.password,
+        input.displayName ?? undefined,
+      )
 
       // Assert
       expect(isSuccess(result)).toBe(true)
@@ -155,7 +165,12 @@ describe('ActiveUserRepositoryImpl', () => {
       mockDb.activeUser.create.mockRejectedValue(prismaError)
 
       // Act
-      const result = await repository.createActiveUser(userId, input.email, input.password, input.displayName ?? undefined)
+      const result = await repository.createActiveUser(
+        userId,
+        input.email,
+        input.password,
+        input.displayName ?? undefined,
+      )
 
       // Assert
       expect(isError(result)).toBe(true)

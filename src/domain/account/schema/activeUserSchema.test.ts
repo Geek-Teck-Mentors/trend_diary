@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { activeUserSchema, activeUserInputSchema, activeUserUpdateSchema } from './activeUserSchema'
+import { activeUserInputSchema, activeUserSchema } from './activeUserSchema'
 
 describe('ActiveUserスキーマ', () => {
   describe('正常系', () => {

@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 import { SESSION_DURATION } from '@/common/constants/session'
+import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
 import {
-  AsyncResult,
   isError,
   isNull,
   isSuccess,
@@ -11,12 +11,11 @@ import {
   resultSuccess,
 } from '@/common/types/utility'
 import { TransactionClient } from '@/infrastructure/rdb'
-import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
 import ActiveUser from '../model/activeUser'
 import User from '../model/user'
 import { ActiveUserRepository } from '../repository/activeUserRepository'
-import { UserRepository } from '../repository/userRepository'
 import { SessionRepository } from '../repository/sessionRepository'
+import { UserRepository } from '../repository/userRepository'
 import { ActiveUserInput } from '../schema/activeUserSchema'
 
 type LoginResult = {
@@ -49,7 +48,7 @@ export default class ActiveUserService {
 
     // User作成 & ActiveUser作成
     await transaction.begin()
-    
+
     // 1. User作成
     const userResult = await this.userRepository.create()
     if (isError(userResult)) {
@@ -58,12 +57,12 @@ export default class ActiveUserService {
     }
 
     // 2. ActiveUser作成
-    const activeUserInput: ActiveUserInput = {
+    const _activeUserInput: ActiveUserInput = {
       email,
       password: hashedPassword,
       displayName,
     }
-    
+
     const activeUserResult = await this.activeUserRepository.createActiveUser(
       userResult.data.userId,
       email,
@@ -111,7 +110,7 @@ export default class ActiveUserService {
     // セッション作成
     const sessionId = uuidv4()
     const expiresAt = new Date(Date.now() + SESSION_DURATION)
-    
+
     const sessionResult = await this.sessionRepository.create({
       sessionId,
       activeUserId: activeUser.activeUserId,
@@ -144,19 +143,21 @@ export default class ActiveUserService {
     return resultSuccess(undefined)
   }
 
-  async findBySessionId(sessionId: string): Promise<Result<{ user: User; activeUser: ActiveUser } | null, Error>> {
+  async findBySessionId(
+    sessionId: string,
+  ): Promise<Result<{ user: User; activeUser: ActiveUser } | null, Error>> {
     const activeUserResult = await this.activeUserRepository.findBySessionId(sessionId)
     if (isError(activeUserResult)) return resultError(ServerError.handle(activeUserResult.error))
     if (isSuccess(activeUserResult) && isNull(activeUserResult.data)) return resultSuccess(null)
 
     const activeUser = activeUserResult.data!
-    
+
     const userResult = await this.userRepository.findById(activeUser.userId)
     if (isError(userResult)) return resultError(ServerError.handle(userResult.error))
     if (isSuccess(userResult) && isNull(userResult.data)) return resultSuccess(null)
 
     const user = userResult.data!
-    
+
     return resultSuccess({ user, activeUser })
   }
 }

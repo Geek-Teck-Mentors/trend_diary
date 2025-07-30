@@ -14,9 +14,7 @@ export default class UserRepositoryImpl implements UserRepository {
         },
       })
 
-      return resultSuccess(
-        new User(user.userId, user.createdAt),
-      )
+      return resultSuccess(new User(user.userId, user.createdAt))
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error('Unknown error'))
     }
@@ -32,9 +30,7 @@ export default class UserRepositoryImpl implements UserRepository {
         return resultSuccess(null)
       }
 
-      return resultSuccess(
-        new User(user.userId, user.createdAt),
-      )
+      return resultSuccess(new User(user.userId, user.createdAt))
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error('Unknown error'))
     }

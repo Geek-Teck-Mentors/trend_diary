@@ -56,7 +56,10 @@ describe('DELETE /api/articles/:article_id/unread', () => {
   describe('正常系', () => {
     it('既読履歴を削除できること', async () => {
       // 事前に既読履歴があることを確認
-      const beforeCount = await articleTestHelper.countReadHistories(testActiveUserId, testArticleId)
+      const beforeCount = await articleTestHelper.countReadHistories(
+        testActiveUserId,
+        testArticleId,
+      )
       expect(beforeCount).toBe(1)
 
       const response = await requestUnreadArticle(testArticleId.toString(), sessionId)

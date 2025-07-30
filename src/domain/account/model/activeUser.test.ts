@@ -13,7 +13,7 @@ describe('ActiveUser ドメインモデル', () => {
         'テストユーザー',
         now,
         now,
-        now
+        now,
       )
 
       expect(activeUser.activeUserId).toBe(1n)
@@ -36,7 +36,7 @@ describe('ActiveUser ドメインモデル', () => {
         undefined,
         now,
         now,
-        now
+        now,
       )
 
       expect(activeUser.displayName).toBeUndefined()
@@ -53,14 +53,14 @@ describe('ActiveUser ドメインモデル', () => {
         'テストユーザー',
         now,
         now,
-        now
+        now,
       )
 
       const beforeLogin = Date.now()
       // 少し待ってから実行
-      await new Promise(resolve => setTimeout(resolve, 2))
+      await new Promise((resolve) => setTimeout(resolve, 2))
       activeUser.recordLogin()
-      
+
       expect(activeUser.lastLogin?.getTime()).toBeGreaterThan(beforeLogin)
       expect(activeUser.lastLogin).toBeInstanceOf(Date)
     })
@@ -77,7 +77,7 @@ describe('ActiveUser ドメインモデル', () => {
         null,
         now,
         now,
-        now
+        now,
       )
 
       expect(activeUser.displayName).toBeNull()
@@ -96,7 +96,7 @@ describe('ActiveUser ドメインモデル', () => {
           'テストユーザー',
           new Date(),
           new Date(),
-          new Date()
+          new Date(),
         )
       }).toThrow('ActiveUser ID must be positive')
     })
@@ -112,7 +112,7 @@ describe('ActiveUser ドメインモデル', () => {
           'テストユーザー',
           new Date(),
           new Date(),
-          new Date()
+          new Date(),
         )
       }).toThrow('Email cannot be empty')
     })

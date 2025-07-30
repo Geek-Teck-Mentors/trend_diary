@@ -9,9 +9,9 @@ import { isError } from '@/common/types/utility'
 import {
   ActiveUserInput,
   ActiveUserRepositoryImpl,
-  UserRepositoryImpl,
-  SessionRepositoryImpl,
   ActiveUserService,
+  SessionRepositoryImpl,
+  UserRepositoryImpl,
 } from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 
@@ -43,7 +43,10 @@ export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   }
 
   const res = result.data
-  logger.info('login success', { userId: res.user.userId.toString(), activeUserId: res.activeUser.activeUserId.toString() })
+  logger.info('login success', {
+    userId: res.user.userId.toString(),
+    activeUserId: res.activeUser.activeUserId.toString(),
+  })
 
   // セッションIDをCookieにセット
   setCookie(c, SESSION_NAME, res.sessionId, {

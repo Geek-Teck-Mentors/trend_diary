@@ -47,7 +47,10 @@ export default class ArticleService {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isError(articleValidation)) return articleValidation
 
-    return this.articleCommandService.deleteAllReadHistory(activeUserId, articleValidation.data.articleId)
+    return this.articleCommandService.deleteAllReadHistory(
+      activeUserId,
+      articleValidation.data.articleId,
+    )
   }
 
   private async validateArticleExists(articleId: bigint): AsyncResult<Article, Error> {

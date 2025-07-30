@@ -6,7 +6,7 @@ describe('Session ドメインモデル', () => {
     it('必須プロパティでSessionを作成できる', () => {
       const now = new Date()
       const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000) // 24時間後
-      
+
       const session = new Session(
         'session-123',
         1n,
@@ -14,7 +14,7 @@ describe('Session ドメインモデル', () => {
         expiresAt,
         '192.168.1.1',
         'Mozilla/5.0',
-        now
+        now,
       )
 
       expect(session.sessionId).toBe('session-123')
@@ -29,7 +29,7 @@ describe('Session ドメインモデル', () => {
     it('オプションプロパティなしでSessionを作成できる', () => {
       const now = new Date()
       const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-      
+
       const session = new Session(
         'session-123',
         1n,
@@ -37,7 +37,7 @@ describe('Session ドメインモデル', () => {
         expiresAt,
         undefined,
         undefined,
-        now
+        now,
       )
 
       expect(session.sessionToken).toBeUndefined()
@@ -48,7 +48,7 @@ describe('Session ドメインモデル', () => {
     it('セッションの有効性を確認できる', () => {
       const now = new Date()
       const futureExpiry = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-      
+
       const session = new Session(
         'session-123',
         1n,
@@ -56,7 +56,7 @@ describe('Session ドメインモデル', () => {
         futureExpiry,
         '192.168.1.1',
         'Mozilla/5.0',
-        now
+        now,
       )
 
       expect(session.isValid()).toBe(true)
@@ -65,7 +65,7 @@ describe('Session ドメインモデル', () => {
     it('期限切れセッションを識別できる', () => {
       const now = new Date()
       const pastExpiry = new Date(now.getTime() - 24 * 60 * 60 * 1000) // 24時間前
-      
+
       const session = new Session(
         'session-123',
         1n,
@@ -74,7 +74,7 @@ describe('Session ドメインモデル', () => {
         '192.168.1.1',
         'Mozilla/5.0',
         now,
-        true // forceExpiredフラグでテスト用に許可
+        true, // forceExpiredフラグでテスト用に許可
       )
 
       expect(session.isValid()).toBe(false)
@@ -83,7 +83,7 @@ describe('Session ドメインモデル', () => {
     it('セッションを無効化できる', () => {
       const now = new Date()
       const futureExpiry = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-      
+
       const session = new Session(
         'session-123',
         1n,
@@ -91,7 +91,7 @@ describe('Session ドメインモデル', () => {
         futureExpiry,
         '192.168.1.1',
         'Mozilla/5.0',
-        now
+        now,
       )
 
       session.invalidate()
@@ -108,7 +108,7 @@ describe('Session ドメインモデル', () => {
         new Date(Date.now() + 24 * 60 * 60 * 1000),
         '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
         'Mozilla/5.0',
-        new Date()
+        new Date(),
       )
 
       expect(session.ipAddress).toBe('2001:0db8:85a3:0000:0000:8a2e:0370:7334')
@@ -126,7 +126,7 @@ describe('Session ドメインモデル', () => {
           new Date(Date.now() + 24 * 60 * 60 * 1000),
           '192.168.1.1',
           'Mozilla/5.0',
-          new Date()
+          new Date(),
         )
       }).toThrow('Session ID cannot be empty')
     })
@@ -141,7 +141,7 @@ describe('Session ドメインモデル', () => {
           new Date(Date.now() + 24 * 60 * 60 * 1000),
           '192.168.1.1',
           'Mozilla/5.0',
-          new Date()
+          new Date(),
         )
       }).toThrow('ActiveUser ID must be positive')
     })
@@ -156,7 +156,7 @@ describe('Session ドメインモデル', () => {
           new Date(Date.now() - 24 * 60 * 60 * 1000), // 過去の日時
           '192.168.1.1',
           'Mozilla/5.0',
-          new Date()
+          new Date(),
         )
       }).toThrow('Session expiry must be in the future')
     })

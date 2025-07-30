@@ -5,10 +5,7 @@ describe('User ドメインモデル', () => {
   describe('正常系', () => {
     it('必須プロパティでUserを作成できる', () => {
       const now = new Date()
-      const user = new User(
-        1n,
-        now
-      )
+      const user = new User(1n, now)
 
       expect(user.userId).toBe(1n)
       expect(user.createdAt).toEqual(now)

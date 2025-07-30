@@ -1,5 +1,5 @@
+import { NotFoundError, ServerError } from '@/common/errors'
 import {
-  AsyncResult,
   isError,
   isNull,
   isSuccess,
@@ -7,7 +7,6 @@ import {
   resultError,
   resultSuccess,
 } from '@/common/types/utility'
-import { NotFoundError, ServerError } from '@/common/errors'
 import User from '../model/user'
 import { UserRepository } from '../repository/userRepository'
 

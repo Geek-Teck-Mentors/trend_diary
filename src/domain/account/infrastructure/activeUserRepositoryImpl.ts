@@ -4,12 +4,17 @@ import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/type
 import { RdbClient } from '@/infrastructure/rdb'
 import ActiveUser from '../model/activeUser'
 import { ActiveUserRepository } from '../repository/activeUserRepository'
-import { ActiveUserInput, ActiveUserUpdate } from '../schema/activeUserSchema'
+import { ActiveUserUpdate } from '../schema/activeUserSchema'
 
 export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
   constructor(private db: RdbClient) {}
 
-  async createActiveUser(userId: bigint, email: string, hashedPassword: string, displayName?: string): AsyncResult<ActiveUser, Error> {
+  async createActiveUser(
+    userId: bigint,
+    email: string,
+    hashedPassword: string,
+    displayName?: string,
+  ): AsyncResult<ActiveUser, Error> {
     try {
       const activeUser = await this.db.activeUser.create({
         data: {

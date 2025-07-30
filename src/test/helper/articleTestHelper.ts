@@ -50,11 +50,15 @@ class ArticleTestHelper {
     const existingActiveUser = await this.rdb.activeUser.findUnique({
       where: { activeUserId },
     })
-    
+
     let targetActiveUserId = activeUserId
     if (!existingActiveUser) {
       // ActiveUserが存在しない場合、テスト用のActiveUserを作成して、そのIDを使用
-      const createdUser = await activeUserTestHelper.create(faker.internet.email(), 'testPassword', 'Test User')
+      const createdUser = await activeUserTestHelper.create(
+        faker.internet.email(),
+        'testPassword',
+        'Test User',
+      )
       targetActiveUserId = createdUser.activeUserId
     }
 

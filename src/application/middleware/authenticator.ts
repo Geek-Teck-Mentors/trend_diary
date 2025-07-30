@@ -3,13 +3,12 @@ import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants/session'
-import { NotFoundError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { 
-  ActiveUserRepositoryImpl, 
-  UserRepositoryImpl, 
+import {
+  ActiveUserRepositoryImpl,
+  ActiveUserService,
   SessionRepositoryImpl,
-  ActiveUserService 
+  UserRepositoryImpl,
 } from '@/domain/account'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env } from '../env'

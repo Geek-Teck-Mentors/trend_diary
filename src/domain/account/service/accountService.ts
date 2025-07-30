@@ -92,7 +92,10 @@ export default class AccountService {
     if (isNull(user)) return resultError(new ServerError('User not found. this should not happen')) // signup時に作成されているはず
 
     const expiredAt = new Date(Date.now() + SESSION_DURATION)
-    const addSessionRes = await this.activeUserRepository.addSession(activeUser.activeUserId, expiredAt)
+    const addSessionRes = await this.activeUserRepository.addSession(
+      activeUser.activeUserId,
+      expiredAt,
+    )
     if (isError(addSessionRes)) return resultError(addSessionRes.error)
     const sessionId = addSessionRes.data
 
