@@ -4,11 +4,48 @@
 [![Check Prisma Schema](https://github.com/Geek-Teck-Mentors/trend_diary/actions/workflows/check_prisma.yaml/badge.svg)](https://github.com/Geek-Teck-Mentors/trend_diary/actions/workflows/check_prisma.yaml)
 [![Functions CI](https://github.com/Geek-Teck-Mentors/trend_diary/actions/workflows/functions_ci.yaml/badge.svg)](https://github.com/Geek-Teck-Mentors/trend_diary/actions/workflows/functions_ci.yaml)
 
-### ドキュメント
+## 環境構築
+
+### 必要なもの
+
+- ローカルでのNodeの実行環境
+- Docker実行環境（Macの場合はOrbStack推奨）
+
+### 手順
+
+Nodeモジュールのインストール
+
+```sh
+npm ci
+```
+
+DockerのDBを起動
+
+```sh
+docker compose up -d
+```
+
+Docker上のDBにマイグレーションを適用
+
+```sh
+# 環境変数のコピー, Cloudflareでは.{env}.vars
+cp .dev.vars.example .dev.vars
+# prismaが読むように.envを作成
+cp .dev.vars.example .env
+npm run db:migrate
+```
+
+サーバの起動（Hono上でAPIとRemixが起動する）
+
+```sh
+npm run dev
+```
+
+## 他ドキュメント
 
 [ホーム](docs/home.md)
 
-### リファレンス
+## リファレンス
 
 - [Hono and Remix on Vite](https://github.com/yusukebe/hono-and-remix-on-vite)
 - [TailwindCSS Using Vite](https://tailwindcss.com/docs/installation/using-vite)
