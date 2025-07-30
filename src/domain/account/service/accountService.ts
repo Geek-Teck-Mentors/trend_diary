@@ -11,20 +11,21 @@ import {
 } from '@/common/types/utility'
 import { TransactionClient } from '@/infrastructure/rdb'
 import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '../../../common/errors'
-import Account from '../model/account'
+import ActiveUser from '../model/activeUser'
 import User from '../model/user'
-import { AccountRepository } from '../repository/accountRepository'
+import { ActiveUserRepository } from '../repository/activeUserRepository'
 import { UserRepository } from '../repository/userRepository'
 
 type LoginResult = {
   user: User
+  activeUser: ActiveUser
   sessionId: string
   expiredAt: Date
 }
 
 export default class AccountService {
   constructor(
-    private accountRepository: AccountRepository,
+    private activeUserRepository: ActiveUserRepository,
     private userRepository: UserRepository,
   ) {}
 
@@ -32,27 +33,33 @@ export default class AccountService {
     transaction: TransactionClient,
     email: string,
     plainPassword: string,
-  ): Promise<Result<Account, Error>> {
-    // 既にアカウントがあるかチェック
-    const res = await this.accountRepository.findByEmail(email)
+    displayName?: string,
+  ): Promise<Result<ActiveUser, Error>> {
+    // 既にアクティブユーザーがあるかチェック
+    const res = await this.activeUserRepository.findByEmail(email)
     if (isSuccess(res) && !isNull(res.data))
-      return resultError(new AlreadyExistsError('Account already exists'))
+      return resultError(new AlreadyExistsError('ActiveUser already exists'))
     if (isError(res)) return resultError(ServerError.handle(res.error))
 
     const hashedPassword = await bcrypt.hash(plainPassword, 10)
 
-    // アカウント作成 & ユーザー作成
+    // ユーザー作成 & アクティブユーザー作成
     await transaction.begin()
-    const createResult = await this.accountRepository.createAccount(email, hashedPassword)
-    if (isError(createResult)) {
-      await transaction.rollback()
-      return resultError(ServerError.handle(createResult.error))
-    }
-
-    const userResult = await this.userRepository.create(createResult.data.accountId)
+    const userResult = await this.userRepository.create()
     if (isError(userResult)) {
       await transaction.rollback()
       return resultError(ServerError.handle(userResult.error))
+    }
+
+    const createResult = await this.activeUserRepository.createActiveUser(
+      userResult.data.userId,
+      email,
+      hashedPassword,
+      displayName,
+    )
+    if (isError(createResult)) {
+      await transaction.rollback()
+      return resultError(ServerError.handle(createResult.error))
     }
 
     await transaction.commit()
@@ -61,39 +68,45 @@ export default class AccountService {
   }
 
   async login(email: string, plainPassword: string): Promise<Result<LoginResult, Error>> {
-    // アカウントを検索
-    const accountRes = await this.accountRepository.findByEmail(email)
-    if (isError(accountRes)) return resultError(accountRes.error)
+    // アクティブユーザーを検索
+    const activeUserRes = await this.activeUserRepository.findByEmail(email)
+    if (isError(activeUserRes)) return resultError(activeUserRes.error)
 
-    const account = accountRes.data
-    if (isNull(account)) return resultError(new NotFoundError('Account not found'))
+    const activeUser = activeUserRes.data
+    if (isNull(activeUser)) return resultError(new NotFoundError('ActiveUser not found'))
 
     // パスワードの照合
-    const isPasswordMatch = await bcrypt.compare(plainPassword, account.password)
+    const isPasswordMatch = await bcrypt.compare(plainPassword, activeUser.password)
     if (!isPasswordMatch) return resultError(new ClientError('Invalid password'))
 
     // ログイン記録の更新
-    account.recordLogin()
-    const saveRes = await this.accountRepository.save(account)
+    activeUser.recordLogin()
+    const saveRes = await this.activeUserRepository.save(activeUser)
     if (isError(saveRes)) return resultError(saveRes.error)
 
     // ユーザー情報の取得
-    const userRes = await this.userRepository.findByAccountId(account.accountId)
+    const userRes = await this.userRepository.findById(activeUser.userId)
     if (isError(userRes)) return resultError(userRes.error)
 
     const user = userRes.data
     if (isNull(user)) return resultError(new ServerError('User not found. this should not happen')) // signup時に作成されているはず
 
     const expiredAt = new Date(Date.now() + SESSION_DURATION)
-    const addSessionRes = await this.accountRepository.addSession(account.accountId, expiredAt)
+    const addSessionRes = await this.activeUserRepository.addSession(activeUser.activeUserId, expiredAt)
     if (isError(addSessionRes)) return resultError(addSessionRes.error)
     const sessionId = addSessionRes.data
 
-    return resultSuccess({ user, sessionId, expiredAt })
+    return resultSuccess({ user, activeUser, sessionId, expiredAt })
   }
 
   async getLoginUser(sessionId: string): AsyncResult<User, Error> {
-    const userRes = await this.userRepository.findBySessionId(sessionId)
+    const activeUserRes = await this.activeUserRepository.findBySessionId(sessionId)
+    if (isError(activeUserRes)) return resultError(activeUserRes.error)
+
+    const activeUser = activeUserRes.data
+    if (isNull(activeUser)) return resultError(new NotFoundError('ActiveUser not found'))
+
+    const userRes = await this.userRepository.findById(activeUser.userId)
     if (isError(userRes)) return userRes
 
     const user = userRes.data
@@ -103,13 +116,13 @@ export default class AccountService {
   }
 
   async logout(sessionId: string): Promise<Result<void, Error>> {
-    const accountRes = await this.accountRepository.findBySessionId(sessionId)
-    if (isError(accountRes)) return resultError(accountRes.error)
+    const activeUserRes = await this.activeUserRepository.findBySessionId(sessionId)
+    if (isError(activeUserRes)) return resultError(activeUserRes.error)
 
-    const account = accountRes.data
-    if (isNull(account)) return resultError(new NotFoundError('Account not found'))
+    const activeUser = activeUserRes.data
+    if (isNull(activeUser)) return resultError(new NotFoundError('ActiveUser not found'))
 
-    const removeRes = await this.accountRepository.removeSession(sessionId)
+    const removeRes = await this.activeUserRepository.removeSession(sessionId)
     if (isError(removeRes)) return resultError(removeRes.error)
 
     return removeRes
