@@ -1,12 +1,16 @@
 model Session {
   sessionId    String  @id @default(uuid()) @map("session_id") @db.VarChar(255)
-  accountId    BigInt  @map("account_id") @db.BigInt
   sessionToken String? @map("session_token") @db.VarChar(255)
 
   expiresAt DateTime @map("expires_at") @db.Timestamptz()
-  ipAddress String?  @map("ip_address") @db.VarChar(45) // IPv4 or IPv6
+  /// IPv4(15文字)とIPv6(39文字)の両方に対応するためVARCHAR(45)
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
   userAgent String?  @map("user_agent") @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  activeUserId BigInt @unique @map("active_user_id") @db.BigInt
+
+  activeUser ActiveUser @relation(fields: [activeUserId], references: [activeUserId], onDelete: Cascade)
 
   @@map("sessions")
 }
