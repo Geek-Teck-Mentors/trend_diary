@@ -7,23 +7,30 @@ import { SESSION_NAME } from '@/common/constants/session'
 import { ClientError, ServerError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
 import {
-  AccountInput,
-  AccountRepositoryImpl,
-  AccountService,
+  ActiveUserInput,
+  ActiveUserRepositoryImpl,
   UserRepositoryImpl,
+  SessionRepositoryImpl,
+  ActiveUserService,
 } from '@/domain/account'
-import getRdbClient from '@/infrastructure/rdb'
+import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 
-export default async function login(c: ZodValidatedContext<AccountInput>) {
+export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   const valid = c.req.valid('json')
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const accountRepository = new AccountRepositoryImpl(rdb)
+  const activeUserRepository = new ActiveUserRepositoryImpl(rdb)
   const userRepository = new UserRepositoryImpl(rdb)
-  const service = new AccountService(accountRepository, userRepository)
+  const sessionRepository = new SessionRepositoryImpl(rdb)
+  const transaction = new Transaction(rdb)
+  const service = new ActiveUserService(activeUserRepository, userRepository, sessionRepository)
 
-  const result = await service.login(valid.email, valid.password)
+  // リクエストからIPアドレスとUserAgentを取得
+  const ipAddress = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || ''
+  const userAgent = c.req.header('user-agent') || ''
+
+  const result = await service.login(transaction, valid.email, valid.password, ipAddress, userAgent)
   if (isError(result)) {
     const { error } = result
     if (error instanceof ClientError) {
@@ -36,19 +43,19 @@ export default async function login(c: ZodValidatedContext<AccountInput>) {
   }
 
   const res = result.data
-  logger.info('login success', { userId: res.user.userId.toString() })
+  logger.info('login success', { userId: res.user.userId.toString(), activeUserId: res.activeUser.activeUserId.toString() })
 
   // セッションIDをCookieにセット
   setCookie(c, SESSION_NAME, res.sessionId, {
     httpOnly: true,
     secure: process.env.NODE_ENV !== 'development', // ローカルだけHTTP
-    expires: res.expiredAt,
+    expires: res.expiresAt,
     sameSite: 'lax',
   })
 
   return c.json(
     {
-      displayName: res.user.displayName,
+      displayName: res.activeUser.displayName,
     },
     200,
   )

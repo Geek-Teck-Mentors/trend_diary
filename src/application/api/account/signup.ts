@@ -3,27 +3,29 @@ import { ZodValidatedContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
 import {
-  AccountInput,
-  AccountRepositoryImpl,
-  AccountService,
+  ActiveUserInput,
+  ActiveUserRepositoryImpl,
   UserRepositoryImpl,
+  SessionRepositoryImpl,
+  ActiveUserService,
 } from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 
-export default async function signup(c: ZodValidatedContext<AccountInput>) {
+export default async function signup(c: ZodValidatedContext<ActiveUserInput>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const valid = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const accountRepository = new AccountRepositoryImpl(rdb)
+  const activeUserRepository = new ActiveUserRepositoryImpl(rdb)
   const userRepository = new UserRepositoryImpl(rdb)
+  const sessionRepository = new SessionRepositoryImpl(rdb)
   const transaction = new Transaction(rdb)
-  const service = new AccountService(accountRepository, userRepository)
+  const service = new ActiveUserService(activeUserRepository, userRepository, sessionRepository)
 
-  const result = await service.signup(transaction, valid.email, valid.password)
+  const result = await service.signup(transaction, valid.email, valid.password, valid.displayName)
   if (isError(result)) throw handleError(result.error, logger)
 
-  const account = result.data
-  logger.info('sign up success', { accountId: account.accountId.toString() })
+  const activeUser = result.data
+  logger.info('sign up success', { activeUserId: activeUser.activeUserId.toString() })
   return c.json({}, 201)
 }

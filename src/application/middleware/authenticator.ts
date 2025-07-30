@@ -5,7 +5,12 @@ import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants/session'
 import { NotFoundError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
+import { 
+  ActiveUserRepositoryImpl, 
+  UserRepositoryImpl, 
+  SessionRepositoryImpl,
+  ActiveUserService 
+} from '@/domain/account'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'
@@ -24,19 +29,31 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb))
+  const activeUserRepository = new ActiveUserRepositoryImpl(rdb)
+  const userRepository = new UserRepositoryImpl(rdb)
+  const sessionRepository = new SessionRepositoryImpl(rdb)
+  const service = new ActiveUserService(activeUserRepository, userRepository, sessionRepository)
 
-  const result = await service.getLoginUser(sessionId)
+  const result = await service.findBySessionId(sessionId)
   if (isError(result)) {
-    if (result.error instanceof NotFoundError) {
-      logger.error('Session not found', result.error, { sessionId })
-      throw new HTTPException(401, { message: 'login required' })
-    }
     logger.error('Error occurred while authenticating', { error: result })
     throw new HTTPException(500, { message: 'Internal Server Error' })
   }
 
-  c.set(CONTEXT_KEY.SESSION_USER, result.data)
+  if (!result.data) {
+    logger.error('Session not found', { sessionId })
+    throw new HTTPException(401, { message: 'login required' })
+  }
+
+  // セッションユーザー情報を設定
+  const sessionUser = {
+    userId: result.data.user.userId,
+    activeUserId: result.data.activeUser.activeUserId,
+    displayName: result.data.activeUser.displayName,
+    email: result.data.activeUser.email,
+  }
+
+  c.set(CONTEXT_KEY.SESSION_USER, sessionUser)
   c.set(CONTEXT_KEY.SESSION_ID, sessionId)
   return next()
 })
