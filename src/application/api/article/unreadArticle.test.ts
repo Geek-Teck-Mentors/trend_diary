@@ -4,7 +4,7 @@ import accountTestHelper from '@/test/helper/accountTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 describe('DELETE /api/articles/:article_id/unread', () => {
-  let testUserId: bigint
+  let testActiveUserId: bigint
   let testArticleId: bigint
   let sessionId: string
 
@@ -12,7 +12,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     // アカウント作成・ログイン
     await accountTestHelper.create('test@example.com', 'password123')
     const loginData = await accountTestHelper.login('test@example.com', 'password123')
-    testUserId = loginData.userId
+    testActiveUserId = loginData.activeUserId
     sessionId = loginData.sessionId
 
     // テスト記事作成
@@ -21,7 +21,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
     // 既読履歴を事前に作成（削除テスト用）
     await articleTestHelper.createReadHistory(
-      testUserId,
+      testActiveUserId,
       testArticleId,
       new Date('2024-01-01T10:00:00Z'),
     )
@@ -56,7 +56,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
   describe('正常系', () => {
     it('既読履歴を削除できること', async () => {
       // 事前に既読履歴があることを確認
-      const beforeCount = await articleTestHelper.countReadHistories(testUserId, testArticleId)
+      const beforeCount = await articleTestHelper.countReadHistories(testActiveUserId, testArticleId)
       expect(beforeCount).toBe(1)
 
       const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
@@ -66,13 +66,13 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       expect(json.message).toBe('記事を未読にしました')
 
       // DBから実際に削除されていることを確認
-      const afterCount = await articleTestHelper.countReadHistories(testUserId, testArticleId)
+      const afterCount = await articleTestHelper.countReadHistories(testActiveUserId, testArticleId)
       expect(afterCount).toBe(0)
     })
 
     it('既読履歴がなくてもOK', async () => {
       // 既読履歴を削除
-      await articleTestHelper.deleteReadHistory(testUserId, testArticleId)
+      await articleTestHelper.deleteReadHistory(testActiveUserId, testArticleId)
 
       const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
 
@@ -81,7 +81,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       expect(json.message).toBe('記事を未読にしました')
 
       // DBから実際に削除されていることを確認
-      const afterCount = await articleTestHelper.countReadHistories(testUserId, testArticleId)
+      const afterCount = await articleTestHelper.countReadHistories(testActiveUserId, testArticleId)
       expect(afterCount).toBe(0)
     })
   })

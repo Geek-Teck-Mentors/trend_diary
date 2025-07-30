@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { SESSION_NAME } from '@/common/constants/session'
-import { AccountService } from '@/domain/account'
+import { ActiveUserService } from '@/domain/account'
 import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import app from '../../server'
@@ -88,22 +88,22 @@ describe('DELETE /api/account/logout', () => {
       expect(data).toEqual({ message: 'login required' })
     })
 
-    it('アカウントがない場合、404', async () => {
-      // アカウントを削除して存在しない状態にする
+    it('アカウントがない場合、401', async () => {
+      // アカウントを削除して存在しない状態にする（Sessionも一緒に削除される）
       await accountTestHelper.deleteAllAccounts()
 
       const res = await requestLogout()
 
-      expect(res.status).toBe(404)
+      expect(res.status).toBe(401)
       const data = await res.json()
-      expect(data).toEqual({ message: 'Account not found' })
+      expect(data).toEqual({ message: 'login required' })
     })
   })
 
   describe('異常系', () => {
     it('予期しないエラーが発生した場合は500エラー', async () => {
-      // AccountServiceのlogoutメソッドをスパイしてエラーをスロー
-      const logoutSpy = vi.spyOn(AccountService.prototype, 'logout')
+      // ActiveUserServiceのlogoutメソッドをスパイしてエラーをスロー
+      const logoutSpy = vi.spyOn(ActiveUserService.prototype, 'logout')
       logoutSpy.mockRejectedValueOnce(new Error('予期しないエラー'))
 
       const res = await requestLogout()

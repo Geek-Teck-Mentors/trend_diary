@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
+import activeUserTestHelper from './activeUserTestHelper'
 
 process.env.NODE_ENV = 'test'
 
@@ -12,9 +13,9 @@ class ArticleTestHelper {
       media: faker.helpers.arrayElement(['qiita', 'zenn']),
       // fakerの生成する文章はテーブルの制約を超えることがあるため、適切な長さに制限
       title: faker.lorem.sentence().substring(0, 100),
-      author: faker.person.fullName(),
+      author: faker.person.fullName().substring(0, 100),
       description: faker.lorem.paragraph().substring(0, 255),
-      url: faker.internet.url(),
+      url: faker.internet.url().substring(0, 500),
     }
     return await this.rdb.article.create({ data })
   }
@@ -45,9 +46,21 @@ class ArticleTestHelper {
   }
 
   async createReadHistory(activeUserId: bigint, articleId: bigint, readAt?: Date) {
+    // ActiveUserが存在することを確認
+    const existingActiveUser = await this.rdb.activeUser.findUnique({
+      where: { activeUserId },
+    })
+    
+    let targetActiveUserId = activeUserId
+    if (!existingActiveUser) {
+      // ActiveUserが存在しない場合、テスト用のActiveUserを作成して、そのIDを使用
+      const createdUser = await activeUserTestHelper.create(faker.internet.email(), 'testPassword', 'Test User')
+      targetActiveUserId = createdUser.activeUserId
+    }
+
     return await this.rdb.readHistory.create({
       data: {
-        activeUserId,
+        activeUserId: targetActiveUserId,
         articleId,
         readAt: readAt || faker.date.recent(),
       },
