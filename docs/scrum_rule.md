@@ -19,7 +19,7 @@
 <details><summary>Fun Done Learnとは</summary>
 
 Fun Done Learnとは、「Fun(楽しかったこと)」「Done(やったこと)」「Learn(学びを得たこと)」の３つの観点から考えるフレームワーク
-![fun done learn](./scrum_rule/fun_done_learn.png)
+![fun done learn](./fun_done_learn.png)
 
 1. 楽しかったこと(FUN)、やったこと(DONE)、学びを得たこと(LEARN)のいずれかに該当しそうなものを書き出す
 2. 書き出したものが集合のどの部分に該当するかを説明する
