@@ -5,7 +5,7 @@ import TEST_ENV from '@/test/env'
 
 process.env.NODE_ENV = 'test'
 
-class AccountTestHelper {
+class UserTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
   private accountRepository = new AccountRepositoryImpl(this.rdb)
@@ -16,10 +16,12 @@ class AccountTestHelper {
 
   async cleanUp(): Promise<void> {
     // 外部キー制約を考慮した順序でTRUNCATE
-    // read_histories → sessions → accounts → users
+    // read_histories → sessions → active_users/banned_users/leaved_users → users
     await this.rdb.$queryRaw`TRUNCATE TABLE "read_histories" CASCADE;`
     await this.rdb.$queryRaw`TRUNCATE TABLE "sessions" CASCADE;`
-    await this.rdb.$queryRaw`TRUNCATE TABLE "accounts" CASCADE;`
+    await this.rdb.$queryRaw`TRUNCATE TABLE "active_users" CASCADE;`
+    await this.rdb.$queryRaw`TRUNCATE TABLE "banned_users" CASCADE;`
+    await this.rdb.$queryRaw`TRUNCATE TABLE "leaved_users" CASCADE;`
     await this.rdb.$queryRaw`TRUNCATE TABLE "users" CASCADE;`
   }
 
@@ -44,7 +46,7 @@ class AccountTestHelper {
   }
 
   async deleteAllAccounts(): Promise<void> {
-    await this.rdb.account.deleteMany()
+    await this.rdb.activeUser.deleteMany()
   }
 
   async disconnect(): Promise<void> {
@@ -52,5 +54,5 @@ class AccountTestHelper {
   }
 }
 
-const accountTestHelper = new AccountTestHelper()
-export default accountTestHelper
+const userTestHelper = new UserTestHelper()
+export default userTestHelper

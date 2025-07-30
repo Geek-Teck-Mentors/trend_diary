@@ -28,12 +28,12 @@ class ArticleTestHelper {
   }
 
   async findReadHistory(
-    userId: bigint,
+    activeUserId: bigint,
     articleId: bigint,
   ): Promise<{ readHistoryId: bigint; readAt: Date } | null> {
     const readHistory = await this.rdb.readHistory.findFirst({
       where: {
-        userId,
+        activeUserId,
         articleId,
       },
       select: {
@@ -44,29 +44,29 @@ class ArticleTestHelper {
     return readHistory
   }
 
-  async createReadHistory(userId: bigint, articleId: bigint, readAt?: Date) {
+  async createReadHistory(activeUserId: bigint, articleId: bigint, readAt?: Date) {
     return await this.rdb.readHistory.create({
       data: {
-        userId,
+        activeUserId,
         articleId,
         readAt: readAt || faker.date.recent(),
       },
     })
   }
 
-  async deleteReadHistory(userId: bigint, articleId: bigint): Promise<void> {
+  async deleteReadHistory(activeUserId: bigint, articleId: bigint): Promise<void> {
     await this.rdb.readHistory.deleteMany({
       where: {
-        userId,
+        activeUserId,
         articleId,
       },
     })
   }
 
-  async countReadHistories(userId: bigint, articleId: bigint): Promise<number> {
+  async countReadHistories(activeUserId: bigint, articleId: bigint): Promise<number> {
     const count = await this.rdb.readHistory.count({
       where: {
-        userId,
+        activeUserId,
         articleId,
       },
     })
