@@ -33,21 +33,21 @@ export default class ArticleService {
   }
 
   async createReadHistory(
-    userId: bigint,
+    activeUserId: bigint,
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isError(articleValidation)) return articleValidation
 
-    return this.articleCommandService.createReadHistory(userId, articleId, readAt)
+    return this.articleCommandService.createReadHistory(activeUserId, articleId, readAt)
   }
 
-  async deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error> {
+  async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isError(articleValidation)) return articleValidation
 
-    return this.articleCommandService.deleteAllReadHistory(userId, articleValidation.data.articleId)
+    return this.articleCommandService.deleteAllReadHistory(activeUserId, articleValidation.data.articleId)
   }
 
   private async validateArticleExists(articleId: bigint): AsyncResult<Article, Error> {
