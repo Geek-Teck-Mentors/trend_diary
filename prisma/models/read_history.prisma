@@ -4,8 +4,8 @@ model ReadHistory {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   /// 記事IDは外部制約なし（記事削除後も履歴を保持するため）
-  articleId     BigInt   @map("article_id") @db.BigInt
-  activeUserId  BigInt   @map("active_user_id") @db.BigInt
+  articleId    BigInt @map("article_id") @db.BigInt
+  activeUserId BigInt @map("active_user_id") @db.BigInt
 
   activeUser ActiveUser @relation(fields: [activeUserId], references: [activeUserId], onDelete: Cascade)
 
