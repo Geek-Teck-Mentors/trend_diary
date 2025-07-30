@@ -1,14 +1,11 @@
-import BaseModel from '@/common/model/baseModel'
-
-export default class User extends BaseModel {
+export default class User {
   constructor(
     public userId: bigint,
-    public accountId: bigint,
-    public displayName?: string,
-    public readonly createdAt: Date = new Date(),
-    updatedAt: Date = new Date(),
-    deletedAt?: Date,
+    public readonly createdAt: Date = new Date()
   ) {
-    super(createdAt, updatedAt, deletedAt)
+    // バリデーション（異常系テスト用）
+    if (userId <= 0n) {
+      throw new Error('User ID must be positive')
+    }
   }
 }
