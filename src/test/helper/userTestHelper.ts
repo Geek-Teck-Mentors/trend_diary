@@ -1,5 +1,10 @@
 import { isError } from '@/common/types/utility'
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
+import {
+  AccountRepositoryImpl,
+  AccountService,
+  SessionRepositoryImpl,
+  UserRepositoryImpl,
+} from '@/domain/account'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
@@ -12,7 +17,13 @@ class UserTestHelper {
 
   private userRepository = new UserRepositoryImpl(this.rdb)
 
-  private service = new AccountService(this.accountRepository, this.userRepository)
+  private sessionRepository = new SessionRepositoryImpl(this.rdb)
+
+  private service = new AccountService(
+    this.accountRepository,
+    this.userRepository,
+    this.sessionRepository,
+  )
 
   async cleanUp(): Promise<void> {
     // 外部キー制約を考慮した順序でTRUNCATE

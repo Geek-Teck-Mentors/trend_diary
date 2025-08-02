@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs'
+import { v4 as uuidv4 } from 'uuid'
 import { SESSION_DURATION } from '@/common/constants/session'
 import {
   AsyncResult,
@@ -14,6 +15,7 @@ import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '../
 import ActiveUser from '../model/activeUser'
 import User from '../model/user'
 import { ActiveUserRepository } from '../repository/activeUserRepository'
+import { SessionRepository } from '../repository/sessionRepository'
 import { UserRepository } from '../repository/userRepository'
 
 type LoginResult = {
@@ -27,6 +29,7 @@ export default class AccountService {
   constructor(
     private activeUserRepository: ActiveUserRepository,
     private userRepository: UserRepository,
+    private sessionRepository: SessionRepository,
   ) {}
 
   async signup(
@@ -91,13 +94,15 @@ export default class AccountService {
     const user = userRes.data
     if (isNull(user)) return resultError(new ServerError('User not found. this should not happen')) // signup時に作成されているはず
 
+    const sessionId = uuidv4()
     const expiredAt = new Date(Date.now() + SESSION_DURATION)
-    const addSessionRes = await this.activeUserRepository.addSession(
-      activeUser.activeUserId,
-      expiredAt,
-    )
+    const addSessionRes = await this.sessionRepository.create({
+      sessionId,
+      activeUserId: activeUser.activeUserId,
+      sessionToken: uuidv4(),
+      expiresAt: expiredAt,
+    })
     if (isError(addSessionRes)) return resultError(addSessionRes.error)
-    const sessionId = addSessionRes.data
 
     return resultSuccess({ user, activeUser, sessionId, expiredAt })
   }
@@ -125,7 +130,7 @@ export default class AccountService {
     const activeUser = activeUserRes.data
     if (isNull(activeUser)) return resultError(new NotFoundError('ActiveUser not found'))
 
-    const removeRes = await this.activeUserRepository.removeSession(sessionId)
+    const removeRes = await this.sessionRepository.delete(sessionId)
     if (isError(removeRes)) return resultError(removeRes.error)
 
     return removeRes
