@@ -1,0 +1,9 @@
+model LeavedUser {
+  userId    BigInt   @unique @map("user_id") @db.BigInt
+  reason    String?  @db.VarChar(1024)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("leaved_users")
+}

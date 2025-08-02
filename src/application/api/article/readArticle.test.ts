@@ -5,7 +5,7 @@ import accountTestHelper from '@/test/helper/accountTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 describe('POST /api/articles/:article_id/read', () => {
-  let testUserId: bigint
+  let testActiveUserId: bigint
   let testArticleId: bigint
   let sessionId: string
 
@@ -13,7 +13,7 @@ describe('POST /api/articles/:article_id/read', () => {
     // アカウント作成・ログイン
     await accountTestHelper.create('test@example.com', 'password123')
     const loginData = await accountTestHelper.login('test@example.com', 'password123')
-    testUserId = loginData.userId
+    testActiveUserId = loginData.activeUserId
     sessionId = loginData.sessionId
 
     // テスト記事作成
@@ -61,7 +61,7 @@ describe('POST /api/articles/:article_id/read', () => {
       expect(json.message).toBe('記事を既読にしました')
 
       // DBに実際に記録されていることを確認
-      const readHistory = await articleTestHelper.findReadHistory(testUserId, testArticleId)
+      const readHistory = await articleTestHelper.findReadHistory(testActiveUserId, testArticleId)
       expect(readHistory).toBeTruthy()
       expect(readHistory!.readAt).toEqual(new Date(fixedReadAt))
     })

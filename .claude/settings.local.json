@@ -21,7 +21,8 @@
       "Bash(npm run check:fix:*)",
       "Bash(npm run test:frontend:*)",
       "Bash(npm ls:*)",
-      "Bash(npm run test-storybook:*)"
+      "Bash(npm run test-storybook:*)",
+      "Bash(find:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",

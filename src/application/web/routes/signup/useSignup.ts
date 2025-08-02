@@ -10,10 +10,10 @@ export default function useSignup() {
   const { client, apiCall } = createSWRFetcher()
 
   const { trigger, isMutating } = useSWRMutation(
-    'account/signup',
+    'user/signup',
     async (_key: string, { arg }: { arg: AuthenticateFormData }) => {
       return apiCall(() =>
-        client.account.$post({
+        client.user.$post({
           json: arg,
         }),
       )

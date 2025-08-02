@@ -1,8 +1,12 @@
 model Article {
   articleId   BigInt   @id @default(autoincrement()) @map("article_id") @db.BigInt
+  /// メディア種別: "qiita", "zenn", "note"など
   media       String   @map("media") @db.VarChar(10)
+  /// 記事タイトル（100文字制限）
   title       String   @map("title") @db.VarChar(100)
+  /// 投稿者名（30文字制限）
   author      String   @map("author") @db.VarChar(30)
+  /// 記事概要（255文字制限）
   description String   @map("description") @db.VarChar(255)
   url         String   @map("url") @db.Text
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()

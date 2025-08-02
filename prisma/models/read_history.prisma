@@ -1,13 +1,13 @@
 model ReadHistory {
   readHistoryId BigInt   @id @default(autoincrement()) @map("read_history_id") @db.BigInt
-  userId        BigInt   @map("user_id") @db.BigInt
-  articleId     BigInt   @map("article_id") @db.BigInt
   readAt        DateTime @map("read_at") @db.Timestamptz()
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  // Userが削除された場合に削除したいので、外部結合を利用
-  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  /// 記事IDは外部制約なし（記事削除後も履歴を保持するため）
+  articleId    BigInt @map("article_id") @db.BigInt
+  activeUserId BigInt @map("active_user_id") @db.BigInt
 
-  @@index([userId, articleId], name: "read_history_user_article_idx")
+  activeUser ActiveUser @relation(fields: [activeUserId], references: [activeUserId], onDelete: Cascade)
+
   @@map("read_histories")
 }

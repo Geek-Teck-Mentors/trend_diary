@@ -272,7 +272,7 @@ describe('ArticleService', () => {
 
       expect(isSuccess(result)).toBe(true)
       if (isSuccess(result)) {
-        expect(result.data.userId).toBe(userId)
+        expect(result.data.activeUserId).toBe(userId)
         expect(result.data.articleId).toBe(articleId)
         expect(result.data.readAt).toBe(readAt)
       }

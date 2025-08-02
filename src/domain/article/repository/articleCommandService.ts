@@ -3,10 +3,10 @@ import ReadHistory from '../model/readHistory'
 
 export interface ArticleCommandService {
   createReadHistory(
-    userId: bigint,
+    activeUserId: bigint,
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error>
 
-  deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error>
+  deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error>
 }
