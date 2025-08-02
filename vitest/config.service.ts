@@ -5,18 +5,11 @@ import { coverageReporter, generateIncludes } from './config'
 
 const { testInclude, coverageInclude } = generateIncludes('src/domain', 'src/common')
 
-// リポジトリの詳細実装での単体テストには担保できる品質特性がないため、除外
-const testExclude = ['src/domain/**/infrastructure/*']
-
-// カバレッジ対象のファイルパスを生成（.test.tsファイル以外全部）
-const coverageExclude = [...testExclude]
-
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
     include: testInclude,
-    exclude: testExclude,
     coverage: {
       reporter: coverageReporter,
       // ベタガキしないと、Github Actionsに閾値が反映されない
@@ -27,7 +20,6 @@ export default defineConfig({
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
       include: coverageInclude,
-      exclude: coverageExclude,
     },
   },
 })
