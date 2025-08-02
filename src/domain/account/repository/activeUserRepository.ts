@@ -14,6 +14,4 @@ export interface ActiveUserRepository {
   findBySessionId(sessionId: string): AsyncResult<Nullable<ActiveUser>, Error>
   save(activeUser: ActiveUser): AsyncResult<ActiveUser, Error>
   delete(activeUser: ActiveUser): AsyncResult<ActiveUser, Error>
-  addSession(activeUserId: bigint, expiresAt: Date): AsyncResult<string, Error>
-  removeSession(sessionId: string): AsyncResult<void, Error>
 }
