@@ -1,11 +1,11 @@
-// ファクトリ
 import createActiveUserService from './factory/activeUserFactory'
 import { ActiveUserInput, activeUserInputSchema, activeUserSchema } from './schema/activeUserSchema'
 
-// 型エクスポート
+// 型
 export type { ActiveUserInput }
 
-// スキーマエクスポート
+// スキーマ
 export { activeUserSchema, activeUserInputSchema }
 
+// ファクトリー
 export { createActiveUserService }
