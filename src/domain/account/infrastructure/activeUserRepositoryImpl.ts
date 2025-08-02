@@ -9,6 +9,28 @@ import { ActiveUserUpdate } from '../schema/activeUserSchema'
 export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
   constructor(private db: RdbClient) {}
 
+  private mapToActiveUser(activeUser: {
+    activeUserId: bigint
+    userId: bigint
+    email: string
+    password: string
+    displayName: string | null
+    lastLogin: Date | null
+    createdAt: Date
+    updatedAt: Date
+  }): ActiveUser {
+    return new ActiveUser(
+      activeUser.activeUserId,
+      activeUser.userId,
+      activeUser.email,
+      activeUser.password,
+      activeUser.displayName,
+      activeUser.lastLogin ?? undefined,
+      activeUser.createdAt,
+      activeUser.updatedAt,
+    )
+  }
+
   async createActiveUser(
     userId: bigint,
     email: string,
@@ -25,18 +47,7 @@ export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
         },
       })
 
-      return resultSuccess(
-        new ActiveUser(
-          activeUser.activeUserId,
-          activeUser.userId,
-          activeUser.email,
-          activeUser.password,
-          activeUser.displayName,
-          activeUser.lastLogin ?? undefined,
-          activeUser.createdAt,
-          activeUser.updatedAt,
-        ),
-      )
+      return resultSuccess(this.mapToActiveUser(activeUser))
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         return resultError(new AlreadyExistsError(`Email ${email} already exists`))
@@ -55,18 +66,7 @@ export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
         return resultSuccess(null)
       }
 
-      return resultSuccess(
-        new ActiveUser(
-          activeUser.activeUserId,
-          activeUser.userId,
-          activeUser.email,
-          activeUser.password,
-          activeUser.displayName,
-          activeUser.lastLogin ?? undefined,
-          activeUser.createdAt,
-          activeUser.updatedAt,
-        ),
-      )
+      return resultSuccess(this.mapToActiveUser(activeUser))
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error('Unknown error'))
     }
@@ -82,18 +82,7 @@ export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
         return resultSuccess(null)
       }
 
-      return resultSuccess(
-        new ActiveUser(
-          activeUser.activeUserId,
-          activeUser.userId,
-          activeUser.email,
-          activeUser.password,
-          activeUser.displayName,
-          activeUser.lastLogin ?? undefined,
-          activeUser.createdAt,
-          activeUser.updatedAt,
-        ),
-      )
+      return resultSuccess(this.mapToActiveUser(activeUser))
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error('Unknown error'))
     }
@@ -109,18 +98,7 @@ export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
         return resultSuccess(null)
       }
 
-      return resultSuccess(
-        new ActiveUser(
-          activeUser.activeUserId,
-          activeUser.userId,
-          activeUser.email,
-          activeUser.password,
-          activeUser.displayName,
-          activeUser.lastLogin ?? undefined,
-          activeUser.createdAt,
-          activeUser.updatedAt,
-        ),
-      )
+      return resultSuccess(this.mapToActiveUser(activeUser))
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error('Unknown error'))
     }
@@ -138,18 +116,7 @@ export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
       }
 
       const activeUser = session.activeUser
-      return resultSuccess(
-        new ActiveUser(
-          activeUser.activeUserId,
-          activeUser.userId,
-          activeUser.email,
-          activeUser.password,
-          activeUser.displayName,
-          activeUser.lastLogin ?? undefined,
-          activeUser.createdAt,
-          activeUser.updatedAt,
-        ),
-      )
+      return resultSuccess(this.mapToActiveUser(activeUser))
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error('Unknown error'))
     }
@@ -162,18 +129,7 @@ export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
         data: updates,
       })
 
-      return resultSuccess(
-        new ActiveUser(
-          activeUser.activeUserId,
-          activeUser.userId,
-          activeUser.email,
-          activeUser.password,
-          activeUser.displayName,
-          activeUser.lastLogin ?? undefined,
-          activeUser.createdAt,
-          activeUser.updatedAt,
-        ),
-      )
+      return resultSuccess(this.mapToActiveUser(activeUser))
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error('Unknown error'))
     }
@@ -202,43 +158,7 @@ export default class ActiveUserRepositoryImpl implements ActiveUserRepository {
         },
       })
 
-      return resultSuccess(
-        new ActiveUser(
-          updatedActiveUser.activeUserId,
-          updatedActiveUser.userId,
-          updatedActiveUser.email,
-          updatedActiveUser.password,
-          updatedActiveUser.displayName,
-          updatedActiveUser.lastLogin ?? undefined,
-          updatedActiveUser.createdAt,
-          updatedActiveUser.updatedAt,
-        ),
-      )
-    } catch (error) {
-      return resultError(error instanceof Error ? error : new Error('Unknown error'))
-    }
-  }
-
-  async addSession(activeUserId: bigint, expiresAt: Date): AsyncResult<string, Error> {
-    try {
-      const session = await this.db.session.create({
-        data: {
-          activeUserId,
-          expiresAt,
-        },
-      })
-      return resultSuccess(session.sessionId)
-    } catch (error) {
-      return resultError(error instanceof Error ? error : new Error('Unknown error'))
-    }
-  }
-
-  async removeSession(sessionId: string): AsyncResult<void, Error> {
-    try {
-      await this.db.session.delete({
-        where: { sessionId },
-      })
-      return resultSuccess(undefined)
+      return resultSuccess(this.mapToActiveUser(updatedActiveUser))
     } catch (error) {
       return resultError(error instanceof Error ? error : new Error('Unknown error'))
     }
