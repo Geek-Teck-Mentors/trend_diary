@@ -4,11 +4,7 @@ import SessionRepositoryImpl from './infrastructure/sessionRepositoryImpl'
 import UserRepositoryImpl from './infrastructure/userRepositoryImpl'
 
 // スキーマと型
-import {
-  ActiveUserInput,
-  activeUserInputSchema,
-  activeUserSchema,
-} from './schema/activeUserSchema'
+import { ActiveUserInput, activeUserInputSchema, activeUserSchema } from './schema/activeUserSchema'
 import { sessionSchema } from './schema/sessionSchema'
 import { UserInput, userSchema } from './schema/userSchema'
 // サービス
