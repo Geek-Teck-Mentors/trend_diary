@@ -30,8 +30,8 @@ describe('ActiveUserService', () => {
     )
   })
 
-  describe('正常系', () => {
-    describe('signup', () => {
+  describe('signup', () => {
+    describe('基本動作', () => {
       it('新規ユーザーを作成できる', async () => {
         // このテストは現在失敗する（ActiveUserServiceが存在しないため）
         const email = 'test@example.com'
@@ -82,7 +82,84 @@ describe('ActiveUserService', () => {
       })
     })
 
-    describe('login', () => {
+    describe('境界値・特殊値', () => {
+      it('displayNameがnullでもユーザーを作成できる', async () => {
+        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
+        const email = 'test@example.com'
+        const password = 'password123'
+
+        // Arrange
+        mockActiveUserRepository.findByEmail.mockResolvedValue({
+          data: null,
+        })
+
+        mockUserRepository.create.mockResolvedValue({
+          data: {
+            userId: 1n,
+            createdAt: new Date(),
+          },
+        })
+
+        mockActiveUserRepository.createActiveUser.mockResolvedValue({
+          data: {
+            activeUserId: 2n,
+            userId: 1n,
+            email,
+            password: 'hashedPassword',
+            displayName: null,
+            lastLogin: undefined,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            recordLogin: vi.fn(),
+          },
+        })
+
+        // Act
+        const result = await service.signup(mockTransaction, email, password)
+
+        // Assert
+        expect(isSuccess(result)).toBe(true)
+        if (isSuccess(result)) {
+          expect(result.data.displayName).toBeNull()
+        }
+      })
+    })
+
+    describe('例外・制約違反', () => {
+      it('重複するメールアドレスでは作成に失敗する', async () => {
+        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
+        const email = 'duplicate@example.com'
+        const password = 'password123'
+
+        // Arrange - 既存ユーザーが存在
+        mockActiveUserRepository.findByEmail.mockResolvedValue({
+          data: {
+            activeUserId: 1n,
+            userId: 2n,
+            email,
+            password: 'existingPassword',
+            displayName: '既存ユーザー',
+            lastLogin: undefined,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            recordLogin: vi.fn(),
+          },
+        })
+
+        // Act
+        const result = await service.signup(mockTransaction, email, password)
+
+        // Assert
+        expect(isError(result)).toBe(true)
+        if (isError(result)) {
+          expect(result.error).toBeInstanceOf(AlreadyExistsError)
+        }
+      })
+    })
+  })
+
+  describe('login', () => {
+    describe('基本動作', () => {
       it('有効な認証情報でログインできる', async () => {
         // このテストは現在失敗する（ActiveUserServiceが存在しないため）
         const email = 'test@example.com'
@@ -141,87 +218,8 @@ describe('ActiveUserService', () => {
         }
       })
     })
-  })
 
-  describe('準正常系', () => {
-    describe('signup', () => {
-      it('displayNameがnullでもユーザーを作成できる', async () => {
-        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
-        const email = 'test@example.com'
-        const password = 'password123'
-
-        // Arrange
-        mockActiveUserRepository.findByEmail.mockResolvedValue({
-          data: null,
-        })
-
-        mockUserRepository.create.mockResolvedValue({
-          data: {
-            userId: 1n,
-            createdAt: new Date(),
-          },
-        })
-
-        mockActiveUserRepository.createActiveUser.mockResolvedValue({
-          data: {
-            activeUserId: 2n,
-            userId: 1n,
-            email,
-            password: 'hashedPassword',
-            displayName: null,
-            lastLogin: undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            recordLogin: vi.fn(),
-          },
-        })
-
-        // Act
-        const result = await service.signup(mockTransaction, email, password)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.displayName).toBeNull()
-        }
-      })
-    })
-  })
-
-  describe('異常系', () => {
-    describe('signup', () => {
-      it('重複するメールアドレスでは作成に失敗する', async () => {
-        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
-        const email = 'duplicate@example.com'
-        const password = 'password123'
-
-        // Arrange - 既存ユーザーが存在
-        mockActiveUserRepository.findByEmail.mockResolvedValue({
-          data: {
-            activeUserId: 1n,
-            userId: 2n,
-            email,
-            password: 'existingPassword',
-            displayName: '既存ユーザー',
-            lastLogin: undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            recordLogin: vi.fn(),
-          },
-        })
-
-        // Act
-        const result = await service.signup(mockTransaction, email, password)
-
-        // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
-          expect(result.error).toBeInstanceOf(AlreadyExistsError)
-        }
-      })
-    })
-
-    describe('login', () => {
+    describe('例外・制約違反', () => {
       it('存在しないメールアドレスではログインに失敗する', async () => {
         // このテストは現在失敗する（ActiveUserServiceが存在しないため）
         const email = 'notfound@example.com'
