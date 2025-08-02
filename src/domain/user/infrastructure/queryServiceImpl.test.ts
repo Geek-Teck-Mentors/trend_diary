@@ -157,38 +157,6 @@ describe('QueryServiceImpl', () => {
         // Arrange
         const SessionId = 'session123'
 
-        // Prismaクエリの結果をモック
-        const mockQueryResult = [
-          {
-            activeUserId: 1n,
-            userId: 2n,
-            email: 'test@example.com',
-            password: 'hashedPassword123',
-            displayName: 'テストユーザー',
-            lastLogin: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ]
-
-        mockDb.$queryRaw.mockResolvedValue(mockQueryResult)
-
-        // Act
-        const result = await service.findActiveBySessionId(SessionId)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data?.activeUserId).toBe(1n)
-          expect(result.data?.email).toBe('test@example.com')
-        }
-        expect(mockDb.$queryRaw).toHaveBeenCalled()
-      })
-
-      it('Prisma includeパターンでActiveUserを検索できる', async () => {
-        // Arrange - alternative implementation using include
-        const _sessionId = 'session123'
-
         const mockSession = {
           sessionId: 'session123',
           activeUserId: 1n,
@@ -209,18 +177,27 @@ describe('QueryServiceImpl', () => {
           },
         }
 
-        mockDb.session.findUnique.mockResolvedValue(mockSession)
+        mockDb.session.findFirst.mockResolvedValue(mockSession)
 
-        // Act - この部分は実装によって異なる可能性がある
-        // includeパターンの場合のテスト
+        // Act
+        const result = await service.findActiveBySessionId(SessionId)
+
+        // Assert
+        expect(isSuccess(result)).toBe(true)
+        if (isSuccess(result)) {
+          expect(result.data?.activeUserId).toBe(1n)
+          expect(result.data?.email).toBe('test@example.com')
+        }
+        expect(mockDb.session.findFirst).toHaveBeenCalled()
       })
+
     })
 
     describe('境界値・特殊値', () => {
       it('存在しないセッションIDの場合nullを返す', async () => {
         // Arrange
         const sessionId = 'nonexistent'
-        mockDb.$queryRaw.mockResolvedValue([])
+        mockDb.session.findFirst.mockResolvedValue(null)
 
         // Act
         const result = await service.findActiveBySessionId(sessionId)
@@ -237,7 +214,7 @@ describe('QueryServiceImpl', () => {
         const SessionId = 'expired-session'
 
         // 期限切れのため結果が返らない
-        mockDb.$queryRaw.mockResolvedValue([])
+        mockDb.session.findFirst.mockResolvedValue(null)
 
         // Act
         const result = await service.findActiveBySessionId(SessionId)
@@ -255,7 +232,7 @@ describe('QueryServiceImpl', () => {
         // Arrange
         const SessionId = 'session123'
         const dbError = new Error('Database connection failed')
-        mockDb.$queryRaw.mockRejectedValue(dbError)
+        mockDb.session.findFirst.mockRejectedValue(dbError)
 
         // Act
         const result = await service.findActiveBySessionId(SessionId)

@@ -1,6 +1,6 @@
 import { isError } from '@/common/types/utility'
 import { createActiveUserService } from '@/domain/user'
-import getRdbClient, { Transaction } from '@/infrastructure/rdb'
+import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
 process.env.NODE_ENV = 'test'
@@ -22,7 +22,6 @@ class UserTestHelper {
   }
 
   async create(email: string, password: string): Promise<void> {
-    const _transaction = new Transaction(this.rdb)
     await this.service.signup(email, password)
   }
 

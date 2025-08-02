@@ -1,6 +1,6 @@
 import { isError } from '@/common/types/utility'
 import { createActiveUserService } from '@/domain/user'
-import getRdbClient, { Transaction } from '@/infrastructure/rdb'
+import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
 process.env.NODE_ENV = 'test'
@@ -26,7 +26,6 @@ class ActiveUserTestHelper {
     password: string,
     displayName?: string,
   ): Promise<{ userId: bigint; activeUserId: bigint }> {
-    const _transaction = new Transaction(this.rdb)
     const result = await this.service.signup(email, password)
     if (isError(result)) {
       throw new Error(`Failed to create user: ${result.error.message}`)
