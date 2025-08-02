@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError } from '@/common/errors'
@@ -160,8 +160,10 @@ describe('ActiveUserRepositoryImpl', () => {
         displayName: 'テストユーザー',
       }
 
-      const prismaError = new Error('Unique constraint violation')
-      ;(prismaError as any).code = 'P2002'
+      const prismaError = new Prisma.PrismaClientKnownRequestError('Unique constraint violation', {
+        code: 'P2002',
+        clientVersion: '5.0.0',
+      })
       mockDb.activeUser.create.mockRejectedValue(prismaError)
 
       // Act
