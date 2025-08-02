@@ -65,7 +65,6 @@ export default class QueryServiceImpl implements QueryService {
 
       return resultSuccess(mapToActiveUser(result[0]))
     } catch (error) {
-      console.error('Error in findActiveBySessionId:', error)
       return resultError(new ServerError(getErrorMessage(error)))
     }
   }

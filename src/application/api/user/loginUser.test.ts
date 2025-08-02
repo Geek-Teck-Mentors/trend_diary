@@ -56,7 +56,7 @@ describe('GET /api/user/me', () => {
       expect(res.status).toBe(200)
 
       // Hono公式のテスト方法に準拠して、レスポンスデータ構造を検証
-      const data = (await res.json()) as { user: {displayName?: string } }
+      const data = (await res.json()) as { user: { displayName?: string } }
 
       // 実際のプロパティ構造に合わせてテスト
       expect(typeof data).toBe('object')

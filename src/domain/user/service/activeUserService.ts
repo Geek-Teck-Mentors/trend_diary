@@ -134,7 +134,7 @@ export default class ActiveUserService {
     return resultSuccess(undefined)
   }
 
-  async getCurrentUser(sessionId: string): AsyncResult<Nullable< ActiveUser>, Error> {
+  async getCurrentUser(sessionId: string): AsyncResult<Nullable<ActiveUser>, Error> {
     const result = await this.queryService.findActiveBySessionId(sessionId)
     if (isError(result)) return resultError(ServerError.handle(result.error))
 
