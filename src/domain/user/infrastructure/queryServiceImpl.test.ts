@@ -190,7 +190,6 @@ describe('QueryServiceImpl', () => {
         }
         expect(mockDb.session.findFirst).toHaveBeenCalled()
       })
-
     })
 
     describe('境界値・特殊値', () => {
