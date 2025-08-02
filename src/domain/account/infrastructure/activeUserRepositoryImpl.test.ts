@@ -116,10 +116,13 @@ describe('ActiveUserRepositoryImpl', () => {
           displayName: 'テストユーザー',
         }
 
-        const prismaError = new Prisma.PrismaClientKnownRequestError('Unique constraint violation', {
-          code: 'P2002',
-          clientVersion: '5.0.0',
-        })
+        const prismaError = new Prisma.PrismaClientKnownRequestError(
+          'Unique constraint violation',
+          {
+            code: 'P2002',
+            clientVersion: '5.0.0',
+          },
+        )
         mockDb.activeUser.create.mockRejectedValue(prismaError)
 
         // Act
