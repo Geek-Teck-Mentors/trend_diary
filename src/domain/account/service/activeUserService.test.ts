@@ -131,13 +131,7 @@ describe('ActiveUserService', () => {
         mockActiveUserRepository.save.mockResolvedValue(resultSuccess(updatedActiveUser))
 
         // Act
-        const result = await service.login(
-          mockTransaction,
-          email,
-          password,
-          '192.168.1.1',
-          'Mozilla/5.0',
-        )
+        const result = await service.login(email, password, '192.168.1.1', 'Mozilla/5.0')
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -239,13 +233,7 @@ describe('ActiveUserService', () => {
         })
 
         // Act
-        const result = await service.login(
-          mockTransaction,
-          email,
-          password,
-          '192.168.1.1',
-          'Mozilla/5.0',
-        )
+        const result = await service.login(email, password, '192.168.1.1', 'Mozilla/5.0')
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -277,13 +265,7 @@ describe('ActiveUserService', () => {
         })
 
         // Act
-        const result = await service.login(
-          mockTransaction,
-          email,
-          wrongPassword,
-          '192.168.1.1',
-          'Mozilla/5.0',
-        )
+        const result = await service.login(email, wrongPassword, '192.168.1.1', 'Mozilla/5.0')
 
         // Assert
         expect(isError(result)).toBe(true)

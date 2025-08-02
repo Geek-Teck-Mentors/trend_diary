@@ -61,8 +61,7 @@ class ActiveUserTestHelper {
     sessionId: string
     expiresAt: Date
   }> {
-    const transaction = new Transaction(this.rdb)
-    const loginResult = await this.service.login(transaction, email, password, ipAddress, userAgent)
+    const loginResult = await this.service.login(email, password, ipAddress, userAgent)
     if (isError(loginResult)) {
       throw new Error(`Failed to login: ${loginResult.error.message}`)
     }
