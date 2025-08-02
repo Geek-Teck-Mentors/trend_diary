@@ -6,57 +6,22 @@ import UserRepositoryImpl from './infrastructure/userRepositoryImpl'
 // スキーマと型
 import {
   ActiveUserInput,
-  ActiveUserOutput,
-  ActiveUserUpdate,
   activeUserInputSchema,
   activeUserSchema,
-  activeUserUpdateSchema,
 } from './schema/activeUserSchema'
-import {
-  SessionInput,
-  SessionOutput,
-  SessionUpdate,
-  sessionInputSchema,
-  sessionSchema,
-  sessionUpdateSchema,
-} from './schema/sessionSchema'
-import { UserInput, UserOutput, userSchema } from './schema/userSchema'
-import AccountService from './service/accountService'
+import { sessionSchema } from './schema/sessionSchema'
+import { UserInput, userSchema } from './schema/userSchema'
 // サービス
 import ActiveUserService from './service/activeUserService'
-import UserService from './service/userService'
 
 // 型エクスポート
-export type {
-  ActiveUserInput,
-  ActiveUserUpdate,
-  ActiveUserOutput,
-  UserInput,
-  UserOutput,
-  SessionInput,
-  SessionUpdate,
-  SessionOutput,
-}
+export type { ActiveUserInput, UserInput }
 
 // スキーマエクスポート
-export {
-  activeUserSchema,
-  activeUserInputSchema,
-  activeUserUpdateSchema,
-  userSchema,
-  sessionSchema,
-  sessionInputSchema,
-  sessionUpdateSchema,
-}
-
-// 互換性のための非推奨エクスポート
-export { activeUserSchema as accountSchema }
+export { activeUserSchema, activeUserInputSchema, userSchema, sessionSchema }
 
 // サービスエクスポート
-export { ActiveUserService, UserService, AccountService }
+export { ActiveUserService }
 
 // リポジトリ実装エクスポート
 export { ActiveUserRepositoryImpl, UserRepositoryImpl, SessionRepositoryImpl }
-
-// 互換性のための非推奨エクスポート
-export { ActiveUserRepositoryImpl as AccountRepositoryImpl }

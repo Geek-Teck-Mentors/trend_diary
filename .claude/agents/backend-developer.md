@@ -75,7 +75,7 @@ src/domain/{aggregate}/
 ├── repository/      # リポジトリインターフェース
 ├── schema/          # Zodバリデーションスキーマ
 ├── infrastructure/  # リポジトリ実装
-└── index.ts         # 集約エクスポート
+└── index.ts         # 集約外で使用するものをエクスポートする
 ```
 
 #### Result<T, E>型エラーハンドリング

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { accountSchema } from '@/domain/account'
+import { activeUserSchema } from '@/domain/account'
 import { newValidationError, newValidationSuccess, ValidationResult } from '../validation'
 
 export type AuthenticateErrors = {
@@ -7,7 +7,7 @@ export type AuthenticateErrors = {
   password?: string[]
 }
 
-export type AuthenticateFormData = Pick<z.infer<typeof accountSchema>, 'email' | 'password'>
+export type AuthenticateFormData = Pick<z.infer<typeof activeUserSchema>, 'email' | 'password'>
 
 export function validateAuthenticateForm(
   formData: FormData,
@@ -15,7 +15,7 @@ export function validateAuthenticateForm(
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  const result = accountSchema.pick({ email: true, password: true }).safeParse({
+  const result = activeUserSchema.pick({ email: true, password: true }).safeParse({
     email,
     password,
   })

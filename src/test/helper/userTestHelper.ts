@@ -1,7 +1,7 @@
 import { isError } from '@/common/types/utility'
 import {
-  AccountRepositoryImpl,
-  AccountService,
+  ActiveUserRepositoryImpl,
+  ActiveUserService,
   SessionRepositoryImpl,
   UserRepositoryImpl,
 } from '@/domain/account'
@@ -13,14 +13,14 @@ process.env.NODE_ENV = 'test'
 class UserTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  private accountRepository = new AccountRepositoryImpl(this.rdb)
+  private activeUserRepository = new ActiveUserRepositoryImpl(this.rdb)
 
   private userRepository = new UserRepositoryImpl(this.rdb)
 
   private sessionRepository = new SessionRepositoryImpl(this.rdb)
 
-  private service = new AccountService(
-    this.accountRepository,
+  private service = new ActiveUserService(
+    this.activeUserRepository,
     this.userRepository,
     this.sessionRepository,
   )
