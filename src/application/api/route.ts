@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
-import userApp from '@/application/api/user/route'
 import articleApp from '@/application/api/article/route'
+import userApp from '@/application/api/user/route'
 
 const app = new Hono().route('/user', userApp).route('/articles', articleApp)
 
