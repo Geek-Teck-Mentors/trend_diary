@@ -16,7 +16,6 @@ import User from '../model/user'
 import { ActiveUserRepository } from '../repository/activeUserRepository'
 import { SessionRepository } from '../repository/sessionRepository'
 import { UserRepository } from '../repository/userRepository'
-import { ActiveUserInput } from '../schema/activeUserSchema'
 
 type LoginResult = {
   user: User
@@ -57,12 +56,6 @@ export default class ActiveUserService {
     }
 
     // 2. ActiveUser作成
-    const _activeUserInput: ActiveUserInput = {
-      email,
-      password: hashedPassword,
-      displayName,
-    }
-
     const activeUserResult = await this.activeUserRepository.createActiveUser(
       userResult.data.userId,
       email,
@@ -85,6 +78,37 @@ export default class ActiveUserService {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<Result<LoginResult, Error>> {
+    const authResult = await this.authenticateUser(email, plainPassword)
+    if (isError(authResult)) return resultError(authResult.error)
+
+    const { user, activeUser } = authResult.data
+
+    const sessionResult = await this.createLoginSession(
+      activeUser.activeUserId,
+      ipAddress,
+      userAgent,
+    )
+    if (isError(sessionResult)) return resultError(sessionResult.error)
+
+    const { sessionId, expiresAt } = sessionResult.data
+
+    // lastLoginを更新
+    activeUser.recordLogin()
+    const updateResult = await this.activeUserRepository.save(activeUser)
+    if (isError(updateResult)) return resultError(updateResult.error)
+
+    return resultSuccess({
+      user,
+      activeUser: updateResult.data,
+      sessionId,
+      expiresAt,
+    })
+  }
+
+  private async authenticateUser(
+    email: string,
+    plainPassword: string,
+  ): Promise<Result<{ user: User; activeUser: ActiveUser }, Error>> {
     // ActiveUserを探す
     const activeUserResult = await this.activeUserRepository.findByEmail(email)
     if (isError(activeUserResult)) return resultError(ServerError.handle(activeUserResult.error))
@@ -94,10 +118,8 @@ export default class ActiveUserService {
     const activeUser = activeUserResult.data!
 
     // パスワードチェック
-    const isValidPassword = await bcrypt.compare(plainPassword, activeUser.password)
-    if (!isValidPassword) {
-      return resultError(new ClientError('Invalid credentials'))
-    }
+    const validationResult = await this.validateCredentials(plainPassword, activeUser.password)
+    if (isError(validationResult)) return resultError(validationResult.error)
 
     // Userも取得
     const userResult = await this.userRepository.findById(activeUser.userId)
@@ -107,13 +129,31 @@ export default class ActiveUserService {
 
     const user = userResult.data!
 
-    // セッション作成
+    return resultSuccess({ user, activeUser })
+  }
+
+  private async validateCredentials(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<Result<void, Error>> {
+    const isValidPassword = await bcrypt.compare(plainPassword, hashedPassword)
+    if (!isValidPassword) {
+      return resultError(new ClientError('Invalid credentials'))
+    }
+    return resultSuccess(undefined)
+  }
+
+  private async createLoginSession(
+    activeUserId: bigint,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<Result<{ sessionId: string; expiresAt: Date }, Error>> {
     const sessionId = uuidv4()
     const expiresAt = new Date(Date.now() + SESSION_DURATION)
 
     const sessionResult = await this.sessionRepository.create({
       sessionId,
-      activeUserId: activeUser.activeUserId,
+      activeUserId,
       sessionToken: uuidv4(),
       expiresAt,
       ipAddress,
@@ -124,17 +164,7 @@ export default class ActiveUserService {
       return resultError(ServerError.handle(sessionResult.error))
     }
 
-    // TODO: lastLoginを更新する処理を実装
-    // const updateResult = await this.activeUserRepository.update(activeUser.activeUserId, {
-    //   lastLogin: new Date()
-    // })
-
-    return resultSuccess({
-      user,
-      activeUser,
-      sessionId,
-      expiresAt,
-    })
+    return resultSuccess({ sessionId, expiresAt })
   }
 
   async logout(sessionId: string): Promise<Result<void, Error>> {
