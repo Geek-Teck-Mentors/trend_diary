@@ -1,9 +1,9 @@
 import { getErrorMessage, ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
+import { CreateSessionInput } from '../dto'
 import ActiveUser from '../model/activeUser'
 import { CommandService } from '../repository/commandService'
-import { SessionInput } from '../schema/sessionSchema'
 import { mapToActiveUser } from './mapper'
 
 export default class CommandServiceImpl implements CommandService {
@@ -48,7 +48,7 @@ export default class CommandServiceImpl implements CommandService {
   }
 
   async createSession(
-    input: SessionInput,
+    input: CreateSessionInput,
   ): AsyncResult<{ sessionId: string; expiresAt: Date }, Error> {
     try {
       const session = await this.db.session.create({
