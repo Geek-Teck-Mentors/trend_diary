@@ -1,3 +1,4 @@
+import { getConnInfo } from 'hono/cloudflare-workers'
 import { setCookie } from 'hono/cookie'
 import { HTTPException } from 'hono/http-exception'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
@@ -27,7 +28,8 @@ export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   const service = new ActiveUserService(activeUserRepository, userRepository, sessionRepository)
 
   // リクエストからIPアドレスとUserAgentを取得
-  const ipAddress = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || ''
+  const connInfo = getConnInfo(c)
+  const ipAddress = connInfo.remote.address || ''
   const userAgent = c.req.header('user-agent') || ''
 
   const result = await service.login(transaction, valid.email, valid.password, ipAddress, userAgent)
