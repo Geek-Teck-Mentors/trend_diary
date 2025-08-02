@@ -4,7 +4,7 @@ export const activeUserSchema = z.object({
   activeUserId: z.bigint().positive(),
   userId: z.bigint().positive(),
   email: z.string().email().max(1024),
-  password: z.string().min(8).max(1024),
+  password: z.string().min(8).max(50),
   displayName: z.string().max(1024).optional().nullable(),
   lastLogin: z.date().optional(),
   createdAt: z.date(),
@@ -13,13 +13,13 @@ export const activeUserSchema = z.object({
 
 export const activeUserInputSchema = z.object({
   email: z.string().email().max(1024),
-  password: z.string().min(8).max(1024),
+  password: z.string().min(8).max(50),
   displayName: z.string().max(1024).optional().nullable(),
 })
 
 export const activeUserUpdateSchema = z.object({
   displayName: z.string().max(1024).optional().nullable(),
-  password: z.string().min(8).max(1024).optional(),
+  password: z.string().min(8).max(50).optional(),
 })
 
 export type ActiveUserInput = z.infer<typeof activeUserInputSchema>

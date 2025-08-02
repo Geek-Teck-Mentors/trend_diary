@@ -103,5 +103,15 @@ describe('ActiveUserスキーマ', () => {
       const result = activeUserInputSchema.safeParse(invalidData)
       expect(result.success).toBe(false)
     })
+
+    it('長すぎるパスワードでは検証に失敗する', () => {
+      const invalidData = {
+        email: 'test@example.com',
+        password: 'a'.repeat(51), // 50文字を超える
+      }
+
+      const result = activeUserInputSchema.safeParse(invalidData)
+      expect(result.success).toBe(false)
+    })
   })
 })
