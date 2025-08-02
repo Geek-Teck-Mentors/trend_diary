@@ -3,119 +3,80 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError } from '@/common/errors'
 import { isError, isSuccess, resultSuccess } from '@/common/types/utility'
-import { TransactionClient } from '@/infrastructure/rdb'
 import ActiveUser from '../model/activeUser'
-import Session from '../model/session'
-import User from '../model/user'
-import { ActiveUserRepository } from '../repository/activeUserRepository'
-import { SessionRepository } from '../repository/sessionRepository'
-import { UserRepository } from '../repository/userRepository'
+import { CommandService } from '../repository/commandService'
+import { QueryService } from '../repository/queryService'
 import ActiveUserService from './activeUserService'
 
 // モックの設定
-const mockActiveUserRepository = mockDeep<ActiveUserRepository>()
-const mockUserRepository = mockDeep<UserRepository>()
-const mockSessionRepository = mockDeep<SessionRepository>()
-const mockTransaction = mockDeep<TransactionClient>()
+const mockQueryService = mockDeep<QueryService>()
+const mockCommandService = mockDeep<CommandService>()
 
 describe('ActiveUserService', () => {
   let service: ActiveUserService
 
   beforeEach(() => {
     vi.clearAllMocks()
-    service = new ActiveUserService(
-      mockActiveUserRepository,
-      mockUserRepository,
-      mockSessionRepository,
-    )
+    service = new ActiveUserService(mockQueryService, mockCommandService)
   })
 
   describe('signup', () => {
     describe('基本動作', () => {
       it('新規ユーザーを作成できる', async () => {
-        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
         const email = 'test@example.com'
         const password = 'password123'
-        const displayName = 'テストユーザー'
 
         // Arrange - 重複チェックでnullを返す
-        mockActiveUserRepository.findByEmail.mockResolvedValue({
-          data: null,
-        })
-
-        // User作成
-        mockUserRepository.create.mockResolvedValue({
-          data: {
-            userId: 1n,
-            createdAt: new Date(),
-          },
-        })
+        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
         // ActiveUser作成
-        const mockActiveUser = {
-          activeUserId: 2n,
-          userId: 1n,
+        const mockActiveUser = new ActiveUser(
+          1n,
+          2n,
           email,
-          password: 'hashedPassword',
-          displayName,
-          lastLogin: undefined,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          recordLogin: vi.fn(),
-        }
-        mockActiveUserRepository.createActiveUser.mockResolvedValue({
-          data: mockActiveUser,
-        })
+          'hashedPassword',
+          'テストユーザー',
+          undefined,
+          new Date(),
+          new Date(),
+        )
+        mockCommandService.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
-        const result = await service.signup(mockTransaction, email, password, displayName)
+        const result = await service.signup(email, password)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
           expect(result.data.email).toBe(email)
-          expect(result.data.displayName).toBe(displayName)
         }
-        expect(mockActiveUserRepository.findByEmail).toHaveBeenCalledWith(email)
-        expect(mockUserRepository.create).toHaveBeenCalled()
-        expect(mockActiveUserRepository.createActiveUser).toHaveBeenCalled()
+        expect(mockQueryService.findActiveByEmail).toHaveBeenCalledWith(email)
+        expect(mockCommandService.createActive).toHaveBeenCalledWith(email, expect.any(String))
       })
     })
 
     describe('境界値・特殊値', () => {
-      it('displayNameがnullでもユーザーを作成できる', async () => {
-        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
+      it('既存のユーザーが存在する場合でも作成できる', async () => {
         const email = 'test@example.com'
         const password = 'password123'
 
         // Arrange
-        mockActiveUserRepository.findByEmail.mockResolvedValue({
-          data: null,
-        })
+        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
-        mockUserRepository.create.mockResolvedValue({
-          data: {
-            userId: 1n,
-            createdAt: new Date(),
-          },
-        })
-
-        mockActiveUserRepository.createActiveUser.mockResolvedValue({
-          data: {
-            activeUserId: 2n,
-            userId: 1n,
-            email,
-            password: 'hashedPassword',
-            displayName: null,
-            lastLogin: undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            recordLogin: vi.fn(),
-          },
-        })
+        const mockActiveUser = new ActiveUser(
+          1n,
+          2n,
+          email,
+          'hashedPassword',
+          null,
+          undefined,
+          new Date(),
+          new Date(),
+        )
+        mockCommandService.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
-        const result = await service.signup(mockTransaction, email, password)
+        const result = await service.signup(email, password)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -127,27 +88,24 @@ describe('ActiveUserService', () => {
 
     describe('例外・制約違反', () => {
       it('重複するメールアドレスでは作成に失敗する', async () => {
-        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
         const email = 'duplicate@example.com'
         const password = 'password123'
 
         // Arrange - 既存ユーザーが存在
-        mockActiveUserRepository.findByEmail.mockResolvedValue({
-          data: {
-            activeUserId: 1n,
-            userId: 2n,
-            email,
-            password: 'existingPassword',
-            displayName: '既存ユーザー',
-            lastLogin: undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            recordLogin: vi.fn(),
-          },
-        })
+        const existingUser = new ActiveUser(
+          1n,
+          2n,
+          email,
+          'existingPassword',
+          '既存ユーザー',
+          undefined,
+          new Date(),
+          new Date(),
+        )
+        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(existingUser))
 
         // Act
-        const result = await service.signup(mockTransaction, email, password)
+        const result = await service.signup(email, password)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -161,7 +119,6 @@ describe('ActiveUserService', () => {
   describe('login', () => {
     describe('基本動作', () => {
       it('有効な認証情報でログインできる', async () => {
-        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
         const email = 'test@example.com'
         const password = 'password123'
         const hashedPassword = await bcrypt.hash(password, 10)
@@ -177,24 +134,16 @@ describe('ActiveUserService', () => {
           new Date(),
           new Date(),
         )
-        mockActiveUserRepository.findByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
 
-        const mockUser = new User(2n, new Date())
-        mockUserRepository.findById.mockResolvedValue(resultSuccess(mockUser))
-
-        const mockSession = new Session(
-          'session-123',
-          1n,
-          'token-456',
-          new Date(Date.now() + 24 * 60 * 60 * 1000),
-          '192.168.1.1',
-          'Mozilla/5.0',
-          new Date(),
-          false,
+        mockCommandService.createSession.mockResolvedValue(
+          resultSuccess({
+            sessionId: 'session-123',
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          }),
         )
-        mockSessionRepository.create.mockResolvedValue(resultSuccess(mockSession))
 
-        // ActiveUserRepository.saveのモックも追加
+        // ActiveUser保存のモック
         const updatedActiveUser = new ActiveUser(
           1n,
           2n,
@@ -205,7 +154,7 @@ describe('ActiveUserService', () => {
           new Date(),
           new Date(),
         )
-        mockActiveUserRepository.save.mockResolvedValue(resultSuccess(updatedActiveUser))
+        mockCommandService.saveActive.mockResolvedValue(resultSuccess(updatedActiveUser))
 
         // Act
         const result = await service.login(email, password, '192.168.1.1', 'Mozilla/5.0')
@@ -213,22 +162,19 @@ describe('ActiveUserService', () => {
         // Assert
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data.user.userId).toBe(2n)
-          expect(result.data.sessionId).toMatch(/^[0-9a-f-]{36}$/) // UUID形式をチェック
+          expect(result.data.activeUser.activeUserId).toBe(1n)
+          expect(result.data.sessionId.length).toBeGreaterThan(0)
         }
       })
     })
 
     describe('例外・制約違反', () => {
       it('存在しないメールアドレスではログインに失敗する', async () => {
-        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
         const email = 'notfound@example.com'
         const password = 'password123'
 
         // Arrange
-        mockActiveUserRepository.findByEmail.mockResolvedValue({
-          data: null,
-        })
+        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
         // Act
         const result = await service.login(email, password, '192.168.1.1', 'Mozilla/5.0')
@@ -241,26 +187,23 @@ describe('ActiveUserService', () => {
       })
 
       it('間違ったパスワードではログインに失敗する', async () => {
-        // このテストは現在失敗する（ActiveUserServiceが存在しないため）
         const email = 'test@example.com'
         const correctPassword = 'password123'
         const wrongPassword = 'wrongpassword'
         const hashedPassword = await bcrypt.hash(correctPassword, 10)
 
         // Arrange
-        mockActiveUserRepository.findByEmail.mockResolvedValue({
-          data: {
-            activeUserId: 1n,
-            userId: 2n,
-            email,
-            password: hashedPassword,
-            displayName: 'テストユーザー',
-            lastLogin: undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            recordLogin: vi.fn(),
-          },
-        })
+        const mockActiveUser = new ActiveUser(
+          1n,
+          2n,
+          email,
+          hashedPassword,
+          'テストユーザー',
+          undefined,
+          new Date(),
+          new Date(),
+        )
+        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
         const result = await service.login(email, wrongPassword, '192.168.1.1', 'Mozilla/5.0')

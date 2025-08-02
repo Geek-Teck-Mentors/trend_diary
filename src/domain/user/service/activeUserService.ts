@@ -3,22 +3,19 @@ import { v4 as uuidv4 } from 'uuid'
 import { SESSION_DURATION } from '@/common/constants/session'
 import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
 import {
+  AsyncResult,
   isError,
   isNull,
-  isSuccess,
+  Nullable,
   Result,
   resultError,
   resultSuccess,
 } from '@/common/types/utility'
-import { TransactionClient } from '@/infrastructure/rdb'
 import ActiveUser from '../model/activeUser'
-import User from '../model/user'
-import { ActiveUserRepository } from '../repository/activeUserRepository'
-import { SessionRepository } from '../repository/sessionRepository'
-import { UserRepository } from '../repository/userRepository'
+import { CommandService } from '../repository/commandService'
+import { QueryService } from '../repository/queryService'
 
 type LoginResult = {
-  user: User
   activeUser: ActiveUser
   sessionId: string
   expiresAt: Date
@@ -26,48 +23,24 @@ type LoginResult = {
 
 export default class ActiveUserService {
   constructor(
-    private activeUserRepository: ActiveUserRepository,
-    private userRepository: UserRepository,
-    private sessionRepository: SessionRepository,
+    private queryService: QueryService,
+    private commandService: CommandService,
   ) {}
 
-  async signup(
-    transaction: TransactionClient,
-    email: string,
-    plainPassword: string,
-    displayName?: string | null,
-  ): Promise<Result<ActiveUser, Error>> {
-    // 既にActiveUserがあるかチェック
-    const existingResult = await this.activeUserRepository.findByEmail(email)
-    if (isSuccess(existingResult) && !isNull(existingResult.data))
-      return resultError(new AlreadyExistsError('Email already exists'))
+  async signup(email: string, plainPassword: string): Promise<Result<ActiveUser, Error>> {
+    const existingResult = await this.queryService.findActiveByEmail(email)
     if (isError(existingResult)) return resultError(ServerError.handle(existingResult.error))
+    if (!isNull(existingResult.data)) {
+      return resultError(new AlreadyExistsError('Email already exists'))
+    }
 
     const hashedPassword = await bcrypt.hash(plainPassword, 10)
 
-    // User作成 & ActiveUser作成
-    await transaction.begin()
-
-    // 1. User作成
-    const userResult = await this.userRepository.create()
-    if (isError(userResult)) {
-      await transaction.rollback()
-      return resultError(ServerError.handle(userResult.error))
-    }
-
-    // 2. ActiveUser作成
-    const activeUserResult = await this.activeUserRepository.createActiveUser(
-      userResult.data.userId,
-      email,
-      hashedPassword,
-      displayName ?? undefined,
-    )
+    const activeUserResult = await this.commandService.createActive(email, hashedPassword)
     if (isError(activeUserResult)) {
-      await transaction.rollback()
       return resultError(ServerError.handle(activeUserResult.error))
     }
 
-    await transaction.commit()
     return resultSuccess(activeUserResult.data)
   }
 
@@ -80,10 +53,8 @@ export default class ActiveUserService {
     const authResult = await this.authenticateUser(email, plainPassword)
     if (isError(authResult)) return resultError(authResult.error)
 
-    const { user, activeUser } = authResult.data
-
     const sessionResult = await this.createLoginSession(
-      activeUser.activeUserId,
+      authResult.data.activeUserId,
       ipAddress,
       userAgent,
     )
@@ -92,12 +63,11 @@ export default class ActiveUserService {
     const { sessionId, expiresAt } = sessionResult.data
 
     // lastLoginを更新
-    activeUser.recordLogin()
-    const updateResult = await this.activeUserRepository.save(activeUser)
+    authResult.data.recordLogin()
+    const updateResult = await this.commandService.saveActive(authResult.data)
     if (isError(updateResult)) return resultError(updateResult.error)
 
     return resultSuccess({
-      user,
       activeUser: updateResult.data,
       sessionId,
       expiresAt,
@@ -107,28 +77,20 @@ export default class ActiveUserService {
   private async authenticateUser(
     email: string,
     plainPassword: string,
-  ): Promise<Result<{ user: User; activeUser: ActiveUser }, Error>> {
-    // ActiveUserを探す
-    const activeUserResult = await this.activeUserRepository.findByEmail(email)
+  ): Promise<Result<ActiveUser, Error>> {
+    const activeUserResult = await this.queryService.findActiveByEmail(email)
     if (isError(activeUserResult)) return resultError(ServerError.handle(activeUserResult.error))
-    if (isSuccess(activeUserResult) && isNull(activeUserResult.data))
+    if (isNull(activeUserResult.data)) {
       return resultError(new NotFoundError('User not found'))
+    }
 
-    const activeUser = activeUserResult.data!
+    const activeUser = activeUserResult.data
 
     // パスワードチェック
     const validationResult = await this.validateCredentials(plainPassword, activeUser.password)
     if (isError(validationResult)) return resultError(validationResult.error)
 
-    // Userも取得
-    const userResult = await this.userRepository.findById(activeUser.userId)
-    if (isError(userResult)) return resultError(ServerError.handle(userResult.error))
-    if (isSuccess(userResult) && isNull(userResult.data))
-      return resultError(new NotFoundError('User not found'))
-
-    const user = userResult.data!
-
-    return resultSuccess({ user, activeUser })
+    return resultSuccess(activeUser)
   }
 
   private async validateCredentials(
@@ -150,7 +112,7 @@ export default class ActiveUserService {
     const sessionId = uuidv4()
     const expiresAt = new Date(Date.now() + SESSION_DURATION)
 
-    const sessionResult = await this.sessionRepository.create({
+    const sessionResult = await this.commandService.createSession({
       sessionId,
       activeUserId,
       sessionToken: uuidv4(),
@@ -167,26 +129,15 @@ export default class ActiveUserService {
   }
 
   async logout(sessionId: string): Promise<Result<void, Error>> {
-    const result = await this.sessionRepository.delete(sessionId)
+    const result = await this.commandService.deleteSession(sessionId)
     if (isError(result)) return resultError(ServerError.handle(result.error))
     return resultSuccess(undefined)
   }
 
-  async findBySessionId(
-    sessionId: string,
-  ): Promise<Result<{ user: User; activeUser: ActiveUser } | null, Error>> {
-    const activeUserResult = await this.activeUserRepository.findBySessionId(sessionId)
-    if (isError(activeUserResult)) return resultError(ServerError.handle(activeUserResult.error))
-    if (isSuccess(activeUserResult) && isNull(activeUserResult.data)) return resultSuccess(null)
+  async getCurrentUser(sessionId: string): AsyncResult<Nullable< ActiveUser>, Error> {
+    const result = await this.queryService.findActiveBySessionId(sessionId)
+    if (isError(result)) return resultError(ServerError.handle(result.error))
 
-    const activeUser = activeUserResult.data!
-
-    const userResult = await this.userRepository.findById(activeUser.userId)
-    if (isError(userResult)) return resultError(ServerError.handle(userResult.error))
-    if (isSuccess(userResult) && isNull(userResult.data)) return resultSuccess(null)
-
-    const user = userResult.data!
-
-    return resultSuccess({ user, activeUser })
+    return resultSuccess(result.data)
   }
 }

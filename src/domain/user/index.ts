@@ -1,23 +1,13 @@
-// リポジトリ実装
-import ActiveUserRepositoryImpl from './infrastructure/activeUserRepositoryImpl'
-import SessionRepositoryImpl from './infrastructure/sessionRepositoryImpl'
-import UserRepositoryImpl from './infrastructure/userRepositoryImpl'
-
-// スキーマと型
+// ファクトリ
+import createActiveUserService from './factory/activeUserFactory'
 import { ActiveUserInput, activeUserInputSchema, activeUserSchema } from './schema/activeUserSchema'
 import { sessionSchema } from './schema/sessionSchema'
-import { UserInput, userSchema } from './schema/userSchema'
-// サービス
-import ActiveUserService from './service/activeUserService'
+import { userSchema } from './schema/userSchema'
 
 // 型エクスポート
-export type { ActiveUserInput, UserInput }
+export type { ActiveUserInput }
 
 // スキーマエクスポート
 export { activeUserSchema, activeUserInputSchema, userSchema, sessionSchema }
 
-// サービスエクスポート
-export { ActiveUserService }
-
-// リポジトリ実装エクスポート
-export { ActiveUserRepositoryImpl, UserRepositoryImpl, SessionRepositoryImpl }
+export { createActiveUserService }
