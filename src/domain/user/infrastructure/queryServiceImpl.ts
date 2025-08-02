@@ -1,4 +1,3 @@
-import { Prisma, ActiveUser as RdbActiveUser } from '@prisma/client'
 import { getErrorMessage, ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
@@ -43,27 +42,19 @@ export default class QueryServiceImpl implements QueryService {
 
   async findActiveBySessionId(sessionId: string): AsyncResult<Nullable<ActiveUser>, Error> {
     try {
-      const query = Prisma.sql`
-        SELECT
-          au.active_user_id AS "activeUserId",
-          au.user_id AS "userId",
-          au.email AS "email",
-          au.password AS "password",
-          au.display_name AS "displayName",
-          au.last_login AS "lastLogin"
-        FROM active_users au
-        INNER JOIN sessions s ON au.active_user_id = s.active_user_id
-        WHERE s.session_id = ${sessionId}
-          AND s.expires_at > NOW()
-      `
+      const session = await this.db.session.findFirst({
+        where: {
+          sessionId,
+          expiresAt: { gt: new Date() },
+        },
+        include: { activeUser: true },
+      })
 
-      const result = await this.db.$queryRaw<RdbActiveUser[]>(query)
-
-      if (result.length === 0) {
+      if (!session) {
         return resultSuccess(null)
       }
 
-      return resultSuccess(mapToActiveUser(result[0]))
+      return resultSuccess(mapToActiveUser(session.activeUser))
     } catch (error) {
       return resultError(new ServerError(getErrorMessage(error)))
     }
