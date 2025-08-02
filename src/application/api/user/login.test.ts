@@ -9,13 +9,13 @@ type LoginTestCase = {
   status: number
 }
 
-describe('POST /api/account/login', () => {
+describe('POST /api/user/login', () => {
   const TEST_EMAIL = faker.internet.email()
   const TEST_PASSWORD = 'test_password'
 
   async function requestLogin(body: string) {
     return app.request(
-      '/api/account/login',
+      '/api/user/login',
       {
         method: 'POST',
         headers: {

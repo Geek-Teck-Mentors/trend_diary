@@ -2,7 +2,7 @@ import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import app from '../../server'
 
-describe('POST /api/account', () => {
+describe('POST /api/user', () => {
   beforeAll(async () => {
     await accountTestHelper.cleanUp()
   })
@@ -14,7 +14,7 @@ describe('POST /api/account', () => {
 
   async function requestShort(body: string) {
     return app.request(
-      '/api/account',
+      '/api/user',
       {
         method: 'POST',
         body,

@@ -5,7 +5,7 @@ import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import app from '../../server'
 
-describe('DELETE /api/account/logout', () => {
+describe('DELETE /api/user/logout', () => {
   let setCookie: string[]
 
   const TEST_EMAIL = faker.internet.email()
@@ -13,7 +13,7 @@ describe('DELETE /api/account/logout', () => {
 
   async function requestLogout() {
     return app.request(
-      '/api/account/logout',
+      '/api/user/logout',
       {
         method: 'DELETE',
         headers: {
@@ -43,7 +43,7 @@ describe('DELETE /api/account/logout', () => {
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(
-      '/api/account/login',
+      '/api/user/login',
       {
         method: 'POST',
         headers: {

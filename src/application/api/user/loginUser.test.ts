@@ -3,7 +3,7 @@ import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import app from '../../server'
 
-describe('GET /api/account/me', () => {
+describe('GET /api/user/me', () => {
   let setCookie: string[]
 
   const TEST_EMAIL = faker.internet.email()
@@ -11,7 +11,7 @@ describe('GET /api/account/me', () => {
 
   async function requestLoginUser() {
     return app.request(
-      '/api/account/me',
+      '/api/user/me',
       {
         method: 'GET',
         headers: {
@@ -40,7 +40,7 @@ describe('GET /api/account/me', () => {
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(
-      '/api/account/login',
+      '/api/user/login',
       {
         method: 'POST',
         headers: {
