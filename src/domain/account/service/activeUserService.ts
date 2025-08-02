@@ -72,7 +72,6 @@ export default class ActiveUserService {
   }
 
   async login(
-    transaction: TransactionClient,
     email: string,
     plainPassword: string,
     ipAddress?: string,

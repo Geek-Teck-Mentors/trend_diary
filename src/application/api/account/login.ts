@@ -14,7 +14,7 @@ import {
   SessionRepositoryImpl,
   UserRepositoryImpl,
 } from '@/domain/account'
-import getRdbClient, { Transaction } from '@/infrastructure/rdb'
+import getRdbClient from '@/infrastructure/rdb'
 
 export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   const valid = c.req.valid('json')
@@ -24,7 +24,6 @@ export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   const activeUserRepository = new ActiveUserRepositoryImpl(rdb)
   const userRepository = new UserRepositoryImpl(rdb)
   const sessionRepository = new SessionRepositoryImpl(rdb)
-  const transaction = new Transaction(rdb)
   const service = new ActiveUserService(activeUserRepository, userRepository, sessionRepository)
 
   // リクエストからIPアドレスとUserAgentを取得
@@ -32,7 +31,7 @@ export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   const ipAddress = connInfo.remote.address || ''
   const userAgent = c.req.header('user-agent') || ''
 
-  const result = await service.login(transaction, valid.email, valid.password, ipAddress, userAgent)
+  const result = await service.login(valid.email, valid.password, ipAddress, userAgent)
   if (isError(result)) {
     const { error } = result
     if (error instanceof ClientError) {
