@@ -1,10 +1,5 @@
 import { isError } from '@/common/types/utility'
-import {
-  ActiveUserRepositoryImpl,
-  ActiveUserService,
-  SessionRepositoryImpl,
-  UserRepositoryImpl,
-} from '@/domain/user'
+import { createActiveUserService } from '@/domain/user'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
@@ -13,17 +8,7 @@ process.env.NODE_ENV = 'test'
 class UserTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  private activeUserRepository = new ActiveUserRepositoryImpl(this.rdb)
-
-  private userRepository = new UserRepositoryImpl(this.rdb)
-
-  private sessionRepository = new SessionRepositoryImpl(this.rdb)
-
-  private service = new ActiveUserService(
-    this.activeUserRepository,
-    this.userRepository,
-    this.sessionRepository,
-  )
+  private service = createActiveUserService(this.rdb)
 
   async cleanUp(): Promise<void> {
     // 外部キー制約を考慮した順序でTRUNCATE
@@ -37,8 +22,8 @@ class UserTestHelper {
   }
 
   async create(email: string, password: string): Promise<void> {
-    const transaction = new Transaction(this.rdb)
-    await this.service.signup(transaction, email, password)
+    const _transaction = new Transaction(this.rdb)
+    await this.service.signup(email, password)
   }
 
   async login(email: string, password: string): Promise<{ userId: bigint; sessionId: string }> {
@@ -47,7 +32,7 @@ class UserTestHelper {
       throw new Error(`Failed to login: ${loginResult.error.message}`)
     }
     return {
-      userId: loginResult.data.user.userId,
+      userId: loginResult.data.activeUser.activeUserId,
       sessionId: loginResult.data.sessionId,
     }
   }

@@ -2,7 +2,6 @@ import { logger } from '@/logger/logger'
 import CONTEXT_KEY from './middleware/context'
 
 export type SessionUser = {
-  userId: bigint
   activeUserId: bigint
   displayName: string | null | undefined
   email: string

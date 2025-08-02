@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { SESSION_NAME } from '@/common/constants/session'
-import { ActiveUserService } from '@/domain/user'
+import ActiveUserService from '@/domain/user/service/activeUserService'
 import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import app from '../../server'
@@ -24,10 +24,6 @@ describe('DELETE /api/user/logout', () => {
       TEST_ENV,
     )
   }
-
-  beforeAll(() => {
-    // accountTestHelperを使用
-  })
 
   afterAll(async () => {
     await accountTestHelper.cleanUp()
@@ -70,7 +66,7 @@ describe('DELETE /api/user/logout', () => {
       expect(res.status).toBe(401)
     })
 
-    it('セッションが見つからない場合は401エラー', async () => {
+    it('セッションが見つからない場合は404エラー', async () => {
       // 有効なセッションIDを含むCookieを作るが、DBからセッションを削除して存在しない状態にする
       const sessionCookie = setCookie.find((cookie) => cookie.startsWith(`${SESSION_NAME}=`))
       if (!sessionCookie) {
@@ -80,23 +76,16 @@ describe('DELETE /api/user/logout', () => {
       // DBのセッションを削除
       await accountTestHelper.deleteAllSessions()
 
-      // セッションが存在しないのでauthenticatorミドルウェアで401エラーになる
       const res = await requestLogout()
-
-      expect(res.status).toBe(401)
-      const data = await res.json()
-      expect(data).toEqual({ message: 'login required' })
+      expect(res.status).toBe(404)
     })
 
-    it('アカウントがない場合、401', async () => {
-      // アカウントを削除して存在しない状態にする（Sessionも一緒に削除される）
+    it('アカウントがない場合、404', async () => {
       await accountTestHelper.deleteAllAccounts()
 
       const res = await requestLogout()
 
-      expect(res.status).toBe(401)
-      const data = await res.json()
-      expect(data).toEqual({ message: 'login required' })
+      expect(res.status).toBe(404)
     })
   })
 

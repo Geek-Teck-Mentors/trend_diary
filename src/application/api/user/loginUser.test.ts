@@ -23,10 +23,6 @@ describe('GET /api/user/me', () => {
     )
   }
 
-  beforeAll(() => {
-    // accountTestHelperを使用
-  })
-
   afterAll(async () => {
     await accountTestHelper.cleanUp()
     await accountTestHelper.disconnect()
@@ -60,13 +56,12 @@ describe('GET /api/user/me', () => {
       expect(res.status).toBe(200)
 
       // Hono公式のテスト方法に準拠して、レスポンスデータ構造を検証
-      const data = (await res.json()) as { user: { userId: string; displayName?: string } }
+      const data = (await res.json()) as { user: {displayName?: string } }
 
       // 実際のプロパティ構造に合わせてテスト
       expect(typeof data).toBe('object')
       expect(data).not.toBeNull()
       expect(data).toHaveProperty('user')
-      expect(data.user).toHaveProperty('userId')
       expect(data.user).toHaveProperty('displayName')
     })
   })

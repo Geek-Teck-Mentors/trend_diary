@@ -8,7 +8,6 @@ export default async function loginUser(c: Context<Env>) {
   return c.json(
     {
       user: {
-        userId: sessionUser.userId.toString(),
         displayName: sessionUser.displayName ?? '',
       },
     },

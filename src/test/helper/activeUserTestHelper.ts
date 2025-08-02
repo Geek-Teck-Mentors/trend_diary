@@ -1,10 +1,5 @@
 import { isError } from '@/common/types/utility'
-import {
-  ActiveUserRepositoryImpl,
-  ActiveUserService,
-  SessionRepositoryImpl,
-  UserRepositoryImpl,
-} from '@/domain/user'
+import { createActiveUserService } from '@/domain/user'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
@@ -13,15 +8,7 @@ process.env.NODE_ENV = 'test'
 class ActiveUserTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  private activeUserRepository = new ActiveUserRepositoryImpl(this.rdb)
-  private userRepository = new UserRepositoryImpl(this.rdb)
-  private sessionRepository = new SessionRepositoryImpl(this.rdb)
-
-  private service = new ActiveUserService(
-    this.activeUserRepository,
-    this.userRepository,
-    this.sessionRepository,
-  )
+  private service = createActiveUserService(this.rdb)
 
   async cleanUp(): Promise<void> {
     // 外部キー制約を考慮した順序でTRUNCATE
@@ -39,8 +26,8 @@ class ActiveUserTestHelper {
     password: string,
     displayName?: string,
   ): Promise<{ userId: bigint; activeUserId: bigint }> {
-    const transaction = new Transaction(this.rdb)
-    const result = await this.service.signup(transaction, email, password, displayName)
+    const _transaction = new Transaction(this.rdb)
+    const result = await this.service.signup(email, password)
     if (isError(result)) {
       throw new Error(`Failed to create user: ${result.error.message}`)
     }
@@ -56,7 +43,6 @@ class ActiveUserTestHelper {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<{
-    userId: bigint
     activeUserId: bigint
     sessionId: string
     expiresAt: Date
@@ -66,7 +52,6 @@ class ActiveUserTestHelper {
       throw new Error(`Failed to login: ${loginResult.error.message}`)
     }
     return {
-      userId: loginResult.data.user.userId,
       activeUserId: loginResult.data.activeUser.activeUserId,
       sessionId: loginResult.data.sessionId,
       expiresAt: loginResult.data.expiresAt,
@@ -80,18 +65,15 @@ class ActiveUserTestHelper {
     }
   }
 
-  async findBySessionId(
-    sessionId: string,
-  ): Promise<{ userId: bigint; activeUserId: bigint } | null> {
-    const result = await this.service.findBySessionId(sessionId)
+  async findBySessionId(sessionId: string): Promise<{ activeUserId: bigint } | null> {
+    const result = await this.service.getCurrentUser(sessionId)
     if (isError(result)) {
       throw new Error(`Failed to find user by session: ${result.error.message}`)
     }
     if (!result.data) return null
 
     return {
-      userId: result.data.user.userId,
-      activeUserId: result.data.activeUser.activeUserId,
+      activeUserId: result.data.activeUserId,
     }
   }
 

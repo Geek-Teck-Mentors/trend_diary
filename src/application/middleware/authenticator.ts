@@ -4,15 +4,12 @@ import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants/session'
 import { isError } from '@/common/types/utility'
-import {
-  ActiveUserRepositoryImpl,
-  ActiveUserService,
-  SessionRepositoryImpl,
-  UserRepositoryImpl,
-} from '@/domain/user'
+import { createActiveUserService } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'
+import { ClientError, ServerError } from '@/common/errors'
+import { ContentfulStatusCode } from 'hono/utils/http-status'
 
 const authenticator = createMiddleware<Env>(async (c, next) => {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
@@ -28,28 +25,30 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const activeUserRepository = new ActiveUserRepositoryImpl(rdb)
-  const userRepository = new UserRepositoryImpl(rdb)
-  const sessionRepository = new SessionRepositoryImpl(rdb)
-  const service = new ActiveUserService(activeUserRepository, userRepository, sessionRepository)
+  const service = createActiveUserService(rdb)
 
-  const result = await service.findBySessionId(sessionId)
+  const result = await service.getCurrentUser(sessionId)
   if (isError(result)) {
-    logger.error('Error occurred while authenticating', { error: result })
-    throw new HTTPException(500, { message: 'Internal Server Error' })
+    if (result.error instanceof ClientError) {
+      throw new HTTPException(result.error.statusCode as ContentfulStatusCode, { message: result.error.message })
+    } else if (result.error instanceof ServerError) {
+      logger.error('Error occurred while authenticating', { error: result.error })
+      throw new HTTPException(result.error.statusCode as ContentfulStatusCode, { message: 'Internal Server Error' })
+    } else {
+      logger.error('Unexpected error occurred', { error: result.error })
+      throw new HTTPException(500, { message: 'Internal Server Error' })
+    }
   }
 
   if (!result.data) {
-    logger.error('Session not found', { sessionId })
-    throw new HTTPException(401, { message: 'login required' })
+    throw new HTTPException(404, { message: 'login required' })
   }
 
   // セッションユーザー情報を設定
   const sessionUser = {
-    userId: result.data.user.userId,
-    activeUserId: result.data.activeUser.activeUserId,
-    displayName: result.data.activeUser.displayName,
-    email: result.data.activeUser.email,
+    activeUserId: result.data.activeUserId,
+    displayName: result.data.displayName,
+    email: result.data.email,
   }
 
   c.set(CONTEXT_KEY.SESSION_USER, sessionUser)
