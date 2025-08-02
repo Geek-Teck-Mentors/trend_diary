@@ -2,9 +2,11 @@ import bcrypt from 'bcryptjs'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError } from '@/common/errors'
-import { isError, isSuccess } from '@/common/types/utility'
+import { isError, isSuccess, resultSuccess } from '@/common/types/utility'
 import { TransactionClient } from '@/infrastructure/rdb'
+import ActiveUser from '../model/activeUser'
 import Session from '../model/session'
+import User from '../model/user'
 import { ActiveUserRepository } from '../repository/activeUserRepository'
 import { SessionRepository } from '../repository/sessionRepository'
 import { UserRepository } from '../repository/userRepository'
@@ -88,26 +90,20 @@ describe('ActiveUserService', () => {
         const hashedPassword = await bcrypt.hash(password, 10)
 
         // Arrange
-        mockActiveUserRepository.findByEmail.mockResolvedValue({
-          data: {
-            activeUserId: 1n,
-            userId: 2n,
-            email,
-            password: hashedPassword,
-            displayName: 'テストユーザー',
-            lastLogin: undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            recordLogin: vi.fn(),
-          },
-        })
+        const mockActiveUser = new ActiveUser(
+          1n,
+          2n,
+          email,
+          hashedPassword,
+          'テストユーザー',
+          undefined,
+          new Date(),
+          new Date(),
+        )
+        mockActiveUserRepository.findByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
 
-        mockUserRepository.findById.mockResolvedValue({
-          data: {
-            userId: 2n,
-            createdAt: new Date(),
-          },
-        })
+        const mockUser = new User(2n, new Date())
+        mockUserRepository.findById.mockResolvedValue(resultSuccess(mockUser))
 
         const mockSession = new Session(
           'session-123',
@@ -119,9 +115,20 @@ describe('ActiveUserService', () => {
           new Date(),
           false,
         )
-        mockSessionRepository.create.mockResolvedValue({
-          data: mockSession,
-        })
+        mockSessionRepository.create.mockResolvedValue(resultSuccess(mockSession))
+
+        // ActiveUserRepository.saveのモックも追加
+        const updatedActiveUser = new ActiveUser(
+          1n,
+          2n,
+          email,
+          hashedPassword,
+          'テストユーザー',
+          new Date(), // lastLoginが更新される
+          new Date(),
+          new Date(),
+        )
+        mockActiveUserRepository.save.mockResolvedValue(resultSuccess(updatedActiveUser))
 
         // Act
         const result = await service.login(
