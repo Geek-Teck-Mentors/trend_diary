@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { SESSION_NAME } from '@/common/constants/session'
-import { ActiveUserService } from '@/domain/account'
+import { ActiveUserService } from '@/domain/user'
 import TEST_ENV from '@/test/env'
 import accountTestHelper from '@/test/helper/accountTestHelper'
 import app from '../../server'

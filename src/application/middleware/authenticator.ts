@@ -9,7 +9,7 @@ import {
   ActiveUserService,
   SessionRepositoryImpl,
   UserRepositoryImpl,
-} from '@/domain/account'
+} from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'

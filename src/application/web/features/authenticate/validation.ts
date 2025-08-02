@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { activeUserSchema } from '@/domain/account'
+import { activeUserSchema } from '@/domain/user'
 import { newValidationError, newValidationSuccess, ValidationResult } from '../validation'
 
 export type AuthenticateErrors = {

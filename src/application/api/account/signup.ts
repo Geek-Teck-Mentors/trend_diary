@@ -8,7 +8,7 @@ import {
   ActiveUserService,
   SessionRepositoryImpl,
   UserRepositoryImpl,
-} from '@/domain/account'
+} from '@/domain/user'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 
 export default async function signup(c: ZodValidatedContext<ActiveUserInput>) {

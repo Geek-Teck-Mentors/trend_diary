@@ -12,7 +12,7 @@ import {
   ActiveUserService,
   SessionRepositoryImpl,
   UserRepositoryImpl,
-} from '@/domain/account'
+} from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function logout(c: Context<Env>) {

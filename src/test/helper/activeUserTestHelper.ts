@@ -4,7 +4,7 @@ import {
   ActiveUserService,
   SessionRepositoryImpl,
   UserRepositoryImpl,
-} from '@/domain/account'
+} from '@/domain/user'
 import getRdbClient, { Transaction } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
