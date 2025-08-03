@@ -23,7 +23,7 @@ export default defineConfig({
       include: coverageInclude,
       exclude,
       thresholds: {
-        branches: 60, // 分岐網羅
+        branches: 80, // 分岐網羅
         functions: 60, // 関数網羅
       },
     },
