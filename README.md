@@ -47,6 +47,8 @@ npm run dev
 
 ## リファレンス
 
-- [Hono and Remix on Vite](https://github.com/yusukebe/hono-and-remix-on-vite)
+- [React Router](https://reactrouter.com/home)
+- [React Router Hono Adapter](https://github.com/yusukebe/hono-react-router-adapter)
+- [Hono](https://hono.dev/docs/)
 - [TailwindCSS Using Vite](https://tailwindcss.com/docs/installation/using-vite)
 - [Using Prisma on Cloudflare Workers](https://hono.dev/examples/prisma)
