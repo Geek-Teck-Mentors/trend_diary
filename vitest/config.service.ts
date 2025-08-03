@@ -20,6 +20,8 @@ export default defineConfig({
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
       include: coverageInclude,
+      // 集約export用のindexを除外
+      exclude: ['src/domain/**/index.ts']
     },
   },
 })
