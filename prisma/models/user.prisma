@@ -10,5 +10,8 @@ model User {
   leavedUser LeavedUser?
   bannedUser BannedUser?
 
+  /// プライバシーポリシー
+  privacyPolicyConsent PrivacyPolicyConsent[]
+
   @@map("users")
 }

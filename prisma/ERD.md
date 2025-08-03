@@ -39,6 +39,23 @@ erDiagram
     }
   
 
+  "privacy_policies" {
+    Int version "🗝️"
+    String content 
+    DateTime effective_at "❓"
+    DateTime created_at 
+    DateTime updated_at 
+    }
+  
+
+  "privacy_policy_consents" {
+    BigInt user_id 
+    Int policy_version 
+    DateTime consented_at 
+    DateTime created_at 
+    }
+  
+
   "read_histories" {
     BigInt read_history_id "🗝️"
     DateTime read_at 
@@ -69,9 +86,11 @@ erDiagram
     "active_users" o{--}o "read_histories" : "readHistories"
     "banned_users" o|--|| "users" : "user"
     "leaved_users" o|--|| "users" : "user"
+    "privacy_policy_consents" o|--|| "users" : "user"
     "read_histories" o|--|| "active_users" : "activeUser"
     "sessions" o|--|| "active_users" : "activeUser"
     "users" o{--}o "active_users" : "activeUser"
     "users" o{--}o "leaved_users" : "leavedUser"
     "users" o{--}o "banned_users" : "bannedUser"
+    "users" o{--}o "privacy_policy_consents" : "privacyPolicyConsent"
 ```
