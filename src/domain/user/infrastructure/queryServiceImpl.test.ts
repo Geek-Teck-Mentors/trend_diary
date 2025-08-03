@@ -155,7 +155,7 @@ describe('QueryServiceImpl', () => {
     describe('基本動作', () => {
       it('有効なセッションからActiveUserを検索できる', async () => {
         // Arrange
-        const SessionId = 'session123'
+        const sessionId = 'session123'
 
         const mockSession = {
           sessionId: 'session123',
@@ -180,7 +180,7 @@ describe('QueryServiceImpl', () => {
         mockDb.session.findFirst.mockResolvedValue(mockSession)
 
         // Act
-        const result = await service.findActiveBySessionId(SessionId)
+        const result = await service.findActiveBySessionId(sessionId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -210,13 +210,13 @@ describe('QueryServiceImpl', () => {
 
       it('期限切れセッションの場合nullを返す', async () => {
         // Arrange
-        const SessionId = 'expired-session'
+        const sessionId = 'expired-session'
 
         // 期限切れのため結果が返らない
         mockDb.session.findFirst.mockResolvedValue(null)
 
         // Act
-        const result = await service.findActiveBySessionId(SessionId)
+        const result = await service.findActiveBySessionId(sessionId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -229,12 +229,12 @@ describe('QueryServiceImpl', () => {
     describe('例外・制約違反', () => {
       it('データベースエラー時は適切にエラーを返す', async () => {
         // Arrange
-        const SessionId = 'session123'
+        const sessionId = 'session123'
         const dbError = new Error('Database connection failed')
         mockDb.session.findFirst.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.findActiveBySessionId(SessionId)
+        const result = await service.findActiveBySessionId(sessionId)
 
         // Assert
         expect(isError(result)).toBe(true)
