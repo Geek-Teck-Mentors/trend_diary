@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "active_users" (
+CREATE TABLE "public"."active_users" (
     "active_user_id" BIGSERIAL NOT NULL,
     "email" VARCHAR(1024) NOT NULL,
     "password" VARCHAR(1024) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE "active_users" (
 );
 
 -- CreateTable
-CREATE TABLE "articles" (
+CREATE TABLE "public"."articles" (
     "article_id" BIGSERIAL NOT NULL,
     "media" VARCHAR(10) NOT NULL,
     "title" VARCHAR(100) NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE "articles" (
 );
 
 -- CreateTable
-CREATE TABLE "banned_users" (
+CREATE TABLE "public"."banned_users" (
     "user_id" BIGINT NOT NULL,
     "banned_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "reason" VARCHAR(1024),
@@ -34,14 +34,14 @@ CREATE TABLE "banned_users" (
 );
 
 -- CreateTable
-CREATE TABLE "leaved_users" (
+CREATE TABLE "public"."leaved_users" (
     "user_id" BIGINT NOT NULL,
     "reason" VARCHAR(1024),
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateTable
-CREATE TABLE "read_histories" (
+CREATE TABLE "public"."read_histories" (
     "read_history_id" BIGSERIAL NOT NULL,
     "read_at" TIMESTAMPTZ NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -52,7 +52,7 @@ CREATE TABLE "read_histories" (
 );
 
 -- CreateTable
-CREATE TABLE "sessions" (
+CREATE TABLE "public"."sessions" (
     "session_id" VARCHAR(255) NOT NULL,
     "session_token" VARCHAR(255),
     "expires_at" TIMESTAMPTZ NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE "sessions" (
 );
 
 -- CreateTable
-CREATE TABLE "users" (
+CREATE TABLE "public"."users" (
     "user_id" BIGSERIAL NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -73,34 +73,37 @@ CREATE TABLE "users" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "active_users_email_key" ON "active_users"("email");
+CREATE UNIQUE INDEX "active_users_email_key" ON "public"."active_users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "active_users_user_id_key" ON "active_users"("user_id");
+CREATE UNIQUE INDEX "active_users_user_id_key" ON "public"."active_users"("user_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "banned_users_user_id_key" ON "banned_users"("user_id");
+CREATE UNIQUE INDEX "banned_users_user_id_key" ON "public"."banned_users"("user_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "leaved_users_user_id_key" ON "leaved_users"("user_id");
+CREATE UNIQUE INDEX "leaved_users_user_id_key" ON "public"."leaved_users"("user_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "sessions_active_user_id_key" ON "sessions"("active_user_id");
+CREATE UNIQUE INDEX "sessions_active_user_id_key" ON "public"."sessions"("active_user_id");
+
+-- CreateIndex
+CREATE INDEX "sessions_session_id_expires_at_idx" ON "public"."sessions"("session_id", "expires_at");
 
 -- AddForeignKey
-ALTER TABLE "active_users" ADD CONSTRAINT "active_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."active_users" ADD CONSTRAINT "active_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "banned_users" ADD CONSTRAINT "banned_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."banned_users" ADD CONSTRAINT "banned_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "leaved_users" ADD CONSTRAINT "leaved_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."leaved_users" ADD CONSTRAINT "leaved_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "read_histories" ADD CONSTRAINT "read_histories_active_user_id_fkey" FOREIGN KEY ("active_user_id") REFERENCES "active_users"("active_user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."read_histories" ADD CONSTRAINT "read_histories_active_user_id_fkey" FOREIGN KEY ("active_user_id") REFERENCES "public"."active_users"("active_user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "sessions" ADD CONSTRAINT "sessions_active_user_id_fkey" FOREIGN KEY ("active_user_id") REFERENCES "active_users"("active_user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."sessions" ADD CONSTRAINT "sessions_active_user_id_fkey" FOREIGN KEY ("active_user_id") REFERENCES "public"."active_users"("active_user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- テーブルコメント
 COMMENT ON TABLE "users" IS 'ユーザーの基本情報テーブル（状態管理は別テーブル）';

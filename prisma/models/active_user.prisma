@@ -13,7 +13,7 @@ model ActiveUser {
   userId BigInt @unique @map("user_id") @db.BigInt
 
   user          User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  session       Session?
+  session       Session[]
   readHistories ReadHistory[]
 
   @@map("active_users")
