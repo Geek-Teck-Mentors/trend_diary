@@ -1,10 +1,9 @@
-import { useNavigate } from '@remix-run/react'
+import { NavigateFunction } from 'react-router'
 import { toast } from 'sonner'
 import useSWRMutation from 'swr/mutation'
 import { createSWRFetcher } from '../../features/createSWRFetcher'
 
-export default function useSidebar() {
-  const navigate = useNavigate()
+export default function useSidebar(navigate: NavigateFunction) {
   const { client, apiCall } = createSWRFetcher()
 
   const { trigger, isMutating } = useSWRMutation(

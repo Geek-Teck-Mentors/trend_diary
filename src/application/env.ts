@@ -18,3 +18,9 @@ export type Env = {
     [CONTEXT_KEY.SESSION_ID]: string
   }
 }
+
+declare module 'react-router' {
+  interface AppLoadContext {
+    whatever: string
+  }
+}

@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   isRouteErrorResponse,
   Links,
@@ -7,8 +8,7 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteError,
-} from '@remix-run/react'
-import React from 'react'
+} from 'react-router'
 
 import './styles.css'
 import { Toaster } from './components/ui/sonner'

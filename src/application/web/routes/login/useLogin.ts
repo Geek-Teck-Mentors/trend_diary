@@ -1,11 +1,10 @@
-import { useNavigate } from '@remix-run/react'
+import { NavigateFunction } from 'react-router'
 import useSWRMutation from 'swr/mutation'
 import { usePageError } from '../../components/PageError/usePageError'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { createSWRFetcher } from '../../features/createSWRFetcher'
 
-export default function useLogin() {
-  const navigate = useNavigate()
+export default function useLogin(navigate: NavigateFunction) {
   const { pageError, newPageError, clearPageError } = usePageError()
   const { client, apiCall } = createSWRFetcher()
 

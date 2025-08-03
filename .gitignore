@@ -1,5 +1,5 @@
 # prod
-dist/
+build/
 
 # dev
 .yarn/
@@ -48,3 +48,6 @@ coverage/
 
 *storybook.log
 storybook-static
+
+# react-router
+.react-router/

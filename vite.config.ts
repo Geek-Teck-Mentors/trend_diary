@@ -3,9 +3,10 @@
 
 import { defaultOptions } from '@hono/vite-dev-server'
 import adapter from '@hono/vite-dev-server/cloudflare'
-import { vitePlugin as remix } from '@remix-run/dev'
+import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
-import serverAdapter from 'hono-remix-adapter/vite'
+import serverAdapter from 'hono-react-router-adapter/vite'
+
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
@@ -16,17 +17,14 @@ export default defineConfig({
     },
   },
   plugins: [
+    tsconfigPaths(),
     tailwindcss(),
-    remix({
-      appDirectory: 'src/application/web',
-      buildDirectory: 'dist',
-    }),
+    reactRouter(),
     serverAdapter({
       adapter,
       entry: 'src/application/server.ts',
       exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/web/**'],
     }),
-    tsconfigPaths(),
   ],
   optimizeDeps: {
     entries: [],

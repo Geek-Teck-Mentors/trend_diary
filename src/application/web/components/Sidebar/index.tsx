@@ -1,4 +1,5 @@
 import { BookOpen, Newspaper, TrendingUp } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import {
   Sidebar,
   SidebarContent,
@@ -31,7 +32,8 @@ type Props = {
 }
 
 export default function AppSidebar({ displayName }: Props) {
-  const { handleLogout, isLoading } = useSidebar()
+  const navigate = useNavigate()
+  const { handleLogout, isLoading } = useSidebar(navigate)
 
   return (
     <Sidebar>
