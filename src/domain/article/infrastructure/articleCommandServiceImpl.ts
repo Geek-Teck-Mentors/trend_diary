@@ -8,14 +8,14 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
   constructor(private readonly db: RdbClient) {}
 
   async createReadHistory(
-    userId: bigint,
+    activeUserId: bigint,
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
     try {
       const createdReadHistory = await this.db.readHistory.create({
         data: {
-          userId,
+          activeUserId,
           articleId,
           readAt,
         },
@@ -23,7 +23,7 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
 
       const readHistory = new ReadHistory(
         createdReadHistory.readHistoryId,
-        createdReadHistory.userId,
+        createdReadHistory.activeUserId,
         createdReadHistory.articleId,
         createdReadHistory.readAt,
         createdReadHistory.createdAt,
@@ -35,11 +35,11 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
     }
   }
 
-  async deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error> {
+  async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {
     try {
       await this.db.readHistory.deleteMany({
         where: {
-          userId,
+          activeUserId,
           articleId,
         },
       })

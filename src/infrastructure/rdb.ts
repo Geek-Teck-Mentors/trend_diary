@@ -8,7 +8,7 @@ export default function getRdbClient(databaseUrl: string) {
   if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     const devPrisma = new PrismaClientLocal({
       datasourceUrl: databaseUrl,
-      log: ['query', 'info', 'warn', 'error'],
+      log: ['query', 'warn', 'error'],
     })
     return devPrisma
   }
@@ -23,30 +23,3 @@ export default function getRdbClient(databaseUrl: string) {
 }
 
 export type RdbClient = ReturnType<typeof getRdbClient>
-
-export interface TransactionClient {
-  begin(): Promise<void>
-  commit(): Promise<void>
-  rollback(): Promise<void>
-}
-
-/**
- * @name トランザクション管理
- * @description Prismaのトランザクションとリポジトリパターンの相性が悪いため、生のSQLを使用. Gormのトランザクションと同じように使用可能
- * @see Prisma公式Docs: https://www.prisma.io/docs/orm/prisma-client/queries/transactions
- */
-export class Transaction implements TransactionClient {
-  constructor(private client: RdbClient) {}
-
-  async begin() {
-    await this.client.$queryRaw`BEGIN;`
-  }
-
-  async commit() {
-    await this.client.$queryRaw`COMMIT;`
-  }
-
-  async rollback() {
-    await this.client.$queryRaw`ROLLBACK;`
-  }
-}

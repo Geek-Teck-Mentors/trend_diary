@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
+import activeUserTestHelper from './activeUserTestHelper'
 
 process.env.NODE_ENV = 'test'
 
@@ -10,9 +11,8 @@ class ArticleTestHelper {
   async createArticle() {
     const data = {
       media: faker.helpers.arrayElement(['qiita', 'zenn']),
-      // fakerの生成する文章はテーブルの制約を超えることがあるため、適切な長さに制限
       title: faker.lorem.sentence().substring(0, 100),
-      author: faker.person.fullName(),
+      author: faker.person.fullName().substring(0, 30),
       description: faker.lorem.paragraph().substring(0, 255),
       url: faker.internet.url(),
     }
@@ -28,12 +28,12 @@ class ArticleTestHelper {
   }
 
   async findReadHistory(
-    userId: bigint,
+    activeUserId: bigint,
     articleId: bigint,
   ): Promise<{ readHistoryId: bigint; readAt: Date } | null> {
     const readHistory = await this.rdb.readHistory.findFirst({
       where: {
-        userId,
+        activeUserId,
         articleId,
       },
       select: {
@@ -44,29 +44,45 @@ class ArticleTestHelper {
     return readHistory
   }
 
-  async createReadHistory(userId: bigint, articleId: bigint, readAt?: Date) {
+  async createReadHistory(activeUserId: bigint, articleId: bigint, readAt?: Date) {
+    // ActiveUserが存在することを確認
+    const existingActiveUser = await this.rdb.activeUser.findUnique({
+      where: { activeUserId },
+    })
+
+    let targetActiveUserId = activeUserId
+    if (!existingActiveUser) {
+      // ActiveUserが存在しない場合、テスト用のActiveUserを作成して、そのIDを使用
+      const createdUser = await activeUserTestHelper.create(
+        faker.internet.email(),
+        'testPassword',
+        'Test User',
+      )
+      targetActiveUserId = createdUser.activeUserId
+    }
+
     return await this.rdb.readHistory.create({
       data: {
-        userId,
+        activeUserId: targetActiveUserId,
         articleId,
         readAt: readAt || faker.date.recent(),
       },
     })
   }
 
-  async deleteReadHistory(userId: bigint, articleId: bigint): Promise<void> {
+  async deleteReadHistory(activeUserId: bigint, articleId: bigint): Promise<void> {
     await this.rdb.readHistory.deleteMany({
       where: {
-        userId,
+        activeUserId,
         articleId,
       },
     })
   }
 
-  async countReadHistories(userId: bigint, articleId: bigint): Promise<number> {
+  async countReadHistories(activeUserId: bigint, articleId: bigint): Promise<number> {
     const count = await this.rdb.readHistory.count({
       where: {
-        userId,
+        activeUserId,
         articleId,
       },
     })

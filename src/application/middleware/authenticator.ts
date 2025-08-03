@@ -1,11 +1,12 @@
 import { getCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
+import { ContentfulStatusCode } from 'hono/utils/http-status'
 import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants/session'
-import { NotFoundError } from '@/common/errors'
+import { ClientError, ServerError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { AccountRepositoryImpl, AccountService, UserRepositoryImpl } from '@/domain/account'
+import { createActiveUserService } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'
@@ -24,19 +25,37 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = new AccountService(new AccountRepositoryImpl(rdb), new UserRepositoryImpl(rdb))
+  const service = createActiveUserService(rdb)
 
-  const result = await service.getLoginUser(sessionId)
+  const result = await service.getCurrentUser(sessionId)
   if (isError(result)) {
-    if (result.error instanceof NotFoundError) {
-      logger.error('Session not found', result.error, { sessionId })
-      throw new HTTPException(401, { message: 'login required' })
+    if (result.error instanceof ClientError) {
+      throw new HTTPException(result.error.statusCode as ContentfulStatusCode, {
+        message: result.error.message,
+      })
     }
-    logger.error('Error occurred while authenticating', { error: result })
+    if (result.error instanceof ServerError) {
+      logger.error('Error occurred while authenticating', { error: result.error })
+      throw new HTTPException(result.error.statusCode as ContentfulStatusCode, {
+        message: 'Internal Server Error',
+      })
+    }
+    logger.error('Unexpected error occurred', { error: result.error })
     throw new HTTPException(500, { message: 'Internal Server Error' })
   }
 
-  c.set(CONTEXT_KEY.SESSION_USER, result.data)
+  if (!result.data) {
+    throw new HTTPException(404, { message: 'login required' })
+  }
+
+  // セッションユーザー情報を設定
+  const sessionUser = {
+    activeUserId: result.data.activeUserId,
+    displayName: result.data.displayName,
+    email: result.data.email,
+  }
+
+  c.set(CONTEXT_KEY.SESSION_USER, sessionUser)
   c.set(CONTEXT_KEY.SESSION_ID, sessionId)
   return next()
 })

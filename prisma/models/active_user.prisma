@@ -1,0 +1,20 @@
+model ActiveUser {
+  activeUserId BigInt    @id @default(autoincrement()) @map("active_user_id") @db.BigInt
+  /// RFC 5321準拠（320文字）+ 余裕を持たせて1024文字
+  email        String    @unique @db.VarChar(1024)
+  /// ハッシュ化されたパスワード保存用
+  password     String    @db.VarChar(1024)
+  /// 表示名（日本語等マルチバイト文字対応で余裕を持たせて1024文字）
+  displayName  String?   @map("display_name") @db.VarChar(1024)
+  lastLogin    DateTime? @default(now()) @map("last_login") @db.Timestamptz()
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  userId BigInt @unique @map("user_id") @db.BigInt
+
+  user          User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  session       Session?
+  readHistories ReadHistory[]
+
+  @@map("active_users")
+}
