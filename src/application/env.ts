@@ -19,8 +19,8 @@ export type Env = {
   }
 }
 
-declare module "react-router" {
+declare module 'react-router' {
   interface AppLoadContext {
-    whatever: string;
+    whatever: string
   }
 }

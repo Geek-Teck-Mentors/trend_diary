@@ -5,9 +5,14 @@
  * For more information, see https://remix.run/file-conventions/entry.server
  */
 
-import type { ActionFunctionArgs, AppLoadContext, EntryContext, LoaderFunctionArgs } from 'react-router';
-import { isRouteErrorResponse, ServerRouter } from 'react-router';
 import { renderToReadableStream } from 'react-dom/server'
+import type {
+  ActionFunctionArgs,
+  AppLoadContext,
+  EntryContext,
+  LoaderFunctionArgs,
+} from 'react-router'
+import { isRouteErrorResponse, ServerRouter } from 'react-router'
 
 export default async function handleRequest(
   request: Request,
