@@ -18,6 +18,7 @@ app.route('/api', apiApp)
 if (process.env.NODE_ENV === 'development')
   app.all('*', async (c) => {
     // ビルド結果をhonoにうまく繋ぎこむために使う virtual import
+    // @ts-ignore
     const build = await import('virtual:react-router/server-build')
     const handler = createRequestHandler(build, 'development')
     const remixContext = {
