@@ -21,7 +21,7 @@ export default defineConfig({
       },
       include: coverageInclude,
       // 集約export用のindexを除外
-      exclude: ['src/domain/**/index.ts']
+      exclude: ['src/domain/**/index.ts'],
     },
   },
 })
