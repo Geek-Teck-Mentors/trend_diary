@@ -1,11 +1,10 @@
-import { useNavigate } from 'react-router'
+import { NavigateFunction } from 'react-router'
 import useSWRMutation from 'swr/mutation'
 import { usePageError } from '../../components/PageError/usePageError'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { createSWRFetcher } from '../../features/createSWRFetcher'
 
-export default function useSignup() {
-  const navigate = useNavigate()
+export default function useSignup(navigate: NavigateFunction) {
   const { pageError, newPageError, clearPageError } = usePageError()
   const { client, apiCall } = createSWRFetcher()
 

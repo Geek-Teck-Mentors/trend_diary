@@ -3,14 +3,6 @@ import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import useSidebar from './useSidebar'
 
-// モック設定
-vi.mock('@react-router/react', () => {
-  const mockNavigate = vi.fn()
-  return {
-    useNavigate: () => mockNavigate,
-  }
-})
-
 vi.mock('sonner', () => {
   return {
     toast: {
@@ -52,7 +44,8 @@ vi.mock('../../features/createSWRFetcher', () => {
 type UseSidebarHook = ReturnType<typeof useSidebar>
 
 function setupHook(): RenderHookResult<UseSidebarHook, unknown> {
-  return renderHook(() => useSidebar())
+  const mockNavigate = vi.fn()
+  return renderHook(() => useSidebar(mockNavigate))
 }
 
 describe('useSidebar', () => {

@@ -3,13 +3,6 @@ import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import useSignup from './useSignup'
 
-// モック設定
-vi.mock('@react-router/react', () => {
-  return {
-    useNavigate: () => vi.fn(),
-  }
-})
-
 vi.mock('../../components/PageError/usePageError', () => {
   return {
     usePageError: () => ({
@@ -46,7 +39,8 @@ vi.mock('../../features/createSWRFetcher', () => {
 type UseSignupHook = ReturnType<typeof useSignup>
 
 function setupHook(): RenderHookResult<UseSignupHook, unknown> {
-  return renderHook(() => useSignup())
+  const mockNavigate = vi.fn()
+  return renderHook(() => useSignup(mockNavigate))
 }
 
 describe('useSignup', () => {

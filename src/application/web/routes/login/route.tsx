@@ -1,4 +1,4 @@
-import type { MetaFunction } from 'react-router'
+import { type MetaFunction, useNavigate } from 'react-router'
 import LoginPage from './page'
 import useLogin from './useLogin'
 
@@ -25,7 +25,8 @@ export const meta: MetaFunction = () => [
 ]
 
 export default function Login() {
-  const { handleSubmit, pageError } = useLogin()
+  const navigate = useNavigate()
+  const { handleSubmit, pageError } = useLogin(navigate)
 
   return <LoginPage pageError={pageError} handleSubmit={handleSubmit} />
 }
