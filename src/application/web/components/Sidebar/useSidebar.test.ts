@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import useSidebar from './useSidebar'
 
 // モック設定
-vi.mock('@remix-run/react', () => {
+vi.mock('@react-router/react', () => {
   const mockNavigate = vi.fn()
   return {
     useNavigate: () => mockNavigate,

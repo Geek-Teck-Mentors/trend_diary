@@ -1,4 +1,4 @@
-import { useNavigate } from '@remix-run/react'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import useSWRMutation from 'swr/mutation'
 import { createSWRFetcher } from '../../features/createSWRFetcher'

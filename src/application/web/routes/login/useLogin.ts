@@ -1,4 +1,4 @@
-import { useNavigate } from '@remix-run/react'
+import { useNavigate } from 'react-router'
 import useSWRMutation from 'swr/mutation'
 import { usePageError } from '../../components/PageError/usePageError'
 import { AuthenticateFormData } from '../../features/authenticate/validation'

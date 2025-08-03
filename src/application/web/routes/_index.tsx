@@ -1,4 +1,4 @@
-import type { MetaFunction } from '@remix-run/cloudflare'
+import type { MetaFunction } from 'react-router';
 import { BookOpen, Calendar, Monitor, TrendingUp, Users } from 'lucide-react'
 import { ClipText } from '../components/ClipText'
 import Footer from '../components/Footer'

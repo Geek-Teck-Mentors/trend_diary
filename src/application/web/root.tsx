@@ -7,7 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteError,
-} from '@remix-run/react'
+} from 'react-router';
 import React from 'react'
 
 import './styles.css'

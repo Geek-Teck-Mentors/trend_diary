@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import useLogin from './useLogin'
 
 // モック設定
-vi.mock('@remix-run/react', () => {
+vi.mock('@react-router/react', () => {
   return {
     useNavigate: () => vi.fn(),
   }
