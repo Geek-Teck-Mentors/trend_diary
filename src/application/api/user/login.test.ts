@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import TEST_ENV from '@/test/env'
-import accountTestHelper from '@/test/helper/accountTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
 
 type LoginTestCase = {
@@ -27,21 +27,17 @@ describe('POST /api/user/login', () => {
     )
   }
 
-  beforeAll(() => {
-    // accountTestHelperを使用
-  })
-
   afterAll(async () => {
-    await accountTestHelper.cleanUp()
-    await accountTestHelper.disconnect()
+    await activeUserTestHelper.cleanUp()
+    await activeUserTestHelper.disconnect()
   })
 
   beforeEach(async () => {
-    await accountTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
+    await activeUserTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
   })
 
   afterEach(async () => {
-    await accountTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
   })
 
   describe('正常系', () => {

@@ -1,6 +1,6 @@
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import accountTestHelper from '@/test/helper/accountTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 describe('DELETE /api/articles/:article_id/unread', () => {
@@ -10,8 +10,8 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
-    await accountTestHelper.create('test@example.com', 'password123')
-    const loginData = await accountTestHelper.login('test@example.com', 'password123')
+    await activeUserTestHelper.create('test@example.com', 'password123')
+    const loginData = await activeUserTestHelper.login('test@example.com', 'password123')
     testActiveUserId = loginData.activeUserId
     sessionId = loginData.sessionId
 
@@ -43,13 +43,13 @@ describe('DELETE /api/articles/:article_id/unread', () => {
   }
 
   beforeEach(async () => {
-    await accountTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await accountTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
   })
 

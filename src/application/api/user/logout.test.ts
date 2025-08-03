@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { SESSION_NAME } from '@/common/constants/session'
 import ActiveUserService from '@/domain/user/service/activeUserService'
 import TEST_ENV from '@/test/env'
-import accountTestHelper from '@/test/helper/accountTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
 
 describe('DELETE /api/user/logout', () => {
@@ -26,16 +26,16 @@ describe('DELETE /api/user/logout', () => {
   }
 
   afterAll(async () => {
-    await accountTestHelper.cleanUp()
-    await accountTestHelper.disconnect()
+    await activeUserTestHelper.cleanUp()
+    await activeUserTestHelper.disconnect()
   })
 
   beforeEach(async () => {
-    await accountTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     // モックをリセット
     vi.clearAllMocks()
 
-    await accountTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
+    await activeUserTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(
@@ -74,14 +74,14 @@ describe('DELETE /api/user/logout', () => {
       }
 
       // DBのセッションを削除
-      await accountTestHelper.deleteAllSessions()
+      await activeUserTestHelper.deleteAllSessions()
 
       const res = await requestLogout()
       expect(res.status).toBe(404)
     })
 
     it('アカウントがない場合、404', async () => {
-      await accountTestHelper.deleteAllAccounts()
+      await activeUserTestHelper.deleteAllAccounts()
 
       const res = await requestLogout()
 

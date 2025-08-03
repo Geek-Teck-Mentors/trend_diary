@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import accountTestHelper from '@/test/helper/accountTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 
 test.describe('ログインページ', () => {
   test.describe.configure({ mode: 'default' })
@@ -8,13 +8,13 @@ test.describe('ログインページ', () => {
   const testPassword = 'password123'
 
   test.beforeAll(async () => {
-    await accountTestHelper.cleanUp()
-    await accountTestHelper.create(testEmail, testPassword)
+    await activeUserTestHelper.cleanUp()
+    await activeUserTestHelper.create(testEmail, testPassword)
   })
 
   test.afterAll(async () => {
-    await accountTestHelper.cleanUp()
-    await accountTestHelper.disconnect()
+    await activeUserTestHelper.cleanUp()
+    await activeUserTestHelper.disconnect()
   })
 
   test.beforeEach(async ({ page }) => {

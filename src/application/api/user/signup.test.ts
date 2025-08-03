@@ -1,15 +1,15 @@
 import TEST_ENV from '@/test/env'
-import accountTestHelper from '@/test/helper/accountTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
 
 describe('POST /api/user', () => {
   beforeAll(async () => {
-    await accountTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
   })
 
   afterAll(async () => {
-    await accountTestHelper.cleanUp()
-    await accountTestHelper.disconnect()
+    await activeUserTestHelper.cleanUp()
+    await activeUserTestHelper.disconnect()
   })
 
   async function requestShort(body: string) {

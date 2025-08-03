@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import accountTestHelper from '@/test/helper/accountTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 describe('POST /api/articles/:article_id/read', () => {
@@ -11,8 +11,8 @@ describe('POST /api/articles/:article_id/read', () => {
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
-    await accountTestHelper.create('test@example.com', 'password123')
-    const loginData = await accountTestHelper.login('test@example.com', 'password123')
+    await activeUserTestHelper.create('test@example.com', 'password123')
+    const loginData = await activeUserTestHelper.login('test@example.com', 'password123')
     testActiveUserId = loginData.activeUserId
     sessionId = loginData.sessionId
 
@@ -41,13 +41,13 @@ describe('POST /api/articles/:article_id/read', () => {
   }
 
   beforeEach(async () => {
-    await accountTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await accountTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
   })
 

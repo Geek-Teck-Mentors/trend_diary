@@ -11,11 +11,10 @@ class ArticleTestHelper {
   async createArticle() {
     const data = {
       media: faker.helpers.arrayElement(['qiita', 'zenn']),
-      // fakerの生成する文章はテーブルの制約を超えることがあるため、適切な長さに制限
       title: faker.lorem.sentence().substring(0, 100),
-      author: faker.person.fullName().substring(0, 100),
+      author: faker.person.fullName().substring(0, 30),
       description: faker.lorem.paragraph().substring(0, 255),
-      url: faker.internet.url().substring(0, 500),
+      url: faker.internet.url(),
     }
     return await this.rdb.article.create({ data })
   }

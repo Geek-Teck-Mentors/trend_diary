@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import TEST_ENV from '@/test/env'
-import accountTestHelper from '@/test/helper/accountTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
 
 describe('GET /api/user/me', () => {
@@ -24,15 +24,15 @@ describe('GET /api/user/me', () => {
   }
 
   afterAll(async () => {
-    await accountTestHelper.cleanUp()
-    await accountTestHelper.disconnect()
+    await activeUserTestHelper.cleanUp()
+    await activeUserTestHelper.disconnect()
   })
 
   beforeEach(async () => {
-    await accountTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
 
     // ユーザーを作成してログインする
-    await accountTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
+    await activeUserTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(
