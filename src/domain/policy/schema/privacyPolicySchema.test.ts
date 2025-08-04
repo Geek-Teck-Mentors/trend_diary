@@ -176,11 +176,20 @@ describe('privacyPolicyUpdateSchema', () => {
     })
   })
 
-  describe('例外・制約違反', () => {
-    it('contentが空文字列の場合はバリデーションに失敗する', () => {
-      const invalidUpdate = {
+  describe('境界値・特殊値', () => {
+    it('contentが空文字列でもバリデーションを通す', () => {
+      const validUpdate = {
         content: '',
       }
+
+      const result = privacyPolicyUpdateSchema.safeParse(validUpdate)
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('例外・制約違反', () => {
+    it('contentが存在しない場合はバリデーションに失敗する', () => {
+      const invalidUpdate = {}
 
       const result = privacyPolicyUpdateSchema.safeParse(invalidUpdate)
       expect(result.success).toBe(false)

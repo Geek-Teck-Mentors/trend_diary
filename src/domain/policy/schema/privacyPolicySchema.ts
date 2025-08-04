@@ -13,7 +13,7 @@ export const privacyPolicyInputSchema = z.object({
 })
 
 export const privacyPolicyUpdateSchema = z.object({
-  content: z.string().min(1, 'コンテンツは必須です'),
+  content: z.string(),
 })
 
 export const privacyPolicyActivateSchema = z.object({
@@ -31,3 +31,4 @@ export type PrivacyPolicyUpdate = z.infer<typeof privacyPolicyUpdateSchema>
 export type PrivacyPolicyActivate = z.infer<typeof privacyPolicyActivateSchema>
 export type PrivacyPolicyClone = z.infer<typeof privacyPolicyCloneSchema>
 export type VersionParam = z.infer<typeof versionParamSchema>
+export type PrivacyPolicyOutput = z.output<typeof privacyPolicySchema>

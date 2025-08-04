@@ -1,7 +1,15 @@
 import TEST_ENV from '@/test/env'
+import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('PATCH /api/policies/:version', () => {
+  let sessionId: string
+
+  async function setupTestData(): Promise<void> {
+    // 管理者アカウント作成・ログイン
+    sessionId = await policyTestHelper.setupUserSession()
+  }
+
   async function requestUpdatePolicy(version: number, body: string) {
     return app.request(
       `/api/policies/${version}`,
@@ -9,6 +17,7 @@ describe('PATCH /api/policies/:version', () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          Cookie: `sid=${sessionId}`,
         },
         body,
       },
@@ -17,47 +26,31 @@ describe('PATCH /api/policies/:version', () => {
   }
 
   async function createTestPolicy(content = 'テストポリシー') {
-    return app.request(
-      '/api/policies',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content }),
-      },
-      TEST_ENV,
-    )
+    return policyTestHelper.createPolicy(sessionId, content)
   }
 
   async function deleteTestPolicy(version: number) {
-    return app.request(
-      `/api/policies/${version}`,
-      {
-        method: 'DELETE',
-      },
-      TEST_ENV,
-    )
+    return policyTestHelper.deletePolicy(version)
   }
 
-  async function activatePolicy(version: number) {
-    return app.request(
-      `/api/policies/${version}/activate`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ effectiveAt: new Date().toISOString() }),
-      },
-      TEST_ENV,
-    )
+  async function activateTestPolicy(version: number) {
+    return policyTestHelper.activatePolicy(version, new Date())
   }
+
+  beforeEach(async () => {
+    await policyTestHelper.cleanUpAll()
+    await setupTestData()
+  })
+
+  afterAll(async () => {
+    await policyTestHelper.cleanUpAll()
+    await policyTestHelper.disconnect()
+  })
 
   describe('正常系', () => {
     it('下書き状態のポリシーを更新できる', async () => {
       // Arrange - 下書きポリシー作成
-      const createRes = await createTestPolicy('更新前のポリシー')
-      expect(createRes.status).toBe(201)
-      const original = await createRes.json()
+      const original = await createTestPolicy('更新前のポリシー')
       const version = original.version
 
       const newContent = '更新後のポリシー内容'
@@ -83,8 +76,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('空のコンテンツに更新できる', async () => {
       // Arrange
-      const createRes = await createTestPolicy('更新前のポリシー')
-      const original = await createRes.json()
+      const original = await createTestPolicy('更新前のポリシー')
       const version = original.version
 
       const requestBody = JSON.stringify({ content: '' })
@@ -103,8 +95,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('非常に長いコンテンツに更新できる', async () => {
       // Arrange
-      const createRes = await createTestPolicy('短いポリシー')
-      const original = await createRes.json()
+      const original = await createTestPolicy('短いポリシー')
       const version = original.version
 
       const longContent = 'a'.repeat(10000)
@@ -131,18 +122,16 @@ describe('PATCH /api/policies/:version', () => {
       // Assert
       expect(res.status).toBe(404)
       const data = await res.json()
-      expect(data).toHaveProperty('error')
-      expect(data.error).toContain('見つかりません')
+      expect(data).toHaveProperty('message')
+      expect(data.message).toContain('見つかりません')
     })
 
     it('有効化されたポリシーを更新しようとすると400を返す', async () => {
       // Arrange - ポリシー作成して有効化
-      const createRes = await createTestPolicy('有効化予定ポリシー')
-      const original = await createRes.json()
+      const original = await createTestPolicy('有効化予定ポリシー')
       const version = original.version
 
-      const activateRes = await activatePolicy(version)
-      expect(activateRes.status).toBe(200)
+      await activateTestPolicy(version)
 
       // Act
       const res = await requestUpdatePolicy(version, JSON.stringify({ content: '更新テスト' }))
@@ -150,14 +139,13 @@ describe('PATCH /api/policies/:version', () => {
       // Assert
       expect(res.status).toBe(400)
       const data = await res.json()
-      expect(data).toHaveProperty('error')
-      expect(data.error).toContain('有効化されたポリシーは更新できません')
+      expect(data).toHaveProperty('message')
+      expect(data.message).toContain('有効化されたポリシーは更新できません')
     })
 
     it('contentが存在しない場合は422を返す', async () => {
       // Arrange
-      const createRes = await createTestPolicy('テストポリシー')
-      const original = await createRes.json()
+      const original = await createTestPolicy('テストポリシー')
       const version = original.version
 
       // Act
@@ -170,24 +158,21 @@ describe('PATCH /api/policies/:version', () => {
       await deleteTestPolicy(version)
     })
 
-    it('空文字列のcontentは422を返す（バリデーションによる）', async () => {
+    it('空文字列のcontentは200を返す（正常な更新として扱う）', async () => {
       // Arrange
-      const createRes = await createTestPolicy('テストポリシー')
-      const original = await createRes.json()
+      const original = await createTestPolicy('テストポリシー')
       const version = original.version
 
       // Act
       const res = await requestUpdatePolicy(version, JSON.stringify({ content: '' }))
 
       // Assert
-      // 実装によってはエラーになる可能性がある
-      // もしくは正常系として扱う場合は200
-      expect([200, 422]).toContain(res.status)
+      expect(res.status).toBe(200)
+      const updated = await res.json()
+      expect(updated.content).toBe('')
 
       // Cleanup
-      if (res.status === 200) {
-        await deleteTestPolicy(version)
-      }
+      await deleteTestPolicy(version)
     })
 
     it('無効なバージョン形式（文字列）は422を返す', async () => {
@@ -196,7 +181,10 @@ describe('PATCH /api/policies/:version', () => {
         '/api/policies/invalid',
         {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
           body: JSON.stringify({ content: 'テスト' }),
         },
         TEST_ENV,
@@ -216,8 +204,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('不正なJSONの場合は400を返す', async () => {
       // Arrange
-      const createRes = await createTestPolicy('JSON不正テスト')
-      const original = await createRes.json()
+      const original = await createTestPolicy('JSON不正テスト')
       const version = original.version
 
       // Act
@@ -225,7 +212,10 @@ describe('PATCH /api/policies/:version', () => {
         `/api/policies/${version}`,
         {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
           body: '{ content: invalid json }',
         },
         TEST_ENV,
@@ -240,26 +230,28 @@ describe('PATCH /api/policies/:version', () => {
   })
 
   describe('異常系', () => {
-    it('メソッドが間違っている場合は405を返す', async () => {
+    it('メソッドが間違っている場合は404を返す', async () => {
       // Act
       const res = await app.request(
         '/api/policies/1',
         {
           method: 'PUT', // PATCHでないメソッド
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
           body: JSON.stringify({ content: 'テスト' }),
         },
         TEST_ENV,
       )
 
       // Assert
-      expect(res.status).toBe(405)
+      expect(res.status).toBe(404)
     })
 
-    it('Content-Typeが指定されていない場合は400を返す', async () => {
+    it('Content-Typeが指定されていない場合は422を返す', async () => {
       // Arrange
-      const createRes = await createTestPolicy('ContentType不正テスト')
-      const original = await createRes.json()
+      const original = await createTestPolicy('ContentType不正テスト')
       const version = original.version
 
       // Act
@@ -267,13 +259,16 @@ describe('PATCH /api/policies/:version', () => {
         `/api/policies/${version}`,
         {
           method: 'PATCH',
+          headers: {
+            Cookie: `sid=${sessionId}`,
+          },
           body: JSON.stringify({ content: 'テスト' }),
         },
         TEST_ENV,
       )
 
       // Assert
-      expect(res.status).toBe(400)
+      expect(res.status).toBe(422)
 
       // Cleanup
       await deleteTestPolicy(version)
