@@ -1,36 +1,71 @@
-import { testClient } from 'hono/testing'
-import { Env } from '@/application/env'
-import getRdbClient from '@/infrastructure/rdb'
+import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
-import route from './route'
+import app from '../../server'
 
-describe('/policies - GET (プライバシーポリシー一覧取得)', () => {
+type PolicyListResponse = {
+  data: Array<{
+    version: number
+    content: string
+    effectiveAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+  }>
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  hasNext: boolean
+  hasPrev: boolean
+}
+
+describe('GET /api/policies', () => {
+  let db: RdbClient
   let sessionId: string
-  const app = testClient(route, TEST_ENV as unknown as Env)
+
+  async function requestGetPolicies(query: string = '', sessionId?: string) {
+    const url = query ? `/api/policies?${query}` : '/api/policies'
+    const headers: Record<string, string> = {}
+    if (sessionId) {
+      headers.Cookie = `sid=${sessionId}`
+    }
+    return app.request(url, { method: 'GET', headers }, TEST_ENV)
+  }
+
+  async function cleanUp(): Promise<void> {
+    await db.$queryRaw`TRUNCATE TABLE "privacy_policies";`
+  }
 
   async function setupTestData(): Promise<void> {
-    // 管理者アカウント作成・ログイン
+    await cleanUp()
+    await activeUserTestHelper.cleanUp()
     await activeUserTestHelper.create('admin@example.com', 'password123')
     const loginData = await activeUserTestHelper.login('admin@example.com', 'password123')
     sessionId = loginData.sessionId
   }
 
-  beforeEach(async () => {
-    await activeUserTestHelper.cleanUp()
-    await setupTestData()
+  beforeAll(() => {
+    db = getRdbClient(TEST_ENV.DATABASE_URL)
   })
 
   afterAll(async () => {
     await activeUserTestHelper.cleanUp()
+    await activeUserTestHelper.disconnect()
+    await db.$disconnect()
+  })
+
+  beforeEach(async () => {
+    await setupTestData()
+  })
+
+  afterEach(async () => {
+    await cleanUp()
   })
 
   describe('正常系', () => {
-    beforeAll(async () => {
-      const rdb = getRdbClient(TEST_ENV.DATABASE_URL)
-
+    beforeEach(async () => {
       // テスト用のプライバシーポリシーを作成
-      await rdb.privacyPolicy.createMany({
+      await db.privacyPolicy.createMany({
         data: [
           {
             version: 1,
@@ -51,22 +86,10 @@ describe('/policies - GET (プライバシーポリシー一覧取得)', () => {
     })
 
     it('デフォルトのページング設定でポリシー一覧を取得できる', async () => {
-      const res = await app.index.$get(
-        {
-          query: {
-            page: 1,
-            limit: 20,
-          },
-        },
-        {
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-        },
-      )
+      const res = await requestGetPolicies('page=1&limit=20', sessionId)
 
       expect(res.status).toBe(200)
-      const body = await res.json()
+      const body: PolicyListResponse = await res.json()
 
       expect(body).toHaveProperty('data')
       expect(body).toHaveProperty('page', 1)
@@ -85,35 +108,21 @@ describe('/policies - GET (プライバシーポリシー一覧取得)', () => {
     })
 
     it('カスタムページング設定でポリシー一覧を取得できる', async () => {
-      const rdb = getRdbClient(TEST_ENV.DATABASE_URL)
-
-      // テスト用のプライバシーポリシーを複数作成
-      const policies = Array.from({ length: 5 }, (_, i) => ({
-        version: i + 1,
-        content: `Privacy Policy v${i + 1}`,
+      // 追加のテスト用プライバシーポリシーを作成
+      const additionalPolicies = Array.from({ length: 3 }, (_, i) => ({
+        version: i + 3,
+        content: `Privacy Policy v${i + 3}`,
         effectiveAt: i % 2 === 0 ? new Date() : null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }))
 
-      await rdb.privacyPolicy.createMany({ data: policies })
+      await db.privacyPolicy.createMany({ data: additionalPolicies })
 
-      const res = await app.index.$get(
-        {
-          query: {
-            page: 2,
-            limit: 2,
-          },
-        },
-        {
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-        },
-      )
+      const res = await requestGetPolicies('page=2&limit=2', sessionId)
 
       expect(res.status).toBe(200)
-      const body = await res.json()
+      const body: PolicyListResponse = await res.json()
 
       expect(body.page).toBe(2)
       expect(body.limit).toBe(2)
@@ -127,82 +136,33 @@ describe('/policies - GET (プライバシーポリシー一覧取得)', () => {
 
   describe('準正常系', () => {
     it('認証されていない場合は401エラーが返される', async () => {
-      const res = await app.index.$get({
-        query: {
-          page: 1,
-          limit: 20,
-        },
-      })
+      const res = await requestGetPolicies('page=1&limit=20')
 
       expect(res.status).toBe(401)
     })
 
     it('無効なpage値の場合はデフォルト値が使用される', async () => {
-      const res = await app.index.$get(
-        {
-          query: {
-            page: NaN,
-            limit: 10,
-          },
-        },
-        {
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-        },
-      )
+      const res = await requestGetPolicies('page=invalid&limit=10', sessionId)
 
       expect(res.status).toBe(200)
-      const body = await res.json()
+      const body: PolicyListResponse = await res.json()
       expect(body.page).toBe(1) // デフォルト値
     })
 
     it('無効なlimit値の場合はデフォルト値が使用される', async () => {
-      const res = await app.index.$get(
-        {
-          query: {
-            page: 1,
-            limit: NaN,
-          },
-        },
-        {
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-        },
-      )
+      const res = await requestGetPolicies('page=1&limit=invalid', sessionId)
 
       expect(res.status).toBe(200)
-      const body = await res.json()
+      const body: PolicyListResponse = await res.json()
       expect(body.limit).toBe(20) // デフォルト値
     })
 
     it('limitが上限を超える場合は上限値が適用される', async () => {
-      const res = await app.index.$get(
-        {
-          query: {
-            page: 1,
-            limit: 200, // 上限100を超える
-          },
-        },
-        {
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-        },
-      )
+      const res = await requestGetPolicies('page=1&limit=200', sessionId)
 
       expect(res.status).toBe(200)
-      const body = await res.json()
+      const body: PolicyListResponse = await res.json()
       expect(body.limit).toBe(100) // 上限値
-    })
-  })
-
-  describe('異常系', () => {
-    it('メソッドが間違っている場合は405を返す', async () => {
-      // testClientではrequestメソッドを使用できないので、
-      // このテストは省略するか、別の方法でテストする
-      expect(true).toBe(true) // プレースホルダー
     })
   })
 })
