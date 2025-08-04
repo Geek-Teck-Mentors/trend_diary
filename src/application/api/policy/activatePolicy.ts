@@ -2,6 +2,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import {
   ZodValidatedContext,
   ZodValidatedParamContext,
+  ZodValidatedParamJsonContext,
 } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
@@ -9,7 +10,7 @@ import { createPrivacyPolicyService, PrivacyPolicyActivate, VersionParam } from 
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function activatePolicy(
-  c: ZodValidatedContext<PrivacyPolicyActivate> & ZodValidatedParamContext<VersionParam>,
+  c: ZodValidatedParamJsonContext<VersionParam, PrivacyPolicyActivate>,
 ) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const { version } = c.req.valid('param')

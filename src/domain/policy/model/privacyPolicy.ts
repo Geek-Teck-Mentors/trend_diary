@@ -1,3 +1,6 @@
+import { ClientError } from "@/common/errors"
+import { Result, resultError, resultSuccess } from "@/common/types/utility"
+
 export default class PrivacyPolicy {
   constructor(
     public version: number,
@@ -28,13 +31,14 @@ export default class PrivacyPolicy {
    * @param effectiveDate 有効開始日
    * @throws 既に有効化されている場合はエラー
    */
-  activate(effectiveDate: Date): void {
+  activate(effectiveDate: Date): Result<void, Error> {
     if (this.isActive()) {
-      throw new Error('このポリシーは既に有効化されています')
+      return resultError(new ClientError('このポリシーは既に有効化されています'))
     }
 
     this.effectiveAt = effectiveDate
     this.updatedAt = new Date()
+    return resultSuccess(undefined)
   }
 
   /**

@@ -9,7 +9,7 @@ import { createPrivacyPolicyService, VersionParam } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function clonePolicy(
-  c: ZodValidatedContext<{}> & ZodValidatedParamContext<VersionParam>,
+  c: ZodValidatedParamContext<VersionParam>,
 ) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const { version } = c.req.valid('param')
