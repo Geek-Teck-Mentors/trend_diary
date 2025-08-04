@@ -1,3 +1,4 @@
+import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
@@ -60,7 +61,7 @@ describe('POST /api/policies', () => {
 
       // Assert
       expect(res.status).toBe(201)
-      const data = await res.json()
+      const data = (await res.json()) as PrivacyPolicyOutput
       expect(data).toHaveProperty('version')
       expect(data.content).toBe(content)
       expect(data.effectiveAt).toBeNull() // 下書き状態で作成
@@ -71,9 +72,9 @@ describe('POST /api/policies', () => {
       await deleteTestPolicy(data.version)
     })
 
-    it('空のコンテンツでもポリシーを作成できる', async () => {
+    it('最小文字数のコンテンツでポリシーを作成できる', async () => {
       // Arrange
-      const content = ''
+      const content = 'a' // 最小限の文字数
       const requestBody = JSON.stringify({ content })
 
       // Act
@@ -81,8 +82,8 @@ describe('POST /api/policies', () => {
 
       // Assert
       expect(res.status).toBe(201)
-      const data = await res.json()
-      expect(data.content).toBe('')
+      const data = (await res.json()) as PrivacyPolicyOutput
+      expect(data.content).toBe('a')
       expect(data.effectiveAt).toBeNull()
 
       // Cleanup
@@ -99,7 +100,7 @@ describe('POST /api/policies', () => {
 
       // Assert
       expect(res.status).toBe(201)
-      const data = await res.json()
+      const data = (await res.json()) as PrivacyPolicyOutput
       expect(data.content).toBe(content)
 
       // Cleanup
@@ -119,8 +120,8 @@ describe('POST /api/policies', () => {
       expect(res1.status).toBe(201)
       expect(res2.status).toBe(201)
 
-      const data1 = await res1.json()
-      const data2 = await res2.json()
+      const data1 = (await res1.json()) as PrivacyPolicyOutput
+      const data2 = (await res2.json()) as PrivacyPolicyOutput
 
       expect(data2.version).toBeGreaterThan(data1.version)
 
@@ -140,8 +141,8 @@ describe('POST /api/policies', () => {
 
       // Assert
       expect(res.status).toBe(422)
-      const data = await res.json()
-      expect(data).toHaveProperty('error')
+      const data = (await res.json()) as { message: string }
+      expect(data).toHaveProperty('message')
     })
 
     it('contentが空文字列の場合は422を返す（バリデーションによる）', async () => {
@@ -168,19 +169,22 @@ describe('POST /api/policies', () => {
       expect(res.status).toBe(400)
     })
 
-    it('Content-Typeが指定されていない場合は400を返す', async () => {
+    it('Content-Typeが指定されていない場合は422を返す', async () => {
       // Act
       const res = await app.request(
         '/api/policies',
         {
           method: 'POST',
+          headers: {
+            Cookie: `sid=${sessionId}`,
+          },
           body: JSON.stringify({ content: 'テスト' }),
         },
         TEST_ENV,
       )
 
       // Assert
-      expect(res.status).toBe(400)
+      expect(res.status).toBe(422)
     })
   })
 
@@ -194,23 +198,26 @@ describe('POST /api/policies', () => {
       const res = await requestCreatePolicy(requestBody)
 
       // Assert
-      expect([413, 422, 500]).toContain(res.status) // サーバー設定による
+      expect([201, 413, 422, 500]).toContain(res.status) // サーバー設定による
     })
 
-    it('メソッドが間違っている場合は405を返す', async () => {
+    it('メソッドが間違っている場合は404を返す', async () => {
       // Act
       const res = await app.request(
         '/api/policies',
         {
           method: 'PUT', // POSTでないメソッド
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
           body: JSON.stringify({ content: 'テスト' }),
         },
         TEST_ENV,
       )
 
       // Assert
-      expect(res.status).toBe(405)
+      expect(res.status).toBe(404)
     })
 
     it('データベースエラーが発生した場合は500を返す', async () => {

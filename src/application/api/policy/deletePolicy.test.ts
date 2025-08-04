@@ -71,7 +71,7 @@ describe('DELETE /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(404)
-      const data = await res.json()
+      const data = (await res.json()) as { message: string }
       expect(data).toHaveProperty('message')
       expect(data.message).toContain('見つかりません')
     })
@@ -87,7 +87,7 @@ describe('DELETE /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(400)
-      const data = await res.json()
+      const data = (await res.json()) as { message: string }
       expect(data).toHaveProperty('message')
       expect(data.message).toContain('有効化されたポリシーは削除できません')
 
@@ -148,11 +148,7 @@ describe('DELETE /api/policies/:version', () => {
   describe('異常系', () => {
     it('認証なしの場合は401を返す', async () => {
       // Act - セッションIDなしでリクエスト
-      const res = await app.request(
-        '/api/policies/1',
-        { method: 'DELETE' },
-        TEST_ENV,
-      )
+      const res = await app.request('/api/policies/1', { method: 'DELETE' }, TEST_ENV)
 
       // Assert
       expect(res.status).toBe(401)

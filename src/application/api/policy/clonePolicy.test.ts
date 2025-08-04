@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest'
+import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
@@ -36,7 +37,7 @@ describe('POST /api/policies/:version/clone', () => {
 
       // レスポンス検証
       expect(response.status).toBe(201)
-      const clonedPolicy = await response.json()
+      const clonedPolicy = (await response.json()) as PrivacyPolicyOutput
 
       // 複製されたポリシーの検証
       expect(clonedPolicy.version).toBeGreaterThan(sourcePolicy.version)
@@ -56,7 +57,7 @@ describe('POST /api/policies/:version/clone', () => {
 
       // レスポンス検証
       expect(response.status).toBe(201)
-      const clonedPolicy = await response.json()
+      const clonedPolicy = (await response.json()) as PrivacyPolicyOutput
 
       // 複製されたポリシーは下書き状態になる
       expect(clonedPolicy.content).toBe('有効化されたポリシー')
@@ -69,7 +70,7 @@ describe('POST /api/policies/:version/clone', () => {
       const response = await requestClonePolicy(999)
 
       expect(response.status).toBe(404)
-      const error = await response.json()
+      const error = (await response.json()) as { message: string }
       expect(error.message).toContain('複製元のプライバシーポリシーが見つかりません')
     })
 

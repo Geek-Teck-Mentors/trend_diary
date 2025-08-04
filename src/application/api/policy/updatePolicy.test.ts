@@ -1,3 +1,4 @@
+import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
@@ -61,7 +62,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const updated = await res.json()
+      const updated = (await res.json()) as PrivacyPolicyOutput
       expect(updated.version).toBe(version) // バージョンは変わらない
       expect(updated.content).toBe(newContent)
       expect(updated.effectiveAt).toBeNull() // 下書き状態を維持
@@ -86,7 +87,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const updated = await res.json()
+      const updated = (await res.json()) as PrivacyPolicyOutput
       expect(updated.content).toBe('')
 
       // Cleanup
@@ -106,7 +107,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const updated = await res.json()
+      const updated = (await res.json()) as PrivacyPolicyOutput
       expect(updated.content).toBe(longContent)
 
       // Cleanup
@@ -121,7 +122,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(404)
-      const data = await res.json()
+      const data = (await res.json()) as { message: string }
       expect(data).toHaveProperty('message')
       expect(data.message).toContain('見つかりません')
     })
@@ -138,7 +139,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(400)
-      const data = await res.json()
+      const data = (await res.json()) as { message: string }
       expect(data).toHaveProperty('message')
       expect(data.message).toContain('有効化されたポリシーは更新できません')
     })
@@ -168,7 +169,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const updated = await res.json()
+      const updated = (await res.json()) as PrivacyPolicyOutput
       expect(updated.content).toBe('')
 
       // Cleanup

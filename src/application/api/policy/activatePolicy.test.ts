@@ -1,7 +1,7 @@
+import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
-import { PrivacyPolicyOutput } from '@/domain/policy'
 
 describe('PATCH /api/policies/:version/activate', () => {
   let sessionId: string
@@ -62,10 +62,10 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const activated = await res.json() as PrivacyPolicyOutput
+      const activated = (await res.json()) as PrivacyPolicyOutput
       expect(activated.version).toBe(version)
       expect(activated.content).toBe('有効化テストポリシー')
-      expect(activated.effectiveAt).toEqual(effectiveAt)
+      expect(activated.effectiveAt).toEqual(effectiveAt.toISOString())
       expect(activated).toHaveProperty('updatedAt')
       expect(new Date(activated.updatedAt).getTime()).toBeGreaterThan(
         new Date(original.updatedAt).getTime(),
@@ -86,11 +86,11 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const activated = await res.json()
+      const activated = (await res.json()) as PrivacyPolicyOutput
       expect(activated.version).toBe(version)
       expect(activated.content).toBe('現在時刻有効化テストポリシー')
 
-      const effectiveAtDate = new Date(activated.effectiveAt)
+      const effectiveAtDate = new Date(activated.effectiveAt!)
       expect(effectiveAtDate.getTime()).toBeGreaterThanOrEqual(beforeRequest.getTime())
       expect(effectiveAtDate.getTime()).toBeLessThanOrEqual(afterRequest.getTime())
     })
@@ -108,8 +108,8 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const activated = await res.json()
-      expect(new Date(activated.effectiveAt)).toEqual(pastDate)
+      const activated = (await res.json()) as PrivacyPolicyOutput
+      expect(new Date(activated.effectiveAt!)).toEqual(pastDate)
     })
 
     it('未来の日時で有効化できる', async () => {
@@ -125,8 +125,8 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const activated = await res.json()
-      expect(new Date(activated.effectiveAt)).toEqual(futureDate)
+      const activated = (await res.json()) as PrivacyPolicyOutput
+      expect(new Date(activated.effectiveAt!)).toEqual(futureDate)
     })
   })
 
@@ -137,7 +137,7 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(404)
-      const data = await res.json()
+      const data = (await res.json()) as { message: string }
       expect(data).toHaveProperty('message')
       expect(data.message).toContain('見つかりません')
     })
@@ -154,7 +154,7 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(400)
-      const data = await res.json()
+      const data = (await res.json()) as { message: string }
       expect(data).toHaveProperty('message')
       expect(data.message).toContain('既に有効化されています')
     })
@@ -247,8 +247,8 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const activated = await res.json()
-      expect(new Date(activated.effectiveAt)).toEqual(effectiveAt)
+      const activated = (await res.json()) as PrivacyPolicyOutput
+      expect(new Date(activated.effectiveAt!)).toEqual(effectiveAt)
     })
   })
 
@@ -292,7 +292,7 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const activated = await res.json()
+      const activated = (await res.json()) as PrivacyPolicyOutput
       expect(activated).toHaveProperty('effectiveAt')
 
       // Cleanup (不要 - 有効化されているため削除できない)
