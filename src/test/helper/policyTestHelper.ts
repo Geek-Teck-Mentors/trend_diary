@@ -38,29 +38,6 @@ class PolicyTestHelper {
     }
   }
 
-  async updatePolicy(
-    version: number,
-    content: string,
-  ): Promise<{
-    version: number
-    effectiveAt: Date | null
-    content: string
-    createdAt: Date
-    updatedAt: Date
-  }> {
-    const result = await this.service.updatePolicy(version, content)
-    if (isError(result)) {
-      throw new Error(`Failed to update policy: ${result.error.message}`)
-    }
-    return {
-      version: result.data.version,
-      effectiveAt: result.data.effectiveAt,
-      content: result.data.content,
-      createdAt: result.data.createdAt,
-      updatedAt: result.data.updatedAt,
-    }
-  }
-
   async activatePolicy(
     version: number,
     effectiveAt: Date,
@@ -91,26 +68,6 @@ class PolicyTestHelper {
     }
   }
 
-  async clonePolicy(sourceVersion: number): Promise<{
-    version: number
-    effectiveAt: Date | null
-    content: string
-    createdAt: Date
-    updatedAt: Date
-  }> {
-    const result = await this.service.clonePolicy(sourceVersion)
-    if (isError(result)) {
-      throw new Error(`Failed to clone policy: ${result.error.message}`)
-    }
-    return {
-      version: result.data.version,
-      effectiveAt: result.data.effectiveAt,
-      content: result.data.content,
-      createdAt: result.data.createdAt,
-      updatedAt: result.data.updatedAt,
-    }
-  }
-
   async getPolicy(version: number): Promise<{
     version: number
     effectiveAt: Date | null
@@ -134,36 +91,6 @@ class PolicyTestHelper {
       content: result.data.content,
       createdAt: result.data.createdAt,
       updatedAt: result.data.updatedAt,
-    }
-  }
-
-  async getPolicies(
-    limit = 10,
-    offset = 0,
-  ): Promise<{
-    policies: Array<{
-      version: number
-      effectiveAt: Date | null
-      content: string
-      createdAt: Date
-      updatedAt: Date
-    }>
-    totalCount: number
-  }> {
-    const result = await this.service.getAllPolicies(limit, offset)
-    if (isError(result)) {
-      throw new Error(`Failed to get policies: ${result.error.message}`)
-    }
-
-    return {
-      policies: result.data.data.map((policy: any) => ({
-        version: policy.version,
-        effectiveAt: policy.effectiveAt,
-        content: policy.content,
-        createdAt: policy.createdAt,
-        updatedAt: policy.updatedAt,
-      })),
-      totalCount: result.data.total,
     }
   }
 
