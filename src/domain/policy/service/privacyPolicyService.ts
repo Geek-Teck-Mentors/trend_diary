@@ -88,13 +88,12 @@ export default class PrivacyPolicyService {
       return resultError(new ClientError('有効化されたポリシーは更新できません'))
     }
 
-    try {
-      policy.updateContent(content)
-    } catch (error) {
-      return resultError(new ClientError((error as Error).message))
-    }
+      const updatedContentResult = policy.updateContent(content)
+      if (isError(updatedContentResult)) {
+        return resultError(new ClientError(updatedContentResult.error.message))
+      }
 
-    const saveResult = await this.commandService.save(policy)
+    const saveResult = await this.commandService.save(updatedContentResult.data)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
     return resultSuccess(saveResult.data)

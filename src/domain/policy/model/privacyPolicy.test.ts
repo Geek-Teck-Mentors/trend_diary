@@ -104,10 +104,14 @@ describe('PrivacyPolicy', () => {
       )
 
       const newContent = '新しいコンテンツ'
-      policy.updateContent(newContent)
+      const updatedPolicyResult = policy.updateContent(newContent)
+      if (isError(updatedPolicyResult)) {
+        expect.fail(`更新に失敗: ${updatedPolicyResult.error.message}`) // エラーが発生した場合はテスト失敗
+      }
 
-      expect(policy.content).toBe(newContent)
-      expect(policy.updatedAt.getTime()).toBeGreaterThan(new Date('2024-01-01T00:00:00Z').getTime())
+      const updatedPolicy = updatedPolicyResult.data
+      expect(updatedPolicy.content).toBe(newContent)
+      expect(updatedPolicy.updatedAt.getTime()).toBeGreaterThan(new Date('2024-01-01T00:00:00Z').getTime())
     })
 
     it('clone() - 既存ポリシーから新しい下書きポリシーを作成できる', () => {
@@ -153,9 +157,9 @@ describe('PrivacyPolicy', () => {
         new Date('2024-01-01T00:00:00Z'),
       )
 
-      expect(() => {
-        policy.updateContent('新しいコンテンツ')
-      }).toThrow('有効化されたポリシーは編集できません')
+
+      const result = policy.updateContent('新しいコンテンツ')
+      expect(isError(result)).toBe(true)
     })
   })
 })
