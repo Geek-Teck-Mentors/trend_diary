@@ -2,22 +2,7 @@ import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
-
-type PolicyListResponse = {
-  data: Array<{
-    version: number
-    content: string
-    effectiveAt: Date | null
-    createdAt: Date
-    updatedAt: Date
-  }>
-  page: number
-  limit: number
-  total: number
-  totalPages: number
-  hasNext: boolean
-  hasPrev: boolean
-}
+import { PolicyListResponse } from './response'
 
 describe('GET /api/policies', () => {
   let db: RdbClient
