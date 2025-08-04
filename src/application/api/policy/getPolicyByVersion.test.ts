@@ -112,9 +112,7 @@ describe('GET /api/policies/:version', () => {
       // Assert
       expect(res.status).toBe(422) // version=0のポリシーは存在しないと仮定
     })
-  })
 
-  describe('異常系', () => {
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
       const res = await app.request(
@@ -139,7 +137,9 @@ describe('GET /api/policies/:version', () => {
       // Assert
       expect(res.status).toBe(422)
     })
+  })
 
+  describe('異常系', () => {
     it('データベースエラーが発生した場合は500を返す', async () => {
       // Note: この種のテストは実際のDBエラーシミュレーションが困難
       // 統合テストでは基本的にはスキップするか、モックインフラとして別途テスト

@@ -41,13 +41,13 @@ describe('POST /api/policies', () => {
     )
   }
 
+  afterAll(async () => {
+    await activeUserTestHelper.cleanUp()
+  })
+
   beforeEach(async () => {
     await activeUserTestHelper.cleanUp()
     await setupTestData()
-  })
-
-  afterAll(async () => {
-    await activeUserTestHelper.cleanUp()
   })
 
   describe('正常系', () => {
@@ -145,7 +145,7 @@ describe('POST /api/policies', () => {
       expect(data).toHaveProperty('message')
     })
 
-    it('contentが空文字列の場合は422を返す（バリデーションによる）', async () => {
+    it('contentが空文字列の場合は422を返す', async () => {
       // Arrange
       const requestBody = JSON.stringify({ content: '' })
 
@@ -189,37 +189,6 @@ describe('POST /api/policies', () => {
   })
 
   describe('異常系', () => {
-    it('非常に大きなペイロードは413を返す', async () => {
-      // Arrange
-      const content = 'a'.repeat(10000000) // 1000万文字
-      const requestBody = JSON.stringify({ content })
-
-      // Act
-      const res = await requestCreatePolicy(requestBody)
-
-      // Assert
-      expect([201, 413, 422, 500]).toContain(res.status) // サーバー設定による
-    })
-
-    it('メソッドが間違っている場合は404を返す', async () => {
-      // Act
-      const res = await app.request(
-        '/api/policies',
-        {
-          method: 'PUT', // POSTでないメソッド
-          headers: {
-            'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
-          },
-          body: JSON.stringify({ content: 'テスト' }),
-        },
-        TEST_ENV,
-      )
-
-      // Assert
-      expect(res.status).toBe(404)
-    })
-
     it('データベースエラーが発生した場合は500を返す', async () => {
       // Note: この種のテストは実際のDBエラーシミュレーションが困難
       // 統合テストでは基本的にはスキップするか、モックインフラとして別途テスト

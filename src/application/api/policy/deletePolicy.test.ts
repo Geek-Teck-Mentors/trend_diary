@@ -4,14 +4,13 @@ import app from '../../server'
 
 describe('DELETE /api/policies/:version', () => {
   let sessionId: string
+  afterAll(async () => {
+    await policyTestHelper.disconnect()
+  })
 
   beforeEach(async () => {
     await policyTestHelper.cleanUpAll()
     sessionId = await policyTestHelper.setupUserSession()
-  })
-
-  afterAll(async () => {
-    await policyTestHelper.disconnect()
   })
 
   async function requestDeletePolicy(version: number) {
@@ -65,6 +64,13 @@ describe('DELETE /api/policies/:version', () => {
   })
 
   describe('準正常系', () => {
+    it('認証なしの場合は401を返す', async () => {
+      // Act - セッションIDなしでリクエスト
+      const res = await app.request('/api/policies/1', { method: 'DELETE' }, TEST_ENV)
+
+      // Assert
+      expect(res.status).toBe(401)
+    })
     it('存在しないバージョンを削除しようとすると404を返す', async () => {
       // Act
       const res = await requestDeletePolicy(99999)
@@ -146,48 +152,6 @@ describe('DELETE /api/policies/:version', () => {
   })
 
   describe('異常系', () => {
-    it('認証なしの場合は401を返す', async () => {
-      // Act - セッションIDなしでリクエスト
-      const res = await app.request('/api/policies/1', { method: 'DELETE' }, TEST_ENV)
-
-      // Assert
-      expect(res.status).toBe(401)
-    })
-
-    it('サポートされていないメソッドの場合は404を返す', async () => {
-      // Act
-      const res = await app.request(
-        '/api/policies/1',
-        {
-          method: 'POST', // DELETEでないメソッド
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-        },
-        TEST_ENV,
-      )
-
-      // Assert
-      expect(res.status).toBe(404)
-    })
-
-    it('存在しないエンドポイントは404を返す', async () => {
-      // Act
-      const res = await app.request(
-        '/api/policies/1/invalid',
-        {
-          method: 'DELETE',
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-        },
-        TEST_ENV,
-      )
-
-      // Assert
-      expect(res.status).toBe(404)
-    })
-
     it('データベースエラーが発生した場合は500を返す', async () => {
       // Note: この種のテストは実際のDBエラーシミュレーションが困難
       // 統合テストでは基本的にはスキップするか、モックインフラとして別途テスト

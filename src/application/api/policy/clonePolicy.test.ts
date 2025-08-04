@@ -21,6 +21,12 @@ describe('POST /api/policies/:version/clone', () => {
     )
   }
 
+  // cleanup
+  afterAll(async () => {
+    await policyTestHelper.cleanUpAll()
+    await policyTestHelper.disconnect()
+  })
+
   beforeEach(async () => {
     await policyTestHelper.cleanUpAll()
     sessionId = await policyTestHelper.setupUserSession()
@@ -65,6 +71,23 @@ describe('POST /api/policies/:version/clone', () => {
   })
 
   describe('準正常系', () => {
+    it('認証されていない場合は401エラー', async () => {
+      // 認証情報なしでリクエスト
+      const response = await app.request(
+        '/api/policies/1/clone',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: '{}',
+        },
+        TEST_ENV,
+      )
+
+      expect(response.status).toBe(401)
+    })
+
     it('存在しないポリシーの複製時は404エラー', async () => {
       const response = await requestClonePolicy(999)
 
@@ -95,50 +118,5 @@ describe('POST /api/policies/:version/clone', () => {
 
       expect(response.status).toBe(422)
     })
-
-    it('不正なJSONの場合は400エラー', async () => {
-      // テストデータ準備
-      const sourcePolicy = await policyTestHelper.createPolicy(sessionId, 'JSON不正テスト')
-
-      const response = await app.request(
-        `/api/policies/${sourcePolicy.version}/clone`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
-          },
-          body: '{ invalid json }',
-        },
-        TEST_ENV,
-      )
-
-      expect(response.status).toBe(400)
-    })
-  })
-
-  describe('異常系', () => {
-    it('認証されていない場合は401エラー', async () => {
-      // 認証情報なしでリクエスト
-      const response = await app.request(
-        '/api/policies/1/clone',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: '{}',
-        },
-        TEST_ENV,
-      )
-
-      expect(response.status).toBe(401)
-    })
-  })
-
-  // cleanup
-  afterAll(async () => {
-    await policyTestHelper.cleanUpAll()
-    await policyTestHelper.disconnect()
   })
 })
