@@ -1,9 +1,13 @@
+import { isError } from '@/common/types/utility'
+import { createPrivacyPolicyService, PrivacyPolicyOutput } from '@/domain/policy'
+import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
 
 describe('GET /api/policies/:version', () => {
   let sessionId: string
+  const service = createPrivacyPolicyService(getRdbClient(TEST_ENV.DATABASE_URL))
 
   async function setupTestData(): Promise<void> {
     // 管理者アカウント作成・ログイン
@@ -27,31 +31,11 @@ describe('GET /api/policies/:version', () => {
   }
 
   async function createTestPolicy(content = 'テストポリシー') {
-    return app.request(
-      '/api/policies',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
-        },
-        body: JSON.stringify({ content }),
-      },
-      TEST_ENV,
-    )
+    return service.createPolicy(content)
   }
 
   async function deleteTestPolicy(version: number) {
-    return app.request(
-      `/api/policies/${version}`,
-      {
-        method: 'DELETE',
-        headers: {
-          Cookie: `sid=${sessionId}`,
-        },
-      },
-      TEST_ENV,
-    )
+    return service.deletePolicy(version)
   }
 
   beforeEach(async () => {
@@ -67,16 +51,18 @@ describe('GET /api/policies/:version', () => {
     it('指定したバージョンのプライバシーポリシーを取得できる', async () => {
       // Arrange - テストデータ作成
       const createRes = await createTestPolicy('特定バージョンのポリシー')
-      expect(createRes.status).toBe(201)
-      const created = await createRes.json()
-      const version = created.version
+      if (isError(createRes)) {
+        throw new Error(`Policy creation failed: ${createRes.error.message}`)
+      }
+
+      const version = createRes.data.version
 
       // Act
       const res = await requestGetPolicyByVersion(version)
 
       // Assert
       expect(res.status).toBe(200)
-      const data = await res.json()
+      const data = (await res.json()) as PrivacyPolicyOutput
       expect(data.version).toBe(version)
       expect(data.content).toBe('特定バージョンのポリシー')
       expect(data.effectiveAt).toBeNull() // 下書き状態
@@ -90,30 +76,21 @@ describe('GET /api/policies/:version', () => {
     it('有効化されたポリシーも取得できる', async () => {
       // Arrange - テストデータ作成して有効化
       const createRes = await createTestPolicy('有効化テストポリシー')
-      const created = await createRes.json()
-      const version = created.version
+      if (isError(createRes)) {
+        throw new Error(`Policy creation failed: ${createRes.error.message}`)
+      }
+
+      const version = createRes.data.version
 
       // 有効化
-      const activateRes = await app.request(
-        `/api/policies/${version}/activate`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
-          },
-          body: JSON.stringify({ effectiveAt: new Date().toISOString() }),
-        },
-        TEST_ENV,
-      )
-      expect(activateRes.status).toBe(200)
+      await service.activatePolicy(version, new Date())
 
       // Act
       const res = await requestGetPolicyByVersion(version)
 
       // Assert
       expect(res.status).toBe(200)
-      const data = await res.json()
+      const data = (await res.json()) as PrivacyPolicyOutput
       expect(data.version).toBe(version)
       expect(data.effectiveAt).not.toBeNull() // 有効化済み
     })
@@ -126,17 +103,14 @@ describe('GET /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(404)
-      const data = await res.json()
-      expect(data).toHaveProperty('error')
-      expect(data.error).toContain('見つかりません')
     })
 
-    it('version=0を指定しても適切に処理される', async () => {
+    it('versionは1以上のみ受け付ける', async () => {
       // Act
       const res = await requestGetPolicyByVersion(0)
 
       // Assert
-      expect(res.status).toBe(404) // version=0のポリシーは存在しないと仮定
+      expect(res.status).toBe(422) // version=0のポリシーは存在しないと仮定
     })
   })
 

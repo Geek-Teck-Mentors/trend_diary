@@ -26,7 +26,7 @@ describe('/policies - GET (プライバシーポリシー一覧取得)', () => {
   })
 
   describe('正常系', () => {
-    it('デフォルトのページング設定でポリシー一覧を取得できる', async () => {
+    beforeAll(async () => {
       const rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
       // テスト用のプライバシーポリシーを作成
@@ -48,7 +48,9 @@ describe('/policies - GET (プライバシーポリシー一覧取得)', () => {
           },
         ],
       })
+    })
 
+    it('デフォルトのページング設定でポリシー一覧を取得できる', async () => {
       const res = await app.index.$get(
         {
           query: {

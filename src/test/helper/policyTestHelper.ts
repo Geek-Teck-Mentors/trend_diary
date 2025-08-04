@@ -120,6 +120,10 @@ class PolicyTestHelper {
   } | null> {
     const result = await this.service.getPolicyByVersion(version)
     if (isError(result)) {
+      // NotFoundErrorの場合はnullを返す（削除されたポリシーの確認に使用）
+      if (result.error.message.includes('見つかりません')) {
+        return null
+      }
       throw new Error(`Failed to get policy: ${result.error.message}`)
     }
     if (!result.data) return null

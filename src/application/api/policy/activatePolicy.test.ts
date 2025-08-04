@@ -1,6 +1,7 @@
 import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
+import { PrivacyPolicyOutput } from '@/domain/policy'
 
 describe('PATCH /api/policies/:version/activate', () => {
   let sessionId: string
@@ -61,10 +62,10 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Assert
       expect(res.status).toBe(200)
-      const activated = await res.json()
+      const activated = await res.json() as PrivacyPolicyOutput
       expect(activated.version).toBe(version)
       expect(activated.content).toBe('有効化テストポリシー')
-      expect(new Date(activated.effectiveAt)).toEqual(effectiveAt)
+      expect(activated.effectiveAt).toEqual(effectiveAt)
       expect(activated).toHaveProperty('updatedAt')
       expect(new Date(activated.updatedAt).getTime()).toBeGreaterThan(
         new Date(original.updatedAt).getTime(),

@@ -8,7 +8,7 @@ export default function getRdbClient(databaseUrl: string) {
   if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     const devPrisma = new PrismaClientLocal({
       datasourceUrl: databaseUrl,
-      log: ['query', 'warn', 'error'],
+      // log: ['query', 'warn', 'error'],
     })
     return devPrisma
   }

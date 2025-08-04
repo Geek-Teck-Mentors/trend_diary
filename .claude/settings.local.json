@@ -22,7 +22,9 @@
       "Bash(npm run test:frontend:*)",
       "Bash(npm ls:*)",
       "Bash(npm run test-storybook:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",
