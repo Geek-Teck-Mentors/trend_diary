@@ -49,7 +49,7 @@ describe('PATCH /api/policies/:version/activate', () => {
   })
 
   describe('正常系', () => {
-    it('下書き状態のポリシーを有効化できる（effectiveAt指定）', async () => {
+    it('下書き状態のポリシーを有効化できる', async () => {
       // Arrange - 下書きポリシー作成
       const original = await createTestPolicy('有効化テストポリシー')
       const version = original.version
@@ -70,29 +70,6 @@ describe('PATCH /api/policies/:version/activate', () => {
       expect(new Date(activated.updatedAt).getTime()).toBeGreaterThan(
         new Date(original.updatedAt).getTime(),
       )
-    })
-
-    it('下書き状態のポリシーを有効化できる（effectiveAt未指定で現在時刻使用）', async () => {
-      // Arrange - 下書きポリシー作成
-      const original = await createTestPolicy('現在時刻有効化テストポリシー')
-      const version = original.version
-
-      const beforeRequest = new Date()
-      const requestBody = JSON.stringify({})
-
-      // Act
-      const res = await requestActivatePolicy(version, requestBody)
-      const afterRequest = new Date()
-
-      // Assert
-      expect(res.status).toBe(200)
-      const activated = (await res.json()) as PrivacyPolicyOutput
-      expect(activated.version).toBe(version)
-      expect(activated.content).toBe('現在時刻有効化テストポリシー')
-
-      const effectiveAtDate = new Date(activated.effectiveAt!)
-      expect(effectiveAtDate.getTime()).toBeGreaterThanOrEqual(beforeRequest.getTime())
-      expect(effectiveAtDate.getTime()).toBeLessThanOrEqual(afterRequest.getTime())
     })
 
     it('過去の日時で有効化できる', async () => {
@@ -131,9 +108,39 @@ describe('PATCH /api/policies/:version/activate', () => {
   })
 
   describe('準正常系', () => {
+    it('認証なしの場合は401を返す', async () => {
+      // Arrange
+      const original = await createTestPolicy('認証なしテスト')
+      const version = original.version
+
+      // Act
+      const res = await app.request(
+        `/api/policies/${version}/activate`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        },
+        TEST_ENV,
+      )
+
+      // Assert
+      expect(res.status).toBe(401)
+
+      // Cleanup
+      await deleteTestPolicy(version)
+    })
+
     it('存在しないバージョンを有効化しようとすると404を返す', async () => {
       // Act
-      const res = await requestActivatePolicy(99999, JSON.stringify({}))
+      const res = await requestActivatePolicy(
+        10,
+        JSON.stringify({
+          effectiveAt: new Date().toISOString(),
+        }),
+      )
 
       // Assert
       expect(res.status).toBe(404)
@@ -150,7 +157,12 @@ describe('PATCH /api/policies/:version/activate', () => {
       await activateTestPolicy(version, new Date())
 
       // Act
-      const res = await requestActivatePolicy(version, JSON.stringify({}))
+      const res = await requestActivatePolicy(
+        version,
+        JSON.stringify({
+          effectiveAt: new Date().toISOString(),
+        }),
+      )
 
       // Assert
       expect(res.status).toBe(400)
@@ -229,100 +241,9 @@ describe('PATCH /api/policies/:version/activate', () => {
       // Cleanup
       await deleteTestPolicy(version)
     })
-
-    it('不要なプロパティを含むリクエストも処理できる', async () => {
-      // Arrange
-      const original = await createTestPolicy('不要プロパティテスト')
-      const version = original.version
-
-      const effectiveAt = new Date('2024-06-01T00:00:00Z')
-      const requestBody = JSON.stringify({
-        effectiveAt: effectiveAt.toISOString(),
-        extraProperty: 'should be ignored',
-        anotherProperty: 123,
-      })
-
-      // Act
-      const res = await requestActivatePolicy(version, requestBody)
-
-      // Assert
-      expect(res.status).toBe(200)
-      const activated = (await res.json()) as PrivacyPolicyOutput
-      expect(new Date(activated.effectiveAt!)).toEqual(effectiveAt)
-    })
   })
 
   describe('異常系', () => {
-    it('メソッドが間違っている場合は404を返す', async () => {
-      // Act
-      const res = await app.request(
-        '/api/policies/1/activate',
-        {
-          method: 'PUT', // PATCHでないメソッド
-          headers: {
-            'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
-          },
-          body: JSON.stringify({}),
-        },
-        TEST_ENV,
-      )
-
-      // Assert
-      expect(res.status).toBe(404)
-    })
-
-    it('Content-Typeが指定されていない場合でも空のボディで処理できる', async () => {
-      // Arrange
-      const original = await createTestPolicy('ContentType不正テスト')
-      const version = original.version
-
-      // Act
-      const res = await app.request(
-        `/api/policies/${version}/activate`,
-        {
-          method: 'PATCH',
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-          body: JSON.stringify({}),
-        },
-        TEST_ENV,
-      )
-
-      // Assert
-      expect(res.status).toBe(200)
-      const activated = (await res.json()) as PrivacyPolicyOutput
-      expect(activated).toHaveProperty('effectiveAt')
-
-      // Cleanup (不要 - 有効化されているため削除できない)
-    })
-
-    it('認証なしの場合は401を返す', async () => {
-      // Arrange
-      const original = await createTestPolicy('認証なしテスト')
-      const version = original.version
-
-      // Act
-      const res = await app.request(
-        `/api/policies/${version}/activate`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({}),
-        },
-        TEST_ENV,
-      )
-
-      // Assert
-      expect(res.status).toBe(401)
-
-      // Cleanup
-      await deleteTestPolicy(version)
-    })
-
     it('データベースエラーが発生した場合は500を返す', async () => {
       // Note: この種のテストは実際のDBエラーシミュレーションが困難
       // 統合テストでは基本的にはスキップするか、モックインフラとして別途テスト

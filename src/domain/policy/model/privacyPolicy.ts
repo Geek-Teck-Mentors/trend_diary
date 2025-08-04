@@ -1,5 +1,4 @@
-import { ClientError } from "@/common/errors"
-import { Result, resultError, resultSuccess } from "@/common/types/utility"
+import { Result, resultError, resultSuccess } from '@/common/types/utility'
 
 export default class PrivacyPolicy {
   constructor(
@@ -33,7 +32,7 @@ export default class PrivacyPolicy {
    */
   activate(effectiveDate: Date): Result<void, Error> {
     if (this.isActive()) {
-      return resultError(new ClientError('このポリシーは既に有効化されています'))
+      return resultError(new Error('このポリシーは既に有効化されています'))
     }
 
     this.effectiveAt = effectiveDate

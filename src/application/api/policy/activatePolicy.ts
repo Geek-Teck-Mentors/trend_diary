@@ -1,9 +1,5 @@
 import CONTEXT_KEY from '@/application/middleware/context'
-import {
-  ZodValidatedContext,
-  ZodValidatedParamContext,
-  ZodValidatedParamJsonContext,
-} from '@/application/middleware/zodValidator'
+import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
 import { createPrivacyPolicyService, PrivacyPolicyActivate, VersionParam } from '@/domain/policy'
