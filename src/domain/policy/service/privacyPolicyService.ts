@@ -168,13 +168,12 @@ export default class PrivacyPolicyService {
     }
 
     const policy = policyResult.data
-
     const activateResult = policy.activate(effectiveDate)
     if (isError(activateResult)) {
       return resultError(new ClientError(activateResult.error.message))
     }
 
-    const saveResult = await this.commandService.save(policy)
+    const saveResult = await this.commandService.save(activateResult.data)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
     return resultSuccess(saveResult.data)
