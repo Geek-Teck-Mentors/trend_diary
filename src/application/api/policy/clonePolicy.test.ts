@@ -1,38 +1,14 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
-import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
+import policyApiTestHelper from '@/test/helper/policyApiTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../server'
 
 describe('POST /api/policies/:version/clone', () => {
-  let sessionId: string
-
-  async function requestClonePolicy(version: number, body = '{}') {
-    return app.request(
-      `/api/policies/${version}/clone`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
-        },
-        body,
-      },
-      TEST_ENV,
-    )
-  }
-
   beforeAll(async () => {
-    await policyTestHelper.cleanUp()
-    await activeUserTestHelper.cleanUp()
-    sessionId = await policyTestHelper.setupUserSession()
+    await policyApiTestHelper.beforeAllSetup()
   })
 
   afterAll(async () => {
-    await policyTestHelper.cleanUp()
-    await activeUserTestHelper.cleanUp()
-    await policyTestHelper.disconnect()
-    await activeUserTestHelper.disconnect()
+    await policyApiTestHelper.afterAllCleanup()
   })
 
   describe('正常系', () => {
@@ -41,7 +17,7 @@ describe('POST /api/policies/:version/clone', () => {
       const sourcePolicy = await policyTestHelper.createPolicy('複製元ポリシー内容')
 
       // API実行
-      const response = await requestClonePolicy(sourcePolicy.version)
+      const response = await policyApiTestHelper.requestClonePolicy(sourcePolicy.version)
 
       // レスポンス検証
       expect(response.status).toBe(201)
@@ -61,7 +37,7 @@ describe('POST /api/policies/:version/clone', () => {
       await policyTestHelper.activatePolicy(sourcePolicy.version, new Date())
 
       // API実行
-      const response = await requestClonePolicy(sourcePolicy.version)
+      const response = await policyApiTestHelper.requestClonePolicy(sourcePolicy.version)
 
       // レスポンス検証
       expect(response.status).toBe(201)
@@ -76,23 +52,19 @@ describe('POST /api/policies/:version/clone', () => {
   describe('準正常系', () => {
     it('認証されていない場合は401エラー', async () => {
       // 認証情報なしでリクエスト
-      const response = await app.request(
+      const response = await policyApiTestHelper.makeUnauthenticatedRequest(
         '/api/policies/1/clone',
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: '{}',
         },
-        TEST_ENV,
       )
 
       expect(response.status).toBe(401)
     })
 
     it('存在しないポリシーの複製時は404エラー', async () => {
-      const response = await requestClonePolicy(999)
+      const response = await policyApiTestHelper.requestClonePolicy(999)
 
       expect(response.status).toBe(404)
       const error = (await response.json()) as { message: string }
@@ -100,24 +72,13 @@ describe('POST /api/policies/:version/clone', () => {
     })
 
     it('無効なバージョン番号時は422エラー', async () => {
-      const response = await app.request(
-        '/api/policies/invalid/clone',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
-          },
-          body: '{}',
-        },
-        TEST_ENV,
-      )
+      const response = await policyApiTestHelper.requestClonePolicy('invalid' as any)
 
       expect(response.status).toBe(422)
     })
 
     it('バージョン番号が0以下の場合は422エラー', async () => {
-      const response = await requestClonePolicy(0)
+      const response = await policyApiTestHelper.requestClonePolicy(0)
 
       expect(response.status).toBe(422)
     })

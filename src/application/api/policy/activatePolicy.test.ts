@@ -1,43 +1,14 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
-import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
+import policyApiTestHelper from '@/test/helper/policyApiTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../server'
 
 describe('PATCH /api/policies/:version/activate', () => {
-  let sessionId: string
-
-  async function requestActivatePolicy(version: number, body: string) {
-    return app.request(
-      `/api/policies/${version}/activate`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
-        },
-        body,
-      },
-      TEST_ENV,
-    )
-  }
-
-  async function activateTestPolicy(version: number, effectiveAt: Date) {
-    return policyTestHelper.activatePolicy(version, effectiveAt)
-  }
-
   beforeAll(async () => {
-    await policyTestHelper.cleanUp()
-    await activeUserTestHelper.cleanUp()
-    // 管理者アカウント作成・ログイン
-    sessionId = await policyTestHelper.setupUserSession()
+    await policyApiTestHelper.beforeAllSetup()
   })
 
   afterAll(async () => {
-    await policyTestHelper.cleanUp()
-    await policyTestHelper.disconnect()
-    await activeUserTestHelper.cleanUp()
-    await activeUserTestHelper.disconnect()
+    await policyApiTestHelper.afterAllCleanup()
   })
 
   describe('正常系', () => {
@@ -47,10 +18,12 @@ describe('PATCH /api/policies/:version/activate', () => {
       const version = original.version
 
       const effectiveAt = new Date('2024-01-01T00:00:00Z')
-      const requestBody = JSON.stringify({ effectiveAt: effectiveAt.toISOString() })
+      const requestBody = policyApiTestHelper.createJsonBody({
+        effectiveAt: effectiveAt.toISOString(),
+      })
 
       // Act
-      const res = await requestActivatePolicy(version, requestBody)
+      const res = await policyApiTestHelper.requestActivatePolicy(version, requestBody)
 
       // Assert
       expect(res.status).toBe(200)
@@ -70,10 +43,12 @@ describe('PATCH /api/policies/:version/activate', () => {
       const version = original.version
 
       const pastDate = new Date('2020-01-01T00:00:00Z')
-      const requestBody = JSON.stringify({ effectiveAt: pastDate.toISOString() })
+      const requestBody = policyApiTestHelper.createJsonBody({
+        effectiveAt: pastDate.toISOString(),
+      })
 
       // Act
-      const res = await requestActivatePolicy(version, requestBody)
+      const res = await policyApiTestHelper.requestActivatePolicy(version, requestBody)
 
       // Assert
       expect(res.status).toBe(200)
@@ -87,10 +62,12 @@ describe('PATCH /api/policies/:version/activate', () => {
       const version = original.version
 
       const futureDate = new Date('2030-01-01T00:00:00Z')
-      const requestBody = JSON.stringify({ effectiveAt: futureDate.toISOString() })
+      const requestBody = policyApiTestHelper.createJsonBody({
+        effectiveAt: futureDate.toISOString(),
+      })
 
       // Act
-      const res = await requestActivatePolicy(version, requestBody)
+      const res = await policyApiTestHelper.requestActivatePolicy(version, requestBody)
 
       // Assert
       expect(res.status).toBe(200)
@@ -106,16 +83,12 @@ describe('PATCH /api/policies/:version/activate', () => {
       const version = original.version
 
       // Act
-      const res = await app.request(
+      const res = await policyApiTestHelper.makeUnauthenticatedRequest(
         `/api/policies/${version}/activate`,
         {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({}),
+          body: policyApiTestHelper.createJsonBody({}),
         },
-        TEST_ENV,
       )
 
       // Assert
@@ -124,9 +97,9 @@ describe('PATCH /api/policies/:version/activate', () => {
 
     it('存在しないバージョンを有効化しようとすると404を返す', async () => {
       // Act
-      const res = await requestActivatePolicy(
+      const res = await policyApiTestHelper.requestActivatePolicy(
         10,
-        JSON.stringify({
+        policyApiTestHelper.createJsonBody({
           effectiveAt: new Date().toISOString(),
         }),
       )
@@ -143,12 +116,12 @@ describe('PATCH /api/policies/:version/activate', () => {
       const original = await policyTestHelper.createPolicy('再有効化テストポリシー')
       const version = original.version
 
-      await activateTestPolicy(version, new Date())
+      await policyApiTestHelper.activateTestPolicy(version)
 
       // Act
-      const res = await requestActivatePolicy(
+      const res = await policyApiTestHelper.requestActivatePolicy(
         version,
-        JSON.stringify({
+        policyApiTestHelper.createJsonBody({
           effectiveAt: new Date().toISOString(),
         }),
       )
@@ -162,17 +135,9 @@ describe('PATCH /api/policies/:version/activate', () => {
 
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
-      const res = await app.request(
-        '/api/policies/invalid/activate',
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
-          },
-          body: JSON.stringify({}),
-        },
-        TEST_ENV,
+      const res = await policyApiTestHelper.requestActivatePolicy(
+        'invalid' as any,
+        policyApiTestHelper.createJsonBody({}),
       )
 
       // Assert
@@ -181,7 +146,10 @@ describe('PATCH /api/policies/:version/activate', () => {
 
     it('負のバージョン番号は422を返す', async () => {
       // Act
-      const res = await requestActivatePolicy(-1, JSON.stringify({}))
+      const res = await policyApiTestHelper.requestActivatePolicy(
+        -1,
+        policyApiTestHelper.createJsonBody({}),
+      )
 
       // Assert
       expect(res.status).toBe(422)
@@ -193,9 +161,9 @@ describe('PATCH /api/policies/:version/activate', () => {
       const version = original.version
 
       // Act
-      const res = await requestActivatePolicy(
+      const res = await policyApiTestHelper.requestActivatePolicy(
         version,
-        JSON.stringify({ effectiveAt: 'invalid-date' }),
+        policyApiTestHelper.createJsonBody({ effectiveAt: 'invalid-date' }),
       )
 
       // Assert
@@ -208,17 +176,10 @@ describe('PATCH /api/policies/:version/activate', () => {
       const version = original.version
 
       // Act
-      const res = await app.request(
+      const res = await policyApiTestHelper.makeInvalidJsonRequest(
         `/api/policies/${version}/activate`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
-          },
-          body: '{ effectiveAt: invalid json }',
-        },
-        TEST_ENV,
+        'PATCH',
+        '{ effectiveAt: invalid json }',
       )
 
       // Assert

@@ -2,30 +2,15 @@ import { createPrivacyPolicyService, PrivacyPolicyOutput } from '@/domain/policy
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
+import policyApiTestHelper from '@/test/helper/policyApiTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../server'
 
 describe('GET /api/policies/:version', () => {
-  let sessionId: string
   const service = createPrivacyPolicyService(getRdbClient(TEST_ENV.DATABASE_URL))
-
-  async function requestGetPolicyByVersion(version: number) {
-    return app.request(
-      `/api/policies/${version}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
-        },
-      },
-      TEST_ENV,
-    )
-  }
 
   beforeEach(async () => {
     await activeUserTestHelper.cleanUp()
-    sessionId = await policyTestHelper.setupUserSession()
+    await policyApiTestHelper.setupTestData()
   })
 
   afterAll(async () => {
@@ -44,7 +29,7 @@ describe('GET /api/policies/:version', () => {
       const version = createRes.version
 
       // Act
-      const res = await requestGetPolicyByVersion(version)
+      const res = await policyApiTestHelper.requestGetPolicyByVersion(version)
 
       // Assert
       expect(res.status).toBe(200)
@@ -66,7 +51,7 @@ describe('GET /api/policies/:version', () => {
       await service.activatePolicy(version, new Date())
 
       // Act
-      const res = await requestGetPolicyByVersion(version)
+      const res = await policyApiTestHelper.requestGetPolicyByVersion(version)
 
       // Assert
       expect(res.status).toBe(200)
@@ -79,7 +64,7 @@ describe('GET /api/policies/:version', () => {
   describe('準正常系', () => {
     it('存在しないバージョンを指定すると404を返す', async () => {
       // Act
-      const res = await requestGetPolicyByVersion(99999)
+      const res = await policyApiTestHelper.requestGetPolicyByVersion(99999)
 
       // Assert
       expect(res.status).toBe(404)
@@ -87,7 +72,7 @@ describe('GET /api/policies/:version', () => {
 
     it('versionは1以上のみ受け付ける', async () => {
       // Act
-      const res = await requestGetPolicyByVersion(0)
+      const res = await policyApiTestHelper.requestGetPolicyByVersion(0)
 
       // Assert
       expect(res.status).toBe(422) // version=0のポリシーは存在しないと仮定
@@ -95,16 +80,7 @@ describe('GET /api/policies/:version', () => {
 
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
-      const res = await app.request(
-        '/api/policies/invalid',
-        {
-          method: 'GET',
-          headers: {
-            Cookie: `sid=${sessionId}`,
-          },
-        },
-        TEST_ENV,
-      )
+      const res = await policyApiTestHelper.requestGetPolicyByVersion('invalid' as any)
 
       // Assert
       expect(res.status).toBe(422)
@@ -112,7 +88,7 @@ describe('GET /api/policies/:version', () => {
 
     it('負のバージョン番号は422を返す', async () => {
       // Act
-      const res = await requestGetPolicyByVersion(-1)
+      const res = await policyApiTestHelper.requestGetPolicyByVersion(-1)
 
       // Assert
       expect(res.status).toBe(422)
