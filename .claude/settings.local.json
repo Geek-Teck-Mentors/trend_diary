@@ -32,7 +32,10 @@
       "mcp__serena__find_file",
       "mcp__serena__replace_regex",
       "mcp__serena__find_symbol",
-      "mcp__serena__think_about_collected_information"
+      "mcp__serena__think_about_collected_information",
+      "Bash(npx biome check:*)",
+      "mcp__serena__replace_symbol_body",
+      "Bash(npx biome ci:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",
