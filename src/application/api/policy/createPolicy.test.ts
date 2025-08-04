@@ -27,7 +27,7 @@ describe('POST /api/policies', () => {
     )
   }
 
-  async function deleteTestPolicy(version: number) {
+  async function _deleteTestPolicy(version: number) {
     return app.request(
       `/api/policies/${version}`,
       {
