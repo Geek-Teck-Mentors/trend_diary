@@ -5,7 +5,6 @@ import zodValidator from '@/application/middleware/zodValidator'
 import { offsetPaginationSchema } from '@/common/pagination'
 import {
   privacyPolicyActivateSchema,
-  privacyPolicyCloneSchema,
   privacyPolicyInputSchema,
   privacyPolicyUpdateSchema,
   versionParamSchema,
@@ -30,19 +29,13 @@ const app = new Hono<Env>()
     updatePolicy,
   )
   .delete('/:version', authenticator, zodValidator('param', versionParamSchema), deletePolicy)
-  .post(
-    '/:version/clone',
-    authenticator,
-    zodValidator('param', versionParamSchema),
-    zodValidator('json', privacyPolicyCloneSchema),
-    clonePolicy as any,
-  )
+  .post('/:version/clone', authenticator, zodValidator('param', versionParamSchema), clonePolicy)
   .patch(
     '/:version/activate',
     authenticator,
     zodValidator('param', versionParamSchema),
     zodValidator('json', privacyPolicyActivateSchema),
-    activatePolicy as any,
+    activatePolicy,
   )
 
 export default app

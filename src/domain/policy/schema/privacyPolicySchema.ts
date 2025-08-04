@@ -1,19 +1,19 @@
 import { z } from 'zod'
 
 export const privacyPolicySchema = z.object({
-  version: z.number().int().min(0),
-  content: z.string(),
+  version: z.coerce.number().int().min(1, 'バージョンは1以上の数値である必要があります'),
+  content: z.string().min(1, 'コンテンツは必須です'),
   effectiveAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
 
-export const privacyPolicyInputSchema = z.object({
-  content: z.string().min(1, 'コンテンツは必須です'),
+export const privacyPolicyInputSchema = privacyPolicySchema.pick({
+  content: true,
 })
 
-export const privacyPolicyUpdateSchema = z.object({
-  content: z.string(),
+export const privacyPolicyUpdateSchema = privacyPolicySchema.pick({
+  content: true,
 })
 
 export const privacyPolicyActivateSchema = z.object({
@@ -21,18 +21,14 @@ export const privacyPolicyActivateSchema = z.object({
     .string()
     .datetime()
     .transform((val) => new Date(val))
-    .optional(),
 })
 
-export const privacyPolicyCloneSchema = z.object({})
-
-export const versionParamSchema = z.object({
-  version: z.coerce.number().int().min(1, 'バージョンは1以上の数値である必要があります'),
+export const versionParamSchema = privacyPolicySchema.pick({
+  version: true,
 })
 
 export type PrivacyPolicyInput = z.infer<typeof privacyPolicyInputSchema>
 export type PrivacyPolicyUpdate = z.infer<typeof privacyPolicyUpdateSchema>
 export type PrivacyPolicyActivate = z.infer<typeof privacyPolicyActivateSchema>
-export type PrivacyPolicyClone = z.infer<typeof privacyPolicyCloneSchema>
 export type VersionParam = z.infer<typeof versionParamSchema>
 export type PrivacyPolicyOutput = z.output<typeof privacyPolicySchema>

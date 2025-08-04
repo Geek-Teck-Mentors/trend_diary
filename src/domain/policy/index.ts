@@ -9,12 +9,10 @@ export type { QueryService } from './repository/queryService'
 // バリデーションスキーマ
 export {
   type PrivacyPolicyActivate,
-  type PrivacyPolicyClone,
   type PrivacyPolicyInput,
   type PrivacyPolicyOutput,
   type PrivacyPolicyUpdate,
   privacyPolicyActivateSchema,
-  privacyPolicyCloneSchema,
   privacyPolicyInputSchema,
   privacyPolicyUpdateSchema,
   type VersionParam,
