@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import PrivacyPolicy from './privacyPolicy'
 import { isError } from '@/common/types/utility'
+import PrivacyPolicy from './privacyPolicy'
 
 describe('PrivacyPolicy', () => {
   describe('基本動作', () => {
@@ -87,11 +87,15 @@ describe('PrivacyPolicy', () => {
       )
 
       const effectiveDate = new Date('2024-01-15T00:00:00Z')
-      policy.activate(effectiveDate)
+      const activateResult = policy.activate(effectiveDate)
+      if (isError(activateResult)) {
+        expect.fail(`有効化に失敗: ${activateResult.error.message}`) // エラーが発生した場合はテスト失敗
+      }
 
-      expect(policy.effectiveAt).toEqual(effectiveDate)
-      expect(policy.isDraft()).toBe(false)
-      expect(policy.isActive()).toBe(true)
+      const activatedPolicy = activateResult.data
+      expect(activatedPolicy.effectiveAt).toEqual(effectiveDate)
+      expect(activatedPolicy.isActive()).toBe(true)
+      expect(activatedPolicy.isDraft()).toBe(false)
     })
 
     it('updateContent() - 下書き状態のポリシーのコンテンツを更新できる', () => {
@@ -111,7 +115,9 @@ describe('PrivacyPolicy', () => {
 
       const updatedPolicy = updatedPolicyResult.data
       expect(updatedPolicy.content).toBe(newContent)
-      expect(updatedPolicy.updatedAt.getTime()).toBeGreaterThan(new Date('2024-01-01T00:00:00Z').getTime())
+      expect(updatedPolicy.updatedAt.getTime()).toBeGreaterThan(
+        new Date('2024-01-01T00:00:00Z').getTime(),
+      )
     })
 
     it('clone() - 既存ポリシーから新しい下書きポリシーを作成できる', () => {
@@ -156,7 +162,6 @@ describe('PrivacyPolicy', () => {
         new Date('2024-01-01T00:00:00Z'),
         new Date('2024-01-01T00:00:00Z'),
       )
-
 
       const result = policy.updateContent('新しいコンテンツ')
       expect(isError(result)).toBe(true)

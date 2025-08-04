@@ -29,14 +29,14 @@ export default class PrivacyPolicy {
    * ポリシーを有効化する
    * @param effectiveDate 有効開始日
    */
-  activate(effectiveDate: Date): Result<void, Error> {
+  activate(effectiveDate: Date): Result<PrivacyPolicy, Error> {
     if (this.isActive()) {
       return resultError(new Error('このポリシーは既に有効化されています'))
     }
 
-    this.effectiveAt = effectiveDate
-    this.updatedAt = new Date()
-    return resultSuccess(undefined)
+    return resultSuccess(
+      new PrivacyPolicy(this.version, this.content, effectiveDate, this.createdAt, new Date()),
+    )
   }
 
   /**
@@ -48,13 +48,9 @@ export default class PrivacyPolicy {
       return resultError(new Error('有効化されたポリシーは編集できません'))
     }
 
-    return resultSuccess(new PrivacyPolicy(
-      this.version,
-      newContent,
-      this.effectiveAt,
-      this.createdAt,
-      new Date()
-    ))
+    return resultSuccess(
+      new PrivacyPolicy(this.version, newContent, this.effectiveAt, this.createdAt, new Date()),
+    )
   }
 
   /**
