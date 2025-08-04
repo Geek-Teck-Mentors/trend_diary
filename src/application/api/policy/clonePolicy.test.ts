@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, test } from 'vitest'
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
@@ -28,7 +27,7 @@ describe('POST /api/policies/:version/clone', () => {
   })
 
   describe('正常系', () => {
-    test('既存のポリシーを複製できる', async () => {
+    it('既存のポリシーを複製できる', async () => {
       // テストデータ準備：複製元のポリシーを作成
       const sourcePolicy = await policyTestHelper.createPolicy(sessionId, '複製元ポリシー内容')
 
@@ -47,7 +46,7 @@ describe('POST /api/policies/:version/clone', () => {
       expect(clonedPolicy.updatedAt).toBeDefined()
     })
 
-    test('有効化されたポリシーも複製できる', async () => {
+    it('有効化されたポリシーも複製できる', async () => {
       // テストデータ準備：有効化されたポリシーを作成
       const sourcePolicy = await policyTestHelper.createPolicy(sessionId, '有効化されたポリシー')
       await policyTestHelper.activatePolicy(sourcePolicy.version, new Date())
@@ -66,7 +65,7 @@ describe('POST /api/policies/:version/clone', () => {
   })
 
   describe('準正常系', () => {
-    test('存在しないポリシーの複製時は404エラー', async () => {
+    it('存在しないポリシーの複製時は404エラー', async () => {
       const response = await requestClonePolicy(999)
 
       expect(response.status).toBe(404)
@@ -74,7 +73,7 @@ describe('POST /api/policies/:version/clone', () => {
       expect(error.message).toContain('複製元のプライバシーポリシーが見つかりません')
     })
 
-    test('無効なバージョン番号時は422エラー', async () => {
+    it('無効なバージョン番号時は422エラー', async () => {
       const response = await app.request(
         '/api/policies/invalid/clone',
         {
@@ -91,13 +90,13 @@ describe('POST /api/policies/:version/clone', () => {
       expect(response.status).toBe(422)
     })
 
-    test('バージョン番号が0以下の場合は422エラー', async () => {
+    it('バージョン番号が0以下の場合は422エラー', async () => {
       const response = await requestClonePolicy(0)
 
       expect(response.status).toBe(422)
     })
 
-    test('不正なJSONの場合は400エラー', async () => {
+    it('不正なJSONの場合は400エラー', async () => {
       // テストデータ準備
       const sourcePolicy = await policyTestHelper.createPolicy(sessionId, 'JSON不正テスト')
 
@@ -119,7 +118,7 @@ describe('POST /api/policies/:version/clone', () => {
   })
 
   describe('異常系', () => {
-    test('認証されていない場合は401エラー', async () => {
+    it('認証されていない場合は401エラー', async () => {
       // 認証情報なしでリクエスト
       const response = await app.request(
         '/api/policies/1/clone',
