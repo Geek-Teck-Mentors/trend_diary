@@ -156,14 +156,14 @@ class PolicyTestHelper {
     }
 
     return {
-      policies: result.data.policies.map((policy: any) => ({
+      policies: result.data.data.map((policy: any) => ({
         version: policy.version,
         effectiveAt: policy.effectiveAt,
         content: policy.content,
         createdAt: policy.createdAt,
         updatedAt: policy.updatedAt,
       })),
-      totalCount: result.data.totalCount,
+      totalCount: result.data.total,
     }
   }
 
