@@ -40,6 +40,7 @@ describe('QueryServiceImpl', () => {
         ]
 
         mockDb.privacyPolicy.findMany.mockResolvedValue(mockPolicies)
+        mockDb.privacyPolicy.count.mockResolvedValue(2)
 
         // Act
         const result = await service.findAll(page, limit)
@@ -47,16 +48,23 @@ describe('QueryServiceImpl', () => {
         // Assert
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data).toHaveLength(2)
-          expect(result.data[0]).toBeInstanceOf(PrivacyPolicy)
-          expect(result.data[0].version).toBe(1)
-          expect(result.data[1].version).toBe(2)
+          expect(result.data.data).toHaveLength(2)
+          expect(result.data.data[0]).toBeInstanceOf(PrivacyPolicy)
+          expect(result.data.data[0].version).toBe(1)
+          expect(result.data.data[1].version).toBe(2)
+          expect(result.data.page).toBe(1)
+          expect(result.data.limit).toBe(10)
+          expect(result.data.total).toBe(2)
+          expect(result.data.totalPages).toBe(1)
+          expect(result.data.hasNext).toBe(false)
+          expect(result.data.hasPrev).toBe(false)
         }
         expect(mockDb.privacyPolicy.findMany).toHaveBeenCalledWith({
           skip: (page - 1) * limit,
           take: limit,
           orderBy: { version: 'desc' },
         })
+        expect(mockDb.privacyPolicy.count).toHaveBeenCalled()
       })
     })
 
@@ -64,6 +72,7 @@ describe('QueryServiceImpl', () => {
       it('空の結果でも正常に処理できる', async () => {
         // Arrange
         mockDb.privacyPolicy.findMany.mockResolvedValue([])
+        mockDb.privacyPolicy.count.mockResolvedValue(0)
 
         // Act
         const result = await service.findAll(1, 10)
@@ -71,13 +80,18 @@ describe('QueryServiceImpl', () => {
         // Assert
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data).toEqual([])
+          expect(result.data.data).toEqual([])
+          expect(result.data.total).toBe(0)
+          expect(result.data.totalPages).toBe(0)
+          expect(result.data.hasNext).toBe(false)
+          expect(result.data.hasPrev).toBe(false)
         }
       })
 
       it('page=0, limit=0でも処理できる', async () => {
         // Arrange
         mockDb.privacyPolicy.findMany.mockResolvedValue([])
+        mockDb.privacyPolicy.count.mockResolvedValue(0)
 
         // Act
         const result = await service.findAll(0, 0)
@@ -89,6 +103,7 @@ describe('QueryServiceImpl', () => {
           take: 0,
           orderBy: { version: 'desc' },
         })
+        expect(mockDb.privacyPolicy.count).toHaveBeenCalled()
       })
     })
 

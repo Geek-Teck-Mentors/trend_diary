@@ -1,4 +1,5 @@
 import { ClientError, NotFoundError, ServerError } from '@/common/errors'
+import { OffsetPaginationResult } from '@/common/pagination'
 import { isError, isNull, Result, resultError, resultSuccess } from '@/common/types/utility'
 import PrivacyPolicy from '../model/privacyPolicy'
 import { CommandService } from '../repository/commandService'
@@ -11,12 +12,15 @@ export default class PrivacyPolicyService {
   ) {}
 
   /**
-   * 全てのプライバシーポリシーを取得する
+   * 全てのプライバシーポリシーを取得する（ページング対応）
    * @param page ページ番号
    * @param limit 1ページあたりの件数
-   * @returns プライバシーポリシーの配列
+   * @returns ページング情報を含むプライバシーポリシーの配列
    */
-  async getAllPolicies(page: number, limit: number): Promise<Result<PrivacyPolicy[], Error>> {
+  async getAllPolicies(
+    page: number,
+    limit: number,
+  ): Promise<Result<OffsetPaginationResult<PrivacyPolicy>, Error>> {
     const result = await this.queryService.findAll(page, limit)
     if (isError(result)) return resultError(ServerError.handle(result.error))
 

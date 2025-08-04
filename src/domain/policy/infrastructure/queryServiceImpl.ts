@@ -1,4 +1,5 @@
 import { getErrorMessage } from '@/common/errors'
+import { OffsetPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import PrivacyPolicy from '../model/privacyPolicy'
@@ -8,15 +9,35 @@ import { mapToPrivacyPolicy } from './mapper'
 export default class QueryServiceImpl implements QueryService {
   constructor(private readonly db: RdbClient) {}
 
-  async findAll(page: number, limit: number): AsyncResult<PrivacyPolicy[], Error> {
+  async findAll(
+    page: number,
+    limit: number,
+  ): AsyncResult<OffsetPaginationResult<PrivacyPolicy>, Error> {
     try {
-      const policies = await this.db.privacyPolicy.findMany({
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy: { version: 'desc' },
-      })
+      const [policies, total] = await Promise.all([
+        this.db.privacyPolicy.findMany({
+          skip: (page - 1) * limit,
+          take: limit,
+          orderBy: { version: 'desc' },
+        }),
+        this.db.privacyPolicy.count(),
+      ])
 
-      return resultSuccess(policies.map(mapToPrivacyPolicy))
+      const totalPages = Math.ceil(total / limit)
+      const hasNext = page < totalPages
+      const hasPrev = page > 1
+
+      const result: OffsetPaginationResult<PrivacyPolicy> = {
+        data: policies.map(mapToPrivacyPolicy),
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext,
+        hasPrev,
+      }
+
+      return resultSuccess(result)
     } catch (error) {
       return resultError(new Error(getErrorMessage(error)))
     }

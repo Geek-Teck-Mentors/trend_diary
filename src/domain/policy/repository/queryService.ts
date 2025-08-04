@@ -1,3 +1,4 @@
+import { OffsetPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable } from '@/common/types/utility'
 import PrivacyPolicy from '../model/privacyPolicy'
 
@@ -6,9 +7,9 @@ export interface QueryService {
    * 全てのプライバシーポリシーを取得する（ページング対応）
    * @param page ページ番号
    * @param limit 1ページあたりの件数
-   * @returns プライバシーポリシーの配列
+   * @returns ページング情報を含むプライバシーポリシーの配列
    */
-  findAll(page: number, limit: number): AsyncResult<PrivacyPolicy[], Error>
+  findAll(page: number, limit: number): AsyncResult<OffsetPaginationResult<PrivacyPolicy>, Error>
 
   /**
    * 指定したバージョンのプライバシーポリシーを取得する

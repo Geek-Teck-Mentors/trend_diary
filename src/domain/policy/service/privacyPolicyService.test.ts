@@ -45,13 +45,22 @@ describe('PrivacyPolicyService', () => {
           new PrivacyPolicy(1, 'コンテンツ1', new Date(), new Date(), new Date()),
           new PrivacyPolicy(2, 'コンテンツ2', null, new Date(), new Date()),
         ]
-        mockQueryService.findAll.mockResolvedValue(resultSuccess(policies))
+        const paginationResult = {
+          data: policies,
+          page: 1,
+          limit: 10,
+          total: 2,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        }
+        mockQueryService.findAll.mockResolvedValue(resultSuccess(paginationResult))
 
         const result = await service.getAllPolicies(1, 10)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data).toEqual(policies)
+          expect(result.data).toEqual(paginationResult)
         }
         expect(mockQueryService.findAll).toHaveBeenCalledWith(1, 10)
       })
@@ -59,23 +68,55 @@ describe('PrivacyPolicyService', () => {
 
     describe('境界値・特殊値', () => {
       it('空のリストを取得した場合でも正常に処理できる', async () => {
-        mockQueryService.findAll.mockResolvedValue(resultSuccess([]))
+        const emptyResult = {
+          data: [],
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        }
+        mockQueryService.findAll.mockResolvedValue(resultSuccess(emptyResult))
 
         const result = await service.getAllPolicies(1, 10)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data).toEqual([])
+          expect(result.data).toEqual(emptyResult)
         }
       })
 
       it('page=0, limit=0でも処理できる', async () => {
-        mockQueryService.findAll.mockResolvedValue(resultSuccess([]))
+        const emptyResult = {
+          data: [],
+          page: 0,
+          limit: 0,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        }
+        mockQueryService.findAll.mockResolvedValue(resultSuccess(emptyResult))
 
         const result = await service.getAllPolicies(0, 0)
 
         expect(isSuccess(result)).toBe(true)
         expect(mockQueryService.findAll).toHaveBeenCalledWith(0, 0)
+      })
+    })
+
+    describe('例外・制約違反', () => {
+      it('リポジトリでエラーが発生した場合はエラーを返す', async () => {
+        const error = new Error('データベースエラー')
+        mockQueryService.findAll.mockResolvedValue(resultError(error))
+
+        const result = await service.getAllPolicies(1, 10)
+
+        expect(isError(result)).toBe(true)
+        if (isError(result)) {
+          expect(result.error.message).toBe('データベースエラー')
+        }
       })
     })
   })
