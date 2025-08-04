@@ -17,7 +17,7 @@ export const privacyPolicyUpdateSchema = z.object({
 })
 
 export const privacyPolicyActivateSchema = z.object({
-  effectiveAt: z.date(),
+  effectiveAt: z.string().datetime().transform((val) => new Date(val)).optional(),
 })
 
 export const privacyPolicyCloneSchema = z.object({})
