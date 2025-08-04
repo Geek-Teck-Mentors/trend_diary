@@ -1,20 +1,13 @@
-import { isError } from '@/common/types/utility'
 import { createPrivacyPolicyService, PrivacyPolicyOutput } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
+import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('GET /api/policies/:version', () => {
   let sessionId: string
   const service = createPrivacyPolicyService(getRdbClient(TEST_ENV.DATABASE_URL))
-
-  async function setupTestData(): Promise<void> {
-    // 管理者アカウント作成・ログイン
-    await activeUserTestHelper.create('admin@example.com', 'password123')
-    const loginData = await activeUserTestHelper.login('admin@example.com', 'password123')
-    sessionId = loginData.sessionId
-  }
 
   async function requestGetPolicyByVersion(version: number) {
     return app.request(
@@ -30,17 +23,9 @@ describe('GET /api/policies/:version', () => {
     )
   }
 
-  async function createTestPolicy(content = 'テストポリシー') {
-    return service.createPolicy(content)
-  }
-
-  async function deleteTestPolicy(version: number) {
-    return service.deletePolicy(version)
-  }
-
   beforeEach(async () => {
     await activeUserTestHelper.cleanUp()
-    await setupTestData()
+    sessionId = await policyTestHelper.setupUserSession()
   })
 
   afterAll(async () => {
@@ -48,14 +33,15 @@ describe('GET /api/policies/:version', () => {
   })
 
   describe('正常系', () => {
+    afterEach(async () => {
+      await policyTestHelper.cleanUp()
+    })
+
     it('指定したバージョンのプライバシーポリシーを取得できる', async () => {
       // Arrange - テストデータ作成
-      const createRes = await createTestPolicy('特定バージョンのポリシー')
-      if (isError(createRes)) {
-        throw new Error(`Policy creation failed: ${createRes.error.message}`)
-      }
+      const createRes = await policyTestHelper.createPolicy('特定バージョンのポリシー')
 
-      const version = createRes.data.version
+      const version = createRes.version
 
       // Act
       const res = await requestGetPolicyByVersion(version)
@@ -68,19 +54,13 @@ describe('GET /api/policies/:version', () => {
       expect(data.effectiveAt).toBeNull() // 下書き状態
       expect(data).toHaveProperty('createdAt')
       expect(data).toHaveProperty('updatedAt')
-
-      // Cleanup
-      await deleteTestPolicy(version)
     })
 
     it('有効化されたポリシーも取得できる', async () => {
       // Arrange - テストデータ作成して有効化
-      const createRes = await createTestPolicy('有効化テストポリシー')
-      if (isError(createRes)) {
-        throw new Error(`Policy creation failed: ${createRes.error.message}`)
-      }
+      const createRes = await policyTestHelper.createPolicy('有効化済みポリシー')
 
-      const version = createRes.data.version
+      const version = createRes.version
 
       // 有効化
       await service.activatePolicy(version, new Date())

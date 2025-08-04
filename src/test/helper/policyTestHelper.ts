@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { isError } from '@/common/types/utility'
 import { createPrivacyPolicyService } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
@@ -15,10 +16,7 @@ class PolicyTestHelper {
     await this.rdb.$queryRaw`TRUNCATE TABLE "privacy_policies" CASCADE;`
   }
 
-  async createPolicy(
-    _sessionId: string,
-    content = 'テストポリシー',
-  ): Promise<{
+  async createPolicy(content: string): Promise<{
     version: number
     effectiveAt: Date | null
     content: string
@@ -96,14 +94,10 @@ class PolicyTestHelper {
 
   // 認証セッション準備
   async setupUserSession(): Promise<string> {
-    await activeUserTestHelper.create('admin@example.com', 'password123')
-    const loginData = await activeUserTestHelper.login('admin@example.com', 'password123')
+    const email = faker.internet.email()
+    await activeUserTestHelper.create(email, 'password123', 'admin')
+    const loginData = await activeUserTestHelper.login(email, 'password123')
     return loginData.sessionId
-  }
-
-  async cleanUpAll(): Promise<void> {
-    await this.cleanUp()
-    await activeUserTestHelper.cleanUp()
   }
 
   async disconnect(): Promise<void> {

@@ -1,6 +1,7 @@
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
+import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 import { PolicyListResponse } from './response'
 
@@ -17,38 +18,24 @@ describe('GET /api/policies', () => {
     return app.request(url, { method: 'GET', headers }, TEST_ENV)
   }
 
-  async function cleanUp(): Promise<void> {
-    await db.$queryRaw`TRUNCATE TABLE "privacy_policies";`
-  }
-
-  async function setupTestData(): Promise<void> {
-    await cleanUp()
+  beforeAll(async () => {
+    await policyTestHelper.cleanUp()
     await activeUserTestHelper.cleanUp()
-    await activeUserTestHelper.create('admin@example.com', 'password123')
-    const loginData = await activeUserTestHelper.login('admin@example.com', 'password123')
-    sessionId = loginData.sessionId
-  }
-
-  beforeAll(() => {
     db = getRdbClient(TEST_ENV.DATABASE_URL)
+    sessionId = await policyTestHelper.setupUserSession()
   })
 
   afterAll(async () => {
     await activeUserTestHelper.cleanUp()
+    await policyTestHelper.cleanUp()
     await activeUserTestHelper.disconnect()
+    await policyTestHelper.disconnect()
     await db.$disconnect()
-  })
-
-  beforeEach(async () => {
-    await setupTestData()
-  })
-
-  afterEach(async () => {
-    await cleanUp()
   })
 
   describe('正常系', () => {
     beforeEach(async () => {
+      await policyTestHelper.cleanUp()
       // テスト用のプライバシーポリシーを作成
       await db.privacyPolicy.createMany({
         data: [

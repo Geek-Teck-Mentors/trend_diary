@@ -1,5 +1,6 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
@@ -21,21 +22,23 @@ describe('POST /api/policies/:version/clone', () => {
     )
   }
 
-  // cleanup
-  afterAll(async () => {
-    await policyTestHelper.cleanUpAll()
-    await policyTestHelper.disconnect()
+  beforeAll(async () => {
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
+    sessionId = await policyTestHelper.setupUserSession()
   })
 
-  beforeEach(async () => {
-    await policyTestHelper.cleanUpAll()
-    sessionId = await policyTestHelper.setupUserSession()
+  afterAll(async () => {
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
+    await policyTestHelper.disconnect()
+    await activeUserTestHelper.disconnect()
   })
 
   describe('正常系', () => {
     it('既存のポリシーを複製できる', async () => {
       // テストデータ準備：複製元のポリシーを作成
-      const sourcePolicy = await policyTestHelper.createPolicy(sessionId, '複製元ポリシー内容')
+      const sourcePolicy = await policyTestHelper.createPolicy('複製元ポリシー内容')
 
       // API実行
       const response = await requestClonePolicy(sourcePolicy.version)
@@ -54,7 +57,7 @@ describe('POST /api/policies/:version/clone', () => {
 
     it('有効化されたポリシーも複製できる', async () => {
       // テストデータ準備：有効化されたポリシーを作成
-      const sourcePolicy = await policyTestHelper.createPolicy(sessionId, '有効化されたポリシー')
+      const sourcePolicy = await policyTestHelper.createPolicy('有効化されたポリシー')
       await policyTestHelper.activatePolicy(sourcePolicy.version, new Date())
 
       // API実行

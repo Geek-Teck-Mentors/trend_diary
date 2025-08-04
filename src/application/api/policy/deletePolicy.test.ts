@@ -1,16 +1,20 @@
 import TEST_ENV from '@/test/env'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('DELETE /api/policies/:version', () => {
   let sessionId: string
-  afterAll(async () => {
-    await policyTestHelper.disconnect()
-  })
-
-  beforeEach(async () => {
-    await policyTestHelper.cleanUpAll()
+  beforeAll(async () => {
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     sessionId = await policyTestHelper.setupUserSession()
+  })
+  afterAll(async () => {
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
+    await policyTestHelper.disconnect()
+    await activeUserTestHelper.disconnect()
   })
 
   async function requestDeletePolicy(version: number) {
@@ -29,7 +33,7 @@ describe('DELETE /api/policies/:version', () => {
   describe('正常系', () => {
     it('下書き状態のポリシーを削除できる', async () => {
       // Arrange - 下書きポリシー作成
-      const policy = await policyTestHelper.createPolicy(sessionId, '削除予定ポリシー')
+      const policy = await policyTestHelper.createPolicy('削除予定ポリシー')
 
       // Act
       const res = await requestDeletePolicy(policy.version)
@@ -44,8 +48,8 @@ describe('DELETE /api/policies/:version', () => {
 
     it('複数の下書きポリシーをそれぞれ削除できる', async () => {
       // Arrange - 複数の下書きポリシー作成
-      const policy1 = await policyTestHelper.createPolicy(sessionId, '削除予定ポリシー1')
-      const policy2 = await policyTestHelper.createPolicy(sessionId, '削除予定ポリシー2')
+      const policy1 = await policyTestHelper.createPolicy('削除予定ポリシー1')
+      const policy2 = await policyTestHelper.createPolicy('削除予定ポリシー2')
 
       // Act
       const res1 = await requestDeletePolicy(policy1.version)
@@ -84,7 +88,7 @@ describe('DELETE /api/policies/:version', () => {
 
     it('有効化されたポリシーを削除しようとすると400を返す', async () => {
       // Arrange - ポリシー作成して有効化
-      const policy = await policyTestHelper.createPolicy(sessionId, '有効化後削除テスト')
+      const policy = await policyTestHelper.createPolicy('有効化後削除テスト')
       const effectiveAt = new Date()
       await policyTestHelper.activatePolicy(policy.version, effectiveAt)
 
@@ -138,7 +142,7 @@ describe('DELETE /api/policies/:version', () => {
 
     it('既に削除されたポリシーを再度削除しようとすると404を返す', async () => {
       // Arrange - ポリシー作成・削除
-      const policy = await policyTestHelper.createPolicy(sessionId, '二重削除テスト')
+      const policy = await policyTestHelper.createPolicy('二重削除テスト')
 
       const firstDeleteRes = await requestDeletePolicy(policy.version)
       expect(firstDeleteRes.status).toBe(204)

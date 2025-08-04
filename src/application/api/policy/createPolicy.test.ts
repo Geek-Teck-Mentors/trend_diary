@@ -1,6 +1,7 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
+import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('POST /api/policies', () => {
@@ -8,9 +9,7 @@ describe('POST /api/policies', () => {
 
   async function setupTestData(): Promise<void> {
     // 管理者アカウント作成・ログイン
-    await activeUserTestHelper.create('admin@example.com', 'password123')
-    const loginData = await activeUserTestHelper.login('admin@example.com', 'password123')
-    sessionId = loginData.sessionId
+    sessionId = await policyTestHelper.setupUserSession()
   }
 
   async function requestCreatePolicy(body: string) {
@@ -41,13 +40,17 @@ describe('POST /api/policies', () => {
     )
   }
 
-  afterAll(async () => {
-    await activeUserTestHelper.cleanUp()
-  })
-
-  beforeEach(async () => {
+  beforeAll(async () => {
+    await policyTestHelper.cleanUp()
     await activeUserTestHelper.cleanUp()
     await setupTestData()
+  })
+
+  afterAll(async () => {
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
+    await policyTestHelper.disconnect()
+    await activeUserTestHelper.disconnect()
   })
 
   describe('正常系', () => {
@@ -67,9 +70,6 @@ describe('POST /api/policies', () => {
       expect(data.effectiveAt).toBeNull() // 下書き状態で作成
       expect(data).toHaveProperty('createdAt')
       expect(data).toHaveProperty('updatedAt')
-
-      // Cleanup
-      await deleteTestPolicy(data.version)
     })
 
     it('最小文字数のコンテンツでポリシーを作成できる', async () => {
@@ -85,9 +85,6 @@ describe('POST /api/policies', () => {
       const data = (await res.json()) as PrivacyPolicyOutput
       expect(data.content).toBe('a')
       expect(data.effectiveAt).toBeNull()
-
-      // Cleanup
-      await deleteTestPolicy(data.version)
     })
 
     it('非常に長いコンテンツでもポリシーを作成できる', async () => {
@@ -102,9 +99,6 @@ describe('POST /api/policies', () => {
       expect(res.status).toBe(201)
       const data = (await res.json()) as PrivacyPolicyOutput
       expect(data.content).toBe(content)
-
-      // Cleanup
-      await deleteTestPolicy(data.version)
     })
 
     it('バージョンが自動採番される', async () => {
@@ -124,10 +118,6 @@ describe('POST /api/policies', () => {
       const data2 = (await res2.json()) as PrivacyPolicyOutput
 
       expect(data2.version).toBeGreaterThan(data1.version)
-
-      // Cleanup
-      await deleteTestPolicy(data1.version)
-      await deleteTestPolicy(data2.version)
     })
   })
 

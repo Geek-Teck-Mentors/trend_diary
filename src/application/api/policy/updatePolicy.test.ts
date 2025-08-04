@@ -26,28 +26,24 @@ describe('PATCH /api/policies/:version', () => {
     )
   }
 
-  async function createTestPolicy(content = 'テストポリシー') {
-    return policyTestHelper.createPolicy(sessionId, content)
-  }
-
   async function activateTestPolicy(version: number) {
     return policyTestHelper.activatePolicy(version, new Date())
   }
 
   beforeEach(async () => {
-    await policyTestHelper.cleanUpAll()
+    await policyTestHelper.cleanUp()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await policyTestHelper.cleanUpAll()
+    await policyTestHelper.cleanUp()
     await policyTestHelper.disconnect()
   })
 
   describe('正常系', () => {
     it('下書き状態のポリシーを更新できる', async () => {
       // Arrange - 下書きポリシー作成
-      const original = await createTestPolicy('更新前のポリシー')
+      const original = await policyTestHelper.createPolicy('更新前のポリシー')
       const version = original.version
 
       const newContent = '更新後のポリシー内容'
@@ -70,7 +66,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('非常に長いコンテンツに更新できる', async () => {
       // Arrange
-      const original = await createTestPolicy('短いポリシー')
+      const original = await policyTestHelper.createPolicy('短いポリシー')
       const version = original.version
 
       const longContent = 'a'.repeat(10000)
@@ -89,7 +85,7 @@ describe('PATCH /api/policies/:version', () => {
   describe('準正常系', () => {
     it('空のコンテンツでは更新できない', async () => {
       // Arrange
-      const original = await createTestPolicy('更新前のポリシー')
+      const original = await policyTestHelper.createPolicy('更新前のポリシー')
       const version = original.version
 
       const requestBody = JSON.stringify({ content: '' })
@@ -114,7 +110,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('有効化されたポリシーを更新しようとすると400を返す', async () => {
       // Arrange - ポリシー作成して有効化
-      const original = await createTestPolicy('有効化予定ポリシー')
+      const original = await policyTestHelper.createPolicy('有効化予定ポリシー')
       const version = original.version
 
       await activateTestPolicy(version)
@@ -131,7 +127,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('contentが存在しない場合は422を返す', async () => {
       // Arrange
-      const original = await createTestPolicy('テストポリシー')
+      const original = await policyTestHelper.createPolicy('テストポリシー')
       const version = original.version
 
       // Act
@@ -170,7 +166,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('不正なJSONの場合は400を返す', async () => {
       // Arrange
-      const original = await createTestPolicy('JSON不正テスト')
+      const original = await policyTestHelper.createPolicy('JSON不正テスト')
       const version = original.version
 
       // Act
@@ -214,7 +210,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('Content-Typeが指定されていない場合は422を返す', async () => {
       // Arrange
-      const original = await createTestPolicy('ContentType不正テスト')
+      const original = await policyTestHelper.createPolicy('ContentType不正テスト')
       const version = original.version
 
       // Act
