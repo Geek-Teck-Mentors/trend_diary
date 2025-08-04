@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import PrivacyPolicy from './privacyPolicy'
+import { isError } from '@/common/types/utility'
 
 describe('PrivacyPolicy', () => {
   describe('基本動作', () => {
@@ -139,9 +140,8 @@ describe('PrivacyPolicy', () => {
         new Date('2024-01-01T00:00:00Z'),
       )
 
-      expect(() => {
-        policy.activate(new Date('2024-01-20T00:00:00Z'))
-      }).toThrow('このポリシーは既に有効化されています')
+      const result = policy.activate(new Date('2024-01-20T00:00:00Z'))
+      expect(isError(result)).toBe(true)
     })
 
     it('updateContent() - 有効化されたポリシーのコンテンツを更新しようとするとエラーになる', () => {
