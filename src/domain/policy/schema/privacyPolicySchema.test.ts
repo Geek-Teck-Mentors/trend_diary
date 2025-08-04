@@ -1,7 +1,4 @@
-import {
-  privacyPolicyActivateSchema,
-  privacyPolicySchema,
-} from './privacyPolicySchema'
+import { privacyPolicyActivateSchema, privacyPolicySchema } from './privacyPolicySchema'
 
 describe('privacyPolicySchema', () => {
   const table = [

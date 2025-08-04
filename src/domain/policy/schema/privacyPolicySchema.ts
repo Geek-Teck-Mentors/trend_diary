@@ -20,7 +20,7 @@ export const privacyPolicyActivateSchema = z.object({
   effectiveAt: z
     .string()
     .datetime()
-    .transform((val) => new Date(val))
+    .transform((val) => new Date(val)),
 })
 
 export const versionParamSchema = privacyPolicySchema.pick({
