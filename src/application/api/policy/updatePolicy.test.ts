@@ -30,10 +30,6 @@ describe('PATCH /api/policies/:version', () => {
     return policyTestHelper.createPolicy(sessionId, content)
   }
 
-  async function deleteTestPolicy(version: number) {
-    return policyTestHelper.deletePolicy(version)
-  }
-
   async function activateTestPolicy(version: number) {
     return policyTestHelper.activatePolicy(version, new Date())
   }
@@ -70,28 +66,6 @@ describe('PATCH /api/policies/:version', () => {
       expect(new Date(updated.updatedAt).getTime()).toBeGreaterThan(
         new Date(original.updatedAt).getTime(),
       )
-
-      // Cleanup
-      await deleteTestPolicy(version)
-    })
-
-    it('空のコンテンツに更新できる', async () => {
-      // Arrange
-      const original = await createTestPolicy('更新前のポリシー')
-      const version = original.version
-
-      const requestBody = JSON.stringify({ content: '' })
-
-      // Act
-      const res = await requestUpdatePolicy(version, requestBody)
-
-      // Assert
-      expect(res.status).toBe(200)
-      const updated = (await res.json()) as PrivacyPolicyOutput
-      expect(updated.content).toBe('')
-
-      // Cleanup
-      await deleteTestPolicy(version)
     })
 
     it('非常に長いコンテンツに更新できる', async () => {
@@ -109,13 +83,24 @@ describe('PATCH /api/policies/:version', () => {
       expect(res.status).toBe(200)
       const updated = (await res.json()) as PrivacyPolicyOutput
       expect(updated.content).toBe(longContent)
-
-      // Cleanup
-      await deleteTestPolicy(version)
     })
   })
 
   describe('準正常系', () => {
+    it('空のコンテンツでは更新できない', async () => {
+      // Arrange
+      const original = await createTestPolicy('更新前のポリシー')
+      const version = original.version
+
+      const requestBody = JSON.stringify({ content: '' })
+
+      // Act
+      const res = await requestUpdatePolicy(version, requestBody)
+
+      // Assert
+      expect(res.status).toBe(422)
+    })
+
     it('存在しないバージョンを更新しようとすると404を返す', async () => {
       // Act
       const res = await requestUpdatePolicy(99999, JSON.stringify({ content: 'テスト' }))
@@ -154,26 +139,6 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(422)
-
-      // Cleanup
-      await deleteTestPolicy(version)
-    })
-
-    it('空文字列のcontentは200を返す（正常な更新として扱う）', async () => {
-      // Arrange
-      const original = await createTestPolicy('テストポリシー')
-      const version = original.version
-
-      // Act
-      const res = await requestUpdatePolicy(version, JSON.stringify({ content: '' }))
-
-      // Assert
-      expect(res.status).toBe(200)
-      const updated = (await res.json()) as PrivacyPolicyOutput
-      expect(updated.content).toBe('')
-
-      // Cleanup
-      await deleteTestPolicy(version)
     })
 
     it('無効なバージョン形式（文字列）は422を返す', async () => {
@@ -224,9 +189,6 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(400)
-
-      // Cleanup
-      await deleteTestPolicy(version)
     })
   })
 
@@ -270,11 +232,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Assert
       expect(res.status).toBe(422)
-
-      // Cleanup
-      await deleteTestPolicy(version)
     })
-
     it('データベースエラーが発生した場合は500を返す', async () => {
       // Note: この種のテストは実際のDBエラーシミュレーションが困難
       // 統合テストでは基本的にはスキップするか、モックインフラとして別途テスト
