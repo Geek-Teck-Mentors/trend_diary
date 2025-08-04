@@ -16,6 +16,8 @@ export {
   privacyPolicyCloneSchema,
   privacyPolicyInputSchema,
   privacyPolicyUpdateSchema,
+  type VersionParam,
+  versionParamSchema,
 } from './schema/privacyPolicySchema'
 // ドメインサービス
 export { default as PrivacyPolicyService } from './service/privacyPolicyService'

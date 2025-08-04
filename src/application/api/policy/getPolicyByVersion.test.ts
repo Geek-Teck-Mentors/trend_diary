@@ -1,7 +1,17 @@
 import TEST_ENV from '@/test/env'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
 
 describe('GET /api/policies/:version', () => {
+  let sessionId: string
+
+  async function setupTestData(): Promise<void> {
+    // 管理者アカウント作成・ログイン
+    await activeUserTestHelper.create('admin@example.com', 'password123')
+    const loginData = await activeUserTestHelper.login('admin@example.com', 'password123')
+    sessionId = loginData.sessionId
+  }
+
   async function requestGetPolicyByVersion(version: number) {
     return app.request(
       `/api/policies/${version}`,
@@ -9,6 +19,7 @@ describe('GET /api/policies/:version', () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          Cookie: `sid=${sessionId}`,
         },
       },
       TEST_ENV,
@@ -22,6 +33,7 @@ describe('GET /api/policies/:version', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Cookie: `sid=${sessionId}`,
         },
         body: JSON.stringify({ content }),
       },
@@ -34,10 +46,22 @@ describe('GET /api/policies/:version', () => {
       `/api/policies/${version}`,
       {
         method: 'DELETE',
+        headers: {
+          Cookie: `sid=${sessionId}`,
+        },
       },
       TEST_ENV,
     )
   }
+
+  beforeEach(async () => {
+    await activeUserTestHelper.cleanUp()
+    await setupTestData()
+  })
+
+  afterAll(async () => {
+    await activeUserTestHelper.cleanUp()
+  })
 
   describe('正常系', () => {
     it('指定したバージョンのプライバシーポリシーを取得できる', async () => {
@@ -74,7 +98,10 @@ describe('GET /api/policies/:version', () => {
         `/api/policies/${version}/activate`,
         {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
           body: JSON.stringify({ effectiveAt: new Date().toISOString() }),
         },
         TEST_ENV,
@@ -116,7 +143,16 @@ describe('GET /api/policies/:version', () => {
   describe('異常系', () => {
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
-      const res = await app.request('/api/policies/invalid', { method: 'GET' }, TEST_ENV)
+      const res = await app.request(
+        '/api/policies/invalid',
+        {
+          method: 'GET',
+          headers: {
+            Cookie: `sid=${sessionId}`,
+          },
+        },
+        TEST_ENV,
+      )
 
       // Assert
       expect(res.status).toBe(422)

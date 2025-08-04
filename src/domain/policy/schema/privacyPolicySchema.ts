@@ -22,7 +22,12 @@ export const privacyPolicyActivateSchema = z.object({
 
 export const privacyPolicyCloneSchema = z.object({})
 
+export const versionParamSchema = z.object({
+  version: z.coerce.number().int().min(1, 'バージョンは1以上の数値である必要があります'),
+})
+
 export type PrivacyPolicyInput = z.infer<typeof privacyPolicyInputSchema>
 export type PrivacyPolicyUpdate = z.infer<typeof privacyPolicyUpdateSchema>
 export type PrivacyPolicyActivate = z.infer<typeof privacyPolicyActivateSchema>
 export type PrivacyPolicyClone = z.infer<typeof privacyPolicyCloneSchema>
+export type VersionParam = z.infer<typeof versionParamSchema>
