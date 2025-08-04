@@ -91,6 +91,26 @@ class PolicyTestHelper {
     }
   }
 
+  async clonePolicy(sourceVersion: number): Promise<{
+    version: number
+    effectiveAt: Date | null
+    content: string
+    createdAt: Date
+    updatedAt: Date
+  }> {
+    const result = await this.service.clonePolicy(sourceVersion)
+    if (isError(result)) {
+      throw new Error(`Failed to clone policy: ${result.error.message}`)
+    }
+    return {
+      version: result.data.version,
+      effectiveAt: result.data.effectiveAt,
+      content: result.data.content,
+      createdAt: result.data.createdAt,
+      updatedAt: result.data.updatedAt,
+    }
+  }
+
   async getPolicy(version: number): Promise<{
     version: number
     effectiveAt: Date | null

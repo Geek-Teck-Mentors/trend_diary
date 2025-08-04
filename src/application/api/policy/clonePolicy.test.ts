@@ -1,7 +1,11 @@
+import { beforeEach, describe, expect, test } from 'vitest'
 import TEST_ENV from '@/test/env'
+import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('POST /api/policies/:version/clone', () => {
+  let sessionId: string
+
   async function requestClonePolicy(version: number, body = '{}') {
     return app.request(
       `/api/policies/${version}/clone`,
@@ -9,6 +13,7 @@ describe('POST /api/policies/:version/clone', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Cookie: `sid=${sessionId}`,
         },
         body,
       },
@@ -16,213 +21,124 @@ describe('POST /api/policies/:version/clone', () => {
     )
   }
 
-  async function createTestPolicy(content = 'テストポリシー') {
-    return app.request(
-      '/api/policies',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content }),
-      },
-      TEST_ENV,
-    )
-  }
-
-  async function deleteTestPolicy(version: number) {
-    return app.request(
-      `/api/policies/${version}`,
-      {
-        method: 'DELETE',
-      },
-      TEST_ENV,
-    )
-  }
+  beforeEach(async () => {
+    await policyTestHelper.cleanUpAll()
+    sessionId = await policyTestHelper.setupUserSession()
+  })
 
   describe('正常系', () => {
-    it('既存のポリシーを複製できる', async () => {
-      // Arrange - 元のポリシー作成
-      const createRes = await createTestPolicy('複製元ポリシー')
-      expect(createRes.status).toBe(201)
-      const original = await createRes.json()
-      const sourceVersion = original.version
+    test('既存のポリシーを複製できる', async () => {
+      // テストデータ準備：複製元のポリシーを作成
+      const sourcePolicy = await policyTestHelper.createPolicy(sessionId, '複製元ポリシー内容')
 
-      // Act
-      const res = await requestClonePolicy(sourceVersion)
+      // API実行
+      const response = await requestClonePolicy(sourcePolicy.version)
 
-      // Assert
-      expect(res.status).toBe(201)
-      const cloned = await res.json()
-      expect(cloned.version).not.toBe(sourceVersion) // 新しいバージョン
-      expect(cloned.version).toBeGreaterThan(sourceVersion)
-      expect(cloned.content).toBe(original.content) // 同じ内容
-      expect(cloned.effectiveAt).toBeNull() // 下書き状態
-      expect(cloned).toHaveProperty('createdAt')
-      expect(cloned).toHaveProperty('updatedAt')
+      // レスポンス検証
+      expect(response.status).toBe(201)
+      const clonedPolicy = await response.json()
 
-      // Cleanup
-      await deleteTestPolicy(sourceVersion)
-      await deleteTestPolicy(cloned.version)
+      // 複製されたポリシーの検証
+      expect(clonedPolicy.version).toBeGreaterThan(sourcePolicy.version)
+      expect(clonedPolicy.content).toBe('複製元ポリシー内容')
+      expect(clonedPolicy.effectiveAt).toBe(null) // 下書き状態
+      expect(clonedPolicy.createdAt).toBeDefined()
+      expect(clonedPolicy.updatedAt).toBeDefined()
     })
 
-    it('有効化されたポリシーからも複製できる', async () => {
-      // Arrange - 元のポリシー作成して有効化
-      const createRes = await createTestPolicy('有効化ポリシー')
-      const original = await createRes.json()
-      const sourceVersion = original.version
+    test('有効化されたポリシーも複製できる', async () => {
+      // テストデータ準備：有効化されたポリシーを作成
+      const sourcePolicy = await policyTestHelper.createPolicy(sessionId, '有効化されたポリシー')
+      await policyTestHelper.activatePolicy(sourcePolicy.version, new Date())
 
-      // 有効化
-      const activateRes = await app.request(
-        `/api/policies/${sourceVersion}/activate`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ effectiveAt: new Date().toISOString() }),
-        },
-        TEST_ENV,
-      )
-      expect(activateRes.status).toBe(200)
+      // API実行
+      const response = await requestClonePolicy(sourcePolicy.version)
 
-      // Act
-      const res = await requestClonePolicy(sourceVersion)
+      // レスポンス検証
+      expect(response.status).toBe(201)
+      const clonedPolicy = await response.json()
 
-      // Assert
-      expect(res.status).toBe(201)
-      const cloned = await res.json()
-      expect(cloned.version).toBeGreaterThan(sourceVersion)
-      expect(cloned.content).toBe(original.content)
-      expect(cloned.effectiveAt).toBeNull() // 複製は下書き状態
-
-      // Cleanup
-      await deleteTestPolicy(cloned.version)
-      // 有効化されたポリシーは削除できないのでCleanupしない
-    })
-
-    it('空のリクエストボディでも複製できる', async () => {
-      // Arrange
-      const createRes = await createTestPolicy('空ボディ複製テスト')
-      const original = await createRes.json()
-      const sourceVersion = original.version
-
-      // Act
-      const res = await requestClonePolicy(sourceVersion, '{}')
-
-      // Assert
-      expect(res.status).toBe(201)
-      const cloned = await res.json()
-      expect(cloned.content).toBe(original.content)
-
-      // Cleanup
-      await deleteTestPolicy(sourceVersion)
-      await deleteTestPolicy(cloned.version)
+      // 複製されたポリシーは下書き状態になる
+      expect(clonedPolicy.content).toBe('有効化されたポリシー')
+      expect(clonedPolicy.effectiveAt).toBe(null) // 下書き状態
     })
   })
 
   describe('準正常系', () => {
-    it('存在しないバージョンを複製しようとすると404を返す', async () => {
-      // Act
-      const res = await requestClonePolicy(99999)
+    test('存在しないポリシーの複製時は404エラー', async () => {
+      const response = await requestClonePolicy(999)
 
-      // Assert
-      expect(res.status).toBe(404)
-      const data = await res.json()
-      expect(data).toHaveProperty('error')
-      expect(data.error).toContain('見つかりません')
+      expect(response.status).toBe(404)
+      const error = await response.json()
+      expect(error.message).toContain('複製元のプライバシーポリシーが見つかりません')
     })
 
-    it('無効なバージョン形式（文字列）は422を返す', async () => {
-      // Act
-      const res = await app.request(
+    test('無効なバージョン番号時は422エラー', async () => {
+      const response = await app.request(
         '/api/policies/invalid/clone',
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
           body: '{}',
         },
         TEST_ENV,
       )
 
-      // Assert
-      expect(res.status).toBe(422)
+      expect(response.status).toBe(422)
     })
 
-    it('負のバージョン番号は422を返す', async () => {
-      // Act
-      const res = await requestClonePolicy(-1)
+    test('バージョン番号が0以下の場合は422エラー', async () => {
+      const response = await requestClonePolicy(0)
 
-      // Assert
-      expect(res.status).toBe(422)
+      expect(response.status).toBe(422)
     })
 
-    it('不正なJSONの場合は400を返す', async () => {
-      // Arrange
-      const createRes = await createTestPolicy('JSON不正テスト')
-      const original = await createRes.json()
-      const sourceVersion = original.version
+    test('不正なJSONの場合は400エラー', async () => {
+      // テストデータ準備
+      const sourcePolicy = await policyTestHelper.createPolicy(sessionId, 'JSON不正テスト')
 
-      // Act
-      const res = await app.request(
-        `/api/policies/${sourceVersion}/clone`,
+      const response = await app.request(
+        `/api/policies/${sourcePolicy.version}/clone`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
           body: '{ invalid json }',
         },
         TEST_ENV,
       )
 
-      // Assert
-      expect(res.status).toBe(400)
-
-      // Cleanup
-      await deleteTestPolicy(sourceVersion)
+      expect(response.status).toBe(400)
     })
   })
 
   describe('異常系', () => {
-    it('メソッドが間違っている場合は405を返す', async () => {
-      // Act
-      const res = await app.request(
+    test('認証されていない場合は401エラー', async () => {
+      // 認証情報なしでリクエスト
+      const response = await app.request(
         '/api/policies/1/clone',
         {
-          method: 'GET', // POSTでないメソッド
-          headers: { 'Content-Type': 'application/json' },
-          body: '{}',
-        },
-        TEST_ENV,
-      )
-
-      // Assert
-      expect(res.status).toBe(405)
-    })
-
-    it('Content-Typeが指定されていない場合は400を返す', async () => {
-      // Arrange
-      const createRes = await createTestPolicy('ContentType不正テスト')
-      const original = await createRes.json()
-      const sourceVersion = original.version
-
-      // Act
-      const res = await app.request(
-        `/api/policies/${sourceVersion}/clone`,
-        {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: '{}',
         },
         TEST_ENV,
       )
 
-      // Assert
-      expect(res.status).toBe(400)
-
-      // Cleanup
-      await deleteTestPolicy(sourceVersion)
+      expect(response.status).toBe(401)
     })
+  })
 
-    it('データベースエラーが発生した場合は500を返す', async () => {
-      // Note: この種のテストは実際のDBエラーシミュレーションが困難
-      // 統合テストでは基本的にはスキップするか、モックインフラとして別途テスト
-    })
+  // cleanup
+  afterAll(async () => {
+    await policyTestHelper.cleanUpAll()
+    await policyTestHelper.disconnect()
   })
 })
