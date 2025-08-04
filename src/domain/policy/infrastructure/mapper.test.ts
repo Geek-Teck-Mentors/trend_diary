@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { isError } from '@/common/types/utility'
 import PrivacyPolicy from '../model/privacyPolicy'
 import { mapToPrivacyPolicy } from './mapper'
 
@@ -127,8 +128,11 @@ describe('mapper', () => {
 
         // updateContentメソッドも正常に動作することを確認
         const newContent = '更新されたコンテンツ'
-        policy.updateContent(newContent)
-        expect(policy.content).toBe(newContent)
+        const updateResult = policy.updateContent(newContent)
+        if (isError(updateResult)) {
+          expect.fail(`更新に失敗: ${updateResult}`)
+        }
+        expect(updateResult.data.content).toBe(newContent)
       })
     })
   })
