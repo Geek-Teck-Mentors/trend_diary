@@ -1,13 +1,34 @@
-import policyApiTestHelper from '@/test/helper/policyApiTestHelper'
+import TEST_ENV from '@/test/env'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
+import app from '../../server'
 
 describe('DELETE /api/policies/:version', () => {
+  let sessionId: string
   beforeAll(async () => {
-    await policyApiTestHelper.beforeAllSetup()
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
+    sessionId = await policyTestHelper.setupUserSession()
   })
   afterAll(async () => {
-    await policyApiTestHelper.afterAllCleanup()
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
+    await policyTestHelper.disconnect()
+    await activeUserTestHelper.disconnect()
   })
+
+  async function requestDeletePolicy(version: number) {
+    return app.request(
+      `/api/policies/${version}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Cookie: `sid=${sessionId}`,
+        },
+      },
+      TEST_ENV,
+    )
+  }
 
   describe('正常系', () => {
     it('下書き状態のポリシーを削除できる', async () => {
@@ -15,7 +36,7 @@ describe('DELETE /api/policies/:version', () => {
       const policy = await policyTestHelper.createPolicy('削除予定ポリシー')
 
       // Act
-      const res = await policyApiTestHelper.requestDeletePolicy(policy.version)
+      const res = await requestDeletePolicy(policy.version)
 
       // Assert
       expect(res.status).toBe(204) // No Content
@@ -31,8 +52,8 @@ describe('DELETE /api/policies/:version', () => {
       const policy2 = await policyTestHelper.createPolicy('削除予定ポリシー2')
 
       // Act
-      const res1 = await policyApiTestHelper.requestDeletePolicy(policy1.version)
-      const res2 = await policyApiTestHelper.requestDeletePolicy(policy2.version)
+      const res1 = await requestDeletePolicy(policy1.version)
+      const res2 = await requestDeletePolicy(policy2.version)
 
       // Assert
       expect(res1.status).toBe(204)
@@ -49,16 +70,14 @@ describe('DELETE /api/policies/:version', () => {
   describe('準正常系', () => {
     it('認証なしの場合は401を返す', async () => {
       // Act - セッションIDなしでリクエスト
-      const res = await policyApiTestHelper.makeUnauthenticatedRequest('/api/policies/1', {
-        method: 'DELETE',
-      })
+      const res = await app.request('/api/policies/1', { method: 'DELETE' }, TEST_ENV)
 
       // Assert
       expect(res.status).toBe(401)
     })
     it('存在しないバージョンを削除しようとすると404を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.requestDeletePolicy(99999)
+      const res = await requestDeletePolicy(99999)
 
       // Assert
       expect(res.status).toBe(404)
@@ -74,7 +93,7 @@ describe('DELETE /api/policies/:version', () => {
       await policyTestHelper.activatePolicy(policy.version, effectiveAt)
 
       // Act
-      const res = await policyApiTestHelper.requestDeletePolicy(policy.version)
+      const res = await requestDeletePolicy(policy.version)
 
       // Assert
       expect(res.status).toBe(400)
@@ -90,7 +109,16 @@ describe('DELETE /api/policies/:version', () => {
 
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.requestDeletePolicy('invalid' as any)
+      const res = await app.request(
+        '/api/policies/invalid',
+        {
+          method: 'DELETE',
+          headers: {
+            Cookie: `sid=${sessionId}`,
+          },
+        },
+        TEST_ENV,
+      )
 
       // Assert
       expect(res.status).toBe(422)
@@ -98,7 +126,7 @@ describe('DELETE /api/policies/:version', () => {
 
     it('負のバージョン番号は422を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.requestDeletePolicy(-1)
+      const res = await requestDeletePolicy(-1)
 
       // Assert
       expect(res.status).toBe(422)
@@ -106,7 +134,7 @@ describe('DELETE /api/policies/:version', () => {
 
     it('version=0は422を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.requestDeletePolicy(0)
+      const res = await requestDeletePolicy(0)
 
       // Assert
       expect(res.status).toBe(422)
@@ -116,11 +144,11 @@ describe('DELETE /api/policies/:version', () => {
       // Arrange - ポリシー作成・削除
       const policy = await policyTestHelper.createPolicy('二重削除テスト')
 
-      const firstDeleteRes = await policyApiTestHelper.requestDeletePolicy(policy.version)
+      const firstDeleteRes = await requestDeletePolicy(policy.version)
       expect(firstDeleteRes.status).toBe(204)
 
       // Act - 再度削除
-      const res = await policyApiTestHelper.requestDeletePolicy(policy.version)
+      const res = await requestDeletePolicy(policy.version)
 
       // Assert
       expect(res.status).toBe(404)

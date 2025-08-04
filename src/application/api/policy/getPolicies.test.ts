@@ -1,19 +1,35 @@
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
-import policyApiTestHelper from '@/test/helper/policyApiTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
+import app from '../../server'
 import { PolicyListResponse } from './response'
 
 describe('GET /api/policies', () => {
   let db: RdbClient
+  let sessionId: string
+
+  async function requestGetPolicies(query: string = '', sessionId?: string) {
+    const url = query ? `/api/policies?${query}` : '/api/policies'
+    const headers: Record<string, string> = {}
+    if (sessionId) {
+      headers.Cookie = `sid=${sessionId}`
+    }
+    return app.request(url, { method: 'GET', headers }, TEST_ENV)
+  }
 
   beforeAll(async () => {
-    await policyApiTestHelper.beforeAllSetup()
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     db = getRdbClient(TEST_ENV.DATABASE_URL)
+    sessionId = await policyTestHelper.setupUserSession()
   })
 
   afterAll(async () => {
-    await policyApiTestHelper.afterAllCleanup()
+    await activeUserTestHelper.cleanUp()
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.disconnect()
+    await policyTestHelper.disconnect()
     await db.$disconnect()
   })
 
@@ -42,7 +58,7 @@ describe('GET /api/policies', () => {
     })
 
     it('デフォルトのページング設定でポリシー一覧を取得できる', async () => {
-      const res = await policyApiTestHelper.requestGetPolicies('page=1&limit=20')
+      const res = await requestGetPolicies('page=1&limit=20', sessionId)
 
       expect(res.status).toBe(200)
       const body: PolicyListResponse = await res.json()
@@ -75,7 +91,7 @@ describe('GET /api/policies', () => {
 
       await db.privacyPolicy.createMany({ data: additionalPolicies })
 
-      const res = await policyApiTestHelper.requestGetPolicies('page=2&limit=2')
+      const res = await requestGetPolicies('page=2&limit=2', sessionId)
 
       expect(res.status).toBe(200)
       const body: PolicyListResponse = await res.json()
@@ -92,18 +108,13 @@ describe('GET /api/policies', () => {
 
   describe('準正常系', () => {
     it('認証されていない場合は401エラーが返される', async () => {
-      const res = await policyApiTestHelper.makeUnauthenticatedRequest(
-        '/api/policies?page=1&limit=20',
-        {
-          method: 'GET',
-        },
-      )
+      const res = await requestGetPolicies('page=1&limit=20')
 
       expect(res.status).toBe(401)
     })
 
     it('無効なpage値の場合はデフォルト値が使用される', async () => {
-      const res = await policyApiTestHelper.requestGetPolicies('page=invalid&limit=10')
+      const res = await requestGetPolicies('page=invalid&limit=10', sessionId)
 
       expect(res.status).toBe(200)
       const body: PolicyListResponse = await res.json()
@@ -111,7 +122,7 @@ describe('GET /api/policies', () => {
     })
 
     it('無効なlimit値の場合はデフォルト値が使用される', async () => {
-      const res = await policyApiTestHelper.requestGetPolicies('page=1&limit=invalid')
+      const res = await requestGetPolicies('page=1&limit=invalid', sessionId)
 
       expect(res.status).toBe(200)
       const body: PolicyListResponse = await res.json()
@@ -119,7 +130,7 @@ describe('GET /api/policies', () => {
     })
 
     it('limitが上限を超える場合は上限値が適用される', async () => {
-      const res = await policyApiTestHelper.requestGetPolicies('page=1&limit=200')
+      const res = await requestGetPolicies('page=1&limit=200', sessionId)
 
       expect(res.status).toBe(200)
       const body: PolicyListResponse = await res.json()

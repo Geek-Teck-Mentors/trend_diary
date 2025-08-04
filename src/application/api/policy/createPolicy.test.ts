@@ -1,23 +1,66 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
-import policyApiTestHelper from '@/test/helper/policyApiTestHelper'
+import TEST_ENV from '@/test/env'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
+import policyTestHelper from '@/test/helper/policyTestHelper'
+import app from '../../server'
 
 describe('POST /api/policies', () => {
+  let sessionId: string
+
+  async function setupTestData(): Promise<void> {
+    // 管理者アカウント作成・ログイン
+    sessionId = await policyTestHelper.setupUserSession()
+  }
+
+  async function requestCreatePolicy(body: string) {
+    return app.request(
+      '/api/policies',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: `sid=${sessionId}`,
+        },
+        body,
+      },
+      TEST_ENV,
+    )
+  }
+
+  async function _deleteTestPolicy(version: number) {
+    return app.request(
+      `/api/policies/${version}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Cookie: `sid=${sessionId}`,
+        },
+      },
+      TEST_ENV,
+    )
+  }
+
   beforeAll(async () => {
-    await policyApiTestHelper.beforeAllSetup()
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
+    await setupTestData()
   })
 
   afterAll(async () => {
-    await policyApiTestHelper.afterAllCleanup()
+    await policyTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
+    await policyTestHelper.disconnect()
+    await activeUserTestHelper.disconnect()
   })
 
   describe('正常系', () => {
     it('新しいプライバシーポリシーを作成できる', async () => {
       // Arrange
       const content = '新しいプライバシーポリシーの内容'
-      const requestBody = policyApiTestHelper.createJsonBody({ content })
+      const requestBody = JSON.stringify({ content })
 
       // Act
-      const res = await policyApiTestHelper.requestCreatePolicy(requestBody)
+      const res = await requestCreatePolicy(requestBody)
 
       // Assert
       expect(res.status).toBe(201)
@@ -32,10 +75,10 @@ describe('POST /api/policies', () => {
     it('最小文字数のコンテンツでポリシーを作成できる', async () => {
       // Arrange
       const content = 'a' // 最小限の文字数
-      const requestBody = policyApiTestHelper.createJsonBody({ content })
+      const requestBody = JSON.stringify({ content })
 
       // Act
-      const res = await policyApiTestHelper.requestCreatePolicy(requestBody)
+      const res = await requestCreatePolicy(requestBody)
 
       // Assert
       expect(res.status).toBe(201)
@@ -47,10 +90,10 @@ describe('POST /api/policies', () => {
     it('非常に長いコンテンツでもポリシーを作成できる', async () => {
       // Arrange
       const content = 'a'.repeat(10000) // 1万文字
-      const requestBody = policyApiTestHelper.createJsonBody({ content })
+      const requestBody = JSON.stringify({ content })
 
       // Act
-      const res = await policyApiTestHelper.requestCreatePolicy(requestBody)
+      const res = await requestCreatePolicy(requestBody)
 
       // Assert
       expect(res.status).toBe(201)
@@ -64,12 +107,8 @@ describe('POST /api/policies', () => {
       const content2 = 'ポリシー2'
 
       // Act
-      const res1 = await policyApiTestHelper.requestCreatePolicy(
-        policyApiTestHelper.createJsonBody({ content: content1 }),
-      )
-      const res2 = await policyApiTestHelper.requestCreatePolicy(
-        policyApiTestHelper.createJsonBody({ content: content2 }),
-      )
+      const res1 = await requestCreatePolicy(JSON.stringify({ content: content1 }))
+      const res2 = await requestCreatePolicy(JSON.stringify({ content: content2 }))
 
       // Assert
       expect(res1.status).toBe(201)
@@ -85,10 +124,10 @@ describe('POST /api/policies', () => {
   describe('準正常系', () => {
     it('contentが存在しない場合は422を返す', async () => {
       // Arrange
-      const requestBody = policyApiTestHelper.createJsonBody({})
+      const requestBody = JSON.stringify({})
 
       // Act
-      const res = await policyApiTestHelper.requestCreatePolicy(requestBody)
+      const res = await requestCreatePolicy(requestBody)
 
       // Assert
       expect(res.status).toBe(422)
@@ -98,10 +137,10 @@ describe('POST /api/policies', () => {
 
     it('contentが空文字列の場合は422を返す', async () => {
       // Arrange
-      const requestBody = policyApiTestHelper.createJsonBody({ content: '' })
+      const requestBody = JSON.stringify({ content: '' })
 
       // Act
-      const res = await policyApiTestHelper.requestCreatePolicy(requestBody)
+      const res = await requestCreatePolicy(requestBody)
 
       // Assert
       // 実装によってはエラーになる可能性がある
@@ -114,11 +153,7 @@ describe('POST /api/policies', () => {
       const invalidJson = '{ content: invalid json }'
 
       // Act
-      const res = await policyApiTestHelper.makeInvalidJsonRequest(
-        '/api/policies',
-        'POST',
-        invalidJson,
-      )
+      const res = await requestCreatePolicy(invalidJson)
 
       // Assert
       expect(res.status).toBe(400)
@@ -126,10 +161,16 @@ describe('POST /api/policies', () => {
 
     it('Content-Typeが指定されていない場合は422を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.makeRequestWithoutContentType(
+      const res = await app.request(
         '/api/policies',
-        'POST',
-        policyApiTestHelper.createJsonBody({ content: 'テスト' }),
+        {
+          method: 'POST',
+          headers: {
+            Cookie: `sid=${sessionId}`,
+          },
+          body: JSON.stringify({ content: 'テスト' }),
+        },
+        TEST_ENV,
       )
 
       // Assert

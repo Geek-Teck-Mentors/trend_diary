@@ -1,14 +1,43 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
-import policyApiTestHelper from '@/test/helper/policyApiTestHelper'
+import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
+import app from '../../server'
 
 describe('PATCH /api/policies/:version', () => {
+  let sessionId: string
+
+  async function setupTestData(): Promise<void> {
+    // 管理者アカウント作成・ログイン
+    sessionId = await policyTestHelper.setupUserSession()
+  }
+
+  async function requestUpdatePolicy(version: number, body: string) {
+    return app.request(
+      `/api/policies/${version}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: `sid=${sessionId}`,
+        },
+        body,
+      },
+      TEST_ENV,
+    )
+  }
+
+  async function activateTestPolicy(version: number) {
+    return policyTestHelper.activatePolicy(version, new Date())
+  }
+
   beforeEach(async () => {
-    await policyApiTestHelper.beforeEachCleanup()
+    await policyTestHelper.cleanUp()
+    await setupTestData()
   })
 
   afterAll(async () => {
-    await policyApiTestHelper.afterAllCleanup()
+    await policyTestHelper.cleanUp()
+    await policyTestHelper.disconnect()
   })
 
   describe('正常系', () => {
@@ -18,10 +47,10 @@ describe('PATCH /api/policies/:version', () => {
       const version = original.version
 
       const newContent = '更新後のポリシー内容'
-      const requestBody = policyApiTestHelper.createJsonBody({ content: newContent })
+      const requestBody = JSON.stringify({ content: newContent })
 
       // Act
-      const res = await policyApiTestHelper.requestUpdatePolicy(version, requestBody)
+      const res = await requestUpdatePolicy(version, requestBody)
 
       // Assert
       expect(res.status).toBe(200)
@@ -41,10 +70,10 @@ describe('PATCH /api/policies/:version', () => {
       const version = original.version
 
       const longContent = 'a'.repeat(10000)
-      const requestBody = policyApiTestHelper.createJsonBody({ content: longContent })
+      const requestBody = JSON.stringify({ content: longContent })
 
       // Act
-      const res = await policyApiTestHelper.requestUpdatePolicy(version, requestBody)
+      const res = await requestUpdatePolicy(version, requestBody)
 
       // Assert
       expect(res.status).toBe(200)
@@ -59,10 +88,10 @@ describe('PATCH /api/policies/:version', () => {
       const original = await policyTestHelper.createPolicy('更新前のポリシー')
       const version = original.version
 
-      const requestBody = policyApiTestHelper.createJsonBody({ content: '' })
+      const requestBody = JSON.stringify({ content: '' })
 
       // Act
-      const res = await policyApiTestHelper.requestUpdatePolicy(version, requestBody)
+      const res = await requestUpdatePolicy(version, requestBody)
 
       // Assert
       expect(res.status).toBe(422)
@@ -70,10 +99,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('存在しないバージョンを更新しようとすると404を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.requestUpdatePolicy(
-        99999,
-        policyApiTestHelper.createJsonBody({ content: 'テスト' }),
-      )
+      const res = await requestUpdatePolicy(99999, JSON.stringify({ content: 'テスト' }))
 
       // Assert
       expect(res.status).toBe(404)
@@ -87,13 +113,10 @@ describe('PATCH /api/policies/:version', () => {
       const original = await policyTestHelper.createPolicy('有効化予定ポリシー')
       const version = original.version
 
-      await policyApiTestHelper.activateTestPolicy(version)
+      await activateTestPolicy(version)
 
       // Act
-      const res = await policyApiTestHelper.requestUpdatePolicy(
-        version,
-        policyApiTestHelper.createJsonBody({ content: '更新テスト' }),
-      )
+      const res = await requestUpdatePolicy(version, JSON.stringify({ content: '更新テスト' }))
 
       // Assert
       expect(res.status).toBe(400)
@@ -108,10 +131,7 @@ describe('PATCH /api/policies/:version', () => {
       const version = original.version
 
       // Act
-      const res = await policyApiTestHelper.requestUpdatePolicy(
-        version,
-        policyApiTestHelper.createJsonBody({}),
-      )
+      const res = await requestUpdatePolicy(version, JSON.stringify({}))
 
       // Assert
       expect(res.status).toBe(422)
@@ -119,9 +139,17 @@ describe('PATCH /api/policies/:version', () => {
 
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.requestUpdatePolicy(
-        'invalid' as any,
-        policyApiTestHelper.createJsonBody({ content: 'テスト' }),
+      const res = await app.request(
+        '/api/policies/invalid',
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
+          body: JSON.stringify({ content: 'テスト' }),
+        },
+        TEST_ENV,
       )
 
       // Assert
@@ -130,10 +158,7 @@ describe('PATCH /api/policies/:version', () => {
 
     it('負のバージョン番号は422を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.requestUpdatePolicy(
-        -1,
-        policyApiTestHelper.createJsonBody({ content: 'テスト' }),
-      )
+      const res = await requestUpdatePolicy(-1, JSON.stringify({ content: 'テスト' }))
 
       // Assert
       expect(res.status).toBe(422)
@@ -145,10 +170,17 @@ describe('PATCH /api/policies/:version', () => {
       const version = original.version
 
       // Act
-      const res = await policyApiTestHelper.makeInvalidJsonRequest(
+      const res = await app.request(
         `/api/policies/${version}`,
-        'PATCH',
-        '{ content: invalid json }',
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
+          body: '{ content: invalid json }',
+        },
+        TEST_ENV,
       )
 
       // Assert
@@ -159,10 +191,18 @@ describe('PATCH /api/policies/:version', () => {
   describe('異常系', () => {
     it('メソッドが間違っている場合は404を返す', async () => {
       // Act
-      const res = await policyApiTestHelper.makeRequest('/api/policies/1', {
-        method: 'PUT', // PATCHでないメソッド
-        body: policyApiTestHelper.createJsonBody({ content: 'テスト' }),
-      })
+      const res = await app.request(
+        '/api/policies/1',
+        {
+          method: 'PUT', // PATCHでないメソッド
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: `sid=${sessionId}`,
+          },
+          body: JSON.stringify({ content: 'テスト' }),
+        },
+        TEST_ENV,
+      )
 
       // Assert
       expect(res.status).toBe(404)
@@ -174,10 +214,16 @@ describe('PATCH /api/policies/:version', () => {
       const version = original.version
 
       // Act
-      const res = await policyApiTestHelper.makeRequestWithoutContentType(
+      const res = await app.request(
         `/api/policies/${version}`,
-        'PATCH',
-        policyApiTestHelper.createJsonBody({ content: 'テスト' }),
+        {
+          method: 'PATCH',
+          headers: {
+            Cookie: `sid=${sessionId}`,
+          },
+          body: JSON.stringify({ content: 'テスト' }),
+        },
+        TEST_ENV,
       )
 
       // Assert
