@@ -35,14 +35,14 @@ const app = new Hono<Env>()
     authenticator,
     zodValidator('param', versionParamSchema),
     zodValidator('json', privacyPolicyCloneSchema),
-    clonePolicy,
+    clonePolicy as any,
   )
   .patch(
     '/:version/activate',
     authenticator,
     zodValidator('param', versionParamSchema),
     zodValidator('json', privacyPolicyActivateSchema),
-    activatePolicy,
+    activatePolicy as any,
   )
 
 export default app
