@@ -13,7 +13,7 @@ CREATE TABLE "public"."privacy_policies" (
 CREATE TABLE "public"."privacy_policy_consents" (
     "user_id" BIGINT NOT NULL,
     "policy_version" INTEGER NOT NULL,
-    "consented_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "consented_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

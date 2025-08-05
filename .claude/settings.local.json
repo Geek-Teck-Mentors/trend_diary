@@ -36,7 +36,8 @@
       "Bash(npx biome check:*)",
       "mcp__serena__replace_symbol_body",
       "Bash(npx biome ci:*)",
-      "mcp__serena__write_memory"
+      "mcp__serena__write_memory",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [
       "Bash(rm -rf /)",
