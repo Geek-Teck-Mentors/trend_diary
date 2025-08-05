@@ -35,4 +35,4 @@ jobs:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
       - name: TypeScript型チェック
-        run: npm run check-types
+        run: npm run tsc

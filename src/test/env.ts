@@ -1,7 +1,7 @@
 import { Env } from '@/application/env'
 
 const TEST_ENV = {
-  DATABASE_URL: process.env.DATABASE_URL ?? '',
+  DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://postgres:password@localhost:5432/test',
   DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL ?? '',
 } satisfies Env['Bindings']
 

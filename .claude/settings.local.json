@@ -22,7 +22,22 @@
       "Bash(npm run test:frontend:*)",
       "Bash(npm ls:*)",
       "Bash(npm run test-storybook:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx tsc:*)",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__list_dir",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__find_file",
+      "mcp__serena__replace_regex",
+      "mcp__serena__find_symbol",
+      "mcp__serena__think_about_collected_information",
+      "Bash(npx biome check:*)",
+      "mcp__serena__replace_symbol_body",
+      "Bash(npx biome ci:*)",
+      "mcp__serena__write_memory",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [
       "Bash(rm -rf /)",
