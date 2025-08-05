@@ -21,7 +21,7 @@ model ActiveUser {
 }
 
 model AdminUser {
-  AdminUserId          Int      @id @default(autoincrement()) @map("admin_user_id")
+  AdminUserId          Int      @id @default(autoincrement()) @map("admin_user_id") @db.Integer
   ActiveUserId         BigInt   @unique @map("active_user_id") @db.BigInt
   grantedAt            DateTime @default(now()) @map("granted_at") @db.Timestamptz()
   grantedByAdminUserId Int      @map("granted_by_admin_user_id")
