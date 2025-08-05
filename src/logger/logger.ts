@@ -13,7 +13,7 @@ class Logger {
     this.context = context
 
     this.logger = pino({
-      level: 'silent',
+      level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
       formatters: {
         level: (label) => ({ level: label }),
       },
