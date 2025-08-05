@@ -12,15 +12,12 @@ export default async function activatePolicy(
   const { version } = c.req.valid('param')
   const { effectiveAt } = c.req.valid('json')
 
-  // effectiveAtが未指定の場合は現在時刻を使用
-  const effectiveDate = effectiveAt || new Date()
-
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const service = createPrivacyPolicyService(rdb)
 
-  const result = await service.activatePolicy(version, effectiveDate)
+  const result = await service.activatePolicy(version, effectiveAt)
   if (isError(result)) throw handleError(result.error, logger)
 
-  logger.info('Policy activated', { version, effectiveAt: effectiveDate })
+  logger.info('Policy activated', { version, effectiveAt })
   return c.json(result.data)
 }
