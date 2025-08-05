@@ -13,6 +13,14 @@ erDiagram
     }
   
 
+  "admin_users" {
+    Int admin_user_id "🗝️"
+    BigInt active_user_id 
+    DateTime granted_at 
+    Int granted_by_admin_user_id 
+    }
+  
+
   "articles" {
     BigInt article_id "🗝️"
     String media 
@@ -84,6 +92,8 @@ erDiagram
     "active_users" o|--|| "users" : "user"
     "active_users" o{--}o "sessions" : "session"
     "active_users" o{--}o "read_histories" : "readHistories"
+    "active_users" o{--}o "admin_users" : "adminUser"
+    "admin_users" o|--|| "active_users" : "activeUser"
     "banned_users" o|--|| "users" : "user"
     "leaved_users" o|--|| "users" : "user"
     "privacy_policy_consents" o|--|| "users" : "user"

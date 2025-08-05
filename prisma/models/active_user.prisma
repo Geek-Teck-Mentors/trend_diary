@@ -15,6 +15,18 @@ model ActiveUser {
   user          User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
   session       Session[]
   readHistories ReadHistory[]
+  adminUser     AdminUser?
 
   @@map("active_users")
+}
+
+model AdminUser {
+  AdminUserId          Int      @id @default(autoincrement()) @map("admin_user_id")
+  ActiveUserId         BigInt   @unique @map("active_user_id") @db.BigInt
+  grantedAt            DateTime @default(now()) @map("granted_at") @db.Timestamptz()
+  grantedByAdminUserId Int      @map("granted_by_admin_user_id")
+
+  activeUser ActiveUser @relation(fields: [ActiveUserId], references: [activeUserId], onDelete: Cascade)
+
+  @@map("admin_users")
 }
