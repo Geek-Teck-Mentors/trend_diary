@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Outlet, redirect } from 'react-router'
-import { toast } from 'sonner'
+import { Outlet } from 'react-router'
 import AppSidebar from '../components/Sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'
 import getApiClientForClient from '../infrastructure/api'
@@ -19,8 +18,7 @@ export default function Layout() {
         const resJson = await res.json()
         setDisplayName(resJson.user?.displayName ?? '未設定')
       } else {
-        toast.error('ログインが必要です')
-        redirect('/login')
+        setDisplayName('ゲスト')
       }
     }
 
