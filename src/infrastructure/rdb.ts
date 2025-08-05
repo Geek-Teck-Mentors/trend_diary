@@ -5,10 +5,11 @@ import { withAccelerate } from '@prisma/extension-accelerate'
 // 開発環境では標準クライアント、本番環境ではエッジクライアントを使用
 // 参考：https://hono.dev/examples/prisma
 export default function getRdbClient(databaseUrl: string) {
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  const isTest = process.env.NODE_ENV === 'test'
+  if (process.env.NODE_ENV === 'development' || isTest) {
     const devPrisma = new PrismaClientLocal({
       datasourceUrl: databaseUrl,
-      log: ['query', 'warn', 'error'],
+      log: isTest ? ['error'] : ['query', 'warn', 'error'],
     })
     return devPrisma
   }

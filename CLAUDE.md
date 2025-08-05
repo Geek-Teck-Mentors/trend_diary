@@ -67,7 +67,7 @@ git commit -m "refactor: improve article service structure TDD cycle complete"
 
 - `npm run lint` - Biomeでlintを実行
 - `npm run lint:fix` - Biomeでlintを自動修正付きで実行
-- `npm run check-types` - TypeScript型チェックを実行
+- `npm run tsc` - TypeScript型チェックを実行
 - `npm run format` - Biomeでコードフォーマットをチェック
 - `npm run format:fix` - Biomeでコードフォーマットを修正
 - `npm run check` - Biomeで総合チェック

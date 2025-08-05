@@ -51,3 +51,6 @@ storybook-static
 
 # react-router
 .react-router/
+
+# serena
+.serena/cache
