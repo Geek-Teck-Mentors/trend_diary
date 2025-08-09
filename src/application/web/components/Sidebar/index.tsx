@@ -38,7 +38,10 @@ export default function AppSidebar({ displayName }: Props) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <a href='/' className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-md transition-colors'>
+        <a
+          href='/'
+          className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-md transition-colors'
+        >
           <BookOpen className='h-6 w-6' />
           <span className='text-xl font-semibold'>TrendDiary</span>
         </a>
