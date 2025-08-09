@@ -11,6 +11,7 @@ export type Env = {
   Bindings: {
     DATABASE_URL: string
     DISCORD_WEBHOOK_URL: string
+    FEATURE_USER_ENABLED: string
   }
   Variables: {
     [CONTEXT_KEY.APP_LOG]: typeof logger
