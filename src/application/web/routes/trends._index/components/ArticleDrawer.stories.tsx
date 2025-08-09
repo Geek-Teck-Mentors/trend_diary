@@ -1,30 +1,24 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
+import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import ArticleDrawer from './ArticleDrawer'
 
-// テスト用のモックデータ
-const mockQiitaArticle: ArticleOutput = {
-  articleId: 1n,
+
+const defaultMockArticle: Article = {
+  articleId: BigInt(1),
   media: 'qiita',
-  title: 'React 19の新機能を徹底解説！Server Componentsとは',
-  author: 'tech_blogger',
-  description:
-    'React 19で導入されるServer Componentsについて詳しく解説します。従来のクライアントサイドレンダリングとの違いや、実装方法、パフォーマンス向上のメリットについて具体的なコード例とともに説明していきます。',
-  url: 'https://qiita.com/tech_blogger/items/react19-server-components',
-  createdAt: new Date('2024-01-15T10:30:00Z'),
+  title: 'デフォルトタイトル',
+  author: 'デフォルト著者',
+  description: 'デフォルトの説明文です',
+  url: 'https://example.com',
+  createdAt: new Date('2024-01-01T00:00:00Z'),
 }
 
-const mockZennArticle: ArticleOutput = {
-  articleId: 2n,
-  media: 'zenn',
-  title: 'TypeScript 5.3の新機能まとめ',
-  author: 'frontend_dev',
-  description:
-    'TypeScript 5.3で追加された新機能について詳しく解説します。型安全性の向上、パフォーマンスの改善、新しい型操作について実際のコードサンプルとともに紹介していきます。',
-  url: 'https://zenn.dev/frontend_dev/articles/typescript-5-3-features',
-  createdAt: new Date('2024-02-20T14:45:00Z'),
-}
+// モックのArticleデータ
+const generateMockArticle = (params?: Partial<Article>): Article => ({
+  ...defaultMockArticle,
+  ...params,
+})
 
 const meta: Meta<typeof ArticleDrawer> = {
   component: ArticleDrawer,
@@ -47,7 +41,7 @@ type Story = StoryObj<typeof ArticleDrawer>
 
 export const Default: Story = {
   args: {
-    article: mockQiitaArticle,
+    article: defaultMockArticle,
   },
   play: async ({ canvas }) => {
     // ドロワーが表示されることを確認（ポータル経由でdocument.bodyに描画される）
@@ -57,20 +51,22 @@ export const Default: Story = {
     })
 
     // 記事タイトルが表示されることを確認
-    await expect(within(document.body).getByText(mockQiitaArticle.title)).toBeInTheDocument()
+    await expect(within(document.body).getByText(defaultMockArticle.title)).toBeInTheDocument()
 
     // 作成者が表示されることを確認
-    await expect(within(document.body).getByText(mockQiitaArticle.author)).toBeInTheDocument()
+    await expect(within(document.body).getByText(defaultMockArticle.author)).toBeInTheDocument()
 
     // 記事の説明が表示されることを確認
-    await expect(within(document.body).getByText(mockQiitaArticle.description)).toBeInTheDocument()
+    await expect(within(document.body).getByText(defaultMockArticle.description)).toBeInTheDocument()
 
     // 作成日が表示されることを確認（ローカライズされた形式）
-    const formattedDate = mockQiitaArticle.createdAt.toLocaleDateString()
+    const formattedDate = defaultMockArticle.createdAt.toLocaleDateString()
     await expect(within(document.body).getByText(formattedDate)).toBeInTheDocument()
 
     // 「記事を読む」ボタンが存在することを確認
-    await expect(within(document.body).getByRole('link', { name: '記事を読む' })).toBeInTheDocument()
+    await expect(
+      within(document.body).getByRole('link', { name: '記事を読む' }),
+    ).toBeInTheDocument()
 
     // 閉じるボタンが存在することを確認
     const closeButton = within(document.body).getByRole('button', { name: 'Close' })
@@ -78,9 +74,12 @@ export const Default: Story = {
   },
 }
 
+const qiitaMockArticle = generateMockArticle({ media: 'qiita' });
+
+
 export const QiitaArticle: Story = {
   args: {
-    article: mockQiitaArticle,
+    article: qiitaMockArticle,
   },
   play: async ({ canvas }) => {
     // Qiitaメディアアイコンが表示されることを確認
@@ -89,33 +88,35 @@ export const QiitaArticle: Story = {
 
     // 記事URLが正しく設定されていることを確認
     const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
-    await expect(readButton).toHaveAttribute('href', mockQiitaArticle.url)
+    await expect(readButton).toHaveAttribute('href', qiitaMockArticle.url)
     await expect(readButton).toHaveAttribute('target', '_blank')
     await expect(readButton).toHaveAttribute('rel', 'noopener noreferrer nofollow')
   },
 }
 
+const zennMockArticle = generateMockArticle({ media: 'zenn' });
+
 export const ZennArticle: Story = {
   args: {
-    article: mockZennArticle,
+    article: zennMockArticle,
   },
   play: async ({ canvas }) => {
     // Zennの記事タイトルが表示されることを確認
-    await expect(within(document.body).getByText(mockZennArticle.title)).toBeInTheDocument()
+    await expect(within(document.body).getByText(zennMockArticle.title)).toBeInTheDocument()
 
     // Zennの作成者が表示されることを確認
-    await expect(within(document.body).getByText(mockZennArticle.author)).toBeInTheDocument()
+    await expect(within(document.body).getByText(zennMockArticle.author)).toBeInTheDocument()
 
     // 記事URLが正しく設定されていることを確認
     const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
-    await expect(readButton).toHaveAttribute('href', mockZennArticle.url)
+    await expect(readButton).toHaveAttribute('href', zennMockArticle.url)
   },
 }
 
 export const InteractionTest: Story = {
   args: {
-    article: mockQiitaArticle,
-    onClose: () => console.log('ドロワーが閉じられました'),
+    article: defaultMockArticle,
+    onClose: () => {},
   },
   play: async ({ canvas }) => {
     // 閉じるボタンをクリックして動作を確認
@@ -139,7 +140,7 @@ export const InteractionTest: Story = {
 
 export const UIElementsValidation: Story = {
   args: {
-    article: mockQiitaArticle,
+    article: defaultMockArticle,
   },
   play: async ({ canvas }) => {
     // data-slot属性を持つ要素が存在することを確認
@@ -155,7 +156,9 @@ export const UIElementsValidation: Story = {
     const contentDescription = within(document.body).getByTestId('drawer-content-description')
     await expect(contentDescription).toBeInTheDocument()
 
-    const contentDescriptionText = within(document.body).getByTestId('drawer-content-description-content')
+    const contentDescriptionText = within(document.body).getByTestId(
+      'drawer-content-description-content',
+    )
     await expect(contentDescriptionText).toBeInTheDocument()
 
     const contentLink = within(document.body).getByTestId('drawer-content-link')
@@ -170,15 +173,14 @@ export const UIElementsValidation: Story = {
   },
 }
 
+const longTitleAndDescriptionMockArticle = generateMockArticle({
+  title: 'a'.repeat(100),
+  description: 'b'.repeat(300),
+})
+
 export const LongContentTest: Story = {
   args: {
-    article: {
-      ...mockQiitaArticle,
-      title: 'とても長いタイトルのテスト記事：React Server Components、TypeScript 5.3、Next.js 14、Remix、Vite、そしてモダンフロントエンド開発の全てを網羅した完全ガイド',
-      description:
-        'この記事は非常に長い説明文を含むテスト用の記事です。複数行にわたる長いテキストがどのように表示されるかを確認するためのものです。実際のプロダクトでは、このような長い説明文が表示される可能性があるため、UIが適切に対応できることを確認する必要があります。テキストの折り返し、スクロール動作、レイアウトの崩れがないかなどを検証していきます。',
-      author: 'very_long_author_name_for_testing_ui_layout',
-    },
+    article: longTitleAndDescriptionMockArticle,
   },
   play: async ({ canvas }) => {
     // 長いコンテンツでもレイアウトが崩れないことを確認
@@ -188,10 +190,14 @@ export const LongContentTest: Story = {
     })
 
     // タイトルが表示されることを確認（長いタイトル）
-    await expect(within(document.body).getByText(/とても長いタイトルのテスト記事/)).toBeInTheDocument()
+    await expect(
+      within(document.body).getByText(/とても長いタイトルのテスト記事/),
+    ).toBeInTheDocument()
 
     // 長い作成者名が表示されることを確認
-    await expect(within(document.body).getByText('very_long_author_name_for_testing_ui_layout')).toBeInTheDocument()
+    await expect(
+      within(document.body).getByText('very_long_author_name_for_testing_ui_layout'),
+    ).toBeInTheDocument()
 
     // スクロール可能な領域が存在することを確認
     const scrollableArea = within(document.body).getByTestId('scrollable-area')
@@ -201,7 +207,7 @@ export const LongContentTest: Story = {
 
 export const ClosedState: Story = {
   args: {
-    article: mockQiitaArticle,
+    article: defaultMockArticle,
     isOpen: false,
   },
   play: async ({ canvas }) => {
@@ -222,12 +228,14 @@ export const ResponsiveLayout: Story = {
     },
   },
   args: {
-    article: mockQiitaArticle,
+    article: defaultMockArticle,
   },
   play: async ({ canvas }) => {
     // モバイル表示でも要素が正しく表示されることを確認
-    await expect(within(document.body).getByText(mockQiitaArticle.title)).toBeInTheDocument()
-    await expect(within(document.body).getByRole('link', { name: '記事を読む' })).toBeInTheDocument()
+    await expect(within(document.body).getByText(defaultMockArticle.title)).toBeInTheDocument()
+    await expect(
+      within(document.body).getByRole('link', { name: '記事を読む' }),
+    ).toBeInTheDocument()
 
     // ドロワーの幅クラスが適用されていることを確認
     const drawerContent = within(document.body).getByTestId('drawer-content')

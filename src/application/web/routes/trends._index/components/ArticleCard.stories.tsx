@@ -3,36 +3,21 @@ import { expect, fn, userEvent } from 'storybook/test'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import ArticleCard from './ArticleCard'
 
-// モックのArticleデータ
-const mockQiitaArticle: Article = {
+const defaultMockArticle: Article = {
   articleId: BigInt(1),
   media: 'qiita',
-  title: 'React Hooksを使ったモダンなフロントエンド開発',
-  author: 'qiita_developer',
-  description: 'React Hooksを活用したモダンなフロントエンド開発手法について解説します',
-  url: 'https://qiita.com/example/react-hooks',
-  createdAt: new Date('2024-01-15T10:00:00Z'),
+  title: 'デフォルトタイトル',
+  author: 'デフォルト筆者',
+  description: 'デフォルトの説明文です',
+  url: 'https://example.com',
+  createdAt: new Date('2024-01-01T00:00:00Z'),
 }
 
-const mockZennArticle: Article = {
-  articleId: BigInt(2),
-  media: 'zenn',
-  title: 'TypeScript + Prismaで型安全なAPI開発を始めよう',
-  author: 'zenn_engineer',
-  description: 'TypeScriptとPrismaを使った型安全なAPI開発について',
-  url: 'https://zenn.dev/example/typescript-prisma',
-  createdAt: new Date('2024-02-20T15:30:00Z'),
-}
-
-const mockLongTitleArticle: Article = {
-  articleId: BigInt(3),
-  media: 'qiita',
-  title: 'これは非常に長いタイトルのテスト記事です。文字数が多い場合の表示確認とline-clampの動作をテストするためのサンプルタイトルです',
-  author: 'long_title_author',
-  description: '長いタイトルのテスト記事',
-  url: 'https://qiita.com/example/long-title',
-  createdAt: new Date('2024-03-10T09:15:00Z'),
-}
+// モックのArticleデータ
+const generateMockArticle = (params?: Partial<Article>): Article => ({
+  ...defaultMockArticle,
+  ...params,
+})
 
 const meta: Meta<typeof ArticleCard> = {
   component: ArticleCard,
@@ -53,6 +38,8 @@ const meta: Meta<typeof ArticleCard> = {
 export default meta
 
 type Story = StoryObj<typeof ArticleCard>
+
+const mockQiitaArticle = generateMockArticle({ media: 'qiita' })
 
 export const QiitaArticle: Story = {
   args: {
@@ -82,6 +69,7 @@ export const QiitaArticle: Story = {
   },
 }
 
+const mockZennArticle = generateMockArticle({ media: 'zenn' })
 export const ZennArticle: Story = {
   args: {
     article: mockZennArticle,
@@ -98,6 +86,7 @@ export const ZennArticle: Story = {
   },
 }
 
+const mockLongTitleArticle = generateMockArticle({ title: 'a'.repeat(100) })
 export const LongTitleArticle: Story = {
   args: {
     article: mockLongTitleArticle,
@@ -106,7 +95,7 @@ export const LongTitleArticle: Story = {
     // 長いタイトルが適切に表示されることを確認（line-clampが適用される）
     const titleElement = canvas.getByText(mockLongTitleArticle.title)
     await expect(titleElement).toBeInTheDocument()
-    
+
     // line-clampクラスが適用されていることを確認
     const titleContainer = titleElement.closest('.line-clamp-2')
     await expect(titleContainer).toBeInTheDocument()
@@ -165,7 +154,7 @@ export const KeyboardNavigation: Story = {
     // マウスクリックのテスト（キーボードイベントハンドラーがない場合の代替）
     await userEvent.click(card)
     await expect(args.onCardClick).toHaveBeenCalledWith(mockQiitaArticle)
-    
+
     // フォーカス可能な要素であることを確認
     await expect(card).toHaveAttribute('tabIndex', '0')
   },
@@ -198,7 +187,7 @@ export const MediaIconVariations: Story = {
     layout: 'padded',
   },
   render: () => (
-    <div className="flex gap-4">
+    <div className='flex gap-4'>
       <ArticleCard article={mockQiitaArticle} onCardClick={fn()} />
       <ArticleCard article={mockZennArticle} onCardClick={fn()} />
     </div>
@@ -211,10 +200,10 @@ export const MediaIconVariations: Story = {
     // 各メディアアイコンが正しく表示されることを確認
     const mediaIcons = canvas.getAllByTestId('media-icon')
     await expect(mediaIcons).toHaveLength(2)
-    
+
     // Qiitaアイコン
     await expect(mediaIcons[0]).toHaveAttribute('src', '/images/qiita-icon.png')
-    
+
     // Zennアイコン
     await expect(mediaIcons[1]).toHaveAttribute('src', '/images/zenn-icon.svg')
   },
