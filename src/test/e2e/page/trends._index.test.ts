@@ -34,6 +34,9 @@ test.describe('記事一覧ページ', () => {
         Array.from({ length: ARTICLE_COUNT }, (_, i) => articleTestHelper.createArticle()),
       )
     })
+    test.beforeEach(async ({ page }) => {
+      await page.waitForSelector('[data-slot="card"]')
+    })
     test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
       // 1. 記事カードの存在を確認
       const articleCards = page.locator('[data-slot="card"]')
