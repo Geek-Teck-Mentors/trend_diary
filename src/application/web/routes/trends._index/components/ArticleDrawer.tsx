@@ -77,6 +77,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
             rel='noopener noreferrer nofollow'
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
             data-testid='drawer-content-link'
+            data-slot='drawer-content-link'
           >
             <ExternalLink className='h-4 w-4' />
             記事を読む
