@@ -17,7 +17,7 @@ test.describe('記事一覧ページ', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/trends')
-    await page.waitForLoadState('networkidle', { timeout: 10000 })
+    await page.waitForLoadState('load', { timeout: 3000 })
   })
 
   test.describe('記事がない場合', () => {
