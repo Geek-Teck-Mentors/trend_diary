@@ -37,7 +37,8 @@
       "mcp__serena__replace_symbol_body",
       "Bash(npx biome ci:*)",
       "mcp__serena__write_memory",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "mcp__serena__read_memory"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -111,6 +112,19 @@
       "Write(/etc/passwd)",
       "Write(/etc/shadow)",
       "Write(/etc/sudoers)"
+    ]
+  },
+  "hooks": {
+    "EventName": [
+      {
+        "matcher": "PostToolUse",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run check:fix"
+          }
+        ]
+      }
     ]
   }
 }
