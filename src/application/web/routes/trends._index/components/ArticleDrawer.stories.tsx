@@ -173,14 +173,18 @@ export const UIElementsValidation: Story = {
   },
 }
 
-const longTitleAndDescriptionMockArticle = generateMockArticle({
-  title: 'a'.repeat(100),
-  description: 'b'.repeat(300),
+const longTitle = 'a'.repeat(100)
+const longDescription = 'b'.repeat(300)
+const longAuthorName = 'c'.repeat(50)
+const longContentMockArticle = generateMockArticle({
+  title: longTitle,
+  description: longDescription,
+  author: longAuthorName,
 })
 
 export const LongContentTest: Story = {
   args: {
-    article: longTitleAndDescriptionMockArticle,
+    article: longContentMockArticle,
   },
   play: async ({ canvas }) => {
     // 長いコンテンツでもレイアウトが崩れないことを確認
@@ -191,12 +195,12 @@ export const LongContentTest: Story = {
 
     // タイトルが表示されることを確認（長いタイトル）
     await expect(
-      within(document.body).getByText(/とても長いタイトルのテスト記事/),
+      within(document.body).getByText(longTitle),
     ).toBeInTheDocument()
 
     // 長い作成者名が表示されることを確認
     await expect(
-      within(document.body).getByText('very_long_author_name_for_testing_ui_layout'),
+      within(document.body).getByText(longAuthorName),
     ).toBeInTheDocument()
 
     // スクロール可能な領域が存在することを確認

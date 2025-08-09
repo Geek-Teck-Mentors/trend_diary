@@ -5,6 +5,11 @@ import { SidebarProvider } from '../ui/sidebar'
 import AppSidebar from './index'
 import useSidebar from './useSidebar'
 
+// React RouterのuseNavigateをモック
+vi.mock('react-router', () => ({
+  useNavigate: () => vi.fn(),
+}))
+
 // useSidebarフックをモック
 vi.mock('./useSidebar', () => ({
   default: vi.fn(() => ({
