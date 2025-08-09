@@ -3,7 +3,6 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import ArticleDrawer from './ArticleDrawer'
 
-
 const defaultMockArticle: Article = {
   articleId: BigInt(1),
   media: 'qiita',
@@ -32,7 +31,7 @@ const meta: Meta<typeof ArticleDrawer> = {
   },
   args: {
     isOpen: true,
-    onClose: () => {},
+    onClose: () => null,
   },
 }
 export default meta
@@ -57,7 +56,9 @@ export const Default: Story = {
     await expect(within(document.body).getByText(defaultMockArticle.author)).toBeInTheDocument()
 
     // 記事の説明が表示されることを確認
-    await expect(within(document.body).getByText(defaultMockArticle.description)).toBeInTheDocument()
+    await expect(
+      within(document.body).getByText(defaultMockArticle.description),
+    ).toBeInTheDocument()
 
     // 作成日が表示されることを確認（ローカライズされた形式）
     const formattedDate = defaultMockArticle.createdAt.toLocaleDateString()
@@ -74,8 +75,7 @@ export const Default: Story = {
   },
 }
 
-const qiitaMockArticle = generateMockArticle({ media: 'qiita' });
-
+const qiitaMockArticle = generateMockArticle({ media: 'qiita' })
 
 export const QiitaArticle: Story = {
   args: {
@@ -94,7 +94,7 @@ export const QiitaArticle: Story = {
   },
 }
 
-const zennMockArticle = generateMockArticle({ media: 'zenn' });
+const zennMockArticle = generateMockArticle({ media: 'zenn' })
 
 export const ZennArticle: Story = {
   args: {
@@ -116,7 +116,7 @@ export const ZennArticle: Story = {
 export const InteractionTest: Story = {
   args: {
     article: defaultMockArticle,
-    onClose: () => {},
+    onClose: () => null,
   },
   play: async ({ canvas }) => {
     // 閉じるボタンをクリックして動作を確認
@@ -194,14 +194,10 @@ export const LongContentTest: Story = {
     })
 
     // タイトルが表示されることを確認（長いタイトル）
-    await expect(
-      within(document.body).getByText(longTitle),
-    ).toBeInTheDocument()
+    await expect(within(document.body).getByText(longTitle)).toBeInTheDocument()
 
     // 長い作成者名が表示されることを確認
-    await expect(
-      within(document.body).getByText(longAuthorName),
-    ).toBeInTheDocument()
+    await expect(within(document.body).getByText(longAuthorName)).toBeInTheDocument()
 
     // スクロール可能な領域が存在することを確認
     const scrollableArea = within(document.body).getByTestId('scrollable-area')

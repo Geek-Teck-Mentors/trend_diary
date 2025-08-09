@@ -1,6 +1,4 @@
-import { faker } from '@faker-js/faker' // TODO: トレンド一覧ページのE2Eテストを実装する
 import { expect, test } from '@playwright/test'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 const ARTICLE_COUNT = 10
@@ -88,7 +86,7 @@ test.describe('記事一覧ページ', () => {
       await expect(drawerLink).toBeVisible()
       // ドロワーの記事を読むリンクのURLを上書き
       await drawerLink.evaluate((element, url) => {
-        (element as HTMLAnchorElement).href = url
+        ;(element as HTMLAnchorElement).href = url
       }, ARTICLE_URL)
       await drawerLink.click()
 

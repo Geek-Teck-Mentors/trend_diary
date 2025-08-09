@@ -41,9 +41,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           <DrawerTitle className='mb-4 text-xl leading-relaxed font-bold text-gray-900'>
             {article.title}
           </DrawerTitle>
-          <DrawerDescription className='sr-only'>
-            記事の詳細情報を表示しています
-          </DrawerDescription>
+          <DrawerDescription className='sr-only'>記事の詳細情報を表示しています</DrawerDescription>
 
           <div
             className='mb-6 flex items-center gap-4 text-sm text-gray-600'
