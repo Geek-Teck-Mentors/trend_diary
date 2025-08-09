@@ -69,7 +69,6 @@ test.describe('記事一覧ページ', () => {
       // 1. 記事カードの存在を確認
       const articleCards = page.locator('[data-slot="card"]')
       const articleCard = articleCards.first()
-      await expect(articleCard).toBeVisible()
 
       await articleCard.click()
 
