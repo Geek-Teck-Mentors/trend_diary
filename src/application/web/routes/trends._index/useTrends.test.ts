@@ -31,7 +31,6 @@ const mockApiClient = {
 }
 
 const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
-
 type UseTrendsHook = ReturnType<typeof useTrends>
 
 function setupHook(): RenderHookResult<UseTrendsHook, unknown> {
