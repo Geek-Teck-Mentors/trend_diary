@@ -70,7 +70,7 @@ test.describe('記事一覧ページ', () => {
     test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
       const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
 
-      // 1. 記事カードの存在をクリック
+      // 1. 記事カードをクリック
       const articleCard = page.locator('[data-slot="card"]').first()
       await articleCard.click()
 
