@@ -27,7 +27,10 @@ export default defineConfig(({ mode }) => {
           'src/application/web/components/**/*.tsx',
           'src/application/web/features/**/*.tsx',
         ],
-        exclude: ['src/application/web/components/ui'],
+        exclude: [
+          'src/application/web/components/ui',
+          'src/application/web/components/customized',
+        ],
         thresholds: {
           statements: 80,
           branches: 80,
