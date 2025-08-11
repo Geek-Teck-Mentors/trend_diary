@@ -17,8 +17,6 @@ test.describe('記事一覧ページ', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/trends')
-    await page.waitForURL('/trends')
-    await page.waitForLoadState('domcontentloaded', { timeout: 3000 })
   })
 
   test.describe('記事がない場合', () => {
@@ -36,7 +34,7 @@ test.describe('記事一覧ページ', () => {
       )
     })
     test.beforeEach(async ({ page }) => {
-      await page.waitForTimeout(3000);
+      // カードが表示されるのを待機
       await page.locator('[data-slot="card"]').nth(0).waitFor({ state: 'visible', timeout: 10000 })
     })
     test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
@@ -72,11 +70,8 @@ test.describe('記事一覧ページ', () => {
     test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
       const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
 
-      // 1. 記事カードの存在を確認
-      const articleCards = page.locator('[data-slot="card"]')
-      const articleCard = articleCards.first()
-      await expect(articleCard).toBeVisible()
-
+      // 1. 記事カードの存在をクリック
+      const articleCard = page.locator('[data-slot="card"]').first()
       await articleCard.click()
 
       // 2. ドロワーが開くのを待機
