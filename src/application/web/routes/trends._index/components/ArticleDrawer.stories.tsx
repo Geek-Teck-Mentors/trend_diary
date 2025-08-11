@@ -237,12 +237,13 @@ export const ResponsiveLayout: Story = {
       within(document.body).getByRole('link', { name: '記事を読む' }),
     ).toBeInTheDocument()
 
-    // ドロワーの幅クラスが適用されていることを確認
-    const drawerContent = within(document.body).getByTestId('drawer-content')
-    await expect(drawerContent).toBeInTheDocument()
-    await expect(drawerContent).toHaveClass('w-1/2')
-
-    // 高さが画面いっぱいになっていることを確認
-    await expect(drawerContent).toHaveClass('h-full')
+    // ドロワーの幅クラスが適用されていることを確認（ポータル経由での描画を考慮して待機）
+    await waitFor(() => {
+      const drawerContent = within(document.body).getByTestId('drawer-content')
+      expect(drawerContent).toBeInTheDocument()
+      expect(drawerContent).toHaveClass('w-1/2')
+      // 高さが画面いっぱいになっていることを確認
+      expect(drawerContent).toHaveClass('h-full')
+    })
   },
 }
