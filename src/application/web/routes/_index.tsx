@@ -1,8 +1,9 @@
 import { BookOpen, Calendar, Monitor, TrendingUp, Users } from 'lucide-react'
-import type { MetaFunction } from 'react-router'
+import { type LoaderFunctionArgs, type MetaFunction, useLoaderData } from 'react-router'
 import { ClipText } from '../components/ClipText'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
+import { isUserFeatureEnabled } from '../features/featureFlag'
 
 export const meta: MetaFunction = () => [
   { property: 'og:title', content: 'TrendDiary | 技術トレンドを効率的に管理' },
@@ -20,7 +21,16 @@ export const meta: MetaFunction = () => [
   },
 ]
 
+export async function loader({ context }: LoaderFunctionArgs) {
+  const env = context.cloudflare?.env
+  return {
+    userFeatureEnabled: isUserFeatureEnabled(env),
+  }
+}
+
 const TrendDiaryTopPage = () => {
+  const { userFeatureEnabled } = useLoaderData<typeof loader>()
+
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
       <Header />
@@ -55,12 +65,14 @@ const TrendDiaryTopPage = () => {
               >
                 今すぐ始める
               </a>
-              <a
-                href='/login'
-                className='inline-flex items-center px-8 py-4 border-2 border-slate-300 text-slate-700 rounded-lg text-lg font-semibold hover:border-slate-400 hover:bg-slate-50 transition-all duration-200'
-              >
-                ログイン
-              </a>
+              {userFeatureEnabled && (
+                <a
+                  href='/login'
+                  className='inline-flex items-center px-8 py-4 border-2 border-slate-300 text-slate-700 rounded-lg text-lg font-semibold hover:border-slate-400 hover:bg-slate-50 transition-all duration-200'
+                >
+                  ログイン
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -81,7 +93,8 @@ const TrendDiaryTopPage = () => {
           <div className='text-center mb-16'>
             <h2 className='text-3xl font-bold text-slate-900 mb-4'>なぜTrendDiaryを選ぶのか？</h2>
             <p className='text-lg text-slate-600 max-w-2xl mx-auto'>
-              Slack RSSフィードとは違い、読んだかどうかを明確に管理できる機能を提供します
+              Slack
+              RSSフィードとは違って特定のアプリに依存せず、Webブラウザからトレンド記事を確認できます。
             </p>
           </div>
 
@@ -92,7 +105,8 @@ const TrendDiaryTopPage = () => {
               </div>
               <h3 className='text-xl font-semibold text-slate-900 mb-2'>読書状況の管理</h3>
               <p className='text-slate-600'>
-                記事を読んだかどうかを簡単に記録し、読み逃しを防げます
+                記事を読んだかどうかを簡単に記録し、読み逃しを防げます。
+                {!userFeatureEnabled && '（ログイン機能は近日公開予定）'}
               </p>
             </div>
 
@@ -148,8 +162,7 @@ const TrendDiaryTopPage = () => {
                 </div>
                 <div className='mt-6 p-4 bg-blue-50 rounded-lg'>
                   <p className='text-sm text-blue-800'>
-                    ※
-                    ログイン後は記事一覧をサイドバー形式で表示するため、十分な画面幅を推奨しています
+                    ※記事一覧をサイドバー形式で表示するため、十分な画面幅を推奨しています
                   </p>
                 </div>
               </div>
@@ -165,14 +178,23 @@ const TrendDiaryTopPage = () => {
             今すぐ技術トレンドの管理を始めましょう
           </h2>
           <p className='text-xl text-blue-100 mb-8 max-w-2xl mx-auto'>
-            無料でアカウントを作成して、効率的な技術キャッチアップを体験してください
+            効率的な技術トレンドのキャッチアップを体験してください
           </p>
-          <a
-            href='/signup'
-            className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
-          >
-            <ClipText text='無料でアカウントを作成' />
-          </a>
+          {userFeatureEnabled ? (
+            <a
+              href='/signup'
+              className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
+            >
+              <ClipText text='無料でアカウントを作成' />
+            </a>
+          ) : (
+            <a
+              href='/trends'
+              className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
+            >
+              <ClipText text='トレンド記事の一覧へ' />
+            </a>
+          )}
         </div>
       </section>
 
