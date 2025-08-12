@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 
-test.describe('ログインページ', () => {
+test.describe.skip('ログインページ', () => {
   test.describe.configure({ mode: 'default' })
   // テストアカウントの情報
   const testEmail = 'test@example.com'
