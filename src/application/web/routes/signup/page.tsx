@@ -21,7 +21,7 @@ type Props = {
 export default function SignupPage({ pageError, handleSubmit }: Props) {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
-      <Header />
+      <Header enableUserFeature={true} />
       <div className='flex min-h-[calc(100vh-180px)] items-center justify-center p-4'>
         <Card className='flex w-full max-w-md flex-col'>
           <CardHeader className='space-y-1'>

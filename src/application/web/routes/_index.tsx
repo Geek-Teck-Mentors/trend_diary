@@ -33,7 +33,7 @@ const TrendDiaryTopPage = () => {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
-      <Header />
+      <Header enableUserFeature={userFeatureEnabled} />
 
       {/* Hero Section */}
       <section className='relative overflow-hidden'>
