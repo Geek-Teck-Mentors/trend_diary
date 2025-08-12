@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router'
+import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
 import AppSidebar from '../components/Sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'
 import getApiClientForClient from '../infrastructure/api'
+import { isUserFeatureEnabled } from '../features/featureFlag'
+
+export async function loader({ context }: LoaderFunctionArgs) {
+  const env = context.cloudflare?.env
+  return {
+    userFeatureEnabled: isUserFeatureEnabled(env),
+  }
+}
 
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
   const [displayName, setDisplayName] = useState('未設定')
+  const { userFeatureEnabled } = useLoaderData<typeof loader>()
 
   useEffect(() => {
     let isMounted = true
@@ -32,7 +41,7 @@ export default function Layout() {
 
   return (
     <SidebarProvider>
-      <AppSidebar displayName={displayName} />
+      <AppSidebar displayName={displayName} userFeatureEnabled={userFeatureEnabled} />
       <div className='w-full'>
         <Outlet />
       </div>

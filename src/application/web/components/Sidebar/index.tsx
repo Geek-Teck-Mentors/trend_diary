@@ -29,9 +29,10 @@ const menuItems = [
 
 type Props = {
   displayName: string
+  userFeatureEnabled: boolean
 }
 
-export default function AppSidebar({ displayName }: Props) {
+export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
   const navigate = useNavigate()
   const { handleLogout, isLoading } = useSidebar(navigate)
 
@@ -64,21 +65,23 @@ export default function AppSidebar({ displayName }: Props) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup className='absolute bottom-0 left-0 w-full'>
-          <SidebarGroupLabel>User</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem className='w-full'>
-                <SidebarMenuButton>ユーザー名：{displayName}</SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleLogout} disabled={isLoading}>
-                  {isLoading ? 'ログアウト中...' : 'ログアウト'}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {userFeatureEnabled && (
+          <SidebarGroup className='absolute bottom-0 left-0 w-full'>
+            <SidebarGroupLabel>User</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem className='w-full'>
+                  <SidebarMenuButton>ユーザー名：{displayName}</SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={handleLogout} disabled={isLoading}>
+                    {isLoading ? 'ログアウト中...' : 'ログアウト'}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>
