@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
 import AppSidebar from '../components/Sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'
-import getApiClientForClient from '../infrastructure/api'
 import { isUserFeatureEnabled } from '../features/featureFlag'
+import getApiClientForClient from '../infrastructure/api'
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const env = context.cloudflare?.env
