@@ -180,21 +180,14 @@ const TrendDiaryTopPage = () => {
           <p className='text-xl text-blue-100 mb-8 max-w-2xl mx-auto'>
             効率的な技術トレンドのキャッチアップを体験してください
           </p>
-          {userFeatureEnabled ? (
-            <a
-              href='/signup'
-              className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
-            >
-              <ClipText text='無料でアカウントを作成' />
-            </a>
-          ) : (
-            <a
-              href='/trends'
-              className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
-            >
-              <ClipText text='トレンド記事の一覧へ' />
-            </a>
-          )}
+          <a
+            href={userFeatureEnabled ? '/signup' : '/trends'}
+            className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
+          >
+            <ClipText
+              text={userFeatureEnabled ? '無料でアカウントを作成' : 'トレンド記事の一覧へ'}
+            />
+          </a>
         </div>
       </section>
 
