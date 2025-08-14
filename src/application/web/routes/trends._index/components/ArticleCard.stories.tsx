@@ -46,7 +46,7 @@ export const QiitaArticle: Story = {
     article: mockQiitaArticle,
   },
   play: async ({ canvas, args }) => {
-    // カード要素が存在することを確認
+    // クリック可能なArticleCard要素が存在することを確認
     const card = canvas.getByRole('button')
     await expect(card).toBeInTheDocument()
 
@@ -59,7 +59,7 @@ export const QiitaArticle: Story = {
     await expect(author).toBeInTheDocument()
 
     // Qiitaメディアアイコンが表示されることを確認
-    const mediaIcon = canvas.getByTestId('media-icon')
+    const mediaIcon = canvas.getByRole('img')
     await expect(mediaIcon).toBeInTheDocument()
     await expect(mediaIcon).toHaveAttribute('src', '/images/qiita-icon.png')
   },
@@ -72,7 +72,7 @@ export const ZennArticle: Story = {
   },
   play: async ({ canvas }) => {
     // Zennメディアアイコンが表示されることを確認
-    const mediaIcon = canvas.getByTestId('media-icon')
+    const mediaIcon = canvas.getByRole('img')
     await expect(mediaIcon).toBeInTheDocument()
     await expect(mediaIcon).toHaveAttribute('src', '/images/zenn-icon.svg')
 
@@ -112,6 +112,7 @@ export const ClickInteraction: Story = {
     article: mockQiitaArticle,
   },
   play: async ({ canvas, args }) => {
+    // クリック可能なArticleCard要素を取得
     const card = canvas.getByRole('button')
 
     // カードをクリック
@@ -128,6 +129,7 @@ export const HoverInteraction: Story = {
     article: mockQiitaArticle,
   },
   play: async ({ canvas }) => {
+    // クリック可能なArticleCard要素を取得
     const card = canvas.getByRole('button')
     const computedStyle = window.getComputedStyle(card)
 
@@ -137,9 +139,6 @@ export const HoverInteraction: Story = {
     // トランジション効果の実際のCSS値を確認
     await expect(computedStyle.transitionProperty).toBe('all')
     await expect(computedStyle.transitionDuration).toBe('0.3s')
-
-    // 初期状態のbox-shadowを取得
-    const initialBoxShadow = computedStyle.boxShadow
 
     // ホバー効果をテスト
     await userEvent.hover(card)
@@ -159,6 +158,7 @@ export const KeyboardNavigation: Story = {
     article: mockQiitaArticle,
   },
   play: async ({ canvas, args }) => {
+    // クリック可能なArticleCard要素を取得してキーボードナビゲーションをテスト
     const card = canvas.getByRole('button')
 
     // キーボードフォーカスをテスト
@@ -185,12 +185,12 @@ export const MediaIconVariations: Story = {
     </div>
   ),
   play: async ({ canvas }) => {
-    // 複数のカードが表示されることを確認
+    // 複数のクリック可能なArticleCard要素が表示されることを確認
     const cards = canvas.getAllByRole('button')
     await expect(cards).toHaveLength(2)
 
     // 各メディアアイコンが正しく表示されることを確認
-    const mediaIcons = canvas.getAllByTestId('media-icon')
+    const mediaIcons = canvas.getAllByRole('img')
     await expect(mediaIcons).toHaveLength(2)
 
     // Qiitaアイコン

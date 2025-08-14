@@ -7,9 +7,8 @@ export default function MediaIcon({ media }: { media: MediaType }) {
   return (
     <img
       src={mediaIconImages[media]}
-      alt=''
+      alt={`${media} icon`}
       className='inline-block w-4 h-4 align-middle mr-1.5 mb-1'
-      data-testid='media-icon'
     />
   )
 }

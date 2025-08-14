@@ -4,7 +4,6 @@ export default function LoadingSpinner() {
   return (
     <div
       className='bg-opacity-75 fixed inset-0 flex items-center justify-center bg-gray-50 backdrop-blur-sm'
-      data-testid='loading-spinner'
       role='status'
       aria-label='Loading...'
     >
