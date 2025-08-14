@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import ArticleDrawer from './ArticleDrawer'
 
@@ -116,12 +116,15 @@ export const ZennArticle: Story = {
 export const InteractionTest: Story = {
   args: {
     article: defaultMockArticle,
-    onClose: () => null,
+    onClose: fn(),
   },
-  play: async ({ canvas }) => {
+  play: async ({ args, canvas }) => {
     // 閉じるボタンをクリックして動作を確認
     const closeButton = within(document.body).getByRole('button', { name: 'Close' })
     await userEvent.click(closeButton)
+
+    // onCloseコールバックが呼び出されたことを確認
+    await expect(args.onClose).toHaveBeenCalledTimes(2)
 
     // 「記事を読む」ボタンにホバーした時の効果を確認
     const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
