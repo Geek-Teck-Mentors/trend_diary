@@ -88,11 +88,11 @@ export const LongTitleArticle: Story = {
     article: mockLongTitleArticle,
   },
   play: async ({ canvas }) => {
-    // 長いタイトルが適切に表示されることを確認（line-clampが適用される）
+    // 長いタイトルが2行を超える時、`...`が表示されることを確認
     const titleElement = canvas.getByText(mockLongTitleArticle.title)
     await expect(titleElement).toBeInTheDocument()
 
-    // line-clamp-2の実際のCSSスタイリングが適用されていることを確認
+    // titleにline-clampが適用されていることを確認
     const titleContainer = titleElement.parentElement
     await expect(titleContainer).toBeInTheDocument()
     const computedStyle = window.getComputedStyle(titleContainer as Element)
