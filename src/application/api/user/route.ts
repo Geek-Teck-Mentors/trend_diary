@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { createMiddleware } from 'hono/factory'
 import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
 import zodValidator from '@/application/middleware/zodValidator'
@@ -8,7 +9,15 @@ import loginUser from './loginUser'
 import logout from './logout'
 import signup from './signup'
 
+const userFeatureGuard = createMiddleware(async (c, next) => {
+  if (c.env.FEATURE_USER_ENABLED !== 'true') {
+    return c.json({ message: 'ユーザー機能は現在利用できません' }, 503)
+  }
+  return next()
+})
+
 const app = new Hono<Env>()
+  .use(userFeatureGuard)
   .get('/me', authenticator, loginUser)
   .post('/', zodValidator('json', activeUserInputSchema), signup)
   .post(
