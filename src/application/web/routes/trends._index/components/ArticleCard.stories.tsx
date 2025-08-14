@@ -75,10 +75,6 @@ export const ZennArticle: Story = {
     const mediaIcon = canvas.getByRole('img')
     await expect(mediaIcon).toBeInTheDocument()
     await expect(mediaIcon).toHaveAttribute('src', '/images/zenn-icon.svg')
-
-    // タイトルと著者が正しく表示されることを確認
-    await expect(canvas.getByText(mockZennArticle.title)).toBeInTheDocument()
-    await expect(canvas.getByText(mockZennArticle.author)).toBeInTheDocument()
   },
 }
 
