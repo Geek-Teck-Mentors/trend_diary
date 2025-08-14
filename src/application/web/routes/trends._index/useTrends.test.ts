@@ -1,9 +1,10 @@
 import type { RenderHookResult } from '@testing-library/react'
-import { renderHook } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, type MockedFunction, vi } from 'vitest'
 import { getErrorMessage } from '@/common/errors'
 import getApiClientForClient from '../../infrastructure/api'
 import useTrends from './useTrends'
+import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 
 // Mocks
 vi.mock('sonner', () => ({
@@ -19,6 +20,22 @@ vi.mock('@/common/errors', () => ({
 vi.mock('../../infrastructure/api', () => ({
   default: vi.fn(),
 }))
+
+const defaultMockArticle: Article = {
+  articleId: BigInt(1),
+  media: 'qiita',
+  title: 'デフォルトタイトル',
+  author: 'デフォルト筆者',
+  description: 'デフォルトの説明文です',
+  url: 'https://example.com',
+  createdAt: new Date('2024-01-01T00:00:00Z'),
+}
+
+// モックのArticleデータ
+const generateMockArticle = (params?: Partial<Article>): Article => ({
+  ...defaultMockArticle,
+  ...params,
+})
 
 // Mock types
 const mockGetErrorMessage = getErrorMessage as MockedFunction<(error: unknown) => string | null>
@@ -72,6 +89,68 @@ describe('useTrends', () => {
       // fetchArticles関数が正しく定義されていることを確認
       expect(typeof result.current.fetchArticles).toBe('function')
       expect(result.current.fetchArticles.length).toBe(1) // 引数1つを受け取る
+    })
+  })
+
+  describe('API成功ケース', () => {
+    it('fetchArticlesが成功した場合、articlesとcursorの状態が正しく更新される', async () => {
+      const mockApiData = [
+        generateMockArticle({title: 'テストタイトル1'}),
+        generateMockArticle({title: 'テストタイトル2'})
+      ]
+      const mockResponse = {
+        status: 200,
+        json: vi.fn().mockResolvedValue({
+          data: mockApiData,
+          nextCursor: 'next_123',
+          prevCursor: 'prev_123'
+        })
+      }
+
+      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+
+      const { result } = setupHook()
+
+      // fetchArticlesを呼び出し
+      await act(async () => {
+        await result.current.fetchArticles({ date: new Date('2024-01-01') })
+      })
+
+      // articlesとcursorが正しく更新されることを確認
+      expect(result.current.articles).toHaveLength(2)
+      expect(result.current.articles[0].title).toBe('テスト記事1')
+      expect(result.current.articles[1].title).toBe('テスト記事2')
+      expect(result.current.cursor).toEqual({
+        next: 'next_123',
+        prev: 'prev_123'
+      })
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    it('空のレスポンスでも正しく処理される', async () => {
+      const mockResponse = {
+        status: 200,
+        json: vi.fn().mockResolvedValue({
+          data: [],
+          nextCursor: null,
+          prevCursor: null
+        })
+      }
+
+      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+
+      const { result } = setupHook()
+
+      await act(async () => {
+        await result.current.fetchArticles({ date: new Date('2024-01-01') })
+      })
+
+      expect(result.current.articles).toEqual([])
+      expect(result.current.cursor).toEqual({
+        next: null,
+        prev: null
+      })
+      expect(result.current.isLoading).toBe(false)
     })
   })
 
