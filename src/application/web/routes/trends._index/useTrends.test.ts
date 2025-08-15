@@ -2,9 +2,9 @@ import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, type MockedFunction, vi } from 'vitest'
 import { getErrorMessage } from '@/common/errors'
+import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 import useTrends from './useTrends'
-import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 
 // Mocks
 vi.mock('sonner', () => ({
@@ -98,16 +98,16 @@ describe('useTrends', () => {
       const title2 = 'テスト記事2'
 
       const mockApiData = [
-        generateMockArticle({title: title1}),
-        generateMockArticle({title: title2})
+        generateMockArticle({ title: title1 }),
+        generateMockArticle({ title: title2 }),
       ]
       const mockResponse = {
         status: 200,
         json: vi.fn().mockResolvedValue({
           data: mockApiData,
           nextCursor: 'next_123',
-          prevCursor: 'prev_123'
-        })
+          prevCursor: 'prev_123',
+        }),
       }
 
       mockApiClient.articles.$get.mockResolvedValue(mockResponse)
@@ -125,7 +125,7 @@ describe('useTrends', () => {
       expect(result.current.articles[1].title).toBe(title2)
       expect(result.current.cursor).toEqual({
         next: 'next_123',
-        prev: 'prev_123'
+        prev: 'prev_123',
       })
       expect(result.current.isLoading).toBe(false)
     })
@@ -136,8 +136,8 @@ describe('useTrends', () => {
         json: vi.fn().mockResolvedValue({
           data: [],
           nextCursor: null,
-          prevCursor: null
-        })
+          prevCursor: null,
+        }),
       }
 
       mockApiClient.articles.$get.mockResolvedValue(mockResponse)
@@ -151,7 +151,7 @@ describe('useTrends', () => {
       expect(result.current.articles).toEqual([])
       expect(result.current.cursor).toEqual({
         next: null,
-        prev: null
+        prev: null,
       })
       expect(result.current.isLoading).toBe(false)
     })

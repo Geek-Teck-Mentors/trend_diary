@@ -56,9 +56,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
 
           <div className='mb-8'>
             <h3 className='mb-3 text-lg font-semibold text-gray-900'>記事の概要</h3>
-            <p className='leading-relaxed text-gray-700'>
-              {article.description}
-            </p>
+            <p className='leading-relaxed text-gray-700'>{article.description}</p>
           </div>
         </div>
 
