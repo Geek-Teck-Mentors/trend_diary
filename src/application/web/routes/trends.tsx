@@ -18,6 +18,7 @@ export default function Layout() {
   const { userFeatureEnabled } = useLoaderData<typeof loader>()
 
   useEffect(() => {
+    if (!userFeatureEnabled) return
     let isMounted = true
     const client = getApiClientForClient()
 
