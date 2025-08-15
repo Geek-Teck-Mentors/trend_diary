@@ -94,9 +94,12 @@ describe('useTrends', () => {
 
   describe('API成功ケース', () => {
     it('fetchArticlesが成功した場合、articlesとcursorの状態が正しく更新される', async () => {
+      const title1 = 'テスト記事1'
+      const title2 = 'テスト記事2'
+
       const mockApiData = [
-        generateMockArticle({title: 'テストタイトル1'}),
-        generateMockArticle({title: 'テストタイトル2'})
+        generateMockArticle({title: title1}),
+        generateMockArticle({title: title2})
       ]
       const mockResponse = {
         status: 200,
@@ -118,8 +121,8 @@ describe('useTrends', () => {
 
       // articlesとcursorが正しく更新されることを確認
       expect(result.current.articles).toHaveLength(2)
-      expect(result.current.articles[0].title).toBe('テスト記事1')
-      expect(result.current.articles[1].title).toBe('テスト記事2')
+      expect(result.current.articles[0].title).toBe(title1)
+      expect(result.current.articles[1].title).toBe(title2)
       expect(result.current.cursor).toEqual({
         next: 'next_123',
         prev: 'prev_123'
