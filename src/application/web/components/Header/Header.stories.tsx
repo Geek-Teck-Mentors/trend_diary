@@ -13,6 +13,9 @@ export default meta
 type Story = StoryObj<typeof Header>
 
 export const Default: Story = {
+  args: {
+    enableUserFeature: true,
+  },
   play: async ({ canvas }) => {
     // ヘッダー要素が存在することを確認
     const header = canvas.getByRole('banner')
@@ -36,6 +39,9 @@ export const Default: Story = {
 }
 
 export const HoverInteraction: Story = {
+  args: {
+    enableUserFeature: true,
+  },
   play: async ({ canvas }) => {
     // サイトロゴにホバーした時の動作を確認
     const homeLink = canvas.getAllByRole('link').find((link) => link.getAttribute('href') === '/')
@@ -59,6 +65,9 @@ export const HoverInteraction: Story = {
 }
 
 export const LinkValidation: Story = {
+  args: {
+    enableUserFeature: true,
+  },
   play: async ({ canvas }) => {
     // リンクのhref属性が正しく設定されていることを確認
     const homeLink = canvas.getAllByRole('link').find((link) => link.getAttribute('href') === '/')
@@ -73,6 +82,9 @@ export const LinkValidation: Story = {
 }
 
 export const ResponsiveLayout: Story = {
+  args: {
+    enableUserFeature: true,
+  },
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',
