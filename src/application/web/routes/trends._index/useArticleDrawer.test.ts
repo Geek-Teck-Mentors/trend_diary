@@ -11,7 +11,7 @@ function setupHook(): RenderHookResult<UseArticleDrawerHook, unknown> {
 }
 
 // テスト用のモック記事データ
-const createMockArticle = (id: number, title: string = 'テスト記事'): Article => ({
+const createMockArticle = (id: number = 1, title: string = 'テスト記事'): Article => ({
   articleId: BigInt(id),
   media: 'tech',
   title,
