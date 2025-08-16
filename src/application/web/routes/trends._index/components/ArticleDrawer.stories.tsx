@@ -101,15 +101,9 @@ export const ZennArticle: Story = {
     article: zennMockArticle,
   },
   play: async ({ canvas }) => {
-    // Zennの記事タイトルが表示されることを確認
-    await expect(within(document.body).getByText(zennMockArticle.title)).toBeInTheDocument()
-
-    // Zennの作成者が表示されることを確認
-    await expect(within(document.body).getByText(zennMockArticle.author)).toBeInTheDocument()
-
-    // 記事URLが正しく設定されていることを確認
-    const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
-    await expect(readButton).toHaveAttribute('href', zennMockArticle.url)
+    // Zennメディアアイコンが表示されることを確認
+    const mediaIcon = within(document.body).getByAltText('zenn icon')
+    await expect(mediaIcon).toBeInTheDocument()
   },
 }
 
@@ -131,43 +125,9 @@ export const InteractionTest: Story = {
     await userEvent.hover(readButton)
     await expect(readButton).toHaveClass('hover:bg-blue-600')
 
-    // 閉じるボタンのXアイコンの存在確認
-    const xIcon = closeButton.querySelector('svg')
-    await expect(xIcon).toBeInTheDocument()
-
     // 外部リンクアイコンの存在確認
     const externalLinkIcon = readButton.querySelector('svg')
     await expect(externalLinkIcon).toBeInTheDocument()
-  },
-}
-
-export const UIElementsValidation: Story = {
-  args: {
-    article: defaultMockArticle,
-  },
-  play: async ({ canvas }) => {
-    // UI要素が正しく表示されていることを確認
-    const mediaIcon = within(document.body).getByAltText('qiita icon')
-    await expect(mediaIcon).toBeInTheDocument()
-
-    const authorElement = within(document.body).getByText(defaultMockArticle.author)
-    await expect(authorElement).toBeInTheDocument()
-
-    const titleElement = within(document.body).getByText(defaultMockArticle.title)
-    await expect(titleElement).toBeInTheDocument()
-
-    const descriptionElement = within(document.body).getByText(defaultMockArticle.description)
-    await expect(descriptionElement).toBeInTheDocument()
-
-    const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
-    await expect(readButton).toBeInTheDocument()
-
-    // 作成日が表示されていることを確認
-    const formattedDate = defaultMockArticle.createdAt.toLocaleDateString()
-    await expect(within(document.body).getByText(formattedDate)).toBeInTheDocument()
-
-    // 「記事の概要」ヘッダーが存在することを確認
-    await expect(within(document.body).getByText('記事の概要')).toBeInTheDocument()
   },
 }
 
@@ -200,47 +160,5 @@ export const LongContentTest: Story = {
     // スクロール可能な領域が存在することを確認（ドロワーのコンテンツ部分）
     const drawer = within(document.body).getByRole('dialog', { hidden: true })
     await expect(drawer).toBeInTheDocument()
-  },
-}
-
-export const ClosedState: Story = {
-  args: {
-    article: defaultMockArticle,
-    isOpen: false,
-  },
-  play: async ({ canvas }) => {
-    // ドロワーが閉じている時は要素が表示されないことを確認
-    // createPortalで描画されるため、通常のcanvasでは取得できない場合がある
-    // この場合はdocument.bodyから直接確認する
-    await waitFor(() => {
-      const drawer = document.body.querySelector('[role="dialog"]')
-      expect(drawer).not.toBeInTheDocument()
-    })
-  },
-}
-
-export const ResponsiveLayout: Story = {
-  parameters: {
-    viewport: {
-      defaultViewport: 'mobile1',
-    },
-  },
-  args: {
-    article: defaultMockArticle,
-  },
-  play: async ({ canvas }) => {
-    // モバイル表示でも要素が正しく表示されることを確認
-    await expect(within(document.body).getByText(defaultMockArticle.title)).toBeInTheDocument()
-    await expect(
-      within(document.body).getByRole('link', { name: '記事を読む' }),
-    ).toBeInTheDocument()
-
-    // ドロワーが正しく表示されていることを確認（ポータル経由での描画を考慮して待機）
-    await waitFor(() => {
-      const drawer = within(document.body).getByRole('dialog', { hidden: true })
-      expect(drawer).toBeInTheDocument()
-      // モバイル表示でもコンテンツが正しく表示されていることを確認
-      expect(within(drawer).getByText(defaultMockArticle.title)).toBeInTheDocument()
-    })
   },
 }

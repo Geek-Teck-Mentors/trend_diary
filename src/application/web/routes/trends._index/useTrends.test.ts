@@ -65,7 +65,7 @@ describe('useTrends', () => {
     vi.clearAllTimers()
   })
 
-  describe('基本動作', () => {
+  describe('正常系', () => {
     it('初期状態が正しく設定される', () => {
       // API呼び出しが失敗しても初期状態は確認できる
       mockApiClient.articles.$get.mockRejectedValue(new Error('Test Error'))
@@ -157,7 +157,7 @@ describe('useTrends', () => {
     })
   })
 
-  describe('境界値テスト', () => {
+  describe('異常系', () => {
     it('フック初期化時の予期しないエラー', () => {
       mockApiClient.articles.$get.mockRejectedValue(new Error('Test Error'))
 
