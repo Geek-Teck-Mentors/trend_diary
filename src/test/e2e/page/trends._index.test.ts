@@ -91,7 +91,7 @@ test.describe('記事一覧ページ', () => {
       await drawerLink.click()
 
       // 5. 新しいタブでそのリンクのページに遷移する
-      const newPage = await page.context().waitForEvent('page');
+      const newPage = await page.context().waitForEvent('page')
       await expect(newPage).toHaveURL(ARTICLE_URL)
     })
   })
