@@ -1,14 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { BrowserRouter } from 'react-router'
 import { expect, userEvent } from 'storybook/test'
 import { vi } from 'vitest'
 import { SidebarProvider } from '../ui/sidebar'
 import AppSidebar from './index'
 import useSidebar from './useSidebar'
-
-// React RouterのuseNavigateをモック
-vi.mock('react-router', () => ({
-  useNavigate: () => vi.fn(),
-}))
 
 // useSidebarフックをモック
 vi.mock('./useSidebar', () => ({
@@ -23,13 +19,18 @@ const meta: Meta<typeof AppSidebar> = {
   parameters: {
     layout: 'fullscreen',
   },
+  args: {
+    userFeatureEnabled: true,
+  },
   decorators: [
     (Story) => (
-      <SidebarProvider>
-        <div style={{ height: '100vh', width: '300px' }}>
-          <Story />
-        </div>
-      </SidebarProvider>
+      <BrowserRouter>
+        <SidebarProvider>
+          <div style={{ height: '100vh', width: '300px' }}>
+            <Story />
+          </div>
+        </SidebarProvider>
+      </BrowserRouter>
     ),
   ],
 }
@@ -48,8 +49,6 @@ export const Default: Story = {
 
     // メニュー項目が表示されることを確認
     await expect(canvas.getByText('トレンド記事')).toBeInTheDocument()
-    // 読んだ記事はコメントアウトされているため、テストからも削除
-    // await expect(canvas.getByText('読んだ記事')).toBeInTheDocument()
 
     // ユーザー名が表示されることを確認
     await expect(canvas.getByText('ユーザー名：田中太郎')).toBeInTheDocument()
