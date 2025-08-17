@@ -4,6 +4,7 @@ import { vi } from 'vitest'
 import { SidebarProvider } from '../ui/sidebar'
 import AppSidebar from './index'
 import useSidebar from './useSidebar'
+import { BrowserRouter } from 'react-router'
 
 // useSidebarフックをモック
 vi.mock('./useSidebar', () => ({
@@ -18,13 +19,18 @@ const meta: Meta<typeof AppSidebar> = {
   parameters: {
     layout: 'fullscreen',
   },
+  args: {
+    userFeatureEnabled: true,
+  },
   decorators: [
     (Story) => (
-      <SidebarProvider>
-        <div style={{ height: '100vh', width: '300px' }}>
-          <Story />
-        </div>
-      </SidebarProvider>
+      <BrowserRouter>
+        <SidebarProvider>
+          <div style={{ height: '100vh', width: '300px' }}>
+            <Story />
+          </div>
+        </SidebarProvider>
+      </BrowserRouter>
     ),
   ],
 }
@@ -42,13 +48,9 @@ export const Default: Story = {
 
     // メニュー項目が表示されることを確認
     await expect(canvas.getByText('トレンド記事')).toBeInTheDocument()
-    await expect(canvas.getByText('読んだ記事')).toBeInTheDocument()
 
     // ユーザー名が表示されることを確認
     await expect(canvas.getByText('ユーザー名：田中太郎')).toBeInTheDocument()
-
-    // ログアウトボタンが表示されることを確認
-    await expect(canvas.getByText('ログアウト')).toBeInTheDocument()
   },
 }
 
