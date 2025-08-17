@@ -19,7 +19,7 @@ project_root/
 src/
 ├── application/            # アプリケーション層
 │   ├── api/               # Hono API (user, article, policy)
-│   ├── web/               # Remix Frontend
+│   ├── web/               # React Router Frontend
 │   ├── middleware/        # 共通ミドルウェア
 │   ├── server.ts          # アプリケーションサーバー
 │   └── env.ts             # 環境変数

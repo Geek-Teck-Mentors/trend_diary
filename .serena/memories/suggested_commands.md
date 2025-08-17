@@ -1,36 +1,69 @@
-# 推奨コマンド
+# 推奨開発コマンド
 
-## 開発サーバー
-- `npm run dev` - 開発サーバーを起動（React Router + Hono）
+## 基本開発フロー
+```bash
+# 開発サーバー起動
+npm run dev
 
-## ビルド
-- `npm run build` - 本番用ビルド
+# ビルド
+npm run build
+```
 
-## テスト
-- `npm run test:service` - ドメイン/サービス層のテスト
-- `npm run test:api` - API層のテスト
-- `npm run test:frontend` - フロントエンドテスト
-- `npm run test-storybook` - Storybookテスト
-- `npm run e2e` - Playwright E2Eテスト
-- `npm run e2e:report` - Playwright HTMLレポート表示
-- `npm run e2e:gen` - Playwrightコード生成
+## テストコマンド
+```bash
+# 各層のテスト
+npm run test:service      # ドメイン/サービス層テスト
+npm run test:api          # API層テスト  
+npm run test:frontend     # フロントエンドテスト
+npm run test-storybook    # Storybookテスト
 
-## コード品質（タスク完了時に実行）
-- `npm run lint:ci` - Biome CI + TypeScript型チェック（推奨）
-- `npm run lint` - Biomeでlint
-- `npm run lint:fix` - Biomeでlint（自動修正）
-- `npm run tsc` - TypeScript型チェック
-- `npm run format` - Biomeでフォーマットチェック
-- `npm run format:fix` - Biomeでフォーマット修正
-- `npm run check` - Biome総合チェック
-- `npm run check:fix` - Biome総合チェック・修正
+# E2Eテスト
+npm run e2e               # Playwrightテスト実行
+npm run e2e:report        # レポート表示
+npm run e2e:gen           # コード生成
+
+# 個別ファイルテスト
+npm run test:service -- <path/to/file>
+```
+
+## コード品質
+```bash
+# 基本チェック（推奨）
+npm run lint:ci           # Biome CI + 型チェック
+
+# 個別実行
+npm run lint              # Lintチェック
+npm run lint:fix          # Lint自動修正
+npm run format            # フォーマットチェック
+npm run format:fix        # フォーマット修正
+npm run check             # 総合チェック
+npm run check:fix         # 総合チェック・修正
+npm run tsc               # TypeScript型チェック
+```
 
 ## データベース
-- `npm run db:gen` - Prisma型生成
-- `npm run db:migrate` - Prismaマイグレーション（開発用）
-- `npm run db:reset` - データベースリセット
-- `npm run db:studio` - Prisma Studio起動
+```bash
+npm run db:gen            # Prisma型生成
+npm run db:migrate        # マイグレーション実行
+npm run db:migrate:sql-only # SQLのみマイグレーション
+npm run db:migrate:deploy # 本番マイグレーション
+npm run db:reset          # DB リセット
+npm run db:studio         # Prisma Studio
+npm run supabase:db:type-gen # Supabase型生成
+```
 
 ## Storybook
-- `npm run storybook` - Storybook開発サーバー起動
-- `npm run build-storybook` - Storybookビルド
+```bash
+npm run storybook         # 開発モード起動
+npm run build-storybook   # ビルド
+```
+
+## 環境設定
+```bash
+# 初期セットアップ
+npm ci
+cp .dev.vars.example .dev.vars
+cp .dev.vars.example .env
+docker compose up -d
+npm run db:migrate
+```
