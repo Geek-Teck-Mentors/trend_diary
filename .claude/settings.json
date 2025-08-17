@@ -115,7 +115,7 @@
     ]
   },
   "hooks": {
-    "EventName": [
+    "PostToolUse": [
       {
         "matcher": "PostToolUse",
         "hooks": [

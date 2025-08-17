@@ -85,7 +85,7 @@
     "ask": []
   },
   "hooks": {
-    "EventName": [
+    "PostToolUse": [
       {
         "matcher": "PostToolUse",
         "hooks": [
