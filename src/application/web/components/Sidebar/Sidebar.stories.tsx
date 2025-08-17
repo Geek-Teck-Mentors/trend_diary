@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { BrowserRouter } from 'react-router'
 import { expect, userEvent } from 'storybook/test'
 import { vi } from 'vitest'
 import { SidebarProvider } from '../ui/sidebar'
 import AppSidebar from './index'
 import useSidebar from './useSidebar'
-import { BrowserRouter } from 'react-router'
 
 // useSidebarフックをモック
 vi.mock('./useSidebar', () => ({

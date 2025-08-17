@@ -8,8 +8,8 @@ const meta: Meta<typeof Header> = {
     layout: 'fullscreen',
   },
   args: {
-    enableUserFeature: true
-  }
+    enableUserFeature: true,
+  },
 }
 export default meta
 
