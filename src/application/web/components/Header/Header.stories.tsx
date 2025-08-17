@@ -7,6 +7,9 @@ const meta: Meta<typeof Header> = {
   parameters: {
     layout: 'fullscreen',
   },
+  args: {
+    enableUserFeature: true
+  }
 }
 export default meta
 
