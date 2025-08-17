@@ -1,13 +1,44 @@
 {
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "300000",
+    "BASH_MAX_TIMEOUT_MS": "1200000"
+  },
   "permissions": {
     "allow": [
+      "Bash(cat:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm run check-types:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run format:fix:*)",
+      "Bash(npm run test:service:*)",
+      "Bash(npm run test:api:*)",
+      "Bash(npm run test:api:coverage:*)",
+      "Bash(npm run e2e:*)",
+      "Bash(git commit:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(npm run check:fix:*)",
+      "Bash(npm run test:frontend:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm run test-storybook:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx tsc:*)",
       "mcp__serena__check_onboarding_performed",
-      "mcp__serena__read_memory",
       "mcp__serena__list_dir",
-      "mcp__serena__find_file",
+      "mcp__serena__get_symbols_overview",
       "mcp__serena__search_for_pattern",
-      "mcp__serena__list_memories",
-      "mcp__serena__write_memory"
+      "mcp__serena__find_file",
+      "mcp__serena__replace_regex",
+      "mcp__serena__find_symbol",
+      "mcp__serena__think_about_collected_information",
+      "Bash(npx biome check:*)",
+      "mcp__serena__replace_symbol_body",
+      "Bash(npx biome ci:*)",
+      "mcp__serena__write_memory",
+      "mcp__ide__getDiagnostics",
+      "mcp__serena__read_memory"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -81,8 +112,7 @@
       "Write(/etc/passwd)",
       "Write(/etc/shadow)",
       "Write(/etc/sudoers)"
-    ],
-    "ask": []
+    ]
   },
   "hooks": {
     "EventName": [

@@ -1,8 +1,13 @@
 # アーキテクチャパターン
 
-## ドメイン駆動設計（DDD）構造
+## 全体アーキテクチャ
+**ドメイン駆動設計（DDD）** + **クリーンアーキテクチャ** + **Cloudflare Workers + Supabase Functions** ハイブリッド構成
+
+## 層構造
+
+### 1. ドメイン層（src/domain/）
 ```
-src/domain/{aggregate}/
+domain/{aggregate}/
 ├── factory/         # ドメインサービスファクトリ
 ├── model/           # ドメインエンティティ
 ├── service/         # ドメインビジネスロジック
@@ -12,35 +17,55 @@ src/domain/{aggregate}/
 └── index.ts         # 集約エクスポート
 ```
 
-## エラーハンドリングパターン
-**関数型エラーハンドリング**を使用：
+### 2. アプリケーション層（src/application/）
+- **API層**: Hono + React Routerアダプター
+- **Web層**: React Router v7 フロントエンド
+- **ミドルウェア**: 認証・バリデーション・エラーハンドリング
 
-- サービス層: `Result<T, E>`型を返す
-- 非同期処理: `AsyncResult<T, E>`型
-- ヘルパー関数:
-  - `resultSuccess<T>(value: T)`: 成功結果作成
-  - `resultError<T, E>(error: E)`: エラー結果作成
-  - `isSuccess<T, E>(result)`: 成功判定
-  - `isError<T, E>(result)`: エラー判定
+### 3. インフラストラクチャ層（src/infrastructure/）
+- **データベース**: Prisma ORM
+- **外部API**: 通知サービス等
 
-## カスタムエラー型（`src/common/errors/`）
-- `ClientError`: クライアントエラー（400系）
-- `ServerError`: サーバーエラー（500系）
-- `NotFoundError`: リソースが見つからない
-- `AlreadyExistsError`: リソースが既に存在
+## 主要パターン
 
-## API層バリデーション規約
-**全てのAPIエンドポイントで`zodValidator`の使用が必須**
+### エラーハンドリング（関数型）
+```typescript
+// Result<T, E>型でエラーハンドリング
+type Result<T, E> = { success: true; data: T } | { success: false; error: E }
 
-- `query`: クエリパラメータ
-- `param`: パスパラメータ  
-- `json`: リクエストボディ
-- **バリデーション順序**: authenticator → zodValidator(param) → zodValidator(json) → handler
-- **型安全性**: `ZodValidatedContext`系の型使用
+// サービス層：Result型を返す
+return resultSuccess(user)
+return resultError(new NotFoundError('User not found'))
 
-## テスト戦略（多層構造）
-- **サービス層**: `vitest/config.service.ts` - モックPrismaクライアント
-- **API層**: `vitest/config.api.ts` - 実際のデータベース
-- **フロントエンド**: `vitest/config.frontend.ts` - コンポーネント・フック
-- **Storybook**: `vitest/config.storybook.ts` - UIコンポーネント
-- **E2E**: Playwright - エンドツーエンドシナリオ
+// API層：HTTPExceptionに変換
+if (isError(result)) {
+  throw new HTTPException(404, { message: result.error.message })
+}
+```
+
+### バリデーション戦略
+```typescript
+// 全APIエンドポイントでzodValidator必須
+app.post('/api/users',
+  authenticator,
+  zodValidator('param', paramSchema),
+  zodValidator('json', bodySchema),
+  handler
+)
+```
+
+### ドメインモデル
+- **集約ルート**: User, Article, Policy
+- **値オブジェクト**: 各スキーマで定義
+- **ドメインサービス**: 複雑なビジネスロジック
+
+## デプロイメント
+- **メインアプリ**: Cloudflare Workers（/functions/[[path]].ts）
+- **バックグラウンド**: Supabase Functions
+- **データベース**: PostgreSQL + Prisma
+
+## 重要な制約
+- **utilsの作成禁止**
+- **絶対インポート**: @/* パスマッピング使用
+- **API層バリデーション**: zodValidator必須
+- **関数型エラーハンドリング**: Result<T,E>型必須
