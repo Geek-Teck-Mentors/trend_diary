@@ -41,7 +41,6 @@ type Story = StoryObj<typeof AppSidebar>
 export const Default: Story = {
   args: {
     displayName: '田中太郎',
-    userFeatureEnabled: true,
   },
   play: async ({ canvas }) => {
     // サイドバーのヘッダー要素が存在することを確認
@@ -61,7 +60,6 @@ export const Default: Story = {
 export const LongDisplayName: Story = {
   args: {
     displayName: 'とても長いユーザー名のテストケースです',
-    userFeatureEnabled: true,
   },
   play: async ({ canvas }) => {
     await expect(canvas.getByText('TrendDiary')).toBeInTheDocument()
@@ -74,7 +72,6 @@ export const LongDisplayName: Story = {
 export const ShortDisplayName: Story = {
   args: {
     displayName: 'A',
-    userFeatureEnabled: true,
   },
   play: async ({ canvas }) => {
     await expect(canvas.getByText('ユーザー名：A')).toBeInTheDocument()
@@ -84,7 +81,6 @@ export const ShortDisplayName: Story = {
 export const InteractiveLogout: Story = {
   args: {
     displayName: '山田花子',
-    userFeatureEnabled: true,
   },
   play: async ({ canvas }) => {
     // ログアウトボタンをクリック
@@ -99,7 +95,6 @@ export const InteractiveLogout: Story = {
 export const LoadingState: Story = {
   args: {
     displayName: '佐藤次郎',
-    userFeatureEnabled: true,
   },
   beforeEach: () => {
     // ローディング状態のモックを設定
