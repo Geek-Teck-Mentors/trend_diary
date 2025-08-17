@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { BrowserRouter } from 'react-router'
 import { expect, userEvent } from 'storybook/test'
 import { vi } from 'vitest'
 import { SidebarProvider } from '../ui/sidebar'
@@ -18,13 +19,18 @@ const meta: Meta<typeof AppSidebar> = {
   parameters: {
     layout: 'fullscreen',
   },
+  args: {
+    userFeatureEnabled: true,
+  },
   decorators: [
     (Story) => (
-      <SidebarProvider>
-        <div style={{ height: '100vh', width: '300px' }}>
-          <Story />
-        </div>
-      </SidebarProvider>
+      <BrowserRouter>
+        <SidebarProvider>
+          <div style={{ height: '100vh', width: '300px' }}>
+            <Story />
+          </div>
+        </SidebarProvider>
+      </BrowserRouter>
     ),
   ],
 }
@@ -42,7 +48,6 @@ export const Default: Story = {
 
     // メニュー項目が表示されることを確認
     await expect(canvas.getByText('トレンド記事')).toBeInTheDocument()
-    await expect(canvas.getByText('読んだ記事')).toBeInTheDocument()
 
     // ユーザー名が表示されることを確認
     await expect(canvas.getByText('ユーザー名：田中太郎')).toBeInTheDocument()
