@@ -1,38 +1,51 @@
 # コードスタイル・規約
 
-## 言語・コミュニケーション
-- **必ず日本語で回答・コメント**
-- **敬語は使用しない**
-
-## コミットメッセージ規約（Conventional Commits）
-- `feat:` - 新機能追加
-- `fix:` - バグ修正
-- `refactor:` - リファクタリング（機能変更なし）
-- `test:` - テスト追加・修正
-- `docs:` - ドキュメント更新
-- `style:` - コードスタイル修正
-- `perf:` - パフォーマンス改善
-- `chore:` - ビルドプロセス・補助ツール等の変更
+## 基本方針
+- **日本語で回答**（敬語は使用しない）
+- **コメント追加禁止**（明示的に要求されない限り）
+- **ファイル新規作成は最小限**（既存ファイル編集を優先）
 
 ## コードスタイル（Biome設定）
-- **インデント**: 2スペース
-- **行幅**: 100文字
-- **改行**: LF
-- **クォート**: シングルクォート
-- **セミコロン**: 必要な場合のみ
-- **末尾カンマ**: 全て
+```json
+{
+  "indentStyle": "space",
+  "indentWidth": 2,
+  "lineWidth": 100,
+  "quoteStyle": "single",
+  "semicolons": "asNeeded",
+  "trailingCommas": "all"
+}
+```
 
-## ネーミング規約
-- **関数**: camelCase または PascalCase
+## 命名規約
+- **関数**: camelCase, PascalCase
 - **変数**: camelCase, PascalCase, CONSTANT_CASE
 - **型**: PascalCase
-- **オブジェクトプロパティ**: CONSTANT_CASE, camelCase, snake_case, PascalCase
+- **プロパティ**: PascalCase, camelCase, CONSTANT_CASE
 
-## インポート
-- **絶対インポート**: `src/`ルートから（`@/*`のpathマッピング使用）
-- **デフォルトエクスポート**: 許可
-- **CommonJS**: 禁止（ESモジュール使用）
+## インポート規約
+- **絶対インポート**: `@/*` パスマッピング使用
+- **相対インポート**: 同じディレクトリ内のみ
 
-## テスト規約
-- **テストファイル**: 実装コードと同じ階層に配置
-- **仕様**: テストコードに記載（テストケース名だけでも記載）
+## エラーハンドリング
+- **Result<T, E>型**: 関数型エラーハンドリング
+- **サービス層**: Result型必須
+- **API層**: HTTPExceptionに変換
+
+## バリデーション
+- **全APIエンドポイント**: zodValidator必須
+- **順序**: authenticator → zodValidator(param) → zodValidator(json) → handler
+
+## テストファイル命名
+- `*.test.ts` - ユニット・統合テスト
+- `*.stories.tsx` - Storybookテスト
+
+## コミットメッセージ（Conventional Commits）
+- `feat:` - 新機能
+- `fix:` - バグ修正  
+- `refactor:` - リファクタリング
+- `test:` - テスト
+- `docs:` - ドキュメント
+- `style:` - スタイル修正
+- `perf:` - パフォーマンス改善
+- `chore:` - ビルド・ツール変更
