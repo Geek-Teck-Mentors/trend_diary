@@ -51,6 +51,9 @@ export const Default: Story = {
 
     // ユーザー名が表示されることを確認
     await expect(canvas.getByText('ユーザー名：田中太郎')).toBeInTheDocument()
+
+    // ログアウトボタンが表示されることを確認
+    await expect(canvas.getByText('ログアウト')).toBeInTheDocument()
   },
 }
 
