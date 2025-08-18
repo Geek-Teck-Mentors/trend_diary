@@ -23,13 +23,6 @@ const meta: Meta<typeof ArticleCard> = {
   component: ArticleCard,
   parameters: {
     layout: 'centered',
-    backgrounds: {
-      default: 'light',
-      values: [
-        { name: 'light', value: '#f0f0f0' },
-        { name: 'dark', value: '#333333' },
-      ],
-    },
   },
   args: {
     onCardClick: fn(),
