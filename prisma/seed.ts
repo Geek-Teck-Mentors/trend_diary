@@ -58,6 +58,7 @@ async function main() {
 
 main()
   .catch((e) => {
+    // biome-ignore lint/suspicious/noConsole: cli command console
     console.error('Error seeding database:', e)
     process.exit(1)
   })
