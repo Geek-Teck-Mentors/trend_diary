@@ -108,8 +108,7 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
       {
         accessorKey: 'createdAt',
         header: '作成日',
-        cell: ({ row }) =>
-          new Date(row.original.createdAt).toLocaleDateString('ja-JP'),
+        cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString('ja-JP'),
       },
       {
         id: 'actions',
