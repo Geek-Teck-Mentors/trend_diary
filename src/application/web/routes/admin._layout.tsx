@@ -1,7 +1,38 @@
-import { Outlet } from 'react-router'
+import { useEffect } from 'react'
+import { Outlet, redirect } from 'react-router'
+import { toast } from 'sonner'
 import LinkAsButton from '../components/linkAsButton'
+import getApiClientForClient from '../infrastructure/api'
 
 export default function AdminLayout() {
+  useEffect(() => {
+    let isMounted = true
+    const client = getApiClientForClient()
+
+    const f = async () => {
+      const res = await client.user.me.$get({}, { init: { credentials: 'include' } })
+      if (res.status === 200) {
+        const resJson = await res.json()
+        if (!resJson.user.isAdmin) {
+          toast.error('管理者ログインが必要です')
+          redirect('/login')
+        }
+        return
+      } else if (res.status >= 400 && res.status < 500) {
+        toast.error('管理者ログインが必要です')
+      } else {
+        toast.error('不明のエラーが発生しました')
+      }
+      redirect('/login')
+    }
+
+    if (isMounted) {
+      f()
+    }
+    return () => {
+      isMounted = false
+    }
+  }, [])
   return (
     <div className='min-h-screen bg-gray-50'>
       <div className='bg-white shadow'>
