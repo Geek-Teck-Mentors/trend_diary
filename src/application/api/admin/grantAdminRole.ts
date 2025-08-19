@@ -8,13 +8,7 @@ import { createAdminUserService } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 
 export const paramSchema = z.object({
-  id: z.string().transform((str) => {
-    try {
-      return BigInt(str)
-    } catch {
-      throw new Error('Invalid user ID format')
-    }
-  }),
+  id: z.string().regex(/^[0-9]+$/)
 })
 
 export interface GrantAdminRoleResponse {
@@ -30,7 +24,7 @@ export default async function grantAdminRole(
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const sessionUser = c.get(CONTEXT_KEY.SESSION_USER)
   const parsedParam = c.req.valid('param')
-  const activeUserId = parsedParam.id
+  const activeUserId = BigInt(parsedParam.id)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const adminUserService = createAdminUserService(rdb)
