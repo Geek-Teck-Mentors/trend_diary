@@ -144,7 +144,7 @@ describe('POST /api/admin/users/:id', () => {
       const invalidUserId = 'invalid-id'
       const res = await requestPostAdminUser(invalidUserId, adminUser.sessionId)
 
-      expect(res.status).toBe(500) // Transform error throws 500
+      expect(res.status).toBe(422)
     })
 
     it('自分自身にAdmin権限を付与しようとした場合400エラー', async () => {
