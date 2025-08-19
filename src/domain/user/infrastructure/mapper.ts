@@ -14,6 +14,6 @@ export function mapToActiveUser(
     activeUser.lastLogin ?? undefined,
     activeUser.createdAt,
     activeUser.updatedAt,
-    activeUser.adminUser !== null
+    activeUser.adminUser !== null,
   )
 }

@@ -18,7 +18,8 @@ export default function AdminLayout() {
           redirect('/login')
         }
         return
-      } else if (res.status >= 400 && res.status < 500) {
+      }
+      if (res.status >= 400 && res.status < 500) {
         toast.error('管理者ログインが必要です')
       } else {
         toast.error('不明のエラーが発生しました')
