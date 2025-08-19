@@ -5,6 +5,7 @@ export type SessionUser = {
   activeUserId: bigint
   displayName: string | null | undefined
   email: string
+  isAdmin: boolean
 }
 
 export type Env = {

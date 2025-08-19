@@ -8,6 +8,7 @@ export default class ActiveUser {
     public lastLogin?: Date,
     public readonly createdAt: Date = new Date(),
     public updatedAt: Date = new Date(),
+    public readonly isAdmin: boolean = false,
   ) {}
 
   recordLogin(): void {
