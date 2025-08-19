@@ -34,7 +34,7 @@ git commit -m "refactor: improve article service structure TDD cycle complete"
 
 ### ビルドとデプロイ
 
-- `npm run dev` - Remixで開発サーバーを起動
+- `npm run dev` - React Routerで開発サーバーを起動
 - `npm run build` - 本番用ビルド
 
 ### テスト
@@ -78,7 +78,7 @@ git commit -m "refactor: improve article service structure TDD cycle complete"
 
 ### ローカル開発サーバー
 
-- **開発サーバー**: `http://localhost:5173` (Vite + Remix)
+- **開発サーバー**: `http://localhost:5173` (Vite + React Router)
 - **Storybook**: `http://localhost:6006` (UIコンポーネント開発)
 - **E2Eテスト**: `http://localhost:5173` (Playwright baseURL)
 
@@ -88,7 +88,7 @@ git commit -m "refactor: improve article service structure TDD cycle complete"
 
 ## アーキテクチャ概要
 
-これは**ドメイン駆動設計（DDD）**とクリーンアーキテクチャの原則に基づく、**Cloudflare Workers + Supabase Functions**のハイブリッド構成でデプロイされるアプリケーション。
+これは**ドメイン駆動設計（DDD）**とクリーンアーキテクチャの原則に基づく、**Cloudflare Workers + Supabase Functions**のハイブリッド構成でデプロイされるReact Router v7アプリケーション。
 
 ### 主要なアーキテクチャパターン
 
@@ -133,8 +133,8 @@ src/domain/{aggregate}/
 ### 技術スタック
 
 **ランタイム**: Cloudflare Workers（メインアプリ）+ Supabase Functions（バックグラウンドジョブ）
-**バックエンド**: HonoウェブフレームワークとRemixアダプター
-**フロントエンド**: Remix + React + TailwindCSS v4 + shadcn/ui
+**バックエンド**: HonoウェブフレームワークとReact Routerアダプター
+**フロントエンド**: React Router v7 + React + TailwindCSS v4 + shadcn/ui
 **データベース**: PostgreSQL + Prisma ORM
 **テスト**: 各層で個別設定のVitest + Playwright E2E
 **ビルドツール**: Vite
@@ -143,7 +143,7 @@ src/domain/{aggregate}/
 ### エントリーポイント
 
 - **メインアプリケーション**: `/functions/[[path]].ts`（Cloudflare Workersエントリー）
-- **開発サーバー**: `/src/application/server.ts`（Hono + Remix）
+- **開発サーバー**: `/src/application/server.ts`（Hono + React Router）
 - **バックグラウンドジョブ**: `/supabase/functions/*/index.ts`
 
 ### データベーススキーマ

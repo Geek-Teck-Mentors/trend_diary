@@ -1,28 +1,76 @@
-# タスク完了時のチェックリスト
+# タスク完了チェックリスト
 
-## 必須実行コマンド
-リファクタリング時は**必ず**以下のコマンドを実行する：
+## 基本フロー（CLAUDE.mdより）
+**リファクタリング時は必ずlint, format, testコマンドを実行すること**
 
-1. **`npm run lint:ci`** - Biome CI + TypeScript型チェック（基本的にこれを使用）
-2. **`npm run lint`** - Biomeでlint実行
-3. **`npm run format`** - Biomeでコードフォーマットチェック
-4. **テストコマンド** - 変更した層に応じて適切なテストを実行
+## 1. 開発・実装時
 
-## テスト実行指針
-変更した内容に応じて適切なテストを実行：
+### コード品質チェック
+```bash
+# 推奨：統合チェック（Biome CI + 型チェック）
+npm run lint:ci
 
-- **ドメイン/サービス層の変更**: `npm run test:service`
-- **API層の変更**: `npm run test:api`
-- **フロントエンド変更**: `npm run test:frontend`
-- **UIコンポーネント変更**: `npm run test-storybook`
-- **全体的な変更**: `npm run e2e`
+# または個別実行
+npm run lint          # Lintチェック
+npm run tsc           # TypeScript型チェック
+npm run format        # フォーマットチェック
+```
 
-## 品質確認
-- すべてのlint・formatエラーが解消されていること
-- TypeScript型エラーがないこと
-- 関連するテストがパスしていること
-- コミットメッセージがConventional Commits形式に従っていること
+### 自動修正
+```bash
+npm run check:fix     # 総合チェック・修正
+npm run lint:fix      # Lint自動修正
+npm run format:fix    # フォーマット修正
+```
 
-## 禁止事項
-- utilsの作成は禁止
-- コメントの追加（明示的に要求されない限り）
+## 2. テスト実行
+
+### 層別テスト
+```bash
+npm run test:service    # ドメイン/サービス層
+npm run test:api        # API層
+npm run test:frontend   # フロントエンド
+npm run test-storybook  # Storybook
+npm run e2e             # E2Eテスト
+```
+
+### 個別ファイルテスト
+```bash
+npm run test:service -- path/to/file
+npm run test:api -- path/to/file
+npm run test:frontend -- path/to/file
+```
+
+## 3. データベース関連
+
+### マイグレーション後
+```bash
+npm run db:gen        # Prisma型生成
+npm run tsc           # 型チェック
+```
+
+## 4. コミット前
+
+### 必須チェック
+1. `npm run lint:ci` - CI用チェック実行
+2. 該当層のテスト実行
+3. 機能テスト実行
+
+### コミットメッセージ（Conventional Commits）
+```bash
+git commit -m "feat: 機能説明 TDD cycle complete"
+git commit -m "fix: バグ修正内容 TDD cycle complete"
+git commit -m "refactor: リファクタリング内容 TDD cycle complete"
+```
+
+## 5. PR作成前
+
+### 最終チェック
+1. 全テスト実行
+2. ビルド確認: `npm run build`
+3. E2Eテスト: `npm run e2e`
+
+### エラー時対応
+- ビルドエラー → 型エラー修正
+- テストエラー → テスト修正またはコード修正
+- Lintエラー → `npm run check:fix`で自動修正
