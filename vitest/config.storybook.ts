@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
         exclude: [
           'src/application/web/components/ui',
           // shadcn/uiに含まれるコンポーネントは除外
-          'src/application/web/components/customized'
+          'src/application/web/components/customized',
         ],
         thresholds: {
           statements: 80,
