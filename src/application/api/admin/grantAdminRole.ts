@@ -8,7 +8,7 @@ import { createAdminUserService } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 
 export const paramSchema = z.object({
-  id: z.string().regex(/^[0-9]+$/)
+  id: z.string().regex(/^[0-9]+$/),
 })
 
 export interface GrantAdminRoleResponse {
