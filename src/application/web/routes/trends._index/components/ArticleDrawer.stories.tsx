@@ -131,13 +131,10 @@ export const InteractionTest: Story = {
   },
 }
 
-const longTitle = 'a'.repeat(100)
-const longDescription = 'b'.repeat(300)
-const longAuthorName = 'c'.repeat(50)
 const longContentMockArticle = generateMockArticle({
-  title: longTitle,
-  description: longDescription,
-  author: longAuthorName,
+  title: 'a'.repeat(100),
+  description: 'b'.repeat(300),
+  author: 'c'.repeat(50),
 })
 
 export const LongContentTest: Story = {
@@ -152,10 +149,10 @@ export const LongContentTest: Story = {
     })
 
     // タイトルが表示されることを確認（長いタイトル）
-    await expect(within(document.body).getByText(longTitle)).toBeInTheDocument()
+    await expect(within(document.body).getByText(longContentMockArticle.title)).toBeInTheDocument()
 
     // 長い作成者名が表示されることを確認
-    await expect(within(document.body).getByText(longAuthorName)).toBeInTheDocument()
+    await expect(within(document.body).getByText(longContentMockArticle.author)).toBeInTheDocument()
 
     // スクロール可能な領域が存在することを確認（ドロワーのコンテンツ部分）
     const drawer = within(document.body).getByRole('dialog', { hidden: true })
