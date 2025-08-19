@@ -7,7 +7,7 @@ import getRdbClient from '@/infrastructure/rdb'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'
 
-const adminAuth = createMiddleware<Env>(async (c, next) => {
+const requiredAdmin = createMiddleware<Env>(async (c, next) => {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
   // authenticatorミドルウェアでSESSION_USERが設定されていることを確認
@@ -35,4 +35,4 @@ const adminAuth = createMiddleware<Env>(async (c, next) => {
   return next()
 })
 
-export default adminAuth
+export default requiredAdmin
