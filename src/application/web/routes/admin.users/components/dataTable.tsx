@@ -216,7 +216,7 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
             disabled={!table.getCanNextPage()}
           >
             <span className='sr-only'>次へ</span>
-            <ChevronRight />
+            <ChevronRight className='h-4 w-4' />
           </Button>
         </div>
       </div>
