@@ -9,3 +9,7 @@ DISCORD_WEBHOOK_URL=
 
 # 一時的なフィーチャーフラグ
 FEATURE_USER_ENABLED=false
+
+# Seedで使うルート管理ユーザの認証情報
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
