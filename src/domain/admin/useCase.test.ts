@@ -2,20 +2,20 @@ import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
-import { AdminCommandServiceImpl } from '../infrastructure/adminCommandServiceImpl'
-import { AdminQueryServiceImpl } from '../infrastructure/adminQueryServiceImpl'
-import { AdminUserService } from './adminUserService'
+import { AdminCommandServiceImpl } from './infrastructure/adminCommandServiceImpl'
+import { AdminQueryServiceImpl } from './infrastructure/adminQueryServiceImpl'
+import { UseCase } from './useCase'
 
 const mockDb = mockDeep<PrismaClient>()
 
-describe('AdminUserService', () => {
-  let service: AdminUserService
+describe('AdminUser UseCase', () => {
+  let useCase: UseCase
 
   beforeEach(() => {
     vi.clearAllMocks()
     const commandService = new AdminCommandServiceImpl(mockDb)
     const queryService = new AdminQueryServiceImpl(mockDb)
-    service = new AdminUserService(commandService, queryService)
+    useCase = new UseCase(commandService, queryService)
   })
 
   describe('grantAdminRole', () => {
@@ -42,7 +42,7 @@ describe('AdminUserService', () => {
           grantedByAdminUserId: 1,
         })
 
-        const result = await service.grantAdminRole(BigInt(100), 1)
+        const result = await useCase.grantAdminRole(BigInt(100), 1)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -56,7 +56,7 @@ describe('AdminUserService', () => {
       it('存在しないユーザーの場合エラーを返す', async () => {
         mockDb.activeUser.findUnique.mockResolvedValue(null)
 
-        const result = await service.grantAdminRole(BigInt(999), 1)
+        const result = await useCase.grantAdminRole(BigInt(999), 1)
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -83,7 +83,7 @@ describe('AdminUserService', () => {
           grantedByAdminUserId: 1,
         })
 
-        const result = await service.grantAdminRole(BigInt(100), 1)
+        const result = await useCase.grantAdminRole(BigInt(100), 1)
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -103,7 +103,7 @@ describe('AdminUserService', () => {
           grantedByAdminUserId: 1,
         })
 
-        const result = await service.isAdmin(BigInt(100))
+        const result = await useCase.isAdmin(BigInt(100))
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -114,7 +114,7 @@ describe('AdminUserService', () => {
       it('Admin権限を持たないユーザーの場合falseを返す', async () => {
         mockDb.adminUser.findUnique.mockResolvedValue(null)
 
-        const result = await service.isAdmin(BigInt(200))
+        const result = await useCase.isAdmin(BigInt(200))
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -159,7 +159,7 @@ describe('AdminUserService', () => {
         mockDb.activeUser.findMany.mockResolvedValue(mockUsers)
         mockDb.activeUser.count.mockResolvedValue(2)
 
-        const result = await service.getUserList()
+        const result = await useCase.getUserList()
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -192,7 +192,7 @@ describe('AdminUserService', () => {
         mockDb.activeUser.findMany.mockResolvedValue(mockUsers)
         mockDb.activeUser.count.mockResolvedValue(1)
 
-        const result = await service.getUserList({ searchQuery: 'admin' })
+        const result = await useCase.getUserList({ searchQuery: 'admin' })
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {

@@ -3,7 +3,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { createAdminUserService } from '@/domain/admin'
+import { createAdminUserUseCase } from '@/domain/admin'
 import { UserListResult } from '@/domain/admin/schema/userListSchema'
 import { User } from '@/domain/admin/schema/userSchema'
 import getRdbClient from '@/infrastructure/rdb'
@@ -31,7 +31,7 @@ export default async function getUserList(
   const parsedQuery = c.req.valid('query')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const adminUserService = createAdminUserService(rdb)
+  const adminUserService = createAdminUserUseCase(rdb)
 
   const result = await adminUserService.getUserList({
     searchQuery: parsedQuery.searchQuery,

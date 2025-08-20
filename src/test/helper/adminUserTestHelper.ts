@@ -1,5 +1,5 @@
 import { isError } from '@/common/types/utility'
-import { createAdminUserService } from '@/domain/admin'
+import { createAdminUserUseCase } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from './activeUserTestHelper'
@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'test'
 class AdminUserTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  private service = createAdminUserService(this.rdb)
+  private service = createAdminUserUseCase(this.rdb)
 
   async cleanUp(): Promise<void> {
     // AdminUser関連テーブルをクリーンアップ（テーブルが存在する場合のみ）

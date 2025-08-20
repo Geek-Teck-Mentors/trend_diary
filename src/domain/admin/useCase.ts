@@ -1,10 +1,10 @@
 import { AsyncResult, isError, resultSuccess } from '@/common/types/utility'
-import { AdminCommandService, AdminQueryService } from '../repository'
-import type { AdminUser } from '../schema/adminUserSchema'
-import { UserListResult } from '../schema/userListSchema'
-import { UserSearchQuery } from '../schema/userSearchSchema'
+import { AdminCommandService, AdminQueryService } from './repository'
+import type { AdminUser } from './schema/adminUserSchema'
+import { UserListResult } from './schema/userListSchema'
+import { UserSearchQuery } from './schema/userSearchSchema'
 
-export class AdminUserService {
+export class UseCase {
   constructor(
     private commandService: AdminCommandService,
     private queryService: AdminQueryService,

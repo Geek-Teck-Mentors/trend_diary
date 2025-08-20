@@ -4,7 +4,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { createAdminUserService } from '@/domain/admin'
+import { createAdminUserUseCase } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 
 export const paramSchema = z.object({
@@ -27,7 +27,7 @@ export default async function grantAdminRole(
   const activeUserId = BigInt(parsedParam.id)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const adminUserService = createAdminUserService(rdb)
+  const adminUserService = createAdminUserUseCase(rdb)
 
   // 自分に権限を付与しようとしていないかチェック
   if (activeUserId === sessionUser.activeUserId) {
