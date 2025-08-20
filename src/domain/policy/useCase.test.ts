@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ClientError, NotFoundError } from '@/common/errors'
 import { isError, isSuccess, resultError, resultSuccess } from '@/common/types/utility'
+import { isActive } from './schema/method'
 import { UseCase } from './useCase'
 
 // モックリポジトリインターフェースの型定義

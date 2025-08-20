@@ -21,7 +21,7 @@ const requiredAdmin = createMiddleware<Env>(async (c, next) => {
   const adminUserUseCase = createAdminUserUseCase(rdb)
 
   // Admin権限チェック
-  const result = await adminUserService.isAdmin(sessionUser.activeUserId)
+  const result = await adminUserUseCase.isAdmin(sessionUser.activeUserId)
   if (isError(result)) {
     throw handleError(result.error, logger)
   }

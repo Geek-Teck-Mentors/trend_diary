@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { isActive } from '../schema/method'
 import { mapToPrivacyPolicy } from './mapper'
 
 describe('mapper', () => {
@@ -26,7 +27,7 @@ describe('mapper', () => {
         expect(policy.updatedAt).toEqual(new Date('2024-01-01T00:00:00Z'))
       })
 
-      it('下書き状態（effectiveAt=null）のDBレコードを変換できる', () => {
+      it('下書き状態のDBレコードを変換できる', () => {
         // Arrange
         const dbRecord = {
           version: 2,
@@ -44,8 +45,7 @@ describe('mapper', () => {
         expect(policy.version).toBe(2)
         expect(policy.content).toBe('下書きポリシー')
         expect(policy.effectiveAt).toBeNull()
-        expect(policy.effectiveAt === null).toBe(true) // isDraft logic
-        expect(policy.effectiveAt !== null).toBe(false) // isActive logic
+        expect(isActive(policy)).toBe(false)
       })
     })
 
