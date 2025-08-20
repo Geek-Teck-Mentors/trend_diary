@@ -72,7 +72,7 @@ function expectDatabaseCalls(calls: {
 }
 
 describe('AdminCommandServiceImpl', () => {
-  let useCase: AdminCommandServiceImpl
+  let commandService: AdminCommandServiceImpl
   let testData: { activeUserId: bigint; grantedByAdminUserId: number }
 
   beforeEach(() => {
