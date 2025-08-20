@@ -74,8 +74,7 @@ API層ではメソッド毎に以下の3段階構造を必ず実装する：
 #### ドメイン層の構造
 ```
 src/domain/{aggregate}/
-├── model/           # ドメインエンティティ
-├── schema/          # Zodバリデーションスキーマ
+├── schema/          # Zodバリデーションスキーマ, entity
 ├── infrastructure/  # リポジトリ実装
 ├── repository.ts    # リポジトリインターフェース
 ├── useCase.ts       # ドメインビジネスロジック
