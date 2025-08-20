@@ -13,6 +13,7 @@ import {
 } from '@/common/types/utility'
 import { CommandService, QueryService } from './repository'
 import type { ActiveUser } from './schema/activeUserSchema'
+import { recordLogin } from './schema/method'
 
 type LoginResult = {
   activeUser: ActiveUser
@@ -61,8 +62,7 @@ export class UseCase {
 
     const { sessionId, expiresAt } = sessionResult.data
 
-    // lastLoginを更新
-    const updatedUser = { ...authResult.data, lastLogin: new Date() }
+    const updatedUser = recordLogin(authResult.data)
     const updateResult = await this.commandService.saveActive(updatedUser)
     if (isError(updateResult)) return resultError(updateResult.error)
 
