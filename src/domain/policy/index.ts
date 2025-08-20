@@ -2,10 +2,10 @@
 
 // サービスファクトリ
 export { default as createPrivacyPolicyService } from './factory/privacyPolicyServiceFactory'
-export { default as PrivacyPolicy } from './model/privacyPolicy'
 export type { CommandService } from './repository/commandService'
 // リポジトリインターフェース（テスト用）
 export type { QueryService } from './repository/queryService'
+export type { PrivacyPolicy } from './schema/privacyPolicySchema'
 // バリデーションスキーマ
 export {
   type PrivacyPolicyActivate,

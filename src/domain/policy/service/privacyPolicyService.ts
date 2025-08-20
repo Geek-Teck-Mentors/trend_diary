@@ -1,9 +1,9 @@
 import { ClientError, NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { isError, isNull, Result, resultError, resultSuccess } from '@/common/types/utility'
-import PrivacyPolicy from '../model/privacyPolicy'
 import { CommandService } from '../repository/commandService'
 import { QueryService } from '../repository/queryService'
+import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 
 export default class PrivacyPolicyService {
   constructor(
@@ -53,13 +53,13 @@ export default class PrivacyPolicyService {
     const versionResult = await this.queryService.getNextVersion()
     if (isError(versionResult)) return resultError(ServerError.handle(versionResult.error))
 
-    const newPolicy = new PrivacyPolicy(
-      versionResult.data,
+    const newPolicy = {
+      version: versionResult.data,
       content,
-      null, // 下書き状態
-      new Date(),
-      new Date(),
-    )
+      effectiveAt: null, // 下書き状態
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
 
     const saveResult = await this.commandService.save(newPolicy)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
@@ -84,16 +84,19 @@ export default class PrivacyPolicyService {
 
     const policy = policyResult.data
 
-    if (policy.isActive()) {
+    // isDraftヘルパー関数の代わりにロジックを直接記述
+    if (policy.effectiveAt !== null) {
       return resultError(new ClientError('有効化されたポリシーは更新できません'))
     }
 
-    const updatedContentResult = policy.updateContent(content)
-    if (isError(updatedContentResult)) {
-      return resultError(new ClientError(updatedContentResult.error.message))
+    // updateContentメソッドのロジックを直接記述
+    const updatedPolicy = {
+      ...policy,
+      content,
+      updatedAt: new Date(),
     }
 
-    const saveResult = await this.commandService.save(updatedContentResult.data)
+    const saveResult = await this.commandService.save(updatedPolicy)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
     return resultSuccess(saveResult.data)
@@ -115,7 +118,8 @@ export default class PrivacyPolicyService {
 
     const policy = policyResult.data
 
-    if (policy.isActive()) {
+    // isActiveメソッドの代わりにロジックを直接記述
+    if (policy.effectiveAt !== null) {
       return resultError(new ClientError('有効化されたポリシーは削除できません'))
     }
 
@@ -141,7 +145,14 @@ export default class PrivacyPolicyService {
     const versionResult = await this.queryService.getNextVersion()
     if (isError(versionResult)) return resultError(ServerError.handle(versionResult.error))
 
-    const clonedPolicy = sourcePolicyResult.data.clone(versionResult.data)
+    // cloneメソッドのロジックを直接記述
+    const clonedPolicy = {
+      version: versionResult.data,
+      content: sourcePolicyResult.data.content,
+      effectiveAt: null, // 下書き状態
+      createdAt: new Date(), // 新しい作成日時
+      updatedAt: new Date(), // 新しい更新日時
+    }
 
     const saveResult = await this.commandService.save(clonedPolicy)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
@@ -168,12 +179,19 @@ export default class PrivacyPolicyService {
     }
 
     const policy = policyResult.data
-    const activateResult = policy.activate(effectiveDate)
-    if (isError(activateResult)) {
-      return resultError(new ClientError(activateResult.error.message))
+
+    // activateメソッドのロジックを直接記述
+    if (policy.effectiveAt !== null) {
+      return resultError(new ClientError('このポリシーは既に有効化されています'))
     }
 
-    const saveResult = await this.commandService.save(activateResult.data)
+    const activatedPolicy = {
+      ...policy,
+      effectiveAt: effectiveDate,
+      updatedAt: new Date(),
+    }
+
+    const saveResult = await this.commandService.save(activatedPolicy)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
     return resultSuccess(saveResult.data)

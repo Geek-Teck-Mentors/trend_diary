@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
-import PrivacyPolicy from '../model/privacyPolicy'
 import QueryServiceImpl from './queryServiceImpl'
 
 // モックの設定

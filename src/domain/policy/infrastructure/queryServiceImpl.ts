@@ -2,8 +2,8 @@ import { getErrorMessage } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
-import PrivacyPolicy from '../model/privacyPolicy'
 import { QueryService } from '../repository/queryService'
+import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 import { mapToPrivacyPolicy } from './mapper'
 
 export default class QueryServiceImpl implements QueryService {

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ClientError, NotFoundError } from '@/common/errors'
 import { isError, isSuccess, resultError, resultSuccess } from '@/common/types/utility'
-import PrivacyPolicy from '../model/privacyPolicy'
 import PrivacyPolicyService from './privacyPolicyService'
 
 // モックリポジトリインターフェースの型定義
@@ -411,7 +410,7 @@ describe('PrivacyPolicyService', () => {
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
           expect(result.data.effectiveAt).toEqual(effectiveDate)
-          expect(result.data.isActive()).toBe(true)
+          expect(result.data.effectiveAt !== null).toBe(true) // isActive logic
         }
         expect(mockQueryService.findByVersion).toHaveBeenCalledWith(version)
         expect(mockCommandService.save).toHaveBeenCalled()

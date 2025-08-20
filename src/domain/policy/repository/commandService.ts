@@ -1,5 +1,5 @@
 import { AsyncResult } from '@/common/types/utility'
-import PrivacyPolicy from '../model/privacyPolicy'
+import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 
 export interface CommandService {
   /**

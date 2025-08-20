@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { isError } from '@/common/types/utility'
-import PrivacyPolicy from '../model/privacyPolicy'
 import { mapToPrivacyPolicy } from './mapper'
 
 describe('mapper', () => {
@@ -20,7 +18,7 @@ describe('mapper', () => {
         const policy = mapToPrivacyPolicy(dbRecord)
 
         // Assert
-        expect(policy).toBeInstanceOf(PrivacyPolicy)
+        expect(policy).toBeDefined()
         expect(policy.version).toBe(1)
         expect(policy.content).toBe('プライバシーポリシーの内容')
         expect(policy.effectiveAt).toEqual(new Date('2024-01-15T00:00:00Z'))
@@ -42,12 +40,12 @@ describe('mapper', () => {
         const policy = mapToPrivacyPolicy(dbRecord)
 
         // Assert
-        expect(policy).toBeInstanceOf(PrivacyPolicy)
+        expect(policy).toBeDefined()
         expect(policy.version).toBe(2)
         expect(policy.content).toBe('下書きポリシー')
         expect(policy.effectiveAt).toBeNull()
-        expect(policy.isDraft()).toBe(true)
-        expect(policy.isActive()).toBe(false)
+        expect(policy.effectiveAt === null).toBe(true) // isDraft logic
+        expect(policy.effectiveAt !== null).toBe(false) // isActive logic
       })
     })
 
@@ -66,7 +64,7 @@ describe('mapper', () => {
         const policy = mapToPrivacyPolicy(dbRecord)
 
         // Assert
-        expect(policy).toBeInstanceOf(PrivacyPolicy)
+        expect(policy).toBeDefined()
         expect(policy.content).toBe('')
       })
 
@@ -84,7 +82,7 @@ describe('mapper', () => {
         const policy = mapToPrivacyPolicy(dbRecord)
 
         // Assert
-        expect(policy).toBeInstanceOf(PrivacyPolicy)
+        expect(policy).toBeDefined()
         expect(policy.version).toBe(0)
       })
 
@@ -103,7 +101,7 @@ describe('mapper', () => {
         const policy = mapToPrivacyPolicy(dbRecord)
 
         // Assert
-        expect(policy).toBeInstanceOf(PrivacyPolicy)
+        expect(policy).toBeDefined()
         expect(policy.content).toBe(longContent)
       })
     })
@@ -123,16 +121,10 @@ describe('mapper', () => {
         const policy = mapToPrivacyPolicy(dbRecord)
 
         // Assert - エンティティのメソッドが正常に呼び出せることを確認
-        expect(policy.isDraft()).toBe(true)
-        expect(policy.isActive()).toBe(false)
+        expect(policy.effectiveAt === null).toBe(true) // isDraft logic
+        expect(policy.effectiveAt !== null).toBe(false) // isActive logic
 
-        // updateContentメソッドも正常に動作することを確認
-        const newContent = '更新されたコンテンツ'
-        const updateResult = policy.updateContent(newContent)
-        if (isError(updateResult)) {
-          expect.fail(`更新に失敗: ${updateResult}`)
-        }
-        expect(updateResult.data.content).toBe(newContent)
+        // ビジネスロジックはサービス層に移動したため、mapperのテストではデータ変換のみをテスト
       })
     })
   })
