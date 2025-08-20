@@ -11,11 +11,11 @@ const mockQueryService = mockDeep<QueryService>()
 const mockCommandService = mockDeep<CommandService>()
 
 describe('User UseCase', () => {
-  let service: UseCase
+  let useCase: UseCase
 
   beforeEach(() => {
     vi.clearAllMocks()
-    service = new UseCase(mockQueryService, mockCommandService)
+    useCase = new UseCase(mockQueryService, mockCommandService)
   })
 
   describe('signup', () => {
@@ -42,7 +42,7 @@ describe('User UseCase', () => {
         mockCommandService.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
-        const result = await service.signup(email, password)
+        const result = await useCase.signup(email, password)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -76,7 +76,7 @@ describe('User UseCase', () => {
         mockCommandService.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
-        const result = await service.signup(email, password)
+        const result = await useCase.signup(email, password)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -106,7 +106,7 @@ describe('User UseCase', () => {
         mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(existingUser))
 
         // Act
-        const result = await service.signup(email, password)
+        const result = await useCase.signup(email, password)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -160,7 +160,7 @@ describe('User UseCase', () => {
         mockCommandService.saveActive.mockResolvedValue(resultSuccess(updatedActiveUser))
 
         // Act
-        const result = await service.login(email, password, '192.168.1.1', 'Mozilla/5.0')
+        const result = await useCase.login(email, password, '192.168.1.1', 'Mozilla/5.0')
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -180,7 +180,7 @@ describe('User UseCase', () => {
         mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
         // Act
-        const result = await service.login(email, password, '192.168.1.1', 'Mozilla/5.0')
+        const result = await useCase.login(email, password, '192.168.1.1', 'Mozilla/5.0')
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -210,7 +210,7 @@ describe('User UseCase', () => {
         mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
-        const result = await service.login(email, wrongPassword, '192.168.1.1', 'Mozilla/5.0')
+        const result = await useCase.login(email, wrongPassword, '192.168.1.1', 'Mozilla/5.0')
 
         // Assert
         expect(isError(result)).toBe(true)

@@ -31,7 +31,7 @@ const mockArticleQueryService = mockDeep<ArticleQueryService>()
 const mockArticleCommandService = mockDeep<ArticleCommandService>()
 
 describe('ArticleService', () => {
-  const service = new UseCase(mockArticleQueryService, mockArticleCommandService)
+  const useCase = new UseCase(mockArticleQueryService, mockArticleCommandService)
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -56,7 +56,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledTimes(1)
@@ -81,7 +81,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledTimes(1)
@@ -100,7 +100,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -121,7 +121,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -142,7 +142,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -163,7 +163,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -184,7 +184,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -206,7 +206,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -228,7 +228,7 @@ describe('ArticleService', () => {
           resultSuccess(mockPaginationResult),
         )
 
-        const result = await service.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(resultSuccess(mockPaginationResult))
         expect(mockArticleQueryService.searchArticles).toHaveBeenCalledWith({
@@ -249,7 +249,7 @@ describe('ArticleService', () => {
       const dbError = new ServerError('Database error')
       mockArticleQueryService.searchArticles.mockResolvedValue(resultError(dbError))
 
-      const result = await service.searchArticles(params)
+      const result = await useCase.searchArticles(params)
 
       expect(result).toEqual(resultError(dbError))
     })
@@ -273,7 +273,7 @@ describe('ArticleService', () => {
       }
       mockArticleCommandService.createReadHistory.mockResolvedValue(resultSuccess(mockReadHistory))
 
-      const result = await service.createReadHistory(userId, articleId, readAt)
+      const result = await useCase.createReadHistory(userId, articleId, readAt)
 
       expect(isSuccess(result)).toBe(true)
       if (isSuccess(result)) {
@@ -301,7 +301,7 @@ describe('ArticleService', () => {
       const dbError = new ServerError('Database error')
       mockArticleCommandService.createReadHistory.mockResolvedValue(resultError(dbError))
 
-      const result = await service.createReadHistory(userId, articleId, readAt)
+      const result = await useCase.createReadHistory(userId, articleId, readAt)
 
       expect(isError(result)).toBe(true)
       if (isError(result)) {
@@ -317,7 +317,7 @@ describe('ArticleService', () => {
       // 記事が存在しない場合のモック
       mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(null))
 
-      const result = await service.createReadHistory(userId, articleId, readAt)
+      const result = await useCase.createReadHistory(userId, articleId, readAt)
 
       expect(isError(result)).toBe(true)
       if (isError(result)) {
@@ -338,7 +338,7 @@ describe('ArticleService', () => {
       mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
       mockArticleCommandService.deleteAllReadHistory.mockResolvedValue(resultSuccess(undefined))
 
-      const result = await service.deleteAllReadHistory(userId, articleId)
+      const result = await useCase.deleteAllReadHistory(userId, articleId)
 
       expect(isSuccess(result)).toBe(true)
       expect(mockArticleCommandService.deleteAllReadHistory).toHaveBeenCalledWith(
@@ -355,7 +355,7 @@ describe('ArticleService', () => {
       const dbError = new ServerError('Database error')
       mockArticleCommandService.deleteAllReadHistory.mockResolvedValue(resultError(dbError))
 
-      const result = await service.deleteAllReadHistory(userId, articleId)
+      const result = await useCase.deleteAllReadHistory(userId, articleId)
 
       expect(isError(result)).toBe(true)
       if (isError(result)) {

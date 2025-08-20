@@ -8,11 +8,11 @@ import QueryServiceImpl from './queryServiceImpl'
 const mockDb = mockDeep<PrismaClient>()
 
 describe('QueryServiceImpl', () => {
-  let service: QueryServiceImpl
+  let useCase: QueryServiceImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    service = new QueryServiceImpl(mockDb)
+    useCase = new QueryServiceImpl(mockDb)
   })
 
   describe('findActiveById', () => {
@@ -35,7 +35,7 @@ describe('QueryServiceImpl', () => {
         mockDb.activeUser.findUnique.mockResolvedValue(mockActiveUserData)
 
         // Act
-        const result = await service.findActiveById(activeUserId)
+        const result = await useCase.findActiveById(activeUserId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -54,7 +54,7 @@ describe('QueryServiceImpl', () => {
         mockDb.activeUser.findUnique.mockResolvedValue(null)
 
         // Act
-        const result = await service.findActiveById(activeUserId)
+        const result = await useCase.findActiveById(activeUserId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -72,7 +72,7 @@ describe('QueryServiceImpl', () => {
         mockDb.activeUser.findUnique.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.findActiveById(activeUserId)
+        const result = await useCase.findActiveById(activeUserId)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -103,7 +103,7 @@ describe('QueryServiceImpl', () => {
         mockDb.activeUser.findUnique.mockResolvedValue(mockActiveUserData)
 
         // Act
-        const result = await service.findActiveByEmail(email)
+        const result = await useCase.findActiveByEmail(email)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -122,7 +122,7 @@ describe('QueryServiceImpl', () => {
         mockDb.activeUser.findUnique.mockResolvedValue(null)
 
         // Act
-        const result = await service.findActiveByEmail(email)
+        const result = await useCase.findActiveByEmail(email)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -140,7 +140,7 @@ describe('QueryServiceImpl', () => {
         mockDb.activeUser.findUnique.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.findActiveByEmail(email)
+        const result = await useCase.findActiveByEmail(email)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -180,7 +180,7 @@ describe('QueryServiceImpl', () => {
         mockDb.session.findFirst.mockResolvedValue(mockSession)
 
         // Act
-        const result = await service.findActiveBySessionId(sessionId)
+        const result = await useCase.findActiveBySessionId(sessionId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -199,7 +199,7 @@ describe('QueryServiceImpl', () => {
         mockDb.session.findFirst.mockResolvedValue(null)
 
         // Act
-        const result = await service.findActiveBySessionId(sessionId)
+        const result = await useCase.findActiveBySessionId(sessionId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -216,7 +216,7 @@ describe('QueryServiceImpl', () => {
         mockDb.session.findFirst.mockResolvedValue(null)
 
         // Act
-        const result = await service.findActiveBySessionId(sessionId)
+        const result = await useCase.findActiveBySessionId(sessionId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -234,7 +234,7 @@ describe('QueryServiceImpl', () => {
         mockDb.session.findFirst.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.findActiveBySessionId(sessionId)
+        const result = await useCase.findActiveBySessionId(sessionId)
 
         // Assert
         expect(isError(result)).toBe(true)

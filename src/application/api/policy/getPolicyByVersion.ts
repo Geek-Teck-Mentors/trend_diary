@@ -10,9 +10,9 @@ export default async function getPolicyByVersion(c: ZodValidatedParamContext<Ver
   const { version } = c.req.valid('param')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createPrivacyPolicyUseCase(rdb)
+  const useCase = createPrivacyPolicyUseCase(rdb)
 
-  const result = await service.getPolicyByVersion(version)
+  const result = await useCase.getPolicyByVersion(version)
   if (isError(result)) throw handleError(result.error, logger)
 
   logger.info('Policy retrieved', { version })

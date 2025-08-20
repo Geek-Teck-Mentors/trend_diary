@@ -8,11 +8,11 @@ import CommandServiceImpl from './commandServiceImpl'
 const mockDb = mockDeep<PrismaClient>()
 
 describe('CommandServiceImpl', () => {
-  let service: CommandServiceImpl
+  let useCase: CommandServiceImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    service = new CommandServiceImpl(mockDb)
+    useCase = new CommandServiceImpl(mockDb)
   })
 
   describe('createActive', () => {
@@ -45,7 +45,7 @@ describe('CommandServiceImpl', () => {
         })
 
         // Act
-        const result = await service.createActive(email, hashedPassword)
+        const result = await useCase.createActive(email, hashedPassword)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -66,7 +66,7 @@ describe('CommandServiceImpl', () => {
         mockDb.$transaction.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.createActive(email, hashedPassword)
+        const result = await useCase.createActive(email, hashedPassword)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -107,7 +107,7 @@ describe('CommandServiceImpl', () => {
         mockDb.activeUser.update.mockResolvedValue(mockUpdatedUser)
 
         // Act
-        const result = await service.saveActive(activeUser)
+        const result = await useCase.saveActive(activeUser)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -137,7 +137,7 @@ describe('CommandServiceImpl', () => {
         mockDb.activeUser.update.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.saveActive(activeUser)
+        const result = await useCase.saveActive(activeUser)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -175,7 +175,7 @@ describe('CommandServiceImpl', () => {
         mockDb.session.create.mockResolvedValue(mockSessionData)
 
         // Act
-        const result = await service.createSession(input)
+        const result = await useCase.createSession(input)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -203,7 +203,7 @@ describe('CommandServiceImpl', () => {
         mockDb.session.create.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.createSession(input)
+        const result = await useCase.createSession(input)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -222,7 +222,7 @@ describe('CommandServiceImpl', () => {
         mockDb.session.delete.mockResolvedValue({} as any)
 
         // Act
-        const result = await service.deleteSession(sessionId)
+        const result = await useCase.deleteSession(sessionId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -241,7 +241,7 @@ describe('CommandServiceImpl', () => {
         mockDb.session.delete.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.deleteSession(sessionId)
+        const result = await useCase.deleteSession(sessionId)
 
         // Assert
         expect(isError(result)).toBe(true)

@@ -13,9 +13,9 @@ export default async function updatePolicy(
   const { content } = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createPrivacyPolicyUseCase(rdb)
+  const useCase = createPrivacyPolicyUseCase(rdb)
 
-  const result = await service.updatePolicy(version, content)
+  const result = await useCase.updatePolicy(version, content)
   if (isError(result)) throw handleError(result.error, logger)
 
   logger.info('Policy updated', { version })

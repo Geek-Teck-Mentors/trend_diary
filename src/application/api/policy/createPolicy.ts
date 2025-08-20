@@ -10,9 +10,9 @@ export default async function createPolicy(c: ZodValidatedContext<PrivacyPolicyI
   const valid = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createPrivacyPolicyUseCase(rdb)
+  const useCase = createPrivacyPolicyUseCase(rdb)
 
-  const result = await service.createPolicy(valid.content)
+  const result = await useCase.createPolicy(valid.content)
   if (isError(result)) throw handleError(result.error, logger)
   logger.info('Policy created', { policy: result.data.version })
 

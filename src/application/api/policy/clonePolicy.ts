@@ -10,9 +10,9 @@ export default async function clonePolicy(c: ZodValidatedParamContext<VersionPar
   const { version } = c.req.valid('param')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createPrivacyPolicyUseCase(rdb)
+  const useCase = createPrivacyPolicyUseCase(rdb)
 
-  const result = await service.clonePolicy(version)
+  const result = await useCase.clonePolicy(version)
   if (isError(result)) throw handleError(result.error, logger)
 
   logger.info('Policy cloned', { sourceVersion: version, newVersion: result.data.version })

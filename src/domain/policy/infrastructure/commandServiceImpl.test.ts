@@ -8,11 +8,11 @@ import CommandServiceImpl from './commandServiceImpl'
 const mockDb = mockDeep<PrismaClient>()
 
 describe('CommandServiceImpl', () => {
-  let service: CommandServiceImpl
+  let useCase: CommandServiceImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    service = new CommandServiceImpl(mockDb)
+    useCase = new CommandServiceImpl(mockDb)
   })
 
   describe('save', () => {
@@ -38,7 +38,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockSavedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -86,7 +86,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockUpdatedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -121,7 +121,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockSavedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -151,7 +151,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockSavedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -182,7 +182,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockSavedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -207,7 +207,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockRejectedValue(error)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -230,7 +230,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockRejectedValue(constraintError)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -258,7 +258,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockResolvedValue(mockDeletedPolicy)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -284,7 +284,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockResolvedValue(mockDeletedPolicy)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -302,7 +302,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockRejectedValue(error)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -318,7 +318,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockRejectedValue(error)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -334,7 +334,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockRejectedValue(constraintError)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isError(result)).toBe(true)

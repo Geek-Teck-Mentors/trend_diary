@@ -25,9 +25,9 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createUserUseCase(rdb)
+  const useCase = createUserUseCase(rdb)
 
-  const result = await service.getCurrentUser(sessionId)
+  const result = await useCase.getCurrentUser(sessionId)
   if (isError(result)) {
     if (result.error instanceof ClientError) {
       throw new HTTPException(result.error.statusCode as ContentfulStatusCode, {

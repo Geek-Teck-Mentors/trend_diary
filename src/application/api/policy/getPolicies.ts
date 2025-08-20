@@ -22,9 +22,9 @@ export default async function getPolicies(c: ZodValidatedQueryContext<OffsetPagi
   const { page, limit } = c.req.valid('query')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createPrivacyPolicyUseCase(rdb)
+  const useCase = createPrivacyPolicyUseCase(rdb)
 
-  const result = await service.getAllPolicies(page, limit)
+  const result = await useCase.getAllPolicies(page, limit)
   if (isError(result)) throw handleError(result.error, logger)
 
   logger.info('Privacy policies retrieved successfully', {

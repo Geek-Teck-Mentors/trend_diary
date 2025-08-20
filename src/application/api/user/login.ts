@@ -15,14 +15,14 @@ export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createUserUseCase(rdb)
+  const useCase = createUserUseCase(rdb)
 
   // リクエストからIPアドレスとUserAgentを取得
   const connInfo = getConnInfo(c)
   const ipAddress = connInfo.remote.address || ''
   const userAgent = c.req.header('user-agent') || ''
 
-  const result = await service.login(valid.email, valid.password, ipAddress, userAgent)
+  const result = await useCase.login(valid.email, valid.password, ipAddress, userAgent)
   if (isError(result)) {
     const { error } = result
     if (error instanceof ClientError) {

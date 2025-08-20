@@ -8,11 +8,11 @@ import QueryServiceImpl from './queryServiceImpl'
 const mockDb = mockDeep<PrismaClient>()
 
 describe('QueryServiceImpl', () => {
-  let service: QueryServiceImpl
+  let useCase: QueryServiceImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    service = new QueryServiceImpl(mockDb)
+    useCase = new QueryServiceImpl(mockDb)
   })
 
   describe('findAll', () => {
@@ -42,7 +42,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.count.mockResolvedValue(2)
 
         // Act
-        const result = await service.findAll(page, limit)
+        const result = await useCase.findAll(page, limit)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -74,7 +74,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.count.mockResolvedValue(0)
 
         // Act
-        const result = await service.findAll(1, 10)
+        const result = await useCase.findAll(1, 10)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -93,7 +93,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.count.mockResolvedValue(0)
 
         // Act
-        const result = await service.findAll(0, 0)
+        const result = await useCase.findAll(0, 0)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -113,7 +113,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findMany.mockRejectedValue(error)
 
         // Act
-        const result = await service.findAll(1, 10)
+        const result = await useCase.findAll(1, 10)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -140,7 +140,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findUnique.mockResolvedValue(mockPolicy)
 
         // Act
-        const result = await service.findByVersion(version)
+        const result = await useCase.findByVersion(version)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -162,7 +162,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findUnique.mockResolvedValue(null)
 
         // Act
-        const result = await service.findByVersion(version)
+        const result = await useCase.findByVersion(version)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -185,7 +185,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findUnique.mockResolvedValue(mockPolicy)
 
         // Act
-        const result = await service.findByVersion(version)
+        const result = await useCase.findByVersion(version)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -202,7 +202,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findUnique.mockRejectedValue(error)
 
         // Act
-        const result = await service.findByVersion(1)
+        const result = await useCase.findByVersion(1)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -228,7 +228,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findFirst.mockResolvedValue(mockDraftPolicy)
 
         // Act
-        const result = await service.getLatestDraft()
+        const result = await useCase.getLatestDraft()
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -250,7 +250,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findFirst.mockResolvedValue(null)
 
         // Act
-        const result = await service.getLatestDraft()
+        const result = await useCase.getLatestDraft()
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -267,7 +267,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findFirst.mockRejectedValue(error)
 
         // Act
-        const result = await service.getLatestDraft()
+        const result = await useCase.getLatestDraft()
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -293,7 +293,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findFirst.mockResolvedValue(mockMaxPolicy)
 
         // Act
-        const result = await service.getNextVersion()
+        const result = await useCase.getNextVersion()
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -312,7 +312,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findFirst.mockResolvedValue(null)
 
         // Act
-        const result = await service.getNextVersion()
+        const result = await useCase.getNextVersion()
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -334,7 +334,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findFirst.mockResolvedValue(mockMaxPolicy)
 
         // Act
-        const result = await service.getNextVersion()
+        const result = await useCase.getNextVersion()
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -351,7 +351,7 @@ describe('QueryServiceImpl', () => {
         mockDb.privacyPolicy.findFirst.mockRejectedValue(error)
 
         // Act
-        const result = await service.getNextVersion()
+        const result = await useCase.getNextVersion()
 
         // Assert
         expect(isError(result)).toBe(true)

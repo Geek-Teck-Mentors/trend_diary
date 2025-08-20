@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'test'
 class AdminUserTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  private service = createAdminUserUseCase(this.rdb)
+  private useCase = createAdminUserUseCase(this.rdb)
 
   async cleanUp(): Promise<void> {
     // AdminUser関連テーブルをクリーンアップ（テーブルが存在する場合のみ）
@@ -33,7 +33,7 @@ class AdminUserTestHelper {
     const userInfo = await activeUserTestHelper.create(email, password, displayName)
 
     // Admin権限を付与
-    const adminResult = await this.service.grantAdminRole(userInfo.activeUserId, 1)
+    const adminResult = await this.useCase.grantAdminRole(userInfo.activeUserId, 1)
     if (isError(adminResult)) {
       throw new Error(`Failed to grant admin role: ${adminResult.error.message}`)
     }
@@ -67,7 +67,7 @@ class AdminUserTestHelper {
     activeUserId: bigint,
     grantedByAdminUserId: number,
   ): Promise<{ adminUserId: number }> {
-    const result = await this.service.grantAdminRole(activeUserId, grantedByAdminUserId)
+    const result = await this.useCase.grantAdminRole(activeUserId, grantedByAdminUserId)
     if (isError(result)) {
       throw new Error(`Failed to grant admin role: ${result.error.message}`)
     }
@@ -77,7 +77,7 @@ class AdminUserTestHelper {
   }
 
   async isAdmin(activeUserId: bigint): Promise<boolean> {
-    const result = await this.service.isAdmin(activeUserId)
+    const result = await this.useCase.isAdmin(activeUserId)
     if (isError(result)) {
       throw new Error(`Failed to check admin status: ${result.error.message}`)
     }
@@ -96,7 +96,7 @@ class AdminUserTestHelper {
     }>
     total: number
   }> {
-    const result = await this.service.getUserList(query)
+    const result = await this.useCase.getUserList(query)
     if (isError(result)) {
       throw new Error(`Failed to get user list: ${result.error.message}`)
     }

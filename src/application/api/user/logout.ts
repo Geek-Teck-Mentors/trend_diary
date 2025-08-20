@@ -14,9 +14,9 @@ export default async function logout(c: Context<Env>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const sessionId = c.get(CONTEXT_KEY.SESSION_ID)
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createUserUseCase(rdb)
+  const useCase = createUserUseCase(rdb)
 
-  const result = await service.logout(sessionId)
+  const result = await useCase.logout(sessionId)
   if (isError(result)) {
     const { error } = result
     if (error instanceof NotFoundError) {

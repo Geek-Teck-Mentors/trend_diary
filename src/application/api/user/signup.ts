@@ -11,9 +11,9 @@ export default async function signup(c: ZodValidatedContext<ActiveUserInput>) {
   const valid = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createUserUseCase(rdb)
+  const useCase = createUserUseCase(rdb)
 
-  const result = await service.signup(valid.email, valid.password)
+  const result = await useCase.signup(valid.email, valid.password)
   if (isError(result)) throw handleError(result.error, logger)
 
   const activeUser = result.data
