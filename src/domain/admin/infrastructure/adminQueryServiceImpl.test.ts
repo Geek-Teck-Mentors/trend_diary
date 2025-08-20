@@ -100,7 +100,7 @@ function setupDatabaseError(mockMethod: any, errorMessage = 'Database connection
 }
 
 describe('AdminQueryServiceImpl', () => {
-  let useCase: AdminQueryServiceImpl
+  let queryService: AdminQueryServiceImpl
   const activeUserId = 123456789n
 
   beforeEach(() => {
