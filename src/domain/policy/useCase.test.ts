@@ -452,7 +452,7 @@ describe('PrivacyPolicyService', () => {
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
           expect(result.data.effectiveAt).toEqual(effectiveDate)
-          expect(result.data.effectiveAt !== null).toBe(true) // isActive logic
+          expect(isActive(result.data)).toBe(true)
         }
         expect(mockQueryService.findByVersion).toHaveBeenCalledWith(version)
         expect(mockCommandService.save).toHaveBeenCalled()
