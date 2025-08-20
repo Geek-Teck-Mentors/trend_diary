@@ -1,13 +1,10 @@
-// ドメインエンティティ
-
-// サービスファクトリ
-export { default as createPrivacyPolicyService } from './factory/privacyPolicyServiceFactory'
+// factory
+export { default as createPrivacyPolicyUseCase } from './factory'
 export type { CommandService } from './repository/commandService'
-// リポジトリインターフェース（テスト用）
-export type { QueryService } from './repository/queryService'
-export type { PrivacyPolicy } from './schema/privacyPolicySchema'
+
 // バリデーションスキーマ
 export {
+  type PrivacyPolicy,
   type PrivacyPolicyActivate,
   type PrivacyPolicyInput,
   type PrivacyPolicyOutput,
@@ -18,5 +15,3 @@ export {
   type VersionParam,
   versionParamSchema,
 } from './schema/privacyPolicySchema'
-// ドメインサービス
-export { default as PrivacyPolicyService } from './service/privacyPolicyService'

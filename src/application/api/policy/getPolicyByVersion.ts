@@ -2,7 +2,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { createPrivacyPolicyService, VersionParam } from '@/domain/policy'
+import { createPrivacyPolicyUseCase, VersionParam } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function getPolicyByVersion(c: ZodValidatedParamContext<VersionParam>) {
@@ -10,7 +10,7 @@ export default async function getPolicyByVersion(c: ZodValidatedParamContext<Ver
   const { version } = c.req.valid('param')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createPrivacyPolicyService(rdb)
+  const service = createPrivacyPolicyUseCase(rdb)
 
   const result = await service.getPolicyByVersion(version)
   if (isError(result)) throw handleError(result.error, logger)

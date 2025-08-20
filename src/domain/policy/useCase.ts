@@ -1,11 +1,12 @@
+import { PrivacyPolicy } from '@prisma/client'
 import { ClientError, NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { isError, isNull, Result, resultError, resultSuccess } from '@/common/types/utility'
-import { CommandService } from '../repository/commandService'
-import { QueryService } from '../repository/queryService'
-import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
+import { CommandService } from './repository/commandService'
+import { QueryService } from './repository/queryService'
+import { activate, isActive, newPrivacyPolicy, updateContent } from './schema/method'
 
-export default class PrivacyPolicyService {
+export class UseCase {
   constructor(
     private queryService: QueryService,
     private commandService: CommandService,
@@ -53,14 +54,7 @@ export default class PrivacyPolicyService {
     const versionResult = await this.queryService.getNextVersion()
     if (isError(versionResult)) return resultError(ServerError.handle(versionResult.error))
 
-    const newPolicy = {
-      version: versionResult.data,
-      content,
-      effectiveAt: null, // 下書き状態
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-
+    const newPolicy = newPrivacyPolicy(versionResult.data, content)
     const saveResult = await this.commandService.save(newPolicy)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
@@ -83,23 +77,17 @@ export default class PrivacyPolicyService {
     }
 
     const policy = policyResult.data
-
-    // isDraftヘルパー関数の代わりにロジックを直接記述
-    if (policy.effectiveAt !== null) {
+    if (isActive(policy)) {
       return resultError(new ClientError('有効化されたポリシーは更新できません'))
     }
 
-    // updateContentメソッドのロジックを直接記述
-    const updatedPolicy = {
-      ...policy,
-      content,
-      updatedAt: new Date(),
-    }
+    const updatedPolicyResult = updateContent(policy, content)
+    if (isError(updatedPolicyResult)) return updatedPolicyResult
 
-    const saveResult = await this.commandService.save(updatedPolicy)
+    const saveResult = await this.commandService.save(updatedPolicyResult.data)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
-    return resultSuccess(saveResult.data)
+    return saveResult
   }
 
   /**
@@ -115,11 +103,7 @@ export default class PrivacyPolicyService {
         new NotFoundError('指定されたバージョンのプライバシーポリシーが見つかりません'),
       )
     }
-
-    const policy = policyResult.data
-
-    // isActiveメソッドの代わりにロジックを直接記述
-    if (policy.effectiveAt !== null) {
+    if (isActive(policyResult.data)) {
       return resultError(new ClientError('有効化されたポリシーは削除できません'))
     }
 
@@ -145,19 +129,12 @@ export default class PrivacyPolicyService {
     const versionResult = await this.queryService.getNextVersion()
     if (isError(versionResult)) return resultError(ServerError.handle(versionResult.error))
 
-    // cloneメソッドのロジックを直接記述
-    const clonedPolicy = {
-      version: versionResult.data,
-      content: sourcePolicyResult.data.content,
-      effectiveAt: null, // 下書き状態
-      createdAt: new Date(), // 新しい作成日時
-      updatedAt: new Date(), // 新しい更新日時
-    }
+    const clonedPolicy = newPrivacyPolicy(versionResult.data, sourcePolicyResult.data.content)
 
     const saveResult = await this.commandService.save(clonedPolicy)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
-    return resultSuccess(saveResult.data)
+    return saveResult
   }
 
   /**
@@ -179,21 +156,16 @@ export default class PrivacyPolicyService {
     }
 
     const policy = policyResult.data
-
-    // activateメソッドのロジックを直接記述
-    if (policy.effectiveAt !== null) {
+    if (isActive(policy)) {
       return resultError(new ClientError('このポリシーは既に有効化されています'))
     }
 
-    const activatedPolicy = {
-      ...policy,
-      effectiveAt: effectiveDate,
-      updatedAt: new Date(),
-    }
+    const activatedPolicyResult = activate(policy, effectiveDate)
+    if (isError(activatedPolicyResult)) return activatedPolicyResult
 
-    const saveResult = await this.commandService.save(activatedPolicy)
+    const saveResult = await this.commandService.save(activatedPolicyResult.data)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
-    return resultSuccess(saveResult.data)
+    return saveResult
   }
 }

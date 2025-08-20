@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { isError } from '@/common/types/utility'
-import { createPrivacyPolicyService } from '@/domain/policy'
+import { createPrivacyPolicyUseCase } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from './activeUserTestHelper'
@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'test'
 
 class PolicyTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
-  private service = createPrivacyPolicyService(this.rdb)
+  private service = createPrivacyPolicyUseCase(this.rdb)
 
   async cleanUp(): Promise<void> {
     // ポリシーテーブルをクリア

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ClientError, NotFoundError } from '@/common/errors'
 import { isError, isSuccess, resultError, resultSuccess } from '@/common/types/utility'
-import PrivacyPolicyService from './privacyPolicyService'
+import { UseCase } from './useCase'
 
 // モックリポジトリインターフェースの型定義
 interface MockQueryService {
@@ -17,7 +17,7 @@ interface MockCommandService {
 }
 
 describe('PrivacyPolicyService', () => {
-  let service: PrivacyPolicyService
+  let useCase: UseCase
   let mockQueryService: MockQueryService
   let mockCommandService: MockCommandService
 
@@ -34,7 +34,7 @@ describe('PrivacyPolicyService', () => {
       deleteByVersion: vi.fn(),
     }
 
-    service = new PrivacyPolicyService(mockQueryService as any, mockCommandService as any)
+    useCase = new UseCase(mockQueryService, mockCommandService)
   })
 
   describe('getAllPolicies', () => {
@@ -67,7 +67,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockQueryService.findAll.mockResolvedValue(resultSuccess(paginationResult))
 
-        const result = await service.getAllPolicies(1, 10)
+        const result = await useCase.getAllPolicies(1, 10)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -90,7 +90,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockQueryService.findAll.mockResolvedValue(resultSuccess(emptyResult))
 
-        const result = await service.getAllPolicies(1, 10)
+        const result = await useCase.getAllPolicies(1, 10)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -110,7 +110,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockQueryService.findAll.mockResolvedValue(resultSuccess(emptyResult))
 
-        const result = await service.getAllPolicies(0, 0)
+        const result = await useCase.getAllPolicies(0, 0)
 
         expect(isSuccess(result)).toBe(true)
         expect(mockQueryService.findAll).toHaveBeenCalledWith(0, 0)
@@ -122,7 +122,7 @@ describe('PrivacyPolicyService', () => {
         const error = new Error('データベースエラー')
         mockQueryService.findAll.mockResolvedValue(resultError(error))
 
-        const result = await service.getAllPolicies(1, 10)
+        const result = await useCase.getAllPolicies(1, 10)
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -144,7 +144,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(policy))
 
-        const result = await service.getPolicyByVersion(1)
+        const result = await useCase.getPolicyByVersion(1)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -159,7 +159,7 @@ describe('PrivacyPolicyService', () => {
         const version = 999
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(null))
 
-        const result = await service.getPolicyByVersion(version)
+        const result = await useCase.getPolicyByVersion(version)
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -175,7 +175,7 @@ describe('PrivacyPolicyService', () => {
         const error = new Error('データベースエラー')
         mockQueryService.findByVersion.mockResolvedValue(resultError(error))
 
-        const result = await service.getPolicyByVersion(version)
+        const result = await useCase.getPolicyByVersion(version)
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -201,7 +201,7 @@ describe('PrivacyPolicyService', () => {
         mockQueryService.getNextVersion.mockResolvedValue(resultSuccess(nextVersion))
         mockCommandService.save.mockResolvedValue(resultSuccess(createdPolicy))
 
-        const result = await service.createPolicy(content)
+        const result = await useCase.createPolicy(content)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -233,7 +233,7 @@ describe('PrivacyPolicyService', () => {
         mockQueryService.getNextVersion.mockResolvedValue(resultSuccess(nextVersion))
         mockCommandService.save.mockResolvedValue(resultSuccess(createdPolicy))
 
-        const result = await service.createPolicy(content)
+        const result = await useCase.createPolicy(content)
 
         expect(isSuccess(result)).toBe(true)
       })
@@ -265,7 +265,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockCommandService.save.mockResolvedValue(resultSuccess(updatedPolicy))
 
-        const result = await service.updatePolicy(version, newContent)
+        const result = await useCase.updatePolicy(version, newContent)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -281,7 +281,7 @@ describe('PrivacyPolicyService', () => {
         const version = 999
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(null))
 
-        const result = await service.updatePolicy(version, '新しいコンテンツ')
+        const result = await useCase.updatePolicy(version, '新しいコンテンツ')
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -300,7 +300,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(activePolicy))
 
-        const result = await service.updatePolicy(version, '新しいコンテンツ')
+        const result = await useCase.updatePolicy(version, '新しいコンテンツ')
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -326,7 +326,7 @@ describe('PrivacyPolicyService', () => {
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(draftPolicy))
         mockCommandService.deleteByVersion.mockResolvedValue(resultSuccess(undefined))
 
-        const result = await service.deletePolicy(version)
+        const result = await useCase.deletePolicy(version)
 
         expect(isSuccess(result)).toBe(true)
         expect(mockQueryService.findByVersion).toHaveBeenCalledWith(version)
@@ -339,7 +339,7 @@ describe('PrivacyPolicyService', () => {
         const version = 999
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(null))
 
-        const result = await service.deletePolicy(version)
+        const result = await useCase.deletePolicy(version)
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -358,7 +358,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(activePolicy))
 
-        const result = await service.deletePolicy(version)
+        const result = await useCase.deletePolicy(version)
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -393,7 +393,7 @@ describe('PrivacyPolicyService', () => {
         mockQueryService.getNextVersion.mockResolvedValue(resultSuccess(nextVersion))
         mockCommandService.save.mockResolvedValue(resultSuccess(clonedPolicy))
 
-        const result = await service.clonePolicy(sourceVersion)
+        const result = await useCase.clonePolicy(sourceVersion)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -412,7 +412,7 @@ describe('PrivacyPolicyService', () => {
         const sourceVersion = 999
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(null))
 
-        const result = await service.clonePolicy(sourceVersion)
+        const result = await useCase.clonePolicy(sourceVersion)
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -447,7 +447,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockCommandService.save.mockResolvedValue(resultSuccess(activatedPolicy))
 
-        const result = await service.activatePolicy(version, effectiveDate)
+        const result = await useCase.activatePolicy(version, effectiveDate)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -464,7 +464,7 @@ describe('PrivacyPolicyService', () => {
         const version = 999
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(null))
 
-        const result = await service.activatePolicy(version, new Date())
+        const result = await useCase.activatePolicy(version, new Date())
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
@@ -483,7 +483,7 @@ describe('PrivacyPolicyService', () => {
         }
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(activePolicy))
 
-        const result = await service.activatePolicy(version, new Date())
+        const result = await useCase.activatePolicy(version, new Date())
 
         expect(isError(result)).toBe(true)
         if (isError(result)) {
