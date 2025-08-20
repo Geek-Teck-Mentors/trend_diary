@@ -25,10 +25,9 @@
 │   └── account
 │       ├── index.ts # package外で使用できるクラスなどをexport
 │       ├── infrastructure # repositoryの実装詳細
-│       ├── model
-│       ├── repository # リポジトリインターフェース
 │       ├── schema # バリデーションスキーマ
-│       └── service
+│       ├── repository.ts # リポジトリインターフェース
+│       └── useCase.ts
 ├── infrastructure # インフラ関連. 永続化層との接続などネットワーク的な意味合いが強い
 │   └── rdb.ts
 └── logger

@@ -113,13 +113,12 @@ git commit -m "refactor: improve article service structure TDD cycle complete"
 
 ```
 src/domain/{aggregate}/
-├── factory/         # ドメインサービスファクトリ
 ├── model/           # ドメインエンティティ
-├── service/         # ドメインビジネスロジック
-├── repository/      # リポジトリインターフェース
 ├── schema/          # Zodバリデーションスキーマ
 ├── infrastructure/  # リポジトリ実装
-└── index.ts         # 集約エクスポート
+├── repository.ts    # リポジトリインターフェース
+├── useCase.ts       # ドメインビジネスロジック
+└── index.ts         # 集約エクスポート, factory
 ```
 
 **テスト戦略**（多層構造）:
