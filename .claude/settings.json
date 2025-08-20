@@ -120,7 +120,6 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "PostToolUse",
         "hooks": [
           {
             "type": "command",
