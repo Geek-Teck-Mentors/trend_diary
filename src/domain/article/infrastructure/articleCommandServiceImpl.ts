@@ -1,6 +1,6 @@
 import { getErrorMessage, ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
+import { ArticleCommandService } from '@/domain/article/repository'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 import { RdbClient } from '@/infrastructure/rdb'
 
