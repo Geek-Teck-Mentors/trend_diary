@@ -6,8 +6,8 @@ const prisma = new PrismaClient()
 
 async function main() {
   // 初期Adminユーザーの情報
-  const adminEmail = 'admin@example.com'
-  const adminPassword = 'admin123456'
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com'
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456'
   const adminDisplayName = 'System Administrator'
 
   // パスワードハッシュ化
