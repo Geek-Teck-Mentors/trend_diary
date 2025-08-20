@@ -21,13 +21,13 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
         },
       })
 
-      const readHistory = new ReadHistory(
-        createdReadHistory.readHistoryId,
-        createdReadHistory.activeUserId,
-        createdReadHistory.articleId,
-        createdReadHistory.readAt,
-        createdReadHistory.createdAt,
-      )
+      const readHistory: ReadHistory = {
+        readHistoryId: createdReadHistory.readHistoryId,
+        activeUserId: createdReadHistory.activeUserId,
+        articleId: createdReadHistory.articleId,
+        readAt: createdReadHistory.readAt,
+        createdAt: createdReadHistory.createdAt,
+      }
 
       return resultSuccess(readHistory)
     } catch (error) {

@@ -1,11 +1,5 @@
-export default class Article {
-  constructor(
-    public articleId: bigint,
-    public media: string,
-    public title: string,
-    public author: string,
-    public description: string,
-    public url: string,
-    public readonly createdAt: Date,
-  ) {}
-}
+import { z } from 'zod'
+import { articleSchema } from '../schema/articleSchema'
+
+export type Article = z.infer<typeof articleSchema>
+export default Article

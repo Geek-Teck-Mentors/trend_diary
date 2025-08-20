@@ -10,15 +10,15 @@ import { ArticleQueryService } from '@/domain/article/repository/articleQuerySer
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import ArticleService from './articleService'
 
-const mockArticle: Article = new Article(
-  BigInt(1),
-  'qiita',
-  faker.lorem.sentence(),
-  faker.person.fullName(),
-  faker.lorem.paragraph(),
-  faker.internet.url(),
-  new Date(),
-)
+const mockArticle: Article = {
+  articleId: BigInt(1),
+  media: 'qiita',
+  title: faker.lorem.sentence(),
+  author: faker.person.fullName(),
+  description: faker.lorem.paragraph(),
+  url: faker.internet.url(),
+  createdAt: new Date(),
+}
 
 const mockPaginationResult: CursorPaginationResult<Article> = {
   data: [mockArticle],
@@ -265,7 +265,13 @@ describe('ArticleService', () => {
       // 記事存在確認のモック
       mockArticleQueryService.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
 
-      const mockReadHistory = new ReadHistory(1n, userId, articleId, readAt, new Date())
+      const mockReadHistory: ReadHistory = {
+        readHistoryId: 1n,
+        activeUserId: userId,
+        articleId: articleId,
+        readAt: readAt,
+        createdAt: new Date(),
+      }
       mockArticleCommandService.createReadHistory.mockResolvedValue(resultSuccess(mockReadHistory))
 
       const result = await service.createReadHistory(userId, articleId, readAt)
