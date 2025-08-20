@@ -3,11 +3,11 @@ import { mockDeep } from 'vitest-mock-extended'
 import { NotFoundError, ServerError } from '@/common/errors'
 import { CursorPaginationResult } from '@/common/pagination'
 import { isError, isSuccess, resultError, resultSuccess } from '@/common/types/utility'
-import Article from '@/domain/article/model/article'
-import ReadHistory from '@/domain/article/model/readHistory'
 import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
 import { ArticleQueryService } from '@/domain/article/repository/articleQueryService'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
+import type { Article } from '@/domain/article/schema/articleSchema'
+import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 import ArticleService from './articleService'
 
 const mockArticle: Article = {

@@ -1,5 +1,5 @@
 import { AsyncResult } from '@/common/types/utility'
-import ReadHistory from '../model/readHistory'
+import type { ReadHistory } from '../schema/readHistorySchema'
 
 export interface ArticleCommandService {
   createReadHistory(

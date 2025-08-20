@@ -1,7 +1,7 @@
 import { getErrorMessage, ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import ReadHistory from '@/domain/article/model/readHistory'
 import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
+import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 import { RdbClient } from '@/infrastructure/rdb'
 
 export default class ArticleCommandServiceImpl implements ArticleCommandService {

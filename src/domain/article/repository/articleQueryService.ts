@@ -1,8 +1,8 @@
 import { ServerError } from '@/common/errors'
 import { CursorPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable } from '@/common/types/utility'
-import Article from '@/domain/article/model/article'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
+import type { Article } from '@/domain/article/schema/articleSchema'
 
 export interface ArticleQueryService {
   searchArticles(
