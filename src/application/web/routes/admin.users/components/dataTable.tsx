@@ -73,7 +73,7 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             メールアドレス
-            <ArrowUpDown />
+            <ArrowUpDown className='ml-2 h-4 w-4' />
           </Button>
         ),
         cell: ({ row }) => <div className='text-sm text-gray-500'>{row.original.email}</div>,
