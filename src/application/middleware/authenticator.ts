@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants/session'
 import { ClientError, ServerError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { createActiveUserService } from '@/domain/user'
+import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env, SessionUser } from '../env'
 import CONTEXT_KEY from './context'
@@ -25,7 +25,7 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createActiveUserService(rdb)
+  const service = createUserUseCase(rdb)
 
   const result = await service.getCurrentUser(sessionId)
   if (isError(result)) {

@@ -1,5 +1,5 @@
 import { isError } from '@/common/types/utility'
-import { createActiveUserService } from '@/domain/user'
+import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
@@ -8,7 +8,7 @@ process.env.NODE_ENV = 'test'
 class ActiveUserTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  private service = createActiveUserService(this.rdb)
+  private service = createUserUseCase(this.rdb)
 
   async cleanUp(): Promise<void> {
     // 外部キー制約を考慮した順序でTRUNCATE
