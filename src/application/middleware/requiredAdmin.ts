@@ -18,7 +18,7 @@ const requiredAdmin = createMiddleware<Env>(async (c, next) => {
   }
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const adminUserService = createAdminUserUseCase(rdb)
+  const adminUserUseCase = createAdminUserUseCase(rdb)
 
   // Admin権限チェック
   const result = await adminUserService.isAdmin(sessionUser.activeUserId)
