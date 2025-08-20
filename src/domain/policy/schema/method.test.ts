@@ -1,6 +1,6 @@
-import { newPrivacyPolicy, isActive, updateContent, activate } from './method'
-import { resultSuccess, resultError } from '@/common/types/utility'
 import { ClientError } from '@/common/errors'
+import { resultError, resultSuccess } from '@/common/types/utility'
+import { activate, isActive, newPrivacyPolicy, updateContent } from './method'
 
 describe('PrivacyPolicy Method', () => {
   describe('newPrivacyPolicy', () => {
@@ -48,9 +48,7 @@ describe('PrivacyPolicy Method', () => {
       policy.effectiveAt = new Date()
       const result = updateContent(policy, 'new')
 
-      expect(result).toEqual(
-        resultError(new ClientError('有効化されたポリシーは更新できません')),
-      )
+      expect(result).toEqual(resultError(new ClientError('有効化されたポリシーは更新できません')))
     })
   })
 
@@ -74,9 +72,7 @@ describe('PrivacyPolicy Method', () => {
       policy.effectiveAt = new Date()
       const result = activate(policy, new Date())
 
-      expect(result).toEqual(
-        resultError(new ClientError('このポリシーは既に有効化されています')),
-      )
+      expect(result).toEqual(resultError(new ClientError('このポリシーは既に有効化されています')))
     })
   })
 })
