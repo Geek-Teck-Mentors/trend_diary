@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import { SESSION_NAME } from '@/common/constants/session'
+import { UseCase } from '@/domain/user/useCase'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
-import { UseCase } from '@/domain/user/useCase'
 
 describe('DELETE /api/user/logout', () => {
   let setCookie: string[]
