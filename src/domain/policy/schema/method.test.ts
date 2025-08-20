@@ -1,2 +1,2 @@
 // TODO: 追加
-describe.skip("PrivacyPolicy Domain Method")
+describe.skip('PrivacyPolicy Domain Method')
