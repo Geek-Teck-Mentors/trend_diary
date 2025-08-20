@@ -98,7 +98,7 @@ describe('AdminUserService', () => {
       it('Admin権限を持つユーザーの場合trueを返す', async () => {
         mockDb.adminUser.findUnique.mockResolvedValue({
           adminUserId: 1,
-        activeUserId: BigInt(100),
+          activeUserId: BigInt(100),
           grantedAt: new Date(),
           grantedByAdminUserId: 1,
         })
