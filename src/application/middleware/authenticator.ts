@@ -8,7 +8,7 @@ import { ClientError, ServerError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
 import { createActiveUserService } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
-import { Env } from '../env'
+import { Env, SessionUser } from '../env'
 import CONTEXT_KEY from './context'
 
 const authenticator = createMiddleware<Env>(async (c, next) => {
@@ -49,10 +49,12 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   // セッションユーザー情報を設定
-  const sessionUser = {
+  const sessionUser: SessionUser = {
     activeUserId: result.data.activeUserId,
     displayName: result.data.displayName,
     email: result.data.email,
+    isAdmin: result.data.adminUserId !== null,
+    adminUserId: result.data.adminUserId,
   }
 
   c.set(CONTEXT_KEY.SESSION_USER, sessionUser)

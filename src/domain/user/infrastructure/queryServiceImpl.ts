@@ -47,7 +47,7 @@ export default class QueryServiceImpl implements QueryService {
           sessionId,
           expiresAt: { gt: new Date() },
         },
-        include: { activeUser: true },
+        include: { activeUser: { include: { adminUser: true } } },
       })
 
       if (!session) {

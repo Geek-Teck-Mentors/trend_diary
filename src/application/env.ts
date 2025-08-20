@@ -1,10 +1,13 @@
+import { Nullable } from '@/common/types/utility'
 import { logger } from '@/logger/logger'
 import CONTEXT_KEY from './middleware/context'
 
 export type SessionUser = {
   activeUserId: bigint
-  displayName: string | null | undefined
+  displayName?: Nullable<string>
   email: string
+  isAdmin: boolean
+  adminUserId: Nullable<number>
 }
 
 export type Env = {
