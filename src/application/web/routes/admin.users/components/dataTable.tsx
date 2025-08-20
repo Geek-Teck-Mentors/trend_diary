@@ -120,7 +120,7 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
               <DropdownMenuTrigger asChild={true}>
                 <Button variant='ghost' className='h-8 w-8 p-0'>
                   <span className='sr-only'>メニューを開く</span>
-                  <MoreHorizontal />
+                  <MoreHorizontal className='h-4 w-4' />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end'>
