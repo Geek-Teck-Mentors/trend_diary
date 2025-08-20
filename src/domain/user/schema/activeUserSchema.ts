@@ -9,6 +9,7 @@ export const activeUserSchema = z.object({
   lastLogin: z.date().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  adminUserId: z.number().positive().nullable().default(null),
 })
 
 export const activeUserInputSchema = activeUserSchema.pick({
@@ -22,4 +23,5 @@ export const activeUserUpdateSchema = activeUserSchema.pick({
   password: true,
 })
 
+export type ActiveUser = z.infer<typeof activeUserSchema>
 export type ActiveUserInput = z.infer<typeof activeUserInputSchema>

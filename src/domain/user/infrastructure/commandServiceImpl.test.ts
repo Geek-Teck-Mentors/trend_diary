@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
-import ActiveUser from '../model/activeUser'
 import CommandServiceImpl from './commandServiceImpl'
 
 // モックの設定
@@ -82,16 +81,17 @@ describe('CommandServiceImpl', () => {
     describe('基本動作', () => {
       it('ActiveUserを保存できる', async () => {
         // Arrange
-        const activeUser = new ActiveUser(
-          1n,
-          2n,
-          'test@example.com',
-          'hashedPassword123',
-          'テストユーザー',
-          undefined,
-          new Date(),
-          new Date(),
-        )
+        const activeUser = {
+          activeUserId: 1n,
+          userId: 2n,
+          email: 'test@example.com',
+          password: 'hashedPassword123',
+          displayName: 'テストユーザー',
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
 
         const mockUpdatedUser = {
           activeUserId: 1n,
@@ -122,16 +122,17 @@ describe('CommandServiceImpl', () => {
     describe('例外・制約違反', () => {
       it('データベースエラー時は適切にエラーを返す', async () => {
         // Arrange
-        const activeUser = new ActiveUser(
-          1n,
-          2n,
-          'test@example.com',
-          'hashedPassword123',
-          'テストユーザー',
-          undefined,
-          new Date(),
-          new Date(),
-        )
+        const activeUser = {
+          activeUserId: 1n,
+          userId: 2n,
+          email: 'test@example.com',
+          password: 'hashedPassword123',
+          displayName: 'テストユーザー',
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
         const dbError = new Error('Database connection failed')
         mockDb.activeUser.update.mockRejectedValue(dbError)
 

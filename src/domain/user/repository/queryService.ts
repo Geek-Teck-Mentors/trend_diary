@@ -1,5 +1,5 @@
 import { AsyncResult, Nullable } from '@/common/types/utility'
-import ActiveUser from '../model/activeUser'
+import type { ActiveUser } from '../schema/activeUserSchema'
 
 export interface QueryService {
   findActiveById(id: bigint): AsyncResult<Nullable<ActiveUser>, Error>

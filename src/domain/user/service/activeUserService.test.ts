@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError } from '@/common/errors'
 import { isError, isSuccess, resultSuccess } from '@/common/types/utility'
-import ActiveUser from '../model/activeUser'
 import { CommandService } from '../repository/commandService'
 import { QueryService } from '../repository/queryService'
 import ActiveUserService from './activeUserService'
@@ -30,16 +29,17 @@ describe('ActiveUserService', () => {
         mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
         // ActiveUser作成
-        const mockActiveUser = new ActiveUser(
-          1n,
-          2n,
+        const mockActiveUser = {
+          activeUserId: 1n,
+          userId: 2n,
           email,
-          'hashedPassword',
-          'テストユーザー',
-          undefined,
-          new Date(),
-          new Date(),
-        )
+          password: 'hashedPassword',
+          displayName: 'テストユーザー',
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
         mockCommandService.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
@@ -63,16 +63,17 @@ describe('ActiveUserService', () => {
         // Arrange
         mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
-        const mockActiveUser = new ActiveUser(
-          1n,
-          2n,
+        const mockActiveUser = {
+          activeUserId: 1n,
+          userId: 2n,
           email,
-          'hashedPassword',
-          null,
-          undefined,
-          new Date(),
-          new Date(),
-        )
+          password: 'hashedPassword',
+          displayName: null,
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
         mockCommandService.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
@@ -92,16 +93,17 @@ describe('ActiveUserService', () => {
         const password = 'password123'
 
         // Arrange - 既存ユーザーが存在
-        const existingUser = new ActiveUser(
-          1n,
-          2n,
+        const existingUser = {
+          activeUserId: 1n,
+          userId: 2n,
           email,
-          'existingPassword',
-          '既存ユーザー',
-          undefined,
-          new Date(),
-          new Date(),
-        )
+          password: 'existingPassword',
+          displayName: '既存ユーザー',
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
         mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(existingUser))
 
         // Act
@@ -124,16 +126,17 @@ describe('ActiveUserService', () => {
         const hashedPassword = await bcrypt.hash(password, 10)
 
         // Arrange
-        const mockActiveUser = new ActiveUser(
-          1n,
-          2n,
+        const mockActiveUser = {
+          activeUserId: 1n,
+          userId: 2n,
           email,
-          hashedPassword,
-          'テストユーザー',
-          undefined,
-          new Date(),
-          new Date(),
-        )
+          password: hashedPassword,
+          displayName: 'テストユーザー',
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
         mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
 
         mockCommandService.createSession.mockResolvedValue(
@@ -144,16 +147,17 @@ describe('ActiveUserService', () => {
         )
 
         // ActiveUser保存のモック
-        const updatedActiveUser = new ActiveUser(
-          1n,
-          2n,
+        const updatedActiveUser = {
+          activeUserId: 1n,
+          userId: 2n,
           email,
-          hashedPassword,
-          'テストユーザー',
-          new Date(), // lastLoginが更新される
-          new Date(),
-          new Date(),
-        )
+          password: hashedPassword,
+          displayName: 'テストユーザー',
+          lastLogin: new Date(), // lastLoginが更新される
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
         mockCommandService.saveActive.mockResolvedValue(resultSuccess(updatedActiveUser))
 
         // Act
@@ -193,16 +197,17 @@ describe('ActiveUserService', () => {
         const hashedPassword = await bcrypt.hash(correctPassword, 10)
 
         // Arrange
-        const mockActiveUser = new ActiveUser(
-          1n,
-          2n,
+        const mockActiveUser = {
+          activeUserId: 1n,
+          userId: 2n,
           email,
-          hashedPassword,
-          'テストユーザー',
-          undefined,
-          new Date(),
-          new Date(),
-        )
+          password: hashedPassword,
+          displayName: 'テストユーザー',
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
         mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act

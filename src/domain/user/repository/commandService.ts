@@ -1,6 +1,6 @@
 import { AsyncResult } from '@/common/types/utility'
 import { CreateSessionInput } from '../dto'
-import ActiveUser from '../model/activeUser'
+import type { ActiveUser } from '../schema/activeUserSchema'
 
 export interface CommandService {
   createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error>

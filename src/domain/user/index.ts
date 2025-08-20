@@ -1,8 +1,13 @@
 import createActiveUserService from './factory/activeUserFactory'
-import { ActiveUserInput, activeUserInputSchema, activeUserSchema } from './schema/activeUserSchema'
+import {
+  ActiveUser,
+  ActiveUserInput,
+  activeUserInputSchema,
+  activeUserSchema,
+} from './schema/activeUserSchema'
 
 // 型
-export type { ActiveUserInput }
+export type { ActiveUser, ActiveUserInput }
 
 // スキーマ
 export { activeUserSchema, activeUserInputSchema }
