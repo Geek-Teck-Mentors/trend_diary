@@ -11,8 +11,7 @@ import {
   resultError,
   resultSuccess,
 } from '@/common/types/utility'
-import { CommandService } from '../repository/commandService'
-import { QueryService } from '../repository/queryService'
+import { CommandService, QueryService } from '../repository'
 import type { ActiveUser } from '../schema/activeUserSchema'
 
 type LoginResult = {

@@ -1,7 +1,7 @@
 import { getErrorMessage, ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
-import { QueryService } from '../repository/queryService'
+import { QueryService } from '../repository'
 import type { ActiveUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 

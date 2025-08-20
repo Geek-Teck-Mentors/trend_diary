@@ -2,7 +2,7 @@ import { getErrorMessage, ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { CreateSessionInput } from '../dto'
-import { CommandService } from '../repository/commandService'
+import { CommandService } from '../repository'
 import type { ActiveUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 

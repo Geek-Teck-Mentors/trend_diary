@@ -3,8 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError } from '@/common/errors'
 import { isError, isSuccess, resultSuccess } from '@/common/types/utility'
-import { CommandService } from './repository/commandService'
-import { QueryService } from './repository/queryService'
+import { CommandService, QueryService } from './repository'
 import { UseCase } from './useCase'
 
 // モックの設定
