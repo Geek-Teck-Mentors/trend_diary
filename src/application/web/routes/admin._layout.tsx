@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import { Outlet, redirect } from 'react-router'
+import { Outlet, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import LinkAsButton from '../components/linkAsButton'
 import getApiClientForClient from '../infrastructure/api'
 
 export default function AdminLayout() {
+  const navigate = useNavigate()
+
   useEffect(() => {
     let isMounted = true
     const client = getApiClientForClient()
@@ -15,7 +17,7 @@ export default function AdminLayout() {
         const resJson = await res.json()
         if (!resJson.user.isAdmin) {
           toast.error('管理者ログインが必要です')
-          redirect('/login')
+          navigate('/login')
         }
         return
       }
@@ -24,7 +26,7 @@ export default function AdminLayout() {
       } else {
         toast.error('不明のエラーが発生しました')
       }
-      redirect('/login')
+      navigate('/login')
     }
 
     if (isMounted) {
