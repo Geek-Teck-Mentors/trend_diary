@@ -207,7 +207,7 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
             disabled={!table.getCanPreviousPage()}
           >
             <span className='sr-only'>前へ</span>
-            <ChevronLeft />
+            <ChevronLeft className='h-4 w-4' />
           </Button>
           <Button
             variant='outline'
