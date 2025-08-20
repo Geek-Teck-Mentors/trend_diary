@@ -48,7 +48,7 @@ describe('POST /api/admin/users/:id', () => {
       expect(data.activeUserId).toBe(regularUser.activeUserId.toString())
       expect(data.adminUserId).toBeDefined()
       expect(data.grantedAt).toBeDefined()
-      expect(data.grantedByAdminUserId).toBe(1)
+      expect(data.grantedByAdminUserId).toBe(adminUser.adminUserId)
 
       // 実際にAdmin権限が付与されたか確認
       const isAdmin = await adminUserTestHelper.isAdmin(regularUser.activeUserId)
@@ -121,7 +121,7 @@ describe('POST /api/admin/users/:id', () => {
         'password123',
         'Regular User',
       )
-      await adminUserTestHelper.grantAdminRole(regularUser.activeUserId, 1)
+      await adminUserTestHelper.grantAdminRole(regularUser.activeUserId, adminUser.adminUserId)
 
       // 既にAdmin権限を持つユーザーに再度Admin権限を付与しようとする
       const res = await requestPostAdminUser(
