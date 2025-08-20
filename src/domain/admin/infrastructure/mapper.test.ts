@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import AdminUser from '../model/adminUser'
 import { AdminUserRow, toDomainAdminUser, toUserListItem, UserWithAdminRow } from './mapper'
 
 describe('Admin Mapper', () => {
@@ -26,7 +25,7 @@ describe('Admin Mapper', () => {
         const result = toDomainAdminUser(adminUserRow)
 
         // Assert
-        expect(result).toBeInstanceOf(AdminUser)
+        expect(result).toBeDefined()
         expect(result.adminUserId).toBe(adminUserRow.adminUserId)
         expect(result.activeUserId).toBe(adminUserRow.activeUserId)
         expect(result.grantedAt).toEqual(adminUserRow.grantedAt)
@@ -42,7 +41,7 @@ describe('Admin Mapper', () => {
 
         // Assert - インスタンス独立性の確認
         expect(result).not.toBe(adminUserRow)
-        expect(result).toBeInstanceOf(AdminUser)
+        expect(result).toBeDefined()
 
         // Dateオブジェクトは同じ参照を持つ（mapperの実装仕様）
         expect(result.grantedAt).toBe(adminUserRow.grantedAt)

@@ -41,8 +41,20 @@ describe('PrivacyPolicyService', () => {
     describe('基本動作', () => {
       it('全てのプライバシーポリシーを取得できる', async () => {
         const policies = [
-          new PrivacyPolicy(1, 'コンテンツ1', new Date(), new Date(), new Date()),
-          new PrivacyPolicy(2, 'コンテンツ2', null, new Date(), new Date()),
+          {
+            version: 1,
+            content: 'コンテンツ1',
+            effectiveAt: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            version: 2,
+            content: 'コンテンツ2',
+            effectiveAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
         ]
         const paginationResult = {
           data: policies,
@@ -123,7 +135,13 @@ describe('PrivacyPolicyService', () => {
   describe('getPolicyByVersion', () => {
     describe('基本動作', () => {
       it('指定したバージョンのプライバシーポリシーを取得できる', async () => {
-        const policy = new PrivacyPolicy(1, 'コンテンツ1', null, new Date(), new Date())
+        const policy = {
+          version: 1,
+          content: 'コンテンツ1',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(policy))
 
         const result = await service.getPolicyByVersion(1)
@@ -172,7 +190,13 @@ describe('PrivacyPolicyService', () => {
       it('新しいプライバシーポリシーを作成できる', async () => {
         const content = '新しいプライバシーポリシー'
         const nextVersion = 1
-        const createdPolicy = new PrivacyPolicy(nextVersion, content, null, new Date(), new Date())
+        const createdPolicy = {
+          version: nextVersion,
+          content,
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         mockQueryService.getNextVersion.mockResolvedValue(resultSuccess(nextVersion))
         mockCommandService.save.mockResolvedValue(resultSuccess(createdPolicy))
@@ -198,7 +222,13 @@ describe('PrivacyPolicyService', () => {
       it('空のコンテンツでもポリシーを作成できる', async () => {
         const content = ''
         const nextVersion = 1
-        const createdPolicy = new PrivacyPolicy(nextVersion, content, null, new Date(), new Date())
+        const createdPolicy = {
+          version: nextVersion,
+          content,
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         mockQueryService.getNextVersion.mockResolvedValue(resultSuccess(nextVersion))
         mockCommandService.save.mockResolvedValue(resultSuccess(createdPolicy))
@@ -215,24 +245,24 @@ describe('PrivacyPolicyService', () => {
       it('下書き状態のプライバシーポリシーを更新できる', async () => {
         const version = 1
         const newContent = '更新されたコンテンツ'
-        const draftPolicy = new PrivacyPolicy(
+        const draftPolicy = {
           version,
-          '古いコンテンツ',
-          null,
-          new Date(),
-          new Date(),
-        )
+          content: '古いコンテンツ',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(draftPolicy))
 
         // 更新されたポリシーを返すようにモック設定
-        const updatedPolicy = new PrivacyPolicy(
+        const updatedPolicy = {
           version,
-          newContent,
-          null,
-          draftPolicy.createdAt,
-          new Date(),
-        )
+          content: newContent,
+          effectiveAt: null,
+          createdAt: draftPolicy.createdAt,
+          updatedAt: new Date(),
+        }
         mockCommandService.save.mockResolvedValue(resultSuccess(updatedPolicy))
 
         const result = await service.updatePolicy(version, newContent)
@@ -261,13 +291,13 @@ describe('PrivacyPolicyService', () => {
 
       it('有効化されたポリシーを更新しようとした場合はClientErrorを返す', async () => {
         const version = 1
-        const activePolicy = new PrivacyPolicy(
+        const activePolicy = {
           version,
-          'コンテンツ',
-          new Date(),
-          new Date(),
-          new Date(),
-        )
+          content: 'コンテンツ',
+          effectiveAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(activePolicy))
 
         const result = await service.updatePolicy(version, '新しいコンテンツ')
@@ -285,7 +315,13 @@ describe('PrivacyPolicyService', () => {
     describe('基本動作', () => {
       it('下書き状態のプライバシーポリシーを削除できる', async () => {
         const version = 1
-        const draftPolicy = new PrivacyPolicy(version, 'コンテンツ', null, new Date(), new Date())
+        const draftPolicy = {
+          version,
+          content: 'コンテンツ',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(draftPolicy))
         mockCommandService.deleteByVersion.mockResolvedValue(resultSuccess(undefined))
@@ -313,13 +349,13 @@ describe('PrivacyPolicyService', () => {
 
       it('有効化されたポリシーを削除しようとした場合はClientErrorを返す', async () => {
         const version = 1
-        const activePolicy = new PrivacyPolicy(
+        const activePolicy = {
           version,
-          'コンテンツ',
-          new Date(),
-          new Date(),
-          new Date(),
-        )
+          content: 'コンテンツ',
+          effectiveAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(activePolicy))
 
         const result = await service.deletePolicy(version)
@@ -338,20 +374,20 @@ describe('PrivacyPolicyService', () => {
       it('既存のプライバシーポリシーを複製できる', async () => {
         const sourceVersion = 1
         const nextVersion = 2
-        const sourcePolicy = new PrivacyPolicy(
-          sourceVersion,
-          '元のコンテンツ',
-          new Date(),
-          new Date(),
-          new Date(),
-        )
-        const clonedPolicy = new PrivacyPolicy(
-          nextVersion,
-          '元のコンテンツ',
-          null,
-          new Date(),
-          new Date(),
-        )
+        const sourcePolicy = {
+          version: sourceVersion,
+          content: '元のコンテンツ',
+          effectiveAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+        const clonedPolicy = {
+          version: nextVersion,
+          content: '元のコンテンツ',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(sourcePolicy))
         mockQueryService.getNextVersion.mockResolvedValue(resultSuccess(nextVersion))
@@ -391,18 +427,24 @@ describe('PrivacyPolicyService', () => {
       it('下書き状態のプライバシーポリシーを有効化できる', async () => {
         const version = 1
         const effectiveDate = new Date('2024-01-15T00:00:00Z')
-        const draftPolicy = new PrivacyPolicy(version, 'コンテンツ', null, new Date(), new Date())
+        const draftPolicy = {
+          version,
+          content: 'コンテンツ',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(draftPolicy))
 
         // 有効化されたポリシーを返すようにモック設定
-        const activatedPolicy = new PrivacyPolicy(
+        const activatedPolicy = {
           version,
-          'コンテンツ',
-          effectiveDate,
-          draftPolicy.createdAt,
-          new Date(),
-        )
+          content: 'コンテンツ',
+          effectiveAt: effectiveDate,
+          createdAt: draftPolicy.createdAt,
+          updatedAt: new Date(),
+        }
         mockCommandService.save.mockResolvedValue(resultSuccess(activatedPolicy))
 
         const result = await service.activatePolicy(version, effectiveDate)
@@ -432,13 +474,13 @@ describe('PrivacyPolicyService', () => {
 
       it('既に有効化されたポリシーを再度有効化しようとした場合はClientErrorを返す', async () => {
         const version = 1
-        const activePolicy = new PrivacyPolicy(
+        const activePolicy = {
           version,
-          'コンテンツ',
-          new Date(),
-          new Date(),
-          new Date(),
-        )
+          content: 'コンテンツ',
+          effectiveAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
         mockQueryService.findByVersion.mockResolvedValue(resultSuccess(activePolicy))
 
         const result = await service.activatePolicy(version, new Date())

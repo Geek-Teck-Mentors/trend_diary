@@ -1,6 +1,6 @@
 import { AsyncResult, isError, resultSuccess } from '@/common/types/utility'
-import AdminUser from '../model/adminUser'
 import { AdminCommandService, AdminQueryService } from '../repository'
+import type { AdminUser } from '../schema/adminUserSchema'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
 

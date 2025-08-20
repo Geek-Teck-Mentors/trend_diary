@@ -9,8 +9,7 @@ export function createAdminUserService(rdb: RdbClient): AdminUserService {
   return new AdminUserService(commandService, queryService)
 }
 
-export { default as AdminUser } from './model/adminUser'
-export type { AdminUserInput as GrantAdminRoleInput } from './schema/adminUserSchema'
+export type { AdminUser, AdminUserInput as GrantAdminRoleInput } from './schema/adminUserSchema'
 export * from './schema/adminUserSchema'
 export type { UserListResult } from './schema/userListSchema'
 export * from './schema/userListSchema'

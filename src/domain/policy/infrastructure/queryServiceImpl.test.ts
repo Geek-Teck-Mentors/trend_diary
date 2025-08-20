@@ -48,7 +48,7 @@ describe('QueryServiceImpl', () => {
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
           expect(result.data.data).toHaveLength(2)
-          expect(result.data.data[0]).toBeInstanceOf(PrivacyPolicy)
+          expect(result.data.data[0]).toBeDefined()
           expect(result.data.data[0].version).toBe(1)
           expect(result.data.data[1].version).toBe(2)
           expect(result.data.page).toBe(1)
@@ -145,7 +145,7 @@ describe('QueryServiceImpl', () => {
         // Assert
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data).toBeInstanceOf(PrivacyPolicy)
+          expect(result.data).toBeDefined()
           expect(result.data?.version).toBe(1)
           expect(result.data?.content).toBe('ポリシー内容')
         }
@@ -233,7 +233,7 @@ describe('QueryServiceImpl', () => {
         // Assert
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data).toBeInstanceOf(PrivacyPolicy)
+          expect(result.data).toBeDefined()
           expect(result.data?.version).toBe(3)
           expect(result.data?.effectiveAt).toBeNull()
         }

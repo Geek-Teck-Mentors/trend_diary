@@ -1,4 +1,4 @@
-import AdminUser from '../model/adminUser'
+import type { AdminUser } from '../schema/adminUserSchema'
 
 export type AdminUserRow = {
   adminUserId: number
@@ -20,7 +20,12 @@ export type UserWithAdminRow = {
 }
 
 export function toDomainAdminUser(row: AdminUserRow): AdminUser {
-  return new AdminUser(row.adminUserId, row.activeUserId, row.grantedAt, row.grantedByAdminUserId)
+  return {
+    adminUserId: row.adminUserId,
+    activeUserId: row.activeUserId,
+    grantedAt: row.grantedAt,
+    grantedByAdminUserId: row.grantedByAdminUserId,
+  }
 }
 
 export function toUserListItem(row: UserWithAdminRow) {
