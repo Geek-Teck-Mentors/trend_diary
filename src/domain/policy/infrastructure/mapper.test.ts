@@ -105,27 +105,5 @@ describe('mapper', () => {
         expect(policy.content).toBe(longContent)
       })
     })
-
-    describe('例外・制約違反', () => {
-      it('変換されたエンティティのメソッドが正常に動作する', () => {
-        // Arrange
-        const dbRecord = {
-          version: 1,
-          content: 'テストコンテンツ',
-          effectiveAt: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
-
-        // Act
-        const policy = mapToPrivacyPolicy(dbRecord)
-
-        // Assert - エンティティのメソッドが正常に呼び出せることを確認
-        expect(policy.effectiveAt === null).toBe(true) // isDraft logic
-        expect(policy.effectiveAt !== null).toBe(false) // isActive logic
-
-        // ビジネスロジックはサービス層に移動したため、mapperのテストではデータ変換のみをテスト
-      })
-    })
   })
 })
