@@ -7,7 +7,7 @@ import { ArticleCommandService, ArticleQueryService } from '@/domain/article/rep
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import type { Article } from '@/domain/article/schema/articleSchema'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
-import ArticleService from './articleService'
+import { UseCase } from './useCase'
 
 const mockArticle: Article = {
   articleId: BigInt(1),
@@ -31,7 +31,7 @@ const mockArticleQueryService = mockDeep<ArticleQueryService>()
 const mockArticleCommandService = mockDeep<ArticleCommandService>()
 
 describe('ArticleService', () => {
-  const service = new ArticleService(mockArticleQueryService, mockArticleCommandService)
+  const service = new UseCase(mockArticleQueryService, mockArticleCommandService)
 
   beforeEach(() => {
     vi.clearAllMocks()

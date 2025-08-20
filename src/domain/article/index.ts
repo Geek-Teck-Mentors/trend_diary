@@ -1,12 +1,12 @@
 import { RdbClient } from '@/infrastructure/rdb'
 import ArticleCommandServiceImpl from './infrastructure/articleCommandServiceImpl'
 import ArticleQueryServiceImpl from './infrastructure/articleQueryServiceImpl'
-import ArticleService from './service/articleService'
+import { UseCase } from './useCase'
 
-export function createArticleService(db: RdbClient): ArticleService {
+export function createArticleService(db: RdbClient): UseCase {
   const articleQueryService = new ArticleQueryServiceImpl(db)
   const articleCommandService = new ArticleCommandServiceImpl(db)
-  return new ArticleService(articleQueryService, articleCommandService)
+  return new UseCase(articleQueryService, articleCommandService)
 }
 
 export type { ArticleQueryParams } from './schema/articleQuerySchema'

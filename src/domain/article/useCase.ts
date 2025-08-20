@@ -7,7 +7,7 @@ import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import type { Article } from '@/domain/article/schema/articleSchema'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 
-export default class ArticleService {
+export class UseCase {
   constructor(
     private readonly articleQueryService: ArticleQueryService,
     private readonly articleCommandService: ArticleCommandService,
