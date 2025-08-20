@@ -1,4 +1,4 @@
-import { Nullable } from "@/common/types/utility";
+import { Nullable } from '@/common/types/utility'
 
 export default class ActiveUser {
   constructor(

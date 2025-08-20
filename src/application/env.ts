@@ -1,6 +1,6 @@
+import { Nullable } from '@/common/types/utility'
 import { logger } from '@/logger/logger'
 import CONTEXT_KEY from './middleware/context'
-import { Nullable } from '@/common/types/utility'
 
 export type SessionUser = {
   activeUserId: bigint
