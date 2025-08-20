@@ -20,15 +20,15 @@ export class AdminQueryServiceImpl implements AdminQueryService {
   > {
     try {
       const adminUser = await this.rdb.adminUser.findUnique({
-        where: { ActiveUserId: activeUserId },
+        where: { activeUserId: activeUserId },
       })
       if (!adminUser) {
         return resultSuccess(null)
       }
 
       return resultSuccess({
-        adminUserId: adminUser.AdminUserId,
-        activeUserId: adminUser.ActiveUserId,
+        adminUserId: adminUser.adminUserId,
+        activeUserId: adminUser.activeUserId,
         grantedAt: adminUser.grantedAt,
         grantedByAdminUserId: adminUser.grantedByAdminUserId,
       })

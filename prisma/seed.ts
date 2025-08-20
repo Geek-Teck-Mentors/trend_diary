@@ -43,7 +43,7 @@ async function main() {
     // 3. AdminUserレコード作成（grantedByAdminUserIdは自分自身を参照）
     const adminUser = await tx.adminUser.create({
       data: {
-        ActiveUserId: activeUser.activeUserId,
+        activeUserId: activeUser.activeUserId,
         grantedByAdminUserId: 1, // 初期Adminは自分自身が付与者
       },
     })

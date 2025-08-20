@@ -1,8 +1,8 @@
 import AdminUser from '../model/adminUser'
 
 export type AdminUserRow = {
-  AdminUserId: number
-  ActiveUserId: bigint
+  adminUserId: number
+  activeUserId: bigint
   grantedAt: Date
   grantedByAdminUserId: number
 }
@@ -13,14 +13,14 @@ export type UserWithAdminRow = {
   displayName: string | null
   createdAt: Date
   adminUser: {
-    AdminUserId: number
+    adminUserId: number
     grantedAt: Date
     grantedByAdminUserId: number
   } | null
 }
 
 export function toDomainAdminUser(row: AdminUserRow): AdminUser {
-  return new AdminUser(row.AdminUserId, row.ActiveUserId, row.grantedAt, row.grantedByAdminUserId)
+  return new AdminUser(row.adminUserId, row.activeUserId, row.grantedAt, row.grantedByAdminUserId)
 }
 
 export function toUserListItem(row: UserWithAdminRow) {

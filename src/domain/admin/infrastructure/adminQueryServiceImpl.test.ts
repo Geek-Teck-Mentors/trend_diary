@@ -11,8 +11,8 @@ const mockDb = mockDeep<PrismaClient>()
 // ヘルパー関数
 function createMockAdminUser(overrides = {}) {
   return {
-    AdminUserId: 1,
-    ActiveUserId: 123456789n,
+    adminUserId: 1,
+    activeUserId: 123456789n,
     grantedAt: new Date('2024-01-15T09:30:15.123Z'),
     grantedByAdminUserId: 2,
     ...overrides,
@@ -30,7 +30,7 @@ function createMockUsers() {
       lastLogin: new Date('2024-01-15T09:30:15.123Z'),
       createdAt: new Date('2024-01-10T00:00:00.000Z'),
       updatedAt: new Date('2024-01-15T09:30:15.123Z'),
-      adminUser: createMockAdminUser({ ActiveUserId: 1n }),
+      adminUser: createMockAdminUser({ activeUserId: 1n }),
     },
     {
       activeUserId: 2n,
@@ -115,7 +115,7 @@ describe('AdminQueryServiceImpl', () => {
   describe('findAdminByActiveUserId', () => {
     describe('基本動作', () => {
       it('ActiveUserIdでAdmin情報を検索できる', async () => {
-        const mockAdminUser = createMockAdminUser({ ActiveUserId: activeUserId })
+        const mockAdminUser = createMockAdminUser({ activeUserId: activeUserId })
         mockDb.adminUser.findUnique.mockResolvedValue(mockAdminUser)
 
         const result = await service.findAdminByActiveUserId(activeUserId)
@@ -127,19 +127,19 @@ describe('AdminQueryServiceImpl', () => {
           grantedByAdminUserId: 2,
         })
         expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith({
-          where: { ActiveUserId: activeUserId },
+          where: { activeUserId: activeUserId },
         })
       })
 
       it('異なるActiveUserIdで複数のAdmin情報を検索できる', async () => {
         const activeUserId2 = 987654321n
         mockDb.adminUser.findUnique.mockResolvedValueOnce(
-          createMockAdminUser({ ActiveUserId: activeUserId }),
+          createMockAdminUser({ activeUserId: activeUserId }),
         )
         mockDb.adminUser.findUnique.mockResolvedValueOnce(
           createMockAdminUser({
-            AdminUserId: 3,
-            ActiveUserId: activeUserId2,
+            adminUserId: 3,
+            activeUserId: activeUserId2,
             grantedByAdminUserId: 1,
           }),
         )
@@ -166,14 +166,14 @@ describe('AdminQueryServiceImpl', () => {
           expect(result.data).toBeNull()
         }
         expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith({
-          where: { ActiveUserId: nonExistentActiveUserId },
+          where: { activeUserId: nonExistentActiveUserId },
         })
       })
 
       it('bigintの最大値に近いActiveUserIdでも正常に処理できる', async () => {
         const largeActiveUserId = 9223372036854775806n
         mockDb.adminUser.findUnique.mockResolvedValue(
-          createMockAdminUser({ ActiveUserId: largeActiveUserId }),
+          createMockAdminUser({ activeUserId: largeActiveUserId }),
         )
 
         const result = await service.findAdminByActiveUserId(largeActiveUserId)
@@ -187,7 +187,7 @@ describe('AdminQueryServiceImpl', () => {
       it('最小値のActiveUserIdでも正常に処理できる', async () => {
         const minActiveUserId = 1n
         mockDb.adminUser.findUnique.mockResolvedValue(
-          createMockAdminUser({ ActiveUserId: minActiveUserId }),
+          createMockAdminUser({ activeUserId: minActiveUserId }),
         )
 
         const result = await service.findAdminByActiveUserId(minActiveUserId)

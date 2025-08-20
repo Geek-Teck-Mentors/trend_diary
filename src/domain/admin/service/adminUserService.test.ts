@@ -36,8 +36,8 @@ describe('AdminUserService', () => {
         mockDb.adminUser.findUnique.mockResolvedValue(null)
 
         mockDb.adminUser.create.mockResolvedValue({
-          AdminUserId: 1,
-          ActiveUserId: BigInt(100),
+          adminUserId: 1,
+          activeUserId: BigInt(100),
           grantedAt: new Date(),
           grantedByAdminUserId: 1,
         })
@@ -77,8 +77,8 @@ describe('AdminUserService', () => {
         })
 
         mockDb.adminUser.findUnique.mockResolvedValue({
-          AdminUserId: 1,
-          ActiveUserId: BigInt(100),
+          adminUserId: 1,
+          activeUserId: BigInt(100),
           grantedAt: new Date(),
           grantedByAdminUserId: 1,
         })
@@ -97,8 +97,8 @@ describe('AdminUserService', () => {
     describe('正常系', () => {
       it('Admin権限を持つユーザーの場合trueを返す', async () => {
         mockDb.adminUser.findUnique.mockResolvedValue({
-          AdminUserId: 1,
-          ActiveUserId: BigInt(100),
+          adminUserId: 1,
+        activeUserId: BigInt(100),
           grantedAt: new Date(),
           grantedByAdminUserId: 1,
         })
@@ -138,7 +138,7 @@ describe('AdminUserService', () => {
             updatedAt: new Date(),
             userId: BigInt(1),
             adminUser: {
-              AdminUserId: 1,
+              adminUserId: 1,
               grantedAt: new Date(),
               grantedByAdminUserId: 1,
             },
@@ -182,7 +182,7 @@ describe('AdminUserService', () => {
             updatedAt: new Date(),
             userId: BigInt(1),
             adminUser: {
-              AdminUserId: 1,
+              adminUserId: 1,
               grantedAt: new Date(),
               grantedByAdminUserId: 1,
             },

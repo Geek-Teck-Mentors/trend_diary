@@ -25,8 +25,8 @@ function createMockActiveUser(overrides = {}) {
 
 function createMockAdminUser(overrides = {}) {
   return {
-    AdminUserId: 1,
-    ActiveUserId: 123456789n,
+    adminUserId: 1,
+    activeUserId: 123456789n,
     grantedAt: new Date(),
     grantedByAdminUserId: 1,
     ...overrides,
@@ -106,10 +106,10 @@ describe('AdminCommandServiceImpl', () => {
         })
         expectDatabaseCalls({
           activeUser: { where: { activeUserId: testData.activeUserId } },
-          adminUserFind: { where: { ActiveUserId: testData.activeUserId } },
+          adminUserFind: { where: { activeUserId: testData.activeUserId } },
           adminUserCreate: {
             data: {
-              ActiveUserId: testData.activeUserId,
+              activeUserId: testData.activeUserId,
               grantedByAdminUserId: testData.grantedByAdminUserId,
             },
           },
@@ -123,7 +123,7 @@ describe('AdminCommandServiceImpl', () => {
           email: 'test2@example.com',
           displayName: 'テストユーザー2',
         })
-        const mockAdminUser2 = createMockAdminUser({ AdminUserId: 2, ActiveUserId: activeUserId2 })
+        const mockAdminUser2 = createMockAdminUser({ adminUserId: 2, activeUserId: activeUserId2 })
 
         mockDb.activeUser.findUnique.mockResolvedValueOnce(createMockActiveUser())
         mockDb.adminUser.findUnique.mockResolvedValueOnce(null)
@@ -174,7 +174,7 @@ describe('AdminCommandServiceImpl', () => {
         expectErrorResult(result, AlreadyExistsError, '既にAdmin権限を持っています')
         expectDatabaseCalls({
           activeUser: { where: { activeUserId: testData.activeUserId } },
-          adminUserFind: { where: { ActiveUserId: testData.activeUserId } },
+          adminUserFind: { where: { activeUserId: testData.activeUserId } },
         })
         expect(mockDb.adminUser.create).not.toHaveBeenCalled()
       })
@@ -186,7 +186,7 @@ describe('AdminCommandServiceImpl', () => {
         )
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         mockDb.adminUser.create.mockResolvedValue(
-          createMockAdminUser({ ActiveUserId: largeActiveUserId }),
+          createMockAdminUser({ activeUserId: largeActiveUserId }),
         )
 
         const result = await service.grantAdminRole(
@@ -254,7 +254,7 @@ describe('AdminCommandServiceImpl', () => {
       it('Prisma制約違反エラーを適切にハンドリングする', async () => {
         const prismaError = {
           code: 'P2002',
-          message: 'Unique constraint failed on the fields: (`ActiveUserId`)',
+          message: 'Unique constraint failed on the fields: (`activeUserId`)',
         }
         mockDb.activeUser.findUnique.mockResolvedValue(createMockActiveUser())
         mockDb.adminUser.findUnique.mockResolvedValue(null)

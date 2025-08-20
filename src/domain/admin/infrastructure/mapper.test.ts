@@ -9,8 +9,8 @@ describe('Admin Mapper', () => {
       const now = new Date('2024-01-15T09:30:15.123Z')
 
       return {
-        AdminUserId: 1,
-        ActiveUserId: 123456789n,
+        adminUserId: 1,
+        activeUserId: 123456789n,
         grantedAt: now,
         grantedByAdminUserId: 2,
         ...overrides,
@@ -27,8 +27,8 @@ describe('Admin Mapper', () => {
 
         // Assert
         expect(result).toBeInstanceOf(AdminUser)
-        expect(result.adminUserId).toBe(adminUserRow.AdminUserId)
-        expect(result.activeUserId).toBe(adminUserRow.ActiveUserId)
+        expect(result.adminUserId).toBe(adminUserRow.adminUserId)
+        expect(result.activeUserId).toBe(adminUserRow.activeUserId)
         expect(result.grantedAt).toEqual(adminUserRow.grantedAt)
         expect(result.grantedByAdminUserId).toBe(adminUserRow.grantedByAdminUserId)
       })
@@ -48,8 +48,8 @@ describe('Admin Mapper', () => {
         expect(result.grantedAt).toBe(adminUserRow.grantedAt)
 
         // プリミティブ値は値で比較される
-        expect(result.adminUserId).toBe(adminUserRow.AdminUserId)
-        expect(result.activeUserId).toBe(adminUserRow.ActiveUserId)
+        expect(result.adminUserId).toBe(adminUserRow.adminUserId)
+        expect(result.activeUserId).toBe(adminUserRow.activeUserId)
         expect(result.grantedByAdminUserId).toBe(adminUserRow.grantedByAdminUserId)
       })
     })
@@ -86,8 +86,8 @@ describe('Admin Mapper', () => {
             it(`${name}`, () => {
               // Arrange
               const adminUserRow = createMockAdminUserRow({
-                AdminUserId: adminUserId,
-                ActiveUserId: activeUserId,
+                adminUserId: adminUserId,
+                activeUserId: activeUserId,
                 grantedByAdminUserId,
               })
 
@@ -138,7 +138,7 @@ describe('Admin Mapper', () => {
           it(`${name}`, () => {
             // Arrange
             const adminUserRow = createMockAdminUserRow({
-              ActiveUserId: activeUserId,
+              activeUserId: activeUserId,
             })
 
             // Act
@@ -215,7 +215,7 @@ describe('Admin Mapper', () => {
           const adminUserId = 123
           const grantedByAdminUserId = 456
           const adminUserRow = createMockAdminUserRow({
-            AdminUserId: adminUserId,
+            adminUserId: adminUserId,
             grantedByAdminUserId,
           })
 
@@ -233,8 +233,8 @@ describe('Admin Mapper', () => {
           const nearMaxInt = 2147483646 // PostgreSQL integerの最大値に近い値
           const nearMaxBigInt = 9223372036854775806n // PostgreSQL bigintの最大値に近い値
           const adminUserRow = createMockAdminUserRow({
-            AdminUserId: nearMaxInt,
-            ActiveUserId: nearMaxBigInt,
+            adminUserId: nearMaxInt,
+            activeUserId: nearMaxBigInt,
             grantedByAdminUserId: nearMaxInt - 1,
           })
 
@@ -284,7 +284,7 @@ describe('Admin Mapper', () => {
         displayName: 'テストユーザー',
         createdAt: now,
         adminUser: {
-          AdminUserId: 1,
+          adminUserId: 1,
           grantedAt: new Date('2024-01-10T10:00:00.000Z'),
           grantedByAdminUserId: 2,
         },
@@ -471,7 +471,7 @@ describe('Admin Mapper', () => {
             const userWithAdminRow = createMockUserWithAdminRow({
               createdAt,
               adminUser: {
-                AdminUserId: 1,
+                adminUserId: 1,
                 grantedAt,
                 grantedByAdminUserId: 2,
               },
@@ -515,7 +515,7 @@ describe('Admin Mapper', () => {
           // Arrange
           const userWithAdminRow = createMockUserWithAdminRow({
             adminUser: {
-              AdminUserId: 999,
+              adminUserId: 999,
               grantedAt: new Date(),
               grantedByAdminUserId: 888,
             },
@@ -576,7 +576,7 @@ describe('Admin Mapper', () => {
           const userWithAdminRow = createMockUserWithAdminRow({
             activeUserId: nearMaxBigInt,
             adminUser: {
-              AdminUserId: nearMaxInt,
+              adminUserId: nearMaxInt,
               grantedAt: new Date(),
               grantedByAdminUserId: nearMaxInt - 1,
             },

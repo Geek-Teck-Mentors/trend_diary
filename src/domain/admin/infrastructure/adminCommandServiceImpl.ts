@@ -24,7 +24,7 @@ export class AdminCommandServiceImpl implements AdminCommandService {
 
       // 既にAdmin権限を持っているかチェック
       const existingAdmin = await this.rdb.adminUser.findUnique({
-        where: { ActiveUserId: activeUserId },
+        where: { activeUserId: activeUserId },
       })
 
       if (existingAdmin) {
@@ -34,7 +34,7 @@ export class AdminCommandServiceImpl implements AdminCommandService {
       // Admin権限付与
       const adminUser = await this.rdb.adminUser.create({
         data: {
-          ActiveUserId: activeUserId,
+          activeUserId: activeUserId,
           grantedByAdminUserId,
         },
       })
