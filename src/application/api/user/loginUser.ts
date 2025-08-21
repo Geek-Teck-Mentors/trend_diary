@@ -9,6 +9,7 @@ export default async function loginUser(c: Context<Env>) {
     {
       user: {
         displayName: sessionUser.displayName ?? '',
+        isAdmin: sessionUser.isAdmin ?? false,
       },
     },
     200,

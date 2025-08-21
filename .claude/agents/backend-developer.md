@@ -74,13 +74,11 @@ API層ではメソッド毎に以下の3段階構造を必ず実装する：
 #### ドメイン層の構造
 ```
 src/domain/{aggregate}/
-├── factory/         # ドメインサービスファクトリ
-├── model/           # ドメインエンティティ
-├── service/         # ドメインビジネスロジック
-├── repository/      # リポジトリインターフェース
-├── schema/          # Zodバリデーションスキーマ
+├── schema/          # Zodバリデーションスキーマ, entity
 ├── infrastructure/  # リポジトリ実装
-└── index.ts         # 集約外で使用するものをエクスポートする
+├── repository.ts    # リポジトリインターフェース
+├── useCase.ts       # ドメインビジネスロジック
+└── index.ts         # 集約外で使用するものをエクスポートする, factory
 ```
 
 #### Result<T, E>型エラーハンドリング

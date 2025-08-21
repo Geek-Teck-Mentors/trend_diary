@@ -1,5 +1,5 @@
 import { isError } from '@/common/types/utility'
-import { createActiveUserService } from '@/domain/user'
+import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
@@ -8,7 +8,7 @@ process.env.NODE_ENV = 'test'
 class ActiveUserTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  private service = createActiveUserService(this.rdb)
+  private useCase = createUserUseCase(this.rdb)
 
   async cleanUp(): Promise<void> {
     // 外部キー制約を考慮した順序でTRUNCATE
@@ -26,7 +26,7 @@ class ActiveUserTestHelper {
     password: string,
     displayName?: string,
   ): Promise<{ userId: bigint; activeUserId: bigint }> {
-    const result = await this.service.signup(email, password)
+    const result = await this.useCase.signup(email, password)
     if (isError(result)) {
       throw new Error(`Failed to create user: ${result.error.message}`)
     }
@@ -46,7 +46,7 @@ class ActiveUserTestHelper {
     sessionId: string
     expiresAt: Date
   }> {
-    const loginResult = await this.service.login(email, password, ipAddress, userAgent)
+    const loginResult = await this.useCase.login(email, password, ipAddress, userAgent)
     if (isError(loginResult)) {
       throw new Error(`Failed to login: ${loginResult.error.message}`)
     }
@@ -58,14 +58,14 @@ class ActiveUserTestHelper {
   }
 
   async logout(sessionId: string): Promise<void> {
-    const result = await this.service.logout(sessionId)
+    const result = await this.useCase.logout(sessionId)
     if (isError(result)) {
       throw new Error(`Failed to logout: ${result.error.message}`)
     }
   }
 
   async findBySessionId(sessionId: string): Promise<{ activeUserId: bigint } | null> {
-    const result = await this.service.getCurrentUser(sessionId)
+    const result = await this.useCase.getCurrentUser(sessionId)
     if (isError(result)) {
       throw new Error(`Failed to find user by session: ${result.error.message}`)
     }

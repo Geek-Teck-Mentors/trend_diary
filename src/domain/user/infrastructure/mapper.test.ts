@@ -1,6 +1,5 @@
 import { ActiveUser as RdbActiveUser } from '@prisma/client'
 import { describe, expect, it } from 'vitest'
-import ActiveUser from '../model/activeUser'
 import { mapToActiveUser } from './mapper'
 
 describe('mapToActiveUser', () => {
@@ -32,7 +31,7 @@ describe('mapToActiveUser', () => {
       const result = mapToActiveUser(rdbActiveUser)
 
       // Assert
-      expect(result).toBeInstanceOf(ActiveUser)
+      expect(result).toBeDefined()
       expect(result.activeUserId).toBe(rdbActiveUser.activeUserId)
       expect(result.userId).toBe(rdbActiveUser.userId)
       expect(result.email).toBe(rdbActiveUser.email)
@@ -54,7 +53,7 @@ describe('mapToActiveUser', () => {
       const result = mapToActiveUser(rdbActiveUser)
 
       // Assert
-      expect(result).toBeInstanceOf(ActiveUser)
+      expect(result).toBeDefined()
       expect(result.activeUserId).toBe(rdbActiveUser.activeUserId)
       expect(result.userId).toBe(rdbActiveUser.userId)
       expect(result.email).toBe(rdbActiveUser.email)
@@ -74,7 +73,7 @@ describe('mapToActiveUser', () => {
 
       // Assert - インスタンス独立性の確認
       expect(result).not.toBe(rdbActiveUser)
-      expect(result).toBeInstanceOf(ActiveUser)
+      expect(result).toBeDefined()
 
       // Dateオブジェクトは同じ参照を持つ（mapperの実装仕様）
       expect(result.createdAt).toBe(rdbActiveUser.createdAt)

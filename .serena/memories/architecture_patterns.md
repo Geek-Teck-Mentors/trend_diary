@@ -9,11 +9,10 @@
 ```
 domain/{aggregate}/
 ├── factory/         # ドメインサービスファクトリ
-├── model/           # ドメインエンティティ
-├── service/         # ドメインビジネスロジック
-├── repository/      # リポジトリインターフェース
 ├── schema/          # Zodバリデーションスキーマ
 ├── infrastructure/  # リポジトリ実装
+├── repository.ts    # リポジトリインターフェース
+├── useCase.ts       # ドメインビジネスロジック
 └── index.ts         # 集約エクスポート
 ```
 

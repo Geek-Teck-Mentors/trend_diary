@@ -43,9 +43,6 @@ coverage/
 /blob-report/
 /playwright/.cache/
 
-# claude
-!.claude/settings.local.json
-
 *storybook.log
 storybook-static
 

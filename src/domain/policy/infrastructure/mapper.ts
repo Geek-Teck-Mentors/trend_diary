@@ -1,12 +1,12 @@
 import type { PrivacyPolicy as RdbPrivacyPolicy } from '@prisma/client'
-import PrivacyPolicy from '../model/privacyPolicy'
+import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 
 export function mapToPrivacyPolicy(policy: RdbPrivacyPolicy): PrivacyPolicy {
-  return new PrivacyPolicy(
-    policy.version,
-    policy.content,
-    policy.effectiveAt,
-    policy.createdAt,
-    policy.updatedAt,
-  )
+  return {
+    version: policy.version,
+    content: policy.content,
+    effectiveAt: policy.effectiveAt,
+    createdAt: policy.createdAt,
+    updatedAt: policy.updatedAt,
+  }
 }

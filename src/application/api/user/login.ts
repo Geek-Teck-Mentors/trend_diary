@@ -7,7 +7,7 @@ import { ZodValidatedContext } from '@/application/middleware/zodValidator'
 import { SESSION_NAME } from '@/common/constants/session'
 import { ClientError, ServerError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { ActiveUserInput, createActiveUserService } from '@/domain/user'
+import { ActiveUserInput, createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
@@ -15,14 +15,14 @@ export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createActiveUserService(rdb)
+  const useCase = createUserUseCase(rdb)
 
   // リクエストからIPアドレスとUserAgentを取得
   const connInfo = getConnInfo(c)
   const ipAddress = connInfo.remote.address || ''
   const userAgent = c.req.header('user-agent') || ''
 
-  const result = await service.login(valid.email, valid.password, ipAddress, userAgent)
+  const result = await useCase.login(valid.email, valid.password, ipAddress, userAgent)
   if (isError(result)) {
     const { error } = result
     if (error instanceof ClientError) {

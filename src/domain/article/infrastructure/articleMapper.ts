@@ -1,14 +1,14 @@
 import { Article as PrismaArticle } from '@prisma/client'
-import Article from '@/domain/article/model/article'
+import type { Article } from '@/domain/article/schema/articleSchema'
 
 export default function fromPrismaToArticle(prismaArticle: PrismaArticle): Article {
-  return new Article(
-    prismaArticle.articleId,
-    prismaArticle.media,
-    prismaArticle.title,
-    prismaArticle.author,
-    prismaArticle.description,
-    prismaArticle.url,
-    prismaArticle.createdAt,
-  )
+  return {
+    articleId: prismaArticle.articleId,
+    media: prismaArticle.media,
+    title: prismaArticle.title,
+    author: prismaArticle.author,
+    description: prismaArticle.description,
+    url: prismaArticle.url,
+    createdAt: prismaArticle.createdAt,
+  }
 }

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { SESSION_NAME } from '@/common/constants/session'
-import ActiveUserService from '@/domain/user/service/activeUserService'
+import { UseCase } from '@/domain/user/useCase'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import app from '../../server'
@@ -91,8 +91,8 @@ describe('DELETE /api/user/logout', () => {
 
   describe('異常系', () => {
     it('予期しないエラーが発生した場合は500エラー', async () => {
-      // ActiveUserServiceのlogoutメソッドをスパイしてエラーをスロー
-      const logoutSpy = vi.spyOn(ActiveUserService.prototype, 'logout')
+      // logoutメソッドをスパイしてエラーをスロー
+      const logoutSpy = vi.spyOn(UseCase.prototype, 'logout')
       logoutSpy.mockRejectedValueOnce(new Error('予期しないエラー'))
 
       const res = await requestLogout()
