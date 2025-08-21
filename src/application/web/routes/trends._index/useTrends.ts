@@ -69,6 +69,7 @@ export default function useTrends() {
           const errorMessage = error.message || 'エラーが発生しました'
           toast.error(errorMessage)
         } else {
+          toast.error('不明なエラーが発生しました')
           // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
           console.error(error)
         }
