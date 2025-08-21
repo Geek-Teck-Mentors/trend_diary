@@ -1,7 +1,6 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, type MockedFunction, vi } from 'vitest'
-import { getErrorMessage } from '@/common/errors'
 import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 import useTrends from './useTrends'
@@ -11,10 +10,6 @@ vi.mock('sonner', () => ({
   toast: {
     error: vi.fn(),
   },
-}))
-
-vi.mock('@/common/errors', () => ({
-  getErrorMessage: vi.fn(),
 }))
 
 vi.mock('../../infrastructure/api', () => ({
@@ -37,9 +32,6 @@ const generateMockArticle = (params?: Partial<Article>): Article => ({
   ...params,
 })
 
-// Mock types
-const mockGetErrorMessage = getErrorMessage as MockedFunction<(error: unknown) => string | null>
-
 const mockApiClient = {
   articles: {
     // biome-ignore lint/style/useNamingConvention: $get is a Hono client method name
@@ -58,7 +50,6 @@ describe('useTrends', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetApiClientForClient.mockReturnValue(mockApiClient)
-    mockGetErrorMessage.mockReturnValue('エラーが発生しました')
   })
 
   afterEach(() => {
