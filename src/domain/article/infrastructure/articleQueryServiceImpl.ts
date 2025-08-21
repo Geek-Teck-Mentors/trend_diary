@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { getErrorMessage, ServerError } from '@/common/errors'
+import { ServerError } from '@/common/errors'
 import {
   CursorDirection,
   CursorPaginationResult,
@@ -60,7 +60,7 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
 
       return resultSuccess(paginationResult)
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -72,7 +72,7 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
       if (!article) return resultSuccess(null)
       return resultSuccess(fromPrismaToArticle(article))
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 

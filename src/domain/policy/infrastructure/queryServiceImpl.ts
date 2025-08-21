@@ -1,4 +1,4 @@
-import { getErrorMessage } from '@/common/errors'
+import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
@@ -39,7 +39,7 @@ export default class QueryServiceImpl implements QueryService {
 
       return resultSuccess(result)
     } catch (error) {
-      return resultError(new Error(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -55,7 +55,7 @@ export default class QueryServiceImpl implements QueryService {
 
       return resultSuccess(mapToPrivacyPolicy(policy))
     } catch (error) {
-      return resultError(new Error(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -72,7 +72,7 @@ export default class QueryServiceImpl implements QueryService {
 
       return resultSuccess(mapToPrivacyPolicy(policy))
     } catch (error) {
-      return resultError(new Error(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -88,7 +88,7 @@ export default class QueryServiceImpl implements QueryService {
 
       return resultSuccess(latestPolicy.version + 1)
     } catch (error) {
-      return resultError(new Error(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 }
