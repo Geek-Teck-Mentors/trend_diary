@@ -5,7 +5,7 @@ import { coverageReporter } from './config'
 
 const testInclude = ['src/application/web/**/*.test.ts']
 
-const coverageInclude = ['src/application/web/**/*', 'src/application/web/components/**/*']
+const coverageInclude = ['src/application/web/**/*.ts', 'src/application/web/components/**/*.ts']
 const exclude = ['src/application/web/components/ui/**/*', 'src/application/web/**/*.tsx']
 
 export default defineConfig({

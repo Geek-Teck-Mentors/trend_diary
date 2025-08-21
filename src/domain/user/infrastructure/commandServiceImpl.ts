@@ -1,4 +1,4 @@
-import { getErrorMessage, ServerError } from '@/common/errors'
+import { ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { CreateSessionInput } from '../dto'
@@ -25,7 +25,7 @@ export default class CommandServiceImpl implements CommandService {
 
       return resultSuccess(mapToActiveUser(activeUser))
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -43,7 +43,7 @@ export default class CommandServiceImpl implements CommandService {
 
       return resultSuccess(mapToActiveUser(updatedActiveUser))
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -67,7 +67,7 @@ export default class CommandServiceImpl implements CommandService {
         expiresAt: session.expiresAt,
       })
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -79,7 +79,7 @@ export default class CommandServiceImpl implements CommandService {
 
       return resultSuccess(undefined)
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 }

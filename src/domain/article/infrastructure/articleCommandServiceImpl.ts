@@ -1,4 +1,4 @@
-import { getErrorMessage, ServerError } from '@/common/errors'
+import { ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { ArticleCommandService } from '@/domain/article/repository'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
@@ -31,7 +31,7 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
 
       return resultSuccess(readHistory)
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -46,7 +46,7 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
 
       return resultSuccess(undefined)
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 }
