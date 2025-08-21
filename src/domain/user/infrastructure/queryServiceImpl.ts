@@ -1,4 +1,4 @@
-import { getErrorMessage, ServerError } from '@/common/errors'
+import { ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { QueryService } from '../repository'
@@ -20,7 +20,7 @@ export default class QueryServiceImpl implements QueryService {
 
       return resultSuccess(mapToActiveUser(activeUser))
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -36,7 +36,7 @@ export default class QueryServiceImpl implements QueryService {
 
       return resultSuccess(mapToActiveUser(activeUser))
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 
@@ -56,7 +56,7 @@ export default class QueryServiceImpl implements QueryService {
 
       return resultSuccess(mapToActiveUser(session.activeUser))
     } catch (error) {
-      return resultError(new ServerError(getErrorMessage(error)))
+      return resultError(new ServerError(error))
     }
   }
 }

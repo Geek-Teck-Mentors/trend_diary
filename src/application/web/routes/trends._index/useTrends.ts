@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { getErrorMessage } from '@/common/errors'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 import { PaginationCursor, PaginationDirection } from '../../types/paginations'
@@ -65,9 +64,14 @@ export default function useTrends() {
         } else if (res.status >= 500) {
           throw new Error('不明なエラーが発生しました')
         }
-      } catch (_error) {
-        const errorMessage = getErrorMessage(_error) || 'エラーが発生しました'
-        toast.error(errorMessage)
+      } catch (error) {
+        if (error instanceof Error) {
+          const errorMessage = error.message || 'エラーが発生しました'
+          toast.error(errorMessage)
+        } else {
+          // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
+          console.error(error)
+        }
       } finally {
         setIsLoading(false)
       }
