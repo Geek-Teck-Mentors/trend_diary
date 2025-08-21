@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import AdminUser from '../model/adminUser'
 import { AdminCommandService } from '../repository'
+import type { AdminUser } from '../schema/adminUserSchema'
 import { toDomainAdminUser } from './mapper'
 
 export class AdminCommandServiceImpl implements AdminCommandService {

@@ -15,4 +15,5 @@ export const adminUserInputSchema = adminUserSchema.pick({
   grantedByAdminUserId: true,
 })
 
+export type AdminUser = z.infer<typeof adminUserSchema>
 export type AdminUserInput = z.infer<typeof adminUserInputSchema>

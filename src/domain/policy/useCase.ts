@@ -1,11 +1,12 @@
+import { PrivacyPolicy } from '@prisma/client'
 import { ClientError, NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { isError, isNull, Result, resultError, resultSuccess } from '@/common/types/utility'
-import PrivacyPolicy from '../model/privacyPolicy'
-import { CommandService } from '../repository/commandService'
-import { QueryService } from '../repository/queryService'
+import { CommandService } from './repository/commandService'
+import { QueryService } from './repository/queryService'
+import { activate, isActive, newPrivacyPolicy, updateContent } from './schema/method'
 
-export default class PrivacyPolicyService {
+export class UseCase {
   constructor(
     private queryService: QueryService,
     private commandService: CommandService,
@@ -53,14 +54,7 @@ export default class PrivacyPolicyService {
     const versionResult = await this.queryService.getNextVersion()
     if (isError(versionResult)) return resultError(ServerError.handle(versionResult.error))
 
-    const newPolicy = new PrivacyPolicy(
-      versionResult.data,
-      content,
-      null, // 下書き状態
-      new Date(),
-      new Date(),
-    )
-
+    const newPolicy = newPrivacyPolicy(versionResult.data, content)
     const saveResult = await this.commandService.save(newPolicy)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
@@ -83,20 +77,17 @@ export default class PrivacyPolicyService {
     }
 
     const policy = policyResult.data
-
-    if (policy.isActive()) {
+    if (isActive(policy)) {
       return resultError(new ClientError('有効化されたポリシーは更新できません'))
     }
 
-    const updatedContentResult = policy.updateContent(content)
-    if (isError(updatedContentResult)) {
-      return resultError(new ClientError(updatedContentResult.error.message))
-    }
+    const updatedPolicyResult = updateContent(policy, content)
+    if (isError(updatedPolicyResult)) return updatedPolicyResult
 
-    const saveResult = await this.commandService.save(updatedContentResult.data)
+    const saveResult = await this.commandService.save(updatedPolicyResult.data)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
-    return resultSuccess(saveResult.data)
+    return saveResult
   }
 
   /**
@@ -112,10 +103,7 @@ export default class PrivacyPolicyService {
         new NotFoundError('指定されたバージョンのプライバシーポリシーが見つかりません'),
       )
     }
-
-    const policy = policyResult.data
-
-    if (policy.isActive()) {
+    if (isActive(policyResult.data)) {
       return resultError(new ClientError('有効化されたポリシーは削除できません'))
     }
 
@@ -141,12 +129,12 @@ export default class PrivacyPolicyService {
     const versionResult = await this.queryService.getNextVersion()
     if (isError(versionResult)) return resultError(ServerError.handle(versionResult.error))
 
-    const clonedPolicy = sourcePolicyResult.data.clone(versionResult.data)
+    const clonedPolicy = newPrivacyPolicy(versionResult.data, sourcePolicyResult.data.content)
 
     const saveResult = await this.commandService.save(clonedPolicy)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
-    return resultSuccess(saveResult.data)
+    return saveResult
   }
 
   /**
@@ -168,14 +156,16 @@ export default class PrivacyPolicyService {
     }
 
     const policy = policyResult.data
-    const activateResult = policy.activate(effectiveDate)
-    if (isError(activateResult)) {
-      return resultError(new ClientError(activateResult.error.message))
+    if (isActive(policy)) {
+      return resultError(new ClientError('このポリシーは既に有効化されています'))
     }
 
-    const saveResult = await this.commandService.save(activateResult.data)
+    const activatedPolicyResult = activate(policy, effectiveDate)
+    if (isError(activatedPolicyResult)) return activatedPolicyResult
+
+    const saveResult = await this.commandService.save(activatedPolicyResult.data)
     if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
 
-    return resultSuccess(saveResult.data)
+    return saveResult
   }
 }

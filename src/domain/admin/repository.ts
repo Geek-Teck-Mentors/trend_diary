@@ -1,5 +1,5 @@
 import { AsyncResult, Nullable } from '@/common/types/utility'
-import AdminUser from './model/adminUser'
+import type { AdminUser } from './schema/adminUserSchema'
 import { UserListResult } from './schema/userListSchema'
 import { UserSearchQuery } from './schema/userSearchSchema'
 

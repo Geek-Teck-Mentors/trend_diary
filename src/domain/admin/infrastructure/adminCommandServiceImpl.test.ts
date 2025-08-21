@@ -72,13 +72,13 @@ function expectDatabaseCalls(calls: {
 }
 
 describe('AdminCommandServiceImpl', () => {
-  let service: AdminCommandServiceImpl
+  let commandService: AdminCommandServiceImpl
   let testData: { activeUserId: bigint; grantedByAdminUserId: number }
 
   beforeEach(() => {
     testData = { activeUserId: 123456789n, grantedByAdminUserId: 1 }
     vi.clearAllMocks()
-    service = new AdminCommandServiceImpl(mockDb)
+    commandService = new AdminCommandServiceImpl(mockDb)
   })
 
   afterEach(() => {
@@ -94,7 +94,7 @@ describe('AdminCommandServiceImpl', () => {
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         mockDb.adminUser.create.mockResolvedValue(mockAdminUser)
 
-        const result = await service.grantAdminRole(
+        const result = await commandService.grantAdminRole(
           testData.activeUserId,
           testData.grantedByAdminUserId,
         )
@@ -134,8 +134,8 @@ describe('AdminCommandServiceImpl', () => {
         mockDb.adminUser.create.mockResolvedValueOnce(mockAdminUser2)
 
         const [result1, result2] = await Promise.all([
-          service.grantAdminRole(testData.activeUserId, testData.grantedByAdminUserId),
-          service.grantAdminRole(activeUserId2, testData.grantedByAdminUserId),
+          commandService.grantAdminRole(testData.activeUserId, testData.grantedByAdminUserId),
+          commandService.grantAdminRole(activeUserId2, testData.grantedByAdminUserId),
         ])
 
         expectSuccessResult(result1, { activeUserId: testData.activeUserId })
@@ -148,7 +148,7 @@ describe('AdminCommandServiceImpl', () => {
         const nonExistentActiveUserId = 999999999n
         mockDb.activeUser.findUnique.mockResolvedValue(null)
 
-        const result = await service.grantAdminRole(
+        const result = await commandService.grantAdminRole(
           nonExistentActiveUserId,
           testData.grantedByAdminUserId,
         )
@@ -166,7 +166,7 @@ describe('AdminCommandServiceImpl', () => {
         mockDb.activeUser.findUnique.mockResolvedValue(createMockActiveUser())
         mockDb.adminUser.findUnique.mockResolvedValue(existingAdminUser)
 
-        const result = await service.grantAdminRole(
+        const result = await commandService.grantAdminRole(
           testData.activeUserId,
           testData.grantedByAdminUserId,
         )
@@ -189,7 +189,7 @@ describe('AdminCommandServiceImpl', () => {
           createMockAdminUser({ activeUserId: largeActiveUserId }),
         )
 
-        const result = await service.grantAdminRole(
+        const result = await commandService.grantAdminRole(
           largeActiveUserId,
           testData.grantedByAdminUserId,
         )
@@ -208,7 +208,10 @@ describe('AdminCommandServiceImpl', () => {
           createMockAdminUser({ grantedByAdminUserId: maxGrantedByAdminUserId }),
         )
 
-        const result = await service.grantAdminRole(testData.activeUserId, maxGrantedByAdminUserId)
+        const result = await commandService.grantAdminRole(
+          testData.activeUserId,
+          maxGrantedByAdminUserId,
+        )
 
         expectSuccessResult(result, { grantedByAdminUserId: maxGrantedByAdminUserId })
       })
@@ -218,7 +221,7 @@ describe('AdminCommandServiceImpl', () => {
       it('activeUser検索時のデータベースエラーを適切にエラーを返す', async () => {
         setupDatabaseError(mockDb.activeUser.findUnique)
 
-        const result = await service.grantAdminRole(
+        const result = await commandService.grantAdminRole(
           testData.activeUserId,
           testData.grantedByAdminUserId,
         )
@@ -230,7 +233,7 @@ describe('AdminCommandServiceImpl', () => {
         mockDb.activeUser.findUnique.mockResolvedValue(createMockActiveUser())
         setupDatabaseError(mockDb.adminUser.findUnique)
 
-        const result = await service.grantAdminRole(
+        const result = await commandService.grantAdminRole(
           testData.activeUserId,
           testData.grantedByAdminUserId,
         )
@@ -243,7 +246,7 @@ describe('AdminCommandServiceImpl', () => {
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         setupDatabaseError(mockDb.adminUser.create, 'Foreign key constraint failed')
 
-        const result = await service.grantAdminRole(
+        const result = await commandService.grantAdminRole(
           testData.activeUserId,
           testData.grantedByAdminUserId,
         )
@@ -260,7 +263,7 @@ describe('AdminCommandServiceImpl', () => {
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         mockDb.adminUser.create.mockRejectedValue(prismaError)
 
-        const result = await service.grantAdminRole(
+        const result = await commandService.grantAdminRole(
           testData.activeUserId,
           testData.grantedByAdminUserId,
         )

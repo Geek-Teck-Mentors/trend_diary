@@ -25,9 +25,9 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createArticleService(rdb)
+  const useCase = createArticleService(rdb)
 
-  const result = await service.searchArticles(convertApiArticleQueryParams(transformedParams))
+  const result = await useCase.searchArticles(convertApiArticleQueryParams(transformedParams))
   if (isError(result)) {
     throw handleError(result.error, logger)
   }

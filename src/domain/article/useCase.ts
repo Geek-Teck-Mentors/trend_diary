@@ -2,13 +2,12 @@ import { NotFoundError, ServerError } from '@/common/errors'
 import { CursorPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
 import { AsyncResult, isError, isNull, resultError, resultSuccess } from '@/common/types/utility'
-import Article from '@/domain/article/model/article'
-import ReadHistory from '@/domain/article/model/readHistory'
-import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
-import { ArticleQueryService } from '@/domain/article/repository/articleQueryService'
+import { ArticleCommandService, ArticleQueryService } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
+import type { Article } from '@/domain/article/schema/articleSchema'
+import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 
-export default class ArticleService {
+export class UseCase {
   constructor(
     private readonly articleQueryService: ArticleQueryService,
     private readonly articleCommandService: ArticleCommandService,

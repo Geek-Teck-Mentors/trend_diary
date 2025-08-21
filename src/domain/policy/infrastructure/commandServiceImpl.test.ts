@@ -2,31 +2,30 @@ import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
-import PrivacyPolicy from '../model/privacyPolicy'
 import CommandServiceImpl from './commandServiceImpl'
 
 // モックの設定
 const mockDb = mockDeep<PrismaClient>()
 
 describe('CommandServiceImpl', () => {
-  let service: CommandServiceImpl
+  let useCase: CommandServiceImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    service = new CommandServiceImpl(mockDb)
+    useCase = new CommandServiceImpl(mockDb)
   })
 
   describe('save', () => {
     describe('基本動作', () => {
       it('新しいプライバシーポリシーを保存できる', async () => {
         // Arrange
-        const policy = new PrivacyPolicy(
-          1,
-          'プライバシーポリシー内容',
-          null,
-          new Date('2024-01-01'),
-          new Date('2024-01-01'),
-        )
+        const policy = {
+          version: 1,
+          content: 'プライバシーポリシー内容',
+          effectiveAt: null,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+        }
 
         const mockSavedPolicy = {
           version: 1,
@@ -39,12 +38,12 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockSavedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data).toBeInstanceOf(PrivacyPolicy)
+          expect(result.data).toBeDefined()
           expect(result.data.version).toBe(1)
           expect(result.data.content).toBe('プライバシーポリシー内容')
           expect(result.data.effectiveAt).toBeNull()
@@ -68,13 +67,13 @@ describe('CommandServiceImpl', () => {
 
       it('既存のプライバシーポリシーを更新できる', async () => {
         // Arrange
-        const policy = new PrivacyPolicy(
-          2,
-          '更新されたポリシー内容',
-          new Date('2024-01-15'),
-          new Date('2024-01-01'),
-          new Date('2024-01-15'),
-        )
+        const policy = {
+          version: 2,
+          content: '更新されたポリシー内容',
+          effectiveAt: new Date('2024-01-15'),
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-15'),
+        }
 
         const mockUpdatedPolicy = {
           version: 2,
@@ -87,12 +86,12 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockUpdatedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data).toBeInstanceOf(PrivacyPolicy)
+          expect(result.data).toBeDefined()
           expect(result.data.version).toBe(2)
           expect(result.data.content).toBe('更新されたポリシー内容')
           expect(result.data.effectiveAt).toEqual(new Date('2024-01-15'))
@@ -103,7 +102,13 @@ describe('CommandServiceImpl', () => {
     describe('境界値・特殊値', () => {
       it('空のコンテンツでも保存できる', async () => {
         // Arrange
-        const policy = new PrivacyPolicy(1, '', null, new Date(), new Date())
+        const policy = {
+          version: 1,
+          content: '',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         const mockSavedPolicy = {
           version: 1,
@@ -116,7 +121,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockSavedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -127,7 +132,13 @@ describe('CommandServiceImpl', () => {
 
       it('version=0でも保存できる', async () => {
         // Arrange
-        const policy = new PrivacyPolicy(0, '初期ポリシー', null, new Date(), new Date())
+        const policy = {
+          version: 0,
+          content: '初期ポリシー',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         const mockSavedPolicy = {
           version: 0,
@@ -140,7 +151,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockSavedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -152,7 +163,13 @@ describe('CommandServiceImpl', () => {
       it('非常に長いコンテンツでも保存できる', async () => {
         // Arrange
         const longContent = 'a'.repeat(100000) // 10万文字
-        const policy = new PrivacyPolicy(1, longContent, null, new Date(), new Date())
+        const policy = {
+          version: 1,
+          content: longContent,
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         const mockSavedPolicy = {
           version: 1,
@@ -165,7 +182,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.upsert.mockResolvedValue(mockSavedPolicy)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -178,13 +195,19 @@ describe('CommandServiceImpl', () => {
     describe('例外・制約違反', () => {
       it('データベースエラーが発生した場合はエラーを返す', async () => {
         // Arrange
-        const policy = new PrivacyPolicy(1, 'テストポリシー', null, new Date(), new Date())
+        const policy = {
+          version: 1,
+          content: 'テストポリシー',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         const error = new Error('データベース制約違反')
         mockDb.privacyPolicy.upsert.mockRejectedValue(error)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -195,13 +218,19 @@ describe('CommandServiceImpl', () => {
 
       it('制約違反エラーが発生した場合はエラーを返す', async () => {
         // Arrange
-        const policy = new PrivacyPolicy(1, 'テストポリシー', null, new Date(), new Date())
+        const policy = {
+          version: 1,
+          content: 'テストポリシー',
+          effectiveAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
         const constraintError = new Error('UNIQUE constraint failed')
         mockDb.privacyPolicy.upsert.mockRejectedValue(constraintError)
 
         // Act
-        const result = await service.save(policy)
+        const result = await useCase.save(policy)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -229,7 +258,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockResolvedValue(mockDeletedPolicy)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -255,7 +284,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockResolvedValue(mockDeletedPolicy)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -273,7 +302,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockRejectedValue(error)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -289,7 +318,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockRejectedValue(error)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -305,7 +334,7 @@ describe('CommandServiceImpl', () => {
         mockDb.privacyPolicy.delete.mockRejectedValue(constraintError)
 
         // Act
-        const result = await service.deleteByVersion(version)
+        const result = await useCase.deleteByVersion(version)
 
         // Assert
         expect(isError(result)).toBe(true)

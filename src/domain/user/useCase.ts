@@ -11,9 +11,9 @@ import {
   resultError,
   resultSuccess,
 } from '@/common/types/utility'
-import ActiveUser from '../model/activeUser'
-import { CommandService } from '../repository/commandService'
-import { QueryService } from '../repository/queryService'
+import { CommandService, QueryService } from './repository'
+import type { ActiveUser } from './schema/activeUserSchema'
+import { recordLogin } from './schema/method'
 
 type LoginResult = {
   activeUser: ActiveUser
@@ -21,7 +21,7 @@ type LoginResult = {
   expiresAt: Date
 }
 
-export default class ActiveUserService {
+export class UseCase {
   constructor(
     private queryService: QueryService,
     private commandService: CommandService,
@@ -62,9 +62,8 @@ export default class ActiveUserService {
 
     const { sessionId, expiresAt } = sessionResult.data
 
-    // lastLoginを更新
-    authResult.data.recordLogin()
-    const updateResult = await this.commandService.saveActive(authResult.data)
+    const updatedUser = recordLogin(authResult.data)
+    const updateResult = await this.commandService.saveActive(updatedUser)
     if (isError(updateResult)) return resultError(updateResult.error)
 
     return resultSuccess({

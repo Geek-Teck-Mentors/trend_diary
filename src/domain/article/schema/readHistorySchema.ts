@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+// API用スキーマ
 export const createReadHistoryApiSchema = z.object({
   read_at: z.string().datetime(),
 })
@@ -14,5 +15,15 @@ export const articleIdParamSchema = z.object({
     .transform((val) => BigInt(val)),
 })
 
+// ドメインモデル用スキーマ
+export const readHistorySchema = z.object({
+  readHistoryId: z.bigint(),
+  activeUserId: z.bigint(),
+  articleId: z.bigint(),
+  readAt: z.date(),
+  createdAt: z.date(),
+})
+
 export type CreateReadHistoryApiInput = z.input<typeof createReadHistoryApiSchema>
 export type ArticleIdParam = z.output<typeof articleIdParamSchema>
+export type ReadHistory = z.infer<typeof readHistorySchema>

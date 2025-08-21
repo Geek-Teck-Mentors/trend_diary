@@ -1,8 +1,8 @@
 import { getErrorMessage } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
-import PrivacyPolicy from '../model/privacyPolicy'
 import { CommandService } from '../repository/commandService'
+import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 import { mapToPrivacyPolicy } from './mapper'
 
 export default class CommandServiceImpl implements CommandService {

@@ -2,7 +2,7 @@ import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { createAdminUserService } from '@/domain/admin'
+import { createAdminUserUseCase } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'
@@ -18,10 +18,10 @@ const requiredAdmin = createMiddleware<Env>(async (c, next) => {
   }
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const adminUserService = createAdminUserService(rdb)
+  const adminUserUseCase = createAdminUserUseCase(rdb)
 
   // Admin権限チェック
-  const result = await adminUserService.isAdmin(sessionUser.activeUserId)
+  const result = await adminUserUseCase.isAdmin(sessionUser.activeUserId)
   if (isError(result)) {
     throw handleError(result.error, logger)
   }

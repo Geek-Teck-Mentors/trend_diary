@@ -3,7 +3,7 @@ import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { OffsetPaginationParams } from '@/common/pagination'
 import { isError } from '@/common/types/utility'
-import { createPrivacyPolicyService, PrivacyPolicy } from '@/domain/policy'
+import { createPrivacyPolicyUseCase, PrivacyPolicy } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import { PolicyListResponse, PolicyResponse } from './response'
 
@@ -22,9 +22,9 @@ export default async function getPolicies(c: ZodValidatedQueryContext<OffsetPagi
   const { page, limit } = c.req.valid('query')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createPrivacyPolicyService(rdb)
+  const useCase = createPrivacyPolicyUseCase(rdb)
 
-  const result = await service.getAllPolicies(page, limit)
+  const result = await useCase.getAllPolicies(page, limit)
   if (isError(result)) throw handleError(result.error, logger)
 
   logger.info('Privacy policies retrieved successfully', {

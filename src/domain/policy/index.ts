@@ -1,13 +1,18 @@
-// ドメインエンティティ
+// factory
+import { RdbClient } from '@/infrastructure/rdb'
+import CommandServiceImpl from './infrastructure/commandServiceImpl'
+import QueryServiceImpl from './infrastructure/queryServiceImpl'
+import { UseCase } from './useCase'
 
-// サービスファクトリ
-export { default as createPrivacyPolicyService } from './factory/privacyPolicyServiceFactory'
-export { default as PrivacyPolicy } from './model/privacyPolicy'
+export function createPrivacyPolicyUseCase(db: RdbClient): UseCase {
+  return new UseCase(new QueryServiceImpl(db), new CommandServiceImpl(db))
+}
+
 export type { CommandService } from './repository/commandService'
-// リポジトリインターフェース（テスト用）
-export type { QueryService } from './repository/queryService'
+
 // バリデーションスキーマ
 export {
+  type PrivacyPolicy,
   type PrivacyPolicyActivate,
   type PrivacyPolicyInput,
   type PrivacyPolicyOutput,
@@ -18,5 +23,3 @@ export {
   type VersionParam,
   versionParamSchema,
 } from './schema/privacyPolicySchema'
-// ドメインサービス
-export { default as PrivacyPolicyService } from './service/privacyPolicyService'

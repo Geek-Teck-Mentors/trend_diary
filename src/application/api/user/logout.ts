@@ -7,16 +7,16 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { SESSION_NAME } from '@/common/constants/session'
 import { NotFoundError, ServerError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { createActiveUserService } from '@/domain/user'
+import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function logout(c: Context<Env>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const sessionId = c.get(CONTEXT_KEY.SESSION_ID)
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createActiveUserService(rdb)
+  const useCase = createUserUseCase(rdb)
 
-  const result = await service.logout(sessionId)
+  const result = await useCase.logout(sessionId)
   if (isError(result)) {
     const { error } = result
     if (error instanceof NotFoundError) {
