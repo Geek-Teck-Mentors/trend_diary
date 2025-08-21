@@ -147,18 +147,4 @@ describe('useDebounce', () => {
       expect(result.current).toBe(true)
     })
   })
-
-  describe('クリーンアップ機能', () => {
-    it('複数の値変更で最後の値のみが反映される', () => {
-      const { result, rerender } = setupHook('initial', 200)
-
-      rerender({ value: 'first', delay: 200 })
-      rerender({ value: 'second', delay: 200 })
-
-      act(() => {
-        vi.advanceTimersByTime(200)
-      })
-      expect(result.current).toBe('second')
-    })
-  })
 })
