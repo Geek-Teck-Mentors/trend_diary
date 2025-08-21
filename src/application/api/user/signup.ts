@@ -2,7 +2,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { ActiveUserInput, createActiveUserService } from '@/domain/user'
+import { ActiveUserInput, createUserUseCase } from '@/domain/user'
 
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -11,9 +11,9 @@ export default async function signup(c: ZodValidatedContext<ActiveUserInput>) {
   const valid = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createActiveUserService(rdb)
+  const useCase = createUserUseCase(rdb)
 
-  const result = await service.signup(valid.email, valid.password)
+  const result = await useCase.signup(valid.email, valid.password)
   if (isError(result)) throw handleError(result.error, logger)
 
   const activeUser = result.data

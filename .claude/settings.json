@@ -38,7 +38,10 @@
       "Bash(npx biome ci:*)",
       "mcp__serena__write_memory",
       "mcp__ide__getDiagnostics",
-      "mcp__serena__read_memory"
+      "mcp__serena__read_memory",
+      "Bash(npm run tsc:*)",
+      "Bash(npm run:*)",
+      "mcp__serena__find_referencing_symbols"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -115,9 +118,8 @@
     ]
   },
   "hooks": {
-    "EventName": [
+    "PostToolUse": [
       {
-        "matcher": "PostToolUse",
         "hooks": [
           {
             "type": "command",

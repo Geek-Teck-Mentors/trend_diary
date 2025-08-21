@@ -1,7 +1,7 @@
 import { getErrorMessage, ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import ReadHistory from '@/domain/article/model/readHistory'
-import { ArticleCommandService } from '@/domain/article/repository/articleCommandService'
+import { ArticleCommandService } from '@/domain/article/repository'
+import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 import { RdbClient } from '@/infrastructure/rdb'
 
 export default class ArticleCommandServiceImpl implements ArticleCommandService {
@@ -21,13 +21,13 @@ export default class ArticleCommandServiceImpl implements ArticleCommandService 
         },
       })
 
-      const readHistory = new ReadHistory(
-        createdReadHistory.readHistoryId,
-        createdReadHistory.activeUserId,
-        createdReadHistory.articleId,
-        createdReadHistory.readAt,
-        createdReadHistory.createdAt,
-      )
+      const readHistory: ReadHistory = {
+        readHistoryId: createdReadHistory.readHistoryId,
+        activeUserId: createdReadHistory.activeUserId,
+        articleId: createdReadHistory.articleId,
+        readAt: createdReadHistory.readAt,
+        createdAt: createdReadHistory.createdAt,
+      }
 
       return resultSuccess(readHistory)
     } catch (error) {

@@ -27,6 +27,7 @@ export const versionParamSchema = privacyPolicySchema.pick({
   version: true,
 })
 
+export type PrivacyPolicy = z.infer<typeof privacyPolicySchema>
 export type PrivacyPolicyInput = z.infer<typeof privacyPolicyInputSchema>
 export type PrivacyPolicyUpdate = z.infer<typeof privacyPolicyUpdateSchema>
 export type PrivacyPolicyActivate = z.infer<typeof privacyPolicyActivateSchema>

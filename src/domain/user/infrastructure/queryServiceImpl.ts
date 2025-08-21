@@ -1,8 +1,8 @@
 import { getErrorMessage, ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
-import ActiveUser from '../model/activeUser'
-import { QueryService } from '../repository/queryService'
+import { QueryService } from '../repository'
+import type { ActiveUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 
 export default class QueryServiceImpl implements QueryService {
@@ -47,7 +47,7 @@ export default class QueryServiceImpl implements QueryService {
           sessionId,
           expiresAt: { gt: new Date() },
         },
-        include: { activeUser: true },
+        include: { activeUser: { include: { adminUser: true } } },
       })
 
       if (!session) {

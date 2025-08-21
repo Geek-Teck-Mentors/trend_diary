@@ -19,9 +19,9 @@ export default async function readArticle(
   const { read_at: readAt } = body
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const service = createArticleService(rdb)
+  const useCase = createArticleService(rdb)
 
-  const result = await service.createReadHistory(user.activeUserId, articleId, new Date(readAt))
+  const result = await useCase.createReadHistory(user.activeUserId, articleId, new Date(readAt))
   if (isError(result)) throw handleError(result.error, logger)
 
   logger.info('Read history created successfully', {

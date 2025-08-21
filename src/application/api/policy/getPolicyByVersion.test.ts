@@ -1,4 +1,4 @@
-import { createPrivacyPolicyService, PrivacyPolicyOutput } from '@/domain/policy'
+import { createPrivacyPolicyUseCase, PrivacyPolicyOutput } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
@@ -7,7 +7,7 @@ import app from '../../server'
 
 describe('GET /api/policies/:version', () => {
   let sessionId: string
-  const service = createPrivacyPolicyService(getRdbClient(TEST_ENV.DATABASE_URL))
+  const useCase = createPrivacyPolicyUseCase(getRdbClient(TEST_ENV.DATABASE_URL))
 
   async function requestGetPolicyByVersion(version: number) {
     return app.request(
@@ -63,7 +63,7 @@ describe('GET /api/policies/:version', () => {
       const version = createRes.version
 
       // 有効化
-      await service.activatePolicy(version, new Date())
+      await useCase.activatePolicy(version, new Date())
 
       // Act
       const res = await requestGetPolicyByVersion(version)

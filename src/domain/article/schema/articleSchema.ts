@@ -10,5 +10,6 @@ export const articleSchema = z.object({
   createdAt: z.date(),
 })
 
+export type Article = z.infer<typeof articleSchema>
 export type ArticleInput = Omit<z.infer<typeof articleSchema>, 'articleId' | 'createdAt'>
 export type ArticleOutput = z.output<typeof articleSchema>

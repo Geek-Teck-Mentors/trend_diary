@@ -1,6 +1,6 @@
 import { OffsetPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable } from '@/common/types/utility'
-import PrivacyPolicy from '../model/privacyPolicy'
+import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 
 export interface QueryService {
   /**

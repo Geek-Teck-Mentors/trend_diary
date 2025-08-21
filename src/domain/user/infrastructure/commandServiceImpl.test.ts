@@ -2,18 +2,17 @@ import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
-import ActiveUser from '../model/activeUser'
 import CommandServiceImpl from './commandServiceImpl'
 
 // モックの設定
 const mockDb = mockDeep<PrismaClient>()
 
 describe('CommandServiceImpl', () => {
-  let service: CommandServiceImpl
+  let useCase: CommandServiceImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    service = new CommandServiceImpl(mockDb)
+    useCase = new CommandServiceImpl(mockDb)
   })
 
   describe('createActive', () => {
@@ -46,7 +45,7 @@ describe('CommandServiceImpl', () => {
         })
 
         // Act
-        const result = await service.createActive(email, hashedPassword)
+        const result = await useCase.createActive(email, hashedPassword)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -67,7 +66,7 @@ describe('CommandServiceImpl', () => {
         mockDb.$transaction.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.createActive(email, hashedPassword)
+        const result = await useCase.createActive(email, hashedPassword)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -82,16 +81,17 @@ describe('CommandServiceImpl', () => {
     describe('基本動作', () => {
       it('ActiveUserを保存できる', async () => {
         // Arrange
-        const activeUser = new ActiveUser(
-          1n,
-          2n,
-          'test@example.com',
-          'hashedPassword123',
-          'テストユーザー',
-          undefined,
-          new Date(),
-          new Date(),
-        )
+        const activeUser = {
+          activeUserId: 1n,
+          userId: 2n,
+          email: 'test@example.com',
+          password: 'hashedPassword123',
+          displayName: 'テストユーザー',
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
 
         const mockUpdatedUser = {
           activeUserId: 1n,
@@ -107,7 +107,7 @@ describe('CommandServiceImpl', () => {
         mockDb.activeUser.update.mockResolvedValue(mockUpdatedUser)
 
         // Act
-        const result = await service.saveActive(activeUser)
+        const result = await useCase.saveActive(activeUser)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -122,21 +122,22 @@ describe('CommandServiceImpl', () => {
     describe('例外・制約違反', () => {
       it('データベースエラー時は適切にエラーを返す', async () => {
         // Arrange
-        const activeUser = new ActiveUser(
-          1n,
-          2n,
-          'test@example.com',
-          'hashedPassword123',
-          'テストユーザー',
-          undefined,
-          new Date(),
-          new Date(),
-        )
+        const activeUser = {
+          activeUserId: 1n,
+          userId: 2n,
+          email: 'test@example.com',
+          password: 'hashedPassword123',
+          displayName: 'テストユーザー',
+          lastLogin: undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          adminUserId: null,
+        }
         const dbError = new Error('Database connection failed')
         mockDb.activeUser.update.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.saveActive(activeUser)
+        const result = await useCase.saveActive(activeUser)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -174,7 +175,7 @@ describe('CommandServiceImpl', () => {
         mockDb.session.create.mockResolvedValue(mockSessionData)
 
         // Act
-        const result = await service.createSession(input)
+        const result = await useCase.createSession(input)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -202,7 +203,7 @@ describe('CommandServiceImpl', () => {
         mockDb.session.create.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.createSession(input)
+        const result = await useCase.createSession(input)
 
         // Assert
         expect(isError(result)).toBe(true)
@@ -221,7 +222,7 @@ describe('CommandServiceImpl', () => {
         mockDb.session.delete.mockResolvedValue({} as any)
 
         // Act
-        const result = await service.deleteSession(sessionId)
+        const result = await useCase.deleteSession(sessionId)
 
         // Assert
         expect(isSuccess(result)).toBe(true)
@@ -240,7 +241,7 @@ describe('CommandServiceImpl', () => {
         mockDb.session.delete.mockRejectedValue(dbError)
 
         // Act
-        const result = await service.deleteSession(sessionId)
+        const result = await useCase.deleteSession(sessionId)
 
         // Assert
         expect(isError(result)).toBe(true)

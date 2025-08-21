@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { isError } from '@/common/types/utility'
-import { createPrivacyPolicyService } from '@/domain/policy'
+import { createPrivacyPolicyUseCase } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from './activeUserTestHelper'
@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'test'
 
 class PolicyTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
-  private service = createPrivacyPolicyService(this.rdb)
+  private useCase = createPrivacyPolicyUseCase(this.rdb)
 
   async cleanUp(): Promise<void> {
     // ポリシーテーブルをクリア
@@ -23,7 +23,7 @@ class PolicyTestHelper {
     createdAt: Date
     updatedAt: Date
   }> {
-    const result = await this.service.createPolicy(content)
+    const result = await this.useCase.createPolicy(content)
     if (isError(result)) {
       throw new Error(`Failed to create policy: ${result.error.message}`)
     }
@@ -46,7 +46,7 @@ class PolicyTestHelper {
     createdAt: Date
     updatedAt: Date
   }> {
-    const result = await this.service.activatePolicy(version, effectiveAt)
+    const result = await this.useCase.activatePolicy(version, effectiveAt)
     if (isError(result)) {
       throw new Error(`Failed to activate policy: ${result.error.message}`)
     }
@@ -60,7 +60,7 @@ class PolicyTestHelper {
   }
 
   async deletePolicy(version: number): Promise<void> {
-    const result = await this.service.deletePolicy(version)
+    const result = await this.useCase.deletePolicy(version)
     if (isError(result)) {
       throw new Error(`Failed to delete policy: ${result.error.message}`)
     }
@@ -73,7 +73,7 @@ class PolicyTestHelper {
     createdAt: Date
     updatedAt: Date
   } | null> {
-    const result = await this.service.getPolicyByVersion(version)
+    const result = await this.useCase.getPolicyByVersion(version)
     if (isError(result)) {
       // NotFoundErrorの場合はnullを返す（削除されたポリシーの確認に使用）
       if (result.error.message.includes('見つかりません')) {

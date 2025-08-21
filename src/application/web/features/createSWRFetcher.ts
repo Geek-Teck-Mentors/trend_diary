@@ -3,7 +3,7 @@ import getApiClientForClient from '../infrastructure/api'
 export const createSWRFetcher = () => {
   const client = getApiClientForClient()
 
-  const fetcher = async (url: string) => {
+  const fetcher = async <T>(url: string): Promise<T> => {
     const response = await fetch(url, {
       credentials: 'include',
     })
