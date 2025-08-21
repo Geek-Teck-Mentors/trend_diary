@@ -1,10 +1,8 @@
-import getErrorMessage from './errorMessage'
-
 export default class ServerError extends Error {
   public readonly statusCode: number = 500
 
   constructor(error: unknown, statusCode?: number) {
-    super(getErrorMessage(error))
+    super(error instanceof Error ? error.message : String(error))
     this.name = 'ServerError'
     if (statusCode) this.statusCode = statusCode
   }
