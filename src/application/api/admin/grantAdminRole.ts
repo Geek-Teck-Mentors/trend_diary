@@ -27,7 +27,7 @@ export default async function grantAdminRole(
   const activeUserId = BigInt(parsedParam.id)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const adminUserService = createAdminUserUseCase(rdb)
+  const adminUserUseCase = createAdminUserUseCase(rdb)
 
   // 自分に権限を付与しようとしていないかチェック
   if (activeUserId === sessionUser.activeUserId) {
@@ -38,7 +38,7 @@ export default async function grantAdminRole(
   }
 
   // Admin権限付与
-  const result = await adminUserService.grantAdminRole(activeUserId, sessionUser.adminUserId)
+  const result = await adminUserUseCase.grantAdminRole(activeUserId, sessionUser.adminUserId)
   if (isError(result)) {
     throw handleError(result.error, logger)
   }

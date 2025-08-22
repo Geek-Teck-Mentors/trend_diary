@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client'
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import { AdminCommandService } from '../repository'
+import { AdminCommand } from '../repository'
 import type { AdminUser } from '../schema/adminUserSchema'
 import { toDomainAdminUser } from './mapper'
 
-export class AdminCommandServiceImpl implements AdminCommandService {
+export class AdminCommandImpl implements AdminCommand {
   constructor(private rdb: PrismaClient) {}
 
   async grantAdminRole(

@@ -2,17 +2,17 @@ import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
-import CommandServiceImpl from './commandServiceImpl'
+import CommandImpl from './commandImpl'
 
 // モックの設定
 const mockDb = mockDeep<PrismaClient>()
 
-describe('CommandServiceImpl', () => {
-  let useCase: CommandServiceImpl
+describe('CommandImpl', () => {
+  let useCase: CommandImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useCase = new CommandServiceImpl(mockDb)
+    useCase = new CommandImpl(mockDb)
   })
 
   describe('save', () => {

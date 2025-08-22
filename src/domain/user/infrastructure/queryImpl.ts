@@ -1,11 +1,11 @@
 import { ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
-import { QueryService } from '../repository'
+import { Query } from '../repository'
 import type { ActiveUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 
-export default class QueryServiceImpl implements QueryService {
+export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
   async findActiveById(id: bigint): AsyncResult<Nullable<ActiveUser>, Error> {

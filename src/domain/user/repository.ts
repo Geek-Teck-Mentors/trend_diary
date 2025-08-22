@@ -2,13 +2,13 @@ import { AsyncResult, Nullable } from '@/common/types/utility'
 import { CreateSessionInput } from './dto'
 import type { ActiveUser } from './schema/activeUserSchema'
 
-export interface QueryService {
+export interface Query {
   findActiveById(id: bigint): AsyncResult<Nullable<ActiveUser>, Error>
   findActiveByEmail(email: string): AsyncResult<Nullable<ActiveUser>, Error>
   findActiveBySessionId(sessionId: string): AsyncResult<Nullable<ActiveUser>, Error>
 }
 
-export interface CommandService {
+export interface Command {
   createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error>
   saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, Error>
   createSession(

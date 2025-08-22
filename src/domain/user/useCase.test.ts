@@ -3,19 +3,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError } from '@/common/errors'
 import { isError, isSuccess, resultSuccess } from '@/common/types/utility'
-import { CommandService, QueryService } from './repository'
+import { Command, Query } from './repository'
 import { UseCase } from './useCase'
 
 // モックの設定
-const mockQueryService = mockDeep<QueryService>()
-const mockCommandService = mockDeep<CommandService>()
+const mockQuery = mockDeep<Query>()
+const mockCommand = mockDeep<Command>()
 
 describe('User UseCase', () => {
   let useCase: UseCase
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useCase = new UseCase(mockQueryService, mockCommandService)
+    useCase = new UseCase(mockQuery, mockCommand)
   })
 
   describe('signup', () => {
@@ -25,7 +25,7 @@ describe('User UseCase', () => {
         const password = 'password123'
 
         // Arrange - 重複チェックでnullを返す
-        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
+        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
         // ActiveUser作成
         const mockActiveUser = {
@@ -39,7 +39,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockCommandService.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockCommand.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
         const result = await useCase.signup(email, password)
@@ -49,8 +49,8 @@ describe('User UseCase', () => {
         if (isSuccess(result)) {
           expect(result.data.email).toBe(email)
         }
-        expect(mockQueryService.findActiveByEmail).toHaveBeenCalledWith(email)
-        expect(mockCommandService.createActive).toHaveBeenCalledWith(email, expect.any(String))
+        expect(mockQuery.findActiveByEmail).toHaveBeenCalledWith(email)
+        expect(mockCommand.createActive).toHaveBeenCalledWith(email, expect.any(String))
       })
     })
 
@@ -60,7 +60,7 @@ describe('User UseCase', () => {
         const password = 'password123'
 
         // Arrange
-        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
+        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
         const mockActiveUser = {
           activeUserId: 1n,
@@ -73,7 +73,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockCommandService.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockCommand.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
         const result = await useCase.signup(email, password)
@@ -103,7 +103,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(existingUser))
+        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(existingUser))
 
         // Act
         const result = await useCase.signup(email, password)
@@ -136,9 +136,9 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
 
-        mockCommandService.createSession.mockResolvedValue(
+        mockCommand.createSession.mockResolvedValue(
           resultSuccess({
             sessionId: 'session-123',
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
@@ -157,7 +157,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockCommandService.saveActive.mockResolvedValue(resultSuccess(updatedActiveUser))
+        mockCommand.saveActive.mockResolvedValue(resultSuccess(updatedActiveUser))
 
         // Act
         const result = await useCase.login(email, password, '192.168.1.1', 'Mozilla/5.0')
@@ -177,7 +177,7 @@ describe('User UseCase', () => {
         const password = 'password123'
 
         // Arrange
-        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(null))
+        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(null))
 
         // Act
         const result = await useCase.login(email, password, '192.168.1.1', 'Mozilla/5.0')
@@ -207,7 +207,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockQueryService.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
 
         // Act
         const result = await useCase.login(email, wrongPassword, '192.168.1.1', 'Mozilla/5.0')

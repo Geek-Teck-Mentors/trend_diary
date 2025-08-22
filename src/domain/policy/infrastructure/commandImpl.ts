@@ -1,11 +1,11 @@
 import { ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
-import { CommandService } from '../repository/commandService'
+import { Command } from '../repository'
 import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 import { mapToPrivacyPolicy } from './mapper'
 
-export default class CommandServiceImpl implements CommandService {
+export default class CommandImpl implements Command {
   constructor(private readonly db: RdbClient) {}
 
   async save(policy: PrivacyPolicy): AsyncResult<PrivacyPolicy, Error> {

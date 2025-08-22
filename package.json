@@ -8,7 +8,7 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "test:frontend": "vitest run -c vitest/config.frontend.ts",
-    "test:service": "vitest run -c vitest/config.service.ts",
+    "test:domain": "vitest run -c vitest/config.domain.ts",
     "test:api": "vitest run -c vitest/config.api.ts",
     "e2e": "npx playwright test",
     "e2e:report": "npx playwright show-report",

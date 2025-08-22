@@ -2,7 +2,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { ArticleIdParam, CreateReadHistoryApiInput, createArticleService } from '@/domain/article'
+import { ArticleIdParam, CreateReadHistoryApiInput, createArticleUseCase } from '@/domain/article'
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function readArticle(
@@ -19,7 +19,7 @@ export default async function readArticle(
   const { read_at: readAt } = body
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createArticleService(rdb)
+  const useCase = createArticleUseCase(rdb)
 
   const result = await useCase.createReadHistory(user.activeUserId, articleId, new Date(readAt))
   if (isError(result)) throw handleError(result.error, logger)
