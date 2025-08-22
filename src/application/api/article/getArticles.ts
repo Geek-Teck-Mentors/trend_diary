@@ -2,7 +2,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { Article, createArticleService } from '@/domain/article'
+import { Article, createArticleUseCase } from '@/domain/article'
 import { ApiArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import getRdbClient from '@/infrastructure/rdb'
 import { convertApiArticleQueryParams } from './request'
@@ -25,7 +25,7 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createArticleService(rdb)
+  const useCase = createArticleUseCase(rdb)
 
   const result = await useCase.searchArticles(convertApiArticleQueryParams(transformedParams))
   if (isError(result)) {

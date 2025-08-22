@@ -2,7 +2,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { ArticleIdParam, createArticleService } from '@/domain/article'
+import { ArticleIdParam, createArticleUseCase } from '@/domain/article'
 import getRdbClient from '@/infrastructure/rdb'
 
 export default async function unreadArticle(c: ZodValidatedParamContext<ArticleIdParam>) {
@@ -13,7 +13,7 @@ export default async function unreadArticle(c: ZodValidatedParamContext<ArticleI
   const { article_id: articleId } = param
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createArticleService(rdb)
+  const useCase = createArticleUseCase(rdb)
 
   const result = await useCase.deleteAllReadHistory(user.activeUserId, articleId)
   if (isError(result)) throw handleError(result.error, logger)
