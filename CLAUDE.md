@@ -27,7 +27,7 @@ git commit -m "feat: add user authentication TDD cycle complete"
 git commit -m "fix: resolve login validation issue TDD cycle complete"
 
 # リファクタリングの場合
-git commit -m "refactor: improve article service structure TDD cycle complete"
+git commit -m "refactor: improve article domain structure TDD cycle complete"
 ```
 
 ## 開発コマンド
@@ -39,7 +39,7 @@ git commit -m "refactor: improve article service structure TDD cycle complete"
 
 ### テスト
 
-- `npm run test:service` - ドメイン/サービス層のテストを実行
+- `npm run test:domain` - ドメイン層のテストを実行
 - `npm run test:api` - API層のテストを実行
 - `npm run test:frontend` - フロントエンドコンポーネントのテストを実行
 - `npm run test-storybook` - Storybookのテストを実行
@@ -123,7 +123,7 @@ src/domain/{aggregate}/
 
 **テスト戦略**（多層構造）:
 
-- **サービス層**: `vitest/config.service.ts`でモックPrismaクライアントを使用したユニットテスト
+- **ドメイン層**: `vitest/config.domain.ts`でモックPrismaクライアントを使用したユニットテスト
 - **API層**: `vitest/config.api.ts`で実際のデータベースを使用した統合テスト
 - **フロントエンド**: `vitest/config.frontend.ts`でコンポーネントとフックのテスト
 - **Storybook**: `vitest/config.storybook.ts`でUIコンポーネントのビジュアルテスト
@@ -158,8 +158,8 @@ Prismaモデルは`prisma/models/`内のファイルに分割:
 ### 重要な規約
 
 **インポート**: `src/`ルートからの絶対インポートを使用（TypeScript path mapping: `@/*`）
-**エラーハンドリング**: サービス層では`Result<T, E>`型を使用し、API層でHTTPExceptionに変換
-**テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック, serviceテストのみで利用
+**エラーハンドリング**: ドメイン層では`Result<T, E>`型を使用し、API層でHTTPExceptionに変換
+**テスト**: `src/test/__mocks__/prisma.ts`でPrismaクライアントをモック, domainテストのみで利用
 **バリデーション**: データ検証にドメイン層のZodスキーマを使用
 **ログ**: Pinoロガーで構造化ログを使用
 

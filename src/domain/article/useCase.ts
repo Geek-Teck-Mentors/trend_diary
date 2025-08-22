@@ -2,15 +2,15 @@ import { NotFoundError, ServerError } from '@/common/errors'
 import { CursorPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
 import { AsyncResult, isError, isNull, resultError, resultSuccess } from '@/common/types/utility'
-import { ArticleCommandService, ArticleQueryService } from '@/domain/article/repository'
+import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import type { Article } from '@/domain/article/schema/articleSchema'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 
 export class UseCase {
   constructor(
-    private readonly articleQueryService: ArticleQueryService,
-    private readonly articleCommandService: ArticleCommandService,
+    private readonly articleQuery: ArticleQuery,
+    private readonly articleCommand: ArticleCommand,
   ) {}
 
   async searchArticles(
@@ -28,7 +28,7 @@ export class UseCase {
       readStatus: params.readStatus,
     }
 
-    return this.articleQueryService.searchArticles(optimizedParams as ArticleQueryParams)
+    return this.articleQuery.searchArticles(optimizedParams as ArticleQueryParams)
   }
 
   async createReadHistory(
@@ -39,21 +39,18 @@ export class UseCase {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isError(articleValidation)) return articleValidation
 
-    return this.articleCommandService.createReadHistory(activeUserId, articleId, readAt)
+    return this.articleCommand.createReadHistory(activeUserId, articleId, readAt)
   }
 
   async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isError(articleValidation)) return articleValidation
 
-    return this.articleCommandService.deleteAllReadHistory(
-      activeUserId,
-      articleValidation.data.articleId,
-    )
+    return this.articleCommand.deleteAllReadHistory(activeUserId, articleValidation.data.articleId)
   }
 
   private async validateArticleExists(articleId: bigint): AsyncResult<Article, Error> {
-    const res = await this.articleQueryService.findArticleById(articleId)
+    const res = await this.articleQuery.findArticleById(articleId)
     if (isError(res)) return res
 
     if (isNull(res.data)) {

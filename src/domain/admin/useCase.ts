@@ -1,24 +1,24 @@
 import { AsyncResult, isError, resultSuccess } from '@/common/types/utility'
-import { AdminCommandService, AdminQueryService } from './repository'
+import { AdminCommand, AdminQuery } from './repository'
 import type { AdminUser } from './schema/adminUserSchema'
 import { UserListResult } from './schema/userListSchema'
 import { UserSearchQuery } from './schema/userSearchSchema'
 
 export class UseCase {
   constructor(
-    private commandService: AdminCommandService,
-    private queryService: AdminQueryService,
+    private command: AdminCommand,
+    private query: AdminQuery,
   ) {}
 
   async grantAdminRole(
     activeUserId: bigint,
     grantedByAdminUserId: number,
   ): AsyncResult<AdminUser, Error> {
-    return await this.commandService.grantAdminRole(activeUserId, grantedByAdminUserId)
+    return await this.command.grantAdminRole(activeUserId, grantedByAdminUserId)
   }
 
   async isAdmin(activeUserId: bigint): AsyncResult<boolean, Error> {
-    const result = await this.queryService.findAdminByActiveUserId(activeUserId)
+    const result = await this.query.findAdminByActiveUserId(activeUserId)
     if (isError(result)) {
       return result
     }
@@ -26,6 +26,6 @@ export class UseCase {
   }
 
   async getUserList(query?: UserSearchQuery): AsyncResult<UserListResult, Error> {
-    return await this.queryService.findAllUsers(query)
+    return await this.query.findAllUsers(query)
   }
 }

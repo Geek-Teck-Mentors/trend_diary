@@ -31,9 +31,9 @@ export default async function getUserList(
   const parsedQuery = c.req.valid('query')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const adminUserService = createAdminUserUseCase(rdb)
+  const adminUserUseCase = createAdminUserUseCase(rdb)
 
-  const result = await adminUserService.getUserList({
+  const result = await adminUserUseCase.getUserList({
     searchQuery: parsedQuery.searchQuery,
     page: parsedQuery.page,
     limit: parsedQuery.limit,

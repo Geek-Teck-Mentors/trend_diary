@@ -11,7 +11,7 @@
       "Bash(npm run lint)",
       "Bash(npm run lint:*)",
       "Bash(npm run format:fix:*)",
-      "Bash(npm run test:service:*)",
+      "Bash(npm run test:domain:*)",
       "Bash(npm run test:api:*)",
       "Bash(npm run test:api:coverage:*)",
       "Bash(npm run e2e:*)",

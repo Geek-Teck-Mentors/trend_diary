@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { ServerError } from '@/common/errors'
 import { isError, isSuccess } from '@/common/types/utility'
-import { AdminQueryServiceImpl } from './adminQueryServiceImpl'
+import { AdminQueryImpl } from './adminQueryImpl'
 
 // モックの設定
 const mockDb = mockDeep<PrismaClient>()
@@ -99,13 +99,13 @@ function setupDatabaseError(mockMethod: any, errorMessage = 'Database connection
   mockMethod.mockRejectedValue(new Error(errorMessage))
 }
 
-describe('AdminQueryServiceImpl', () => {
-  let queryService: AdminQueryServiceImpl
+describe('AdminQueryImpl', () => {
+  let query: AdminQueryImpl
   const activeUserId = 123456789n
 
   beforeEach(() => {
     vi.clearAllMocks()
-    queryService = new AdminQueryServiceImpl(mockDb)
+    query = new AdminQueryImpl(mockDb)
   })
 
   afterEach(() => {
@@ -118,7 +118,7 @@ describe('AdminQueryServiceImpl', () => {
         const mockAdminUser = createMockAdminUser({ activeUserId: activeUserId })
         mockDb.adminUser.findUnique.mockResolvedValue(mockAdminUser)
 
-        const result = await queryService.findAdminByActiveUserId(activeUserId)
+        const result = await query.findAdminByActiveUserId(activeUserId)
 
         expectSuccessResult(result, {
           adminUserId: 1,
@@ -145,8 +145,8 @@ describe('AdminQueryServiceImpl', () => {
         )
 
         const [result1, result2] = await Promise.all([
-          queryService.findAdminByActiveUserId(activeUserId),
-          queryService.findAdminByActiveUserId(activeUserId2),
+          query.findAdminByActiveUserId(activeUserId),
+          query.findAdminByActiveUserId(activeUserId2),
         ])
 
         expectSuccessResult(result1, { adminUserId: 1, activeUserId })
@@ -159,7 +159,7 @@ describe('AdminQueryServiceImpl', () => {
         const nonExistentActiveUserId = 999999999n
         mockDb.adminUser.findUnique.mockResolvedValue(null)
 
-        const result = await queryService.findAdminByActiveUserId(nonExistentActiveUserId)
+        const result = await query.findAdminByActiveUserId(nonExistentActiveUserId)
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
@@ -176,7 +176,7 @@ describe('AdminQueryServiceImpl', () => {
           createMockAdminUser({ activeUserId: largeActiveUserId }),
         )
 
-        const result = await queryService.findAdminByActiveUserId(largeActiveUserId)
+        const result = await query.findAdminByActiveUserId(largeActiveUserId)
 
         expectSuccessResult(result, { activeUserId: largeActiveUserId })
         expect(isSuccess(result) && result.data?.activeUserId.toString()).toBe(
@@ -190,7 +190,7 @@ describe('AdminQueryServiceImpl', () => {
           createMockAdminUser({ activeUserId: minActiveUserId }),
         )
 
-        const result = await queryService.findAdminByActiveUserId(minActiveUserId)
+        const result = await query.findAdminByActiveUserId(minActiveUserId)
 
         expectSuccessResult(result, { activeUserId: minActiveUserId })
       })
@@ -200,7 +200,7 @@ describe('AdminQueryServiceImpl', () => {
       it('データベースエラー時は適切にエラーを返す', async () => {
         setupDatabaseError(mockDb.adminUser.findUnique)
 
-        const result = await queryService.findAdminByActiveUserId(activeUserId)
+        const result = await query.findAdminByActiveUserId(activeUserId)
 
         expectErrorResult(result, ServerError, 'Admin情報の取得に失敗しました')
       })
@@ -211,7 +211,7 @@ describe('AdminQueryServiceImpl', () => {
           message: 'Record not found',
         })
 
-        const result = await queryService.findAdminByActiveUserId(activeUserId)
+        const result = await query.findAdminByActiveUserId(activeUserId)
 
         expectErrorResult(result, ServerError, 'Admin情報の取得に失敗しました')
       })
@@ -225,7 +225,7 @@ describe('AdminQueryServiceImpl', () => {
         mockDb.activeUser.findMany.mockResolvedValue(mockUsers)
         mockDb.activeUser.count.mockResolvedValue(2)
 
-        const result = await queryService.findAllUsers()
+        const result = await query.findAllUsers()
 
         expectSuccessResult(result, { users: { length: 2 }, total: 2, page: 1, limit: 20 })
         expect(mockDb.activeUser.findMany).toHaveBeenCalledWith({
@@ -243,7 +243,7 @@ describe('AdminQueryServiceImpl', () => {
         mockDb.activeUser.findMany.mockResolvedValue(mockSearchUsers)
         mockDb.activeUser.count.mockResolvedValue(1)
 
-        const result = await queryService.findAllUsers(searchQuery)
+        const result = await query.findAllUsers(searchQuery)
 
         expectSuccessResult(result, { users: { length: 1 }, total: 1, page: 1, limit: 10 })
         expectFindManyCall({
@@ -264,7 +264,7 @@ describe('AdminQueryServiceImpl', () => {
         ])
         mockDb.activeUser.count.mockResolvedValue(10)
 
-        const result = await queryService.findAllUsers(paginationQuery)
+        const result = await query.findAllUsers(paginationQuery)
 
         expectSuccessResult(result, { users: { length: 1 }, total: 10, page: 2, limit: 5 })
         expectFindManyCall({ skip: 5, take: 5 })
@@ -274,7 +274,7 @@ describe('AdminQueryServiceImpl', () => {
         mockDb.activeUser.findMany.mockResolvedValue([])
         mockDb.activeUser.count.mockResolvedValue(0)
 
-        const result = await queryService.findAllUsers()
+        const result = await query.findAllUsers()
 
         expectSuccessResult(result, { users: { length: 0 }, total: 0, page: 1, limit: 20 })
       })
@@ -286,7 +286,7 @@ describe('AdminQueryServiceImpl', () => {
         mockDb.activeUser.findMany.mockResolvedValue([])
         mockDb.activeUser.count.mockResolvedValue(0)
 
-        const result = await queryService.findAllUsers(largePageQuery)
+        const result = await query.findAllUsers(largePageQuery)
 
         expectSuccessResult(result, { users: { length: 0 }, total: 0, page: 1000, limit: 20 })
         expectFindManyCall({ skip: 19980, take: 20 })
@@ -304,7 +304,7 @@ describe('AdminQueryServiceImpl', () => {
         mockDb.activeUser.findMany.mockResolvedValue(mockUsersLarge)
         mockDb.activeUser.count.mockResolvedValue(100)
 
-        const result = await queryService.findAllUsers(largeLimitQuery)
+        const result = await query.findAllUsers(largeLimitQuery)
 
         expectSuccessResult(result, { users: { length: 100 }, total: 100, page: 1, limit: 1000 })
         expectFindManyCall({ skip: 0, take: 1000 })
@@ -315,7 +315,7 @@ describe('AdminQueryServiceImpl', () => {
         mockDb.activeUser.findMany.mockResolvedValue([])
         mockDb.activeUser.count.mockResolvedValue(0)
 
-        const result = await queryService.findAllUsers(specialCharQuery)
+        const result = await query.findAllUsers(specialCharQuery)
 
         expectSuccessResult(result, { page: 1, limit: 20 })
         expectFindManyCall({
@@ -336,7 +336,7 @@ describe('AdminQueryServiceImpl', () => {
         mockDb.activeUser.findMany.mockResolvedValue(mockJapaneseUsers)
         mockDb.activeUser.count.mockResolvedValue(1)
 
-        const result = await queryService.findAllUsers(japaneseQuery)
+        const result = await query.findAllUsers(japaneseQuery)
 
         expectSuccessResult(result, { users: { length: 1 }, page: 1, limit: 20 })
         if (isSuccess(result)) {
@@ -349,7 +349,7 @@ describe('AdminQueryServiceImpl', () => {
       it('findMany実行時のデータベースエラーを適切にエラーを返す', async () => {
         setupDatabaseError(mockDb.activeUser.findMany)
 
-        const result = await queryService.findAllUsers()
+        const result = await query.findAllUsers()
 
         expectErrorResult(result, ServerError, 'ユーザ一覧の取得に失敗しました')
       })
@@ -358,7 +358,7 @@ describe('AdminQueryServiceImpl', () => {
         mockDb.activeUser.findMany.mockResolvedValue([createMockUser()])
         setupDatabaseError(mockDb.activeUser.count)
 
-        const result = await queryService.findAllUsers()
+        const result = await query.findAllUsers()
 
         expectErrorResult(result, ServerError, 'ユーザ一覧の取得に失敗しました')
       })
@@ -370,7 +370,7 @@ describe('AdminQueryServiceImpl', () => {
         }
         mockDb.activeUser.findMany.mockRejectedValue(prismaError)
 
-        const result = await queryService.findAllUsers()
+        const result = await query.findAllUsers()
 
         expectErrorResult(result, ServerError, 'ユーザ一覧の取得に失敗しました')
       })

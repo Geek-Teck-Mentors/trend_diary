@@ -12,7 +12,7 @@ npm run build
 ## テストコマンド
 ```bash
 # 各層のテスト
-npm run test:service      # ドメイン/サービス層テスト
+npm run test:domain       # ドメイン層テスト
 npm run test:api          # API層テスト  
 npm run test:frontend     # フロントエンドテスト
 npm run test-storybook    # Storybookテスト
@@ -23,7 +23,7 @@ npm run e2e:report        # レポート表示
 npm run e2e:gen           # コード生成
 
 # 個別ファイルテスト
-npm run test:service -- <path/to/file>
+npm run test:domain -- <path/to/file>
 ```
 
 ## コード品質

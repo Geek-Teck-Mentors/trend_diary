@@ -1,6 +1,6 @@
 import { RdbClient } from '@/infrastructure/rdb'
-import CommandServiceImpl from './infrastructure/commandServiceImpl'
-import QueryServiceImpl from './infrastructure/queryServiceImpl'
+import CommandImpl from './infrastructure/commandImpl'
+import QueryImpl from './infrastructure/queryImpl'
 import {
   ActiveUser,
   ActiveUserInput,
@@ -10,7 +10,7 @@ import {
 import { UseCase } from './useCase'
 
 export function createUserUseCase(db: RdbClient): UseCase {
-  return new UseCase(new QueryServiceImpl(db), new CommandServiceImpl(db))
+  return new UseCase(new QueryImpl(db), new CommandImpl(db))
 }
 
 // 型

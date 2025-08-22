@@ -2,11 +2,11 @@
 
 ## テスト構成（多層アーキテクチャ）
 
-### 1. サービス層テスト
-- **設定**: `vitest/config.service.ts`
+### 1. ドメイン層テスト
+- **設定**: `vitest/config.domain.ts`
 - **対象**: ドメインロジック・ビジネスルール
 - **特徴**: モックPrismaクライアント使用
-- **実行**: `npm run test:service`
+- **実行**: `npm run test:domain`
 
 ### 2. API層テスト  
 - **設定**: `vitest/config.api.ts`
@@ -33,7 +33,7 @@
 ## テストパターン
 
 ### モック戦略
-- **Prismaクライアント**: `src/test/__mocks__/prisma.ts`（serviceテストのみ）
+- **Prismaクライアント**: `src/test/__mocks__/prisma.ts`（domainテストのみ）
 - **API層**: 実データベース使用
 - **外部API**: モック化
 
@@ -50,12 +50,12 @@
 ## 実行方法
 ```bash
 # 各層個別実行
-npm run test:service -- path/to/file
+npm run test:domain -- path/to/file
 npm run test:api -- path/to/file  
 npm run test:frontend -- path/to/file
 
 # 全体実行
-npm run test:service
+npm run test:domain
 npm run test:api
 npm run test:frontend
 npm run test-storybook

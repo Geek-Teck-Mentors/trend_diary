@@ -8,12 +8,12 @@ import {
 } from '@/common/pagination'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
-import { ArticleQueryService } from '@/domain/article/repository'
+import { ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import type { Article } from '@/domain/article/schema/articleSchema'
 import { RdbClient } from '@/infrastructure/rdb'
 
-export default class ArticleQueryServiceImpl implements ArticleQueryService {
+export default class ArticleQueryImpl implements ArticleQuery {
   constructor(private readonly db: RdbClient) {}
 
   async searchArticles(
@@ -22,8 +22,8 @@ export default class ArticleQueryServiceImpl implements ArticleQueryService {
     try {
       const { cursor, limit = 20, direction = 'next', ...searchParams } = params
 
-      const where = ArticleQueryServiceImpl.buildWhereClause(searchParams)
-      const cursorCondition = ArticleQueryServiceImpl.buildCursorCondition(direction, cursor)
+      const where = ArticleQueryImpl.buildWhereClause(searchParams)
+      const cursorCondition = ArticleQueryImpl.buildCursorCondition(direction, cursor)
 
       if (cursorCondition) {
         let existingAnd: any[] = []
