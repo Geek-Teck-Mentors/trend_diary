@@ -5,14 +5,14 @@ import { AsyncResult, Nullable } from '@/common/types/utility'
 import { ArticleQueryParams } from './schema/articleQuerySchema'
 import type { ReadHistory } from './schema/readHistorySchema'
 
-export interface ArticleQueryService {
+export interface ArticleQuery {
   searchArticles(
     params: ArticleQueryParams,
   ): AsyncResult<CursorPaginationResult<Article>, ServerError>
   findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError>
 }
 
-export interface ArticleCommandService {
+export interface ArticleCommand {
   createReadHistory(
     activeUserId: bigint,
     articleId: bigint,

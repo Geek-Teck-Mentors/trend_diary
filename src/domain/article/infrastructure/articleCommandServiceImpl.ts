@@ -1,10 +1,10 @@
 import { ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import { ArticleCommandService } from '@/domain/article/repository'
+import { ArticleCommand } from '@/domain/article/repository'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 import { RdbClient } from '@/infrastructure/rdb'
 
-export default class ArticleCommandServiceImpl implements ArticleCommandService {
+export default class ArticleCommandServiceImpl implements ArticleCommand {
   constructor(private readonly db: RdbClient) {}
 
   async createReadHistory(
