@@ -6,7 +6,7 @@ import { CommandService } from '../repository'
 import type { ActiveUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 
-export default class CommandServiceImpl implements CommandService {
+export default class CommandImpl implements CommandService {
   constructor(private readonly db: RdbClient) {}
 
   async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error> {

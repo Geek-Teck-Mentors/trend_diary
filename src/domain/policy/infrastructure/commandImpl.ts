@@ -5,7 +5,7 @@ import { CommandService } from '../repository/commandService'
 import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 import { mapToPrivacyPolicy } from './mapper'
 
-export default class CommandServiceImpl implements CommandService {
+export default class CommandImpl implements CommandService {
   constructor(private readonly db: RdbClient) {}
 
   async save(policy: PrivacyPolicy): AsyncResult<PrivacyPolicy, Error> {

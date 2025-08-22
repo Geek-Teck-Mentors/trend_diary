@@ -5,7 +5,7 @@ import { QueryService } from '../repository'
 import type { ActiveUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 
-export default class QueryServiceImpl implements QueryService {
+export default class QueryImpl implements QueryService {
   constructor(private readonly db: RdbClient) {}
 
   async findActiveById(id: bigint): AsyncResult<Nullable<ActiveUser>, Error> {

@@ -6,7 +6,7 @@ import { QueryService } from '../repository/queryService'
 import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 import { mapToPrivacyPolicy } from './mapper'
 
-export default class QueryServiceImpl implements QueryService {
+export default class QueryImpl implements QueryService {
   constructor(private readonly db: RdbClient) {}
 
   async findAll(

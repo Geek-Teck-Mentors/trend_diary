@@ -2,17 +2,17 @@ import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
-import QueryServiceImpl from './queryServiceImpl'
+import QueryImpl from './queryImpl'
 
 // モックの設定
 const mockDb = mockDeep<PrismaClient>()
 
-describe('QueryServiceImpl', () => {
-  let useCase: QueryServiceImpl
+describe('QueryImpl', () => {
+  let useCase: QueryImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useCase = new QueryServiceImpl(mockDb)
+    useCase = new QueryImpl(mockDb)
   })
 
   describe('findActiveById', () => {
