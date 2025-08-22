@@ -27,7 +27,7 @@ npm run format:fix    # フォーマット修正
 
 ### 層別テスト
 ```bash
-npm run test:service    # ドメイン/サービス層
+npm run test:domain     # ドメイン層
 npm run test:api        # API層
 npm run test:frontend   # フロントエンド
 npm run test-storybook  # Storybook
@@ -36,7 +36,7 @@ npm run e2e             # E2Eテスト
 
 ### 個別ファイルテスト
 ```bash
-npm run test:service -- path/to/file
+npm run test:domain -- path/to/file
 npm run test:api -- path/to/file
 npm run test:frontend -- path/to/file
 ```

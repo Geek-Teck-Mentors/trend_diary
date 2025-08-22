@@ -159,7 +159,7 @@ src/domain/{aggregate}/
 ### コード品質保証
 
 各TDDサイクル完了時に以下を実行：
-- `npm run test:service` - サービス層テスト
+- `npm run test:domain` - ドメイン層テスト
 - `npm run test:api` - API層テスト  
 - `npm run lint:ci` - コード品質チェック
 - 全て成功後にConventional Commitsでコミット
