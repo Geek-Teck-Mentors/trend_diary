@@ -2,8 +2,8 @@ import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
-import { AdminCommandServiceImpl } from './infrastructure/adminCommandServiceImpl'
-import { AdminQueryServiceImpl } from './infrastructure/adminQueryServiceImpl'
+import { AdminCommandImpl } from './infrastructure/adminCommandImpl'
+import { AdminQueryImpl } from './infrastructure/adminQueryImpl'
 import { UseCase } from './useCase'
 
 const mockDb = mockDeep<PrismaClient>()
@@ -13,8 +13,8 @@ describe('AdminUser UseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    const commandService = new AdminCommandServiceImpl(mockDb)
-    const queryService = new AdminQueryServiceImpl(mockDb)
+    const commandService = new AdminCommandImpl(mockDb)
+    const queryService = new AdminQueryImpl(mockDb)
     useCase = new UseCase(commandService, queryService)
   })
 

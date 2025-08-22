@@ -6,7 +6,7 @@ import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
 import { toUserListItem } from './mapper'
 
-export class AdminQueryServiceImpl implements AdminQuery {
+export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
 
   async findAdminByActiveUserId(activeUserId: bigint): AsyncResult<

@@ -4,7 +4,7 @@ import { ArticleCommand } from '@/domain/article/repository'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 import { RdbClient } from '@/infrastructure/rdb'
 
-export default class ArticleCommandServiceImpl implements ArticleCommand {
+export default class ArticleCommandImpl implements ArticleCommand {
   constructor(private readonly db: RdbClient) {}
 
   async createReadHistory(

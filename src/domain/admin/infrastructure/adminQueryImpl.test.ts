@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { ServerError } from '@/common/errors'
 import { isError, isSuccess } from '@/common/types/utility'
-import { AdminQueryServiceImpl } from './adminQueryServiceImpl'
+import { AdminQueryImpl } from './adminQueryImpl'
 
 // モックの設定
 const mockDb = mockDeep<PrismaClient>()
@@ -99,13 +99,13 @@ function setupDatabaseError(mockMethod: any, errorMessage = 'Database connection
   mockMethod.mockRejectedValue(new Error(errorMessage))
 }
 
-describe('AdminQueryServiceImpl', () => {
-  let queryService: AdminQueryServiceImpl
+describe('AdminQueryImpl', () => {
+  let queryService: AdminQueryImpl
   const activeUserId = 123456789n
 
   beforeEach(() => {
     vi.clearAllMocks()
-    queryService = new AdminQueryServiceImpl(mockDb)
+    queryService = new AdminQueryImpl(mockDb)
   })
 
   afterEach(() => {

@@ -1,11 +1,11 @@
 import { RdbClient } from '@/infrastructure/rdb'
-import { AdminCommandServiceImpl } from './infrastructure/adminCommandServiceImpl'
-import { AdminQueryServiceImpl } from './infrastructure/adminQueryServiceImpl'
+import { AdminCommandImpl } from './infrastructure/adminCommandImpl'
+import { AdminQueryImpl } from './infrastructure/adminQueryImpl'
 import { UseCase } from './useCase'
 
 export function createAdminUserUseCase(rdb: RdbClient): UseCase {
-  const commandService = new AdminCommandServiceImpl(rdb)
-  const queryService = new AdminQueryServiceImpl(rdb)
+  const commandService = new AdminCommandImpl(rdb)
+  const queryService = new AdminQueryImpl(rdb)
   return new UseCase(commandService, queryService)
 }
 

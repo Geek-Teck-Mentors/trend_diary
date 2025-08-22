@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
 import { isError, isSuccess } from '@/common/types/utility'
-import { AdminCommandServiceImpl } from './adminCommandServiceImpl'
+import { AdminCommandImpl } from './adminCommandImpl'
 
 // モックの設定
 const mockDb = mockDeep<PrismaClient>()
@@ -71,14 +71,14 @@ function expectDatabaseCalls(calls: {
   }
 }
 
-describe('AdminCommandServiceImpl', () => {
-  let commandService: AdminCommandServiceImpl
+describe('AdminCommandImpl', () => {
+  let commandService: AdminCommandImpl
   let testData: { activeUserId: bigint; grantedByAdminUserId: number }
 
   beforeEach(() => {
     testData = { activeUserId: 123456789n, grantedByAdminUserId: 1 }
     vi.clearAllMocks()
-    commandService = new AdminCommandServiceImpl(mockDb)
+    commandService = new AdminCommandImpl(mockDb)
   })
 
   afterEach(() => {

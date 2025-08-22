@@ -5,7 +5,7 @@ import { AdminCommand } from '../repository'
 import type { AdminUser } from '../schema/adminUserSchema'
 import { toDomainAdminUser } from './mapper'
 
-export class AdminCommandServiceImpl implements AdminCommand {
+export class AdminCommandImpl implements AdminCommand {
   constructor(private rdb: PrismaClient) {}
 
   async grantAdminRole(
