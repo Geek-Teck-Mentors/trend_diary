@@ -35,11 +35,11 @@ test.describe('記事一覧ページ', () => {
     })
     test.beforeEach(async ({ page }) => {
       // カードが表示されるのを待機
-      await page.getByRole('button').first().waitFor({ state: 'visible', timeout: 10000 })
+      await page.locator('[data-slot="card"]').nth(0).waitFor({ state: 'visible', timeout: 10000 })
     })
     test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
       // 1. 記事カードの存在を確認
-      const articleCards = page.getByRole('button')
+      const articleCards = page.locator('[data-slot="card"]')
       const articleCard = articleCards.first()
       await expect(articleCard).toBeVisible()
 
