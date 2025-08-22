@@ -123,7 +123,7 @@ src/domain/{aggregate}/
 
 **テスト戦略**（多層構造）:
 
-- **ドメイン層**: `vitest/config.service.ts`でモックPrismaクライアントを使用したユニットテスト
+- **ドメイン層**: `vitest/config.domain.ts`でモックPrismaクライアントを使用したユニットテスト
 - **API層**: `vitest/config.api.ts`で実際のデータベースを使用した統合テスト
 - **フロントエンド**: `vitest/config.frontend.ts`でコンポーネントとフックのテスト
 - **Storybook**: `vitest/config.storybook.ts`でUIコンポーネントのビジュアルテスト

@@ -3,7 +3,7 @@
 ## テスト構成（多層アーキテクチャ）
 
 ### 1. ドメイン層テスト
-- **設定**: `vitest/config.service.ts`
+- **設定**: `vitest/config.domain.ts`
 - **対象**: ドメインロジック・ビジネスルール
 - **特徴**: モックPrismaクライアント使用
 - **実行**: `npm run test:domain`
