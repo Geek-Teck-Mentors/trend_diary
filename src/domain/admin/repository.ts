@@ -3,7 +3,7 @@ import type { AdminUser } from './schema/adminUserSchema'
 import { UserListResult } from './schema/userListSchema'
 import { UserSearchQuery } from './schema/userSearchSchema'
 
-export interface AdminQueryService {
+export interface AdminQuery {
   findAdminByActiveUserId(activeUserId: bigint): AsyncResult<
     Nullable<{
       adminUserId: number
@@ -16,6 +16,6 @@ export interface AdminQueryService {
   findAllUsers(query?: UserSearchQuery): AsyncResult<UserListResult, Error>
 }
 
-export interface AdminCommandService {
+export interface AdminCommand {
   grantAdminRole(activeUserId: bigint, grantedByAdminUserId: number): AsyncResult<AdminUser, Error>
 }

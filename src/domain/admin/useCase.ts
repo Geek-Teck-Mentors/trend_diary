@@ -1,13 +1,13 @@
 import { AsyncResult, isError, resultSuccess } from '@/common/types/utility'
-import { AdminCommandService, AdminQueryService } from './repository'
+import { AdminCommand, AdminQuery } from './repository'
 import type { AdminUser } from './schema/adminUserSchema'
 import { UserListResult } from './schema/userListSchema'
 import { UserSearchQuery } from './schema/userSearchSchema'
 
 export class UseCase {
   constructor(
-    private commandService: AdminCommandService,
-    private queryService: AdminQueryService,
+    private commandService: AdminCommand,
+    private queryService: AdminQuery,
   ) {}
 
   async grantAdminRole(

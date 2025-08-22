@@ -1,12 +1,12 @@
 import { PrismaClient } from '@prisma/client'
 import { ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
-import { AdminQueryService } from '../repository'
+import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
 import { toUserListItem } from './mapper'
 
-export class AdminQueryServiceImpl implements AdminQueryService {
+export class AdminQueryServiceImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
 
   async findAdminByActiveUserId(activeUserId: bigint): AsyncResult<
