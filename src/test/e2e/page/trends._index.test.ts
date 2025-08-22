@@ -71,7 +71,7 @@ test.describe('記事一覧ページ', () => {
       const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
 
       // 1. 記事カードをクリック
-      const articleCard = page.getByRole('button').first()
+      const articleCard = page.locator('[data-slot="card"]').first()
       await articleCard.click()
 
       // 2. ドロワーが開くのを待機
