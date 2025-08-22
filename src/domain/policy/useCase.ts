@@ -2,14 +2,13 @@ import { PrivacyPolicy } from '@prisma/client'
 import { ClientError, NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { isError, isNull, Result, resultError, resultSuccess } from '@/common/types/utility'
-import { CommandService } from './repository/commandService'
-import { QueryService } from './repository/queryService'
+import { Command, Query } from './repository'
 import { activate, isActive, newPrivacyPolicy, updateContent } from './schema/method'
 
 export class UseCase {
   constructor(
-    private queryService: QueryService,
-    private commandService: CommandService,
+    private queryService: Query,
+    private commandService: Command,
   ) {}
 
   /**

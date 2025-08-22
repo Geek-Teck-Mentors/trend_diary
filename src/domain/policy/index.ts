@@ -8,8 +8,6 @@ export function createPrivacyPolicyUseCase(db: RdbClient): UseCase {
   return new UseCase(new QueryImpl(db), new CommandImpl(db))
 }
 
-export type { CommandService } from './repository/commandService'
-
 // バリデーションスキーマ
 export {
   type PrivacyPolicy,

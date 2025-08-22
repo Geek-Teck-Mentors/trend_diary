@@ -2,11 +2,11 @@ import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
-import { QueryService } from '../repository/queryService'
+import { Query } from '../repository'
 import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
 import { mapToPrivacyPolicy } from './mapper'
 
-export default class QueryImpl implements QueryService {
+export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
   async findAll(
