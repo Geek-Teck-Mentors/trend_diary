@@ -17,7 +17,7 @@ interface MockCommand {
   deleteByVersion: ReturnType<typeof vi.fn>
 }
 
-describe('PrivacyPolicyService', () => {
+describe('PrivacyPolicyUseCase', () => {
   let useCase: UseCase
   let mockQuery: MockQuery
   let mockCommand: MockCommand

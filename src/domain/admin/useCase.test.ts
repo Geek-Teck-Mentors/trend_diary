@@ -13,9 +13,9 @@ describe('AdminUser UseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    const commandService = new AdminCommandImpl(mockDb)
-    const queryService = new AdminQueryImpl(mockDb)
-    useCase = new UseCase(commandService, queryService)
+    const command = new AdminCommandImpl(mockDb)
+    const query = new AdminQueryImpl(mockDb)
+    useCase = new UseCase(command, query)
   })
 
   describe('grantAdminRole', () => {

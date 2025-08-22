@@ -30,7 +30,7 @@ const mockPaginationResult: CursorPaginationResult<Article> = {
 const mockArticleQuery = mockDeep<ArticleQuery>()
 const mockArticleCommand = mockDeep<ArticleCommand>()
 
-describe('ArticleService', () => {
+describe('ArticleUseCase', () => {
   const useCase = new UseCase(mockArticleQuery, mockArticleCommand)
 
   beforeEach(() => {
