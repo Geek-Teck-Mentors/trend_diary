@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError } from '@/common/errors'
 import { isError, isSuccess, resultSuccess } from '@/common/types/utility'
-import { CommandService, QueryService } from './repository'
+import { Command, Query } from './repository'
 import { UseCase } from './useCase'
 
 // モックの設定
-const mockQuery = mockDeep<QueryService>()
-const mockCommand = mockDeep<CommandService>()
+const mockQuery = mockDeep<Query>()
+const mockCommand = mockDeep<Command>()
 
 describe('User UseCase', () => {
   let useCase: UseCase

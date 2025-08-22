@@ -2,11 +2,11 @@ import { ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { CreateSessionInput } from '../dto'
-import { CommandService } from '../repository'
+import { Command } from '../repository'
 import type { ActiveUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 
-export default class CommandImpl implements CommandService {
+export default class CommandImpl implements Command {
   constructor(private readonly db: RdbClient) {}
 
   async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error> {

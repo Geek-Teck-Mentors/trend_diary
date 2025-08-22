@@ -11,7 +11,7 @@ import {
   resultError,
   resultSuccess,
 } from '@/common/types/utility'
-import { CommandService, QueryService } from './repository'
+import { Command, Query } from './repository'
 import type { ActiveUser } from './schema/activeUserSchema'
 import { recordLogin } from './schema/method'
 
@@ -23,12 +23,12 @@ type LoginResult = {
 
 export class UseCase {
   constructor(
-    private queryService: QueryService,
-    private commandService: CommandService,
+    private query: Query,
+    private command: Command,
   ) {}
 
   async signup(email: string, plainPassword: string): Promise<Result<ActiveUser, Error>> {
-    const existingResult = await this.queryService.findActiveByEmail(email)
+    const existingResult = await this.query.findActiveByEmail(email)
     if (isError(existingResult)) return resultError(ServerError.handle(existingResult.error))
     if (!isNull(existingResult.data)) {
       return resultError(new AlreadyExistsError('Email already exists'))
@@ -36,7 +36,7 @@ export class UseCase {
 
     const hashedPassword = await bcrypt.hash(plainPassword, 10)
 
-    const activeUserResult = await this.commandService.createActive(email, hashedPassword)
+    const activeUserResult = await this.command.createActive(email, hashedPassword)
     if (isError(activeUserResult)) {
       return resultError(ServerError.handle(activeUserResult.error))
     }
@@ -63,7 +63,7 @@ export class UseCase {
     const { sessionId, expiresAt } = sessionResult.data
 
     const updatedUser = recordLogin(authResult.data)
-    const updateResult = await this.commandService.saveActive(updatedUser)
+    const updateResult = await this.command.saveActive(updatedUser)
     if (isError(updateResult)) return resultError(updateResult.error)
 
     return resultSuccess({
@@ -77,7 +77,7 @@ export class UseCase {
     email: string,
     plainPassword: string,
   ): Promise<Result<ActiveUser, Error>> {
-    const activeUserResult = await this.queryService.findActiveByEmail(email)
+    const activeUserResult = await this.query.findActiveByEmail(email)
     if (isError(activeUserResult)) return resultError(ServerError.handle(activeUserResult.error))
     if (isNull(activeUserResult.data)) {
       return resultError(new NotFoundError('User not found'))
@@ -111,7 +111,7 @@ export class UseCase {
     const sessionId = uuidv4()
     const expiresAt = new Date(Date.now() + SESSION_DURATION)
 
-    const sessionResult = await this.commandService.createSession({
+    const sessionResult = await this.command.createSession({
       sessionId,
       activeUserId,
       sessionToken: uuidv4(),
@@ -128,13 +128,13 @@ export class UseCase {
   }
 
   async logout(sessionId: string): Promise<Result<void, Error>> {
-    const result = await this.commandService.deleteSession(sessionId)
+    const result = await this.command.deleteSession(sessionId)
     if (isError(result)) return resultError(ServerError.handle(result.error))
     return resultSuccess(undefined)
   }
 
   async getCurrentUser(sessionId: string): AsyncResult<Nullable<ActiveUser>, Error> {
-    const result = await this.queryService.findActiveBySessionId(sessionId)
+    const result = await this.query.findActiveBySessionId(sessionId)
     if (isError(result)) return resultError(ServerError.handle(result.error))
 
     return resultSuccess(result.data)
