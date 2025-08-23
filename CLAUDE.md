@@ -72,7 +72,7 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
 - `npm run format:fix` - Biomeでコードフォーマットを修正
 - `npm run check` - Biomeで総合チェック
 - `npm run check:fix` - Biomeで総合チェック・修正
-- `npm run lint:ci` - biome ci実行 + 型チェック（基本的にこれを使用する）
+- `npm run lint` - biome ci実行 + 型チェック（基本的にこれを使用する）
 
 ## 開発環境設定
 

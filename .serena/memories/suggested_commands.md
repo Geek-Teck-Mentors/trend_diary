@@ -29,7 +29,7 @@ npm run test:domain -- <path/to/file>
 ## コード品質
 ```bash
 # 基本チェック（推奨）
-npm run lint:ci           # Biome CI + 型チェック
+npm run lint           # Biome CI + 型チェック
 
 # 個別実行
 npm run lint              # Lintチェック

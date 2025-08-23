@@ -8,7 +8,7 @@
 ### コード品質チェック
 ```bash
 # 推奨：統合チェック（Biome CI + 型チェック）
-npm run lint:ci
+npm run lint
 
 # または個別実行
 npm run lint          # Lintチェック
@@ -52,7 +52,7 @@ npm run tsc           # 型チェック
 ## 4. コミット前
 
 ### 必須チェック
-1. `npm run lint:ci` - CI用チェック実行
+1. `npm run lint` - CI用チェック実行
 2. 該当層のテスト実行
 3. 機能テスト実行
 
