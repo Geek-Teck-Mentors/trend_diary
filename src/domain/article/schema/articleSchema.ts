@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { createdAt } from '@/common/schema'
 
 export const articleSchema = z.object({
   articleId: z.bigint(),
@@ -7,7 +8,7 @@ export const articleSchema = z.object({
   author: z.string().max(30),
   description: z.string().max(255),
   url: z.string().url(),
-  createdAt: z.date(),
+  createdAt,
 })
 
 export type Article = z.infer<typeof articleSchema>
