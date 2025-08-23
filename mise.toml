@@ -8,7 +8,7 @@ run = "docker compose up -d"
 [tasks.init]
 depends = ['db']
 description = "Setup Development"
-run = "npm i"
+run = "npm i && npm run db:gen"
 
 [tasks.migrate]
 depends = ['db']
