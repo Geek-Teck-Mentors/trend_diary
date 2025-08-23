@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createdAt } from '@/common/schema'
+import { createdAt } from '@/common/schemas'
 
 // API用スキーマ
 export const createReadHistoryApiSchema = z.object({
