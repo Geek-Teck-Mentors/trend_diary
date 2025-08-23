@@ -10,14 +10,14 @@ import {
 const PATH_INDEX = '/'
 
 interface GroupRoute {
-  prefix: string
-  layout?: string
-  routes: Route[]
+  readonly prefix: string
+  readonly layout?: string
+  readonly routes: Route[]
 }
 
 interface Route {
-  path: string
-  file: `./routes/${string}.tsx`
+  readonly path: string
+  readonly file: `./routes/${string}.tsx`
 }
 
 const baseGroup = {
