@@ -59,6 +59,14 @@ export function LinkAsButton({
   )
 }
 
+/**
+ * AnchorLink
+ * @description aタグを薄くラップしたコンポーネント
+ * @param to InternalPath | `https://${string}`, InternalPathはルーティング定義から型推論される
+ * @param children
+ * @param className
+ * @param external false | true
+ */
 export function AnchorLink({
   to,
   children,
@@ -70,8 +78,8 @@ export function AnchorLink({
       {children}
     </ExternalLink>
   ) : (
-    <a href={to} className={className}>
+    <Link to={to} className={className}>
       {children}
-    </a>
+    </Link>
   )
 }
