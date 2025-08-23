@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createdAt, updatedAt } from '@/common/schema'
+import { createdAt, updatedAt } from '@/common/schemas'
 
 export const privacyPolicySchema = z.object({
   version: z.coerce.number().int().min(1, 'バージョンは1以上の数値である必要があります'),

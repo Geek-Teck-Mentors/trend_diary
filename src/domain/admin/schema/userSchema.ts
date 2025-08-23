@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createdAt } from '@/common/schema'
+import { createdAt } from '@/common/schemas'
 
 export const userSchema = z.object({
   activeUserId: z.bigint().positive('activeUserIdは正の整数である必要があります'),

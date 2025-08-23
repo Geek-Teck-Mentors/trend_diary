@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createdAt, updatedAt } from '@/common/schema'
+import { createdAt, updatedAt } from '@/common/schemas'
 
 export const activeUserSchema = z.object({
   activeUserId: z.bigint().positive(),
