@@ -1,3 +1,8 @@
+export interface Cursor {
+  id: bigint
+  createdAt: Date
+}
+
 export type CursorDirection = 'next' | 'prev'
 
 interface BaseResult<T> {
@@ -9,11 +14,6 @@ interface BaseResult<T> {
 export interface CursorPaginationResult<T> extends BaseResult<T> {
   nextCursor?: string
   prevCursor?: string
-}
-
-export interface CursorInfo {
-  id: bigint
-  createdAt: Date
 }
 
 export interface OffsetPaginationResult<T> extends BaseResult<T> {
