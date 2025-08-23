@@ -10,6 +10,9 @@ on:
         options:
           - fetch_articles
 
+permissions:
+  contents: read
+
 env:
   SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
   PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
