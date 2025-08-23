@@ -8,6 +8,7 @@
     "postinstall": "prisma generate",
     "prestart": "docker compose up -d",
     "start": "react-router dev",
+    "poststart": "docker compose down",
     "build": "react-router build",
     "test:frontend": "vitest run -c vitest/config.frontend.ts",
     "test:domain": "vitest run -c vitest/config.domain.ts",
