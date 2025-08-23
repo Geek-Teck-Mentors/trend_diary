@@ -1,5 +1,6 @@
 import Footer from '../../components/Footer'
 import Header from '../../components/Header'
+import { AnchorLink } from '../../components/link'
 import PageError from '../../components/PageError'
 import { PageErrorType } from '../../components/PageError/usePageError'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
@@ -31,9 +32,9 @@ export default function LoginPage({ handleSubmit, pageError }: Props) {
           <CardFooter className='flex flex-col gap-4 border-t pt-6'>
             <div className='text-muted-foreground text-center text-sm'>
               アカウントをお持ちでないですか？{' '}
-              <a href='/signup' className='text-primary hover:text-primary/90 underline'>
+              <AnchorLink to='/signup' className='text-primary hover:text-primary/90 underline'>
                 アカウント作成
-              </a>
+              </AnchorLink>
             </div>
           </CardFooter>
         </Card>

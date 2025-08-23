@@ -3,6 +3,7 @@ import { type LoaderFunctionArgs, type MetaFunction, useLoaderData } from 'react
 import { ClipText } from '../components/ClipText'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
+import { AnchorLink } from '../components/link'
 import { isUserFeatureEnabled } from '../features/featureFlag'
 
 export const meta: MetaFunction = () => [
@@ -59,12 +60,12 @@ const TrendDiaryTopPage = () => {
             </p>
 
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-              <a
-                href='/trends'
+              <AnchorLink
+                to='/trends'
                 className='inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl'
               >
                 今すぐ始める
-              </a>
+              </AnchorLink>
               {userFeatureEnabled && (
                 <a
                   href='/login'
