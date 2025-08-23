@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { createdAt, updatedAt } from '@/common/schema'
 
 export const activeUserSchema = z.object({
   activeUserId: z.bigint().positive(),
@@ -7,8 +8,8 @@ export const activeUserSchema = z.object({
   password: z.string().min(8).max(50),
   displayName: z.string().max(64).optional().nullable(), // オプションで最大長64文字
   lastLogin: z.date().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt,
+  updatedAt,
   adminUserId: z.number().positive().nullable().default(null),
 })
 
