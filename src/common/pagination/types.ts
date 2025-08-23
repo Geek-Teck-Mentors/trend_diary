@@ -1,12 +1,6 @@
 export type CursorDirection = 'next' | 'prev'
 
-export type CursorPaginationParams = {
-  cursor?: string
-  limit?: number
-  direction?: CursorDirection
-}
-
-export type CursorPaginationResult<T> = {
+export interface CursorPaginationResult<T> {
   data: T[]
   nextCursor?: string
   prevCursor?: string
@@ -14,17 +8,12 @@ export type CursorPaginationResult<T> = {
   hasPrev: boolean
 }
 
-export type CursorInfo = {
+export interface CursorInfo {
   id: bigint
   createdAt: Date
 }
 
-export type OffsetPaginationParams = {
-  page?: number
-  limit?: number
-}
-
-export type OffsetPaginationResult<T> = {
+export interface OffsetPaginationResult<T> {
   data: T[]
   page: number
   limit: number
