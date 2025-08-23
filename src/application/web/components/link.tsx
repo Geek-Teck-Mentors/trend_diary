@@ -21,6 +21,18 @@ function ExternalLink({ to, children, className }: PropsWithChildren<ExternalLin
   )
 }
 
+interface InternalLinkProps extends BaseProps {
+  to: InternalPath
+}
+
+function InternalLink({ to, children, className }: PropsWithChildren<InternalLinkProps>) {
+  return (
+    <Link to={to} className={className}>
+      {children}
+    </Link>
+  )
+}
+
 type LinkAsButtonProps =
   | (BaseProps & {
       to: InternalPath
@@ -51,9 +63,9 @@ export function LinkAsButton({
           {children}
         </ExternalLink>
       ) : (
-        <Link to={to} className={className}>
+        <InternalLink to={to} className={className}>
           {children}
-        </Link>
+        </InternalLink>
       )}
     </Button>
   )
@@ -78,8 +90,8 @@ export function AnchorLink({
       {children}
     </ExternalLink>
   ) : (
-    <Link to={to} className={className}>
+    <InternalLink to={to} className={className}>
       {children}
-    </Link>
+    </InternalLink>
   )
 }
