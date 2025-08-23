@@ -6,7 +6,13 @@ const config: StorybookConfig = {
     '@chromatic-com/storybook',
     '@storybook/addon-docs',
     '@storybook/addon-a11y',
-    '@storybook/addon-vitest',
+    // NOTE: addon-vitestは一時的に無効化（直接vitestコマンドでテスト実行する）
+    // {
+    //   name: '@storybook/addon-vitest',
+    //   options: {
+    //     configFile: '.storybook/vitest.config.ts',
+    //   },
+    // },
   ],
   framework: {
     name: '@storybook/react-vite',
