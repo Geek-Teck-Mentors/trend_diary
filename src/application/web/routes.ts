@@ -96,19 +96,14 @@ type CombinePrefix<P extends string, Path extends string> = Path extends '/'
  * Paths<T>
  *
  * groupRoutes の型から全てのパス文字列リテラルのユニオンを生成する型。
- * - T は group の配列型（readonly を含む）であることを想定する。
- * - 各要素は { prefix: P, routes: Array<{ path: Path }> } の形であること。
+ * ジェネリックは明示的に `GroupRoute` 配列を受け取るようにして、
+ * `any` による曖昧なケースを排除する。
  *
- * 生成される型例:
- * '/' | '/login' | '/signup' | '/trends' | '/admin' | '/admin/users'
- *
- * @template T groupRoutes のリテラル配列型
+ * @template T groupRoutes のリテラル配列型（readonly GroupRoute[]）
  */
-type Paths<T extends readonly any[]> = T[number] extends infer Item
-  ? Item extends { prefix: infer P extends string; routes: infer R extends readonly any[] }
-    ? R[number] extends { path: infer Path extends string }
-      ? CombinePrefix<P, Path>
-      : never
+type Paths<T extends readonly GroupRoute[]> = T[number] extends infer Item
+  ? Item extends GroupRoute
+    ? CombinePrefix<Item['prefix'], Item['routes'][number]['path']>
     : never
   : never
 
