@@ -161,7 +161,7 @@ src/domain/{aggregate}/
 各TDDサイクル完了時に以下を実行：
 - `npm run test:domain` - ドメイン層テスト
 - `npm run test:api` - API層テスト  
-- `npm run lint:ci` - コード品質チェック
+- `npm run lint` - コード品質チェック
 - 全て成功後にConventional Commitsでコミット
 
 ### Backend技術スタック

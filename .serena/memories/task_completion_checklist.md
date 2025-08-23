@@ -1,76 +1,139 @@
-# タスク完了チェックリスト
+# Task Completion Checklist
 
-## 基本フロー（CLAUDE.mdより）
-**リファクタリング時は必ずlint, format, testコマンドを実行すること**
+## タスク完了時に必ず実行すること
 
-## 1. 開発・実装時
-
-### コード品質チェック
+### 1. コード品質チェック（必須）
 ```bash
-# 推奨：統合チェック（Biome CI + 型チェック）
-npm run lint:ci
-
-# または個別実行
-npm run lint          # Lintチェック
-npm run tsc           # TypeScript型チェック
-npm run format        # フォーマットチェック
+# 基本的にこのコマンドのみ実行（推奨）
+npm run lint  # Biome CI + TypeScript型チェック
 ```
 
-### 自動修正
+個別実行が必要な場合：
 ```bash
-npm run check:fix     # 総合チェック・修正
-npm run lint:fix      # Lint自動修正
-npm run format:fix    # フォーマット修正
+npm run tsc        # TypeScript型チェックのみ
+npm run check      # Biome総合チェック
+npm run check:fix  # Biome自動修正付きチェック
 ```
 
-## 2. テスト実行
+### 2. テスト実行（機能によって選択）
 
-### 層別テスト
+#### ドメイン層の変更
 ```bash
-npm run test:domain     # ドメイン層
-npm run test:api        # API層
-npm run test:frontend   # フロントエンド
-npm run test-storybook  # Storybook
-npm run e2e             # E2Eテスト
+npm run test:domain
 ```
 
-### 個別ファイルテスト
+#### API層の変更
 ```bash
-npm run test:domain -- path/to/file
-npm run test:api -- path/to/file
-npm run test:frontend -- path/to/file
+npm run test:api
 ```
 
-## 3. データベース関連
-
-### マイグレーション後
+#### フロントエンド変更
 ```bash
-npm run db:gen        # Prisma型生成
-npm run tsc           # 型チェック
+npm run test:frontend
 ```
 
-## 4. コミット前
-
-### 必須チェック
-1. `npm run lint:ci` - CI用チェック実行
-2. 該当層のテスト実行
-3. 機能テスト実行
-
-### コミットメッセージ（Conventional Commits）
+#### UIコンポーネント変更
 ```bash
-git commit -m "feat: 機能説明 TDD cycle complete"
-git commit -m "fix: バグ修正内容 TDD cycle complete"
-git commit -m "refactor: リファクタリング内容 TDD cycle complete"
+npm run test-storybook
 ```
 
-## 5. PR作成前
+#### 重要な機能変更・新機能追加
+```bash
+npm run e2e
+```
 
-### 最終チェック
-1. 全テスト実行
-2. ビルド確認: `npm run build`
-3. E2Eテスト: `npm run e2e`
+### 3. 重要な変更時の追加チェック
 
-### エラー時対応
-- ビルドエラー → 型エラー修正
-- テストエラー → テスト修正またはコード修正
-- Lintエラー → `npm run check:fix`で自動修正
+#### データベース変更
+```bash
+# マイグレーション確認
+npm run db:migrate
+
+# シード確認
+npm run db:seed
+```
+
+#### 本番ビルド確認（重要な変更時）
+```bash
+npm run build
+```
+
+## Git コミット前チェックリスト
+
+### 1. 動作確認
+- [ ] 開発サーバーが正常に起動する (`npm start`)
+- [ ] 変更箇所が期待通りに動作する
+- [ ] 既存機能が壊れていない
+
+### 2. コード品質
+- [ ] `npm run lint` が通る
+- [ ] 関連するテストが通る
+- [ ] 新しいコードにテストを追加している
+
+### 3. コミットメッセージ
+- [ ] Conventional Commitsに従っている
+- [ ] 適切なプレフィックスを使用している
+  - `feat:` 新機能追加
+  - `fix:` バグ修正
+  - `refactor:` リファクタリング
+  - `test:` テスト追加・修正
+  - `docs:` ドキュメント更新
+
+## リファクタリング時の特別ルール
+
+リファクタリング時は以下のコマンドを**必ず**実行すること：
+
+```bash
+npm run lint           # 必須
+npm run test:domain    # ドメイン変更時
+npm run test:api       # API変更時
+npm run test:frontend  # UI変更時
+```
+
+## プルリクエスト前チェックリスト
+
+### 1. 全テスト実行
+```bash
+npm run test:domain
+npm run test:api
+npm run test:frontend
+npm run e2e  # 重要な変更の場合
+```
+
+### 2. 品質チェック
+```bash
+npm run lint
+npm run build
+```
+
+### 3. 動作確認
+- [ ] 開発環境で正常動作
+- [ ] 関連する画面・機能のテスト
+- [ ] エラーハンドリングの確認
+
+### 4. ドキュメント更新
+- [ ] 必要に応じてCLAUDE.mdの更新
+- [ ] 新しいAPIの場合、ドキュメントの追加
+- [ ] 破壊的変更の場合、移行ガイドの作成
+
+## エラーが発生した場合
+
+### Lintエラー
+```bash
+npm run check:fix  # 自動修正
+```
+
+### TypeScriptエラー
+- 型定義の確認
+- importパスの確認
+- 設定ファイル（tsconfig.json）の確認
+
+### テストエラー
+- テストケースの見直し
+- モックの設定確認
+- テストデータの準備確認
+
+### ビルドエラー
+- 依存関係の確認
+- 環境変数の確認
+- 設定ファイルの確認

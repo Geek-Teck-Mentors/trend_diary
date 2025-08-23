@@ -1,0 +1,10 @@
+[tools]
+node = "22.13.0"
+
+[env]
+DATABASE_URL = "postgresql://postgres:password@localhost:5432/postgres?connection_limit=20"
+DIRECT_URL = "postgresql://postgres:password@localhost:5432/postgres?connection_limit=20"
+FEATURE_USER_ENABLED = "true"
+ADMIN_EMAIL = ""
+ADMIN_PASSWORD = ""
+DISCORD_WEBHOOK_URL = ""
