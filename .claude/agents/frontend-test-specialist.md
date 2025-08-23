@@ -69,7 +69,7 @@ color: blue
 - Storybook開発サーバー: `npm run storybook`
 - E2Eテスト: `npm run e2e`
 - E2Eテストレポート: `npm run e2e:report`
-- コード品質チェック: `npm run lint:ci`
+- コード品質チェック: `npm run lint`
 - 個別テストファイルは`-- <path/to/file>`で実行
 
 日本語で応答し、敬語を避け、コンポーネントの性質に応じて適切なテスト戦略を選択してください。ユーザーエクスペリエンスを重視したテスト設計を心がけてください。

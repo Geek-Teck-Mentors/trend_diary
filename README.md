@@ -19,6 +19,11 @@ Nodeモジュールのインストール
 npm ci
 ```
 
+環境変数ファイルをコピー(Cloudflareでは.{env}.vars)
+```sh
+cp .dev.vars.example .dev.vars
+```
+
 DockerのDBを起動
 
 ```sh
@@ -28,17 +33,13 @@ docker compose up -d
 Docker上のDBにマイグレーションを適用
 
 ```sh
-# 環境変数のコピー, Cloudflareでは.{env}.vars
-cp .dev.vars.example .dev.vars
-# prismaが読むように.envを作成
-cp .dev.vars.example .env
 npm run db:migrate
 ```
 
 サーバの起動（Hono上でAPIとRemixが起動する）
 
 ```sh
-npm run dev
+npm start
 ```
 
 ## 他ドキュメント
