@@ -1,6 +1,6 @@
 import { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
-import { RequestInfo } from '@/common/adapters/notification'
+import { RequestInfo } from '@/adapters/notification'
 import DiscordNotifier from '@/infrastructure/discordNotifier'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'

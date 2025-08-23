@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { logger } from '@/logger/logger'
 import CONTEXT_KEY from './context'
 
-const loggerMiddleware = createMiddleware(async (c, next) => {
+const requestLogger = createMiddleware(async (c, next) => {
   const requestId = uuidv4()
   const startTime = performance.now()
 
@@ -34,4 +34,4 @@ const loggerMiddleware = createMiddleware(async (c, next) => {
   })
 })
 
-export default loggerMiddleware
+export default requestLogger

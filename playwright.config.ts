@@ -18,7 +18,7 @@ export default defineConfig({
   forbidOnly: true,
   /* Retry on CI only */
   // INFO: CIに合わせる
-  retries: 2,
+  retries: 0,
   /* Run tests in files in parallel */
   // INFO: CIではスペックの問題で並列実行ができないので、オフにする
   fullyParallel: false,
@@ -26,7 +26,7 @@ export default defineConfig({
   // INFO: CIではスペックの問題で並列実行ができないので、オフにする
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: 'list',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */

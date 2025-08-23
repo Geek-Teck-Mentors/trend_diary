@@ -1,4 +1,4 @@
-import { ChatNotifier, RequestInfo } from '@/common/adapters/notification'
+import { ChatNotifier, RequestInfo } from '@/adapters/notification'
 
 type DiscordEmbed = {
   title: string
@@ -38,10 +38,8 @@ class DiscordNotifier implements ChatNotifier {
         },
         body: JSON.stringify(payload),
       })
-    } catch (notificationError) {
+    } catch (_notificationError) {
       // Discord通知の失敗は元のエラー処理に影響させない
-      // biome-ignore lint/suspicious/noConsole: Discord通知の失敗はログに出力する
-      console.error('Failed to send error notification to Discord', notificationError)
     }
   }
 

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
-import { SESSION_DURATION } from '@/common/constants/session'
+import { SESSION_DURATION } from '@/common/constants'
 import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
 import {
   AsyncResult,

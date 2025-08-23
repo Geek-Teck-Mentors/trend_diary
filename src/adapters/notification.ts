@@ -1,4 +1,4 @@
-export type RequestInfo = {
+export interface RequestInfo {
   url: string
   method: string
   userAgent: string

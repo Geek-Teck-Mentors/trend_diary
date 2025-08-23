@@ -1,11 +1,12 @@
 import { z } from 'zod'
+import { createdAt, updatedAt } from '@/common/schemas'
 
 export const privacyPolicySchema = z.object({
   version: z.coerce.number().int().min(1, 'バージョンは1以上の数値である必要があります'),
   content: z.string().min(1, 'コンテンツは必須です'),
   effectiveAt: z.date().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt,
+  updatedAt,
 })
 
 export const privacyPolicyInputSchema = privacyPolicySchema.pick({
