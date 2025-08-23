@@ -51,28 +51,21 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
 ### Storybook
 
 - `npm run storybook` - Storybookを開発モードで起動
-- `npm run build-storybook` - Storybookをビルド
 
 ### データベース
 
-- `npm run db:gen` - Prisma型生成
 - `npm run db:migrate` - Prismaマイグレーション実行（開発用）
 - `npm run db:migrate:sql-only` - SQLのみのマイグレーション実行
-- `npm run db:migrate:deploy` - 本番用マイグレーション実行
 - `npm run db:reset` - データベースリセット
-- `npm run db:studio` - Prisma Studio起動
+- `npm run db:seed` - データベースシード実行
 - `npm run supabase:db:type-gen` - Supabase型生成
 
 ### コード品質
 
-- `npm run lint` - Biomeでlintを実行
-- `npm run lint:fix` - Biomeでlintを自動修正付きで実行
-- `npm run tsc` - TypeScript型チェックを実行
-- `npm run format` - Biomeでコードフォーマットをチェック
-- `npm run format:fix` - Biomeでコードフォーマットを修正
+- `npm run lint` - Biome CI実行 + TypeScript型チェック（基本的にこれを使用する）
+- `npm run tsc` - TypeScript型チェックのみ実行
 - `npm run check` - Biomeで総合チェック
 - `npm run check:fix` - Biomeで総合チェック・修正
-- `npm run lint` - biome ci実行 + 型チェック（基本的にこれを使用する）
 
 ## 開発環境設定
 
@@ -141,7 +134,7 @@ src/domain/{aggregate}/
 
 ### エントリーポイント
 
-- **メインアプリケーション**: `/functions/[[path]].ts`（Cloudflare Workersエントリー）
+- **メインアプリケーション**: `src/worker.ts`（Cloudflare Workersエントリー）
 - **開発サーバー**: `/src/application/server.ts`（Hono + React Router）
 - **バックグラウンドジョブ**: `/supabase/functions/*/index.ts`
 
@@ -150,9 +143,13 @@ src/domain/{aggregate}/
 Prismaモデルは`prisma/models/`内のファイルに分割:
 
 - `user.prisma` - ユーザー管理
-- `account.prisma` - アカウント管理
+- `active_user.prisma` - アクティブユーザー管理
+- `ban_user.prisma` - BANユーザー管理
+- `leaved_user.prisma` - 退会ユーザー管理
 - `session.prisma` - セッション管理
 - `article.prisma` - 記事集約システム
+- `read_history.prisma` - 記事読み履歴
+- `privacy_policy.prisma` - プライバシーポリシー管理
 - 全モデルは統一されたID/タイムスタンプパターンでベーススキーマを拡張
 
 ### 重要な規約
