@@ -19,6 +19,11 @@ Nodeモジュールのインストール
 npm ci
 ```
 
+環境変数ファイルをコピー(Cloudflareでは.{env}.vars)
+```sh
+cp .dev.vars.example .dev.vars
+```
+
 DockerのDBを起動
 
 ```sh
@@ -34,8 +39,6 @@ npm run db:migrate
 サーバの起動（Hono上でAPIとRemixが起動する）
 
 ```sh
-# 環境変数のコピー, Cloudflareでは.{env}.vars
-cp .dev.vars.example .dev.vars
 npm start
 ```
 
