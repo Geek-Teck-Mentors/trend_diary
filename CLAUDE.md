@@ -34,7 +34,7 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
 
 ### ビルドとデプロイ
 
-- `npm run dev` - React Routerで開発サーバーを起動
+- `npm start` - React Routerで開発サーバーを起動
 - `npm run build` - 本番用ビルド
 
 ### テスト

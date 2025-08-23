@@ -3,7 +3,7 @@
 ## 基本開発フロー
 ```bash
 # 開発サーバー起動
-npm run dev
+npm start
 
 # ビルド
 npm run build
