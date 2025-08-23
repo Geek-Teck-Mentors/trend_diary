@@ -75,14 +75,14 @@ test.describe('記事一覧ページ', () => {
       await articleCard.click()
 
       // 2. ドロワーが開くのを待機
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 10000 })
+      await page.waitForSelector('[data-slot="drawer-content"]', { timeout: 10000 })
 
       // 3. ドロワーの存在を確認
-      const drawer = page.getByRole('dialog')
+      const drawer = page.locator('[data-slot="drawer-content"]')
       await expect(drawer).toBeVisible()
 
       // 4. 記事を読むリンクをクリック
-      const drawerLink = drawer.getByRole('link', { name: '記事を読む' })
+      const drawerLink = drawer.locator('[data-slot="drawer-content-link"]')
       await expect(drawerLink).toBeVisible()
       // ドロワーの記事を読むリンクのURLを上書き
       await drawerLink.evaluate((element, url) => {
