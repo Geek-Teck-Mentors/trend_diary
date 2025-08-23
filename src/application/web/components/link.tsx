@@ -33,59 +33,25 @@ function InternalLink({ to, children, className }: PropsWithChildren<InternalLin
   )
 }
 
-type LinkAsButtonProps =
-  | (BaseProps & {
-      to: InternalPath
-      external?: false
-    })
-  | (ExternalLinkProps & {
-      external: true
-    })
-
-/**
- * LinkAsButton
- * @description 内部リンクの際はReact RouterのLink、外部リンクの際はaタグとして振る舞うボタンコンポーネント
- * @param to InternalPath | `https://${string}`
- * @param external false | true
- * @param className Optional class name for styling
- * @link Linkのperf参考: https://zenn.dev/atusi/articles/3e37d4d54736fa#link
- */
-export function LinkAsButton({
-  to,
-  children,
-  className,
-  external,
-}: PropsWithChildren<LinkAsButtonProps>) {
-  return (
-    <Button variant='link' asChild={true}>
-      {external ? (
-        <ExternalLink to={to} className={className}>
-          {children}
-        </ExternalLink>
-      ) : (
-        <InternalLink to={to} className={className}>
-          {children}
-        </InternalLink>
-      )}
-    </Button>
-  )
+function isExternalPath(to: string): to is ExternalPath {
+  return /^https:\/\//.test(to)
 }
+
+type AnchorLinkProps = PropsWithChildren<{
+  to: InternalPath | ExternalPath
+  className?: string
+}>
 
 /**
  * AnchorLink
- * @description aタグを薄くラップしたコンポーネント
+ * @description aタグを薄くラップしたコンポーネント。内部リンクの際はReact RouterのLink
  * @param to InternalPath | `https://${string}`, InternalPathはルーティング定義から型推論される
- * @param children
  * @param className
- * @param external false | true
+ * @param children
+ * @link Linkのperf参考: https://zenn.dev/atusi/articles/3e37d4d54736fa#link
  */
-export function AnchorLink({
-  to,
-  children,
-  className,
-  external,
-}: PropsWithChildren<LinkAsButtonProps>) {
-  return external ? (
+export function AnchorLink({ to, className, children }: AnchorLinkProps) {
+  return isExternalPath(to) ? (
     <ExternalLink to={to} className={className}>
       {children}
     </ExternalLink>
@@ -93,5 +59,23 @@ export function AnchorLink({
     <InternalLink to={to} className={className}>
       {children}
     </InternalLink>
+  )
+}
+
+type LinkAsButtonProps = AnchorLinkProps
+
+/**
+ * LinkAsButton
+ * @description 内部リンクの際はReact RouterのLink、外部リンクの際はaタグとして振る舞うボタンコンポーネント
+ * @param to InternalPath | `https://${string}`
+ * @param className Optional class name for styling
+ */
+export function LinkAsButton({ to, className, children }: LinkAsButtonProps) {
+  return (
+    <Button variant='link' asChild={true}>
+      <AnchorLink to={to} className={className}>
+        {children}
+      </AnchorLink>
+    </Button>
   )
 }
