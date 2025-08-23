@@ -35,5 +35,4 @@ export const offsetPaginationSchema = z.object({
     .default(20),
 })
 
-export type CursorPaginationParams = z.infer<typeof cursorPaginationSchema>
 export type OffsetPaginationParams = z.infer<typeof offsetPaginationSchema>
