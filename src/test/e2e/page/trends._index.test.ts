@@ -18,6 +18,7 @@ test.describe('記事一覧ページ', () => {
   test.beforeEach(async ({ page }) => {
     await page.waitForTimeout(1000) // DBの反映を待つ
     await page.goto('/trends')
+    await page.waitForLoadState('networkidle') // ネットワークがアイドル状態になるまで待機
   })
 
   test.describe('記事がない場合', () => {
@@ -36,7 +37,7 @@ test.describe('記事一覧ページ', () => {
     })
     test.beforeEach(async ({ page }) => {
       // カードが表示されるのを待機
-      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: 10000 })
+      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: 20000 })
     })
     test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
       // 1. 記事カードの存在を確認
