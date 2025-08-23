@@ -16,7 +16,7 @@
 Nodeモジュールのインストール
 
 ```sh
-npm i
+npm ci
 ```
 
 DockerのDBを起動
