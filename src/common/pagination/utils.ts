@@ -1,6 +1,6 @@
-import { CursorDirection, CursorInfo, CursorPaginationResult } from './types'
+import { Cursor, CursorDirection, CursorPaginationResult } from './types'
 
-export function encodeCursor(info: CursorInfo): string {
+export function encodeCursor(info: Cursor): string {
   return Buffer.from(
     JSON.stringify({
       id: info.id.toString(),
@@ -9,7 +9,7 @@ export function encodeCursor(info: CursorInfo): string {
   ).toString('base64')
 }
 
-export function decodeCursor(cursor: string): CursorInfo {
+export function decodeCursor(cursor: string): Cursor {
   try {
     const decoded = JSON.parse(Buffer.from(cursor, 'base64').toString())
     return {

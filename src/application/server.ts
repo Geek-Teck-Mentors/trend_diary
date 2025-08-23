@@ -4,11 +4,11 @@ import { AppLoadContext, createRequestHandler } from 'react-router'
 import apiApp from './api/route'
 import { Env } from './env'
 import errorHandler from './middleware/errorHandler'
-import loggerMiddleware from './middleware/requestLogger'
+import requestLogger from './middleware/requestLogger'
 
 const app = new Hono<Env>()
 
-app.use(loggerMiddleware)
+app.use(requestLogger)
 app.onError(errorHandler)
 
 app.use('/api', timeout(5000))

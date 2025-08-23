@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { createdAt } from '@/common/schemas'
 
 // API用スキーマ
 export const createReadHistoryApiSchema = z.object({
@@ -21,7 +22,7 @@ export const readHistorySchema = z.object({
   activeUserId: z.bigint(),
   articleId: z.bigint(),
   readAt: z.date(),
-  createdAt: z.date(),
+  createdAt,
 })
 
 export type CreateReadHistoryApiInput = z.input<typeof createReadHistoryApiSchema>

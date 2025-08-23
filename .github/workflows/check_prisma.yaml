@@ -9,6 +9,9 @@ on:
       - 'prisma/**/*.prisma'
       - '.github/workflows/check_prisma.yaml'
 
+permissions:
+  contents: read
+
 env:
   NODE_VERSION_FILE: .node-version
 

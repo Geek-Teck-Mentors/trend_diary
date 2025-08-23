@@ -2,6 +2,9 @@ name: Lint
 
 on: push
 
+permissions:
+  contents: read
+
 # 連続push時に同じジョブが並列で実行されるのを防ぐ
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
