@@ -28,14 +28,14 @@ docker compose up -d
 Docker上のDBにマイグレーションを適用
 
 ```sh
-# 環境変数のコピー, Cloudflareでは.{env}.vars
-cp .dev.vars.example .dev.vars
 npm run db:migrate
 ```
 
 サーバの起動（Hono上でAPIとRemixが起動する）
 
 ```sh
+# 環境変数のコピー, Cloudflareでは.{env}.vars
+cp .dev.vars.example .dev.vars
 npm start
 ```
 
