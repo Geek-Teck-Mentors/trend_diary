@@ -5,7 +5,9 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "react-router dev",
+    "postinstall": "prisma generate",
+    "prestart": "docker compose up -d",
+    "start": "react-router dev",
     "build": "react-router build",
     "test:frontend": "vitest run -c vitest/config.frontend.ts",
     "test:domain": "vitest run -c vitest/config.domain.ts",
@@ -17,7 +19,6 @@
     "lint:ci": "biome ci . && npm run tsc",
     "check": "biome check .",
     "check:fix": "biome check --write . --unsafe",
-    "db:gen": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:sql-only": "prisma migrate dev --skip-seed --skip-generate",
     "db:reset": "prisma migrate reset",

@@ -1,25 +1,6 @@
 [tools]
 node = "22.13.0"
 
-[tasks.db]
-description = "Start DB services with docker compose"
-run = "docker compose up -d"
-
-[tasks.init]
-depends = ['db']
-description = "Setup Development"
-run = "npm i && npm run db:gen"
-
-[tasks.migrate]
-depends = ['db']
-description = "DB Migration"
-run = "npm run db:migrate"
-
-[tasks.web]
-depends = ["migrate", 'dev']
-description = "Web Server"
-run = "npm run dev"
-
 [env]
 DATABASE_URL = "postgresql://postgres:password@localhost:5432/postgres?connection_limit=20"
 DIRECT_URL = "postgresql://postgres:password@localhost:5432/postgres?connection_limit=20"
