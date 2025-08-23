@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { SESSION_NAME } from '@/common/constants/session'
+import { SESSION_NAME } from '@/common/constant'
 import { UseCase } from '@/domain/user/useCase'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
