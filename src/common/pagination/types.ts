@@ -1,11 +1,14 @@
 export type CursorDirection = 'next' | 'prev'
 
-export interface CursorPaginationResult<T> {
+interface BaseResult<T> {
   data: T[]
-  nextCursor?: string
-  prevCursor?: string
   hasNext: boolean
   hasPrev: boolean
+}
+
+export interface CursorPaginationResult<T> extends BaseResult<T> {
+  nextCursor?: string
+  prevCursor?: string
 }
 
 export interface CursorInfo {
@@ -13,12 +16,9 @@ export interface CursorInfo {
   createdAt: Date
 }
 
-export interface OffsetPaginationResult<T> {
-  data: T[]
+export interface OffsetPaginationResult<T> extends BaseResult<T> {
   page: number
   limit: number
   total: number
   totalPages: number
-  hasNext: boolean
-  hasPrev: boolean
 }
