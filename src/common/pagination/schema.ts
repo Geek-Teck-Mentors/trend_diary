@@ -1,16 +1,18 @@
 import { z } from 'zod'
 
+const limit = z
+  .union([z.string(), z.number()])
+  .optional()
+  .transform((val) => {
+    if (val === undefined || val === null) return 20
+    const num = typeof val === 'string' ? parseInt(val, 10) : val
+    return Number.isNaN(num) ? 20 : Math.min(Math.max(num, 1), 100)
+  })
+  .default(20)
+
 export const cursorPaginationSchema = z.object({
   cursor: z.string().optional(),
-  limit: z
-    .union([z.string(), z.number()])
-    .optional()
-    .transform((val) => {
-      if (val === undefined || val === null) return 20
-      const num = typeof val === 'string' ? parseInt(val, 10) : val
-      return Number.isNaN(num) ? 20 : Math.min(Math.max(num, 1), 100)
-    })
-    .default(20),
+  limit,
   direction: z.enum(['next', 'prev']).default('next'),
 })
 
@@ -24,15 +26,7 @@ export const offsetPaginationSchema = z.object({
       return Number.isNaN(num) ? 1 : Math.max(num, 1)
     })
     .default(1),
-  limit: z
-    .union([z.string(), z.number()])
-    .optional()
-    .transform((val) => {
-      if (val === undefined || val === null) return 20
-      const num = typeof val === 'string' ? parseInt(val, 10) : val
-      return Number.isNaN(num) ? 20 : Math.min(Math.max(num, 1), 100)
-    })
-    .default(20),
+  limit,
 })
 
 export type OffsetPaginationParams = z.infer<typeof offsetPaginationSchema>
