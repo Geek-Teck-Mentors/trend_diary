@@ -13,7 +13,7 @@
     "test:frontend": "vitest run -c vitest/config.frontend.ts",
     "test:domain": "vitest run -c vitest/config.domain.ts",
     "test:api": "vitest run -c vitest/config.api.ts",
-    "e2e": "playwright test",
+    "e2e": "npx playwright test",
     "e2e:report": "playwright show-report",
     "e2e:gen": "playwright codegen",
     "tsc": "tsc --noEmit",
