@@ -23,6 +23,9 @@ test.describe('記事一覧ページ', () => {
 
   test.describe('記事がない場合', () => {
     test('記事がないと表示される', async ({ page }) => {
+      console.log("aa",await page.locator("[data-slot='card']").isVisible())
+      console.log("bb",await page.locator("[data-slot='card']").first().isVisible())
+      console.log("cc",await page.getByText('記事がありません').isVisible())
       // 記事がない場合は「記事がありません」が表示されることを確認
       await expect(page.getByText('記事がありません')).toBeVisible()
     })
