@@ -44,6 +44,8 @@ const adminGroup = {
   ],
 } as const satisfies GroupRoute
 
+const groupRoutes = [baseGroup, trendGroup, adminGroup] as const satisfies GroupRoute[]
+
 function buildGroupRoute(group: GroupRoute): RouteConfigEntry[] {
   const routes = group.routes.map((value) =>
     value.path === PATH_INDEX ? index(value.file) : route(value.path, value.file),
@@ -52,8 +54,6 @@ function buildGroupRoute(group: GroupRoute): RouteConfigEntry[] {
 
   return group.prefix ? prefix(group.prefix, layoutRoutes) : layoutRoutes
 }
-
-const groupRoutes = [baseGroup, trendGroup, adminGroup] as const satisfies GroupRoute[]
 
 const routing: RouteConfig = groupRoutes.flatMap(buildGroupRoute)
 export default routing
