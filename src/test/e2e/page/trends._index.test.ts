@@ -23,6 +23,7 @@ test.describe('記事一覧ページ', () => {
 
   test.describe('記事がない場合', () => {
     test('記事がないと表示される', async ({ page }) => {
+      console.log('Page HTML 0:', await page.locator('body').innerHTML())
       // loadingスピナーが消えるのを待機
       await page.getByRole('status').waitFor({ state: 'detached', timeout: 10000 })
 
