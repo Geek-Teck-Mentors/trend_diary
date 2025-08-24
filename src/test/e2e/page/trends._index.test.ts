@@ -27,33 +27,10 @@ test.describe('記事一覧ページ', () => {
       // loadingスピナーが消えるのを待機
       await page.getByRole('status').waitFor({ state: 'detached', timeout: 10000 })
 
-      // コンテンツが表示されるまで待機（カード or 空メッセージ）
-      await page.waitForFunction(
-        () => {
-          const card = document.querySelector('[data-slot="card"]')
-          const emptyMessage = Array.from(document.querySelectorAll('*')).find(
-            (el) => el.textContent && el.textContent.includes('記事がありません'),
-          )
-          return card !== null || emptyMessage !== null
-        },
-        { timeout: 15000 },
-      )
-
       // デバッグ用：ページの状態を確認
       console.log('Page HTML:', await page.locator('body').innerHTML())
-      console.log('Card visible:', await page.locator('[data-slot="card"]').isVisible())
-      console.log('Empty message visible:', await page.getByText('記事がありません').isVisible())
-      // さらに詳細なデバッグ：page.tsxの条件分岐を確認
-      const articlesCount = await page.evaluate(() => {
-        const cards = document.querySelectorAll('[data-slot="card"]')
-        return cards.length
-      })
-      console.log('Articles count in DOM:', articlesCount)
-      // ページ全体のテキストコンテンツを確認
-      const pageText = await page.locator('body').textContent()
-      console.log('Page contains "記事がありません":', pageText?.includes('記事がありません'))
-      console.log('Full page text:', pageText)
       // 記事がない場合は「記事がありません」が表示されることを確認
+
       await expect(page.getByText('記事がありません')).toBeVisible()
     })
   })
