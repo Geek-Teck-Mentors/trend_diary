@@ -15,6 +15,7 @@ interface ExternalLinkProps extends BaseProps {
 
 function ExternalLink({ to, children, className }: PropsWithChildren<ExternalLinkProps>) {
   return (
+    // biome-ignore lint: plugin
     <a href={to} className={className} target='_blank' rel='noopener noreferrer'>
       {children}
     </a>
