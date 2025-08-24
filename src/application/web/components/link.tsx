@@ -7,7 +7,7 @@ interface BaseProps {
   className?: string
 }
 
-type ExternalPath = `https://${string}`
+export type ExternalPath = `https://${string}`
 
 interface ExternalLinkProps extends BaseProps {
   to: ExternalPath
