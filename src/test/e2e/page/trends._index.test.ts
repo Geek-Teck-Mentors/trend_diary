@@ -16,6 +16,8 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.beforeEach(async ({ page }) => {
+    // INFO: DBの反映を待つ
+    await page.waitForTimeout(1000)
     await page.goto('/trends')
   })
 
