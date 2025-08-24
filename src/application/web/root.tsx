@@ -11,7 +11,7 @@ import {
 } from 'react-router'
 
 import './styles.css'
-// import { Toaster } from './components/ui/sonner'
+import { Toaster } from './components/ui/sonner'
 
 export const meta: MetaFunction = () => [
   { charSet: 'utf-8' },
@@ -46,7 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <ScrollRestoration />
         <Scripts />
-        {/* <Toaster /> */}
+        <Toaster />
       </body>
     </html>
   )
