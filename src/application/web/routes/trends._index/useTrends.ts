@@ -67,9 +67,16 @@ export default function useTrends() {
       } catch (error) {
         if (error instanceof Error) {
           const errorMessage = error.message || 'エラーが発生しました'
-          toast.error(errorMessage)
+          // CI環境でのToasterエラーを避けるため、安全にtoast呼び出し
+          try {
+            console.error(error)
+            toast.error(errorMessage)
+          } catch (_toastError) {
+          }
         } else {
-          toast.error('不明なエラーが発生しました')
+          try {
+            toast.error('不明なエラーが発生しました')
+          } catch (_toastError) {}
           // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
           console.error(error)
         }
