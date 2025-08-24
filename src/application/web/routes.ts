@@ -12,7 +12,7 @@ const PATH_INDEX = '/'
 interface GroupRoute {
   readonly prefix: string
   readonly layout?: string
-  readonly routes: Route[]
+  readonly routes: readonly Route[]
 }
 
 interface Route {
