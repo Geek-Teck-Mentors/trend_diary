@@ -16,9 +16,7 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    await page.waitForTimeout(1000) // DBの反映を待つ
     await page.goto('/trends')
-    await page.waitForLoadState('networkidle') // ネットワークがアイドル状態になるまで待機
   })
 
   test.describe('記事がない場合', () => {
