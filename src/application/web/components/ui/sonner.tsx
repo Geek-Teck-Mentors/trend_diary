@@ -1,6 +1,19 @@
+import { useEffect, useState } from "react"
 import { Toaster as Sonner, ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    // クライアントサイドでのみToasterを表示
+    setIsMounted(true)
+  }, [])
+
+  // サーバーサイドレンダリング時やReactが完全に初期化されていない場合は何も表示しない
+  if (!isMounted) {
+    return null
+  }
+
   // CI環境でのエラーを避けるため、エラーハンドリングを追加
   try {
     return (
