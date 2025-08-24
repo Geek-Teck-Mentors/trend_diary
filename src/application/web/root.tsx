@@ -45,7 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <ScrollRestoration />
-        <Scripts />
+        {typeof window !== 'undefined' && <Scripts />}
         <Toaster />
       </body>
     </html>
