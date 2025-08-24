@@ -50,7 +50,7 @@ function Button({
 
   return (
     <Comp
-      ref={ref as any}
+      ref={ref}
       data-slot='button'
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}

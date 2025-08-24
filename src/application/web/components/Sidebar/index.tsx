@@ -1,5 +1,7 @@
 import { BookOpen, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
+import { InternalPath } from '../../routes'
+import { AnchorLink } from '../link'
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +16,13 @@ import {
 } from '../ui/sidebar'
 import useSidebar from './useSidebar'
 
-const menuItems = [
+interface MenuItem {
+  title: string
+  url: InternalPath
+  icon: React.ElementType
+}
+
+const menuItems: MenuItem[] = [
   {
     title: 'トレンド記事',
     url: '/trends',
@@ -39,13 +47,13 @@ export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <a
-          href='/'
+        <AnchorLink
+          to='/'
           className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-md transition-colors'
         >
           <BookOpen className='h-6 w-6' />
           <span className='text-xl font-semibold'>TrendDiary</span>
-        </a>
+        </AnchorLink>
       </SidebarHeader>
       <SidebarContent className='relative'>
         <SidebarGroup>
@@ -55,10 +63,10 @@ export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild={true}>
-                    <a href={item.url}>
+                    <AnchorLink to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </AnchorLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

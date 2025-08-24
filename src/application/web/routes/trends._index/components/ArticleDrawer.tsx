@@ -1,5 +1,6 @@
 import { Calendar, ExternalLink, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
+import { AnchorLink, ExternalPath } from '@/application/web/components/link'
 import {
   Drawer,
   DrawerClose,
@@ -61,16 +62,14 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
         </div>
 
         <div className='border-t p-4'>
-          <a
-            href={article.url}
-            target='_blank'
-            rel='noopener noreferrer nofollow'
+          <AnchorLink
+            to={article.url as ExternalPath}
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
             data-slot='drawer-content-link'
           >
             <ExternalLink className='h-4 w-4' />
             記事を読む
-          </a>
+          </AnchorLink>
         </div>
       </DrawerContent>
     </Drawer>,

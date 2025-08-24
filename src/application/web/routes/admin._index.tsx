@@ -6,7 +6,7 @@ import {
   CardFooter,
   CardTitle,
 } from '@/application/web/components/ui/card'
-import LinkAsButton from '../components/linkAsButton'
+import { LinkAsButton } from '../components/link'
 
 export default function AdminDashboard() {
   return (

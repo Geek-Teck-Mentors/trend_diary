@@ -1,5 +1,6 @@
 import Footer from '../../components/Footer'
 import Header from '../../components/Header'
+import { AnchorLink } from '../../components/link'
 import PageError from '../../components/PageError'
 import { PageErrorType } from '../../components/PageError/usePageError'
 import {
@@ -39,9 +40,9 @@ export default function SignupPage({ pageError, handleSubmit }: Props) {
           <CardFooter className='flex flex-col gap-4 border-t pt-6'>
             <div className='text-muted-foreground text-center text-sm'>
               既にアカウントをお持ちですか？{' '}
-              <a href='/login' className='text-primary hover:text-primary/90 underline'>
+              <AnchorLink to='/login' className='text-primary hover:text-primary/90 underline'>
                 ログイン
-              </a>
+              </AnchorLink>
             </div>
           </CardFooter>
         </Card>
