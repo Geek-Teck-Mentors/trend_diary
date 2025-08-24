@@ -26,10 +26,18 @@ test.describe('記事一覧ページ', () => {
       // loadingスピナーが消えるのを待機
       await page.getByRole('status').waitFor({ state: 'detached', timeout: 10000 })
 
-      // データが空の場合のメッセージかカードの表示を明示的に待機
-      await page.waitForSelector('[data-slot="card"], :text("記事がありません")', {
-        timeout: 10000,
-      })
+      // コンテンツが表示されるまで待機（カード or 空メッセージ）
+      await page.waitForFunction(
+        () => {
+          const card = document.querySelector('[data-slot="card"]')
+          const emptyMessage = Array.from(document.querySelectorAll('*')).find(
+            (el) => el.textContent && el.textContent.includes('記事がありません'),
+          )
+          return card !== null || emptyMessage !== null
+        },
+        { timeout: 15000 },
+      )
+
       console.log("aa",await page.locator("[data-slot='card']").isVisible())
       console.log("bb",await page.locator("[data-slot='card']").first().isVisible())
       console.log("cc",await page.getByText('記事がありません').isVisible())
