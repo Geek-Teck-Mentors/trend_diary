@@ -349,5 +349,6 @@
   "assist": {
     "enabled": true,
     "actions": { "source": { "organizeImports": "on" } }
-  }
+  },
+  "plugins": ["./plugin/biome/no-use-direct-dom-a-element.grit"]
 }

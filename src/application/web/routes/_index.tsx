@@ -3,6 +3,7 @@ import { type LoaderFunctionArgs, type MetaFunction, useLoaderData } from 'react
 import { ClipText } from '../components/ClipText'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
+import { AnchorLink } from '../components/link'
 import { isUserFeatureEnabled } from '../features/featureFlag'
 
 export const meta: MetaFunction = () => [
@@ -59,19 +60,19 @@ const TrendDiaryTopPage = () => {
             </p>
 
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-              <a
-                href='/trends'
+              <AnchorLink
+                to='/trends'
                 className='inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl'
               >
                 今すぐ始める
-              </a>
+              </AnchorLink>
               {userFeatureEnabled && (
-                <a
-                  href='/login'
+                <AnchorLink
+                  to='/login'
                   className='inline-flex items-center px-8 py-4 border-2 border-slate-300 text-slate-700 rounded-lg text-lg font-semibold hover:border-slate-400 hover:bg-slate-50 transition-all duration-200'
                 >
                   ログイン
-                </a>
+                </AnchorLink>
               )}
             </div>
           </div>
@@ -180,14 +181,14 @@ const TrendDiaryTopPage = () => {
           <p className='text-xl text-blue-100 mb-8 max-w-2xl mx-auto'>
             効率的な技術トレンドのキャッチアップを体験してください
           </p>
-          <a
-            href={userFeatureEnabled ? '/signup' : '/trends'}
+          <AnchorLink
+            to={userFeatureEnabled ? '/signup' : '/trends'}
             className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
             <ClipText
               text={userFeatureEnabled ? '無料でアカウントを作成' : 'トレンド記事の一覧へ'}
             />
-          </a>
+          </AnchorLink>
         </div>
       </section>
 
