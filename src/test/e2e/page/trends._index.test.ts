@@ -38,9 +38,20 @@ test.describe('記事一覧ページ', () => {
         { timeout: 15000 },
       )
 
-      console.log("aa",await page.locator("[data-slot='card']").isVisible())
-      console.log("bb",await page.locator("[data-slot='card']").first().isVisible())
-      console.log("cc",await page.getByText('記事がありません').isVisible())
+      // デバッグ用：ページの状態を確認
+      console.log('Page HTML:', await page.locator('body').innerHTML())
+      console.log('Card visible:', await page.locator('[data-slot="card"]').isVisible())
+      console.log('Empty message visible:', await page.getByText('記事がありません').isVisible())
+      // さらに詳細なデバッグ：page.tsxの条件分岐を確認
+      const articlesCount = await page.evaluate(() => {
+        const cards = document.querySelectorAll('[data-slot="card"]')
+        return cards.length
+      })
+      console.log('Articles count in DOM:', articlesCount)
+      // ページ全体のテキストコンテンツを確認
+      const pageText = await page.locator('body').textContent()
+      console.log('Page contains "記事がありません":', pageText?.includes('記事がありません'))
+      console.log('Full page text:', pageText)
       // 記事がない場合は「記事がありません」が表示されることを確認
       await expect(page.getByText('記事がありません')).toBeVisible()
     })
