@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect } from 'storybook/test'
-import LoadingSpinner from '.';
+import LoadingSpinner from '.'
 
 const meta: Meta<typeof LoadingSpinner> = {
   component: LoadingSpinner,
