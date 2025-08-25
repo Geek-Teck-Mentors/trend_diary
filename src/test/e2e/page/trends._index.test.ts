@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, Locator, Page, test } from '@playwright/test'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 const ARTICLE_COUNT = 10
@@ -39,6 +39,17 @@ test.describe('記事一覧ページ', () => {
       await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
     })
 
+    async function waitDrawerOpen(page: Page): Promise<Locator> {
+      // ドロワーが開くのを待機
+      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
+
+      // ドロワーの存在を確認
+      const drawer = page.getByRole('dialog')
+      await expect(drawer).toBeVisible()
+
+      return drawer
+    }
+
     test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
       // 1. 記事カードの存在を確認
       const articleCards = page.locator('[data-slot="card"]')
@@ -47,14 +58,7 @@ test.describe('記事一覧ページ', () => {
 
       await articleCard.click()
 
-      // 2. ドロワーが開くのを待機
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
-
-      // 3. ドロワーの存在を確認
-      const drawer = page.getByRole('dialog')
-      await expect(drawer).toBeVisible()
-
-      // 4. ドロワーの閉じるボタンをクリック
+      const drawer = await waitDrawerOpen(page)
       await drawer.getByRole('button', { name: 'Close' }).click()
 
       // 5. ドロワーが閉じるのを待機
@@ -77,14 +81,7 @@ test.describe('記事一覧ページ', () => {
       const articleCard = page.locator('[data-slot="card"]').first()
       await articleCard.click()
 
-      // 2. ドロワーが開くのを待機
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
-
-      // 3. ドロワーの存在を確認
-      const drawer = page.getByRole('dialog')
-      await expect(drawer).toBeVisible()
-
-      // 4. 記事を読むリンクをクリック
+      const drawer = await waitDrawerOpen(page)
       const drawerLink = drawer.getByRole('link', { name: '記事を読む' })
       await expect(drawerLink).toBeVisible()
 
