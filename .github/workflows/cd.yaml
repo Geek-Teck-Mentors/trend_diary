@@ -65,4 +65,4 @@ jobs:
           node-version-file: .node-version
 
       - name: Prismaのマイグレーション
-        run: npm run db:migrate:deploy
+        run: npm run db:deploy

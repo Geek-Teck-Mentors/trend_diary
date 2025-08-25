@@ -24,6 +24,7 @@
     "db:migrate:sql-only": "prisma migrate dev --skip-seed --skip-generate",
     "db:reset": "prisma migrate reset",
     "db:seed": "tsx prisma/seed.ts",
+    "db:deploy": "prisma migrate deploy",
     "supabase:db:type-gen": "supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
     "test-storybook": "vitest run -c vitest/config.storybook.ts"
