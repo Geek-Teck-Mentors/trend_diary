@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { createMemoryRouter, RouterProvider } from 'react-router'
 import { expect, userEvent } from 'storybook/test'
 import Header from './index'
 
@@ -10,6 +11,30 @@ const meta: Meta<typeof Header> = {
   args: {
     enableUserFeature: true,
   },
+  decorators: [
+    (Story) => {
+      const router = createMemoryRouter(
+        [
+          {
+            path: '/',
+            element: <Story />,
+          },
+          {
+            path: '/login',
+            element: <div>Login Page</div>,
+          },
+          {
+            path: '/signup',
+            element: <div>Signup Page</div>,
+          },
+        ],
+        {
+          initialEntries: ['/'],
+        },
+      )
+      return <RouterProvider router={router} />
+    },
+  ],
 }
 export default meta
 
