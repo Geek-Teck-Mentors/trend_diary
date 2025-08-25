@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 const ARTICLE_COUNT = 10
-const OPEN_DRAWER_WAIT = 10000
+const TIMEOUT = 10000
 
 test.describe('記事一覧ページ', () => {
   test.describe.configure({ mode: 'serial' })
@@ -22,7 +22,7 @@ test.describe('記事一覧ページ', () => {
 
   test.describe('記事がない場合', () => {
     test('記事がないと表示される', async ({ page }) => {
-      await expect(page.getByText('記事がありません')).toBeVisible({ timeout: 10000 })
+      await expect(page.getByText('記事がありません')).toBeVisible({ timeout: TIMEOUT })
     })
   })
 
@@ -36,7 +36,7 @@ test.describe('記事一覧ページ', () => {
 
     test.beforeEach(async ({ page }) => {
       // カードが表示されるのを待機
-      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: 10000 })
+      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
     })
 
     test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe('記事一覧ページ', () => {
       await articleCard.click()
 
       // 2. ドロワーが開くのを待機
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: OPEN_DRAWER_WAIT })
+      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
 
       // 3. ドロワーの存在を確認
       const drawer = page.getByRole('dialog')
@@ -60,7 +60,7 @@ test.describe('記事一覧ページ', () => {
       // 5. ドロワーが閉じるのを待機
       await page.getByRole('dialog').waitFor({
         state: 'detached',
-        timeout: OPEN_DRAWER_WAIT,
+        timeout: TIMEOUT,
       })
 
       // 6. 記事一覧に戻っていることを確認
@@ -78,7 +78,7 @@ test.describe('記事一覧ページ', () => {
       await articleCard.click()
 
       // 2. ドロワーが開くのを待機
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: OPEN_DRAWER_WAIT })
+      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
 
       // 3. ドロワーの存在を確認
       const drawer = page.getByRole('dialog')
