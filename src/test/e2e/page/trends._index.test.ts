@@ -22,10 +22,7 @@ test.describe('記事一覧ページ', () => {
 
   test.describe('記事がない場合', () => {
     test('記事がないと表示される', async ({ page }) => {
-      const locator = page.getByText('記事がありません')
-      await locator.waitFor({ timeout: 10000 })
-      // 記事がない場合は「記事がありません」が表示されることを確認
-      await expect(locator).toBeVisible()
+      await expect(page.getByText('記事がありません')).toBeVisible({ timeout: 10000 })
     })
   })
 
