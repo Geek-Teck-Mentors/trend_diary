@@ -27,7 +27,6 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.describe('記事がある場合', () => {
-    test.describe.configure({ mode: 'default' })
     test.beforeAll(async () => {
       // 記事を作成
       await Promise.all(
