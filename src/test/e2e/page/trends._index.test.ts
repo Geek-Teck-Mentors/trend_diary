@@ -51,7 +51,7 @@ test.describe('記事一覧ページ', () => {
     }
 
     test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
-      // 1. 記事カードの存在を確認
+      // 記事カードの存在を確認
       const articleCards = page.locator('[data-slot="card"]')
       const articleCard = articleCards.first()
       await expect(articleCard).toBeVisible()
@@ -61,14 +61,13 @@ test.describe('記事一覧ページ', () => {
       const drawer = await waitDrawerOpen(page)
       await drawer.getByRole('button', { name: 'Close' }).click()
 
-      // 5. ドロワーが閉じるのを待機
+      // ドロワーが閉じるのを待機
       await page.getByRole('dialog').waitFor({
         state: 'detached',
         timeout: TIMEOUT,
       })
 
-      // 6. 記事一覧に戻っていることを確認
-      // 記事カードが表示されていることを確認
+      // 記事一覧に戻っていることを確認(記事カードが表示されていること)
       await expect(articleCard).toBeVisible()
       // ドロワーが閉じていることを確認
       await expect(page.getByRole('dialog')).not.toBeVisible()
@@ -77,7 +76,7 @@ test.describe('記事一覧ページ', () => {
     test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
       const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
 
-      // 1. 記事カードをクリック
+      // 記事カードをクリック
       const articleCard = page.locator('[data-slot="card"]').first()
       await articleCard.click()
 
@@ -91,7 +90,7 @@ test.describe('記事一覧ページ', () => {
       }, ARTICLE_URL)
       await drawerLink.click()
 
-      // 5. 新しいタブでそのリンクのページに遷移する
+      // 新しいタブでそのリンクのページに遷移する
       const newPage = await page.context().waitForEvent('page')
       await expect(newPage).toHaveURL(ARTICLE_URL)
     })
