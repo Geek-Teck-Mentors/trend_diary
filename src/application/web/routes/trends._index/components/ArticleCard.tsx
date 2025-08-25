@@ -18,13 +18,11 @@ export default function ArticleCard({ article, onCardClick }: Props) {
       <CardContent className='flex h-full flex-col p-0'>
         <CardTitle className='line-clamp-2 flex-1 overflow-hidden text-sm leading-relaxed font-bold text-gray-700'>
           <MediaIcon media={article.media === 'qiita' ? 'qiita' : 'zenn'} />
-          <span data-slot='card-title-content'>{article.title}</span>
+          <span>{article.title}</span>
         </CardTitle>
 
         <CardDescription className='mt-3 flex items-end justify-between'>
-          <span className='text-sm text-gray-600' data-slot='card-description-author'>
-            {article.author}
-          </span>
+          <span className='text-sm text-gray-600'>{article.author}</span>
         </CardDescription>
       </CardContent>
     </Card>
