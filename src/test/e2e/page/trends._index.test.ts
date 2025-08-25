@@ -5,7 +5,7 @@ const ARTICLE_COUNT = 10
 const OPEN_DRAWER_WAIT = 10000
 
 test.describe('記事一覧ページ', () => {
-  test.describe.configure({ mode: 'default' })
+  test.describe.configure({ mode: 'serial' })
 
   test.beforeAll(async () => {
     await articleTestHelper.cleanUpArticles()
