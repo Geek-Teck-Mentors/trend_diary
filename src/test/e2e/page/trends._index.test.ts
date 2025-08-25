@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
 const ARTICLE_COUNT = 10
+const OPEN_DRAWER_WAIT = 10000
 
 test.describe('記事一覧ページ', () => {
   test.describe.configure({ mode: 'default' })
@@ -51,7 +52,7 @@ test.describe('記事一覧ページ', () => {
       await articleCard.click()
 
       // 2. ドロワーが開くのを待機
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 10000 })
+      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: OPEN_DRAWER_WAIT })
 
       // 3. ドロワーの存在を確認
       const drawer = page.getByRole('dialog')
@@ -63,7 +64,7 @@ test.describe('記事一覧ページ', () => {
       // 5. ドロワーが閉じるのを待機
       await page.getByRole('dialog').waitFor({
         state: 'detached',
-        timeout: 10000,
+        timeout: OPEN_DRAWER_WAIT,
       })
 
       // 6. 記事一覧に戻っていることを確認
@@ -73,32 +74,33 @@ test.describe('記事一覧ページ', () => {
       await expect(page.getByRole('dialog')).not.toBeVisible()
     })
 
-    // test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
-    //   const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
+    test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
+      const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
 
-    //   // 1. 記事カードをクリック
-    //   const articleCard = page.locator('[data-slot="card"]').first()
-    //   await articleCard.click()
+      // 1. 記事カードをクリック
+      const articleCard = page.locator('[data-slot="card"]').first()
+      await articleCard.click()
 
-    //   // 2. ドロワーが開くのを待機
-    //   await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 10000 })
+      // 2. ドロワーが開くのを待機
+      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: OPEN_DRAWER_WAIT })
 
-    //   // 3. ドロワーの存在を確認
-    //   const drawer = page.getByRole('dialog')
-    //   await expect(drawer).toBeVisible()
+      // 3. ドロワーの存在を確認
+      const drawer = page.getByRole('dialog')
+      await expect(drawer).toBeVisible()
 
-    //   // 4. 記事を読むリンクをクリック
-    //   const drawerLink = drawer.getByRole('link', { name: '記事を読む' })
-    //   await expect(drawerLink).toBeVisible()
-    //   // ドロワーの記事を読むリンクのURLを上書き
-    //   await drawerLink.evaluate((element, url) => {
-    //     ;(element as HTMLAnchorElement).href = url
-    //   }, ARTICLE_URL)
-    //   await drawerLink.click()
+      // 4. 記事を読むリンクをクリック
+      const drawerLink = drawer.getByRole('link', { name: '記事を読む' })
+      await expect(drawerLink).toBeVisible()
 
-    //   // 5. 新しいタブでそのリンクのページに遷移する
-    //   const newPage = await page.context().waitForEvent('page')
-    //   await expect(newPage).toHaveURL(ARTICLE_URL)
-    // })
+      // ドロワーの記事を読むリンクのURLを上書き
+      await drawerLink.evaluate((element, url) => {
+        ;(element as HTMLAnchorElement).href = url
+      }, ARTICLE_URL)
+      await drawerLink.click()
+
+      // 5. 新しいタブでそのリンクのページに遷移する
+      const newPage = await page.context().waitForEvent('page')
+      await expect(newPage).toHaveURL(ARTICLE_URL)
+    })
   })
 })
