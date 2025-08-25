@@ -22,9 +22,7 @@ export default function ArticleCard({ article, onCardClick }: Props) {
         </CardTitle>
 
         <CardDescription className='mt-3 flex items-end justify-between'>
-          <span className='text-sm text-gray-600'>
-            {article.author}
-          </span>
+          <span className='text-sm text-gray-600'>{article.author}</span>
         </CardDescription>
       </CardContent>
     </Card>
