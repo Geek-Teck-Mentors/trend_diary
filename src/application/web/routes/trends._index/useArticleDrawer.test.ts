@@ -1,6 +1,6 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
+import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
 import useArticleDrawer from './useArticleDrawer'
 
 type UseArticleDrawerHook = ReturnType<typeof useArticleDrawer>
@@ -10,7 +10,7 @@ function setupHook(): RenderHookResult<UseArticleDrawerHook, unknown> {
 }
 
 // テスト用のモック記事データ
-const createMockArticle = (id: number = 1, title: string = 'テスト記事'): Article => ({
+const createMockArticle = (id: number = 1, title: string = 'テスト記事'): ArticleOutput => ({
   articleId: BigInt(id),
   media: 'tech',
   title,
@@ -66,7 +66,7 @@ describe('useArticleDrawer', () => {
   })
 
   describe('エッジケース', () => {
-    it('複数回open関数を呼び出しても正常に動作する', () => {
+    it('複数回open関数を呼び出してもDrawerが開いた状態になる', () => {
       const { result } = setupHook()
       const mockArticle1 = createMockArticle(1, '記事1')
       const mockArticle2 = createMockArticle(2, '記事2')
@@ -86,7 +86,7 @@ describe('useArticleDrawer', () => {
       expect(result.current.selectedArticle).toEqual(mockArticle2)
     })
 
-    it('複数回close関数を呼び出しても問題ない', () => {
+    it('複数回close関数を呼び出してもDrawerが閉じる', () => {
       const { result } = setupHook()
       const mockArticle = createMockArticle()
 
@@ -105,7 +105,7 @@ describe('useArticleDrawer', () => {
       expect(result.current.selectedArticle).toBeNull()
     })
 
-    it('close状態でclose関数を呼び出しても問題ない', () => {
+    it('close状態でclose関数を呼び出してもDrawerが閉じたままである', () => {
       const { result } = setupHook()
 
       act(() => {
@@ -116,7 +116,7 @@ describe('useArticleDrawer', () => {
       expect(result.current.selectedArticle).toBeNull()
     })
 
-    it('異なる記事での操作が正常に動作する', () => {
+    it('ある記事のDrawerを開いた状態で別の記事を開くとその記事に内容が置き換わる', () => {
       const { result } = setupHook()
       const mockArticle1 = createMockArticle(1, '技術記事')
       const mockArticle2 = createMockArticle(2, 'ビジネス記事')
