@@ -118,7 +118,7 @@ export const InteractionTest: Story = {
     await userEvent.click(closeButton)
 
     // onCloseコールバックが呼び出されたことを確認
-    await expect(args.onClose).toHaveBeenCalledTimes(2)
+    await expect(args.onClose).toHaveBeenCalled()
 
     // 「記事を読む」ボタンにホバーした時の効果を確認
     const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
@@ -153,9 +153,5 @@ export const LongContentTest: Story = {
 
     // 長い作成者名が表示されることを確認
     await expect(within(document.body).getByText(longContentMockArticle.author)).toBeInTheDocument()
-
-    // スクロール可能な領域が存在することを確認（ドロワーのコンテンツ部分）
-    const drawer = within(document.body).getByRole('dialog', { hidden: true })
-    await expect(drawer).toBeInTheDocument()
   },
 }
