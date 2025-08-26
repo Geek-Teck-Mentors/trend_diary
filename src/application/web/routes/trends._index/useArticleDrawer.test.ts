@@ -1,6 +1,5 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import useArticleDrawer from './useArticleDrawer'
 
