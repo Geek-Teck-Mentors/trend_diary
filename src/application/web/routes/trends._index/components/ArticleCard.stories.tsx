@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, userEvent } from 'storybook/test'
+import { expect, fn, userEvent, waitFor } from 'storybook/test'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import ArticleCard from './ArticleCard'
 
@@ -136,7 +136,10 @@ export const HoverInteraction: Story = {
     await userEvent.hover(card)
 
     // トランジション効果が完了するまで待機
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    await waitFor(() => {
+      // ホバー状態が適用されるまで待機
+      expect(card).toBeVisible()
+    })
 
     // ホバー時にカードが正常に表示され続けていることを確認
     await expect(card).toBeVisible()
@@ -154,7 +157,10 @@ export const HoverInteraction: Story = {
     await userEvent.unhover(card)
 
     // トランジション効果が完了するまで待機
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    await waitFor(() => {
+      // ホバー解除状態が適用されるまで待機
+      expect(card).toBeVisible()
+    })
 
     // ホバー解除後も正常に表示されることを確認
     await expect(card).toBeVisible()

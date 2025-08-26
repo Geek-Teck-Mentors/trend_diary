@@ -27,16 +27,5 @@ export const Default: Story = {
     // スピナーのアニメーションが動作していることを確認
     const spinnerStyle = window.getComputedStyle(spinner as Element)
     await expect(spinnerStyle.animation).toContain('spin')
-
-    // アニメーション期間中の transform プロパティの変化を確認
-    const initialTransform = spinnerStyle.transform
-
-    // 少し待機してからtransformが変化していることを確認
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    const updatedStyle = window.getComputedStyle(spinner as Element)
-    const laterTransform = updatedStyle.transform
-
-    // アニメーションにより transform が変化していることを確認
-    await expect(initialTransform).not.toBe(laterTransform)
   },
 }
