@@ -294,124 +294,110 @@ describe('useTrends', () => {
       expect(result.current.cursor.prev).toBe('updated-prev-cursor')
     })
 
-    it('フック初期化が正常に完了する', async () => {
-      mockApiClient.articles.$get.mockRejectedValue(new Error('Test Error'))
+    it('記事が0件でも正しく処理される', async () => {
+      const mockResponse = generateMockResponse()
 
-      expect(() => {
-        const { result } = setupHook()
-        expect(result.current).toBeDefined()
-      }).not.toThrow()
+      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
 
-      // 初期化の非同期処理を待つ
+      const { result } = renderHook(() => useTrends())
+
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 0))
       })
+
+      expect(result.current.articles).toEqual([])
+      expect(result.current.cursor.next).toBeNull()
+      expect(result.current.cursor.prev).toBeNull()
+      expect(result.current.isLoading).toBe(false)
     })
+  })
 
-    describe('エッジケース', () => {
-      it('記事が0件でも正しく処理される', async () => {
-        const mockResponse = generateMockResponse()
-
-        mockApiClient.articles.$get.mockResolvedValue(mockResponse)
-
-        const { result } = renderHook(() => useTrends())
-
-        await act(async () => {
-          await new Promise((resolve) => setTimeout(resolve, 0))
-        })
-
-        expect(result.current.articles).toEqual([])
-        expect(result.current.cursor.next).toBeNull()
-        expect(result.current.cursor.prev).toBeNull()
-        expect(result.current.isLoading).toBe(false)
-      })
-
-      it('ローディング中に再度fetchArticlesを呼び出しても処理されない', async () => {
-        let resolvePromise: () => void
-        const mockPromise = new Promise<any>((resolve) => {
-          resolvePromise = () =>
-            resolve({
-              status: 200,
-              json: () =>
-                Promise.resolve({
-                  data: [],
-                  nextCursor: null,
-                  prevCursor: null,
-                }),
-            })
-        })
-
-        mockApiClient.articles.$get.mockReturnValue(mockPromise)
-
-        const { result } = renderHook(() => useTrends())
-
-        // ローディング中であることを確認
-        expect(result.current.isLoading).toBe(true)
-
-        // ローディング中に再度fetchArticlesを呼び出し
-        await act(async () => {
-          await result.current.fetchArticles({
-            date: new Date('2024-01-01'),
+  describe('エッジケース', () => {
+    it('ローディング中に再度fetchArticlesを呼び出しても処理されない', async () => {
+      let resolvePromise: () => void
+      const mockPromise = new Promise<any>((resolve) => {
+        resolvePromise = () =>
+          resolve({
+            status: 200,
+            json: () =>
+              Promise.resolve({
+                data: [],
+                nextCursor: null,
+                prevCursor: null,
+              }),
           })
-        })
-
-        // API呼び出しが1回のみであることを確認（初期化時のみ）
-        expect(mockApiClient.articles.$get).toHaveBeenCalledTimes(1)
-
-        await act(async () => {
-          resolvePromise!()
-          await mockPromise
-        })
-
-        expect(result.current.isLoading).toBe(false)
       })
+
+      mockApiClient.articles.$get.mockReturnValue(mockPromise)
+
+      const { result } = renderHook(() => useTrends())
+
+      // ローディング中であることを確認
+      expect(result.current.isLoading).toBe(true)
+
+      // ローディング中に再度fetchArticlesを呼び出し
+      await act(async () => {
+        await result.current.fetchArticles({
+          date: new Date('2024-01-01'),
+        })
+      })
+
+      // API呼び出しが1回のみであることを確認（初期化時のみ）
+      expect(mockApiClient.articles.$get).toHaveBeenCalledTimes(1)
+
+      await act(async () => {
+        resolvePromise!()
+        await mockPromise
+      })
+
+      expect(result.current.isLoading).toBe(false)
+    })
+  })
+
+  describe('APIのエラーケース', () => {
+    it('API呼び出しで400番台の時、エラーのtoastが表示される', async () => {
+      const mockResponse = generateMockResponse({ status: 400 })
+
+      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+
+      const { result } = renderHook(() => useTrends())
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+
+      expect(toast.error).toHaveBeenCalledWith('不正なパラメータです')
+      expect(result.current.isLoading).toBe(false)
     })
 
-    describe('APIのエラーケース', () => {
-      it('API呼び出しで400番台の時、エラーのtoastが表示される', async () => {
-        const mockResponse = generateMockResponse({ status: 400 })
+    it('API呼び出しで500番台の時、エラーのtoastが表示される', async () => {
+      const mockResponse = generateMockResponse({ status: 500 })
 
-        mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
 
-        const { result } = renderHook(() => useTrends())
+      const { result } = renderHook(() => useTrends())
 
-        await act(async () => {
-          await new Promise((resolve) => setTimeout(resolve, 0))
-        })
-
-        expect(toast.error).toHaveBeenCalledWith('不正なパラメータです')
-        expect(result.current.isLoading).toBe(false)
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
       })
 
-      it('API呼び出しで500番台の時、エラーのtoastが表示される', async () => {
-        const mockResponse = generateMockResponse({ status: 500 })
+      expect(toast.error).toHaveBeenCalledWith('不明なエラーが発生しました')
+      expect(result.current.isLoading).toBe(false)
+    })
 
-        mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+    it('その他のエラーの時、エラーのtoastが表示される', async () => {
+      const otherErrorMessage = 'その他のエラーが発生しました'
+      const networkError = new Error(otherErrorMessage)
+      mockApiClient.articles.$get.mockRejectedValue(networkError)
 
-        const { result } = renderHook(() => useTrends())
+      const { result } = renderHook(() => useTrends())
 
-        await act(async () => {
-          await new Promise((resolve) => setTimeout(resolve, 0))
-        })
-
-        expect(toast.error).toHaveBeenCalledWith('不明なエラーが発生しました')
-        expect(result.current.isLoading).toBe(false)
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
       })
 
-      it('その他のエラーの時、エラーのtoastが表示される', async () => {
-        const otherErrorMessage = 'その他のエラーが発生しました'
-        const networkError = new Error(otherErrorMessage)
-        mockApiClient.articles.$get.mockRejectedValue(networkError)
-
-        const { result } = renderHook(() => useTrends())
-
-        await act(async () => {
-          await new Promise((resolve) => setTimeout(resolve, 0))
-        })
-
-        expect(toast.error).toHaveBeenCalledWith(otherErrorMessage)
-        expect(result.current.isLoading).toBe(false)
-      })
+      expect(toast.error).toHaveBeenCalledWith(otherErrorMessage)
+      expect(result.current.isLoading).toBe(false)
     })
   })
 })
