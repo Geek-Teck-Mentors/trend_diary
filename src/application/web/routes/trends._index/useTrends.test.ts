@@ -40,6 +40,23 @@ const mockApiClient = {
   },
 }
 
+// モックのレスポンスデータ
+const generateMockResponse = (
+  params?: Partial<{
+    status: number
+    articles: Article[]
+    nextCursor: string | null
+    prevCursor: string | null
+  }>,
+) => ({
+  status: params?.status || 200,
+  json: vi.fn().mockResolvedValue({
+    data: params?.articles || [],
+    nextCursor: params?.nextCursor || null,
+    prevCursor: params?.prevCursor || null,
+  }),
+})
+
 const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
 type UseTrendsHook = ReturnType<typeof useTrends>
 
@@ -58,20 +75,13 @@ describe('useTrends', () => {
   })
 
   afterAll(() => {
-    vi.clearAllMocks();
-    vi.clearAllTimers();
+    vi.clearAllMocks()
+    vi.clearAllTimers()
   })
 
   describe('基本動作', () => {
     it('現在の日時が取得できる', async () => {
-      const mockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: [],
-          nextCursor: null,
-          prevCursor: null,
-        }),
-      }
+      const mockResponse = generateMockResponse()
       mockApiClient.articles.$get.mockResolvedValue(mockResponse)
 
       const { result } = setupHook()
@@ -85,18 +95,11 @@ describe('useTrends', () => {
         generateMockArticle({ articleId: BigInt(2), title: '記事2' }),
       ]
 
-      const mockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: mockArticles.map((article) => ({
-            ...article,
-            articleId: article.articleId.toString(),
-            createdAt: article.createdAt.toISOString(),
-          })),
-          nextCursor: 'next-cursor',
-          prevCursor: 'prev-cursor',
-        }),
-      }
+      const mockResponse = generateMockResponse({
+        articles: mockArticles,
+        nextCursor: 'next-cursor',
+        prevCursor: 'prev-cursor',
+      })
 
       mockApiClient.articles.$get.mockResolvedValue(mockResponse)
 
@@ -123,23 +126,16 @@ describe('useTrends', () => {
     })
 
     it('directionをnextに設定すると、次のページが取得できる', async () => {
-      const initialMockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: [],
-          nextCursor: 'next-cursor-initial',
-          prevCursor: null,
-        }),
-      }
+      const initialMockResponse = generateMockResponse({
+        nextCursor: 'next-cursor-initial',
+        prevCursor: null,
+      })
 
-      const nextPageMockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: [generateMockArticle({ articleId: BigInt(3), title: '記事3' })],
-          nextCursor: 'next-cursor-2',
-          prevCursor: 'prev-cursor-2',
-        }),
-      }
+      const nextPageMockResponse = generateMockResponse({
+        articles: [generateMockArticle({ articleId: BigInt(3), title: '記事3' })],
+        nextCursor: 'next-cursor-2',
+        prevCursor: 'prev-cursor-2',
+      })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(initialMockResponse)
 
@@ -173,23 +169,16 @@ describe('useTrends', () => {
     })
 
     it('directionをprevに設定すると、前のページが取得できる', async () => {
-      const initialMockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: [],
-          nextCursor: null,
-          prevCursor: 'prev-cursor-initial',
-        }),
-      }
+      const initialMockResponse = generateMockResponse({
+        nextCursor: null,
+        prevCursor: 'prev-cursor-initial',
+      })
 
-      const prevPageMockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: [generateMockArticle({ articleId: BigInt(4), title: '記事4' })],
-          nextCursor: 'next-cursor-3',
-          prevCursor: 'prev-cursor-3',
-        }),
-      }
+      const prevPageMockResponse = generateMockResponse({
+        articles: [generateMockArticle({ articleId: BigInt(4), title: '記事4' })],
+        nextCursor: 'next-cursor-3',
+        prevCursor: 'prev-cursor-3',
+      })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(initialMockResponse)
 
@@ -253,23 +242,9 @@ describe('useTrends', () => {
     })
 
     it('limitを設定すると1度に取得できる記事の数を制限できる', async () => {
-      const initialMockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: [],
-          nextCursor: null,
-          prevCursor: null,
-        }),
-      }
+      const initialMockResponse = generateMockResponse()
 
-      const limitMockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: [],
-          nextCursor: null,
-          prevCursor: null,
-        }),
-      }
+      const limitMockResponse = generateMockResponse()
 
       mockApiClient.articles.$get.mockResolvedValueOnce(initialMockResponse)
 
@@ -301,18 +276,11 @@ describe('useTrends', () => {
     })
 
     it('記事一覧を取得したタイミングで、前後のページの情報が更新される', async () => {
-      const mockResponse = {
-        status: 200,
-        json: vi.fn().mockResolvedValue({
-          data: [generateMockArticle()].map((article) => ({
-            ...article,
-            articleId: article.articleId.toString(),
-            createdAt: article.createdAt.toISOString(),
-          })),
-          nextCursor: 'updated-next-cursor',
-          prevCursor: 'updated-prev-cursor',
-        }),
-      }
+      const mockResponse = generateMockResponse({
+        articles: [generateMockArticle()],
+        nextCursor: 'updated-next-cursor',
+        prevCursor: 'updated-prev-cursor',
+      })
 
       mockApiClient.articles.$get.mockResolvedValue(mockResponse)
 
@@ -342,14 +310,7 @@ describe('useTrends', () => {
 
     describe('エッジケース', () => {
       it('記事が0件でも正しく処理される', async () => {
-        const mockResponse = {
-          status: 200,
-          json: vi.fn().mockResolvedValue({
-            data: [],
-            nextCursor: null,
-            prevCursor: null,
-          }),
-        }
+        const mockResponse = generateMockResponse()
 
         mockApiClient.articles.$get.mockResolvedValue(mockResponse)
 
@@ -408,9 +369,7 @@ describe('useTrends', () => {
 
     describe('APIのエラーケース', () => {
       it('API呼び出しで400番台の時、エラーのtoastが表示される', async () => {
-        const mockResponse = {
-          status: 400,
-        }
+        const mockResponse = generateMockResponse({ status: 400 })
 
         mockApiClient.articles.$get.mockResolvedValue(mockResponse)
 
@@ -425,9 +384,7 @@ describe('useTrends', () => {
       })
 
       it('API呼び出しで500番台の時、エラーのtoastが表示される', async () => {
-        const mockResponse = {
-          status: 500,
-        }
+        const mockResponse = generateMockResponse({ status: 500 })
 
         mockApiClient.articles.$get.mockResolvedValue(mockResponse)
 
