@@ -1,7 +1,7 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import { toast } from 'sonner'
-import { afterEach, beforeEach, describe, expect, it, type MockedFunction, vi } from 'vitest'
+import type { MockedFunction } from 'vitest'
 import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 import useTrends from './useTrends'
@@ -15,10 +15,6 @@ vi.mock('sonner', () => ({
 
 vi.mock('../../infrastructure/api', () => ({
   default: vi.fn(),
-}))
-
-vi.mock('@/common/errors', () => ({
-  getErrorMessage: vi.fn((error) => error?.message || 'エラーが発生しました'),
 }))
 
 const defaultMockArticle: Article = {
@@ -59,6 +55,11 @@ describe('useTrends', () => {
 
   afterEach(() => {
     vi.clearAllTimers()
+  })
+
+  afterAll(() => {
+    vi.clearAllMocks();
+    vi.clearAllTimers();
   })
 
   describe('基本動作', () => {
@@ -405,7 +406,7 @@ describe('useTrends', () => {
       })
     })
 
-    describe('異常系', () => {
+    describe('APIのエラーケース', () => {
       it('API呼び出しで400番台の時、エラーのtoastが表示される', async () => {
         const mockResponse = {
           status: 400,
