@@ -1,5 +1,5 @@
 import type { RenderHookResult } from '@testing-library/react'
-import { act, renderHook } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
 import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
@@ -106,8 +106,8 @@ describe('useTrends', () => {
       const { result } = renderHook(() => useTrends())
 
       // 初期化時のAPI呼び出しを待つ
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(result.current.articles).toHaveLength(2)
       })
 
       expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
@@ -119,7 +119,6 @@ describe('useTrends', () => {
           limit: 20,
         },
       })
-      expect(result.current.articles).toHaveLength(2)
       expect(result.current.articles[0].title).toBe('記事1')
       expect(result.current.cursor.next).toBe('next-cursor')
       expect(result.current.cursor.prev).toBe('prev-cursor')
@@ -142,8 +141,8 @@ describe('useTrends', () => {
       const { result } = renderHook(() => useTrends())
 
       // 初期化を待つ
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(result.current.cursor.next).toBe('next-cursor-initial')
       })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(nextPageMockResponse)
@@ -185,8 +184,8 @@ describe('useTrends', () => {
       const { result } = renderHook(() => useTrends())
 
       // 初期化を待つ
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(result.current.cursor.prev).toBe('prev-cursor-initial')
       })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(prevPageMockResponse)
@@ -251,8 +250,8 @@ describe('useTrends', () => {
       const { result } = renderHook(() => useTrends())
 
       // 初期化を待つ
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
       })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(limitMockResponse)
@@ -286,12 +285,10 @@ describe('useTrends', () => {
 
       const { result } = renderHook(() => useTrends())
 
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(result.current.cursor.next).toBe('updated-next-cursor')
+        expect(result.current.cursor.prev).toBe('updated-prev-cursor')
       })
-
-      expect(result.current.cursor.next).toBe('updated-next-cursor')
-      expect(result.current.cursor.prev).toBe('updated-prev-cursor')
     })
 
     it('記事が0件でも正しく処理される', async () => {
@@ -301,14 +298,13 @@ describe('useTrends', () => {
 
       const { result } = renderHook(() => useTrends())
 
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
       })
 
       expect(result.current.articles).toEqual([])
       expect(result.current.cursor.next).toBeNull()
       expect(result.current.cursor.prev).toBeNull()
-      expect(result.current.isLoading).toBe(false)
     })
   })
 
@@ -362,12 +358,10 @@ describe('useTrends', () => {
 
       const { result } = renderHook(() => useTrends())
 
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('不正なパラメータです')
+        expect(result.current.isLoading).toBe(false)
       })
-
-      expect(toast.error).toHaveBeenCalledWith('不正なパラメータです')
-      expect(result.current.isLoading).toBe(false)
     })
 
     it('API呼び出しで500番台の時、エラーのtoastが表示される', async () => {
@@ -377,12 +371,10 @@ describe('useTrends', () => {
 
       const { result } = renderHook(() => useTrends())
 
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('不明なエラーが発生しました')
+        expect(result.current.isLoading).toBe(false)
       })
-
-      expect(toast.error).toHaveBeenCalledWith('不明なエラーが発生しました')
-      expect(result.current.isLoading).toBe(false)
     })
 
     it('その他のエラーの時、エラーのtoastが表示される', async () => {
@@ -392,12 +384,10 @@ describe('useTrends', () => {
 
       const { result } = renderHook(() => useTrends())
 
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0))
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(otherErrorMessage)
+        expect(result.current.isLoading).toBe(false)
       })
-
-      expect(toast.error).toHaveBeenCalledWith(otherErrorMessage)
-      expect(result.current.isLoading).toBe(false)
     })
   })
 })
