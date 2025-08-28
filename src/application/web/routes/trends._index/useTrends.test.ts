@@ -234,10 +234,12 @@ describe('useTrends', () => {
 
       await act(async () => {
         resolvePromise!()
-        await mockPromise
       })
 
-      expect(result.current.isLoading).toBe(false)
+      // waitForを使用してローディング状態が解除されるまで待機
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
     })
 
     it('limitを設定すると1度に取得できる記事の数を制限できる', async () => {
@@ -343,10 +345,12 @@ describe('useTrends', () => {
 
       await act(async () => {
         resolvePromise!()
-        await mockPromise
       })
 
-      expect(result.current.isLoading).toBe(false)
+      // waitForを使用してローディング状態が解除されるまで待機
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
     })
   })
 
