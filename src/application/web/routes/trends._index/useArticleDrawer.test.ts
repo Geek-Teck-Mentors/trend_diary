@@ -20,7 +20,9 @@ function openArticleDrawer(
 }
 
 // ヘルパー関数：ドロワーを閉じる操作
-function closeArticleDrawer(result: RenderHookResult<UseArticleDrawerHook, unknown>['result']): void {
+function closeArticleDrawer(
+  result: RenderHookResult<UseArticleDrawerHook, unknown>['result'],
+): void {
   act(() => {
     result.current.close()
   })
@@ -36,8 +38,6 @@ const createFakeArticle = (id: number = 1, title: string = 'テスト記事'): A
   url: 'https://example.com/article',
   createdAt: new Date('2024-01-01T00:00:00Z'),
 })
-
-
 
 describe('useArticleDrawer', () => {
   describe('基本動作', () => {
