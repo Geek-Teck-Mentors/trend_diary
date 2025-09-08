@@ -17,7 +17,7 @@ vi.mock('../../infrastructure/api', () => ({
   default: vi.fn(),
 }))
 
-const defaultMockArticle: Article = {
+const defaultFaleArticle: Article = {
   articleId: BigInt(1),
   media: 'qiita',
   title: 'デフォルトタイトル',
@@ -28,8 +28,8 @@ const defaultMockArticle: Article = {
 }
 
 // モックのArticleデータ
-const generateMockArticle = (params?: Partial<Article>): Article => ({
-  ...defaultMockArticle,
+const generateFaleArticle = (params?: Partial<Article>): Article => ({
+  ...defaultFaleArticle,
   ...params,
 })
 
@@ -41,7 +41,7 @@ const mockApiClient = {
 }
 
 // モックのレスポンスデータ
-const generateMockResponse = (
+const generateFakeResponse = (
   params?: Partial<{
     status: number
     articles: Article[]
@@ -81,8 +81,8 @@ describe('useTrends', () => {
 
   describe('基本動作', () => {
     it('現在の日時が取得できる', async () => {
-      const mockResponse = generateMockResponse()
-      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+      const fakeResponse = generateFakeResponse()
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
       const { result } = setupHook()
 
@@ -90,18 +90,18 @@ describe('useTrends', () => {
     })
 
     it('初期化時に今日の日付で記事一覧が取得できる', async () => {
-      const mockArticles = [
-        generateMockArticle({ articleId: BigInt(1), title: '記事1' }),
-        generateMockArticle({ articleId: BigInt(2), title: '記事2' }),
+      const fakeArticles = [
+        generateFaleArticle({ articleId: BigInt(1), title: '記事1' }),
+        generateFaleArticle({ articleId: BigInt(2), title: '記事2' }),
       ]
 
-      const mockResponse = generateMockResponse({
-        articles: mockArticles,
+      const fakeResponse = generateFakeResponse({
+        articles: fakeArticles,
         nextCursor: 'next-cursor',
         prevCursor: 'prev-cursor',
       })
 
-      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
       const { result } = renderHook(() => useTrends())
 
@@ -125,18 +125,18 @@ describe('useTrends', () => {
     })
 
     it('directionをnextに設定すると、次のページが取得できる', async () => {
-      const initialMockResponse = generateMockResponse({
+      const initialFakeResponse = generateFakeResponse({
         nextCursor: 'next-cursor-initial',
         prevCursor: null,
       })
 
-      const nextPageMockResponse = generateMockResponse({
-        articles: [generateMockArticle({ articleId: BigInt(3), title: '記事3' })],
+      const nextPageFakeResponse = generateFakeResponse({
+        articles: [generateFaleArticle({ articleId: BigInt(3), title: '記事3' })],
         nextCursor: 'next-cursor-2',
         prevCursor: 'prev-cursor-2',
       })
 
-      mockApiClient.articles.$get.mockResolvedValueOnce(initialMockResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
 
       const { result } = renderHook(() => useTrends())
 
@@ -145,7 +145,7 @@ describe('useTrends', () => {
         expect(result.current.cursor.next).toBe('next-cursor-initial')
       })
 
-      mockApiClient.articles.$get.mockResolvedValueOnce(nextPageMockResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(nextPageFakeResponse)
 
       await act(async () => {
         await result.current.fetchArticles({
@@ -168,18 +168,18 @@ describe('useTrends', () => {
     })
 
     it('directionをprevに設定すると、前のページが取得できる', async () => {
-      const initialMockResponse = generateMockResponse({
+      const initialFakeResponse = generateFakeResponse({
         nextCursor: null,
         prevCursor: 'prev-cursor-initial',
       })
 
-      const prevPageMockResponse = generateMockResponse({
-        articles: [generateMockArticle({ articleId: BigInt(4), title: '記事4' })],
+      const prevPageFakeResponse = generateFakeResponse({
+        articles: [generateFaleArticle({ articleId: BigInt(4), title: '記事4' })],
         nextCursor: 'next-cursor-3',
         prevCursor: 'prev-cursor-3',
       })
 
-      mockApiClient.articles.$get.mockResolvedValueOnce(initialMockResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
 
       const { result } = renderHook(() => useTrends())
 
@@ -188,7 +188,7 @@ describe('useTrends', () => {
         expect(result.current.cursor.prev).toBe('prev-cursor-initial')
       })
 
-      mockApiClient.articles.$get.mockResolvedValueOnce(prevPageMockResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(prevPageFakeResponse)
 
       await act(async () => {
         await result.current.fetchArticles({
@@ -243,11 +243,11 @@ describe('useTrends', () => {
     })
 
     it('limitを設定すると1度に取得できる記事の数を制限できる', async () => {
-      const initialMockResponse = generateMockResponse()
+      const initialFakeResponse = generateFakeResponse()
 
-      const limitMockResponse = generateMockResponse()
+      const limitFakeResponse = generateFakeResponse()
 
-      mockApiClient.articles.$get.mockResolvedValueOnce(initialMockResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
 
       const { result } = renderHook(() => useTrends())
 
@@ -256,7 +256,7 @@ describe('useTrends', () => {
         expect(result.current.isLoading).toBe(false)
       })
 
-      mockApiClient.articles.$get.mockResolvedValueOnce(limitMockResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(limitFakeResponse)
 
       await act(async () => {
         await result.current.fetchArticles({
@@ -277,13 +277,13 @@ describe('useTrends', () => {
     })
 
     it('記事一覧を取得したタイミングで、前後のページの情報が更新される', async () => {
-      const mockResponse = generateMockResponse({
-        articles: [generateMockArticle()],
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFaleArticle()],
         nextCursor: 'updated-next-cursor',
         prevCursor: 'updated-prev-cursor',
       })
 
-      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
       const { result } = renderHook(() => useTrends())
 
@@ -294,9 +294,9 @@ describe('useTrends', () => {
     })
 
     it('記事が0件でも正しく処理される', async () => {
-      const mockResponse = generateMockResponse()
+      const fakeResponse = generateFakeResponse()
 
-      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
       const { result } = renderHook(() => useTrends())
 
@@ -356,9 +356,9 @@ describe('useTrends', () => {
 
   describe('APIのエラーケース', () => {
     it('API呼び出しで400番台の時、エラーのtoastが表示される', async () => {
-      const mockResponse = generateMockResponse({ status: 400 })
+      const fakeResponse = generateFakeResponse({ status: 400 })
 
-      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
       const { result } = renderHook(() => useTrends())
 
@@ -369,9 +369,9 @@ describe('useTrends', () => {
     })
 
     it('API呼び出しで500番台の時、エラーのtoastが表示される', async () => {
-      const mockResponse = generateMockResponse({ status: 500 })
+      const fakeResponse = generateFakeResponse({ status: 500 })
 
-      mockApiClient.articles.$get.mockResolvedValue(mockResponse)
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
       const { result } = renderHook(() => useTrends())
 

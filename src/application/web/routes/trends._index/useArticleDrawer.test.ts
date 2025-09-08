@@ -10,7 +10,7 @@ function setupHook(): RenderHookResult<UseArticleDrawerHook, unknown> {
 }
 
 // テスト用のモック記事データ
-const createMockArticle = (id: number = 1, title: string = 'テスト記事'): ArticleOutput => ({
+const createFakeArticle = (id: number = 1, title: string = 'テスト記事'): ArticleOutput => ({
   articleId: BigInt(id),
   media: 'tech',
   title,
@@ -33,27 +33,27 @@ describe('useArticleDrawer', () => {
 
     it('open関数で記事を選択してドロワーを開くことができる', () => {
       const { result } = setupHook()
-      const mockArticle = createMockArticle()
+      const fakeArticle = createFakeArticle()
 
       act(() => {
-        result.current.open(mockArticle)
+        result.current.open(fakeArticle)
       })
 
       expect(result.current.isOpen).toBe(true)
-      expect(result.current.selectedArticle).toEqual(mockArticle)
+      expect(result.current.selectedArticle).toEqual(fakeArticle)
     })
 
     it('close関数でドロワーを閉じて記事選択をクリアできる', () => {
       const { result } = setupHook()
-      const mockArticle = createMockArticle()
+      const fakeArticle = createFakeArticle()
 
       // まず記事を開く
       act(() => {
-        result.current.open(mockArticle)
+        result.current.open(fakeArticle)
       })
 
       expect(result.current.isOpen).toBe(true)
-      expect(result.current.selectedArticle).toEqual(mockArticle)
+      expect(result.current.selectedArticle).toEqual(fakeArticle)
 
       // ドロワーを閉じる
       act(() => {
@@ -68,31 +68,31 @@ describe('useArticleDrawer', () => {
   describe('エッジケース', () => {
     it('複数回open関数を呼び出してもDrawerが開いた状態になる', () => {
       const { result } = setupHook()
-      const mockArticle1 = createMockArticle(1, '記事1')
-      const mockArticle2 = createMockArticle(2, '記事2')
+      const fakeArticle1 = createFakeArticle(1, '記事1')
+      const fakeArticle2 = createFakeArticle(2, '記事2')
 
       act(() => {
-        result.current.open(mockArticle1)
+        result.current.open(fakeArticle1)
       })
 
       expect(result.current.isOpen).toBe(true)
-      expect(result.current.selectedArticle).toEqual(mockArticle1)
+      expect(result.current.selectedArticle).toEqual(fakeArticle1)
 
       act(() => {
-        result.current.open(mockArticle2)
+        result.current.open(fakeArticle2)
       })
 
       expect(result.current.isOpen).toBe(true)
-      expect(result.current.selectedArticle).toEqual(mockArticle2)
+      expect(result.current.selectedArticle).toEqual(fakeArticle2)
     })
 
     it('複数回close関数を呼び出してもDrawerが閉じる', () => {
       const { result } = setupHook()
-      const mockArticle = createMockArticle()
+      const fakeArticle = createFakeArticle()
 
       // まず記事を開く
       act(() => {
-        result.current.open(mockArticle)
+        result.current.open(fakeArticle)
       })
 
       // 複数回閉じる
@@ -118,19 +118,19 @@ describe('useArticleDrawer', () => {
 
     it('ある記事のDrawerを開いた状態で別の記事を開くとその記事に内容が置き換わる', () => {
       const { result } = setupHook()
-      const mockArticle1 = createMockArticle(1, '技術記事')
-      const mockArticle2 = createMockArticle(2, 'ビジネス記事')
+      const fakeArticle1 = createFakeArticle(1, '技術記事')
+      const fakeArticle2 = createFakeArticle(2, 'ビジネス記事')
 
       // 記事1を開く
       act(() => {
-        result.current.open(mockArticle1)
+        result.current.open(fakeArticle1)
       })
 
       expect(result.current.selectedArticle?.title).toBe('技術記事')
 
       // 記事2に切り替える
       act(() => {
-        result.current.open(mockArticle2)
+        result.current.open(fakeArticle2)
       })
 
       expect(result.current.selectedArticle?.title).toBe('ビジネス記事')
