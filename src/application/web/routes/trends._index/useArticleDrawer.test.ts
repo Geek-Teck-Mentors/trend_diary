@@ -9,7 +9,24 @@ function setupHook(): RenderHookResult<UseArticleDrawerHook, unknown> {
   return renderHook(() => useArticleDrawer())
 }
 
-// テスト用のモック記事データ
+// ヘルパー関数：記事を開く操作
+function openArticleDrawer(
+  result: RenderHookResult<UseArticleDrawerHook, unknown>['result'],
+  article: ArticleOutput,
+): void {
+  act(() => {
+    result.current.open(article)
+  })
+}
+
+// ヘルパー関数：ドロワーを閉じる操作
+function closeArticleDrawer(result: RenderHookResult<UseArticleDrawerHook, unknown>['result']): void {
+  act(() => {
+    result.current.close()
+  })
+}
+
+// テスト用のフェイク記事データ
 const createFakeArticle = (id: number = 1, title: string = 'テスト記事'): ArticleOutput => ({
   articleId: BigInt(id),
   media: 'tech',
@@ -19,6 +36,8 @@ const createFakeArticle = (id: number = 1, title: string = 'テスト記事'): A
   url: 'https://example.com/article',
   createdAt: new Date('2024-01-01T00:00:00Z'),
 })
+
+
 
 describe('useArticleDrawer', () => {
   describe('基本動作', () => {
@@ -35,9 +54,7 @@ describe('useArticleDrawer', () => {
       const { result } = setupHook()
       const fakeArticle = createFakeArticle()
 
-      act(() => {
-        result.current.open(fakeArticle)
-      })
+      openArticleDrawer(result, fakeArticle)
 
       expect(result.current.isOpen).toBe(true)
       expect(result.current.selectedArticle).toEqual(fakeArticle)
@@ -48,17 +65,13 @@ describe('useArticleDrawer', () => {
       const fakeArticle = createFakeArticle()
 
       // まず記事を開く
-      act(() => {
-        result.current.open(fakeArticle)
-      })
+      openArticleDrawer(result, fakeArticle)
 
       expect(result.current.isOpen).toBe(true)
       expect(result.current.selectedArticle).toEqual(fakeArticle)
 
       // ドロワーを閉じる
-      act(() => {
-        result.current.close()
-      })
+      closeArticleDrawer(result)
 
       expect(result.current.isOpen).toBe(false)
       expect(result.current.selectedArticle).toBeNull()
@@ -71,16 +84,12 @@ describe('useArticleDrawer', () => {
       const fakeArticle1 = createFakeArticle(1, '記事1')
       const fakeArticle2 = createFakeArticle(2, '記事2')
 
-      act(() => {
-        result.current.open(fakeArticle1)
-      })
+      openArticleDrawer(result, fakeArticle1)
 
       expect(result.current.isOpen).toBe(true)
       expect(result.current.selectedArticle).toEqual(fakeArticle1)
 
-      act(() => {
-        result.current.open(fakeArticle2)
-      })
+      openArticleDrawer(result, fakeArticle2)
 
       expect(result.current.isOpen).toBe(true)
       expect(result.current.selectedArticle).toEqual(fakeArticle2)
@@ -91,15 +100,11 @@ describe('useArticleDrawer', () => {
       const fakeArticle = createFakeArticle()
 
       // まず記事を開く
-      act(() => {
-        result.current.open(fakeArticle)
-      })
+      openArticleDrawer(result, fakeArticle)
 
       // 複数回閉じる
-      act(() => {
-        result.current.close()
-        result.current.close()
-      })
+      closeArticleDrawer(result)
+      closeArticleDrawer(result)
 
       expect(result.current.isOpen).toBe(false)
       expect(result.current.selectedArticle).toBeNull()
@@ -108,9 +113,7 @@ describe('useArticleDrawer', () => {
     it('close状態でclose関数を呼び出してもDrawerが閉じたままである', () => {
       const { result } = setupHook()
 
-      act(() => {
-        result.current.close()
-      })
+      closeArticleDrawer(result)
 
       expect(result.current.isOpen).toBe(false)
       expect(result.current.selectedArticle).toBeNull()
@@ -122,23 +125,17 @@ describe('useArticleDrawer', () => {
       const fakeArticle2 = createFakeArticle(2, 'ビジネス記事')
 
       // 記事1を開く
-      act(() => {
-        result.current.open(fakeArticle1)
-      })
+      openArticleDrawer(result, fakeArticle1)
 
       expect(result.current.selectedArticle?.title).toBe('技術記事')
 
       // 記事2に切り替える
-      act(() => {
-        result.current.open(fakeArticle2)
-      })
+      openArticleDrawer(result, fakeArticle2)
 
       expect(result.current.selectedArticle?.title).toBe('ビジネス記事')
 
       // 閉じる
-      act(() => {
-        result.current.close()
-      })
+      closeArticleDrawer(result)
 
       expect(result.current.selectedArticle).toBeNull()
     })
