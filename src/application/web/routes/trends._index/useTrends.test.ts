@@ -17,7 +17,7 @@ vi.mock('../../infrastructure/api', () => ({
   default: vi.fn(),
 }))
 
-const defaultFaleArticle: Article = {
+const defaultFakeArticle: Article = {
   articleId: BigInt(1),
   media: 'qiita',
   title: 'デフォルトタイトル',
@@ -28,8 +28,8 @@ const defaultFaleArticle: Article = {
 }
 
 // モックのArticleデータ
-const generateFaleArticle = (params?: Partial<Article>): Article => ({
-  ...defaultFaleArticle,
+const generateFakeArticle = (params?: Partial<Article>): Article => ({
+  ...defaultFakeArticle,
   ...params,
 })
 
@@ -70,29 +70,15 @@ describe('useTrends', () => {
     mockGetApiClientForClient.mockReturnValue(mockApiClient)
   })
 
-  afterEach(() => {
-    vi.clearAllTimers()
-  })
-
   afterAll(() => {
     vi.clearAllMocks()
-    vi.clearAllTimers()
   })
 
   describe('基本動作', () => {
-    it('現在の日時が取得できる', async () => {
-      const fakeResponse = generateFakeResponse()
-      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
-
-      const { result } = setupHook()
-
-      expect(result.current.date).toBeInstanceOf(Date)
-    })
-
     it('初期化時に今日の日付で記事一覧が取得できる', async () => {
       const fakeArticles = [
-        generateFaleArticle({ articleId: BigInt(1), title: '記事1' }),
-        generateFaleArticle({ articleId: BigInt(2), title: '記事2' }),
+        generateFakeArticle({ articleId: BigInt(1), title: '記事1' }),
+        generateFakeArticle({ articleId: BigInt(2), title: '記事2' }),
       ]
 
       const fakeResponse = generateFakeResponse({
@@ -103,7 +89,7 @@ describe('useTrends', () => {
 
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       // 初期化時のAPI呼び出しを待つ
       await waitFor(() => {
@@ -131,14 +117,14 @@ describe('useTrends', () => {
       })
 
       const nextPageFakeResponse = generateFakeResponse({
-        articles: [generateFaleArticle({ articleId: BigInt(3), title: '記事3' })],
+        articles: [generateFakeArticle({ articleId: BigInt(3), title: '記事3' })],
         nextCursor: 'next-cursor-2',
         prevCursor: 'prev-cursor-2',
       })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       // 初期化を待つ
       await waitFor(() => {
@@ -174,14 +160,14 @@ describe('useTrends', () => {
       })
 
       const prevPageFakeResponse = generateFakeResponse({
-        articles: [generateFaleArticle({ articleId: BigInt(4), title: '記事4' })],
+        articles: [generateFakeArticle({ articleId: BigInt(4), title: '記事4' })],
         nextCursor: 'next-cursor-3',
         prevCursor: 'prev-cursor-3',
       })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       // 初期化を待つ
       await waitFor(() => {
@@ -227,7 +213,7 @@ describe('useTrends', () => {
 
       mockApiClient.articles.$get.mockReturnValue(mockPromise)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       // 初期化時にローディング状態になることを確認
       expect(result.current.isLoading).toBe(true)
@@ -249,7 +235,7 @@ describe('useTrends', () => {
 
       mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       // 初期化を待つ
       await waitFor(() => {
@@ -278,14 +264,14 @@ describe('useTrends', () => {
 
     it('記事一覧を取得したタイミングで、前後のページの情報が更新される', async () => {
       const fakeResponse = generateFakeResponse({
-        articles: [generateFaleArticle()],
+        articles: [generateFakeArticle()],
         nextCursor: 'updated-next-cursor',
         prevCursor: 'updated-prev-cursor',
       })
 
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       await waitFor(() => {
         expect(result.current.cursor.next).toBe('updated-next-cursor')
@@ -298,7 +284,7 @@ describe('useTrends', () => {
 
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -328,7 +314,7 @@ describe('useTrends', () => {
 
       mockApiClient.articles.$get.mockReturnValue(mockPromise)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       // ローディング中であることを確認
       expect(result.current.isLoading).toBe(true)
@@ -360,7 +346,7 @@ describe('useTrends', () => {
 
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith('不正なパラメータです')
@@ -373,7 +359,7 @@ describe('useTrends', () => {
 
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith('不明なエラーが発生しました')

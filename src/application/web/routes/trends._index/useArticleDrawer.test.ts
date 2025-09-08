@@ -31,7 +31,7 @@ function closeArticleDrawer(
 // テスト用のフェイク記事データ
 const createFakeArticle = (id: number = 1, title: string = 'テスト記事'): ArticleOutput => ({
   articleId: BigInt(id),
-  media: 'tech',
+  media: 'qiita',
   title,
   author: 'テスト著者',
   description: 'テスト記事の説明文です',
