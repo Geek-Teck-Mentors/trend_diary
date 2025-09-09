@@ -8,7 +8,7 @@ const mediaAttributes = {
     iconImage: '/images/zenn-icon.svg',
     altText: 'zenn icon',
   },
-} as const;
+} as const
 
 export default function MediaTag({ media }: { media: MediaType }) {
   const { iconImage, altText } = mediaAttributes[media]
