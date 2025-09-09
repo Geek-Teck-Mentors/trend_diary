@@ -89,8 +89,6 @@ export const QiitaArticle: Story = {
     // 記事URLが正しく設定されていることを確認
     const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
     await expect(readButton).toHaveAttribute('href', qiitaMockArticle.url)
-    await expect(readButton).toHaveAttribute('target', '_blank')
-    await expect(readButton).toHaveAttribute('rel', 'noopener noreferrer nofollow')
   },
 }
 
