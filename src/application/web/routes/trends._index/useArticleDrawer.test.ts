@@ -9,7 +9,6 @@ function setupHook(): RenderHookResult<UseArticleDrawerHook, unknown> {
   return renderHook(() => useArticleDrawer())
 }
 
-// ヘルパー関数：記事を開く操作
 function openArticleDrawer(
   result: RenderHookResult<UseArticleDrawerHook, unknown>['result'],
   article: ArticleOutput,
@@ -19,7 +18,6 @@ function openArticleDrawer(
   })
 }
 
-// ヘルパー関数：ドロワーを閉じる操作
 function closeArticleDrawer(
   result: RenderHookResult<UseArticleDrawerHook, unknown>['result'],
 ): void {
@@ -28,7 +26,6 @@ function closeArticleDrawer(
   })
 }
 
-// テスト用のフェイク記事データ
 const createFakeArticle = (id: number = 1, title: string = 'テスト記事'): ArticleOutput => ({
   articleId: BigInt(id),
   media: 'qiita',
@@ -64,13 +61,11 @@ describe('useArticleDrawer', () => {
       const { result } = setupHook()
       const fakeArticle = createFakeArticle()
 
-      // まず記事を開く
       openArticleDrawer(result, fakeArticle)
 
       expect(result.current.isOpen).toBe(true)
       expect(result.current.selectedArticle).toEqual(fakeArticle)
 
-      // ドロワーを閉じる
       closeArticleDrawer(result)
 
       expect(result.current.isOpen).toBe(false)
@@ -99,10 +94,8 @@ describe('useArticleDrawer', () => {
       const { result } = setupHook()
       const fakeArticle = createFakeArticle()
 
-      // まず記事を開く
       openArticleDrawer(result, fakeArticle)
 
-      // 複数回閉じる
       closeArticleDrawer(result)
       closeArticleDrawer(result)
 
@@ -124,17 +117,14 @@ describe('useArticleDrawer', () => {
       const fakeArticle1 = createFakeArticle(1, '技術記事')
       const fakeArticle2 = createFakeArticle(2, 'ビジネス記事')
 
-      // 記事1を開く
       openArticleDrawer(result, fakeArticle1)
 
       expect(result.current.selectedArticle?.title).toBe('技術記事')
 
-      // 記事2に切り替える
       openArticleDrawer(result, fakeArticle2)
 
       expect(result.current.selectedArticle?.title).toBe('ビジネス記事')
 
-      // 閉じる
       closeArticleDrawer(result)
 
       expect(result.current.selectedArticle).toBeNull()

@@ -6,7 +6,6 @@ import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 import useTrends from './useTrends'
 
-// Mocks
 vi.mock('sonner', () => ({
   toast: {
     error: vi.fn(),
@@ -27,7 +26,6 @@ const defaultFakeArticle: Article = {
   createdAt: new Date('2024-01-01T00:00:00Z'),
 }
 
-// モックのArticleデータ
 const generateFakeArticle = (params?: Partial<Article>): Article => ({
   ...defaultFakeArticle,
   ...params,
@@ -40,7 +38,6 @@ const mockApiClient = {
   },
 }
 
-// モックのレスポンスデータ
 const generateFakeResponse = (
   params?: Partial<{
     status: number
@@ -91,7 +88,6 @@ describe('useTrends', () => {
 
       const { result } = setupHook()
 
-      // 初期化時のAPI呼び出しを待つ
       await waitFor(() => {
         expect(result.current.articles).toHaveLength(2)
       })
@@ -126,7 +122,6 @@ describe('useTrends', () => {
 
       const { result } = setupHook()
 
-      // 初期化を待つ
       await waitFor(() => {
         expect(result.current.cursor.next).toBe('next-cursor-initial')
       })
@@ -169,7 +164,6 @@ describe('useTrends', () => {
 
       const { result } = setupHook()
 
-      // 初期化を待つ
       await waitFor(() => {
         expect(result.current.cursor.prev).toBe('prev-cursor-initial')
       })
@@ -215,14 +209,12 @@ describe('useTrends', () => {
 
       const { result } = setupHook()
 
-      // 初期化時にローディング状態になることを確認
       expect(result.current.isLoading).toBe(true)
 
       await act(async () => {
         resolvePromise!()
       })
 
-      // waitForを使用してローディング状態が解除されるまで待機
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
@@ -237,7 +229,6 @@ describe('useTrends', () => {
 
       const { result } = setupHook()
 
-      // 初期化を待つ
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
@@ -316,24 +307,20 @@ describe('useTrends', () => {
 
       const { result } = setupHook()
 
-      // ローディング中であることを確認
       expect(result.current.isLoading).toBe(true)
 
-      // ローディング中に再度fetchArticlesを呼び出し
       await act(async () => {
         await result.current.fetchArticles({
           date: new Date('2024-01-01'),
         })
       })
 
-      // API呼び出しが1回のみであることを確認（初期化時のみ）
       expect(mockApiClient.articles.$get).toHaveBeenCalledTimes(1)
 
       await act(async () => {
         resolvePromise!()
       })
 
-      // waitForを使用してローディング状態が解除されるまで待機
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
