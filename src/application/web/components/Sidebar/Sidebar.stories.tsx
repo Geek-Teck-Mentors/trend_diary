@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { createMemoryRouter, RouterProvider } from 'react-router'
 import { expect, userEvent } from 'storybook/test'
 import { vi } from 'vitest'
 import { SidebarProvider } from '../ui/sidebar'
@@ -31,30 +30,13 @@ const meta: Meta<typeof AppSidebar> = {
     userFeatureEnabled: true,
   },
   decorators: [
-    (Story) => {
-      const router = createMemoryRouter(
-        [
-          {
-            path: '/',
-            element: (
-              <SidebarProvider>
-                <div style={{ height: '100vh', width: '300px' }}>
-                  <Story />
-                </div>
-              </SidebarProvider>
-            ),
-          },
-          {
-            path: '/trends',
-            element: <div>Trends Page</div>,
-          },
-        ],
-        {
-          initialEntries: ['/'],
-        },
-      )
-      return <RouterProvider router={router} />
-    },
+    (Story) => (
+      <SidebarProvider>
+        <div style={{ height: '100vh', width: '300px' }}>
+          <Story />
+        </div>
+      </SidebarProvider>
+    ),
   ],
 }
 export default meta

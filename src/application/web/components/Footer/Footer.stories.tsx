@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { createMemoryRouter, RouterProvider } from 'react-router'
 import { expect, userEvent } from 'storybook/test'
 import Footer from './index'
 
@@ -8,30 +7,6 @@ const meta: Meta<typeof Footer> = {
   parameters: {
     layout: 'fullscreen',
   },
-  decorators: [
-    (Story) => {
-      const router = createMemoryRouter(
-        [
-          {
-            path: '/',
-            element: <Story />,
-          },
-          {
-            path: '/login',
-            element: <div>Login Page</div>,
-          },
-          {
-            path: '/signup',
-            element: <div>Signup Page</div>,
-          },
-        ],
-        {
-          initialEntries: ['/'],
-        },
-      )
-      return <RouterProvider router={router} />
-    },
-  ],
 }
 export default meta
 
