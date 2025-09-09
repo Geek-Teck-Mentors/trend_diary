@@ -62,5 +62,7 @@
     "fs",
     "http",
     "net"
-  ]
+  ],
+  // なんか知らんけど、VSCodeが認識しないことがあるため
+  "biome.lsp.bin": "./node_modules/.bin/biome"
 }
