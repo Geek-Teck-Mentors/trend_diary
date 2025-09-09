@@ -27,6 +27,14 @@ const preview: Preview = {
             element: <Story />,
           },
           {
+            path: '/login',
+            element: <Story />,
+          },
+          {
+            path: '/signup',
+            element: <Story />,
+          },
+          {
             path: '*',
             element: <Story />,
           },
