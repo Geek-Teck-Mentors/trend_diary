@@ -56,9 +56,7 @@ export const Default: Story = {
     await expect(within(document.body).getByText(defaultArticle.author)).toBeInTheDocument()
 
     // 記事の説明が表示されることを確認
-    await expect(
-      within(document.body).getByText(defaultArticle.description),
-    ).toBeInTheDocument()
+    await expect(within(document.body).getByText(defaultArticle.description)).toBeInTheDocument()
 
     // 作成日が表示されることを確認（ローカライズされた形式）
     const formattedDate = defaultArticle.createdAt.toLocaleDateString()
