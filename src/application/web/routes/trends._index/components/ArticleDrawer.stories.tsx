@@ -3,7 +3,7 @@ import { expect, waitFor, within } from 'storybook/test'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import ArticleDrawer from './ArticleDrawer'
 
-const defaultMockArticle: Article = {
+const defaultArticle: Article = {
   articleId: BigInt(1),
   media: 'qiita',
   title: 'デフォルトタイトル',
@@ -14,8 +14,8 @@ const defaultMockArticle: Article = {
 }
 
 // モックのArticleデータ
-const generateMockArticle = (params?: Partial<Article>): Article => ({
-  ...defaultMockArticle,
+const generateArticle = (params?: Partial<Article>): Article => ({
+  ...defaultArticle,
   ...params,
 })
 
@@ -40,7 +40,7 @@ type Story = StoryObj<typeof ArticleDrawer>
 
 export const Default: Story = {
   args: {
-    article: defaultMockArticle,
+    article: defaultArticle,
   },
   play: async ({ canvas }) => {
     // ドロワーが表示されることを確認（ポータル経由でdocument.bodyに描画される）
@@ -50,18 +50,18 @@ export const Default: Story = {
     })
 
     // 記事タイトルが表示されることを確認
-    await expect(within(document.body).getByText(defaultMockArticle.title)).toBeInTheDocument()
+    await expect(within(document.body).getByText(defaultArticle.title)).toBeInTheDocument()
 
     // 作成者が表示されることを確認
-    await expect(within(document.body).getByText(defaultMockArticle.author)).toBeInTheDocument()
+    await expect(within(document.body).getByText(defaultArticle.author)).toBeInTheDocument()
 
     // 記事の説明が表示されることを確認
     await expect(
-      within(document.body).getByText(defaultMockArticle.description),
+      within(document.body).getByText(defaultArticle.description),
     ).toBeInTheDocument()
 
     // 作成日が表示されることを確認（ローカライズされた形式）
-    const formattedDate = defaultMockArticle.createdAt.toLocaleDateString()
+    const formattedDate = defaultArticle.createdAt.toLocaleDateString()
     await expect(within(document.body).getByText(formattedDate)).toBeInTheDocument()
 
     // 「記事を読む」ボタンが存在することを確認
@@ -75,11 +75,11 @@ export const Default: Story = {
   },
 }
 
-const qiitaMockArticle = generateMockArticle({ media: 'qiita' })
+const qiitaArticle = generateArticle({ media: 'qiita' })
 
 export const QiitaArticle: Story = {
   args: {
-    article: qiitaMockArticle,
+    article: qiitaArticle,
   },
   play: async ({ canvas }) => {
     // Qiitaメディアアイコンが表示されることを確認
@@ -88,15 +88,15 @@ export const QiitaArticle: Story = {
 
     // 記事URLが正しく設定されていることを確認
     const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
-    await expect(readButton).toHaveAttribute('href', qiitaMockArticle.url)
+    await expect(readButton).toHaveAttribute('href', qiitaArticle.url)
   },
 }
 
-const zennMockArticle = generateMockArticle({ media: 'zenn' })
+const zennArticle = generateArticle({ media: 'zenn' })
 
 export const ZennArticle: Story = {
   args: {
-    article: zennMockArticle,
+    article: zennArticle,
   },
   play: async ({ canvas }) => {
     // Zennメディアアイコンが表示されることを確認

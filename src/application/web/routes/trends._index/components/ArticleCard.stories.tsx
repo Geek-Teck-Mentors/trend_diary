@@ -3,7 +3,7 @@ import { expect, fn, userEvent, waitFor } from 'storybook/test'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import ArticleCard from './ArticleCard'
 
-const defaultMockArticle: Article = {
+const defaultArticle: Article = {
   articleId: BigInt(1),
   media: 'qiita',
   title: 'デフォルトタイトル',
@@ -14,8 +14,8 @@ const defaultMockArticle: Article = {
 }
 
 // モックのArticleデータ
-const generateMockArticle = (params?: Partial<Article>): Article => ({
-  ...defaultMockArticle,
+const generateArticle = (params?: Partial<Article>): Article => ({
+  ...defaultArticle,
   ...params,
 })
 
@@ -32,11 +32,11 @@ export default meta
 
 type Story = StoryObj<typeof ArticleCard>
 
-const mockQiitaArticle = generateMockArticle({ media: 'qiita' })
+const qiitaArticle = generateArticle({ media: 'qiita' })
 
 export const QiitaArticle: Story = {
   args: {
-    article: mockQiitaArticle,
+    article: qiitaArticle,
   },
   play: async ({ canvas, args }) => {
     // クリック可能なArticleCard要素が存在することを確認
@@ -44,11 +44,11 @@ export const QiitaArticle: Story = {
     await expect(card).toBeInTheDocument()
 
     // タイトルが表示されることを確認
-    const titleContent = canvas.getByText(mockQiitaArticle.title)
+    const titleContent = canvas.getByText(qiitaArticle.title)
     await expect(titleContent).toBeInTheDocument()
 
     // 著者名が表示されることを確認
-    const author = canvas.getByText(mockQiitaArticle.author)
+    const author = canvas.getByText(qiitaArticle.author)
     await expect(author).toBeInTheDocument()
 
     // Qiitaメディアアイコンが表示されることを確認
@@ -58,10 +58,10 @@ export const QiitaArticle: Story = {
   },
 }
 
-const mockZennArticle = generateMockArticle({ media: 'zenn' })
+const zennArticle = generateArticle({ media: 'zenn' })
 export const ZennArticle: Story = {
   args: {
-    article: mockZennArticle,
+    article: zennArticle,
   },
   play: async ({ canvas }) => {
     // Zennメディアアイコンが表示されることを確認
@@ -71,12 +71,12 @@ export const ZennArticle: Story = {
   },
 }
 
-const mockLongTitleArticle = generateMockArticle({
+const longTitleArticle = generateArticle({
   title: '非常に長いタイトルです'.repeat(10),
 })
 export const LongTitleArticle: Story = {
   args: {
-    article: mockLongTitleArticle,
+    article: longTitleArticle,
   },
   play: async ({ canvas }) => {
     // カード全体が表示されていることを確認
@@ -85,7 +85,7 @@ export const LongTitleArticle: Story = {
     await expect(card).toBeVisible()
 
     // タイトル要素を取得
-    const titleElement = canvas.getByText(mockLongTitleArticle.title)
+    const titleElement = canvas.getByText(longTitleArticle.title)
     await expect(titleElement).toBeInTheDocument()
     await expect(titleElement).toBeVisible()
 
@@ -104,7 +104,7 @@ export const LongTitleArticle: Story = {
 
 export const ClickInteraction: Story = {
   args: {
-    article: mockQiitaArticle,
+    article: qiitaArticle,
   },
   play: async ({ canvas, args }) => {
     // クリック可能なArticleCard要素を取得
@@ -114,14 +114,14 @@ export const ClickInteraction: Story = {
     await userEvent.click(card)
 
     // onCardClickが正しい引数で呼ばれることを確認
-    await expect(args.onCardClick).toHaveBeenCalledWith(mockQiitaArticle)
+    await expect(args.onCardClick).toHaveBeenCalledWith(qiitaArticle)
     await expect(args.onCardClick).toHaveBeenCalledTimes(1)
   },
 }
 
 export const HoverInteraction: Story = {
   args: {
-    article: mockQiitaArticle,
+    article: qiitaArticle,
   },
   play: async ({ canvas }) => {
     // クリック可能なArticleCard要素を取得
