@@ -19,6 +19,9 @@ const preview: Preview = {
     },
   },
   decorators: [
+    // React Routerを使用するコンポーネントのStory用デコレーター
+    // useNavigate, useLocation等のhookを使用するコンポーネントが
+    // Storybook内でエラーにならないように、メモリルーターでラップする
     (Story) => {
       const router = createMemoryRouter(
         [
