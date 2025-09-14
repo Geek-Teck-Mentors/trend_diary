@@ -38,23 +38,27 @@ export const QiitaArticle: Story = {
   args: {
     article: qiitaArticle,
   },
-  play: async ({ canvas, args }) => {
-    // クリック可能なArticleCard要素が存在することを確認
-    const card = canvas.getByRole('button')
-    await expect(card).toBeInTheDocument()
+  play: async ({ canvas, step }) => {
+    await step('クリック可能なArticleCard要素が存在することを確認', async () => {
+      const card = canvas.getByRole('button')
+      await expect(card).toBeInTheDocument()
+    })
 
-    // タイトルが表示されることを確認
-    const titleContent = canvas.getByText(qiitaArticle.title)
-    await expect(titleContent).toBeInTheDocument()
+    await step('タイトルが表示されることを確認', async () => {
+      const titleContent = canvas.getByText(qiitaArticle.title)
+      await expect(titleContent).toBeInTheDocument()
+    })
 
-    // 著者名が表示されることを確認
-    const author = canvas.getByText(qiitaArticle.author)
-    await expect(author).toBeInTheDocument()
+    await step('著者名が表示されることを確認', async () => {
+      const author = canvas.getByText(qiitaArticle.author)
+      await expect(author).toBeInTheDocument()
+    })
 
-    // Qiitaメディアアイコンが表示されることを確認
-    const mediaIcon = canvas.getByRole('img')
-    await expect(mediaIcon).toBeInTheDocument()
-    await expect(mediaIcon).toHaveAttribute('src', '/images/qiita-icon.png')
+    await step('Qiitaメディアアイコンが表示されることを確認', async () => {
+      const mediaIcon = canvas.getByRole('img')
+      await expect(mediaIcon).toBeInTheDocument()
+      await expect(mediaIcon).toHaveAttribute('src', '/images/qiita-icon.png')
+    })
   },
 }
 
@@ -63,11 +67,12 @@ export const ZennArticle: Story = {
   args: {
     article: zennArticle,
   },
-  play: async ({ canvas }) => {
-    // Zennメディアアイコンが表示されることを確認
-    const mediaIcon = canvas.getByRole('img')
-    await expect(mediaIcon).toBeInTheDocument()
-    await expect(mediaIcon).toHaveAttribute('src', '/images/zenn-icon.svg')
+  play: async ({ canvas, step }) => {
+    await step('Zennメディアアイコンが表示されることを確認', async () => {
+      const mediaIcon = canvas.getByRole('img')
+      await expect(mediaIcon).toBeInTheDocument()
+      await expect(mediaIcon).toHaveAttribute('src', '/images/zenn-icon.svg')
+    })
   },
 }
 
@@ -78,27 +83,30 @@ export const LongTitleArticle: Story = {
   args: {
     article: longTitleArticle,
   },
-  play: async ({ canvas }) => {
-    // カード全体が表示されていることを確認
-    const card = canvas.getByRole('button')
-    await expect(card).toBeInTheDocument()
-    await expect(card).toBeVisible()
+  play: async ({ canvas, step }) => {
+    await step('カード全体が表示されていることを確認', async () => {
+      const card = canvas.getByRole('button')
+      await expect(card).toBeInTheDocument()
+      await expect(card).toBeVisible()
+    })
 
-    // タイトル要素を取得
     const titleElement = canvas.getByText(longTitleArticle.title)
-    await expect(titleElement).toBeInTheDocument()
-    await expect(titleElement).toBeVisible()
 
-    // タイトルが制限された高さ内に収まっていることを確認
-    // line-clamp-2の効果で2行分の高さに制限されている
-    const titleContainer = titleElement.closest('[class*="line-clamp-2"]')
-    await expect(titleContainer).toBeInTheDocument()
+    await step('タイトル要素の存在を確認', async () => {
+      await expect(titleElement).toBeInTheDocument()
+      await expect(titleElement).toBeVisible()
+    })
 
-    // タイトルコンテナの高さが合理的な範囲内であることを確認
-    // (2行分のテキストの高さ程度)
-    const containerRect = titleContainer!.getBoundingClientRect()
-    await expect(containerRect.height).toBeGreaterThan(20) // 最低限の高さ
-    await expect(containerRect.height).toBeLessThan(100) // 長すぎない高さ
+    await step('タイトルが制限された高さ内に収まっていることを確認', async () => {
+      // line-clamp-2の効果で2行分の高さに制限されている
+      const titleContainer = titleElement.closest('[class*="line-clamp-2"]')
+      await expect(titleContainer).toBeInTheDocument()
+
+      // (2行分のテキストの高さ程度)
+      const containerRect = titleContainer!.getBoundingClientRect()
+      await expect(containerRect.height).toBeGreaterThan(20) // 最低限の高さ
+      await expect(containerRect.height).toBeLessThan(100) // 長すぎない高さ
+    })
   },
 }
 
@@ -106,16 +114,18 @@ export const ClickInteraction: Story = {
   args: {
     article: qiitaArticle,
   },
-  play: async ({ canvas, args }) => {
+  play: async ({ canvas, args, step }) => {
     // クリック可能なArticleCard要素を取得
     const card = canvas.getByRole('button')
 
-    // カードをクリック
-    await userEvent.click(card)
+    await step('カードをクリック', async () => {
+      await userEvent.click(card)
+    })
 
-    // onCardClickが正しい引数で呼ばれることを確認
-    await expect(args.onCardClick).toHaveBeenCalledWith(qiitaArticle)
-    await expect(args.onCardClick).toHaveBeenCalledTimes(1)
+    await step('onCardClickが正しい引数で呼ばれることを確認', async () => {
+      await expect(args.onCardClick).toHaveBeenCalledWith(qiitaArticle)
+      await expect(args.onCardClick).toHaveBeenCalledTimes(1)
+    })
   },
 }
 
@@ -123,49 +133,54 @@ export const HoverInteraction: Story = {
   args: {
     article: qiitaArticle,
   },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, step }) => {
     // クリック可能なArticleCard要素を取得
     const card = canvas.getByRole('button')
-    await expect(card).toBeVisible()
 
-    // ホバー前の位置とサイズを記録
-    const initialRect = card.getBoundingClientRect()
-    const initialOpacity = window.getComputedStyle(card).opacity
-
-    // ホバー効果をテスト
-    await userEvent.hover(card)
-
-    // トランジション効果が完了するまで待機
-    await waitFor(() => {
-      // ホバー状態が適用されるまで待機
-      expect(card).toBeVisible()
+    await step('ArticleCardの存在の確認', async () => {
+      await expect(card).toBeVisible()
     })
 
-    // ホバー時にカードが正常に表示され続けていることを確認
-    await expect(card).toBeVisible()
+    await step('ホバーが適切に行われるか確認', async () => {
+      // ホバー前の位置とサイズを記録
+      const initialRect = card.getBoundingClientRect()
+      const initialOpacity = window.getComputedStyle(card).opacity
 
-    // ホバー時の位置とサイズを確認（レイアウトが崩れていないこと）
-    const hoveredRect = card.getBoundingClientRect()
-    await expect(hoveredRect.width).toBeCloseTo(initialRect.width, 0)
-    await expect(hoveredRect.height).toBeCloseTo(initialRect.height, 0)
+      // ホバー効果をテスト
+      await userEvent.hover(card)
 
-    // ホバー時の透明度確認（表示されていること）
-    const hoveredOpacity = window.getComputedStyle(card).opacity
-    await expect(hoveredOpacity).toBe(initialOpacity)
+      // トランジション効果が完了するまで待機
+      await waitFor(() => {
+        // ホバー状態が適用されるまで待機
+        expect(card).toBeVisible()
+      })
 
-    // ホバー解除
-    await userEvent.unhover(card)
+      // ホバー時にカードが正常に表示され続けていることを確認
+      await expect(card).toBeVisible()
 
-    // トランジション効果が完了するまで待機
-    await waitFor(() => {
-      // ホバー解除状態が適用されるまで待機
-      expect(card).toBeVisible()
+      // ホバー時の位置とサイズを確認（レイアウトが崩れていないこと）
+      const hoveredRect = card.getBoundingClientRect()
+      await expect(hoveredRect.width).toBeCloseTo(initialRect.width, 0)
+      await expect(hoveredRect.height).toBeCloseTo(initialRect.height, 0)
+
+      // ホバー時の透明度確認（表示されていること）
+      const hoveredOpacity = window.getComputedStyle(card).opacity
+      await expect(hoveredOpacity).toBe(initialOpacity)
+
+      // ホバー解除
+      await userEvent.unhover(card)
+
+      // トランジション効果が完了するまで待機
+      await waitFor(() => {
+        // ホバー解除状態が適用されるまで待機
+        expect(card).toBeVisible()
+      })
+
+      // ホバー解除後も正常に表示されることを確認
+      await expect(card).toBeVisible()
+      const finalRect = card.getBoundingClientRect()
+      await expect(finalRect.width).toBeCloseTo(initialRect.width, 0)
+      await expect(finalRect.height).toBeCloseTo(initialRect.height, 0)
     })
-
-    // ホバー解除後も正常に表示されることを確認
-    await expect(card).toBeVisible()
-    const finalRect = card.getBoundingClientRect()
-    await expect(finalRect.width).toBeCloseTo(initialRect.width, 0)
-    await expect(finalRect.height).toBeCloseTo(initialRect.height, 0)
   },
 }

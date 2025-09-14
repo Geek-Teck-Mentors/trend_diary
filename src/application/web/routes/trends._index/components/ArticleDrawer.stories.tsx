@@ -42,34 +42,40 @@ export const Default: Story = {
   args: {
     article: defaultArticle,
   },
-  play: async ({ canvas }) => {
+  play: async ({ step }) => {
     // ドロワーが表示されることを確認（ポータル経由でdocument.bodyに描画される）
     await waitFor(() => {
       const drawer = within(document.body).getByRole('dialog', { hidden: true })
       expect(drawer).toBeInTheDocument()
     })
 
-    // 記事タイトルが表示されることを確認
-    await expect(within(document.body).getByText(defaultArticle.title)).toBeInTheDocument()
+    await step('記事タイトルが表示されることを確認', async () => {
+      await expect(within(document.body).getByText(defaultArticle.title)).toBeInTheDocument()
+    })
 
-    // 作成者が表示されることを確認
-    await expect(within(document.body).getByText(defaultArticle.author)).toBeInTheDocument()
+    await step('作成者が表示されることを確認', async () => {
+      await expect(within(document.body).getByText(defaultArticle.author)).toBeInTheDocument()
+    })
 
-    // 記事の説明が表示されることを確認
-    await expect(within(document.body).getByText(defaultArticle.description)).toBeInTheDocument()
+    await step('記事の説明が表示されることを確認', async () => {
+      await expect(within(document.body).getByText(defaultArticle.description)).toBeInTheDocument()
+    })
 
-    // 作成日が表示されることを確認（ローカライズされた形式）
-    const formattedDate = defaultArticle.createdAt.toLocaleDateString()
-    await expect(within(document.body).getByText(formattedDate)).toBeInTheDocument()
+    await step('作成日が表示されることを確認（ローカライズされた形式）', async () => {
+      const formattedDate = defaultArticle.createdAt.toLocaleDateString()
+      await expect(within(document.body).getByText(formattedDate)).toBeInTheDocument()
+    })
 
-    // 「記事を読む」ボタンが存在することを確認
-    await expect(
-      within(document.body).getByRole('link', { name: '記事を読む' }),
-    ).toBeInTheDocument()
+    await step('「記事を読む」ボタンが存在することを確認', async () => {
+      await expect(
+        within(document.body).getByRole('link', { name: '記事を読む' }),
+      ).toBeInTheDocument()
+    })
 
-    // 閉じるボタンが存在することを確認
-    const closeButton = within(document.body).getByRole('button', { name: 'Close' })
-    await expect(closeButton).toBeInTheDocument()
+    await step('閉じるボタンが存在することを確認', async () => {
+      const closeButton = within(document.body).getByRole('button', { name: 'Close' })
+      await expect(closeButton).toBeInTheDocument()
+    })
   },
 }
 
@@ -79,14 +85,16 @@ export const QiitaArticle: Story = {
   args: {
     article: qiitaArticle,
   },
-  play: async ({ canvas }) => {
-    // Qiitaメディアアイコンが表示されることを確認
-    const mediaIcon = within(document.body).getByAltText('qiita icon')
-    await expect(mediaIcon).toBeInTheDocument()
+  play: async ({ step }) => {
+    await step('Qiitaメディアアイコンが表示されることを確認', async () => {
+      const mediaIcon = within(document.body).getByAltText('qiita icon')
+      await expect(mediaIcon).toBeInTheDocument()
+    })
 
-    // 記事URLが正しく設定されていることを確認
-    const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
-    await expect(readButton).toHaveAttribute('href', qiitaArticle.url)
+    await step('記事URLが正しく設定されていることを確認', async () => {
+      const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
+      await expect(readButton).toHaveAttribute('href', qiitaArticle.url)
+    })
   },
 }
 
@@ -96,9 +104,10 @@ export const ZennArticle: Story = {
   args: {
     article: zennArticle,
   },
-  play: async ({ canvas }) => {
-    // Zennメディアアイコンが表示されることを確認
-    const mediaIcon = within(document.body).getByAltText('zenn icon')
-    await expect(mediaIcon).toBeInTheDocument()
+  play: async ({ step }) => {
+    await step('Zennメディアアイコンが表示されることを確認', async () => {
+      const mediaIcon = within(document.body).getByAltText('zenn icon')
+      await expect(mediaIcon).toBeInTheDocument()
+    })
   },
 }
