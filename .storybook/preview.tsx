@@ -23,29 +23,14 @@ const preview: Preview = {
     // useNavigate, useLocation等のhookを使用するコンポーネントが
     // Storybook内でエラーにならないように、メモリルーターでラップする
     (Story) => {
-      const router = createMemoryRouter(
-        [
-          {
-            path: '/',
-            element: <Story />,
-          },
-          {
-            path: '/login',
-            element: <Story />,
-          },
-          {
-            path: '/signup',
-            element: <Story />,
-          },
-          {
-            path: '*',
-            element: <Story />,
-          },
-        ],
-        {
-          initialEntries: ['/'],
-        },
-      )
+      const generateRoute = (path: string) => ({
+        path,
+        element: <Story />,
+      })
+
+      const router = createMemoryRouter(['/', '/login', '/signup', '*'].map(generateRoute), {
+        initialEntries: ['/'],
+      })
       return <RouterProvider router={router} />
     },
   ],
