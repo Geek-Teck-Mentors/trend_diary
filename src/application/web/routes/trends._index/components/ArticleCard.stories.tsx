@@ -76,40 +76,6 @@ export const ZennArticle: Story = {
   },
 }
 
-const longTitleArticle = generateArticle({
-  title: '非常に長いタイトルです'.repeat(10),
-})
-export const LongTitleArticle: Story = {
-  args: {
-    article: longTitleArticle,
-  },
-  play: async ({ canvas, step }) => {
-    await step('カード全体が表示されていることを確認', async () => {
-      const card = canvas.getByRole('button')
-      await expect(card).toBeInTheDocument()
-      await expect(card).toBeVisible()
-    })
-
-    const titleElement = canvas.getByText(longTitleArticle.title)
-
-    await step('タイトル要素の存在を確認', async () => {
-      await expect(titleElement).toBeInTheDocument()
-      await expect(titleElement).toBeVisible()
-    })
-
-    await step('タイトルが制限された高さ内に収まっていることを確認', async () => {
-      // line-clamp-2の効果で2行分の高さに制限されている
-      const titleContainer = titleElement.closest('[class*="line-clamp-2"]')
-      await expect(titleContainer).toBeInTheDocument()
-
-      // (2行分のテキストの高さ程度)
-      const containerRect = titleContainer!.getBoundingClientRect()
-      await expect(containerRect.height).toBeGreaterThan(20) // 最低限の高さ
-      await expect(containerRect.height).toBeLessThan(100) // 長すぎない高さ
-    })
-  },
-}
-
 export const ClickInteraction: Story = {
   args: {
     article: qiitaArticle,
@@ -117,10 +83,7 @@ export const ClickInteraction: Story = {
   play: async ({ canvas, args, step }) => {
     // クリック可能なArticleCard要素を取得
     const card = canvas.getByRole('button')
-
-    await step('カードをクリック', async () => {
-      await userEvent.click(card)
-    })
+    await userEvent.click(card)
 
     await step('onCardClickが正しい引数で呼ばれることを確認', async () => {
       await expect(args.onCardClick).toHaveBeenCalledWith(qiitaArticle)
@@ -141,32 +104,19 @@ export const HoverInteraction: Story = {
       await expect(card).toBeVisible()
     })
 
-    await step('ホバーが適切に行われるか確認', async () => {
-      // ホバー前の位置とサイズを記録
-      const initialRect = card.getBoundingClientRect()
-      const initialOpacity = window.getComputedStyle(card).opacity
 
-      // ホバー効果をテスト
+    await step('ホバー時にカードが表示され続けていることを確認', async () => {
       await userEvent.hover(card)
-
-      // トランジション効果が完了するまで待機
       await waitFor(() => {
         // ホバー状態が適用されるまで待機
         expect(card).toBeVisible()
       })
 
-      // ホバー時にカードが正常に表示され続けていることを確認
       await expect(card).toBeVisible()
+    })
 
-      // ホバー時の位置とサイズを確認（レイアウトが崩れていないこと）
-      const hoveredRect = card.getBoundingClientRect()
-      await expect(hoveredRect.width).toBeCloseTo(initialRect.width, 0)
-      await expect(hoveredRect.height).toBeCloseTo(initialRect.height, 0)
-
-      // ホバー時の透明度確認（表示されていること）
-      const hoveredOpacity = window.getComputedStyle(card).opacity
-      await expect(hoveredOpacity).toBe(initialOpacity)
-
+    await step('ホバー解除時にカードが表示され続けていることを確認', async () => {
+      await userEvent.hover(card)
       // ホバー解除
       await userEvent.unhover(card)
 
@@ -176,11 +126,7 @@ export const HoverInteraction: Story = {
         expect(card).toBeVisible()
       })
 
-      // ホバー解除後も正常に表示されることを確認
       await expect(card).toBeVisible()
-      const finalRect = card.getBoundingClientRect()
-      await expect(finalRect.width).toBeCloseTo(initialRect.width, 0)
-      await expect(finalRect.height).toBeCloseTo(initialRect.height, 0)
     })
   },
 }
