@@ -104,7 +104,6 @@ export const HoverInteraction: Story = {
       await expect(card).toBeVisible()
     })
 
-
     await step('ホバー時にカードが表示され続けていることを確認', async () => {
       await userEvent.hover(card)
       await waitFor(() => {
