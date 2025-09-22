@@ -1,34 +1,43 @@
-import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router'
+import useSWR from 'swr'
 import AppSidebar from '../components/Sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'
-import getApiClientForClient from '../infrastructure/api'
+import { createSWRFetcher } from '../features/createSWRFetcher'
+
+interface UserMeResponse {
+  user?: {
+    displayName?: string
+    // 他の必要なプロパティをここに追加
+  }
+}
 
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
-  const [displayName, setDisplayName] = useState('未設定')
+  const { client, apiCall } = createSWRFetcher()
 
-  useEffect(() => {
-    let isMounted = true
-    const client = getApiClientForClient()
+  const { data: userData, error } = useSWR<UserMeResponse>(
+    'user/me',
+    async (): Promise<UserMeResponse> => {
+      return apiCall(() =>
+        client.user.me.$get({}, { init: { credentials: 'include' } })
+      )
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      errorRetryCount: 2,
+      fallbackData: undefined,
+    }
+  )
 
-    const f = async () => {
-      const res = await client.user.me.$get({}, { init: { credentials: 'include' } })
-      if (res.status === 200) {
-        const resJson = await res.json()
-        setDisplayName(resJson.user?.displayName ?? '未設定')
-      } else {
-        setDisplayName('ゲスト')
-      }
-    }
+  // displayNameの決定ロジック
+  const getDisplayName = () => {
+    if (error) return 'ゲスト'
+    if (!userData) return '未設定'
+    return userData.user?.displayName ?? '未設定'
+  }
 
-    if (isMounted) {
-      f()
-    }
-    return () => {
-      isMounted = false
-    }
-  }, [])
+  const displayName = getDisplayName()
 
   return (
     <SidebarProvider>
