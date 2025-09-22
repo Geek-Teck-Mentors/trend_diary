@@ -22,23 +22,14 @@ export default function Layout() {
     let isMounted = true
     const client = getApiClientForClient()
 
-    const f = async () => {
-      const res = await client.user.me.$get({}, { init: { credentials: 'include' } })
-      if (res.status === 200) {
-        const resJson = await res.json()
-        setDisplayName(resJson.user?.displayName ?? '未設定')
-      } else {
-        setDisplayName('ゲスト')
-      }
-    }
+  // displayNameの決定ロジック
+  const getDisplayName = () => {
+    if (error) return 'ゲスト'
+    if (!userData) return '未設定'
+    return userData.user?.displayName ?? '未設定'
+  }
 
-    if (isMounted) {
-      f()
-    }
-    return () => {
-      isMounted = false
-    }
-  }, [])
+  const displayName = getDisplayName()
 
   return (
     <SidebarProvider>
