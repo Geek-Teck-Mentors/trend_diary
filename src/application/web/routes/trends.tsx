@@ -33,13 +33,7 @@ export default function Layout() {
       }
     }
 
-    if (isMounted) {
-      f()
-    }
-    return () => {
-      isMounted = false
-    }
-  }, [])
+  const displayName = getDisplayName()
 
   return (
     <SidebarProvider>
