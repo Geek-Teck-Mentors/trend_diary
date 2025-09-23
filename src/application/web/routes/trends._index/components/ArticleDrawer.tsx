@@ -51,7 +51,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           >
             <div className='flex items-center gap-1'>
               <Calendar className='h-4 w-4' />
-              <span>{article.createdAt.toLocaleDateString()}</span>
+              <span>{article.createdAt.toLocaleDateString('ja-JP')}</span>
             </div>
           </div>
 
