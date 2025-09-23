@@ -1,4 +1,4 @@
-import { Calendar, ExternalLink, X } from 'lucide-react'
+import { Calendar, ExternalLink, User, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { AnchorLink, ExternalPath } from '@/application/web/components/link'
 import {
@@ -37,13 +37,16 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           </DrawerClose>
         </DrawerHeader>
 
-        <div className='flex-1 overflow-y-auto px-4'>
-          <DrawerTitle className='mb-4 text-xl leading-relaxed font-bold text-gray-900'>
+        <div
+          className='flex-1 overflow-y-auto px-4 select-text'
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <DrawerTitle className='mb-4 text-xl leading-relaxed font-bold text-gray-900 select-text'>
             {article.title}
           </DrawerTitle>
 
           <div
-            className='mb-6 flex items-center gap-4 text-sm text-gray-600'
+            className='mb-6 flex items-center gap-4 text-sm text-gray-600 select-text'
             data-slot='drawer-content-meta'
           >
             <div className='flex items-center gap-1'>
@@ -52,14 +55,18 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
             </div>
           </div>
 
-          <div className='mb-6' data-slot='drawer-content-author'>
+          <div
+            className='flex items-center gap-1 mb-6 select-text'
+            data-slot='drawer-content-author'
+          >
+            <User className='h-4 w-4' />
             <span className='text-sm font-medium text-gray-700'>{article.author}</span>
           </div>
 
-          <div className='mb-8' data-slot='drawer-content-description'>
+          <div className='mb-8 select-text' data-slot='drawer-content-description'>
             <h3 className='mb-3 text-lg font-semibold text-gray-900'>記事の概要</h3>
             <p
-              className='leading-relaxed text-gray-700'
+              className='leading-relaxed text-gray-700 select-text'
               data-slot='drawer-content-description-content'
             >
               {article.description}
