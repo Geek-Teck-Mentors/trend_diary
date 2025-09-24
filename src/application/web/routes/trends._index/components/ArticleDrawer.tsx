@@ -10,6 +10,7 @@ import {
 } from '@/application/web/components/ui/drawer'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import MediaIcon from './MediaIcon'
+import { toJaDateString } from '@/common/utils/date'
 
 type Props = {
   article: Article
@@ -51,7 +52,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           >
             <div className='flex items-center gap-1'>
               <Calendar className='h-4 w-4' />
-              <span>{article.createdAt.toLocaleDateString('ja-JP')}</span>
+              <span>{toJaDateString(article.createdAt)}</span>
             </div>
           </div>
 
