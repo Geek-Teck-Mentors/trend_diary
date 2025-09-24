@@ -102,9 +102,7 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
         accessorKey: 'grantedAt',
         header: '付与日',
         cell: ({ row }) =>
-          row.original.grantedAt
-            ? toJaDateString(new Date(row.original.grantedAt))
-            : '-',
+          row.original.grantedAt ? toJaDateString(new Date(row.original.grantedAt)) : '-',
       },
       {
         accessorKey: 'createdAt',

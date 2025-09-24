@@ -1,4 +1,4 @@
-import { toJaDateString } from "./date";
+import { toJaDateString } from './date'
 
 describe('Date Utils', () => {
   describe('toJaDateString', () => {
@@ -8,5 +8,5 @@ describe('Date Utils', () => {
 
       expect(formatted).toBe('2024/1/1')
     })
-  });
-});
+  })
+})
