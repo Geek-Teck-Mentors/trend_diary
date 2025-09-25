@@ -1,4 +1,4 @@
-import { Calendar, ExternalLink, X } from 'lucide-react'
+import { Calendar, ExternalLink, User, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { AnchorLink, ExternalPath } from '@/application/web/components/link'
 import {
