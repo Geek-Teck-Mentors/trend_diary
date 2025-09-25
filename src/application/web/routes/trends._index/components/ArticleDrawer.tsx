@@ -32,7 +32,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
             <MediaIcon media={media} />
           </div>
           <DrawerClose className='ring-offset-background focus:ring-ring cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'>
-            <X className='h-4 w-4' data-slot='x-icon' />
+            <X className='size-4' data-slot='x-icon' />
             <span className='sr-only'>Close</span>
           </DrawerClose>
         </DrawerHeader>
@@ -49,13 +49,13 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
             data-slot='drawer-content-meta'
           >
             <div className='flex items-center gap-1'>
-              <Calendar className='h-4 w-4' />
+              <Calendar className='size-4' />
               <span>{article.createdAt.toLocaleDateString()}</span>
             </div>
           </div>
 
           <div className='flex items-center gap-1 mb-6' data-slot='drawer-content-author'>
-            <User className='h-4 w-4' />
+            <User className='size-4' />
             <span className='text-sm font-medium text-gray-700'>{article.author}</span>
           </div>
 
@@ -76,7 +76,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
             data-slot='drawer-content-link'
           >
-            <ExternalLink className='h-4 w-4' />
+            <ExternalLink className='size-4' />
             記事を読む
           </AnchorLink>
         </div>
