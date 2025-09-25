@@ -62,7 +62,7 @@ export const Default: Story = {
     })
 
     await step('作成日が表示されることを確認（ローカライズされた形式）', async () => {
-      const formattedDate = defaultArticle.createdAt.toLocaleDateString()
+      const formattedDate = defaultArticle.createdAt.toLocaleDateString('ja-JP')
       await expect(within(document.body).getByText(formattedDate)).toBeInTheDocument()
     })
 
