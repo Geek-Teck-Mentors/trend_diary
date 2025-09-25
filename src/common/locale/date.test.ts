@@ -1,6 +1,6 @@
 import { toJaDateString } from './date'
 
-describe('Date Utils', () => {
+describe('Common Date Module', () => {
   describe('toJaDateString', () => {
     describe('文字列で日付が渡された場合', () => {
       it('文字列の日付が日本語形式で正しくフォーマットされること', () => {
