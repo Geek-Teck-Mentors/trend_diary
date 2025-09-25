@@ -1,1 +1,1 @@
-export * from './date'
+export { toJaDateString } from './date'
