@@ -6,12 +6,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/application/web/components/ui/pagination'
+import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { PaginationCursor } from '../../types/paginations'
 import ArticleCard from './components/ArticleCard'
 import { FetchArticles } from './useTrends'
-import { toJaDateString } from '@/common/locale'
 
 type Props = {
   date: Date

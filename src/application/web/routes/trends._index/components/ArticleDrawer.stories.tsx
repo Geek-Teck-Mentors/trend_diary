@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, waitFor, within } from 'storybook/test'
+import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import ArticleDrawer from './ArticleDrawer'
-import { toJaDateString } from '@/common/locale'
 
 const defaultArticle: Article = {
   articleId: BigInt(1),
