@@ -37,6 +37,8 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           </DrawerClose>
         </DrawerHeader>
 
+        {/* Drawer内では文字選択とドラッグしてDrawerを閉じるアクションがバッティングする */}
+        {/* data-vaul-no-dragをfalseに指定し、ドラッグしてDrawerが閉じないように */}
         <div className='flex-1 overflow-y-auto px-4 select-text' data-vaul-no-drag={false}>
           <DrawerTitle className='mb-4 text-xl leading-relaxed font-bold text-gray-900'>
             {article.title}
