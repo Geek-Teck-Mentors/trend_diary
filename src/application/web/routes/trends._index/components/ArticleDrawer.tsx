@@ -56,7 +56,8 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
             </div>
           </div>
 
-          <div className='mb-6' data-slot='drawer-content-author'>
+          <div className='flex items-center gap-1 mb-6' data-slot='drawer-content-author'>
+            <User className='h-4 w-4' />
             <span className='text-sm font-medium text-gray-700'>{article.author}</span>
           </div>
 
