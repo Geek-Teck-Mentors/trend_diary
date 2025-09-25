@@ -37,7 +37,11 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           </DrawerClose>
         </DrawerHeader>
 
-        <div className='flex-1 overflow-y-auto px-4'>
+        {/* Drawer内では文字選択とドラッグしてDrawerを閉じるアクションがバッティングするため、onPointerDownを上書きし、ドラッグしてDrawerを閉じれないように */}
+        <div
+          className='flex-1 overflow-y-auto px-4 select-text'
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <DrawerTitle className='mb-4 text-xl leading-relaxed font-bold text-gray-900'>
             {article.title}
           </DrawerTitle>
