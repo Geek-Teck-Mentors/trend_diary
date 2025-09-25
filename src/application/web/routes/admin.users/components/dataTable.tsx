@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/application/web/components/ui/table'
+import { toJaDateString } from '@/common/locale'
 
 export type DataTableProps = {
   users: UserListResponse['users']
@@ -102,13 +103,13 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
         header: '付与日',
         cell: ({ row }) =>
           row.original.grantedAt
-            ? new Date(row.original.grantedAt).toLocaleDateString('ja-JP')
+            ? toJaDateString(row.original.grantedAt)
             : '-',
       },
       {
         accessorKey: 'createdAt',
         header: '作成日',
-        cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString('ja-JP'),
+        cell: ({ row }) => toJaDateString(row.original.createdAt),
       },
       {
         id: 'actions',

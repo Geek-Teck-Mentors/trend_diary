@@ -11,6 +11,7 @@ import LoadingSpinner from '../../components/LoadingSpinner'
 import { PaginationCursor } from '../../types/paginations'
 import ArticleCard from './components/ArticleCard'
 import { FetchArticles } from './useTrends'
+import { toJaDateString } from '@/common/locale'
 
 type Props = {
   date: Date
@@ -49,7 +50,7 @@ export default function TrendsPage({
 
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
-      <h1 className='pb-4 text-xl italic'>- {date.toLocaleDateString('ja-JP')} -</h1>
+      <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
       {articles.length === 0 ? (
         <div className='text-gray-500'>記事がありません</div>
       ) : (
