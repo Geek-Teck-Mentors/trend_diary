@@ -35,8 +35,8 @@ export default function Layout() {
       errorRetryCount: 2,
       fallbackData: undefined,
       onError: (error) => {
-        const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
         // エラーログはSWRの内部で処理される
+        console.error('SWR Error:', error)
       },
     },
   )
