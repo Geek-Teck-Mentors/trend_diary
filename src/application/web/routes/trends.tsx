@@ -2,8 +2,8 @@ import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
 import useSWR from 'swr'
 import AppSidebar from '../components/Sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'
-import { isUserFeatureEnabled } from '../features/featureFlag'
 import { createSWRFetcher } from '../features/createSWRFetcher'
+import { isUserFeatureEnabled } from '../features/featureFlag'
 
 interface UserMeResponse {
   user?: {
@@ -27,9 +27,7 @@ export default function Layout() {
   const { data: userData, error } = useSWR<UserMeResponse>(
     'user/me',
     async (): Promise<UserMeResponse> => {
-      return apiCall(() =>
-        client.user.me.$get({}, { init: { credentials: 'include' } })
-      )
+      return apiCall(() => client.user.me.$get({}, { init: { credentials: 'include' } }))
     },
     {
       revalidateOnFocus: false,
@@ -38,9 +36,9 @@ export default function Layout() {
       fallbackData: undefined,
       onError: (error) => {
         const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
-        console.error('User data fetch error:', errorMessage)
+        // エラーログはSWRの内部で処理される
       },
-    }
+    },
   )
 
     const f = async () => {

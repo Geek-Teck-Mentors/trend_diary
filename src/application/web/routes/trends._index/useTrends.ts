@@ -42,7 +42,7 @@ export default function useTrends() {
   const date = new Date() // 常に今日の日付を返す
 
   // SWRで記事データ取得（カーソル管理を自動化）
-  const { data: articlesData, error, isLoading } = useSWR<ArticlesResponse>(
+  const { data: articlesData, isLoading } = useSWR<ArticlesResponse>(
     `articles/${currentQueryDate}`,
     async (): Promise<ArticlesResponse> => {
       return apiCall(() =>
@@ -53,7 +53,7 @@ export default function useTrends() {
             direction: 'next' as PaginationDirection,
             limit: 20,
           },
-        })
+        }),
       )
     },
     {
@@ -72,24 +72,28 @@ export default function useTrends() {
           prev: data.prevCursor,
         })
       },
-    }
+    },
   )
 
   // 記事データの変換（元のロジック通り）
-  const articles: Article[] = articlesData?.data?.map((data) => ({
-    articleId: BigInt(data.articleId),
-    media: data.media,
-    title: data.title,
-    author: data.author,
-    description: data.description,
-    url: data.url,
-    createdAt: new Date(data.createdAt),
-  })) ?? []
+  const articles: Article[] =
+    articlesData?.data?.map((data) => ({
+      articleId: BigInt(data.articleId),
+      media: data.media,
+      title: data.title,
+      author: data.author,
+      description: data.description,
+      url: data.url,
+      createdAt: new Date(data.createdAt),
+    })) ?? []
 
   // pagination用のfetchArticles（SWRの自動機能を活用）
   const { trigger: fetchArticlesMutation, isMutating } = useSWRMutation(
     'articles/pagination',
-    async (key, { arg }: { arg: { date: Date; direction: PaginationDirection; limit: number } }) => {
+    async (
+      key,
+      { arg }: { arg: { date: Date; direction: PaginationDirection; limit: number } },
+    ) => {
       const queryDate = formatDate(arg.date)
       const response = await apiCall(() =>
         client.articles.$get({
@@ -100,40 +104,40 @@ export default function useTrends() {
             cursor: cursor[arg.direction],
             limit: arg.limit,
           },
-        })
+        }),
       )
-      
+
       // 成功時の処理をここで実行
       setCurrentQueryDate(queryDate)
       // SWRの自動再検証を活用
       mutate(`articles/${queryDate}`)
-      
+
       return response
     },
     {
       onError: (error) => {
         const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
         toast.error(errorMessage)
-      }
-    }
+      },
+    },
   )
 
   // 元のインターフェースを維持するためのラッパー関数
   const fetchArticles: FetchArticles = useCallback(
     async ({ date: targetDate, direction = 'next', limit = 20 }) => {
       if (isLoading || isMutating) return
-      
+
       try {
         await fetchArticlesMutation({
           date: targetDate,
           direction,
           limit,
         })
-      } catch (error) {
+      } catch (_error) {
         // エラーは既にuseSWRMutationで処理されている
       }
     },
-    [fetchArticlesMutation, isLoading, isMutating]
+    [fetchArticlesMutation, isLoading, isMutating],
   )
 
   // INFO: URLパラメータの変更を監視して記事を取得
