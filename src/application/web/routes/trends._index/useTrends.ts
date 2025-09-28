@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import useSWR, { mutate } from 'swr'
+import useSWRMutation from 'swr/mutation'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import { createSWRFetcher } from '../../features/createSWRFetcher'
 import type { PaginationCursor, PaginationDirection } from '../../types/paginations'
@@ -59,7 +61,7 @@ export default function useTrends() {
       errorRetryCount: 2,
       fallbackData: undefined,
       onError: (error) => {
-        const errorMessage = getErrorMessage(error) || 'エラーが発生しました'
+        const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
         toast.error(errorMessage)
       },
       onSuccess: (data) => {
@@ -109,7 +111,7 @@ export default function useTrends() {
     },
     {
       onError: (error) => {
-        const errorMessage = getErrorMessage(error) || 'エラーが発生しました'
+        const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
         toast.error(errorMessage)
       }
     }
