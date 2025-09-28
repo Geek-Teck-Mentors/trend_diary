@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/application/web/components/ui/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import getApiClientForClient from '../../infrastructure/api'
+import { createSWRFetcher } from '../../features/createSWRFetcher'
+import type { PaginationCursor, PaginationDirection } from '../../types/paginations'
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
@@ -12,73 +12,127 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
-export type FetchArticles = (params: { date: Date; page?: number; limit?: number }) => Promise<void>
+interface ArticlesResponse {
+  data: Array<{
+    articleId: string
+    media: string
+    title: string
+    author: string
+    description: string
+    url: string
+    createdAt: string
+  }>
+  nextCursor?: string
+  prevCursor?: string
+}
+
+export type FetchArticles = (params: {
+  date: Date
+  direction?: PaginationDirection
+  limit?: number
+}) => Promise<void>
 
 export default function useTrends() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [articles, setArticles] = useState<Article[]>([])
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(20)
-  const [totalPages, setTotalPages] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const isLoadingRef = useRef(false)
-  const isMobile = useIsMobile()
+  const { client, apiCall } = createSWRFetcher()
+  const [cursor, setCursor] = useState<PaginationCursor>({})
+  const [currentQueryDate, setCurrentQueryDate] = useState<string>(formatDate(new Date()))
 
-  const date = useMemo(() => new Date(), [])
+  const date = new Date() // 常に今日の日付を返す
 
-  const fetchArticles: FetchArticles = useCallback(async ({ date, page = 1, limit = 20 }) => {
-    if (isLoadingRef.current) return
-
-    isLoadingRef.current = true
-    setIsLoading(true)
-    try {
-      const queryDate = formatDate(date)
-
-      const res = await getApiClientForClient().articles.$get({
-        query: {
-          to: queryDate,
-          from: queryDate,
-          page,
-          limit,
-        },
-      })
-      if (res.status === 200) {
-        const resJson = await res.json()
-        setArticles(
-          resJson.data.map((data) => ({
-            articleId: BigInt(data.articleId),
-            media: data.media,
-            title: data.title,
-            author: data.author,
-            description: data.description,
-            url: data.url,
-            createdAt: new Date(data.createdAt),
-          })),
-        )
-        setPage(resJson.page)
-        setLimit(resJson.limit)
-        setTotalPages(resJson.totalPages)
-
-        // 400番台
-      } else if (res.status >= 400 && res.status < 500) {
-        throw new Error('不正なパラメータです')
-      } else if (res.status >= 500) {
-        throw new Error('不明なエラーが発生しました')
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        const errorMessage = error.message || 'エラーが発生しました'
+  // SWRで記事データ取得（カーソル管理を自動化）
+  const { data: articlesData, error, isLoading } = useSWR<ArticlesResponse>(
+    `articles/${currentQueryDate}`,
+    async (): Promise<ArticlesResponse> => {
+      return apiCall(() =>
+        client.articles.$get({
+          query: {
+            to: currentQueryDate,
+            from: currentQueryDate,
+            direction: 'next' as PaginationDirection,
+            limit: 20,
+          },
+        })
+      )
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      errorRetryCount: 2,
+      fallbackData: undefined,
+      onError: (error) => {
+        const errorMessage = getErrorMessage(error) || 'エラーが発生しました'
         toast.error(errorMessage)
-      } else {
-        toast.error('不明なエラーが発生しました')
-        // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
-        console.error(error)
-      }
-    } finally {
-      isLoadingRef.current = false
-      setIsLoading(false)
+      },
+      onSuccess: (data) => {
+        // SWRの自動機能でカーソルを管理
+        setCursor({
+          next: data.nextCursor,
+          prev: data.prevCursor,
+        })
+      },
     }
-  }, [])
+  )
+
+  // 記事データの変換（元のロジック通り）
+  const articles: Article[] = articlesData?.data?.map((data) => ({
+    articleId: BigInt(data.articleId),
+    media: data.media,
+    title: data.title,
+    author: data.author,
+    description: data.description,
+    url: data.url,
+    createdAt: new Date(data.createdAt),
+  })) ?? []
+
+  // pagination用のfetchArticles（SWRの自動機能を活用）
+  const { trigger: fetchArticlesMutation, isMutating } = useSWRMutation(
+    'articles/pagination',
+    async (key, { arg }: { arg: { date: Date; direction: PaginationDirection; limit: number } }) => {
+      const queryDate = formatDate(arg.date)
+      const response = await apiCall(() =>
+        client.articles.$get({
+          query: {
+            to: queryDate,
+            from: queryDate,
+            direction: arg.direction,
+            cursor: cursor[arg.direction],
+            limit: arg.limit,
+          },
+        })
+      )
+      
+      // 成功時の処理をここで実行
+      setCurrentQueryDate(queryDate)
+      // SWRの自動再検証を活用
+      mutate(`articles/${queryDate}`)
+      
+      return response
+    },
+    {
+      onError: (error) => {
+        const errorMessage = getErrorMessage(error) || 'エラーが発生しました'
+        toast.error(errorMessage)
+      }
+    }
+  )
+
+  // 元のインターフェースを維持するためのラッパー関数
+  const fetchArticles: FetchArticles = useCallback(
+    async ({ date: targetDate, direction = 'next', limit = 20 }) => {
+      if (isLoading || isMutating) return
+      
+      try {
+        await fetchArticlesMutation({
+          date: targetDate,
+          direction,
+          limit,
+        })
+      } catch (error) {
+        // エラーは既にuseSWRMutationで処理されている
+      }
+    },
+    [fetchArticlesMutation, isLoading, isMutating]
+  )
 
   // INFO: URLパラメータの変更を監視して記事を取得
   useEffect(() => {
@@ -104,13 +158,10 @@ export default function useTrends() {
   }, [searchParams, date, fetchArticles])
 
   return {
-    date,
+    date, // 常に今日の日付（元の要件通り）
     articles,
     fetchArticles,
-    page,
-    limit,
-    totalPages,
-    isLoading,
-    setSearchParams,
+    cursor,
+    isLoading: isLoading || isMutating,
   }
 }
