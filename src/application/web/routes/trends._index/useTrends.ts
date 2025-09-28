@@ -43,7 +43,7 @@ export default function useTrends() {
   const fetchArticles: FetchArticles = useCallback(async ({ date, page = 1, limit = 20 }) => {
     if (isLoadingRef.current) return
   // SWRで記事データ取得（カーソル管理を自動化）
-  const { data: articlesData, error, isLoading } = useSWR<ArticlesResponse>(
+  const { data: articlesData, isLoading } = useSWR<ArticlesResponse>(
     `articles/${currentQueryDate}`,
     async (): Promise<ArticlesResponse> => {
       return apiCall(() =>
@@ -54,7 +54,7 @@ export default function useTrends() {
             direction: 'next' as PaginationDirection,
             limit: 20,
           },
-        })
+        }),
       )
     },
     {
@@ -73,7 +73,7 @@ export default function useTrends() {
           prev: data.prevCursor,
         })
       },
-    }
+    },
   )
 
     isLoadingRef.current = true
@@ -84,7 +84,10 @@ export default function useTrends() {
   // pagination用のfetchArticles（SWRの自動機能を活用）
   const { trigger: fetchArticlesMutation, isMutating } = useSWRMutation(
     'articles/pagination',
-    async (key, { arg }: { arg: { date: Date; direction: PaginationDirection; limit: number } }) => {
+    async (
+      key,
+      { arg }: { arg: { date: Date; direction: PaginationDirection; limit: number } },
+    ) => {
       const queryDate = formatDate(arg.date)
       const response = await apiCall(() =>
         client.articles.$get({
@@ -95,29 +98,29 @@ export default function useTrends() {
             cursor: cursor[arg.direction],
             limit: arg.limit,
           },
-        })
+        }),
       )
-      
+
       // 成功時の処理をここで実行
       setCurrentQueryDate(queryDate)
       // SWRの自動再検証を活用
       mutate(`articles/${queryDate}`)
-      
+
       return response
     },
     {
       onError: (error) => {
         const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
         toast.error(errorMessage)
-      }
-    }
+      },
+    },
   )
 
   // 元のインターフェースを維持するためのラッパー関数
   const fetchArticles: FetchArticles = useCallback(
     async ({ date: targetDate, direction = 'next', limit = 20 }) => {
       if (isLoading || isMutating) return
-      
+
       try {
         await fetchArticlesMutation({
           date: targetDate,
