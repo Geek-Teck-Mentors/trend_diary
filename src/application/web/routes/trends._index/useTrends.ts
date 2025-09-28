@@ -51,6 +51,7 @@ export default function useTrends() {
             to: currentQueryDate,
             from: currentQueryDate,
             direction: 'next' as PaginationDirection,
+            cursor: (cursor.next || null) as any,
             limit: 20,
           },
         }),
@@ -62,7 +63,19 @@ export default function useTrends() {
       errorRetryCount: 2,
       fallbackData: undefined,
       onError: (error) => {
-        const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
+        let errorMessage = 'エラーが発生しました'
+        
+        if (error instanceof Error) {
+          // HTTPエラーの場合、ステータスコードに基づいてメッセージを決定
+          if (error.message.startsWith('HTTP 4')) {
+            errorMessage = '不正なパラメータです'
+          } else if (error.message.startsWith('HTTP 5')) {
+            errorMessage = '不明なエラーが発生しました'
+          } else {
+            errorMessage = error.message
+          }
+        }
+        
         toast.error(errorMessage)
       },
       onSuccess: (data) => {
@@ -101,7 +114,7 @@ export default function useTrends() {
             to: queryDate,
             from: queryDate,
             direction: arg.direction,
-            cursor: cursor[arg.direction],
+            cursor: (cursor[arg.direction] || null) as any,
             limit: arg.limit,
           },
         }),
@@ -112,11 +125,29 @@ export default function useTrends() {
       // SWRの自動再検証を活用
       mutate(`articles/${queryDate}`)
 
+      // カーソル情報を更新
+      setCursor({
+        next: (response as ArticlesResponse).nextCursor,
+        prev: (response as ArticlesResponse).prevCursor,
+      })
+
       return response
     },
     {
       onError: (error) => {
-        const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
+        let errorMessage = 'エラーが発生しました'
+        
+        if (error instanceof Error) {
+          // HTTPエラーの場合、ステータスコードに基づいてメッセージを決定
+          if (error.message.startsWith('HTTP 4')) {
+            errorMessage = '不正なパラメータです'
+          } else if (error.message.startsWith('HTTP 5')) {
+            errorMessage = '不明なエラーが発生しました'
+          } else {
+            errorMessage = error.message
+          }
+        }
+        
         toast.error(errorMessage)
       },
     },
