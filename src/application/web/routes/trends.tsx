@@ -1,10 +1,16 @@
-import { useEffect, useState } from 'react'
 import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
-import AppHeader from '../components/AppHeader'
+import useSWR from 'swr'
 import AppSidebar from '../components/Sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'
 import { isUserFeatureEnabled } from '../features/featureFlag'
-import getApiClientForClient from '../infrastructure/api'
+import { createSWRFetcher } from '../features/createSWRFetcher'
+
+interface UserMeResponse {
+  user?: {
+    displayName?: string
+    // 他の必要なプロパティをここに追加
+  }
+}
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const env = context.cloudflare?.env
@@ -15,13 +21,27 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
-  const [displayName, setDisplayName] = useState('')
   const { userFeatureEnabled } = useLoaderData<typeof loader>()
+  const { client, apiCall } = createSWRFetcher()
 
-  useEffect(() => {
-    if (!userFeatureEnabled) return
-    let isMounted = true
-    const client = getApiClientForClient()
+  const { data: userData, error } = useSWR<UserMeResponse>(
+    'user/me',
+    async (): Promise<UserMeResponse> => {
+      return apiCall(() =>
+        client.user.me.$get({}, { init: { credentials: 'include' } })
+      )
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      errorRetryCount: 2,
+      fallbackData: undefined,
+      onError: (error) => {
+        const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
+        console.error('User data fetch error:', errorMessage)
+      },
+    }
+  )
 
     const f = async () => {
       const res = await client.user.me.$get({}, { init: { credentials: 'include' } })
