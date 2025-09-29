@@ -76,17 +76,13 @@ export default function useTrends() {
             errorMessage = error.message
           }
         }
-        
-        toast.error(errorMessage)
-      },
-      onSuccess: (data) => {
-        // SWRの自動機能でカーソルを管理
-        setCursor({
-          next: data.nextCursor,
-          prev: data.prevCursor,
-        })
-      },
-    },
+      } else if (res.status >= 400 && res.status < 500) {
+        throw new Error('不正なパラメータです')
+      } else if (res.status >= 500) {
+        throw new Error('不明なエラーが発生しました')
+      }
+      throw new Error('エラーが発生しました')
+    }
   )
 
     isLoadingRef.current = true
@@ -94,22 +90,35 @@ export default function useTrends() {
     try {
       const queryDate = formatDate(date)
 
-  // pagination用のfetchArticles（SWRの自動機能を活用）
-  const { trigger: fetchArticlesMutation, isMutating } = useSWRMutation(
-    'articles/pagination',
-    async (
-      key,
-      { arg }: { arg: { date: Date; direction: PaginationDirection; limit: number } },
-    ) => {
-      const queryDate = formatDate(arg.date)
-      const response = await apiCall(() =>
-        client.articles.$get({
+  // SWRのエラーをtoastに表示
+  useEffect(() => {
+    if (swrError) {
+      if (swrError instanceof Error) {
+        const errorMessage = swrError.message || 'エラーが発生しました'
+        toast.error(errorMessage)
+      } else {
+        toast.error('不明なエラーが発生しました')
+        console.error(swrError)
+      }
+      setIsLoading(false)
+    }
+  }, [swrError])
+
+  const fetchArticles: FetchArticles = useCallback(
+    async ({ date, direction, limit }) => {
+      if (isLoading) return
+
+      setIsLoading(true)
+      try {
+        const queryDate = formatDate(date)
+
+        const res = await getApiClientForClient().articles.$get({
           query: {
             to: queryDate,
             from: queryDate,
-            direction: arg.direction,
-            cursor: (cursor[arg.direction] || null) as any,
-            limit: arg.limit,
+            direction: direction || 'next',
+            cursor: cursor[direction || 'next'],
+            limit: limit || 20,
           },
         }),
       )
@@ -268,10 +277,13 @@ export default function useTrends() {
   }, [searchParams, date, fetchArticles])
 
   return {
-    date, // 常に今日の日付（元の要件通り）
-    articles, // SWRから直接取得した変換済みデータ
-    fetchArticles, // pagination機能
-    cursor, // SWRデータから自動更新されるカーソル
-    isLoading, // SWRのisLoadingを直接使用
+    date,
+    articles,
+    fetchArticles,
+    page,
+    limit,
+    totalPages,
+    isLoading,
+    setSearchParams,
   }
 }
