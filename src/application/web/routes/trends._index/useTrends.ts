@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import useSWR from 'swr'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 import { PaginationCursor, PaginationDirection } from '../../types/paginations'
@@ -20,12 +21,73 @@ export type FetchArticles = (params: {
 export default function useTrends() {
   const [articles, setArticles] = useState<Article[]>([])
   const [cursor, setCursor] = useState<PaginationCursor>({})
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true) // 初期値をtrueに設定
 
   const date = new Date()
 
+  // SWRで初期データ取得
+  const { data: swrData, error: swrError } = useSWR(`articles-${formatDate(date)}`, async () => {
+    const res = await getApiClientForClient().articles.$get({
+      query: {
+        to: formatDate(date),
+        from: formatDate(date),
+        direction: 'next',
+        cursor: undefined,
+        limit: 20,
+      },
+    })
+
+    if (res.status === 200) {
+      const resJson = await res.json()
+      return {
+        articles: resJson.data.map((data) => ({
+          articleId: BigInt(data.articleId),
+          media: data.media,
+          title: data.title,
+          author: data.author,
+          description: data.description,
+          url: data.url,
+          createdAt: new Date(data.createdAt),
+        })),
+        cursor: {
+          next: resJson.nextCursor ,
+          prev: resJson.prevCursor ,
+        },
+      }
+    }
+    if (res.status >= 400 && res.status < 500) {
+      throw new Error('不正なパラメータです')
+    }
+    if (res.status >= 500) {
+      throw new Error('不明なエラーが発生しました')
+    }
+    throw new Error('エラーが発生しました')
+  })
+
+  // SWRのデータをstateに反映
+  useEffect(() => {
+    if (swrData) {
+      setArticles(swrData.articles)
+      setCursor(swrData.cursor)
+      setIsLoading(false)
+    }
+  }, [swrData])
+
+  // SWRのエラーをtoastに表示
+  useEffect(() => {
+    if (swrError) {
+      if (swrError instanceof Error) {
+        const errorMessage = swrError.message || 'エラーが発生しました'
+        toast.error(errorMessage)
+      } else {
+        toast.error('不明なエラーが発生しました')
+      }
+      setIsLoading(false)
+    }
+  }, [swrError])
+
   const fetchArticles: FetchArticles = useCallback(
-    async ({ date, direction = 'next', limit = 20 }) => {
+    async ({ date, direction, limit }) => {
       if (isLoading) return
 
       setIsLoading(true)
@@ -36,9 +98,9 @@ export default function useTrends() {
           query: {
             to: queryDate,
             from: queryDate,
-            direction,
-            cursor: cursor[direction],
-            limit,
+            direction: direction || 'next',
+            cursor: cursor[direction || 'next'] || undefined,
+            limit: limit || 20,
           },
         })
         if (res.status === 200) {
@@ -58,10 +120,11 @@ export default function useTrends() {
             next: resJson.nextCursor,
             prev: resJson.prevCursor,
           })
-          // 400番台
-        } else if (res.status >= 400 && res.status < 500) {
+        }
+        if (res.status >= 400 && res.status < 500) {
           throw new Error('不正なパラメータです')
-        } else if (res.status >= 500) {
+        }
+        if (res.status >= 500) {
           throw new Error('不明なエラーが発生しました')
         }
       } catch (error) {
@@ -70,8 +133,6 @@ export default function useTrends() {
           toast.error(errorMessage)
         } else {
           toast.error('不明なエラーが発生しました')
-          // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
-          console.error(error)
         }
       } finally {
         setIsLoading(false)
@@ -79,11 +140,6 @@ export default function useTrends() {
     },
     [cursor, isLoading],
   )
-
-  // INFO: 初回読み込み時に今日の日付で記事を取得
-  useEffect(() => {
-    fetchArticles({ date })
-  }, [])
 
   return {
     date,
