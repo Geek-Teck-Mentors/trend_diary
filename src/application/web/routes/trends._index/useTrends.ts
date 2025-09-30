@@ -81,9 +81,15 @@ export default function useTrends() {
       } else if (res.status >= 500) {
         throw new Error('不明なエラーが発生しました')
       }
-      throw new Error('エラーが発生しました')
     }
-  )
+    if (res.status >= 400 && res.status < 500) {
+      throw new Error('不正なパラメータです')
+    }
+    if (res.status >= 500) {
+      throw new Error('不明なエラーが発生しました')
+    }
+    throw new Error('エラーが発生しました')
+  })
 
     isLoadingRef.current = true
     setIsLoading(true)
@@ -98,7 +104,6 @@ export default function useTrends() {
         toast.error(errorMessage)
       } else {
         toast.error('不明なエラーが発生しました')
-        console.error(swrError)
       }
       setIsLoading(false)
     }
@@ -117,7 +122,7 @@ export default function useTrends() {
             to: queryDate,
             from: queryDate,
             direction: direction || 'next',
-            cursor: cursor[direction || 'next'],
+            cursor: cursor[direction || 'next'] || undefined,
             limit: limit || 20,
           },
         }),
