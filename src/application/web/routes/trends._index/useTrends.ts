@@ -28,44 +28,43 @@ export default function useTrends() {
   const date = new Date()
 
   // SWRで初期データ取得
-  const { data: swrData, error: swrError } = useSWR(
-    `articles-${formatDate(date)}`,
-    async () => {
-      const res = await getApiClientForClient().articles.$get({
-        query: {
-          to: formatDate(date),
-          from: formatDate(date),
-          direction: 'next',
-          cursor: undefined,
-          limit: 20,
+  const { data: swrData, error: swrError } = useSWR(`articles-${formatDate(date)}`, async () => {
+    const res = await getApiClientForClient().articles.$get({
+      query: {
+        to: formatDate(date),
+        from: formatDate(date),
+        direction: 'next',
+        cursor: undefined,
+        limit: 20,
+      },
+    })
+
+    if (res.status === 200) {
+      const resJson = await res.json()
+      return {
+        articles: resJson.data.map((data) => ({
+          articleId: BigInt(data.articleId),
+          media: data.media,
+          title: data.title,
+          author: data.author,
+          description: data.description,
+          url: data.url,
+          createdAt: new Date(data.createdAt),
+        })),
+        cursor: {
+          next: resJson.nextCursor ,
+          prev: resJson.prevCursor ,
         },
-      })
-      
-      if (res.status === 200) {
-        const resJson = await res.json()
-        return {
-          articles: resJson.data.map((data) => ({
-            articleId: BigInt(data.articleId),
-            media: data.media,
-            title: data.title,
-            author: data.author,
-            description: data.description,
-            url: data.url,
-            createdAt: new Date(data.createdAt),
-          })),
-          cursor: {
-            next: resJson.nextCursor,
-            prev: resJson.prevCursor,
-          }
-        }
-      } else if (res.status >= 400 && res.status < 500) {
-        throw new Error('不正なパラメータです')
-      } else if (res.status >= 500) {
-        throw new Error('不明なエラーが発生しました')
       }
-      throw new Error('エラーが発生しました')
     }
-  )
+    if (res.status >= 400 && res.status < 500) {
+      throw new Error('不正なパラメータです')
+    }
+    if (res.status >= 500) {
+      throw new Error('不明なエラーが発生しました')
+    }
+    throw new Error('エラーが発生しました')
+  })
 
   // SWRのデータをstateに反映
   useEffect(() => {
@@ -84,7 +83,6 @@ export default function useTrends() {
         toast.error(errorMessage)
       } else {
         toast.error('不明なエラーが発生しました')
-        console.error(swrError)
       }
       setIsLoading(false)
     }
@@ -103,7 +101,7 @@ export default function useTrends() {
             to: queryDate,
             from: queryDate,
             direction: direction || 'next',
-            cursor: cursor[direction || 'next'],
+            cursor: cursor[direction || 'next'] || undefined,
             limit: limit || 20,
           },
         })
@@ -124,9 +122,11 @@ export default function useTrends() {
             next: resJson.nextCursor,
             prev: resJson.prevCursor,
           })
-        } else if (res.status >= 400 && res.status < 500) {
+        }
+        if (res.status >= 400 && res.status < 500) {
           throw new Error('不正なパラメータです')
-        } else if (res.status >= 500) {
+        }
+        if (res.status >= 500) {
           throw new Error('不明なエラーが発生しました')
         }
       } catch (error) {
@@ -135,7 +135,6 @@ export default function useTrends() {
           toast.error(errorMessage)
         } else {
           toast.error('不明なエラーが発生しました')
-          console.error(error)
         }
       } finally {
         setIsLoading(false)
