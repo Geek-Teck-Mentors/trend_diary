@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router'
 import { isLoggedIn } from '../../features/authenticate/userStatus'
 import { InternalPath } from '../../routes'
 import { AnchorLink } from '../link'
+import NavMenu from '../NavMenu'
+import UserSection from '../UserSection'
 import {
   Sidebar,
   SidebarContent,
@@ -11,9 +13,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from '../ui/sidebar'
 import useSidebar from './useSidebar'
 
@@ -61,34 +60,19 @@ export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
           <SidebarGroup>
             <SidebarGroupLabel>Application</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild={true}>
-                      <AnchorLink to={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </AnchorLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
+              <NavMenu variant='sidebar' menuItems={menuItems} />
             </SidebarGroupContent>
           </SidebarGroup>
           {userFeatureEnabled && isLoggedIn(displayName) && (
             <SidebarGroup className='absolute bottom-0 left-0 w-full'>
               <SidebarGroupLabel>User</SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem className='w-full'>
-                    <SidebarMenuButton>ユーザー名：{displayName}</SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={handleLogout} disabled={isLoading}>
-                      {isLoading ? 'ログアウト中...' : 'ログアウト'}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
+                <UserSection
+                  variant='sidebar'
+                  displayName={displayName}
+                  onLogout={handleLogout}
+                  isLoading={isLoading}
+                />
               </SidebarGroupContent>
             </SidebarGroup>
           )}
