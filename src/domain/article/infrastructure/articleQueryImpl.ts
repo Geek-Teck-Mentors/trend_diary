@@ -1,11 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { ServerError } from '@/common/errors'
-import {
-  CursorDirection,
-  CursorPaginationResult,
-  createPaginationResult,
-  decodeCursor,
-} from '@/common/pagination'
+import { OffsetPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
 import { ArticleQuery } from '@/domain/article/repository'
@@ -18,47 +13,41 @@ export default class ArticleQueryImpl implements ArticleQuery {
 
   async searchArticles(
     params: ArticleQueryParams,
-  ): AsyncResult<CursorPaginationResult<Article>, ServerError> {
+  ): AsyncResult<OffsetPaginationResult<Article>, ServerError> {
     try {
-      const { cursor, limit = 20, direction = 'next', ...searchParams } = params
+      const { page = 1, limit = 20, ...searchParams } = params
 
       const where = ArticleQueryImpl.buildWhereClause(searchParams)
-      const cursorCondition = ArticleQueryImpl.buildCursorCondition(direction, cursor)
-
-      if (cursorCondition) {
-        let existingAnd: any[] = []
-        if (where.AND) {
-          existingAnd = Array.isArray(where.AND) ? where.AND : [where.AND]
-        }
-        where.AND = [...existingAnd, cursorCondition]
-      }
 
       const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
-        { createdAt: direction === 'next' ? 'desc' : 'asc' },
-        { articleId: direction === 'next' ? 'desc' : 'asc' },
+        { createdAt: 'desc' },
+        { articleId: 'desc' },
       ]
 
-      const articles = await this.db.article.findMany({
-        where,
-        orderBy,
-        take: limit + 1,
-      })
+      const [articles, total] = await Promise.all([
+        this.db.article.findMany({
+          where,
+          orderBy,
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        this.db.article.count({ where }),
+      ])
 
-      let mappedArticles = articles.map(fromPrismaToArticle)
+      const mappedArticles = articles.map(fromPrismaToArticle)
+      const totalPages = Math.ceil(total / limit)
 
-      if (direction === 'prev') {
-        mappedArticles = mappedArticles.reverse()
+      const result: OffsetPaginationResult<Article> = {
+        data: mappedArticles,
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
       }
 
-      const paginationResult = createPaginationResult(
-        mappedArticles,
-        limit,
-        (article) => article.articleId,
-        direction,
-        !!cursor,
-      )
-
-      return resultSuccess(paginationResult)
+      return resultSuccess(result)
     } catch (error) {
       return resultError(new ServerError(error))
     }
@@ -76,47 +65,8 @@ export default class ArticleQueryImpl implements ArticleQuery {
     }
   }
 
-  private static buildCursorCondition(
-    direction: CursorDirection,
-    cursor?: string,
-  ): Nullable<Prisma.ArticleWhereInput> {
-    if (!cursor) return null
-
-    try {
-      const cursorInfo = decodeCursor(cursor)
-
-      if (direction === 'next') {
-        return {
-          OR: [
-            {
-              createdAt: { lt: cursorInfo.createdAt },
-            },
-            {
-              createdAt: cursorInfo.createdAt,
-              articleId: { lt: cursorInfo.id },
-            },
-          ],
-        }
-      }
-
-      return {
-        OR: [
-          {
-            createdAt: { gt: cursorInfo.createdAt },
-          },
-          {
-            createdAt: cursorInfo.createdAt,
-            articleId: { gt: cursorInfo.id },
-          },
-        ],
-      }
-    } catch {
-      return null
-    }
-  }
-
   private static buildWhereClause(
-    params: Omit<ArticleQueryParams, 'cursor' | 'limit' | 'direction'>,
+    params: Omit<ArticleQueryParams, 'page' | 'limit'>,
   ): Prisma.ArticleWhereInput {
     const where: Prisma.ArticleWhereInput = {}
 

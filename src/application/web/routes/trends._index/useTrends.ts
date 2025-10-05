@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
-import { PaginationCursor, PaginationDirection } from '../../types/paginations'
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
@@ -12,35 +11,30 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
-export type FetchArticles = (params: {
-  date: Date
-  direction?: PaginationDirection
-  limit?: number
-}) => Promise<void>
+export type FetchArticles = (params: { date: Date; page?: number; limit?: number }) => Promise<void>
 
 export default function useTrends() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [articles, setArticles] = useState<Article[]>([])
-  const [cursor, setCursor] = useState<PaginationCursor>({})
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
 
   const date = new Date()
 
   const fetchArticles: FetchArticles = useCallback(
-    async ({ date, direction = 'next', limit = 20 }) => {
+    async ({ date, page = 1, limit = 20 }) => {
       if (isLoading) return
 
       setIsLoading(true)
       try {
         const queryDate = formatDate(date)
-        const cursorValue = cursor[direction]
 
         const res = await getApiClientForClient().articles.$get({
           query: {
             to: queryDate,
             from: queryDate,
-            direction,
-            cursor: cursorValue,
+            page,
             limit,
           },
         })
@@ -57,19 +51,15 @@ export default function useTrends() {
               createdAt: new Date(data.createdAt),
             })),
           )
-          setCursor({
-            next: resJson.nextCursor,
-            prev: resJson.prevCursor,
-          })
+          setPage(resJson.page)
+          setTotalPages(resJson.totalPages)
 
           // URLパラメータを更新
           const newParams = new URLSearchParams(searchParams)
-          if (cursorValue) {
-            newParams.set('cursor', cursorValue)
-            newParams.set('direction', direction)
+          if (page > 1) {
+            newParams.set('page', page.toString())
           } else {
-            newParams.delete('cursor')
-            newParams.delete('direction')
+            newParams.delete('page')
           }
           setSearchParams(newParams, { replace: true })
 
@@ -92,7 +82,7 @@ export default function useTrends() {
         setIsLoading(false)
       }
     },
-    [cursor, isLoading, searchParams, setSearchParams],
+    [isLoading, searchParams, setSearchParams],
   )
 
   // INFO: 初回読み込み時に今日の日付で記事を取得
@@ -104,7 +94,8 @@ export default function useTrends() {
     date,
     articles,
     fetchArticles,
-    cursor,
+    page,
+    totalPages,
     isLoading,
   }
 }

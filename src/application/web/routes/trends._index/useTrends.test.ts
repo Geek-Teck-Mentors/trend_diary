@@ -1,7 +1,7 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { createElement } from 'react'
 import type { ReactNode } from 'react'
+import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
@@ -45,15 +45,21 @@ const generateFakeResponse = (
   params?: Partial<{
     status: number
     articles: Article[]
-    nextCursor: string | null
-    prevCursor: string | null
+    page: number
+    limit: number
+    total: number
+    totalPages: number
   }>,
 ) => ({
   status: params?.status || 200,
   json: vi.fn().mockResolvedValue({
     data: params?.articles || [],
-    nextCursor: params?.nextCursor || null,
-    prevCursor: params?.prevCursor || null,
+    page: params?.page || 1,
+    limit: params?.limit || 20,
+    total: params?.total || 0,
+    totalPages: params?.totalPages || 1,
+    hasNext: (params?.page || 1) < (params?.totalPages || 1),
+    hasPrev: (params?.page || 1) > 1,
   }),
 })
 
@@ -62,8 +68,7 @@ type UseTrendsHook = ReturnType<typeof useTrends>
 
 function setupHook(): RenderHookResult<UseTrendsHook, unknown> {
   return renderHook(() => useTrends(), {
-    wrapper: ({ children }: { children: ReactNode }) =>
-      createElement(MemoryRouter, null, children),
+    wrapper: ({ children }: { children: ReactNode }) => createElement(MemoryRouter, null, children),
   })
 }
 
@@ -86,8 +91,10 @@ describe('useTrends', () => {
 
       const fakeResponse = generateFakeResponse({
         articles: fakeArticles,
-        nextCursor: 'next-cursor',
-        prevCursor: 'prev-cursor',
+        page: 1,
+        limit: 20,
+        total: 2,
+        totalPages: 1,
       })
 
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
@@ -102,26 +109,27 @@ describe('useTrends', () => {
         query: {
           to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
           from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
-          direction: 'next',
-          cursor: undefined,
+          page: 1,
           limit: 20,
         },
       })
       expect(result.current.articles[0].title).toBe('記事1')
-      expect(result.current.cursor.next).toBe('next-cursor')
-      expect(result.current.cursor.prev).toBe('prev-cursor')
+      expect(result.current.page).toBe(1)
+      expect(result.current.totalPages).toBe(1)
     })
 
-    it('directionをnextに設定すると、次のページが取得できる', async () => {
+    it('pageを2に設定すると、2ページ目が取得できる', async () => {
       const initialFakeResponse = generateFakeResponse({
-        nextCursor: 'next-cursor-initial',
-        prevCursor: null,
+        page: 1,
+        totalPages: 3,
       })
 
       const nextPageFakeResponse = generateFakeResponse({
         articles: [generateFakeArticle({ articleId: BigInt(3), title: '記事3' })],
-        nextCursor: 'next-cursor-2',
-        prevCursor: 'prev-cursor-2',
+        page: 2,
+        limit: 20,
+        total: 50,
+        totalPages: 3,
       })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
@@ -129,7 +137,7 @@ describe('useTrends', () => {
       const { result } = setupHook()
 
       await waitFor(() => {
-        expect(result.current.cursor.next).toBe('next-cursor-initial')
+        expect(result.current.page).toBe(1)
       })
 
       mockApiClient.articles.$get.mockResolvedValueOnce(nextPageFakeResponse)
@@ -137,7 +145,7 @@ describe('useTrends', () => {
       await act(async () => {
         await result.current.fetchArticles({
           date: new Date('2024-01-01'),
-          direction: 'next',
+          page: 2,
         })
       })
 
@@ -145,55 +153,12 @@ describe('useTrends', () => {
         query: {
           to: '2024-01-01',
           from: '2024-01-01',
-          direction: 'next',
-          cursor: 'next-cursor-initial',
+          page: 2,
           limit: 20,
         },
       })
       expect(result.current.articles).toHaveLength(1)
       expect(result.current.articles[0].title).toBe('記事3')
-    })
-
-    it('directionをprevに設定すると、前のページが取得できる', async () => {
-      const initialFakeResponse = generateFakeResponse({
-        nextCursor: null,
-        prevCursor: 'prev-cursor-initial',
-      })
-
-      const prevPageFakeResponse = generateFakeResponse({
-        articles: [generateFakeArticle({ articleId: BigInt(4), title: '記事4' })],
-        nextCursor: 'next-cursor-3',
-        prevCursor: 'prev-cursor-3',
-      })
-
-      mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
-
-      const { result } = setupHook()
-
-      await waitFor(() => {
-        expect(result.current.cursor.prev).toBe('prev-cursor-initial')
-      })
-
-      mockApiClient.articles.$get.mockResolvedValueOnce(prevPageFakeResponse)
-
-      await act(async () => {
-        await result.current.fetchArticles({
-          date: new Date('2024-01-01'),
-          direction: 'prev',
-        })
-      })
-
-      expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith({
-        query: {
-          to: '2024-01-01',
-          from: '2024-01-01',
-          direction: 'prev',
-          cursor: 'prev-cursor-initial',
-          limit: 20,
-        },
-      })
-      expect(result.current.articles).toHaveLength(1)
-      expect(result.current.articles[0].title).toBe('記事4')
     })
 
     it('loading中はisLoadingがtrueになる', async () => {
@@ -205,8 +170,12 @@ describe('useTrends', () => {
             json: () =>
               Promise.resolve({
                 data: [],
-                nextCursor: null,
-                prevCursor: null,
+                page: 1,
+                limit: 20,
+                total: 0,
+                totalPages: 1,
+                hasNext: false,
+                hasPrev: false,
               }),
           })
       })
@@ -252,18 +221,19 @@ describe('useTrends', () => {
         query: {
           to: '2024-01-01',
           from: '2024-01-01',
-          direction: 'next',
-          cursor: null,
+          page: 1,
           limit: 10,
         },
       })
     })
 
-    it('記事一覧を取得したタイミングで、前後のページの情報が更新される', async () => {
+    it('記事一覧を取得したタイミングで、ページ情報が更新される', async () => {
       const fakeResponse = generateFakeResponse({
         articles: [generateFakeArticle()],
-        nextCursor: 'updated-next-cursor',
-        prevCursor: 'updated-prev-cursor',
+        page: 2,
+        limit: 20,
+        total: 50,
+        totalPages: 3,
       })
 
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
@@ -271,8 +241,8 @@ describe('useTrends', () => {
       const { result } = setupHook()
 
       await waitFor(() => {
-        expect(result.current.cursor.next).toBe('updated-next-cursor')
-        expect(result.current.cursor.prev).toBe('updated-prev-cursor')
+        expect(result.current.page).toBe(2)
+        expect(result.current.totalPages).toBe(3)
       })
     })
 
@@ -288,8 +258,8 @@ describe('useTrends', () => {
       })
 
       expect(result.current.articles).toEqual([])
-      expect(result.current.cursor.next).toBeNull()
-      expect(result.current.cursor.prev).toBeNull()
+      expect(result.current.page).toBe(1)
+      expect(result.current.totalPages).toBe(1)
     })
   })
 
@@ -303,8 +273,12 @@ describe('useTrends', () => {
             json: () =>
               Promise.resolve({
                 data: [],
-                nextCursor: null,
-                prevCursor: null,
+                page: 1,
+                limit: 20,
+                total: 0,
+                totalPages: 1,
+                hasNext: false,
+                hasPrev: false,
               }),
           })
       })

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { cursorPaginationSchema } from '@/common/pagination'
+import { offsetPaginationSchema } from '@/common/pagination'
 
 const mediaEnum = z.enum(['qiita', 'zenn'])
 const readStatusEnum = z.enum(['0', '1'])
@@ -33,7 +33,7 @@ export const articleQuerySchema = baseArticleSearchSchema
   .extend({
     readStatus: z.boolean().optional(),
   })
-  .merge(cursorPaginationSchema)
+  .merge(offsetPaginationSchema)
   .refine(dateRangeRefine, {
     message: DATE_RANGE_ERROR_MESSAGE,
   })
@@ -44,7 +44,7 @@ export const apiArticleQuerySchema = baseArticleSearchSchema
   .extend({
     read_status: readStatusEnum.optional(),
   })
-  .merge(cursorPaginationSchema)
+  .merge(offsetPaginationSchema)
   .refine(dateRangeRefine, {
     message: DATE_RANGE_ERROR_MESSAGE,
   })

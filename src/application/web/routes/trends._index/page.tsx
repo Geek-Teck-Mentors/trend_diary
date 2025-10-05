@@ -11,7 +11,6 @@ import {
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
-import { PaginationCursor } from '../../types/paginations'
 import ArticleCard from './components/ArticleCard'
 import { FetchArticles } from './useTrends'
 
@@ -21,7 +20,8 @@ type Props = {
   fetchArticles: FetchArticles
   openDrawer: (article: Article) => void
   isLoading: boolean
-  cursor: PaginationCursor
+  page: number
+  totalPages: number
 }
 
 export default function TrendsPage({
@@ -30,7 +30,8 @@ export default function TrendsPage({
   fetchArticles,
   openDrawer,
   isLoading,
-  cursor,
+  page,
+  totalPages,
 }: Props) {
   const [searchParams] = useSearchParams()
 
@@ -38,13 +39,13 @@ export default function TrendsPage({
     openDrawer(article)
   }
   const handlePrevPageClick = (isDisabled: boolean) => {
-    if (cursor.prev && !isDisabled) {
-      fetchArticles({ date, direction: 'prev' })
+    if (!isDisabled && page > 1) {
+      fetchArticles({ date, page: page - 1 })
     }
   }
   const handleNextPageClick = (isDisabled: boolean) => {
-    if (cursor.next && !isDisabled) {
-      fetchArticles({ date, direction: 'next' })
+    if (!isDisabled && page < totalPages) {
+      fetchArticles({ date, page: page + 1 })
     }
   }
   const getPaginationClass = (isDisabled: boolean) => {
@@ -77,16 +78,16 @@ export default function TrendsPage({
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  aria-disabled={!cursor.prev}
-                  className={getPaginationClass(!cursor.prev)}
-                  onClick={() => handlePrevPageClick(!cursor.prev)}
+                  aria-disabled={page <= 1}
+                  className={getPaginationClass(page <= 1)}
+                  onClick={() => handlePrevPageClick(page <= 1)}
                 />
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
-                  aria-disabled={!cursor.next}
-                  className={getPaginationClass(!cursor.next)}
-                  onClick={() => handleNextPageClick(!cursor.next)}
+                  aria-disabled={page >= totalPages}
+                  className={getPaginationClass(page >= totalPages)}
+                  onClick={() => handleNextPageClick(page >= totalPages)}
                 />
               </PaginationItem>
             </PaginationContent>
