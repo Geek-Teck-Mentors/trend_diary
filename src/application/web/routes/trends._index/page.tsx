@@ -95,6 +95,11 @@ export default function TrendsPage({
                 />
               </PaginationItem>
               <PaginationItem>
+                <span className='mx-4 text-sm'>
+                  ページ {page} / {totalPages}
+                </span>
+              </PaginationItem>
+              <PaginationItem>
                 <PaginationNext
                   aria-disabled={isNextDisabled}
                   className={getPaginationClass(isNextDisabled)}
