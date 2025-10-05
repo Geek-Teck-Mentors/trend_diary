@@ -40,8 +40,8 @@ export default function TrendsPage({
   const handleCardClick = (article: Article) => {
     openDrawer(article)
   }
-  const handlePrevPageClick = (isDisabled: boolean) => {
-    if (!isDisabled && page > 1) {
+  const handlePrevPageClick = () => {
+    if (!isPrevDisabled) {
       const newParams = new URLSearchParams(searchParams)
       const newPage = page - 1
       if (newPage > 1) {
@@ -52,8 +52,8 @@ export default function TrendsPage({
       setSearchParams(newParams)
     }
   }
-  const handleNextPageClick = (isDisabled: boolean) => {
-    if (!isDisabled && page < totalPages) {
+  const handleNextPageClick = () => {
+    if (!isNextDisabled) {
       const newParams = new URLSearchParams(searchParams)
       newParams.set('page', (page + 1).toString())
       setSearchParams(newParams)
@@ -91,14 +91,14 @@ export default function TrendsPage({
                 <PaginationPrevious
                   aria-disabled={isPrevDisabled}
                   className={getPaginationClass(isPrevDisabled)}
-                  onClick={() => handlePrevPageClick(isPrevDisabled)}
+                  onClick={handlePrevPageClick}
                 />
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
                   aria-disabled={isNextDisabled}
                   className={getPaginationClass(isNextDisabled)}
-                  onClick={() => handleNextPageClick(isNextDisabled)}
+                  onClick={handleNextPageClick}
                 />
               </PaginationItem>
             </PaginationContent>
