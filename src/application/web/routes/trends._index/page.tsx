@@ -45,10 +45,10 @@ export default function TrendsPage({
     },
     [openDrawer],
   )
-  const handlePrevPageClick = useCallback(() => {
-    if (!isPrevDisabled) {
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
       const newParams = new URLSearchParams(searchParams)
-      const newPage = page - 1
       if (newPage > 1) {
         newParams.set('page', newPage.toString())
       } else {
@@ -56,16 +56,21 @@ export default function TrendsPage({
       }
       newParams.set('limit', limit.toString())
       setSearchParams(newParams)
+    },
+    [searchParams, limit, setSearchParams],
+  )
+
+  const handlePrevPageClick = useCallback(() => {
+    if (!isPrevDisabled) {
+      handlePageChange(page - 1)
     }
-  }, [isPrevDisabled, page, searchParams, limit, setSearchParams])
+  }, [isPrevDisabled, page, handlePageChange])
+
   const handleNextPageClick = useCallback(() => {
     if (!isNextDisabled) {
-      const newParams = new URLSearchParams(searchParams)
-      newParams.set('page', (page + 1).toString())
-      newParams.set('limit', limit.toString())
-      setSearchParams(newParams)
+      handlePageChange(page + 1)
     }
-  }, [isNextDisabled, page, searchParams, limit, setSearchParams])
+  }, [isNextDisabled, page, handlePageChange])
   const getPaginationClass = (isDisabled: boolean) => {
     const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
     return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')
