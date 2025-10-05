@@ -1,5 +1,5 @@
 import Footer from '../../components/Footer'
-import Header from '../../components/Header'
+import LandingHeader from '../../components/LandingHeader'
 import { AnchorLink } from '../../components/link'
 import PageError from '../../components/PageError'
 import { PageErrorType } from '../../components/PageError/usePageError'
@@ -15,7 +15,7 @@ type Props = {
 export default function LoginPage({ handleSubmit, pageError }: Props) {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
-      <Header enableUserFeature={true} />
+      <LandingHeader enableUserFeature={true} />
       <div className='flex min-h-[calc(100vh-180px)] items-center justify-center p-4'>
         <Card className='flex w-full max-w-md flex-col'>
           <CardHeader className='space-y-1'>
