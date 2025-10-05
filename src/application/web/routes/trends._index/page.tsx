@@ -35,6 +35,9 @@ export default function TrendsPage({
 }: Props) {
   const [searchParams] = useSearchParams()
 
+  const isPrevDisabled = page <= 1
+  const isNextDisabled = page >= totalPages
+
   const handleCardClick = (article: Article) => {
     openDrawer(article)
   }
@@ -78,16 +81,16 @@ export default function TrendsPage({
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  aria-disabled={page <= 1}
-                  className={getPaginationClass(page <= 1)}
-                  onClick={() => handlePrevPageClick(page <= 1)}
+                  aria-disabled={isPrevDisabled}
+                  className={getPaginationClass(isPrevDisabled)}
+                  onClick={() => handlePrevPageClick(isPrevDisabled)}
                 />
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
-                  aria-disabled={page >= totalPages}
-                  className={getPaginationClass(page >= totalPages)}
-                  onClick={() => handleNextPageClick(page >= totalPages)}
+                  aria-disabled={isNextDisabled}
+                  className={getPaginationClass(isNextDisabled)}
+                  onClick={() => handleNextPageClick(isNextDisabled)}
                 />
               </PaginationItem>
             </PaginationContent>
