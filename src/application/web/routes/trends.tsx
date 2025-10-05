@@ -15,7 +15,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
-  const [displayName, setDisplayName] = useState('未設定')
+  const [displayName, setDisplayName] = useState('')
   const { userFeatureEnabled } = useLoaderData<typeof loader>()
 
   useEffect(() => {
@@ -27,9 +27,9 @@ export default function Layout() {
       const res = await client.user.me.$get({}, { init: { credentials: 'include' } })
       if (res.status === 200) {
         const resJson = await res.json()
-        setDisplayName(resJson.user?.displayName ?? '未設定')
+        setDisplayName(resJson.user?.displayName ?? '')
       } else {
-        setDisplayName('ゲスト')
+        setDisplayName('')
       }
     }
 

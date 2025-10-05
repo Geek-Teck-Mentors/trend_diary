@@ -1,5 +1,6 @@
 import { BookOpen, Menu } from 'lucide-react'
 import { useNavigate } from 'react-router'
+import { isLoggedIn } from '../../features/authenticate/userStatus'
 import { AnchorLink } from '../link'
 import { menuItems } from '../Sidebar'
 import useSidebar from '../Sidebar/useSidebar'
@@ -57,7 +58,7 @@ export default function AppHeader({ displayName, userFeatureEnabled }: Props) {
                 ))}
               </nav>
 
-              {userFeatureEnabled && displayName !== 'ゲスト' && displayName !== '未設定' && (
+              {userFeatureEnabled && isLoggedIn(displayName) && (
                 <div className='border-t pt-4 mt-auto'>
                   <div className='text-xs font-semibold text-gray-500 mb-2 px-3'>User</div>
                   <div className='flex flex-col gap-2 px-3'>

@@ -1,5 +1,6 @@
 import { BookOpen, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
+import { isLoggedIn } from '../../features/authenticate/userStatus'
 import { InternalPath } from '../../routes'
 import { AnchorLink } from '../link'
 import {
@@ -74,7 +75,7 @@ export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-          {userFeatureEnabled && displayName !== 'ゲスト' && displayName !== '未設定' && (
+          {userFeatureEnabled && isLoggedIn(displayName) && (
             <SidebarGroup className='absolute bottom-0 left-0 w-full'>
               <SidebarGroupLabel>User</SidebarGroupLabel>
               <SidebarGroupContent>
