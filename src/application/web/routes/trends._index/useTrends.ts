@@ -23,90 +23,66 @@ export default function useTrends() {
 
   const date = useMemo(() => new Date(), [])
 
-  const fetchArticles: FetchArticles = useCallback(
-    async ({ date, page = 1, limit = 20 }) => {
-      if (isLoadingRef.current) return
+  const fetchArticles: FetchArticles = useCallback(async ({ date, page = 1, limit = 20 }) => {
+    if (isLoadingRef.current) return
 
-      isLoadingRef.current = true
-      setIsLoading(true)
-      try {
-        const queryDate = formatDate(date)
+    isLoadingRef.current = true
+    setIsLoading(true)
+    try {
+      const queryDate = formatDate(date)
 
-        const res = await getApiClientForClient().articles.$get({
-          query: {
-            to: queryDate,
-            from: queryDate,
-            page,
-            limit,
-          },
-        })
-        if (res.status === 200) {
-          const resJson = await res.json()
-          setArticles(
-            resJson.data.map((data) => ({
-              articleId: BigInt(data.articleId),
-              media: data.media,
-              title: data.title,
-              author: data.author,
-              description: data.description,
-              url: data.url,
-              createdAt: new Date(data.createdAt),
-            })),
-          )
-          setPage(resJson.page)
-          setTotalPages(resJson.totalPages)
+      const res = await getApiClientForClient().articles.$get({
+        query: {
+          to: queryDate,
+          from: queryDate,
+          page,
+          limit,
+        },
+      })
+      if (res.status === 200) {
+        const resJson = await res.json()
+        setArticles(
+          resJson.data.map((data) => ({
+            articleId: BigInt(data.articleId),
+            media: data.media,
+            title: data.title,
+            author: data.author,
+            description: data.description,
+            url: data.url,
+            createdAt: new Date(data.createdAt),
+          })),
+        )
+        setPage(resJson.page)
+        setTotalPages(resJson.totalPages)
 
-          // URLパラメータを更新（無限ループ防止のため、既に同じ値の場合は更新しない）
-          const currentPage = searchParams.get('page')
-          let shouldUpdateUrl: boolean
-          if (page > 1) {
-            // ページが1より大きい場合、URLのpageパラメータが現在のページ番号と異なれば更新
-            shouldUpdateUrl = currentPage !== page.toString()
-          } else {
-            // ページが1の場合、URLにpageパラメータが存在すれば削除
-            shouldUpdateUrl = currentPage !== null
-          }
-
-          if (shouldUpdateUrl) {
-            const newParams = new URLSearchParams(searchParams)
-            if (page > 1) {
-              newParams.set('page', page.toString())
-            } else {
-              newParams.delete('page')
-            }
-            setSearchParams(newParams, { replace: true })
-          }
-
-          // 400番台
-        } else if (res.status >= 400 && res.status < 500) {
-          throw new Error('不正なパラメータです')
-        } else if (res.status >= 500) {
-          throw new Error('不明なエラーが発生しました')
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          const errorMessage = error.message || 'エラーが発生しました'
-          toast.error(errorMessage)
-        } else {
-          toast.error('不明なエラーが発生しました')
-          // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
-          console.error(error)
-        }
-      } finally {
-        isLoadingRef.current = false
-        setIsLoading(false)
+        // 400番台
+      } else if (res.status >= 400 && res.status < 500) {
+        throw new Error('不正なパラメータです')
+      } else if (res.status >= 500) {
+        throw new Error('不明なエラーが発生しました')
       }
-    },
-    [searchParams, setSearchParams],
-  )
+    } catch (error) {
+      if (error instanceof Error) {
+        const errorMessage = error.message || 'エラーが発生しました'
+        toast.error(errorMessage)
+      } else {
+        toast.error('不明なエラーが発生しました')
+        // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
+        console.error(error)
+      }
+    } finally {
+      isLoadingRef.current = false
+      setIsLoading(false)
+    }
+  }, [])
 
-  // INFO: 初回読み込み時に今日の日付で記事を取得（URLパラメータからページ番号を取得）
+  // INFO: URLパラメータの変更を監視して記事を取得
   useEffect(() => {
     const pageParam = searchParams.get('page')
-    const initialPage = pageParam ? parseInt(pageParam, 10) : 1
-    const validPage = Number.isNaN(initialPage) ? 1 : Math.max(initialPage, 1)
+    const currentPage = pageParam ? parseInt(pageParam, 10) : 1
+    const validPage = Number.isNaN(currentPage) ? 1 : Math.max(currentPage, 1)
     fetchArticles({ date, page: validPage })
-  }, [])
+  }, [searchParams, date, fetchArticles])
 
   return {
     date,
@@ -115,5 +91,6 @@ export default function useTrends() {
     page,
     totalPages,
     isLoading,
+    setSearchParams,
   }
 }

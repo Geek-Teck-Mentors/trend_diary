@@ -12,12 +12,11 @@ import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ArticleCard from './components/ArticleCard'
-import { FetchArticles } from './useTrends'
 
 type Props = {
   date: Date
   articles: Article[]
-  fetchArticles: FetchArticles
+  setSearchParams: ReturnType<typeof useSearchParams>[1]
   openDrawer: (article: Article) => void
   isLoading: boolean
   page: number
@@ -27,7 +26,7 @@ type Props = {
 export default function TrendsPage({
   date,
   articles,
-  fetchArticles,
+  setSearchParams,
   openDrawer,
   isLoading,
   page,
@@ -43,12 +42,21 @@ export default function TrendsPage({
   }
   const handlePrevPageClick = (isDisabled: boolean) => {
     if (!isDisabled && page > 1) {
-      fetchArticles({ date, page: page - 1 })
+      const newParams = new URLSearchParams(searchParams)
+      const newPage = page - 1
+      if (newPage > 1) {
+        newParams.set('page', newPage.toString())
+      } else {
+        newParams.delete('page')
+      }
+      setSearchParams(newParams)
     }
   }
   const handleNextPageClick = (isDisabled: boolean) => {
     if (!isDisabled && page < totalPages) {
-      fetchArticles({ date, page: page + 1 })
+      const newParams = new URLSearchParams(searchParams)
+      newParams.set('page', (page + 1).toString())
+      setSearchParams(newParams)
     }
   }
   const getPaginationClass = (isDisabled: boolean) => {
