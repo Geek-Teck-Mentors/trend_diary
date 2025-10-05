@@ -24,14 +24,14 @@ export default class ArticleQueryImpl implements ArticleQuery {
         { articleId: 'desc' },
       ]
 
-      const [articles, total] = await Promise.all([
+      const [total, articles] = await this.db.$transaction([
+        this.db.article.count({ where }),
         this.db.article.findMany({
           where,
           orderBy,
           skip: (page - 1) * limit,
           take: limit,
         }),
-        this.db.article.count({ where }),
       ])
 
       const mappedArticles = articles.map(fromPrismaToArticle)
