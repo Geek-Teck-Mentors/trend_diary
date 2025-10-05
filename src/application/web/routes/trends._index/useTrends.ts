@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
@@ -19,13 +19,15 @@ export default function useTrends() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const isLoadingRef = useRef(false)
 
   const date = useMemo(() => new Date(), [])
 
   const fetchArticles: FetchArticles = useCallback(
     async ({ date, page = 1, limit = 20 }) => {
-      if (isLoading) return
+      if (isLoadingRef.current) return
 
+      isLoadingRef.current = true
       setIsLoading(true)
       try {
         const queryDate = formatDate(date)
@@ -84,10 +86,11 @@ export default function useTrends() {
           console.error(error)
         }
       } finally {
+        isLoadingRef.current = false
         setIsLoading(false)
       }
     },
-    [isLoading, searchParams, setSearchParams],
+    [searchParams, setSearchParams],
   )
 
   // INFO: 初回読み込み時に今日の日付で記事を取得（URLパラメータからページ番号を取得）
