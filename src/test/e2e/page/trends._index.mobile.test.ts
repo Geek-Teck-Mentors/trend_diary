@@ -1,0 +1,146 @@
+import { expect, Locator, Page, test } from '@playwright/test'
+import articleTestHelper from '@/test/helper/articleTestHelper'
+
+const ARTICLE_COUNT = 10
+const TIMEOUT = 10000
+const MOBILE_VIEWPORT = { width: 375, height: 667 }
+
+test.describe('記事一覧ページ(モバイル)', () => {
+  test.use({ viewport: MOBILE_VIEWPORT })
+
+  test.beforeAll(async () => {
+    await articleTestHelper.cleanUpArticles()
+  })
+
+  test.afterAll(async () => {
+    await articleTestHelper.cleanUpArticles()
+    await articleTestHelper.disconnect()
+  })
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/trends')
+  })
+
+  test.describe('レイアウト確認', () => {
+    test('AppHeaderが表示され、AppSidebarが非表示であること', async ({ page }) => {
+      // AppHeaderが表示されていること
+      const header = page.locator('header')
+      await expect(header).toBeVisible()
+
+      // ハンバーガーメニューボタンが表示されていること
+      const menuButton = page.getByRole('button', { name: 'メニューを開く' })
+      await expect(menuButton).toBeVisible()
+
+      // AppSidebarが非表示であること(data-slot='sidebar'で判定)
+      const sidebar = page.locator('[data-slot="sidebar"]')
+      await expect(sidebar).not.toBeVisible()
+    })
+
+    test('ハンバーガーメニューを開いてメニュー項目が表示されること', async ({ page }) => {
+      // ハンバーガーメニューを開く
+      const menuButton = page.getByRole('button', { name: 'メニューを開く' })
+      await menuButton.click()
+
+      // Sheetが開くのを待機
+      const sheet = page.getByRole('dialog')
+      await expect(sheet).toBeVisible({ timeout: TIMEOUT })
+
+      // Applicationラベルが表示されていること
+      await expect(sheet.getByText('Application')).toBeVisible()
+
+      // トレンド記事リンクが表示されていること
+      await expect(sheet.getByRole('link', { name: 'トレンド記事' })).toBeVisible()
+    })
+  })
+
+  test.describe('記事がない場合', () => {
+    test('記事がないと表示される', async ({ page }) => {
+      await expect(page.getByText('記事がありません')).toBeVisible({ timeout: TIMEOUT })
+    })
+  })
+
+  test.describe('記事がある場合', () => {
+    test.beforeAll(async () => {
+      // 記事を作成
+      await Promise.all(
+        Array.from({ length: ARTICLE_COUNT }, () => articleTestHelper.createArticle()),
+      )
+    })
+
+    test.beforeEach(async ({ page }) => {
+      // カードが表示されるのを待機
+      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
+    })
+
+    async function waitDrawerOpen(page: Page): Promise<Locator> {
+      // ドロワーが開くのを待機
+      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
+
+      // ドロワーの存在を確認
+      const drawer = page.getByRole('dialog')
+      await expect(drawer).toBeVisible()
+
+      return drawer
+    }
+
+    test('記事カードがモバイルサイズで全幅表示されること', async ({ page }) => {
+      // 記事カードの存在を確認
+      const articleCard = page.locator('[data-slot="card"]').first()
+      await expect(articleCard).toBeVisible()
+
+      // カードの幅を取得(w-fullで375pxに近い値になるはず)
+      const cardBox = await articleCard.boundingBox()
+      expect(cardBox).not.toBeNull()
+      if (cardBox) {
+        // モバイル幅375pxから左右のpadding等を引いた値に近いことを確認
+        // 完全一致ではなく、おおよそ全幅であることを確認
+        expect(cardBox.width).toBeGreaterThan(300)
+      }
+    })
+
+    test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
+      // 記事カードの存在を確認
+      const articleCards = page.locator('[data-slot="card"]')
+      const articleCard = articleCards.first()
+      await expect(articleCard).toBeVisible()
+
+      await articleCard.click()
+
+      const drawer = await waitDrawerOpen(page)
+      await drawer.getByRole('button', { name: 'Close' }).click()
+
+      // ドロワーが閉じるのを待機
+      await page.getByRole('dialog').waitFor({
+        state: 'detached',
+        timeout: TIMEOUT,
+      })
+
+      // 記事一覧に戻っていることを確認(記事カードが表示されていること)
+      await expect(articleCard).toBeVisible()
+      // ドロワーが閉じていることを確認
+      await expect(page.getByRole('dialog')).not.toBeVisible()
+    })
+
+    test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
+      const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
+
+      // 記事カードをクリック
+      const articleCard = page.locator('[data-slot="card"]').first()
+      await articleCard.click()
+
+      const drawer = await waitDrawerOpen(page)
+      const drawerLink = drawer.getByRole('link', { name: '記事を読む' })
+      await expect(drawerLink).toBeVisible()
+
+      // ドロワーの記事を読むリンクのURLを上書き
+      await drawerLink.evaluate((element, url) => {
+        ;(element as HTMLAnchorElement).href = url
+      }, ARTICLE_URL)
+      await drawerLink.click()
+
+      // 新しいタブでそのリンクのページに遷移する
+      const newPage = await page.context().waitForEvent('page')
+      await expect(newPage).toHaveURL(ARTICLE_URL)
+    })
+  })
+})
