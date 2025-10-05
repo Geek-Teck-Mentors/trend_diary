@@ -87,15 +87,21 @@ export default function useTrends() {
     const currentPage = pageParam ? parseInt(pageParam, 10) : 1
     const validPage = Number.isNaN(currentPage) ? 1 : Math.max(currentPage, 1)
 
-    // デフォルトのlimitはモバイルなら10、デスクトップなら20
-    const defaultLimit = isMobile ? 10 : 20
-    const currentLimit = limitParam ? parseInt(limitParam, 10) : defaultLimit
-    const validLimit = Number.isNaN(currentLimit)
-      ? defaultLimit
-      : Math.max(Math.min(currentLimit, 100), 1)
+    // limitParamが明示的に指定されている場合はそれを使用
+    // 指定がない場合のみisMobileに基づいたデフォルト値を使用
+    let validLimit: number
+    if (limitParam) {
+      const currentLimit = parseInt(limitParam, 10)
+      validLimit = Number.isNaN(currentLimit) ? 20 : Math.max(Math.min(currentLimit, 100), 1)
+    } else {
+      // デフォルトのlimitはモバイルなら10、デスクトップなら20
+      validLimit = isMobile ? 10 : 20
+    }
 
     fetchArticles({ date, page: validPage, limit: validLimit })
-  }, [searchParams, date, fetchArticles, isMobile])
+    // NOTE: isMobileを依存配列から除外することで、初回マウント時のisMobile変化による2重実行を防ぐ
+    // isMobileの最新値はクロージャー経由で常に参照できる
+  }, [searchParams, date, fetchArticles])
 
   return {
     date,
