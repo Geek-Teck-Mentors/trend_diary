@@ -10,12 +10,6 @@ const limit = z
   })
   .default(20)
 
-export const cursorPaginationSchema = z.object({
-  cursor: z.string().optional(),
-  limit,
-  direction: z.enum(['next', 'prev']).default('next'),
-})
-
 export const offsetPaginationSchema = z.object({
   page: z
     .union([z.string(), z.number()])
