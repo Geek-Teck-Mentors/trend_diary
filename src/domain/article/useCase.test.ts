@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { mockDeep } from 'vitest-mock-extended'
 import { NotFoundError, ServerError } from '@/common/errors'
-import { CursorPaginationResult } from '@/common/pagination'
+import { OffsetPaginationResult } from '@/common/pagination'
 import { isError, isSuccess, resultError, resultSuccess } from '@/common/types/utility'
 import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
@@ -19,10 +19,12 @@ const mockArticle: Article = {
   createdAt: new Date(),
 }
 
-const mockPaginationResult: CursorPaginationResult<Article> = {
+const mockPaginationResult: OffsetPaginationResult<Article> = {
   data: [mockArticle],
-  nextCursor: undefined,
-  prevCursor: undefined,
+  page: 1,
+  limit: 20,
+  total: 1,
+  totalPages: 1,
   hasNext: false,
   hasPrev: false,
 }
@@ -48,8 +50,7 @@ describe('ArticleUseCase', () => {
           to: '2024-01-31',
           readStatus: false,
           limit: 20,
-          direction: 'next',
-          cursor: undefined,
+          page: 1,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -71,8 +72,7 @@ describe('ArticleUseCase', () => {
           to: '2024-01-31',
           readStatus: false,
           limit: 10,
-          direction: 'prev',
-          cursor: 'test-cursor',
+          page: 2,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -89,7 +89,7 @@ describe('ArticleUseCase', () => {
         const params: ArticleQueryParams = {
           title: 'test title',
           limit: 20,
-          direction: 'next',
+          page: 1,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -100,7 +100,7 @@ describe('ArticleUseCase', () => {
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           title: 'test title',
           limit: 20,
-          direction: 'next',
+          page: 1,
         })
       })
 
@@ -108,7 +108,7 @@ describe('ArticleUseCase', () => {
         const params: ArticleQueryParams = {
           author: 'test author',
           limit: 20,
-          direction: 'next',
+          page: 1,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -119,7 +119,7 @@ describe('ArticleUseCase', () => {
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           author: 'test author',
           limit: 20,
-          direction: 'next',
+          page: 1,
         })
       })
 
@@ -127,7 +127,7 @@ describe('ArticleUseCase', () => {
         const params: ArticleQueryParams = {
           media: 'zenn',
           limit: 20,
-          direction: 'next',
+          page: 1,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -138,7 +138,7 @@ describe('ArticleUseCase', () => {
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           media: 'zenn',
           limit: 20,
-          direction: 'next',
+          page: 1,
         })
       })
 
@@ -146,7 +146,7 @@ describe('ArticleUseCase', () => {
         const params: ArticleQueryParams = {
           from: '2024-01-01',
           limit: 20,
-          direction: 'next',
+          page: 1,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -157,7 +157,7 @@ describe('ArticleUseCase', () => {
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           from: '2024-01-01',
           limit: 20,
-          direction: 'next',
+          page: 1,
         })
       })
 
@@ -165,7 +165,7 @@ describe('ArticleUseCase', () => {
         const params: ArticleQueryParams = {
           to: '2024-01-31',
           limit: 20,
-          direction: 'next',
+          page: 1,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -176,7 +176,7 @@ describe('ArticleUseCase', () => {
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           to: '2024-01-31',
           limit: 20,
-          direction: 'next',
+          page: 1,
         })
       })
 
@@ -185,7 +185,7 @@ describe('ArticleUseCase', () => {
           from: '2024-01-01',
           to: '2024-01-31',
           limit: 20,
-          direction: 'next',
+          page: 1,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -197,7 +197,7 @@ describe('ArticleUseCase', () => {
           from: '2024-01-01',
           to: '2024-01-31',
           limit: 20,
-          direction: 'next',
+          page: 1,
         })
       })
 
@@ -205,7 +205,7 @@ describe('ArticleUseCase', () => {
         const params: ArticleQueryParams = {
           readStatus: true,
           limit: 20,
-          direction: 'next',
+          page: 1,
         }
 
         mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
@@ -216,7 +216,7 @@ describe('ArticleUseCase', () => {
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           readStatus: true,
           limit: 20,
-          direction: 'next',
+          page: 1,
         })
       })
     })
@@ -225,7 +225,7 @@ describe('ArticleUseCase', () => {
       const params: ArticleQueryParams = {
         title: 'test title',
         limit: 20,
-        direction: 'next',
+        page: 1,
       }
 
       const dbError = new ServerError('Database error')

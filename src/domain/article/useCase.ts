@@ -1,5 +1,5 @@
 import { NotFoundError, ServerError } from '@/common/errors'
-import { CursorPaginationResult } from '@/common/pagination'
+import { OffsetPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
 import { AsyncResult, isError, isNull, resultError, resultSuccess } from '@/common/types/utility'
 import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
@@ -15,13 +15,12 @@ export class UseCase {
 
   async searchArticles(
     params: ArticleQueryParams,
-  ): AsyncResult<CursorPaginationResult<Article>, ServerError> {
+  ): AsyncResult<OffsetPaginationResult<Article>, ServerError> {
     const optimizedParams: Partial<ArticleQueryParams> = {
       title: extractTrimmed(params.title),
       author: extractTrimmed(params.author),
       limit: params.limit ?? 20,
-      direction: params.direction ?? 'next',
-      cursor: params.cursor,
+      page: params.page ?? 1,
       from: params.from,
       to: params.to,
       media: params.media,

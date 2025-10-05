@@ -1,3 +1,5 @@
+import { useCallback, useEffect } from 'react'
+import { useSearchParams } from 'react-router'
 import { twMerge } from 'tailwind-merge'
 import {
   Pagination,
@@ -9,44 +11,75 @@ import {
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
-import { PaginationCursor } from '../../types/paginations'
 import ArticleCard from './components/ArticleCard'
-import { FetchArticles } from './useTrends'
 
 type Props = {
   date: Date
   articles: Article[]
-  fetchArticles: FetchArticles
+  setSearchParams: ReturnType<typeof useSearchParams>[1]
   openDrawer: (article: Article) => void
   isLoading: boolean
-  cursor: PaginationCursor
+  page: number
+  limit: number
+  totalPages: number
 }
 
 export default function TrendsPage({
   date,
   articles,
-  fetchArticles,
+  setSearchParams,
   openDrawer,
   isLoading,
-  cursor,
+  page,
+  limit,
+  totalPages,
 }: Props) {
-  const handleCardClick = (article: Article) => {
-    openDrawer(article)
-  }
-  const handlePrevPageClick = (isDisabled: boolean) => {
-    if (cursor.prev && !isDisabled) {
-      fetchArticles({ date, direction: 'prev' })
+  const [searchParams] = useSearchParams()
+
+  const isPrevDisabled = page <= 1
+  const isNextDisabled = page >= totalPages
+
+  const handleCardClick = useCallback(
+    (article: Article) => {
+      openDrawer(article)
+    },
+    [openDrawer],
+  )
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      const newParams = new URLSearchParams(searchParams)
+      if (newPage > 1) {
+        newParams.set('page', newPage.toString())
+      } else {
+        newParams.delete('page')
+      }
+      newParams.set('limit', limit.toString())
+      setSearchParams(newParams)
+    },
+    [searchParams, limit, setSearchParams],
+  )
+
+  const handlePrevPageClick = useCallback(() => {
+    if (!isPrevDisabled) {
+      handlePageChange(page - 1)
     }
-  }
-  const handleNextPageClick = (isDisabled: boolean) => {
-    if (cursor.next && !isDisabled) {
-      fetchArticles({ date, direction: 'next' })
+  }, [isPrevDisabled, page, handlePageChange])
+
+  const handleNextPageClick = useCallback(() => {
+    if (!isNextDisabled) {
+      handlePageChange(page + 1)
     }
-  }
+  }, [isNextDisabled, page, handlePageChange])
   const getPaginationClass = (isDisabled: boolean) => {
     const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
     return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')
   }
+
+  // URLパラメータ変更時にページトップへスクロール
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [searchParams])
 
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
@@ -68,16 +101,21 @@ export default function TrendsPage({
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  aria-disabled={!cursor.prev}
-                  className={getPaginationClass(!cursor.prev)}
-                  onClick={() => handlePrevPageClick(!cursor.prev)}
+                  aria-disabled={isPrevDisabled}
+                  className={getPaginationClass(isPrevDisabled)}
+                  onClick={handlePrevPageClick}
                 />
               </PaginationItem>
               <PaginationItem>
+                <span className='mx-4 text-sm'>
+                  ページ {page} / {totalPages}
+                </span>
+              </PaginationItem>
+              <PaginationItem>
                 <PaginationNext
-                  aria-disabled={!cursor.next}
-                  className={getPaginationClass(!cursor.next)}
-                  onClick={() => handleNextPageClick(!cursor.next)}
+                  aria-disabled={isNextDisabled}
+                  className={getPaginationClass(isNextDisabled)}
+                  onClick={handleNextPageClick}
                 />
               </PaginationItem>
             </PaginationContent>

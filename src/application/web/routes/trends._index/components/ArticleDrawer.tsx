@@ -27,7 +27,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
 
   return createPortal(
     <Drawer open={isOpen} onOpenChange={handleOpenChange} direction='right'>
-      <DrawerContent className='h-full w-1/2'>
+      <DrawerContent className='h-full w-3/4 md:w-1/2'>
         <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
           <div className='flex-1' data-slot='drawer-header-icon'>
             <MediaIcon media={media} />

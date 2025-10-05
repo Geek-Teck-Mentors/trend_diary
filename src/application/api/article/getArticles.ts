@@ -36,8 +36,10 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   logger.info('articles retrieved successfully', { count: paginationResult.data.length })
   const response: ArticleListResponse = {
     data: paginationResult.data.map(convertToResponse),
-    nextCursor: paginationResult.nextCursor,
-    prevCursor: paginationResult.prevCursor,
+    page: paginationResult.page,
+    limit: paginationResult.limit,
+    total: paginationResult.total,
+    totalPages: paginationResult.totalPages,
     hasNext: paginationResult.hasNext,
     hasPrev: paginationResult.hasPrev,
   }

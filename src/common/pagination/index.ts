@@ -1,8 +1,3 @@
 export type { OffsetPaginationParams } from './schema'
-export { cursorPaginationSchema, offsetPaginationSchema } from './schema'
-export type {
-  CursorDirection,
-  CursorPaginationResult,
-  OffsetPaginationResult,
-} from './types'
-export * from './utils'
+export { offsetPaginationSchema } from './schema'
+export type { OffsetPaginationResult } from './types'

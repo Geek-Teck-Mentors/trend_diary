@@ -1,6 +1,6 @@
 import { Article } from '@prisma/client'
 import { ServerError } from '@/common/errors'
-import { CursorPaginationResult } from '@/common/pagination'
+import { OffsetPaginationResult } from '@/common/pagination'
 import { AsyncResult, Nullable } from '@/common/types/utility'
 import { ArticleQueryParams } from './schema/articleQuerySchema'
 import type { ReadHistory } from './schema/readHistorySchema'
@@ -8,7 +8,7 @@ import type { ReadHistory } from './schema/readHistorySchema'
 export interface ArticleQuery {
   searchArticles(
     params: ArticleQueryParams,
-  ): AsyncResult<CursorPaginationResult<Article>, ServerError>
+  ): AsyncResult<OffsetPaginationResult<Article>, ServerError>
   findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError>
 }
 

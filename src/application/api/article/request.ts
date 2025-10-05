@@ -13,8 +13,7 @@ export function convertApiArticleQueryParams(params: ApiArticleQueryParams): Art
 
   return {
     limit: params.limit,
-    direction: params.direction,
-    cursor: params.cursor,
+    page: params.page,
     title: params.title,
     author: params.author,
     media: params.media,
