@@ -16,13 +16,13 @@ import {
 } from '../ui/sidebar'
 import useSidebar from './useSidebar'
 
-interface MenuItem {
+export interface MenuItem {
   title: string
   url: InternalPath
   icon: React.ElementType
 }
 
-const menuItems: MenuItem[] = [
+export const menuItems: MenuItem[] = [
   {
     title: 'トレンド記事',
     url: '/trends',
@@ -45,53 +45,55 @@ export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
   const { handleLogout, isLoading } = useSidebar(navigate)
 
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <AnchorLink
-          to='/'
-          className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-md transition-colors'
-        >
-          <BookOpen className='h-6 w-6' />
-          <span className='text-xl font-semibold'>TrendDiary</span>
-        </AnchorLink>
-      </SidebarHeader>
-      <SidebarContent className='relative'>
-        <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild={true}>
-                    <AnchorLink to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </AnchorLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        {userFeatureEnabled && (
-          <SidebarGroup className='absolute bottom-0 left-0 w-full'>
-            <SidebarGroupLabel>User</SidebarGroupLabel>
+    <div className='hidden md:block'>
+      <Sidebar>
+        <SidebarHeader>
+          <AnchorLink
+            to='/'
+            className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-md transition-colors'
+          >
+            <BookOpen className='h-6 w-6' />
+            <span className='text-xl font-semibold'>TrendDiary</span>
+          </AnchorLink>
+        </SidebarHeader>
+        <SidebarContent className='relative'>
+          <SidebarGroup>
+            <SidebarGroupLabel>Application</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem className='w-full'>
-                  <SidebarMenuButton>ユーザー名：{displayName}</SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={handleLogout} disabled={isLoading}>
-                    {isLoading ? 'ログアウト中...' : 'ログアウト'}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild={true}>
+                      <AnchorLink to={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </AnchorLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
-      </SidebarContent>
-      <SidebarFooter />
-    </Sidebar>
+          {userFeatureEnabled && displayName !== 'ゲスト' && displayName !== '未設定' && (
+            <SidebarGroup className='absolute bottom-0 left-0 w-full'>
+              <SidebarGroupLabel>User</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem className='w-full'>
+                    <SidebarMenuButton>ユーザー名：{displayName}</SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton onClick={handleLogout} disabled={isLoading}>
+                      {isLoading ? 'ログアウト中...' : 'ログアウト'}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+        </SidebarContent>
+        <SidebarFooter />
+      </Sidebar>
+    </div>
   )
 }
