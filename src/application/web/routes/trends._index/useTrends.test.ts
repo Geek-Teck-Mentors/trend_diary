@@ -1,5 +1,8 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { createElement } from 'react'
+import type { ReactNode } from 'react'
+import { MemoryRouter } from 'react-router'
 import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
 import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
@@ -58,7 +61,10 @@ const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
 type UseTrendsHook = ReturnType<typeof useTrends>
 
 function setupHook(): RenderHookResult<UseTrendsHook, unknown> {
-  return renderHook(() => useTrends())
+  return renderHook(() => useTrends(), {
+    wrapper: ({ children }: { children: ReactNode }) =>
+      createElement(MemoryRouter, null, children),
+  })
 }
 
 describe('useTrends', () => {
@@ -359,7 +365,7 @@ describe('useTrends', () => {
       const networkError = new Error(otherErrorMessage)
       mockApiClient.articles.$get.mockRejectedValue(networkError)
 
-      const { result } = renderHook(() => useTrends())
+      const { result } = setupHook()
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith(otherErrorMessage)

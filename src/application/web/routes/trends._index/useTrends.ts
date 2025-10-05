@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
@@ -18,6 +19,7 @@ export type FetchArticles = (params: {
 }) => Promise<void>
 
 export default function useTrends() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [articles, setArticles] = useState<Article[]>([])
   const [cursor, setCursor] = useState<PaginationCursor>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -31,13 +33,14 @@ export default function useTrends() {
       setIsLoading(true)
       try {
         const queryDate = formatDate(date)
+        const cursorValue = cursor[direction]
 
         const res = await getApiClientForClient().articles.$get({
           query: {
             to: queryDate,
             from: queryDate,
             direction,
-            cursor: cursor[direction],
+            cursor: cursorValue,
             limit,
           },
         })
@@ -58,6 +61,18 @@ export default function useTrends() {
             next: resJson.nextCursor,
             prev: resJson.prevCursor,
           })
+
+          // URLパラメータを更新
+          const newParams = new URLSearchParams(searchParams)
+          if (cursorValue) {
+            newParams.set('cursor', cursorValue)
+            newParams.set('direction', direction)
+          } else {
+            newParams.delete('cursor')
+            newParams.delete('direction')
+          }
+          setSearchParams(newParams, { replace: true })
+
           // 400番台
         } else if (res.status >= 400 && res.status < 500) {
           throw new Error('不正なパラメータです')
@@ -77,7 +92,7 @@ export default function useTrends() {
         setIsLoading(false)
       }
     },
-    [cursor, isLoading],
+    [cursor, isLoading, searchParams, setSearchParams],
   )
 
   // INFO: 初回読み込み時に今日の日付で記事を取得

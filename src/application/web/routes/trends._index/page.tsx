@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { useSearchParams } from 'react-router'
 import { twMerge } from 'tailwind-merge'
 import {
   Pagination,
@@ -30,6 +32,8 @@ export default function TrendsPage({
   isLoading,
   cursor,
 }: Props) {
+  const [searchParams] = useSearchParams()
+
   const handleCardClick = (article: Article) => {
     openDrawer(article)
   }
@@ -47,6 +51,11 @@ export default function TrendsPage({
     const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
     return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')
   }
+
+  // URLパラメータ変更時にページトップへスクロール
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [searchParams])
 
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
