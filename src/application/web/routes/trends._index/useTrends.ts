@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
@@ -20,7 +20,7 @@ export default function useTrends() {
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
 
-  const date = new Date()
+  const date = useMemo(() => new Date(), [])
 
   const fetchArticles: FetchArticles = useCallback(
     async ({ date, page = 1, limit = 20 }) => {
