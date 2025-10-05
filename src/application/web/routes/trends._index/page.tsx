@@ -20,6 +20,7 @@ type Props = {
   openDrawer: (article: Article) => void
   isLoading: boolean
   page: number
+  limit: number
   totalPages: number
 }
 
@@ -30,6 +31,7 @@ export default function TrendsPage({
   openDrawer,
   isLoading,
   page,
+  limit,
   totalPages,
 }: Props) {
   const [searchParams] = useSearchParams()
@@ -49,6 +51,7 @@ export default function TrendsPage({
       } else {
         newParams.delete('page')
       }
+      newParams.set('limit', limit.toString())
       setSearchParams(newParams)
     }
   }
@@ -56,6 +59,7 @@ export default function TrendsPage({
     if (!isNextDisabled) {
       const newParams = new URLSearchParams(searchParams)
       newParams.set('page', (page + 1).toString())
+      newParams.set('limit', limit.toString())
       setSearchParams(newParams)
     }
   }

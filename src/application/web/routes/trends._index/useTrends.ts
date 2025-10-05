@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import { useIsMobile } from '@/application/web/components/ui/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 
@@ -17,9 +18,11 @@ export default function useTrends() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [articles, setArticles] = useState<Article[]>([])
   const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(20)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const isLoadingRef = useRef(false)
+  const isMobile = useIsMobile()
 
   const date = useMemo(() => new Date(), [])
 
@@ -53,6 +56,7 @@ export default function useTrends() {
           })),
         )
         setPage(resJson.page)
+        setLimit(resJson.limit)
         setTotalPages(resJson.totalPages)
 
         // 400番台
@@ -79,16 +83,26 @@ export default function useTrends() {
   // INFO: URLパラメータの変更を監視して記事を取得
   useEffect(() => {
     const pageParam = searchParams.get('page')
+    const limitParam = searchParams.get('limit')
     const currentPage = pageParam ? parseInt(pageParam, 10) : 1
     const validPage = Number.isNaN(currentPage) ? 1 : Math.max(currentPage, 1)
-    fetchArticles({ date, page: validPage })
-  }, [searchParams, date, fetchArticles])
+
+    // デフォルトのlimitはモバイルなら10、デスクトップなら20
+    const defaultLimit = isMobile ? 10 : 20
+    const currentLimit = limitParam ? parseInt(limitParam, 10) : defaultLimit
+    const validLimit = Number.isNaN(currentLimit)
+      ? defaultLimit
+      : Math.max(Math.min(currentLimit, 100), 1)
+
+    fetchArticles({ date, page: validPage, limit: validLimit })
+  }, [searchParams, date, fetchArticles, isMobile])
 
   return {
     date,
     articles,
     fetchArticles,
     page,
+    limit,
     totalPages,
     isLoading,
     setSearchParams,
