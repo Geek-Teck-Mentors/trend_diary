@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router'
 import { twMerge } from 'tailwind-merge'
 import {
@@ -39,10 +39,13 @@ export default function TrendsPage({
   const isPrevDisabled = page <= 1
   const isNextDisabled = page >= totalPages
 
-  const handleCardClick = (article: Article) => {
-    openDrawer(article)
-  }
-  const handlePrevPageClick = () => {
+  const handleCardClick = useCallback(
+    (article: Article) => {
+      openDrawer(article)
+    },
+    [openDrawer],
+  )
+  const handlePrevPageClick = useCallback(() => {
     if (!isPrevDisabled) {
       const newParams = new URLSearchParams(searchParams)
       const newPage = page - 1
@@ -54,15 +57,15 @@ export default function TrendsPage({
       newParams.set('limit', limit.toString())
       setSearchParams(newParams)
     }
-  }
-  const handleNextPageClick = () => {
+  }, [isPrevDisabled, page, searchParams, limit, setSearchParams])
+  const handleNextPageClick = useCallback(() => {
     if (!isNextDisabled) {
       const newParams = new URLSearchParams(searchParams)
       newParams.set('page', (page + 1).toString())
       newParams.set('limit', limit.toString())
       setSearchParams(newParams)
     }
-  }
+  }, [isNextDisabled, page, searchParams, limit, setSearchParams])
   const getPaginationClass = (isDisabled: boolean) => {
     const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
     return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')
