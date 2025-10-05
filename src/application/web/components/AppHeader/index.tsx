@@ -42,9 +42,9 @@ export default function AppHeader({ displayName, userFeatureEnabled }: Props) {
               <SheetTitle>メニュー</SheetTitle>
               <SheetDescription>ナビゲーションとユーザー設定</SheetDescription>
             </SheetHeader>
-            <div className='mt-6 flex flex-col gap-4'>
+            <div className='flex flex-col gap-4'>
               <nav className='flex flex-col gap-2'>
-                <div className='text-xs font-semibold text-gray-500 mb-2 px-3'>Application</div>
+                <div className='text-xs font-semibold text-gray-500 px-3'>Application</div>
                 {menuItems.map((item) => (
                   <AnchorLink
                     key={item.title}
