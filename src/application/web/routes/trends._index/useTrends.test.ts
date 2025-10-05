@@ -66,9 +66,10 @@ const generateFakeResponse = (
 const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
 type UseTrendsHook = ReturnType<typeof useTrends>
 
-function setupHook(): RenderHookResult<UseTrendsHook, unknown> {
+function setupHook(initialEntries?: string[]): RenderHookResult<UseTrendsHook, unknown> {
   return renderHook(() => useTrends(), {
-    wrapper: ({ children }: { children: ReactNode }) => createElement(MemoryRouter, null, children),
+    wrapper: ({ children }: { children: ReactNode }) =>
+      createElement(MemoryRouter, { initialEntries }, children),
   })
 }
 
@@ -260,6 +261,54 @@ describe('useTrends', () => {
       expect(result.current.articles).toEqual([])
       expect(result.current.page).toBe(1)
       expect(result.current.totalPages).toBe(1)
+    })
+
+    it('URLパラメータにpage=2がある場合、初期表示で2ページ目を取得する', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle({ articleId: BigInt(3), title: '2ページ目の記事' })],
+        page: 2,
+        totalPages: 3,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?page=2'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
+        query: {
+          to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          page: 2,
+          limit: 20,
+        },
+      })
+      expect(result.current.page).toBe(2)
+      expect(result.current.articles[0].title).toBe('2ページ目の記事')
+    })
+
+    it('URLパラメータのpageが不正な値の場合、page=1として扱う', async () => {
+      const fakeResponse = generateFakeResponse()
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?page=invalid'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
+        query: {
+          to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          page: 1,
+          limit: 20,
+        },
+      })
     })
   })
 

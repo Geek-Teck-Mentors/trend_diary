@@ -54,14 +54,19 @@ export default function useTrends() {
           setPage(resJson.page)
           setTotalPages(resJson.totalPages)
 
-          // URLパラメータを更新
-          const newParams = new URLSearchParams(searchParams)
-          if (page > 1) {
-            newParams.set('page', page.toString())
-          } else {
-            newParams.delete('page')
+          // URLパラメータを更新（無限ループ防止のため、既に同じ値の場合は更新しない）
+          const currentPage = searchParams.get('page')
+          const shouldUpdateUrl = page > 1 ? currentPage !== page.toString() : currentPage !== null
+
+          if (shouldUpdateUrl) {
+            const newParams = new URLSearchParams(searchParams)
+            if (page > 1) {
+              newParams.set('page', page.toString())
+            } else {
+              newParams.delete('page')
+            }
+            setSearchParams(newParams, { replace: true })
           }
-          setSearchParams(newParams, { replace: true })
 
           // 400番台
         } else if (res.status >= 400 && res.status < 500) {
@@ -85,9 +90,12 @@ export default function useTrends() {
     [isLoading, searchParams, setSearchParams],
   )
 
-  // INFO: 初回読み込み時に今日の日付で記事を取得
+  // INFO: 初回読み込み時に今日の日付で記事を取得（URLパラメータからページ番号を取得）
   useEffect(() => {
-    fetchArticles({ date })
+    const pageParam = searchParams.get('page')
+    const initialPage = pageParam ? parseInt(pageParam, 10) : 1
+    const validPage = Number.isNaN(initialPage) ? 1 : Math.max(initialPage, 1)
+    fetchArticles({ date, page: validPage })
   }, [])
 
   return {
