@@ -6,6 +6,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/application/web/components/ui/pagination'
+import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { PaginationCursor } from '../../types/paginations'
@@ -49,7 +50,7 @@ export default function TrendsPage({
 
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
-      <h1 className='pb-4 text-xl italic'>- {date.toLocaleDateString('ja-JP')} -</h1>
+      <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
       {articles.length === 0 ? (
         <div className='text-gray-500'>記事がありません</div>
       ) : (
