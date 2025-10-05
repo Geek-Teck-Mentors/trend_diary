@@ -58,7 +58,14 @@ export default function useTrends() {
 
           // URLパラメータを更新（無限ループ防止のため、既に同じ値の場合は更新しない）
           const currentPage = searchParams.get('page')
-          const shouldUpdateUrl = page > 1 ? currentPage !== page.toString() : currentPage !== null
+          let shouldUpdateUrl: boolean
+          if (page > 1) {
+            // ページが1より大きい場合、URLのpageパラメータが現在のページ番号と異なれば更新
+            shouldUpdateUrl = currentPage !== page.toString()
+          } else {
+            // ページが1の場合、URLにpageパラメータが存在すれば削除
+            shouldUpdateUrl = currentPage !== null
+          }
 
           if (shouldUpdateUrl) {
             const newParams = new URLSearchParams(searchParams)
