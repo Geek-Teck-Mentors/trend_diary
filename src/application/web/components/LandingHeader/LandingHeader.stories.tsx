@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent } from 'storybook/test'
-import Header from './index'
+import LandingHeader from './index'
 
-const meta: Meta<typeof Header> = {
-  component: Header,
+const meta: Meta<typeof LandingHeader> = {
+  component: LandingHeader,
   parameters: {
     layout: 'fullscreen',
   },
@@ -13,7 +13,7 @@ const meta: Meta<typeof Header> = {
 }
 export default meta
 
-type Story = StoryObj<typeof Header>
+type Story = StoryObj<typeof LandingHeader>
 
 export const Default: Story = {
   play: async ({ canvas }) => {

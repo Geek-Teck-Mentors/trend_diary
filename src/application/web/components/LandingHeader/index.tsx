@@ -5,7 +5,7 @@ type Props = {
   enableUserFeature: boolean
 }
 
-export default function Header({ enableUserFeature }: Props) {
+export default function LandingHeader({ enableUserFeature }: Props) {
   return (
     <header className='border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>

@@ -2,7 +2,7 @@ import { BookOpen, Calendar, Monitor, TrendingUp, Users } from 'lucide-react'
 import { type LoaderFunctionArgs, type MetaFunction, useLoaderData } from 'react-router'
 import { ClipText } from '../components/ClipText'
 import Footer from '../components/Footer'
-import Header from '../components/Header'
+import LandingHeader from '../components/LandingHeader'
 import { AnchorLink } from '../components/link'
 import { isUserFeatureEnabled } from '../features/featureFlag'
 
@@ -34,7 +34,7 @@ const TrendDiaryTopPage = () => {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
-      <Header enableUserFeature={userFeatureEnabled} />
+      <LandingHeader enableUserFeature={userFeatureEnabled} />
 
       {/* Hero Section */}
       <section className='relative overflow-hidden'>
