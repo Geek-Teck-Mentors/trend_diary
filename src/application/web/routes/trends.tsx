@@ -27,10 +27,7 @@ export default function Layout() {
     return 'ゲスト'
   }
 
-  const { data: displayName = '未設定' } = useSWR(
-    userFeatureEnabled ? 'user-me' : null,
-    fetcher
-  )
+  const { data: displayName = '未設定' } = useSWR(userFeatureEnabled ? 'user-me' : null, fetcher)
 
   return (
     <SidebarProvider>

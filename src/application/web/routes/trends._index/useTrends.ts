@@ -102,20 +102,39 @@ export default function useTrends() {
       if (swrError instanceof Error) {
         const errorMessage = swrError.message || 'エラーが発生しました'
         toast.error(errorMessage)
-      } else {
-        toast.error('不明なエラーが発生しました')
-      }
-      setIsLoading(false)
-    }
-  }, [swrError])
+      },
+    },
+  )
 
+  // 記事データの変換（元のロジック通り）
+  const articles: Article[] =
+    articlesData?.data?.map((data) => ({
+      articleId: BigInt(data.articleId),
+      media: data.media,
+      title: data.title,
+      author: data.author,
+      description: data.description,
+      url: data.url,
+      createdAt: new Date(data.createdAt),
+    })) ?? []
+
+  // カーソル更新（SWRデータが更新された時）
+  useEffect(() => {
+    if (articlesData) {
+      setCursor({
+        next: articlesData.nextCursor,
+        prev: articlesData.prevCursor,
+      })
+    }
+  }, [articlesData])
+
+  // pagination用のfetchArticles（元の要件維持）
   const fetchArticles: FetchArticles = useCallback(
-    async ({ date, direction, limit }) => {
+    async ({ date: targetDate, direction = 'next', limit = 20 }) => {
       if (isLoading) return
 
-      setIsLoading(true)
       try {
-        const queryDate = formatDate(date)
+        const queryDate = formatDate(targetDate)
 
         const res = await getApiClientForClient().articles.$get({
           query: {
