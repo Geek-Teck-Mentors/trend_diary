@@ -23,15 +23,11 @@ export default function Layout() {
     if (res.status === 200) {
       const resJson = await res.json()
       return resJson.user?.displayName ?? '未設定'
-    } else {
-      return 'ゲスト'
     }
+    return 'ゲスト'
   }
 
-  const { data: displayName = '未設定' } = useSWR(
-    userFeatureEnabled ? 'user-me' : null,
-    fetcher
-  )
+  const { data: displayName = '未設定' } = useSWR(userFeatureEnabled ? 'user-me' : null, fetcher)
 
   return (
     <SidebarProvider>
