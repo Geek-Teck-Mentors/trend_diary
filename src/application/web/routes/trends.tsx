@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
 import useSWR from 'swr'
+import AppHeader from '../components/AppHeader'
 import AppSidebar from '../components/Sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'
 import { isUserFeatureEnabled } from '../features/featureFlag'
