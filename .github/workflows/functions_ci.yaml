@@ -144,6 +144,10 @@ jobs:
       - name: PRにカバレッジをコメント
         if: github.event_name == 'pull_request'
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "$(cat coverage/coverage_report.md)" --edit-last
+            gh pr comment ${{ github.event.pull_request.number }} \
+              --body "$(cat coverage/coverage_report.md)" \
+              --edit-last || \
+            gh pr comment ${{ github.event.pull_request.number }} \
+            --body "$(cat coverage/coverage_report.md)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
