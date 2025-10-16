@@ -41,16 +41,15 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
   }
 
   private normalizeForArticleInput = (params: ArticleInput): ArticleInput => ({
-    media: params.media.length > 10 ? params.media.slice(0, 10) : params.media,
-    title: params.title.length > 100
-      ? params.title.slice(0, 100)
-      : params.title,
-    author: params.author.length > 30
-      ? params.author.slice(0, 30)
-      : params.author,
-    description: params.description.length > 255
-      ? params.description.slice(0, 255)
-      : params.description,
+    media: this.sliceString(params.media, 10),
+    title: this.sliceString(params.title, 100),
+    author: this.sliceString(params.author, 30),
+    description: this.sliceString(params.description, 255),
     url: params.url,
   });
+
+  private sliceString = (str: string, maxLength: number) => {
+    // INFO: サロゲートペアを考慮して文字列を分割
+    return [...str].slice(0, maxLength).join("");
+  };
 }
