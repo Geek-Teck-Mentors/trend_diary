@@ -51,5 +51,5 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
   private sliceString = (str: string, maxLength: number) => {
     // INFO: サロゲートペアを考慮して文字列を分割
     return [...str].slice(0, maxLength).join("");
-  }
+  };
 }
