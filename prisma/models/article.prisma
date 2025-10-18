@@ -6,8 +6,8 @@ model Article {
   title       String   @map("title") @db.VarChar(100)
   /// 投稿者名（30文字制限）
   author      String   @map("author") @db.VarChar(30)
-  /// 記事概要（255文字制限）
-  description String   @map("description") @db.VarChar(255)
+  /// 記事概要（1024文字制限）
+  description String   @map("description") @db.VarChar(1024)
   url         String   @map("url") @db.Text
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
