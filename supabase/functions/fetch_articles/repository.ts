@@ -44,7 +44,7 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
     media: this.sliceString(params.media, 10),
     title: this.sliceString(params.title, 100),
     author: this.sliceString(params.author, 30),
-    description: this.sliceString(params.description, 255),
+    description: this.sliceString(params.description, 1024),
     url: params.url,
   });
 
