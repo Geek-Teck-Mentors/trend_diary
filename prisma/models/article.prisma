@@ -11,6 +11,6 @@ model Article {
   url         String   @map("url") @db.Text
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  @@index([url])
+  @@unique([url])
   @@map("articles")
 }
