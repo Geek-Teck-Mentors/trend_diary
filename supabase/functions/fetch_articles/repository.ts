@@ -31,7 +31,9 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       throw new DatabaseError("No data returned from Supabase");
     }
 
-    logger.info(`Fetched ${data.length} articles from Supabase for ${urls.length} URLs.`);
+    logger.info(
+      `Fetched ${data.length} articles from Supabase for ${urls.length} URLs.`,
+    );
 
     return data;
   }
