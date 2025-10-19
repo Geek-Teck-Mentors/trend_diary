@@ -1,5 +1,4 @@
 import { ArticleFetcher, ArticleRepository } from "./model/interface.ts";
-import { ArticleInput } from "./model/model.ts";
 import { FeedItem } from "./model/types.ts";
 
 export class Executor {
