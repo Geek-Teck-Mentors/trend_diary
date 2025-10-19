@@ -42,7 +42,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
         }),
       ])
 
-      const total = allIds.length;
+      const total = allIds.length
 
       const mappedArticles = articles.map(fromPrismaToArticle)
       const totalPages = Math.ceil(total / limit)
