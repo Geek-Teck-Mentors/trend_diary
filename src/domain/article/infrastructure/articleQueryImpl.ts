@@ -24,25 +24,15 @@ export default class ArticleQueryImpl implements ArticleQuery {
         { articleId: 'desc' },
       ]
 
-      const distinct: Prisma.ArticleScalarFieldEnum[] = ['url']
-
-      const [allIds, articles] = await this.db.$transaction([
-        // HACK: PrismaではCOUNT DISTINCTが使えないため、一旦distinctなIDリストを取得してからカウントする
+      const [total, articles] = await this.db.$transaction([
+        this.db.article.count({ where }),
         this.db.article.findMany({
-          distinct,
-          where,
-          select: { articleId: true },
-        }),
-        this.db.article.findMany({
-          distinct,
           where,
           orderBy,
           skip: (page - 1) * limit,
           take: limit,
         }),
       ])
-
-      const total = allIds.length;
 
       const mappedArticles = articles.map(fromPrismaToArticle)
       const totalPages = Math.ceil(total / limit)
