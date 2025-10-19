@@ -17,7 +17,9 @@ export class Executor {
     }
 
     const existingArticles = await this.fetchExistingArticles(fetchedItems);
-    const existingUrls = new Set(existingArticles.map((article) => article.url));
+    const existingUrls = new Set(
+      existingArticles.map((article) => article.url),
+    );
 
     const items = fetchedItems.filter((item) => !existingUrls.has(item.url));
 

@@ -32,7 +32,9 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
     }
 
     logger.info(
-      `Fetched ${data.length} articles from Supabase for URLs: ${urls.join(", ")}`,
+      `Fetched ${data.length} articles from Supabase for URLs: ${
+        urls.join(", ")
+      }`,
     );
 
     return data;
