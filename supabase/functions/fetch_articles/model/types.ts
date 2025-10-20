@@ -1,3 +1,8 @@
+export type Result<T> = {
+  data: T;
+  error: Error | null;
+};
+
 export type FeedItem = {
   title: string;
   author: string;
