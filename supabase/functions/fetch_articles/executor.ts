@@ -1,5 +1,9 @@
 import { InternalServerError } from "./error.ts";
-import { ArticleFetcher, ArticleRepository, Executor } from "./model/interface.ts";
+import {
+  ArticleFetcher,
+  ArticleRepository,
+  Executor,
+} from "./model/interface.ts";
 import { FeedItem } from "./model/types.ts";
 
 export class ExecutorImpl implements Executor {

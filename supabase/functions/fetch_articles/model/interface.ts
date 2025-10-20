@@ -12,5 +12,7 @@ export interface ArticleRepository {
 }
 
 export interface Executor {
-  do(): Promise<{ message: string; error: null } | { message: null; error: Error }>;
+  do(): Promise<
+    { message: string; error: null } | { message: null; error: Error }
+  >;
 }

@@ -45,8 +45,16 @@ describe("Executor", () => {
   describe("正常系", () => {
     it("fetch結果が0件の場合、no itemsのメッセージが返り、記事は登録されないこと", async () => {
       stub(fetcher, "fetch", () => Promise.resolve({ data: [], error: null }));
-      stub(repository, "fetchArticlesByUrls", () => Promise.resolve({ data: [], error: null }));
-      stub(repository, "bulkCreateArticle", () => Promise.resolve({ data: [], error: null }));
+      stub(
+        repository,
+        "fetchArticlesByUrls",
+        () => Promise.resolve({ data: [], error: null }),
+      );
+      stub(
+        repository,
+        "bulkCreateArticle",
+        () => Promise.resolve({ data: [], error: null }),
+      );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
       assertEquals(
@@ -56,8 +64,16 @@ describe("Executor", () => {
     });
 
     it("fetch結果が1件以上の場合、記事が登録され、成功メッセージが返ること", async () => {
-      stub(fetcher, "fetch", () => Promise.resolve({ data: defaultItems, error: null }));
-      stub(repository, "fetchArticlesByUrls", () => Promise.resolve({ data: [], error: null }));
+      stub(
+        fetcher,
+        "fetch",
+        () => Promise.resolve({ data: defaultItems, error: null }),
+      );
+      stub(
+        repository,
+        "fetchArticlesByUrls",
+        () => Promise.resolve({ data: [], error: null }),
+      );
       stub(
         repository,
         "bulkCreateArticle",
@@ -67,7 +83,10 @@ describe("Executor", () => {
       const res = await executor.do();
       assertEquals(
         JSON.stringify(res),
-        JSON.stringify({ message: "Articles fetched successfully: 1", error: null }),
+        JSON.stringify({
+          message: "Articles fetched successfully: 1",
+          error: null,
+        }),
       );
     });
 
@@ -122,7 +141,11 @@ describe("Executor", () => {
       };
 
       // モックフェッチャーを作成
-      stub(fetcher, "fetch", () => Promise.resolve({ data: fetchedItems, error: null }));
+      stub(
+        fetcher,
+        "fetch",
+        () => Promise.resolve({ data: fetchedItems, error: null }),
+      );
       stub(
         repository,
         "fetchArticlesByUrls",
@@ -139,7 +162,10 @@ describe("Executor", () => {
 
       assertEquals(
         JSON.stringify(res),
-        JSON.stringify({ message: "Articles fetched successfully: 1", error: null }),
+        JSON.stringify({
+          message: "Articles fetched successfully: 1",
+          error: null,
+        }),
       );
     });
   });
@@ -147,7 +173,11 @@ describe("Executor", () => {
   describe("異常系", () => {
     it("fetcherでエラーが発生した場合、エラーが返されること", async () => {
       const fetchError = new Error("fetch error");
-      stub(fetcher, "fetch", () => Promise.resolve({ data: [], error: fetchError }));
+      stub(
+        fetcher,
+        "fetch",
+        () => Promise.resolve({ data: [], error: fetchError }),
+      );
       stub(
         repository,
         "bulkCreateArticle",
@@ -161,9 +191,21 @@ describe("Executor", () => {
 
     it("repositoryのfetchArticlesByUrlsでエラーが発生した場合、エラーが返されること", async () => {
       const dbError = new Error("db fetch error");
-      stub(fetcher, "fetch", () => Promise.resolve({ data: defaultItems, error: null }));
-      stub(repository, "fetchArticlesByUrls", () => Promise.resolve({ data: [], error: dbError }));
-      stub(repository, "bulkCreateArticle", () => Promise.resolve({ data: defaultArticles, error: null }));
+      stub(
+        fetcher,
+        "fetch",
+        () => Promise.resolve({ data: defaultItems, error: null }),
+      );
+      stub(
+        repository,
+        "fetchArticlesByUrls",
+        () => Promise.resolve({ data: [], error: dbError }),
+      );
+      stub(
+        repository,
+        "bulkCreateArticle",
+        () => Promise.resolve({ data: defaultArticles, error: null }),
+      );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
       assertEquals(res.message, null);
@@ -172,9 +214,21 @@ describe("Executor", () => {
 
     it("repositoryのbulkCreateArticleでエラーが発生した場合、エラーが返されること", async () => {
       const dbError = new Error("db create error");
-      stub(fetcher, "fetch", () => Promise.resolve({ data: defaultItems, error: null }));
-      stub(repository, "fetchArticlesByUrls", () => Promise.resolve({ data: [], error: null }));
-      stub(repository, "bulkCreateArticle", () => Promise.resolve({ data: [], error: dbError }));
+      stub(
+        fetcher,
+        "fetch",
+        () => Promise.resolve({ data: defaultItems, error: null }),
+      );
+      stub(
+        repository,
+        "fetchArticlesByUrls",
+        () => Promise.resolve({ data: [], error: null }),
+      );
+      stub(
+        repository,
+        "bulkCreateArticle",
+        () => Promise.resolve({ data: [], error: dbError }),
+      );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
       assertEquals(res.message, null);
