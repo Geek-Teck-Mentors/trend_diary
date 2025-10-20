@@ -11,4 +11,6 @@ export interface ArticleRepository {
   fetchArticlesByUrls: (urls: string[]) => Promise<Result<Article[]>>;
 }
 
+export interface Executor {
+  do(): Promise<{ message: string; error: null } | { message: null; error: Error }>;
 }
