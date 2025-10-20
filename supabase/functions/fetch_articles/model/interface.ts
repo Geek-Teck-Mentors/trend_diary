@@ -1,5 +1,5 @@
 import { Article, ArticleInput } from "./model.ts";
-import { FeedItem } from "./types.ts";
+import { FeedItem, Result } from "./types.ts";
 
 export interface ArticleFetcher {
   url: string;
@@ -7,6 +7,8 @@ export interface ArticleFetcher {
 }
 
 export interface ArticleRepository {
-  bulkCreateArticle: (params: ArticleInput[]) => Promise<Article[]>;
-  fetchArticlesByUrls: (urls: string[]) => Promise<Article[]>;
+  bulkCreateArticle: (params: ArticleInput[]) => Promise<Result<Article[]>>;
+  fetchArticlesByUrls: (urls: string[]) => Promise<Result<Article[]>>;
+}
+
 }

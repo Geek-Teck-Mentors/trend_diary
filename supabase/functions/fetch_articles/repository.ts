@@ -22,20 +22,23 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       .returns<Article[]>();
 
     if (error) {
-      throw new DatabaseError(
-        "Failed to fetch articles by URLs: " + JSON.stringify(error),
-      );
+      const message = `Failed to fetch articles by URLs: ${
+        JSON.stringify(error)
+      }`;
+
+      return { data: [], error: new DatabaseError(message) };
     }
 
     if (!data) {
-      throw new DatabaseError("No data returned from Supabase");
+      const message = "No data returned from Supabase";
+      return { data: [], error: new DatabaseError(message) };
     }
 
     logger.info(
       `Fetched ${data.length} articles from Supabase for ${urls.length} URLs.`,
     );
 
-    return data;
+    return { data, error: null };
   }
 
   async bulkCreateArticle(params: ArticleInput[]) {
@@ -53,18 +56,20 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       .returns<Article[]>();
 
     if (error) {
-      throw new DatabaseError(
-        "Failed to create article: " + JSON.stringify(error),
-      );
+      const message = `Failed to bulk create articles: ${
+        JSON.stringify(error)
+      }`;
+      return { data: [], error: new DatabaseError(message) };
     }
 
     if (!data) {
-      throw new DatabaseError("No data returned from Supabase");
+      const message = "No data returned from Supabase";
+      return { data: [], error: new DatabaseError(message) };
     }
 
     logger.info("Inserted articles into Supabase successfully");
 
-    return data;
+    return { data, error: null };
   }
 
   private normalizeForArticleInput = (params: ArticleInput): ArticleInput => ({
