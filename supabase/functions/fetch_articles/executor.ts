@@ -15,7 +15,7 @@ export class Executor {
       return { message: "no items" };
     }
 
-    const existingArticles = await this.fetchExistingArticles(fetchedItems);
+    const existingArticles = await this.findExistingArticles(fetchedItems);
     const existingUrls = new Set(
       existingArticles.map((article) => article.url),
     );
@@ -30,7 +30,7 @@ export class Executor {
     };
   }
 
-  private async fetchExistingArticles(items: FeedItem[]) {
+  private async findExistingArticles(items: FeedItem[]) {
     const urls = items.map((item) => item.url);
     return await this.repository.fetchArticlesByUrls(urls);
   }
