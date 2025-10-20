@@ -19,10 +19,11 @@ export class QiitaFetcher implements ArticleFetcher {
         url: item.link,
       }));
 
-      return params;
+      return { data: params, error: null };
     } catch (error: unknown) {
       logger.error("Error fetching Qiita feed:", error);
-      throw new MediaFetchError("Failed to process feed items: " + error);
+      const message = `Failed to fetch Qiita feed: ${error}`;
+      return { data: [], error: new MediaFetchError(message) };
     }
   }
 }

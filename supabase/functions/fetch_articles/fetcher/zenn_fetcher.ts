@@ -18,10 +18,11 @@ export class ZennFetcher implements ArticleFetcher {
         url: item.link,
       }));
 
-      return params;
+      return { data: params, error: null };
     } catch (error: unknown) {
       logger.error("Error fetching Zenn feed:", error);
-      throw new MediaFetchError("Failed to process feed items: " + error);
+      const message = `Failed to process feed items: ${error}`;
+      return { data: [], error: new MediaFetchError(message) };
     }
   }
 }

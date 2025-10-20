@@ -3,7 +3,7 @@ import { FeedItem, Result } from "./types.ts";
 
 export interface ArticleFetcher {
   url: string;
-  fetch(): Promise<FeedItem[]>;
+  fetch(): Promise<Result<FeedItem[]>>;
 }
 
 export interface ArticleRepository {
