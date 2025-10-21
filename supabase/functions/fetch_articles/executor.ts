@@ -13,31 +13,23 @@ export class ExecutorImpl implements Executor {
     private repository: ArticleRepository,
   ) {}
 
-  async do(): Promise<
-    {
-      message: string;
-      error: null;
-    } | {
-      message: null;
-      error: InternalServerError;
-    }
-  > {
+  async do() {
     console.log("Executing fetcher for media:", this.media);
     const { data: fetchedItems, error: fetchError } = await this.fetcher
       .fetch();
 
     if (fetchError) {
-      return { message: null, error: fetchError };
+      return { data: null, error: fetchError };
     }
 
     if (fetchedItems.length === 0) {
-      return { message: "no items", error: null };
+      return { data: { message: "no items" }, error: null };
     }
 
     const { data: existingArticles, error: findError } = await this
       .findExistingArticles(fetchedItems);
     if (findError) {
-      return { message: null, error: findError };
+      return { data: null, error: findError };
     }
 
     const existingUrls = new Set(
@@ -50,11 +42,13 @@ export class ExecutorImpl implements Executor {
     const { data: articles, error: bulkCreateError } = await this
       .bulkCreateArticles(items);
     if (bulkCreateError) {
-      return { message: null, error: bulkCreateError };
+      return { data: null, error: bulkCreateError };
     }
 
     return {
-      message: `Articles fetched successfully: ${articles.length}`,
+      data: {
+        message: `Articles fetched successfully: ${articles.length}`,
+      },
       error: null,
     };
   }

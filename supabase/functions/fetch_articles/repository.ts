@@ -26,12 +26,12 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
         JSON.stringify(error)
       }`;
 
-      return { data: [], error: new DatabaseError(message) };
+      return { data: null, error: new DatabaseError(message) };
     }
 
     if (!data) {
       const message = "No data returned from Supabase";
-      return { data: [], error: new DatabaseError(message) };
+      return { data: null, error: new DatabaseError(message) };
     }
 
     logger.info(
@@ -59,12 +59,12 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       const message = `Failed to bulk create articles: ${
         JSON.stringify(error)
       }`;
-      return { data: [], error: new DatabaseError(message) };
+      return { data: null, error: new DatabaseError(message) };
     }
 
     if (!data) {
       const message = "No data returned from Supabase";
-      return { data: [], error: new DatabaseError(message) };
+      return { data: null, error: new DatabaseError(message) };
     }
 
     logger.info("Inserted articles into Supabase successfully");

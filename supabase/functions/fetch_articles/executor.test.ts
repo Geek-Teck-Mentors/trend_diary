@@ -176,7 +176,7 @@ describe("Executor", () => {
       stub(
         fetcher,
         "fetch",
-        () => Promise.resolve({ data: [], error: fetchError }),
+        () => Promise.resolve({ data: null, error: fetchError }),
       );
       stub(
         repository,
@@ -185,7 +185,7 @@ describe("Executor", () => {
       );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
-      assertEquals(res.message, null);
+      assertEquals(res.data?.message, null);
       assertEquals(res.error?.message, "fetch error");
     });
 
@@ -199,7 +199,7 @@ describe("Executor", () => {
       stub(
         repository,
         "fetchArticlesByUrls",
-        () => Promise.resolve({ data: [], error: dbError }),
+        () => Promise.resolve({ data: null, error: dbError }),
       );
       stub(
         repository,
@@ -208,7 +208,7 @@ describe("Executor", () => {
       );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
-      assertEquals(res.message, null);
+      assertEquals(res.data?.message, null);
       assertEquals(res.error?.message, "db fetch error");
     });
 
@@ -227,11 +227,11 @@ describe("Executor", () => {
       stub(
         repository,
         "bulkCreateArticle",
-        () => Promise.resolve({ data: [], error: dbError }),
+        () => Promise.resolve({ data: null, error: dbError }),
       );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
-      assertEquals(res.message, null);
+      assertEquals(res.data?.message, null);
       assertEquals(res.error?.message, "db create error");
     });
   });

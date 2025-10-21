@@ -22,7 +22,7 @@ export class ZennFetcher implements ArticleFetcher {
     } catch (error: unknown) {
       logger.error("Error fetching Zenn feed:", error);
       const message = `Failed to process feed items: ${error}`;
-      return { data: [], error: new MediaFetchError(message) };
+      return { data: null, error: new MediaFetchError(message) };
     }
   }
 }

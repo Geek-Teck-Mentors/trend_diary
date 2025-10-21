@@ -23,7 +23,7 @@ export class QiitaFetcher implements ArticleFetcher {
     } catch (error: unknown) {
       logger.error("Error fetching Qiita feed:", error);
       const message = `Failed to fetch Qiita feed: ${error}`;
-      return { data: [], error: new MediaFetchError(message) };
+      return { data: null, error: new MediaFetchError(message) };
     }
   }
 }

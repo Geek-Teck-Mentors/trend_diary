@@ -1,6 +1,9 @@
-export type Result<T> = {
+export type Result<T, E extends Error = Error> = {
   data: T;
-  error: Error | null;
+  error: null;
+} | {
+  data: null;
+  error: E;
 };
 
 export type FeedItem = {

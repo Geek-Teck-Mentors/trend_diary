@@ -115,7 +115,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
         "fetch",
         () =>
           Promise.resolve({
-            data: [],
+            data: null,
             error: new MediaFetchError("Failed to fetch Qiita articles"),
           }),
       ));
@@ -162,7 +162,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
         "bulkCreateArticle",
         () =>
           Promise.resolve({
-            data: [],
+            data: null,
             error: new DatabaseError("Failed to save to database"),
           }),
       ));
@@ -276,7 +276,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
         "fetch",
         () =>
           Promise.resolve({
-            data: [],
+            data: null,
             error: new MediaFetchError("Failed to fetch Zenn articles"),
           }),
       ));
@@ -323,7 +323,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
         "bulkCreateArticle",
         () =>
           Promise.resolve({
-            data: [],
+            data: null,
             error: new DatabaseError("Failed to save to database"),
           }),
       ));

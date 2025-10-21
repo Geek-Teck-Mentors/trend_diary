@@ -16,12 +16,12 @@ app.post("/articles/qiita", async (c) => {
     const repository = new ArticleRepositoryImpl(rdbClient);
 
     const exec = new ExecutorImpl("qiita", fetcher, repository);
-    const { message, error } = await exec.do();
+    const { data, error } = await exec.do();
     if (error) {
       logger.error(error.name, error.message);
       return c.json({ message: "internal server error" }, 500);
     }
-    return c.json({ message }, 201);
+    return c.json({ message: data.message }, 201);
   } catch (error) {
     logger.error("unknown error", error);
     return c.json({ message: "unknown error" }, 500);
@@ -35,12 +35,12 @@ app.post("/articles/zenn", async (c) => {
     const repository = new ArticleRepositoryImpl(rdbClient);
 
     const exec = new ExecutorImpl("zenn", fetcher, repository);
-    const { message, error } = await exec.do();
+    const { data, error } = await exec.do();
     if (error) {
       logger.error(error.name, error.message);
       return c.json({ message: "internal server error" }, 500);
     }
-    return c.json({ message }, 201);
+    return c.json({ message: data.message }, 201);
   } catch (error) {
     logger.error("unknown error", error);
     return c.json({ message: "unknown error" }, 500);
