@@ -59,7 +59,7 @@ describe("Executor", () => {
       const res = await executor.do();
       assertEquals(
         JSON.stringify(res),
-        JSON.stringify({ message: "no items", error: null }),
+        JSON.stringify({ data: { message: "no items" }, error: null }),
       );
     });
 
@@ -84,7 +84,7 @@ describe("Executor", () => {
       assertEquals(
         JSON.stringify(res),
         JSON.stringify({
-          message: "Articles fetched successfully: 1",
+          data: { message: "Articles fetched successfully: 1" },
           error: null,
         }),
       );
@@ -163,7 +163,7 @@ describe("Executor", () => {
       assertEquals(
         JSON.stringify(res),
         JSON.stringify({
-          message: "Articles fetched successfully: 1",
+          data: { message: "Articles fetched successfully: 1" },
           error: null,
         }),
       );
@@ -185,7 +185,7 @@ describe("Executor", () => {
       );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
-      assertEquals(res.data?.message, null);
+      assertEquals(res.data, null);
       assertEquals(res.error?.message, "fetch error");
     });
 
@@ -208,7 +208,7 @@ describe("Executor", () => {
       );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
-      assertEquals(res.data?.message, null);
+      assertEquals(res.data, null);
       assertEquals(res.error?.message, "db fetch error");
     });
 
@@ -231,7 +231,7 @@ describe("Executor", () => {
       );
       const executor = new ExecutorImpl("qiita", fetcher, repository);
       const res = await executor.do();
-      assertEquals(res.data?.message, null);
+      assertEquals(res.data, null);
       assertEquals(res.error?.message, "db create error");
     });
   });
