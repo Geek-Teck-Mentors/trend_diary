@@ -1,4 +1,8 @@
-import { DatabaseError, InternalServerError, MediaFetchError } from "../error.ts";
+import {
+  DatabaseError,
+  InternalServerError,
+  MediaFetchError,
+} from "../error.ts";
 import { Article, ArticleInput } from "./model.ts";
 import { FeedItem, Result } from "./types.ts";
 
@@ -8,8 +12,12 @@ export interface ArticleFetcher {
 }
 
 export interface ArticleRepository {
-  bulkCreateArticle: (params: ArticleInput[]) => Promise<Result<Article[], DatabaseError>>;
-  fetchArticlesByUrls: (urls: string[]) => Promise<Result<Article[], DatabaseError>>;
+  bulkCreateArticle: (
+    params: ArticleInput[],
+  ) => Promise<Result<Article[], DatabaseError>>;
+  fetchArticlesByUrls: (
+    urls: string[],
+  ) => Promise<Result<Article[], DatabaseError>>;
 }
 
 export interface Executor {
