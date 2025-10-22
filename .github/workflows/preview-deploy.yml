@@ -3,8 +3,6 @@ name: Cloudflare Preview Deploy
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  pull_request_target:
-    types: [closed]
 
 jobs:
   deploy-preview:
@@ -33,26 +31,22 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to Cloudflare Workers
+      - name: Upload Preview Version to Cloudflare Workers
         id: deploy
         run: |
-          # PR番号を取得
+          # PR番号からプレビューエイリアスを生成
           PR_NUMBER=${{ github.event.pull_request.number }}
-          WORKER_NAME="trend-diary-pr-${PR_NUMBER}"
+          PREVIEW_ALIAS="pr-${PR_NUMBER}"
 
-          # wrangler.tomlをPR用に一時的にコピー
-          cp wrangler.toml wrangler.preview.toml
-          sed -i "s/name = \"trend-diary\"/name = \"${WORKER_NAME}\"/" wrangler.preview.toml
+          # 新しいバージョンをアップロード（本番デプロイしない）
+          npx wrangler versions upload --preview-alias "${PREVIEW_ALIAS}" > deploy-output.txt
 
-          # デプロイ実行
-          npx wrangler deploy --config wrangler.preview.toml --keep-vars > deploy-output.txt
-
-          # デプロイURLを抽出
+          # プレビューURLを抽出
           DEPLOY_URL=$(grep -oP 'https://[^\s]+workers\.dev' deploy-output.txt | head -1)
           echo "deploy_url=${DEPLOY_URL}" >> $GITHUB_OUTPUT
 
           # クリーンアップ
-          rm wrangler.preview.toml deploy-output.txt
+          rm deploy-output.txt
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -72,7 +66,7 @@ jobs:
             ---
 
             ℹ️ このプレビュー環境は本番のDBとAPIに接続している
-            ℹ️ PRがクローズされると自動的に削除される`;
+            ℹ️ プレビューエイリアスは自動的に管理される（最新1000個まで保持）`;
 
             // 既存のコメントを検索
             const { data: comments } = await github.rest.issues.listComments({
@@ -103,33 +97,3 @@ jobs:
                 body: commentBody
               });
             }
-
-  cleanup-preview:
-    if: github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Delete Preview Worker
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          WORKER_NAME="trend-diary-pr-${PR_NUMBER}"
-
-          # Workerを削除
-          npx wrangler delete ${WORKER_NAME} --force || true
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

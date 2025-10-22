@@ -46,6 +46,8 @@ npm start
 
 このプロジェクトではPR毎にCloudflare Workersのプレビュー環境を自動デプロイする仕組みを導入している。
 
+**安全性**: `wrangler versions upload`を使用しているため、本番環境には一切影響しない。
+
 ### 必要なGitHub Secrets
 
 リポジトリの Settings > Secrets and variables > Actions から以下のシークレットを設定する必要がある：
@@ -59,21 +61,26 @@ npm start
 
 ### プレビュー環境の動作
 
-- PR作成・更新時に自動的にプレビュー環境がデプロイされる
-- デプロイURLはPRコメントに自動投稿される（例: `https://trend-diary-pr-123.{subdomain}.workers.dev`）
+- PR作成・更新時に新しいWorkerバージョンをアップロード（本番デプロイはしない）
+- プレビューエイリアス（例: `pr-123`）を自動作成
+- プレビューURLはPRコメントに自動投稿（例: `https://pr-123.trend-diary.workers.dev`）
 - プレビュー環境は本番のDBとAPIに接続する
-- PRクローズ時に自動的にプレビュー環境が削除される
+- プレビューエイリアスは自動的に管理される（最新1000個まで保持、古いものは自動削除）
 
-### プレビュー環境用の環境変数設定
+### 技術詳細
 
-Cloudflare Workersのプレビュー環境でも本番環境と同じ環境変数が必要な場合は、`wrangler secret put`コマンドで設定可能：
+Cloudflare公式の`wrangler versions upload`コマンドを使用：
 
 ```sh
-# プレビュー環境名を指定して環境変数を設定
-npx wrangler secret put DATABASE_URL --name trend-diary-pr-123
+# 新しいバージョンをアップロード（本番デプロイしない）
+npx wrangler versions upload --preview-alias pr-123
 ```
 
-ただし、`--keep-vars`オプションを使用しているため、基本的には本番環境と同じ環境変数が使用される。
+これにより：
+- 本番Workerには影響なし
+- 新しいWorkerを作成しない（バージョン管理の一部）
+- プレビューエイリアスのみ作成
+- セキュアかつCloudflare推奨の方法
 
 ## 他ドキュメント
 
