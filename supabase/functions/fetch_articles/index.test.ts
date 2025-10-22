@@ -42,13 +42,13 @@ describe("POST /fetch_articles/articles/qiita", () => {
               title: "title 1",
               author: "author",
               description: "content",
-              url: "https://article1.example.com",
+              url: "https://qiita.example.com/article1",
             },
             {
               title: "title 2",
               author: "author",
               description: "content",
-              url: "https://article2.example.com",
+              url: "https://qiita.example.com/article2",
             },
           ]),
       ));
@@ -90,7 +90,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
               title: "title 1",
               author: "author",
               description: "content",
-              url: "https://article1.example.com",
+              url: "https://qiita.example.com/article1",
             },
           ]),
       ));
@@ -140,13 +140,13 @@ describe("POST /fetch_articles/articles/zenn", () => {
               title: "title 1",
               author: "author",
               description: "content",
-              url: "https://article1.example.com",
+              url: "https://zenn.example.com/article1",
             },
             {
               title: "title 2",
               author: "author",
               description: "content",
-              url: "https://article2.example.com",
+              url: "https://zenn.example.com/article2",
             },
           ]),
       ));
@@ -188,7 +188,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
               title: "title 1",
               author: "author",
               description: "content",
-              url: "https://article1.example.com",
+              url: "https://zenn.example.com/article1",
             },
           ]),
       ));
