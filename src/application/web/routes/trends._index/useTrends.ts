@@ -12,7 +12,12 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
-export type FetchArticles = (params: { date: Date; page?: number; limit?: number }) => Promise<void>
+export type FetchArticles = (params: {
+  date: Date
+  page?: number
+  limit?: number
+  media?: 'qiita' | 'zenn'
+}) => Promise<void>
 
 export default function useTrends() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -26,64 +31,69 @@ export default function useTrends() {
 
   const date = useMemo(() => new Date(), [])
 
-  const fetchArticles: FetchArticles = useCallback(async ({ date, page = 1, limit = 20 }) => {
-    if (isLoadingRef.current) return
+  const fetchArticles: FetchArticles = useCallback(
+    async ({ date, page = 1, limit = 20, media }) => {
+      if (isLoadingRef.current) return
 
-    isLoadingRef.current = true
-    setIsLoading(true)
-    try {
-      const queryDate = formatDate(date)
+      isLoadingRef.current = true
+      setIsLoading(true)
+      try {
+        const queryDate = formatDate(date)
 
-      const res = await getApiClientForClient().articles.$get({
-        query: {
-          to: queryDate,
-          from: queryDate,
-          page,
-          limit,
-        },
-      })
-      if (res.status === 200) {
-        const resJson = await res.json()
-        setArticles(
-          resJson.data.map((data) => ({
-            articleId: BigInt(data.articleId),
-            media: data.media,
-            title: data.title,
-            author: data.author,
-            description: data.description,
-            url: data.url,
-            createdAt: new Date(data.createdAt),
-          })),
-        )
-        setPage(resJson.page)
-        setLimit(resJson.limit)
-        setTotalPages(resJson.totalPages)
+        const res = await getApiClientForClient().articles.$get({
+          query: {
+            to: queryDate,
+            from: queryDate,
+            page,
+            limit,
+            ...(media && { media }),
+          },
+        })
+        if (res.status === 200) {
+          const resJson = await res.json()
+          setArticles(
+            resJson.data.map((data) => ({
+              articleId: BigInt(data.articleId),
+              media: data.media,
+              title: data.title,
+              author: data.author,
+              description: data.description,
+              url: data.url,
+              createdAt: new Date(data.createdAt),
+            })),
+          )
+          setPage(resJson.page)
+          setLimit(resJson.limit)
+          setTotalPages(resJson.totalPages)
 
-        // 400番台
-      } else if (res.status >= 400 && res.status < 500) {
-        throw new Error('不正なパラメータです')
-      } else if (res.status >= 500) {
-        throw new Error('不明なエラーが発生しました')
+          // 400番台
+        } else if (res.status >= 400 && res.status < 500) {
+          throw new Error('不正なパラメータです')
+        } else if (res.status >= 500) {
+          throw new Error('不明なエラーが発生しました')
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          const errorMessage = error.message || 'エラーが発生しました'
+          toast.error(errorMessage)
+        } else {
+          toast.error('不明なエラーが発生しました')
+          // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
+          console.error(error)
+        }
+      } finally {
+        isLoadingRef.current = false
+        setIsLoading(false)
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        const errorMessage = error.message || 'エラーが発生しました'
-        toast.error(errorMessage)
-      } else {
-        toast.error('不明なエラーが発生しました')
-        // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
-        console.error(error)
-      }
-    } finally {
-      isLoadingRef.current = false
-      setIsLoading(false)
-    }
-  }, [])
+    },
+    [],
+  )
 
   // INFO: URLパラメータの変更を監視して記事を取得
   useEffect(() => {
     const pageParam = searchParams.get('page')
     const limitParam = searchParams.get('limit')
+    const mediaParam = searchParams.get('media') as 'qiita' | 'zenn' | null
     const currentPage = pageParam ? parseInt(pageParam, 10) : 1
     const validPage = Number.isNaN(currentPage) ? 1 : Math.max(currentPage, 1)
 
@@ -98,7 +108,12 @@ export default function useTrends() {
       validLimit = isMobile ? 10 : 20
     }
 
-    fetchArticles({ date, page: validPage, limit: validLimit })
+    fetchArticles({
+      date,
+      page: validPage,
+      limit: validLimit,
+      ...(mediaParam && { media: mediaParam }),
+    })
     // NOTE: isMobileを依存配列から除外することで、初回マウント時のisMobile変化による2重実行を防ぐ
     // isMobileの最新値はクロージャー経由で常に参照できる
   }, [searchParams, date, fetchArticles])

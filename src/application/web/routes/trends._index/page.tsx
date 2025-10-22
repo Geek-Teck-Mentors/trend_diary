@@ -12,6 +12,7 @@ import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ArticleCard from './components/ArticleCard'
+import MediaFilter from './components/MediaFilter'
 
 type Props = {
   date: Date
@@ -84,6 +85,7 @@ export default function TrendsPage({
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
       <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
+      <MediaFilter />
       {articles.length === 0 ? (
         <div className='text-gray-500'>記事がありません</div>
       ) : (
