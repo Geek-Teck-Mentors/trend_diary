@@ -69,8 +69,8 @@ npm start
 
 ### 技術詳細
 
+**デプロイ方法**:
 Cloudflare公式の`wrangler versions upload`コマンドを使用：
-
 ```sh
 # 新しいバージョンをアップロード（本番デプロイしない）
 npx wrangler versions upload --preview-alias pr-123
@@ -81,6 +81,21 @@ npx wrangler versions upload --preview-alias pr-123
 - 新しいWorkerを作成しない（バージョン管理の一部）
 - プレビューエイリアスのみ作成
 - セキュアかつCloudflare推奨の方法
+
+**クリーンアップ方法**:
+PRクローズ時にCloudflare APIを使用してデプロイメントを削除：
+```sh
+# デプロイメント一覧を取得
+GET /accounts/{account_id}/workers/scripts/trend-diary/deployments
+
+# プレビューエイリアスに一致するデプロイメントを削除
+DELETE /accounts/{account_id}/workers/scripts/trend-diary/deployments/{deployment_id}
+```
+
+**ワークフロー構成**:
+- 既存の`.github/actions/setup_node`アクションを使用
+- Node.jsバージョンは`.node-version`ファイルから自動読み取り
+- 他のワークフローと同じパターンで統一
 
 ## 他ドキュメント
 
