@@ -67,6 +67,11 @@ test.describe('記事一覧ページ(モバイル)', () => {
       )
     })
 
+    test.afterAll(async () => {
+      // テスト後に記事をクリーンアップ
+      await articleTestHelper.cleanUpArticles()
+    })
+
     test.beforeEach(async ({ page }) => {
       // カードが表示されるのを待機
       await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
