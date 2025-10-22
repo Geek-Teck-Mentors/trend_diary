@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router'
 import { twMerge } from 'tailwind-merge'
+import { DatePicker } from '@/application/web/components/ui/date-picker'
 import {
   Pagination,
   PaginationContent,
@@ -71,6 +72,22 @@ export default function TrendsPage({
       handlePageChange(page + 1)
     }
   }, [isNextDisabled, page, handlePageChange])
+
+  const handleDateChange = useCallback(
+    (newDate: Date | undefined) => {
+      if (!newDate) return
+      const newParams = new URLSearchParams(searchParams)
+      const year = newDate.getFullYear()
+      const month = String(newDate.getMonth() + 1).padStart(2, '0')
+      const day = String(newDate.getDate()).padStart(2, '0')
+      const dateString = `${year}-${month}-${day}`
+      newParams.set('date', dateString)
+      newParams.delete('page') // 日付を変更したらページをリセット
+      setSearchParams(newParams)
+    },
+    [searchParams, setSearchParams],
+  )
+
   const getPaginationClass = (isDisabled: boolean) => {
     const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
     return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')
@@ -83,6 +100,9 @@ export default function TrendsPage({
 
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
+      <div className='mb-4'>
+        <DatePicker date={date} onDateChange={handleDateChange} />
+      </div>
       <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
       {articles.length === 0 ? (
         <div className='text-gray-500'>記事がありません</div>

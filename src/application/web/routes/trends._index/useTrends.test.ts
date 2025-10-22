@@ -325,6 +325,59 @@ describe('useTrends', () => {
         },
       })
     })
+
+    it('URLパラメータにdate=2024-01-01がある場合、その日付で記事を取得する', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle({ articleId: BigInt(1), title: '2024年1月1日の記事' })],
+        page: 1,
+        totalPages: 1,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?date=2024-01-01'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
+        query: {
+          to: '2024-01-01',
+          from: '2024-01-01',
+          page: 1,
+          limit: 20,
+        },
+      })
+      expect(result.current.date.getFullYear()).toBe(2024)
+      expect(result.current.date.getMonth()).toBe(0)
+      expect(result.current.date.getDate()).toBe(1)
+    })
+
+    it('URLパラメータのdateが不正な値の場合、今日の日付として扱う', async () => {
+      const fakeResponse = generateFakeResponse()
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?date=invalid'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
+        query: {
+          to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          page: 1,
+          limit: 20,
+        },
+      })
+      const today = new Date()
+      expect(result.current.date.getFullYear()).toBe(today.getFullYear())
+      expect(result.current.date.getMonth()).toBe(today.getMonth())
+      expect(result.current.date.getDate()).toBe(today.getDate())
+    })
   })
 
   describe('エッジケース', () => {

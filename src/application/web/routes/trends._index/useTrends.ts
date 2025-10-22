@@ -24,7 +24,14 @@ export default function useTrends() {
   const isLoadingRef = useRef(false)
   const isMobile = useIsMobile()
 
-  const date = useMemo(() => new Date(), [])
+  const date = useMemo(() => {
+    const dateParam = searchParams.get('date')
+    if (dateParam) {
+      const parsedDate = new Date(dateParam)
+      return Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate
+    }
+    return new Date()
+  }, [searchParams])
 
   const fetchArticles: FetchArticles = useCallback(async ({ date, page = 1, limit = 20 }) => {
     if (isLoadingRef.current) return
