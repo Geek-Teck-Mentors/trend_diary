@@ -1,0 +1,30 @@
+name: Setup and Build
+description: Node.jsセットアップ、依存関係インストール、Prisma生成、ビルドを実行
+
+inputs:
+  skip-build:
+    description: 'ビルドをスキップするかどうか'
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.node-version'
+        cache: 'npm'
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Generate Prisma Client
+      shell: bash
+      run: npx prisma generate
+
+    - name: Build
+      if: inputs.skip-build != 'true'
+      shell: bash
+      run: npm run build
