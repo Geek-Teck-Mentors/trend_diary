@@ -42,6 +42,39 @@ npm run db:migrate
 npm start
 ```
 
+## Cloudflare Preview環境の設定
+
+このプロジェクトではPR毎にCloudflare Workersのプレビュー環境を自動デプロイする仕組みを導入している。
+
+### 必要なGitHub Secrets
+
+リポジトリの Settings > Secrets and variables > Actions から以下のシークレットを設定する必要がある：
+
+- `CLOUDFLARE_API_TOKEN`: Cloudflare APIトークン
+  - [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens) から作成
+  - 必要な権限: `Workers Scripts:Edit`
+
+- `CLOUDFLARE_ACCOUNT_ID`: CloudflareアカウントID
+  - [Cloudflare Dashboard](https://dash.cloudflare.com/) のWorkers & Pages画面で確認可能
+
+### プレビュー環境の動作
+
+- PR作成・更新時に自動的にプレビュー環境がデプロイされる
+- デプロイURLはPRコメントに自動投稿される（例: `https://trend-diary-pr-123.{subdomain}.workers.dev`）
+- プレビュー環境は本番のDBとAPIに接続する
+- PRクローズ時に自動的にプレビュー環境が削除される
+
+### プレビュー環境用の環境変数設定
+
+Cloudflare Workersのプレビュー環境でも本番環境と同じ環境変数が必要な場合は、`wrangler secret put`コマンドで設定可能：
+
+```sh
+# プレビュー環境名を指定して環境変数を設定
+npx wrangler secret put DATABASE_URL --name trend-diary-pr-123
+```
+
+ただし、`--keep-vars`オプションを使用しているため、基本的には本番環境と同じ環境変数が使用される。
+
 ## 他ドキュメント
 
 [ホーム](docs/home.md)
