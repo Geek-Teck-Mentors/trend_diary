@@ -119,6 +119,7 @@ test.describe('記事一覧ページ', () => {
     })
 
     test.beforeEach(async ({ page }) => {
+      await page.goto('/trends')
       // カードが表示されるのを待機
       await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
     })
