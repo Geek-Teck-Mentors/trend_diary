@@ -8,4 +8,5 @@ export interface ArticleFetcher {
 
 export interface ArticleRepository {
   bulkCreateArticle: (params: ArticleInput[]) => Promise<Article[]>;
+  fetchArticlesByUrls: (urls: string[]) => Promise<Article[]>;
 }
