@@ -2,7 +2,7 @@ name: Cloudflare Preview Deploy
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, closed]
 
 jobs:
   deploy-preview:
@@ -66,7 +66,7 @@ jobs:
             ---
 
             ℹ️ このプレビュー環境は本番のDBとAPIに接続している
-            ℹ️ プレビューエイリアスは自動的に管理される（最新1000個まで保持）`;
+            ℹ️ PRがクローズされると自動的に削除される`;
 
             // 既存のコメントを検索
             const { data: comments } = await github.rest.issues.listComments({
@@ -97,3 +97,41 @@ jobs:
                 body: commentBody
               });
             }
+
+  cleanup-preview:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Delete Preview Alias Deployment
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PREVIEW_ALIAS="pr-${PR_NUMBER}"
+          SCRIPT_NAME="trend-diary"
+
+          # プレビューエイリアスに関連するデプロイメントを一覧取得
+          DEPLOYMENTS=$(curl -s "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${SCRIPT_NAME}/deployments" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json")
+
+          # プレビューエイリアスに一致するデプロイメントIDを抽出
+          DEPLOYMENT_ID=$(echo "$DEPLOYMENTS" | jq -r ".result[] | select(.annotations.\"workers/triggered_by\" == \"upload\" and .annotations.\"workers/preview-alias\" == \"${PREVIEW_ALIAS}\") | .id" | head -1)
+
+          if [ -n "$DEPLOYMENT_ID" ] && [ "$DEPLOYMENT_ID" != "null" ]; then
+            echo "Deleting deployment: ${DEPLOYMENT_ID} for alias: ${PREVIEW_ALIAS}"
+
+            # デプロイメントを削除
+            curl -X DELETE "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${SCRIPT_NAME}/deployments/${DEPLOYMENT_ID}" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json"
+
+            echo "Preview deployment deleted successfully"
+          else
+            echo "No deployment found for preview alias: ${PREVIEW_ALIAS}"
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
