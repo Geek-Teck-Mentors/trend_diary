@@ -1,4 +1,3 @@
-import { InternalServerError } from "./error.ts";
 import {
   ArticleFetcher,
   ArticleRepository,
