@@ -11,6 +11,33 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
     private client: RdbClient,
   ) {}
 
+  async fetchArticlesByUrls(urls: string[]) {
+    const { data, error }: {
+      data: Article[] | null;
+      error: QueryError | null;
+    } = await this.client
+      .from("articles")
+      .select("*")
+      .in("url", urls)
+      .returns<Article[]>();
+
+    if (error) {
+      throw new DatabaseError(
+        "Failed to fetch articles by URLs: " + JSON.stringify(error),
+      );
+    }
+
+    if (!data) {
+      throw new DatabaseError("No data returned from Supabase");
+    }
+
+    logger.info(
+      `Fetched ${data.length} articles from Supabase for ${urls.length} URLs.`,
+    );
+
+    return data;
+  }
+
   async bulkCreateArticle(params: ArticleInput[]) {
     const insertParams: TablesInsert<"articles">[] = params.map(
       this.normalizeForArticleInput,
