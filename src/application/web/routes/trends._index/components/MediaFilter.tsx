@@ -6,7 +6,9 @@ type MediaType = 'qiita' | 'zenn' | 'all'
 
 export default function MediaFilter() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const currentMedia: MediaType = (searchParams.get('media') as 'qiita' | 'zenn') || 'all'
+  const mediaParam = searchParams.get('media')
+  const currentMedia: MediaType =
+    mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : 'all'
 
   const handleMediaChange = useCallback(
     (media: MediaType) => {
