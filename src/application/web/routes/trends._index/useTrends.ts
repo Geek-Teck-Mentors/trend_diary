@@ -12,11 +12,13 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
+export type MediaType = 'qiita' | 'zenn' | null
+
 export type FetchArticles = (params: {
   date: Date
   page?: number
   limit?: number
-  media?: 'qiita' | 'zenn'
+  media?: MediaType
 }) => Promise<void>
 
 export default function useTrends() {
@@ -32,7 +34,7 @@ export default function useTrends() {
   const date = useMemo(() => new Date(), [])
 
   const fetchArticles: FetchArticles = useCallback(
-    async ({ date, page = 1, limit = 20, media }) => {
+    async ({ date, page = 1, limit = 20, media = null }) => {
       if (isLoadingRef.current) return
 
       isLoadingRef.current = true
@@ -89,11 +91,15 @@ export default function useTrends() {
     [],
   )
 
+  const selectedMedia = useMemo<MediaType>(() => {
+    const mediaParam = searchParams.get('media')
+    return mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : null
+  }, [searchParams])
+
   // INFO: URLパラメータの変更を監視して記事を取得
   useEffect(() => {
     const pageParam = searchParams.get('page')
     const limitParam = searchParams.get('limit')
-    const mediaParam = searchParams.get('media') as 'qiita' | 'zenn' | null
     const currentPage = pageParam ? parseInt(pageParam, 10) : 1
     const validPage = Number.isNaN(currentPage) ? 1 : Math.max(currentPage, 1)
 
@@ -108,15 +114,25 @@ export default function useTrends() {
       validLimit = isMobile ? 10 : 20
     }
 
-    fetchArticles({
-      date,
-      page: validPage,
-      limit: validLimit,
-      ...(mediaParam && { media: mediaParam }),
-    })
+    fetchArticles({ date, page: validPage, limit: validLimit, media: selectedMedia })
     // NOTE: isMobileを依存配列から除外することで、初回マウント時のisMobile変化による2重実行を防ぐ
     // isMobileの最新値はクロージャー経由で常に参照できる
-  }, [searchParams, date, fetchArticles])
+  }, [searchParams, date, fetchArticles, selectedMedia])
+
+  const handleMediaChange = useCallback(
+    (media: MediaType) => {
+      const newParams = new URLSearchParams(searchParams)
+      if (media) {
+        newParams.set('media', media)
+      } else {
+        newParams.delete('media')
+      }
+      // メディアを変更したらページを1にリセット
+      newParams.delete('page')
+      setSearchParams(newParams)
+    },
+    [searchParams, setSearchParams],
+  )
 
   return {
     date,
@@ -127,5 +143,7 @@ export default function useTrends() {
     totalPages,
     isLoading,
     setSearchParams,
+    handleMediaChange,
+    selectedMedia,
   }
 }

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { createMemoryRouter, RouterProvider } from 'react-router'
 import { expect, userEvent, waitFor } from 'storybook/test'
 import MediaFilter from './MediaFilter'
 
@@ -13,160 +12,168 @@ export default meta
 
 type Story = StoryObj<typeof MediaFilter>
 
-// URLパラメータを設定したカスタムデコレーター
-const createRouterDecorator = (initialPath: string) => (Story: any) => {
-  const router = createMemoryRouter(
-    [
-      {
-        path: '*',
-        element: <Story />,
-      },
-    ],
-    {
-      initialEntries: [initialPath],
+export const AllSelected: Story = {
+  args: {
+    selectedMedia: null,
+    onMediaChange: () => {
+      // Storybook display only
     },
-  )
-  return <RouterProvider router={router} />
-}
-
-export const Default: Story = {
-  decorators: [createRouterDecorator('/trends')],
+  },
   play: async ({ canvas, step }) => {
-    await step('3つのボタンが表示されることを確認', async () => {
-      const allButton = canvas.getByRole('button', { name: '全て' })
-      const qiitaButton = canvas.getByRole('button', { name: 'Qiita' })
-      const zennButton = canvas.getByRole('button', { name: 'Zenn' })
-
-      await expect(allButton).toBeInTheDocument()
-      await expect(qiitaButton).toBeInTheDocument()
-      await expect(zennButton).toBeInTheDocument()
+    let trigger: HTMLElement
+    await step('フィルタトリガーが表示され、「すべて」と表示されることを確認', async () => {
+      trigger = canvas.getByRole('button')
+      await expect(trigger).toBeInTheDocument()
+      await expect(trigger).toHaveTextContent('すべて')
     })
 
-    await step('デフォルトで「全て」ボタンが選択状態であることを確認', async () => {
-      const allButton = canvas.getByRole('button', { name: '全て' })
-      // default variantが適用されている（具体的なクラス名は実装依存）
-      await expect(allButton).toBeVisible()
+    await step('フィルタがアクティブでないため、アイコンが灰色であることを確認', async () => {
+      const icon = trigger.querySelector('svg')
+      await expect(icon).toHaveClass('text-gray-600')
     })
   },
 }
 
 export const QiitaSelected: Story = {
-  decorators: [createRouterDecorator('/trends?media=qiita')],
+  args: {
+    selectedMedia: 'qiita',
+    onMediaChange: () => {
+      // Storybook display only
+    },
+  },
   play: async ({ canvas, step }) => {
-    await step('Qiitaボタンが選択状態であることを確認', async () => {
-      const qiitaButton = canvas.getByRole('button', { name: 'Qiita' })
-      await expect(qiitaButton).toBeVisible()
+    let trigger: HTMLElement
+    await step('フィルタトリガーが表示され、「Qiita」と表示されることを確認', async () => {
+      trigger = canvas.getByRole('button')
+      await expect(trigger).toBeInTheDocument()
+      await expect(trigger).toHaveTextContent('Qiita')
     })
 
-    await step('他のボタンが非選択状態であることを確認', async () => {
-      const allButton = canvas.getByRole('button', { name: '全て' })
-      const zennButton = canvas.getByRole('button', { name: 'Zenn' })
-
-      await expect(allButton).toBeVisible()
-      await expect(zennButton).toBeVisible()
+    await step('フィルタがアクティブなため、アイコンが青色であることを確認', async () => {
+      const icon = trigger.querySelector('svg')
+      await expect(icon).toHaveClass('text-blue-600')
     })
   },
 }
 
 export const ZennSelected: Story = {
-  decorators: [createRouterDecorator('/trends?media=zenn')],
+  args: {
+    selectedMedia: 'zenn',
+    onMediaChange: () => {
+      // Storybook display only
+    },
+  },
   play: async ({ canvas, step }) => {
-    await step('Zennボタンが選択状態であることを確認', async () => {
-      const zennButton = canvas.getByRole('button', { name: 'Zenn' })
-      await expect(zennButton).toBeVisible()
+    let trigger: HTMLElement
+    await step('フィルタトリガーが表示され、「Zenn」と表示されることを確認', async () => {
+      trigger = canvas.getByRole('button')
+      await expect(trigger).toBeInTheDocument()
+      await expect(trigger).toHaveTextContent('Zenn')
     })
 
-    await step('他のボタンが非選択状態であることを確認', async () => {
-      const allButton = canvas.getByRole('button', { name: '全て' })
-      const qiitaButton = canvas.getByRole('button', { name: 'Qiita' })
-
-      await expect(allButton).toBeVisible()
-      await expect(qiitaButton).toBeVisible()
+    await step('フィルタがアクティブなため、アイコンが青色であることを確認', async () => {
+      const icon = trigger.querySelector('svg')
+      await expect(icon).toHaveClass('text-blue-600')
     })
   },
 }
 
-export const ClickQiitaButton: Story = {
-  decorators: [createRouterDecorator('/trends')],
+export const OpenDropdownMenu: Story = {
+  args: {
+    selectedMedia: null,
+    onMediaChange: () => {
+      // Storybook display only
+    },
+  },
   play: async ({ canvas, step }) => {
-    const qiitaButton = canvas.getByRole('button', { name: 'Qiita' })
+    const trigger = canvas.getByRole('button')
 
-    await step('Qiitaボタンをクリック', async () => {
-      await userEvent.click(qiitaButton)
+    await step('フィルタトリガーをクリックしてドロップダウンを開く', async () => {
+      await userEvent.click(trigger)
     })
 
-    await step('Qiitaボタンが選択状態になることを確認', async () => {
-      await waitFor(() => {
-        expect(qiitaButton).toBeVisible()
+    await step('ドロップダウンメニューが表示され、3つの項目があることを確認', async () => {
+      await waitFor(async () => {
+        const allItem = canvas.getByRole('menuitem', { name: 'すべて' })
+        const qiitaItem = canvas.getByRole('menuitem', { name: 'Qiita' })
+        const zennItem = canvas.getByRole('menuitem', { name: 'Zenn' })
+
+        await expect(allItem).toBeVisible()
+        await expect(qiitaItem).toBeVisible()
+        await expect(zennItem).toBeVisible()
       })
     })
   },
 }
 
-export const ClickZennButton: Story = {
-  decorators: [createRouterDecorator('/trends')],
+export const SelectQiitaFromDropdown: Story = {
+  args: {
+    selectedMedia: null,
+    onMediaChange: () => {
+      // Storybook display only
+    },
+  },
   play: async ({ canvas, step }) => {
-    const zennButton = canvas.getByRole('button', { name: 'Zenn' })
+    const trigger = canvas.getByRole('button')
 
-    await step('Zennボタンをクリック', async () => {
-      await userEvent.click(zennButton)
+    await step('フィルタトリガーをクリック', async () => {
+      await userEvent.click(trigger)
     })
 
-    await step('Zennボタンが選択状態になることを確認', async () => {
-      await waitFor(() => {
-        expect(zennButton).toBeVisible()
+    await step('Qiita項目をクリック', async () => {
+      await waitFor(async () => {
+        const qiitaItem = canvas.getByRole('menuitem', { name: 'Qiita' })
+        await userEvent.click(qiitaItem)
       })
     })
   },
 }
 
-export const ClickAllButton: Story = {
-  decorators: [createRouterDecorator('/trends?media=qiita')],
+export const SelectZennFromDropdown: Story = {
+  args: {
+    selectedMedia: null,
+    onMediaChange: () => {
+      // Storybook display only
+    },
+  },
   play: async ({ canvas, step }) => {
-    const allButton = canvas.getByRole('button', { name: '全て' })
+    const trigger = canvas.getByRole('button')
+
+    await step('フィルタトリガーをクリック', async () => {
+      await userEvent.click(trigger)
+    })
+
+    await step('Zenn項目をクリック', async () => {
+      await waitFor(async () => {
+        const zennItem = canvas.getByRole('menuitem', { name: 'Zenn' })
+        await userEvent.click(zennItem)
+      })
+    })
+  },
+}
+
+export const ResetFilter: Story = {
+  args: {
+    selectedMedia: 'qiita',
+    onMediaChange: () => {
+      // Storybook display only
+    },
+  },
+  play: async ({ canvas, step }) => {
+    const trigger = canvas.getByRole('button')
 
     await step('初期状態でQiitaが選択されていることを確認', async () => {
-      const qiitaButton = canvas.getByRole('button', { name: 'Qiita' })
-      await expect(qiitaButton).toBeVisible()
+      await expect(trigger).toHaveTextContent('Qiita')
     })
 
-    await step('「全て」ボタンをクリック', async () => {
-      await userEvent.click(allButton)
+    await step('フィルタトリガーをクリック', async () => {
+      await userEvent.click(trigger)
     })
 
-    await step('「全て」ボタンが選択状態になることを確認', async () => {
-      await waitFor(() => {
-        expect(allButton).toBeVisible()
-      })
-    })
-  },
-}
-
-export const SwitchBetweenFilters: Story = {
-  decorators: [createRouterDecorator('/trends')],
-  play: async ({ canvas, step }) => {
-    const allButton = canvas.getByRole('button', { name: '全て' })
-    const qiitaButton = canvas.getByRole('button', { name: 'Qiita' })
-    const zennButton = canvas.getByRole('button', { name: 'Zenn' })
-
-    await step('Qiitaボタンをクリック', async () => {
-      await userEvent.click(qiitaButton)
-      await waitFor(() => {
-        expect(qiitaButton).toBeVisible()
-      })
-    })
-
-    await step('Zennボタンをクリック', async () => {
-      await userEvent.click(zennButton)
-      await waitFor(() => {
-        expect(zennButton).toBeVisible()
-      })
-    })
-
-    await step('「全て」ボタンをクリック', async () => {
-      await userEvent.click(allButton)
-      await waitFor(() => {
-        expect(allButton).toBeVisible()
+    await step('「すべて」項目をクリック', async () => {
+      await waitFor(async () => {
+        const allItem = canvas.getByRole('menuitem', { name: 'すべて' })
+        await userEvent.click(allItem)
       })
     })
   },

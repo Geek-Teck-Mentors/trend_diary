@@ -7,7 +7,17 @@ import useTrends from './useTrends'
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
 
 export default function Trends() {
-  const { articles, isLoading, page, limit, totalPages, date, setSearchParams } = useTrends()
+  const {
+    articles,
+    isLoading,
+    page,
+    limit,
+    totalPages,
+    date,
+    setSearchParams,
+    handleMediaChange,
+    selectedMedia,
+  } = useTrends()
   const {
     isOpen: isDrawerOpen,
     selectedArticle,
@@ -26,6 +36,8 @@ export default function Trends() {
         page={page}
         limit={limit}
         totalPages={totalPages}
+        selectedMedia={selectedMedia}
+        onMediaChange={handleMediaChange}
       />
       {selectedArticle && (
         <ArticleDrawer article={selectedArticle} isOpen={isDrawerOpen} onClose={closeDrawer} />
