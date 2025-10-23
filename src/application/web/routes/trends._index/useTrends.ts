@@ -12,6 +12,12 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
+const parseDate = (dateString: string | null): Date => {
+  if (!dateString) return new Date()
+  const parsed = new Date(dateString)
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed
+}
+
 export type FetchArticles = (params: { date: Date; page?: number; limit?: number }) => Promise<void>
 
 export default function useTrends() {
@@ -24,7 +30,7 @@ export default function useTrends() {
   const isLoadingRef = useRef(false)
   const isMobile = useIsMobile()
 
-  const date = useMemo(() => new Date(), [])
+  const date = useMemo(() => parseDate(searchParams.get('date')), [searchParams])
 
   const fetchArticles: FetchArticles = useCallback(async ({ date, page = 1, limit = 20 }) => {
     if (isLoadingRef.current) return
@@ -80,6 +86,17 @@ export default function useTrends() {
     }
   }, [])
 
+  const handleDateChange = useCallback(
+    (newDate: Date) => {
+      const newParams = new URLSearchParams(searchParams)
+      newParams.set('date', formatDate(newDate))
+      // 日付が変更されたらページを1にリセット
+      newParams.delete('page')
+      setSearchParams(newParams)
+    },
+    [searchParams, setSearchParams],
+  )
+
   // INFO: URLパラメータの変更を監視して記事を取得
   useEffect(() => {
     const pageParam = searchParams.get('page')
@@ -112,5 +129,6 @@ export default function useTrends() {
     totalPages,
     isLoading,
     setSearchParams,
+    handleDateChange,
   }
 }

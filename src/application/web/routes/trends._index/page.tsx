@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router'
 import { twMerge } from 'tailwind-merge'
+import { DatePicker } from '@/application/web/components/DatePicker'
 import {
   Pagination,
   PaginationContent,
@@ -8,7 +9,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/application/web/components/ui/pagination'
-import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ArticleCard from './components/ArticleCard'
@@ -22,6 +22,7 @@ type Props = {
   page: number
   limit: number
   totalPages: number
+  onDateChange: (date: Date) => void
 }
 
 export default function TrendsPage({
@@ -33,6 +34,7 @@ export default function TrendsPage({
   page,
   limit,
   totalPages,
+  onDateChange,
 }: Props) {
   const [searchParams] = useSearchParams()
 
@@ -83,7 +85,9 @@ export default function TrendsPage({
 
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
-      <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
+      <div className='mb-6 flex justify-center'>
+        <DatePicker date={date} onDateChange={onDateChange} />
+      </div>
       {articles.length === 0 ? (
         <div className='text-gray-500'>記事がありません</div>
       ) : (
