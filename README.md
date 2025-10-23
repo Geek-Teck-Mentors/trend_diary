@@ -42,6 +42,61 @@ npm run db:migrate
 npm start
 ```
 
+## Cloudflare Preview環境の設定
+
+このプロジェクトではPR毎にCloudflare Workersのプレビュー環境を自動デプロイする仕組みを導入している。
+
+**安全性**: `wrangler versions upload`を使用しているため、本番環境には一切影響しない。
+
+### 必要なGitHub Secrets
+
+リポジトリの Settings > Secrets and variables > Actions から以下のシークレットを設定する必要がある：
+
+- `CLOUDFLARE_API_TOKEN`: Cloudflare APIトークン
+  - [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens) から作成
+  - 必要な権限: `Workers Scripts:Edit`
+
+- `CLOUDFLARE_ACCOUNT_ID`: CloudflareアカウントID
+  - [Cloudflare Dashboard](https://dash.cloudflare.com/) のWorkers & Pages画面で確認可能
+
+### プレビュー環境の動作
+
+- PR作成・更新時に新しいWorkerバージョンをアップロード（本番デプロイはしない）
+- プレビューエイリアス（例: `pr-123`）を自動作成
+- プレビューURLはPRコメントに自動投稿（例: `https://pr-123.trend-diary.workers.dev`）
+- プレビュー環境は本番のDBとAPIに接続する
+- PRクローズ時にCloudflare APIを使ってプレビューデプロイメントを自動削除
+
+### 技術詳細
+
+**デプロイ方法**:
+Cloudflare公式の`wrangler versions upload`コマンドを使用：
+```sh
+# 新しいバージョンをアップロード（本番デプロイしない）
+npx wrangler versions upload --preview-alias pr-123
+```
+
+これにより：
+- 本番Workerには影響なし
+- 新しいWorkerを作成しない（バージョン管理の一部）
+- プレビューエイリアスのみ作成
+- セキュアかつCloudflare推奨の方法
+
+**クリーンアップ方法**:
+PRクローズ時にCloudflare APIを使用してデプロイメントを削除：
+```sh
+# デプロイメント一覧を取得
+GET /accounts/{account_id}/workers/scripts/trend-diary/deployments
+
+# プレビューエイリアスに一致するデプロイメントを削除
+DELETE /accounts/{account_id}/workers/scripts/trend-diary/deployments/{deployment_id}
+```
+
+**ワークフロー構成**:
+- 既存の`.github/actions/setup_node`アクションを使用
+- Node.jsバージョンは`.node-version`ファイルから自動読み取り
+- 他のワークフローと同じパターンで統一
+
 ## 他ドキュメント
 
 [ホーム](docs/home.md)
