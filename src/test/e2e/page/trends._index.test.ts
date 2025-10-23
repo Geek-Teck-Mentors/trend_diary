@@ -134,6 +134,11 @@ test.describe('記事一覧ページ', () => {
       const qiitaButton = page.getByRole('button', { name: 'Qiita' })
       const zennButton = page.getByRole('button', { name: 'Zenn' })
 
+      // ボタンが表示されるまで待機
+      await allButton.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await zennButton.waitFor({ state: 'visible', timeout: TIMEOUT })
+
       await expect(allButton).toBeVisible()
       await expect(qiitaButton).toBeVisible()
       await expect(zennButton).toBeVisible()
@@ -147,6 +152,7 @@ test.describe('記事一覧ページ', () => {
 
     test('Qiitaボタンをクリックすると、Qiita記事のみが表示される', async ({ page }) => {
       const qiitaButton = page.getByRole('button', { name: 'Qiita' })
+      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
       await qiitaButton.click()
 
       // URLパラメータが変更されるのを待機
@@ -163,6 +169,7 @@ test.describe('記事一覧ページ', () => {
 
     test('Zennボタンをクリックすると、Zenn記事のみが表示される', async ({ page }) => {
       const zennButton = page.getByRole('button', { name: 'Zenn' })
+      await zennButton.waitFor({ state: 'visible', timeout: TIMEOUT })
       await zennButton.click()
 
       // URLパラメータが変更されるのを待機
@@ -182,6 +189,7 @@ test.describe('記事一覧ページ', () => {
     }) => {
       // まずQiitaフィルターを選択
       const qiitaButton = page.getByRole('button', { name: 'Qiita' })
+      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
       await qiitaButton.click()
       await page.waitForURL('**/trends?media=qiita', { timeout: TIMEOUT })
 
@@ -191,6 +199,7 @@ test.describe('記事一覧ページ', () => {
 
       // 全てボタンをクリック
       const allButton = page.getByRole('button', { name: '全て' })
+      await allButton.waitFor({ state: 'visible', timeout: TIMEOUT })
       await allButton.click()
 
       // URLパラメータからmediaが削除されるのを待機
@@ -208,6 +217,7 @@ test.describe('記事一覧ページ', () => {
 
       // Qiitaフィルターをクリック
       const qiitaButton = page.getByRole('button', { name: 'Qiita' })
+      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
       await qiitaButton.click()
 
       // ページ番号がリセットされることを確認
