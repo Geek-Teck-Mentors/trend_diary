@@ -12,15 +12,16 @@ type Props = {
   onMediaChange: (media: MediaType) => void
 }
 
-const mediaLabels: Record<'all' | 'qiita' | 'zenn', string> = {
-  all: 'すべて',
-  qiita: 'Qiita',
-  zenn: 'Zenn',
-}
+const mediaOptions = [
+  { value: null, label: 'すべて', dataSlot: 'media-filter-all' },
+  { value: 'qiita', label: 'Qiita', dataSlot: 'media-filter-qiita' },
+  { value: 'zenn', label: 'Zenn', dataSlot: 'media-filter-zenn' },
+] as const
 
 export default function MediaFilter({ selectedMedia, onMediaChange }: Props) {
   const isFilterActive = selectedMedia !== null
-  const currentLabel = selectedMedia ? mediaLabels[selectedMedia] : mediaLabels.all
+  const currentLabel =
+    mediaOptions.find((option) => option.value === selectedMedia)?.label || mediaOptions[0].label
 
   return (
     <DropdownMenu>
@@ -34,15 +35,15 @@ export default function MediaFilter({ selectedMedia, onMediaChange }: Props) {
         <span className='text-sm font-medium'>{currentLabel}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='start'>
-        <DropdownMenuItem onClick={() => onMediaChange(null)} data-slot='media-filter-all'>
-          すべて
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onMediaChange('qiita')} data-slot='media-filter-qiita'>
-          Qiita
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onMediaChange('zenn')} data-slot='media-filter-zenn'>
-          Zenn
-        </DropdownMenuItem>
+        {mediaOptions.map((option) => (
+          <DropdownMenuItem
+            key={option.dataSlot}
+            onClick={() => onMediaChange(option.value as MediaType)}
+            data-slot={option.dataSlot}
+          >
+            {option.label}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
