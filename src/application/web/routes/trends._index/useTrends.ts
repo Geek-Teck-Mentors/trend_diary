@@ -42,25 +42,14 @@ export default function useTrends() {
       try {
         const queryDate = formatDate(date)
 
-        const query: {
-          to: string
-          from: string
-          page: number
-          limit: number
-          media?: 'qiita' | 'zenn'
-        } = {
-          to: queryDate,
-          from: queryDate,
-          page,
-          limit,
-        }
-
-        if (media) {
-          query.media = media
-        }
-
         const res = await getApiClientForClient().articles.$get({
-          query,
+          query: {
+            to: queryDate,
+            from: queryDate,
+            page,
+            limit,
+            ...(media && { media }),
+          },
         })
         if (res.status === 200) {
           const resJson = await res.json()
