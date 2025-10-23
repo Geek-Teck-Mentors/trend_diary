@@ -42,7 +42,7 @@ export default function MediaFilter({ selectedMedia, onMediaChange }: Props) {
         {mediaOptions.map((option) => (
           <DropdownMenuItem
             key={option.dataSlot}
-            onClick={() => onMediaChange(option.value as MediaType)}
+            onClick={() => onMediaChange(option.value)}
             data-slot={option.dataSlot}
           >
             {option.label}
