@@ -5,8 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/application/web/components/ui/dropdown-menu'
-
-type MediaType = 'qiita' | 'zenn' | null
+import type { MediaType } from '../useTrends'
 
 type Props = {
   selectedMedia: MediaType

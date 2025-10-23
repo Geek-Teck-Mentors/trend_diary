@@ -12,7 +12,7 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
-type MediaType = 'qiita' | 'zenn' | null
+export type MediaType = 'qiita' | 'zenn' | null
 
 export type FetchArticles = (params: {
   date: Date
@@ -144,7 +144,7 @@ export default function useTrends() {
     [searchParams, setSearchParams],
   )
 
-  const selectedMedia = useMemo(() => {
+  const selectedMedia = useMemo<MediaType>(() => {
     const mediaParam = searchParams.get('media')
     return mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : null
   }, [searchParams])

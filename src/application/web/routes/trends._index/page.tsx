@@ -13,8 +13,7 @@ import type { ArticleOutput as Article } from '@/domain/article/schema/articleSc
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ArticleCard from './components/ArticleCard'
 import MediaFilter from './components/MediaFilter'
-
-type MediaType = 'qiita' | 'zenn' | null
+import type { MediaType } from './useTrends'
 
 type Props = {
   date: Date
