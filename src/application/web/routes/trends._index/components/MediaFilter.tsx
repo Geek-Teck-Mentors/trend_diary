@@ -5,6 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/application/web/components/ui/dropdown-menu'
+import { cn } from '@/application/web/components/ui/lib/utils'
 import type { MediaType } from '../useTrends'
 
 type Props = {
@@ -30,7 +31,10 @@ export default function MediaFilter({ selectedMedia, onMediaChange }: Props) {
         data-slot='media-filter-trigger'
       >
         <Filter
-          className={`w-4 h-4 transition-colors ${isFilterActive ? 'text-blue-600' : 'text-gray-600'}`}
+          className={cn(
+            'w-4 h-4 transition-colors',
+            isFilterActive ? 'text-blue-600' : 'text-gray-600',
+          )}
         />
         <span className='text-sm font-medium'>{currentLabel}</span>
       </DropdownMenuTrigger>

@@ -94,9 +94,9 @@ export const OpenDropdownMenu: Story = {
 
     await step('ドロップダウンメニューが表示され、3つの項目があることを確認', async () => {
       await waitFor(async () => {
-        const allItem = canvas.getByText('すべて')
-        const qiitaItem = canvas.getByText('Qiita')
-        const zennItem = canvas.getByText('Zenn')
+        const allItem = canvas.getByRole('menuitem', { name: 'すべて' })
+        const qiitaItem = canvas.getByRole('menuitem', { name: 'Qiita' })
+        const zennItem = canvas.getByRole('menuitem', { name: 'Zenn' })
 
         await expect(allItem).toBeVisible()
         await expect(qiitaItem).toBeVisible()
@@ -122,9 +122,7 @@ export const SelectQiitaFromDropdown: Story = {
 
     await step('Qiita項目をクリック', async () => {
       await waitFor(async () => {
-        // ドロップダウンメニュー内のQiitaを取得
-        const menuItems = canvas.getAllByText('Qiita')
-        const qiitaItem = menuItems[menuItems.length - 1]
+        const qiitaItem = canvas.getByRole('menuitem', { name: 'Qiita' })
         await userEvent.click(qiitaItem)
       })
     })
@@ -147,7 +145,7 @@ export const SelectZennFromDropdown: Story = {
 
     await step('Zenn項目をクリック', async () => {
       await waitFor(async () => {
-        const zennItem = canvas.getByText('Zenn')
+        const zennItem = canvas.getByRole('menuitem', { name: 'Zenn' })
         await userEvent.click(zennItem)
       })
     })
@@ -174,7 +172,7 @@ export const ResetFilter: Story = {
 
     await step('「すべて」項目をクリック', async () => {
       await waitFor(async () => {
-        const allItem = canvas.getByText('すべて')
+        const allItem = canvas.getByRole('menuitem', { name: 'すべて' })
         await userEvent.click(allItem)
       })
     })
