@@ -1,85 +1,31 @@
-import { ServerError } from '@/common/errors'
-import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import { RdbClient } from '@/infrastructure/rdb'
-import { CreateSessionInput } from '../dto'
-import { Command } from '../repository'
-import type { ActiveUser } from '../schema/activeUserSchema'
-import { mapToActiveUser } from './mapper'
+import { ServerError } from "@/common/errors";
+import {
+	type AsyncResult,
+	resultError,
+	resultSuccess,
+} from "@/common/types/utility";
+import type { RdbClient } from "@/infrastructure/rdb";
+import type { UserCommandRepository } from "../repository";
+import type { User } from "../schema/userSchema";
 
-export default class CommandImpl implements Command {
-  constructor(private readonly db: RdbClient) {}
+export class UserCommandRepositoryImpl implements UserCommandRepository {
+	constructor(private readonly db: RdbClient) {}
 
-  async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error> {
-    try {
-      const activeUser = await this.db.$transaction(async (tx) => {
-        const user = await tx.user.create({})
-        const activeUser = await tx.activeUser.create({
-          data: {
-            userId: user.userId,
-            email,
-            password: hashedPassword,
-          },
-        })
-        return activeUser
-      })
+	async create(data: { supabaseId: string }): AsyncResult<User, Error> {
+		try {
+			const user = await this.db.user.create({
+				data: {
+					supabaseId: data.supabaseId,
+				},
+			});
 
-      return resultSuccess(mapToActiveUser(activeUser))
-    } catch (error) {
-      return resultError(new ServerError(error))
-    }
-  }
-
-  async saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, Error> {
-    try {
-      const updatedActiveUser = await this.db.activeUser.update({
-        where: { activeUserId: activeUser.activeUserId },
-        data: {
-          email: activeUser.email,
-          password: activeUser.password,
-          displayName: activeUser.displayName,
-          lastLogin: activeUser.lastLogin,
-        },
-      })
-
-      return resultSuccess(mapToActiveUser(updatedActiveUser))
-    } catch (error) {
-      return resultError(new ServerError(error))
-    }
-  }
-
-  async createSession(
-    input: CreateSessionInput,
-  ): AsyncResult<{ sessionId: string; expiresAt: Date }, Error> {
-    try {
-      const session = await this.db.session.create({
-        data: {
-          sessionId: input.sessionId,
-          activeUserId: input.activeUserId,
-          sessionToken: input.sessionToken,
-          expiresAt: input.expiresAt,
-          ipAddress: input.ipAddress,
-          userAgent: input.userAgent,
-        },
-      })
-
-      return resultSuccess({
-        sessionId: session.sessionId,
-        expiresAt: session.expiresAt,
-      })
-    } catch (error) {
-      return resultError(new ServerError(error))
-    }
-  }
-
-  async deleteSession(sessionId: string): AsyncResult<void, Error> {
-    try {
-      await this.db.session.delete({
-        where: { sessionId },
-      })
-
-      return resultSuccess(undefined)
-    } catch (error) {
-      return resultError(new ServerError(error))
-    }
-  }
+			return resultSuccess({
+				userId: user.userId,
+				supabaseId: user.supabaseId,
+				createdAt: user.createdAt,
+			});
+		} catch (error) {
+			return resultError(new ServerError(error));
+		}
+	}
 }

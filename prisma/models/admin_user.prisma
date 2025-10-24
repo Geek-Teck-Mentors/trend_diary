@@ -1,0 +1,10 @@
+model AdminUser {
+  adminUserId          Int      @id @default(autoincrement()) @map("admin_user_id") @db.Integer
+  userId               BigInt   @unique @map("user_id") @db.BigInt
+  grantedAt            DateTime @default(now()) @map("granted_at") @db.Timestamptz()
+  grantedByAdminUserId Int      @map("granted_by_admin_user_id")
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("admin_users")
+}

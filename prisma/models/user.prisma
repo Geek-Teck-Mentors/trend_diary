@@ -1,17 +1,23 @@
 /// ユーザーの基本情報テーブル
 /// Active/Banned/Leavedの状態は別テーブルで管理し、状態遷移を履歴として保持
 model User {
-  userId BigInt @id @default(autoincrement()) @map("user_id") @db.BigInt
+  userId     BigInt  @id @default(autoincrement()) @map("user_id") @db.BigInt
+  supabaseId String  @unique @map("supabase_id") @db.Uuid
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   /// ユーザー状態（1対1関係、いずれか1つのみ存在）
-  activeUser ActiveUser?
   leavedUser LeavedUser?
   bannedUser BannedUser?
 
   /// プライバシーポリシー
   privacyPolicyConsent PrivacyPolicyConsent[]
+
+  /// 読み履歴
+  readHistories ReadHistory[]
+
+  /// 管理者権限
+  adminUser AdminUser?
 
   @@map("users")
 }
