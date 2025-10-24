@@ -199,8 +199,8 @@ test.describe('記事一覧ページ', () => {
       await page.waitForURL('**/trends?media=qiita', { timeout: TIMEOUT })
 
       // Qiita記事のみ表示されることを確認
-      let articleCards = page.locator('[data-slot="card"]')
-      await expect(articleCards).toHaveCount(QIITA_COUNT)
+      const qiitaArticleCards = page.locator('[data-slot="card"]')
+      await expect(qiitaArticleCards).toHaveCount(QIITA_COUNT)
 
       // すべてフィルターを選択
       await filterTrigger.click()
@@ -212,8 +212,8 @@ test.describe('記事一覧ページ', () => {
       await page.waitForURL('**/trends', { timeout: TIMEOUT })
 
       // 全記事が表示されることを確認
-      articleCards = page.locator('[data-slot="card"]')
-      await expect(articleCards).toHaveCount(QIITA_COUNT + ZENN_COUNT)
+      const allArticleCards = page.locator('[data-slot="card"]')
+      await expect(allArticleCards).toHaveCount(QIITA_COUNT + ZENN_COUNT)
     })
 
     test('フィルター切り替え時にページがリセットされる', async ({ page }) => {
