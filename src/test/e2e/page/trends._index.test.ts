@@ -129,19 +129,13 @@ test.describe('記事一覧ページ', () => {
       await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
     })
 
-    test('メディアフィルターボタンが3つ表示される', async ({ page }) => {
-      const allButton = page.getByRole('button', { name: '全て' })
-      const qiitaButton = page.getByRole('button', { name: 'Qiita' })
-      const zennButton = page.getByRole('button', { name: 'Zenn' })
+    test('メディアフィルタートリガーが表示される', async ({ page }) => {
+      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await expect(filterTrigger).toBeVisible()
 
-      // ボタンが表示されるまで待機
-      await allButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await zennButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-
-      await expect(allButton).toBeVisible()
-      await expect(qiitaButton).toBeVisible()
-      await expect(zennButton).toBeVisible()
+      // デフォルトでは「すべて」が表示されている
+      await expect(filterTrigger).toContainText('すべて')
     })
 
     test('初期状態では全ての記事が表示される', async ({ page }) => {
@@ -150,10 +144,16 @@ test.describe('記事一覧ページ', () => {
       await expect(articleCards).toHaveCount(QIITA_COUNT + ZENN_COUNT)
     })
 
-    test('Qiitaボタンをクリックすると、Qiita記事のみが表示される', async ({ page }) => {
-      const qiitaButton = page.getByRole('button', { name: 'Qiita' })
-      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await qiitaButton.click()
+    test('Qiitaフィルターを選択すると、Qiita記事のみが表示される', async ({ page }) => {
+      // ドロップダウントリガーをクリック
+      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await filterTrigger.click()
+
+      // Qiitaメニューアイテムをクリック
+      const qiitaOption = page.locator('[data-slot="media-filter-qiita"]')
+      await qiitaOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await qiitaOption.click()
 
       // URLパラメータが変更されるのを待機
       await page.waitForURL('**/trends?media=qiita', { timeout: TIMEOUT })
@@ -167,10 +167,16 @@ test.describe('記事一覧ページ', () => {
       await expect(qiitaIcons).toHaveCount(QIITA_COUNT)
     })
 
-    test('Zennボタンをクリックすると、Zenn記事のみが表示される', async ({ page }) => {
-      const zennButton = page.getByRole('button', { name: 'Zenn' })
-      await zennButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await zennButton.click()
+    test('Zennフィルターを選択すると、Zenn記事のみが表示される', async ({ page }) => {
+      // ドロップダウントリガーをクリック
+      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await filterTrigger.click()
+
+      // Zennメニューアイテムをクリック
+      const zennOption = page.locator('[data-slot="media-filter-zenn"]')
+      await zennOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await zennOption.click()
 
       // URLパラメータが変更されるのを待機
       await page.waitForURL('**/trends?media=zenn', { timeout: TIMEOUT })
@@ -184,30 +190,35 @@ test.describe('記事一覧ページ', () => {
       await expect(zennIcons).toHaveCount(ZENN_COUNT)
     })
 
-    test('Qiitaフィルター選択後、全てボタンをクリックすると全記事が表示される', async ({
+    test('Qiitaフィルター選択後、すべてフィルターを選択すると全記事が表示される', async ({
       page,
     }) => {
       // まずQiitaフィルターを選択
-      const qiitaButton = page.getByRole('button', { name: 'Qiita' })
-      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await qiitaButton.click()
+      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await filterTrigger.click()
+
+      const qiitaOption = page.locator('[data-slot="media-filter-qiita"]')
+      await qiitaOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await qiitaOption.click()
       await page.waitForURL('**/trends?media=qiita', { timeout: TIMEOUT })
 
       // Qiita記事のみ表示されることを確認
-      let articleCards = page.locator('[data-slot="card"]')
-      await expect(articleCards).toHaveCount(QIITA_COUNT)
+      const qiitaArticleCards = page.locator('[data-slot="card"]')
+      await expect(qiitaArticleCards).toHaveCount(QIITA_COUNT)
 
-      // 全てボタンをクリック
-      const allButton = page.getByRole('button', { name: '全て' })
-      await allButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await allButton.click()
+      // すべてフィルターを選択
+      await filterTrigger.click()
+      const allOption = page.locator('[data-slot="media-filter-all"]')
+      await allOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await allOption.click()
 
       // URLパラメータからmediaが削除されるのを待機
       await page.waitForURL('**/trends', { timeout: TIMEOUT })
 
       // 全記事が表示されることを確認
-      articleCards = page.locator('[data-slot="card"]')
-      await expect(articleCards).toHaveCount(QIITA_COUNT + ZENN_COUNT)
+      const allArticleCards = page.locator('[data-slot="card"]')
+      await expect(allArticleCards).toHaveCount(QIITA_COUNT + ZENN_COUNT)
     })
 
     test('フィルター切り替え時にページがリセットされる', async ({ page }) => {
@@ -215,10 +226,14 @@ test.describe('記事一覧ページ', () => {
       await page.goto('/trends?page=2')
       await page.waitForLoadState('networkidle')
 
-      // Qiitaフィルターをクリック
-      const qiitaButton = page.getByRole('button', { name: 'Qiita' })
-      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await qiitaButton.click()
+      // Qiitaフィルターを選択
+      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await filterTrigger.click()
+
+      const qiitaOption = page.locator('[data-slot="media-filter-qiita"]')
+      await qiitaOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await qiitaOption.click()
 
       // ページ番号がリセットされることを確認
       await page.waitForURL('**/trends?media=qiita', { timeout: TIMEOUT })

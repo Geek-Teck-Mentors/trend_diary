@@ -179,25 +179,25 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
     })
 
-    test('メディアフィルターボタンが3つ表示される', async ({ page }) => {
-      const allButton = page.getByRole('button', { name: '全て' })
-      const qiitaButton = page.getByRole('button', { name: 'Qiita' })
-      const zennButton = page.getByRole('button', { name: 'Zenn' })
+    test('メディアフィルタートリガーが表示される', async ({ page }) => {
+      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await expect(filterTrigger).toBeVisible()
 
-      // ボタンが表示されるまで待機
-      await allButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await zennButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-
-      await expect(allButton).toBeVisible()
-      await expect(qiitaButton).toBeVisible()
-      await expect(zennButton).toBeVisible()
+      // デフォルトでは「すべて」が表示されている
+      await expect(filterTrigger).toContainText('すべて')
     })
 
-    test('Qiitaボタンをクリックすると、Qiita記事のみが表示される', async ({ page }) => {
-      const qiitaButton = page.getByRole('button', { name: 'Qiita' })
-      await qiitaButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await qiitaButton.click()
+    test('Qiitaフィルターを選択すると、Qiita記事のみが表示される', async ({ page }) => {
+      // ドロップダウントリガーをクリック
+      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await filterTrigger.click()
+
+      // Qiitaメニューアイテムをクリック
+      const qiitaOption = page.locator('[data-slot="media-filter-qiita"]')
+      await qiitaOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await qiitaOption.click()
 
       // URLパラメータが変更されるのを待機
       await page.waitForURL('**/trends?media=qiita', { timeout: TIMEOUT })
@@ -211,10 +211,16 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await expect(qiitaIcons).toHaveCount(QIITA_COUNT)
     })
 
-    test('Zennボタンをクリックすると、Zenn記事のみが表示される', async ({ page }) => {
-      const zennButton = page.getByRole('button', { name: 'Zenn' })
-      await zennButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await zennButton.click()
+    test('Zennフィルターを選択すると、Zenn記事のみが表示される', async ({ page }) => {
+      // ドロップダウントリガーをクリック
+      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await filterTrigger.click()
+
+      // Zennメニューアイテムをクリック
+      const zennOption = page.locator('[data-slot="media-filter-zenn"]')
+      await zennOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await zennOption.click()
 
       // URLパラメータが変更されるのを待機
       await page.waitForURL('**/trends?media=zenn', { timeout: TIMEOUT })
