@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const adminUserSchema = z.object({
   adminUserId: z.number().int().positive('adminUserIdは正の整数である必要があります'),
-  activeUserId: z.bigint().positive('activeUserIdは正の整数である必要があります'),
+  userId: z.bigint().positive('userIdは正の整数である必要があります'), // userId から userId に変更
   grantedAt: z.date(),
   grantedByAdminUserId: z
     .number()
@@ -11,7 +11,7 @@ export const adminUserSchema = z.object({
 })
 
 export const adminUserInputSchema = adminUserSchema.pick({
-  activeUserId: true,
+  userId: true, // userId から userId に変更
   grantedByAdminUserId: true,
 })
 

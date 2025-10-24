@@ -28,12 +28,12 @@ class ArticleTestHelper {
   }
 
   async findReadHistory(
-    activeUserId: bigint,
+    userId: bigint,
     articleId: bigint,
   ): Promise<{ readHistoryId: bigint; readAt: Date } | null> {
     const readHistory = await this.rdb.readHistory.findFirst({
       where: {
-        activeUserId,
+        userId,
         articleId,
       },
       select: {
@@ -44,13 +44,13 @@ class ArticleTestHelper {
     return readHistory
   }
 
-  async createReadHistory(activeUserId: bigint, articleId: bigint, readAt?: Date) {
+  async createReadHistory(userId: bigint, articleId: bigint, readAt?: Date) {
     // ActiveUserが存在することを確認
     const existingActiveUser = await this.rdb.activeUser.findUnique({
-      where: { activeUserId },
+      where: { userId },
     })
 
-    let targetActiveUserId = activeUserId
+    let targetActiveUserId = userId
     if (!existingActiveUser) {
       // ActiveUserが存在しない場合、テスト用のActiveUserを作成して、そのIDを使用
       const createdUser = await activeUserTestHelper.create(
@@ -58,31 +58,31 @@ class ArticleTestHelper {
         'testPassword',
         'Test User',
       )
-      targetActiveUserId = createdUser.activeUserId
+      targetActiveUserId = createdUser.userId
     }
 
     return await this.rdb.readHistory.create({
       data: {
-        activeUserId: targetActiveUserId,
+        userId: targetActiveUserId,
         articleId,
         readAt: readAt || faker.date.recent(),
       },
     })
   }
 
-  async deleteReadHistory(activeUserId: bigint, articleId: bigint): Promise<void> {
+  async deleteReadHistory(userId: bigint, articleId: bigint): Promise<void> {
     await this.rdb.readHistory.deleteMany({
       where: {
-        activeUserId,
+        userId,
         articleId,
       },
     })
   }
 
-  async countReadHistories(activeUserId: bigint, articleId: bigint): Promise<number> {
+  async countReadHistories(userId: bigint, articleId: bigint): Promise<number> {
     const count = await this.rdb.readHistory.count({
       where: {
-        activeUserId,
+        userId,
         articleId,
       },
     })

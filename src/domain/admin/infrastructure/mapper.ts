@@ -2,13 +2,13 @@ import type { AdminUser } from '../schema/adminUserSchema'
 
 export type AdminUserRow = {
   adminUserId: number
-  activeUserId: bigint
+  userId: bigint
   grantedAt: Date
   grantedByAdminUserId: number
 }
 
 export type UserWithAdminRow = {
-  activeUserId: bigint
+  userId: bigint
   email: string
   displayName: string | null
   createdAt: Date
@@ -22,7 +22,7 @@ export type UserWithAdminRow = {
 export function toDomainAdminUser(row: AdminUserRow): AdminUser {
   return {
     adminUserId: row.adminUserId,
-    activeUserId: row.activeUserId,
+    userId: row.userId,
     grantedAt: row.grantedAt,
     grantedByAdminUserId: row.grantedByAdminUserId,
   }
@@ -30,7 +30,7 @@ export function toDomainAdminUser(row: AdminUserRow): AdminUser {
 
 export function toUserListItem(row: UserWithAdminRow) {
   return {
-    activeUserId: row.activeUserId,
+    userId: row.userId,
     email: row.email,
     displayName: row.displayName,
     isAdmin: row.adminUser !== null,

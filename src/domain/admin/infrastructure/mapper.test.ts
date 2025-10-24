@@ -9,7 +9,7 @@ describe('Admin Mapper', () => {
 
       return {
         adminUserId: 1,
-        activeUserId: 123456789n,
+        userId: 123456789n,
         grantedAt: now,
         grantedByAdminUserId: 2,
         ...overrides,
@@ -27,7 +27,7 @@ describe('Admin Mapper', () => {
         // Assert
         expect(result).toBeDefined()
         expect(result.adminUserId).toBe(adminUserRow.adminUserId)
-        expect(result.activeUserId).toBe(adminUserRow.activeUserId)
+        expect(result.userId).toBe(adminUserRow.userId)
         expect(result.grantedAt).toEqual(adminUserRow.grantedAt)
         expect(result.grantedByAdminUserId).toBe(adminUserRow.grantedByAdminUserId)
       })
@@ -48,7 +48,7 @@ describe('Admin Mapper', () => {
 
         // プリミティブ値は値で比較される
         expect(result.adminUserId).toBe(adminUserRow.adminUserId)
-        expect(result.activeUserId).toBe(adminUserRow.activeUserId)
+        expect(result.userId).toBe(adminUserRow.userId)
         expect(result.grantedByAdminUserId).toBe(adminUserRow.grantedByAdminUserId)
       })
     })
@@ -60,33 +60,33 @@ describe('Admin Mapper', () => {
           {
             name: 'adminUserIdの最小値(1)での境界値処理',
             adminUserId: 1,
-            activeUserId: 1n,
+            userId: 1n,
             grantedByAdminUserId: 1,
             description: '正の整数の最小値での正確なマッピング',
           },
           {
             name: 'adminUserIdの通常値での処理',
             adminUserId: 999999,
-            activeUserId: 123456789n,
+            userId: 123456789n,
             grantedByAdminUserId: 888888,
             description: '一般的な正の整数値での正確なマッピング',
           },
           {
             name: 'PostgreSQL integer最大値での処理',
             adminUserId: 2147483647, // PostgreSQL integerの最大値
-            activeUserId: 9223372036854775806n, // PostgreSQL bigintの最大値に近い値
+            userId: 9223372036854775806n, // PostgreSQL bigintの最大値に近い値
             grantedByAdminUserId: 2147483646,
             description: 'PostgreSQL integerの最大値での正確なマッピング',
           },
         ]
 
         numericTestCases.forEach(
-          ({ name, adminUserId, activeUserId, grantedByAdminUserId, description }) => {
+          ({ name, adminUserId, userId, grantedByAdminUserId, description }) => {
             it(`${name}`, () => {
               // Arrange
               const adminUserRow = createMockAdminUserRow({
                 adminUserId: adminUserId,
-                activeUserId: activeUserId,
+                userId: userId,
                 grantedByAdminUserId,
               })
 
@@ -95,14 +95,14 @@ describe('Admin Mapper', () => {
 
               // Assert
               expect(result.adminUserId).toBe(adminUserId)
-              expect(result.activeUserId).toBe(activeUserId)
+              expect(result.userId).toBe(userId)
               expect(result.grantedByAdminUserId).toBe(grantedByAdminUserId)
               expect(typeof result.adminUserId).toBe('number')
-              expect(typeof result.activeUserId).toBe('bigint')
+              expect(typeof result.userId).toBe('bigint')
               expect(typeof result.grantedByAdminUserId).toBe('number')
 
               // 数値の正確性確認（文字列変換で比較）
-              expect(result.activeUserId.toString()).toBe(activeUserId.toString())
+              expect(result.userId.toString()).toBe(userId.toString())
             })
           },
         )
@@ -113,42 +113,42 @@ describe('Admin Mapper', () => {
         const bigintTestCases = [
           {
             name: '最小値(1)での境界値処理',
-            activeUserId: 1n,
+            userId: 1n,
             description: 'bigintの最小値1での正確なマッピング',
           },
           {
             name: 'JavaScript Number.MAX_SAFE_INTEGER相当値での処理',
-            activeUserId: 9007199254740991n, // Number.MAX_SAFE_INTEGER
+            userId: 9007199254740991n, // Number.MAX_SAFE_INTEGER
             description: 'JavaScript Number型の安全な最大値での正確なマッピング',
           },
           {
             name: 'JavaScript Number.MAX_SAFE_INTEGER超過値での処理',
-            activeUserId: 9007199254740992n, // Number.MAX_SAFE_INTEGER + 1
+            userId: 9007199254740992n, // Number.MAX_SAFE_INTEGER + 1
             description: 'JavaScript Number型の安全範囲を超えた値での正確なマッピング',
           },
           {
             name: '非常に大きなbigint値での処理',
-            activeUserId: 123456789012345678901234567890n,
+            userId: 123456789012345678901234567890n,
             description: 'PostgreSQL bigintの上限に近い非常に大きな値での正確なマッピング',
           },
         ]
 
-        bigintTestCases.forEach(({ name, activeUserId, description }) => {
+        bigintTestCases.forEach(({ name, userId, description }) => {
           it(`${name}`, () => {
             // Arrange
             const adminUserRow = createMockAdminUserRow({
-              activeUserId: activeUserId,
+              userId: userId,
             })
 
             // Act
             const result = toDomainAdminUser(adminUserRow)
 
             // Assert
-            expect(result.activeUserId).toBe(activeUserId)
-            expect(typeof result.activeUserId).toBe('bigint')
+            expect(result.userId).toBe(userId)
+            expect(typeof result.userId).toBe('bigint')
 
             // 数値の正確性確認（文字列変換で比較）
-            expect(result.activeUserId.toString()).toBe(activeUserId.toString())
+            expect(result.userId.toString()).toBe(userId.toString())
           })
         })
       })
@@ -233,7 +233,7 @@ describe('Admin Mapper', () => {
           const nearMaxBigInt = 9223372036854775806n // PostgreSQL bigintの最大値に近い値
           const adminUserRow = createMockAdminUserRow({
             adminUserId: nearMaxInt,
-            activeUserId: nearMaxBigInt,
+            userId: nearMaxBigInt,
             grantedByAdminUserId: nearMaxInt - 1,
           })
 
@@ -242,13 +242,13 @@ describe('Admin Mapper', () => {
 
           // Assert
           expect(result.adminUserId).toBe(nearMaxInt)
-          expect(result.activeUserId).toBe(nearMaxBigInt)
+          expect(result.userId).toBe(nearMaxBigInt)
           expect(result.grantedByAdminUserId).toBe(nearMaxInt - 1)
           expect(typeof result.adminUserId).toBe('number')
-          expect(typeof result.activeUserId).toBe('bigint')
+          expect(typeof result.userId).toBe('bigint')
           expect(typeof result.grantedByAdminUserId).toBe('number')
           // 文字列変換での精度確認
-          expect(result.activeUserId.toString()).toBe('9223372036854775806')
+          expect(result.userId.toString()).toBe('9223372036854775806')
         })
 
         it('ミリ秒境界でのDate型マッピング精度テスト', () => {
@@ -278,7 +278,7 @@ describe('Admin Mapper', () => {
       const now = new Date('2024-01-15T09:30:15.123Z')
 
       return {
-        activeUserId: 123456789n,
+        userId: 123456789n,
         email: 'test@example.com',
         displayName: 'テストユーザー',
         createdAt: now,
@@ -300,7 +300,7 @@ describe('Admin Mapper', () => {
         const result = toUserListItem(userWithAdminRow)
 
         // Assert
-        expect(result.activeUserId).toBe(userWithAdminRow.activeUserId)
+        expect(result.userId).toBe(userWithAdminRow.userId)
         expect(result.email).toBe(userWithAdminRow.email)
         expect(result.displayName).toBe(userWithAdminRow.displayName)
         expect(result.isAdmin).toBe(true)
@@ -319,7 +319,7 @@ describe('Admin Mapper', () => {
         const result = toUserListItem(userWithAdminRow)
 
         // Assert
-        expect(result.activeUserId).toBe(userWithAdminRow.activeUserId)
+        expect(result.userId).toBe(userWithAdminRow.userId)
         expect(result.email).toBe(userWithAdminRow.email)
         expect(result.displayName).toBe(userWithAdminRow.displayName)
         expect(result.isAdmin).toBe(false)
@@ -352,26 +352,26 @@ describe('Admin Mapper', () => {
         const bigintTestCases = [
           {
             name: '最小値(1)での境界値処理',
-            activeUserId: 1n,
+            userId: 1n,
             description: 'bigintの最小値1での正確なマッピング',
           },
           {
             name: 'JavaScript Number.MAX_SAFE_INTEGER相当値での処理',
-            activeUserId: 9007199254740991n,
+            userId: 9007199254740991n,
             description: 'JavaScript Number型の安全な最大値での正確なマッピング',
           },
           {
             name: '非常に大きなbigint値での処理',
-            activeUserId: 123456789012345678901234567890n,
+            userId: 123456789012345678901234567890n,
             description: 'PostgreSQL bigintの上限に近い非常に大きな値での正確なマッピング',
           },
         ]
 
-        bigintTestCases.forEach(({ name, activeUserId, description }) => {
+        bigintTestCases.forEach(({ name, userId, description }) => {
           it(`${name}`, () => {
             // Arrange
             const userWithAdminRow = createMockUserWithAdminRow({
-              activeUserId,
+              userId,
               adminUser: null,
             })
 
@@ -379,9 +379,9 @@ describe('Admin Mapper', () => {
             const result = toUserListItem(userWithAdminRow)
 
             // Assert
-            expect(result.activeUserId).toBe(activeUserId)
-            expect(typeof result.activeUserId).toBe('bigint')
-            expect(result.activeUserId.toString()).toBe(activeUserId.toString())
+            expect(result.userId).toBe(userId)
+            expect(typeof result.userId).toBe('bigint')
+            expect(result.userId.toString()).toBe(userId.toString())
           })
         })
       })
@@ -573,7 +573,7 @@ describe('Admin Mapper', () => {
           const nearMaxBigInt = 9223372036854775806n
           const nearMaxInt = 2147483647
           const userWithAdminRow = createMockUserWithAdminRow({
-            activeUserId: nearMaxBigInt,
+            userId: nearMaxBigInt,
             adminUser: {
               adminUserId: nearMaxInt,
               grantedAt: new Date(),
@@ -585,11 +585,11 @@ describe('Admin Mapper', () => {
           const result = toUserListItem(userWithAdminRow)
 
           // Assert
-          expect(result.activeUserId).toBe(nearMaxBigInt)
+          expect(result.userId).toBe(nearMaxBigInt)
           expect(result.grantedByAdminUserId).toBe(nearMaxInt - 1)
-          expect(typeof result.activeUserId).toBe('bigint')
+          expect(typeof result.userId).toBe('bigint')
           expect(typeof result.grantedByAdminUserId).toBe('number')
-          expect(result.activeUserId.toString()).toBe('9223372036854775806')
+          expect(result.userId.toString()).toBe('9223372036854775806')
         })
       })
     })

@@ -21,13 +21,13 @@ const requiredAdmin = createMiddleware<Env>(async (c, next) => {
   const adminUserUseCase = createAdminUserUseCase(rdb)
 
   // Admin権限チェック
-  const result = await adminUserUseCase.isAdmin(sessionUser.activeUserId)
+  const result = await adminUserUseCase.isAdmin(sessionUser.userId)
   if (isError(result)) {
     throw handleError(result.error, logger)
   }
 
   if (!result.data) {
-    logger.warn('Admin permission denied', { activeUserId: sessionUser.activeUserId })
+    logger.warn('Admin permission denied', { userId: sessionUser.userId })
     throw new HTTPException(403, { message: 'Admin permission required' })
   }
 

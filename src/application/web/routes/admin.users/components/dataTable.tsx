@@ -124,7 +124,7 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
               <DropdownMenuContent align='end'>
                 <DropdownMenuLabel>操作</DropdownMenuLabel>
                 {!user.isAdmin && (
-                  <DropdownMenuItem onClick={() => grantAdminRole(user.activeUserId)}>
+                  <DropdownMenuItem onClick={() => grantAdminRole(user.userId)}>
                     Admin権限を付与
                   </DropdownMenuItem>
                 )}

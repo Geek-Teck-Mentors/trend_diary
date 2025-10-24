@@ -15,11 +15,11 @@ export default async function unreadArticle(c: ZodValidatedParamContext<ArticleI
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const useCase = createArticleUseCase(rdb)
 
-  const result = await useCase.deleteAllReadHistory(user.activeUserId, articleId)
+  const result = await useCase.deleteAllReadHistory(user.userId, articleId)
   if (isError(result)) throw handleError(result.error, logger)
 
   logger.info('Read history deleted successfully', {
-    activeUserId: user.activeUserId,
+    userId: user.userId,
     articleId,
   })
 

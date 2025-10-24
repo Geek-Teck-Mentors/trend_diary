@@ -9,13 +9,13 @@ export class AdminCommandImpl implements AdminCommand {
   constructor(private rdb: PrismaClient) {}
 
   async grantAdminRole(
-    activeUserId: bigint,
+    userId: bigint,
     grantedByAdminUserId: number,
   ): AsyncResult<AdminUser, Error> {
     try {
       // ユーザーが存在するかチェック
       const existingUser = await this.rdb.activeUser.findUnique({
-        where: { activeUserId },
+        where: { userId },
       })
 
       if (!existingUser) {
@@ -24,7 +24,7 @@ export class AdminCommandImpl implements AdminCommand {
 
       // 既にAdmin権限を持っているかチェック
       const existingAdmin = await this.rdb.adminUser.findUnique({
-        where: { activeUserId: activeUserId },
+        where: { userId: userId },
       })
 
       if (existingAdmin) {
@@ -34,7 +34,7 @@ export class AdminCommandImpl implements AdminCommand {
       // Admin権限付与
       const adminUser = await this.rdb.adminUser.create({
         data: {
-          activeUserId: activeUserId,
+          userId: userId,
           grantedByAdminUserId,
         },
       })

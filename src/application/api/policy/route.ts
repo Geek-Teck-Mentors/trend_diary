@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
-import authenticator from '@/application/middleware/authenticator'
+import authMiddleware from '@/application/middleware/authMiddleware'
 import zodValidator from '@/application/middleware/zodValidator'
 import { offsetPaginationSchema } from '@/common/pagination'
 import {
@@ -18,21 +18,21 @@ import getPolicyByVersion from './getPolicyByVersion'
 import updatePolicy from './updatePolicy'
 
 const app = new Hono<Env>()
-  .get('/', authenticator, zodValidator('query', offsetPaginationSchema), getPolicies)
-  .post('/', authenticator, zodValidator('json', privacyPolicyInputSchema), createPolicy)
-  .get('/:version', authenticator, zodValidator('param', versionParamSchema), getPolicyByVersion)
+  .get('/', authMiddleware, zodValidator('query', offsetPaginationSchema), getPolicies)
+  .post('/', authMiddleware, zodValidator('json', privacyPolicyInputSchema), createPolicy)
+  .get('/:version', authMiddleware, zodValidator('param', versionParamSchema), getPolicyByVersion)
   .patch(
     '/:version',
-    authenticator,
+    authMiddleware,
     zodValidator('param', versionParamSchema),
     zodValidator('json', privacyPolicyUpdateSchema),
     updatePolicy,
   )
-  .delete('/:version', authenticator, zodValidator('param', versionParamSchema), deletePolicy)
-  .post('/:version/clone', authenticator, zodValidator('param', versionParamSchema), clonePolicy)
+  .delete('/:version', authMiddleware, zodValidator('param', versionParamSchema), deletePolicy)
+  .post('/:version/clone', authMiddleware, zodValidator('param', versionParamSchema), clonePolicy)
   .patch(
     '/:version/activate',
-    authenticator,
+    authMiddleware,
     zodValidator('param', versionParamSchema),
     zodValidator('json', privacyPolicyActivateSchema),
     activatePolicy,

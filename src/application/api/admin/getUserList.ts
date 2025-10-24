@@ -8,8 +8,8 @@ import { UserListResult } from '@/domain/admin/schema/userListSchema'
 import { User } from '@/domain/admin/schema/userSchema'
 import getRdbClient from '@/infrastructure/rdb'
 
-interface ApiUser extends Omit<User, 'activeUserId' | 'grantedAt' | 'createdAt'> {
-  activeUserId: string
+interface ApiUser extends Omit<User, 'userId' | 'grantedAt' | 'createdAt'> {
+  userId: string
   grantedAt: string | null
   createdAt: string
 }
@@ -45,7 +45,7 @@ export default async function getUserList(
 
   return c.json({
     users: result.data.users.map((user) => ({
-      activeUserId: user.activeUserId.toString(),
+      userId: user.userId.toString(),
       email: user.email,
       displayName: user.displayName,
       isAdmin: user.isAdmin,

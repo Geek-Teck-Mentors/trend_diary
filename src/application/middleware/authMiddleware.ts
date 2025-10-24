@@ -58,7 +58,7 @@ const authMiddleware = createMiddleware<Env>(async (c, next) => {
 
   // セッションユーザー情報を設定
   const sessionUser: SessionUser = {
-    activeUserId: user.userId, // 互換性のため、userIdをactiveUserIdとして使用
+    userId: user.userId,
     displayName: null,
     email: authResult.data.email,
     isAdmin: !!user.adminUser,

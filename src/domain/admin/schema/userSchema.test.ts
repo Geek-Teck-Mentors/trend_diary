@@ -2,7 +2,7 @@ import { userSchema } from './userSchema'
 
 describe('userSchema', () => {
   const validUser = {
-    activeUserId: 123456789n,
+    userId: 123456789n,
     email: 'test@example.com',
     displayName: 'Test User',
     isAdmin: false,
@@ -17,30 +17,30 @@ describe('userSchema', () => {
     }).not.toThrow()
   })
 
-  describe('activeUserId のバリデーション', () => {
-    it('有効な正のbigint型のactiveUserIdを受け入れること', () => {
+  describe('userId のバリデーション', () => {
+    it('有効な正のbigint型のuserIdを受け入れること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          activeUserId: 9007199254740991n,
+          userId: 9007199254740991n,
         })
       }).not.toThrow()
     })
 
-    it('0以下のactiveUserIdを拒否すること', () => {
+    it('0以下のuserIdを拒否すること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          activeUserId: 0n,
+          userId: 0n,
         })
       }).toThrow()
     })
 
-    it('bigint型でないactiveUserIdを拒否すること', () => {
+    it('bigint型でないuserIdを拒否すること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          activeUserId: 123456789,
+          userId: 123456789,
         })
       }).toThrow()
     })

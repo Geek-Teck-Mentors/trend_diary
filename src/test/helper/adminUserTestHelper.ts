@@ -28,12 +28,12 @@ class AdminUserTestHelper {
     email: string,
     password: string,
     displayName?: string,
-  ): Promise<{ activeUserId: bigint; adminUserId: number; sessionId: string }> {
+  ): Promise<{ userId: bigint; adminUserId: number; sessionId: string }> {
     // 通常ユーザーを作成
     const userInfo = await activeUserTestHelper.create(email, password, displayName)
 
     // Admin権限を付与
-    const adminResult = await this.useCase.grantAdminRole(userInfo.activeUserId, 1)
+    const adminResult = await this.useCase.grantAdminRole(userInfo.userId, 1)
     if (isError(adminResult)) {
       throw new Error(`Failed to grant admin role: ${adminResult.error.message}`)
     }
@@ -42,7 +42,7 @@ class AdminUserTestHelper {
     const loginInfo = await activeUserTestHelper.login(email, password)
 
     return {
-      activeUserId: userInfo.activeUserId,
+      userId: userInfo.userId,
       adminUserId: adminResult.data.adminUserId,
       sessionId: loginInfo.sessionId,
     }
@@ -52,22 +52,22 @@ class AdminUserTestHelper {
     email: string,
     password: string,
     displayName?: string,
-  ): Promise<{ activeUserId: bigint; sessionId: string }> {
+  ): Promise<{ userId: bigint; sessionId: string }> {
     // 通常ユーザーを作成（Admin権限は付与しない）
     const userInfo = await activeUserTestHelper.create(email, password, displayName)
     const loginInfo = await activeUserTestHelper.login(email, password)
 
     return {
-      activeUserId: userInfo.activeUserId,
+      userId: userInfo.userId,
       sessionId: loginInfo.sessionId,
     }
   }
 
   async grantAdminRole(
-    activeUserId: bigint,
+    userId: bigint,
     grantedByAdminUserId: number,
   ): Promise<{ adminUserId: number }> {
-    const result = await this.useCase.grantAdminRole(activeUserId, grantedByAdminUserId)
+    const result = await this.useCase.grantAdminRole(userId, grantedByAdminUserId)
     if (isError(result)) {
       throw new Error(`Failed to grant admin role: ${result.error.message}`)
     }
@@ -76,8 +76,8 @@ class AdminUserTestHelper {
     }
   }
 
-  async isAdmin(activeUserId: bigint): Promise<boolean> {
-    const result = await this.useCase.isAdmin(activeUserId)
+  async isAdmin(userId: bigint): Promise<boolean> {
+    const result = await this.useCase.isAdmin(userId)
     if (isError(result)) {
       throw new Error(`Failed to check admin status: ${result.error.message}`)
     }
@@ -86,7 +86,7 @@ class AdminUserTestHelper {
 
   async getUserList(query?: { searchQuery?: string; page?: number; limit?: number }): Promise<{
     users: Array<{
-      activeUserId: bigint
+      userId: bigint
       email: string
       displayName: string | null
       isAdmin: boolean

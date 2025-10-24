@@ -31,21 +31,21 @@ export class UseCase {
   }
 
   async createReadHistory(
-    activeUserId: bigint,
+    userId: bigint,
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isError(articleValidation)) return articleValidation
 
-    return this.articleCommand.createReadHistory(activeUserId, articleId, readAt)
+    return this.articleCommand.createReadHistory(userId, articleId, readAt)
   }
 
-  async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {
+  async deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isError(articleValidation)) return articleValidation
 
-    return this.articleCommand.deleteAllReadHistory(activeUserId, articleValidation.data.articleId)
+    return this.articleCommand.deleteAllReadHistory(userId, articleValidation.data.articleId)
   }
 
   private async validateArticleExists(articleId: bigint): AsyncResult<Article, Error> {

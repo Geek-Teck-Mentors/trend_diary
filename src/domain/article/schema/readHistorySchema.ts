@@ -19,7 +19,7 @@ export const articleIdParamSchema = z.object({
 // ドメインモデル用スキーマ
 export const readHistorySchema = z.object({
   readHistoryId: z.bigint(),
-  activeUserId: z.bigint(),
+  userId: z.bigint(),
   articleId: z.bigint(),
   readAt: z.date(),
   createdAt,

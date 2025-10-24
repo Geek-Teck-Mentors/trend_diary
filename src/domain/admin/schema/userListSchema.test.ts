@@ -4,7 +4,7 @@ describe('userListResultSchema', () => {
   const validUserListResult = {
     users: [
       {
-        activeUserId: 123456789n,
+        userId: 123456789n,
         email: 'test@example.com',
         displayName: 'Test User',
         isAdmin: false,
@@ -41,7 +41,7 @@ describe('userListResultSchema', () => {
           users: [
             ...validUserListResult.users,
             {
-              activeUserId: 987654321n,
+              userId: 987654321n,
               email: 'user2@example.com',
               displayName: 'User Two',
               isAdmin: true,

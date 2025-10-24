@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { createdAt } from '@/common/schemas'
 
 export const userSchema = z.object({
-  activeUserId: z.bigint().positive('activeUserIdは正の整数である必要があります'),
+  userId: z.bigint().positive('userIdは正の整数である必要があります'),
   email: z.string().email('有効なメールアドレスである必要があります'),
   displayName: z.string().nullable(),
   isAdmin: z.boolean(),

@@ -4,10 +4,10 @@ import { UserListResult } from './schema/userListSchema'
 import { UserSearchQuery } from './schema/userSearchSchema'
 
 export interface AdminQuery {
-  findAdminByActiveUserId(activeUserId: bigint): AsyncResult<
+  findAdminByActiveUserId(userId: bigint): AsyncResult<
     Nullable<{
       adminUserId: number
-      activeUserId: bigint
+      userId: bigint
       grantedAt: Date
       grantedByAdminUserId: number
     }>,
@@ -17,5 +17,5 @@ export interface AdminQuery {
 }
 
 export interface AdminCommand {
-  grantAdminRole(activeUserId: bigint, grantedByAdminUserId: number): AsyncResult<AdminUser, Error>
+  grantAdminRole(userId: bigint, grantedByAdminUserId: number): AsyncResult<AdminUser, Error>
 }

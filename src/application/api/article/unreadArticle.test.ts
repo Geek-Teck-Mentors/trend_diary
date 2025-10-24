@@ -12,7 +12,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     // アカウント作成・ログイン
     await activeUserTestHelper.create('test@example.com', 'password123')
     const loginData = await activeUserTestHelper.login('test@example.com', 'password123')
-    testActiveUserId = loginData.activeUserId
+    testActiveUserId = loginData.userId
     sessionId = loginData.sessionId
 
     // テスト記事作成

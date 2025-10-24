@@ -21,11 +21,11 @@ export default async function readArticle(
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const useCase = createArticleUseCase(rdb)
 
-  const result = await useCase.createReadHistory(user.activeUserId, articleId, new Date(readAt))
+  const result = await useCase.createReadHistory(user.userId, articleId, new Date(readAt))
   if (isError(result)) throw handleError(result.error, logger)
 
   logger.info('Read history created successfully', {
-    activeUserId: user.activeUserId,
+    userId: user.userId,
     articleId,
   })
 

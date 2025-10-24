@@ -14,10 +14,10 @@ export interface ArticleQuery {
 
 export interface ArticleCommand {
   createReadHistory(
-    activeUserId: bigint,
+    userId: bigint,
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error>
 
-  deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error>
+  deleteAllReadHistory(userId: bigint, articleId: bigint): AsyncResult<void, Error>
 }

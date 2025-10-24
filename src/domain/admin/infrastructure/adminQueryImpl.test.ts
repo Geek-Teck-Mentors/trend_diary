@@ -12,7 +12,7 @@ const mockDb = mockDeep<PrismaClient>()
 function createMockAdminUser(overrides = {}) {
   return {
     adminUserId: 1,
-    activeUserId: 123456789n,
+    userId: 123456789n,
     grantedAt: new Date('2024-01-15T09:30:15.123Z'),
     grantedByAdminUserId: 2,
     ...overrides,
@@ -22,7 +22,6 @@ function createMockAdminUser(overrides = {}) {
 function createMockUsers() {
   return [
     {
-      activeUserId: 1n,
       userId: 2n,
       email: 'test1@example.com',
       password: 'hashedPassword123',
@@ -30,10 +29,9 @@ function createMockUsers() {
       lastLogin: new Date('2024-01-15T09:30:15.123Z'),
       createdAt: new Date('2024-01-10T00:00:00.000Z'),
       updatedAt: new Date('2024-01-15T09:30:15.123Z'),
-      adminUser: createMockAdminUser({ activeUserId: 1n }),
+      adminUser: createMockAdminUser({ userId: 1n }),
     },
     {
-      activeUserId: 2n,
       userId: 3n,
       email: 'test2@example.com',
       password: 'hashedPassword456',
@@ -48,7 +46,6 @@ function createMockUsers() {
 
 function createMockUser(overrides = {}) {
   return {
-    activeUserId: 1n,
     userId: 2n,
     email: 'test@example.com',
     password: 'hashedPassword123',
@@ -101,7 +98,7 @@ function setupDatabaseError(mockMethod: any, errorMessage = 'Database connection
 
 describe('AdminQueryImpl', () => {
   let query: AdminQueryImpl
-  const activeUserId = 123456789n
+  const userId = 123456789n
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -115,42 +112,40 @@ describe('AdminQueryImpl', () => {
   describe('findAdminByActiveUserId', () => {
     describe('基本動作', () => {
       it('ActiveUserIdでAdmin情報を検索できる', async () => {
-        const mockAdminUser = createMockAdminUser({ activeUserId: activeUserId })
+        const mockAdminUser = createMockAdminUser({ userId: userId })
         mockDb.adminUser.findUnique.mockResolvedValue(mockAdminUser)
 
-        const result = await query.findAdminByActiveUserId(activeUserId)
+        const result = await query.findAdminByActiveUserId(userId)
 
         expectSuccessResult(result, {
           adminUserId: 1,
-          activeUserId,
+          userId,
           grantedAt: new Date('2024-01-15T09:30:15.123Z'),
           grantedByAdminUserId: 2,
         })
         expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith({
-          where: { activeUserId: activeUserId },
+          where: { userId: userId },
         })
       })
 
       it('異なるActiveUserIdで複数のAdmin情報を検索できる', async () => {
-        const activeUserId2 = 987654321n
-        mockDb.adminUser.findUnique.mockResolvedValueOnce(
-          createMockAdminUser({ activeUserId: activeUserId }),
-        )
+        const userId2 = 987654321n
+        mockDb.adminUser.findUnique.mockResolvedValueOnce(createMockAdminUser({ userId: userId }))
         mockDb.adminUser.findUnique.mockResolvedValueOnce(
           createMockAdminUser({
             adminUserId: 3,
-            activeUserId: activeUserId2,
+            userId: userId2,
             grantedByAdminUserId: 1,
           }),
         )
 
         const [result1, result2] = await Promise.all([
-          query.findAdminByActiveUserId(activeUserId),
-          query.findAdminByActiveUserId(activeUserId2),
+          query.findAdminByActiveUserId(userId),
+          query.findAdminByActiveUserId(userId2),
         ])
 
-        expectSuccessResult(result1, { adminUserId: 1, activeUserId })
-        expectSuccessResult(result2, { adminUserId: 3, activeUserId: activeUserId2 })
+        expectSuccessResult(result1, { adminUserId: 1, userId })
+        expectSuccessResult(result2, { adminUserId: 3, userId: userId2 })
       })
     })
 
@@ -166,33 +161,31 @@ describe('AdminQueryImpl', () => {
           expect(result.data).toBeNull()
         }
         expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith({
-          where: { activeUserId: nonExistentActiveUserId },
+          where: { userId: nonExistentActiveUserId },
         })
       })
 
       it('bigintの最大値に近いActiveUserIdでも正常に処理できる', async () => {
         const largeActiveUserId = 9223372036854775806n
         mockDb.adminUser.findUnique.mockResolvedValue(
-          createMockAdminUser({ activeUserId: largeActiveUserId }),
+          createMockAdminUser({ userId: largeActiveUserId }),
         )
 
         const result = await query.findAdminByActiveUserId(largeActiveUserId)
 
-        expectSuccessResult(result, { activeUserId: largeActiveUserId })
-        expect(isSuccess(result) && result.data?.activeUserId.toString()).toBe(
-          '9223372036854775806',
-        )
+        expectSuccessResult(result, { userId: largeActiveUserId })
+        expect(isSuccess(result) && result.data?.userId.toString()).toBe('9223372036854775806')
       })
 
       it('最小値のActiveUserIdでも正常に処理できる', async () => {
         const minActiveUserId = 1n
         mockDb.adminUser.findUnique.mockResolvedValue(
-          createMockAdminUser({ activeUserId: minActiveUserId }),
+          createMockAdminUser({ userId: minActiveUserId }),
         )
 
         const result = await query.findAdminByActiveUserId(minActiveUserId)
 
-        expectSuccessResult(result, { activeUserId: minActiveUserId })
+        expectSuccessResult(result, { userId: minActiveUserId })
       })
     })
 
@@ -200,7 +193,7 @@ describe('AdminQueryImpl', () => {
       it('データベースエラー時は適切にエラーを返す', async () => {
         setupDatabaseError(mockDb.adminUser.findUnique)
 
-        const result = await query.findAdminByActiveUserId(activeUserId)
+        const result = await query.findAdminByActiveUserId(userId)
 
         expectErrorResult(result, ServerError, 'Admin情報の取得に失敗しました')
       })
@@ -211,7 +204,7 @@ describe('AdminQueryImpl', () => {
           message: 'Record not found',
         })
 
-        const result = await query.findAdminByActiveUserId(activeUserId)
+        const result = await query.findAdminByActiveUserId(userId)
 
         expectErrorResult(result, ServerError, 'Admin情報の取得に失敗しました')
       })
@@ -260,7 +253,7 @@ describe('AdminQueryImpl', () => {
       it('ページネーションが正しく動作する', async () => {
         const paginationQuery = { page: 2, limit: 5 }
         mockDb.activeUser.findMany.mockResolvedValue([
-          createMockUser({ activeUserId: 6n, email: 'test6@example.com' }),
+          createMockUser({ userId: 6n, email: 'test6@example.com' }),
         ])
         mockDb.activeUser.count.mockResolvedValue(10)
 
@@ -296,7 +289,7 @@ describe('AdminQueryImpl', () => {
         const largeLimitQuery = { page: 1, limit: 1000 }
         const mockUsersLarge = Array.from({ length: 100 }, (_, i) =>
           createMockUser({
-            activeUserId: BigInt(i + 1),
+            userId: BigInt(i + 1),
             email: `test${i + 1}@example.com`,
             displayName: `テストユーザー${i + 1}`,
           }),

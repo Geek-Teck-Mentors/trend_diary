@@ -9,10 +9,10 @@ import { toUserListItem } from './mapper'
 export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
 
-  async findAdminByActiveUserId(activeUserId: bigint): AsyncResult<
+  async findAdminByActiveUserId(userId: bigint): AsyncResult<
     Nullable<{
       adminUserId: number
-      activeUserId: bigint
+      userId: bigint
       grantedAt: Date
       grantedByAdminUserId: number
     }>,
@@ -20,7 +20,7 @@ export class AdminQueryImpl implements AdminQuery {
   > {
     try {
       const adminUser = await this.rdb.adminUser.findUnique({
-        where: { activeUserId: activeUserId },
+        where: { userId: userId },
       })
       if (!adminUser) {
         return resultSuccess(null)
@@ -28,7 +28,7 @@ export class AdminQueryImpl implements AdminQuery {
 
       return resultSuccess({
         adminUserId: adminUser.adminUserId,
-        activeUserId: adminUser.activeUserId,
+        userId: adminUser.userId,
         grantedAt: adminUser.grantedAt,
         grantedByAdminUserId: adminUser.grantedByAdminUserId,
       })
@@ -52,7 +52,7 @@ export class AdminQueryImpl implements AdminQuery {
         : {}
 
       const [users, total] = await Promise.all([
-        this.rdb.activeUser.findMany({
+        this.rdb.user.findMany({
           where: whereClause,
           include: {
             adminUser: true,
@@ -61,7 +61,7 @@ export class AdminQueryImpl implements AdminQuery {
           skip: offset,
           take: limit,
         }),
-        this.rdb.activeUser.count({ where: whereClause }),
+        this.rdb.user.count({ where: whereClause }),
       ])
 
       const userList = users.map((user) => toUserListItem(user))

@@ -11,14 +11,14 @@ export class UseCase {
   ) {}
 
   async grantAdminRole(
-    activeUserId: bigint,
+    userId: bigint,
     grantedByAdminUserId: number,
   ): AsyncResult<AdminUser, Error> {
-    return await this.command.grantAdminRole(activeUserId, grantedByAdminUserId)
+    return await this.command.grantAdminRole(userId, grantedByAdminUserId)
   }
 
-  async isAdmin(activeUserId: bigint): AsyncResult<boolean, Error> {
-    const result = await this.query.findAdminByActiveUserId(activeUserId)
+  async isAdmin(userId: bigint): AsyncResult<boolean, Error> {
+    const result = await this.query.findAdminByActiveUserId(userId)
     if (isError(result)) {
       return result
     }

@@ -38,20 +38,17 @@ describe('POST /api/admin/users/:id', () => {
       )
 
       // Admin権限を付与
-      const res = await requestPostAdminUser(
-        regularUser.activeUserId.toString(),
-        adminUser.sessionId,
-      )
+      const res = await requestPostAdminUser(regularUser.userId.toString(), adminUser.sessionId)
 
       expect(res.status).toBe(200)
       const data = await res.json<GrantAdminRoleResponse>()
-      expect(data.activeUserId).toBe(regularUser.activeUserId.toString())
+      expect(data.userId).toBe(regularUser.userId.toString())
       expect(data.adminUserId).toBeDefined()
       expect(data.grantedAt).toBeDefined()
       expect(data.grantedByAdminUserId).toBe(adminUser.adminUserId)
 
       // 実際にAdmin権限が付与されたか確認
-      const isAdmin = await adminUserTestHelper.isAdmin(regularUser.activeUserId)
+      const isAdmin = await adminUserTestHelper.isAdmin(regularUser.userId)
       expect(isAdmin).toBe(true)
     })
   })
@@ -65,7 +62,7 @@ describe('POST /api/admin/users/:id', () => {
         'Regular User',
       )
 
-      const res = await requestPostAdminUser(regularUser.activeUserId.toString())
+      const res = await requestPostAdminUser(regularUser.userId.toString())
 
       expect(res.status).toBe(401)
     })
@@ -84,10 +81,7 @@ describe('POST /api/admin/users/:id', () => {
       )
 
       // 通常ユーザーが他のユーザーにAdmin権限を付与しようとする
-      const res = await requestPostAdminUser(
-        regularUser2.activeUserId.toString(),
-        regularUser1.sessionId,
-      )
+      const res = await requestPostAdminUser(regularUser2.userId.toString(), regularUser1.sessionId)
 
       expect(res.status).toBe(403)
     })
@@ -121,13 +115,10 @@ describe('POST /api/admin/users/:id', () => {
         'password123',
         'Regular User',
       )
-      await adminUserTestHelper.grantAdminRole(regularUser.activeUserId, adminUser.adminUserId)
+      await adminUserTestHelper.grantAdminRole(regularUser.userId, adminUser.adminUserId)
 
       // 既にAdmin権限を持つユーザーに再度Admin権限を付与しようとする
-      const res = await requestPostAdminUser(
-        regularUser.activeUserId.toString(),
-        adminUser.sessionId,
-      )
+      const res = await requestPostAdminUser(regularUser.userId.toString(), adminUser.sessionId)
 
       expect(res.status).toBe(409)
     })
@@ -156,7 +147,7 @@ describe('POST /api/admin/users/:id', () => {
       )
 
       // 自分自身にAdmin権限を付与しようとする
-      const res = await requestPostAdminUser(adminUser.activeUserId.toString(), adminUser.sessionId)
+      const res = await requestPostAdminUser(adminUser.userId.toString(), adminUser.sessionId)
 
       expect(res.status).toBe(400)
       const responseText = await res.text()

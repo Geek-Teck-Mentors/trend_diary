@@ -23,7 +23,6 @@ describe('AdminUser UseCase', () => {
       it('Admin権限を正常に付与できる', async () => {
         // モックデータセットアップ
         mockDb.activeUser.findUnique.mockResolvedValue({
-          activeUserId: BigInt(100),
           email: 'user@example.com',
           password: 'hashedPassword',
           displayName: 'Test User',
@@ -37,7 +36,7 @@ describe('AdminUser UseCase', () => {
 
         mockDb.adminUser.create.mockResolvedValue({
           adminUserId: 1,
-          activeUserId: BigInt(100),
+          userId: BigInt(100),
           grantedAt: new Date(),
           grantedByAdminUserId: 1,
         })
@@ -46,7 +45,7 @@ describe('AdminUser UseCase', () => {
 
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
-          expect(result.data.activeUserId).toBe(BigInt(100))
+          expect(result.data.userId).toBe(BigInt(100))
           expect(result.data.grantedByAdminUserId).toBe(1)
         }
       })
@@ -66,7 +65,6 @@ describe('AdminUser UseCase', () => {
 
       it('既にAdmin権限を持つユーザーの場合エラーを返す', async () => {
         mockDb.activeUser.findUnique.mockResolvedValue({
-          activeUserId: BigInt(100),
           email: 'admin@example.com',
           password: 'hashedPassword',
           displayName: 'Admin User',
@@ -78,7 +76,7 @@ describe('AdminUser UseCase', () => {
 
         mockDb.adminUser.findUnique.mockResolvedValue({
           adminUserId: 1,
-          activeUserId: BigInt(100),
+          userId: BigInt(100),
           grantedAt: new Date(),
           grantedByAdminUserId: 1,
         })
@@ -98,7 +96,7 @@ describe('AdminUser UseCase', () => {
       it('Admin権限を持つユーザーの場合trueを返す', async () => {
         mockDb.adminUser.findUnique.mockResolvedValue({
           adminUserId: 1,
-          activeUserId: BigInt(100),
+          userId: BigInt(100),
           grantedAt: new Date(),
           grantedByAdminUserId: 1,
         })
@@ -129,7 +127,6 @@ describe('AdminUser UseCase', () => {
       it('ユーザー一覧を取得できる', async () => {
         const mockUsers = [
           {
-            activeUserId: BigInt(100),
             email: 'admin@example.com',
             displayName: 'Admin User',
             password: 'hashedPassword',
@@ -144,7 +141,6 @@ describe('AdminUser UseCase', () => {
             },
           },
           {
-            activeUserId: BigInt(200),
             email: 'user@example.com',
             displayName: 'Regular User',
             password: 'hashedPassword',
@@ -173,7 +169,6 @@ describe('AdminUser UseCase', () => {
       it('検索クエリでユーザーをフィルタリングできる', async () => {
         const mockUsers = [
           {
-            activeUserId: BigInt(100),
             email: 'admin@example.com',
             displayName: 'Admin User',
             password: 'hashedPassword',

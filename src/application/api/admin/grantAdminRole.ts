@@ -13,7 +13,7 @@ export const paramSchema = z.object({
 
 export interface GrantAdminRoleResponse {
   adminUserId: number
-  activeUserId: string
+  userId: string
   grantedAt: string
   grantedByAdminUserId: number
 }
@@ -24,13 +24,13 @@ export default async function grantAdminRole(
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const sessionUser = c.get(CONTEXT_KEY.SESSION_USER)
   const parsedParam = c.req.valid('param')
-  const activeUserId = BigInt(parsedParam.id)
+  const userId = BigInt(parsedParam.id)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const adminUserUseCase = createAdminUserUseCase(rdb)
 
   // 自分に権限を付与しようとしていないかチェック
-  if (activeUserId === sessionUser.activeUserId) {
+  if (userId === sessionUser.userId) {
     throw new HTTPException(400, { message: '自分自身にAdmin権限を付与することはできません' })
   }
   if (sessionUser.adminUserId === null) {
@@ -38,14 +38,14 @@ export default async function grantAdminRole(
   }
 
   // Admin権限付与
-  const result = await adminUserUseCase.grantAdminRole(activeUserId, sessionUser.adminUserId)
+  const result = await adminUserUseCase.grantAdminRole(userId, sessionUser.adminUserId)
   if (isError(result)) {
     throw handleError(result.error, logger)
   }
 
   return c.json({
     adminUserId: result.data.adminUserId,
-    activeUserId: result.data.activeUserId.toString(),
+    userId: result.data.userId.toString(),
     grantedAt: result.data.grantedAt.toISOString(),
     grantedByAdminUserId: result.data.grantedByAdminUserId,
   })

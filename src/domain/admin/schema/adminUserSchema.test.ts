@@ -3,7 +3,7 @@ import { adminUserSchema } from './adminUserSchema'
 describe('adminUserSchema', () => {
   const validAdminUser = {
     adminUserId: 1,
-    activeUserId: 123456789n,
+    userId: 123456789n,
     grantedAt: new Date(),
     grantedByAdminUserId: 2,
   }
@@ -66,58 +66,58 @@ describe('adminUserSchema', () => {
     })
   })
 
-  describe('activeUserId のバリデーション', () => {
-    it('有効な正のbigint型のactiveUserIdを受け入れること', () => {
+  describe('userId のバリデーション', () => {
+    it('有効な正のbigint型のuserIdを受け入れること', () => {
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          activeUserId: 9007199254740991n, // Number.MAX_SAFE_INTEGER
+          userId: 9007199254740991n, // Number.MAX_SAFE_INTEGER
         })
       }).not.toThrow()
 
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          activeUserId: 123456789012345678901234567890n, // 非常に大きな値
+          userId: 123456789012345678901234567890n, // 非常に大きな値
         })
       }).not.toThrow()
     })
 
-    it('0以下のactiveUserIdを拒否すること', () => {
+    it('0以下のuserIdを拒否すること', () => {
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          activeUserId: 0n,
+          userId: 0n,
         })
       }).toThrow()
 
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          activeUserId: -1n,
+          userId: -1n,
         })
       }).toThrow()
     })
 
-    it('bigint型でないactiveUserIdを拒否すること', () => {
+    it('bigint型でないuserIdを拒否すること', () => {
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          activeUserId: 123456789,
+          userId: 123456789,
         })
       }).toThrow()
 
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          activeUserId: '123456789',
+          userId: '123456789',
         })
       }).toThrow()
 
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          activeUserId: true,
+          userId: true,
         })
       }).toThrow()
     })
@@ -231,8 +231,8 @@ describe('adminUserSchema', () => {
       }).toThrow()
     })
 
-    it('activeUserIdが欠落している場合を拒否すること', () => {
-      const { activeUserId: _, ...incompleteData } = validAdminUser
+    it('userIdが欠落している場合を拒否すること', () => {
+      const { userId: _, ...incompleteData } = validAdminUser
       expect(() => {
         adminUserSchema.parse(incompleteData)
       }).toThrow()

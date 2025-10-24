@@ -11,7 +11,6 @@ const mockDb = mockDeep<PrismaClient>()
 // ヘルパー関数
 function createMockActiveUser(overrides = {}) {
   return {
-    activeUserId: 123456789n,
     userId: 2n,
     email: 'test@example.com',
     password: 'hashedPassword123',
@@ -26,7 +25,7 @@ function createMockActiveUser(overrides = {}) {
 function createMockAdminUser(overrides = {}) {
   return {
     adminUserId: 1,
-    activeUserId: 123456789n,
+    userId: 123456789n,
     grantedAt: new Date(),
     grantedByAdminUserId: 1,
     ...overrides,
@@ -73,10 +72,10 @@ function expectDatabaseCalls(calls: {
 
 describe('AdminCommandImpl', () => {
   let command: AdminCommandImpl
-  let testData: { activeUserId: bigint; grantedByAdminUserId: number }
+  let testData: { userId: bigint; grantedByAdminUserId: number }
 
   beforeEach(() => {
-    testData = { activeUserId: 123456789n, grantedByAdminUserId: 1 }
+    testData = { userId: 123456789n, grantedByAdminUserId: 1 }
     vi.clearAllMocks()
     command = new AdminCommandImpl(mockDb)
   })
@@ -94,36 +93,33 @@ describe('AdminCommandImpl', () => {
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         mockDb.adminUser.create.mockResolvedValue(mockAdminUser)
 
-        const result = await command.grantAdminRole(
-          testData.activeUserId,
-          testData.grantedByAdminUserId,
-        )
+        const result = await command.grantAdminRole(testData.userId, testData.grantedByAdminUserId)
 
         expectSuccessResult(result, {
           adminUserId: 1,
-          activeUserId: testData.activeUserId,
+          userId: testData.userId,
           grantedByAdminUserId: testData.grantedByAdminUserId,
         })
         expectDatabaseCalls({
-          activeUser: { where: { activeUserId: testData.activeUserId } },
-          adminUserFind: { where: { activeUserId: testData.activeUserId } },
+          activeUser: { where: { userId: testData.userId } },
+          adminUserFind: { where: { userId: testData.userId } },
           adminUserCreate: {
             data: {
-              activeUserId: testData.activeUserId,
+              userId: testData.userId,
               grantedByAdminUserId: testData.grantedByAdminUserId,
             },
           },
         })
       })
 
-      it('異なるactiveUserIdで複数のAdmin権限を付与できる', async () => {
-        const activeUserId2 = 987654321n
+      it('異なるuserIdで複数のAdmin権限を付与できる', async () => {
+        const userId2 = 987654321n
         const mockActiveUser2 = createMockActiveUser({
-          activeUserId: activeUserId2,
+          userId: userId2,
           email: 'test2@example.com',
           displayName: 'テストユーザー2',
         })
-        const mockAdminUser2 = createMockAdminUser({ adminUserId: 2, activeUserId: activeUserId2 })
+        const mockAdminUser2 = createMockAdminUser({ adminUserId: 2, userId: userId2 })
 
         mockDb.activeUser.findUnique.mockResolvedValueOnce(createMockActiveUser())
         mockDb.adminUser.findUnique.mockResolvedValueOnce(null)
@@ -134,17 +130,17 @@ describe('AdminCommandImpl', () => {
         mockDb.adminUser.create.mockResolvedValueOnce(mockAdminUser2)
 
         const [result1, result2] = await Promise.all([
-          command.grantAdminRole(testData.activeUserId, testData.grantedByAdminUserId),
-          command.grantAdminRole(activeUserId2, testData.grantedByAdminUserId),
+          command.grantAdminRole(testData.userId, testData.grantedByAdminUserId),
+          command.grantAdminRole(userId2, testData.grantedByAdminUserId),
         ])
 
-        expectSuccessResult(result1, { activeUserId: testData.activeUserId })
-        expectSuccessResult(result2, { activeUserId: activeUserId2 })
+        expectSuccessResult(result1, { userId: testData.userId })
+        expectSuccessResult(result2, { userId: userId2 })
       })
     })
 
     describe('境界値・特殊値', () => {
-      it('存在しないactiveUserIdの場合NotFoundErrorを返す', async () => {
+      it('存在しないuserIdの場合NotFoundErrorを返す', async () => {
         const nonExistentActiveUserId = 999999999n
         mockDb.activeUser.findUnique.mockResolvedValue(null)
 
@@ -155,7 +151,7 @@ describe('AdminCommandImpl', () => {
 
         expectErrorResult(result, NotFoundError, 'ユーザーが見つかりません')
         expect(mockDb.activeUser.findUnique).toHaveBeenCalledWith({
-          where: { activeUserId: nonExistentActiveUserId },
+          where: { userId: nonExistentActiveUserId },
         })
         expect(mockDb.adminUser.findUnique).not.toHaveBeenCalled()
         expect(mockDb.adminUser.create).not.toHaveBeenCalled()
@@ -166,27 +162,24 @@ describe('AdminCommandImpl', () => {
         mockDb.activeUser.findUnique.mockResolvedValue(createMockActiveUser())
         mockDb.adminUser.findUnique.mockResolvedValue(existingAdminUser)
 
-        const result = await command.grantAdminRole(
-          testData.activeUserId,
-          testData.grantedByAdminUserId,
-        )
+        const result = await command.grantAdminRole(testData.userId, testData.grantedByAdminUserId)
 
         expectErrorResult(result, AlreadyExistsError, '既にAdmin権限を持っています')
         expectDatabaseCalls({
-          activeUser: { where: { activeUserId: testData.activeUserId } },
-          adminUserFind: { where: { activeUserId: testData.activeUserId } },
+          activeUser: { where: { userId: testData.userId } },
+          adminUserFind: { where: { userId: testData.userId } },
         })
         expect(mockDb.adminUser.create).not.toHaveBeenCalled()
       })
 
-      it('bigintの最大値に近いactiveUserIdでも正常に処理できる', async () => {
+      it('bigintの最大値に近いuserIdでも正常に処理できる', async () => {
         const largeActiveUserId = 9223372036854775806n
         mockDb.activeUser.findUnique.mockResolvedValue(
-          createMockActiveUser({ activeUserId: largeActiveUserId }),
+          createMockActiveUser({ userId: largeActiveUserId }),
         )
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         mockDb.adminUser.create.mockResolvedValue(
-          createMockAdminUser({ activeUserId: largeActiveUserId }),
+          createMockAdminUser({ userId: largeActiveUserId }),
         )
 
         const result = await command.grantAdminRole(
@@ -194,9 +187,9 @@ describe('AdminCommandImpl', () => {
           testData.grantedByAdminUserId,
         )
 
-        expectSuccessResult(result, { activeUserId: largeActiveUserId })
+        expectSuccessResult(result, { userId: largeActiveUserId })
         if (isSuccess(result)) {
-          expect(result.data.activeUserId.toString()).toBe('9223372036854775806')
+          expect(result.data.userId.toString()).toBe('9223372036854775806')
         }
       })
 
@@ -208,7 +201,7 @@ describe('AdminCommandImpl', () => {
           createMockAdminUser({ grantedByAdminUserId: maxGrantedByAdminUserId }),
         )
 
-        const result = await command.grantAdminRole(testData.activeUserId, maxGrantedByAdminUserId)
+        const result = await command.grantAdminRole(testData.userId, maxGrantedByAdminUserId)
 
         expectSuccessResult(result, { grantedByAdminUserId: maxGrantedByAdminUserId })
       })
@@ -218,10 +211,7 @@ describe('AdminCommandImpl', () => {
       it('activeUser検索時のデータベースエラーを適切にエラーを返す', async () => {
         setupDatabaseError(mockDb.activeUser.findUnique)
 
-        const result = await command.grantAdminRole(
-          testData.activeUserId,
-          testData.grantedByAdminUserId,
-        )
+        const result = await command.grantAdminRole(testData.userId, testData.grantedByAdminUserId)
 
         expectErrorResult(result, ServerError, 'Admin権限の付与に失敗しました')
       })
@@ -230,10 +220,7 @@ describe('AdminCommandImpl', () => {
         mockDb.activeUser.findUnique.mockResolvedValue(createMockActiveUser())
         setupDatabaseError(mockDb.adminUser.findUnique)
 
-        const result = await command.grantAdminRole(
-          testData.activeUserId,
-          testData.grantedByAdminUserId,
-        )
+        const result = await command.grantAdminRole(testData.userId, testData.grantedByAdminUserId)
 
         expectErrorResult(result, ServerError, 'Admin権限の付与に失敗しました')
       })
@@ -243,10 +230,7 @@ describe('AdminCommandImpl', () => {
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         setupDatabaseError(mockDb.adminUser.create, 'Foreign key constraint failed')
 
-        const result = await command.grantAdminRole(
-          testData.activeUserId,
-          testData.grantedByAdminUserId,
-        )
+        const result = await command.grantAdminRole(testData.userId, testData.grantedByAdminUserId)
 
         expectErrorResult(result, ServerError, 'Admin権限の付与に失敗しました')
       })
@@ -254,16 +238,13 @@ describe('AdminCommandImpl', () => {
       it('Prisma制約違反エラーを適切にハンドリングする', async () => {
         const prismaError = {
           code: 'P2002',
-          message: 'Unique constraint failed on the fields: (`activeUserId`)',
+          message: 'Unique constraint failed on the fields: (`userId`)',
         }
         mockDb.activeUser.findUnique.mockResolvedValue(createMockActiveUser())
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         mockDb.adminUser.create.mockRejectedValue(prismaError)
 
-        const result = await command.grantAdminRole(
-          testData.activeUserId,
-          testData.grantedByAdminUserId,
-        )
+        const result = await command.grantAdminRole(testData.userId, testData.grantedByAdminUserId)
 
         expectErrorResult(result, ServerError, 'Admin権限の付与に失敗しました')
       })

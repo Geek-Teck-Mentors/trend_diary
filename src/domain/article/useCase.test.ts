@@ -248,7 +248,7 @@ describe('ArticleUseCase', () => {
 
       const mockReadHistory: ReadHistory = {
         readHistoryId: 1n,
-        activeUserId: userId,
+        userId: userId,
         articleId: articleId,
         readAt: readAt,
         createdAt: new Date(),
@@ -259,7 +259,7 @@ describe('ArticleUseCase', () => {
 
       expect(isSuccess(result)).toBe(true)
       if (isSuccess(result)) {
-        expect(result.data.activeUserId).toBe(userId)
+        expect(result.data.userId).toBe(userId)
         expect(result.data.articleId).toBe(articleId)
         expect(result.data.readAt).toBe(readAt)
       }
