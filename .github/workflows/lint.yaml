@@ -37,5 +37,8 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
+      - name: Prismaクライアント生成
+        run: npx prisma generate
+
       - name: TypeScript型チェック
         run: npm run tsc
