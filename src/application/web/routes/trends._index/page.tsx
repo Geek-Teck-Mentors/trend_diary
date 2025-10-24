@@ -12,6 +12,8 @@ import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ArticleCard from './components/ArticleCard'
+import MediaFilter from './components/MediaFilter'
+import type { MediaType } from './useTrends'
 
 type Props = {
   date: Date
@@ -22,6 +24,8 @@ type Props = {
   page: number
   limit: number
   totalPages: number
+  selectedMedia: MediaType
+  onMediaChange: (media: MediaType) => void
 }
 
 export default function TrendsPage({
@@ -33,6 +37,8 @@ export default function TrendsPage({
   page,
   limit,
   totalPages,
+  selectedMedia,
+  onMediaChange,
 }: Props) {
   const [searchParams] = useSearchParams()
 
@@ -84,6 +90,9 @@ export default function TrendsPage({
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
       <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
+      <div className='mb-4'>
+        <MediaFilter selectedMedia={selectedMedia} onMediaChange={onMediaChange} />
+      </div>
       {articles.length === 0 ? (
         <div className='text-gray-500'>記事がありません</div>
       ) : (
