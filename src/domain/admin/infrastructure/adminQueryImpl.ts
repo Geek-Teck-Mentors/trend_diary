@@ -63,15 +63,21 @@ export class AdminQueryImpl implements AdminQuery {
         this.rdb.user.count({ where: whereClause }),
       ])
 
-      const userList = users.map((user) => ({
-        userId: user.userId,
-        email: 'email@placeholder.com', // TODO: Supabaseから取得
-        displayName: null,
-        isAdmin: user.adminUser !== null,
-        grantedAt: user.adminUser?.grantedAt || null,
-        grantedByAdminUserId: user.adminUser?.grantedByAdminUserId || null,
-        createdAt: user.createdAt,
-      }))
+      const userList = users.map(
+        (user: {
+          userId: bigint
+          createdAt: Date
+          adminUser: { grantedAt: Date; grantedByAdminUserId: number } | null
+        }) => ({
+          userId: user.userId,
+          email: 'email@placeholder.com', // TODO: Supabaseから取得
+          displayName: null,
+          isAdmin: user.adminUser !== null,
+          grantedAt: user.adminUser?.grantedAt || null,
+          grantedByAdminUserId: user.adminUser?.grantedByAdminUserId || null,
+          createdAt: user.createdAt,
+        }),
+      )
 
       return resultSuccess({
         users: userList,

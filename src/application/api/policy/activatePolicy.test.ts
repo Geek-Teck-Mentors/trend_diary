@@ -1,11 +1,10 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('PATCH /api/policies/:version/activate', () => {
-  let sessionId: string
+  let accessToken: string
 
   async function requestActivatePolicy(version: number, body: string) {
     return app.request(
@@ -14,7 +13,7 @@ describe('PATCH /api/policies/:version/activate', () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
+          Cookie: `sb-access-token=${accessToken}`,
         },
         body,
       },
@@ -28,16 +27,13 @@ describe('PATCH /api/policies/:version/activate', () => {
 
   beforeAll(async () => {
     await policyTestHelper.cleanUp()
-    await activeUserTestHelper.cleanUp()
     // 管理者アカウント作成・ログイン
-    sessionId = await policyTestHelper.setupUserSession()
+    accessToken = await policyTestHelper.setupUserSession()
   })
 
   afterAll(async () => {
     await policyTestHelper.cleanUp()
     await policyTestHelper.disconnect()
-    await activeUserTestHelper.cleanUp()
-    await activeUserTestHelper.disconnect()
   })
 
   describe('正常系', () => {
@@ -168,7 +164,7 @@ describe('PATCH /api/policies/:version/activate', () => {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
           body: JSON.stringify({}),
         },
@@ -214,7 +210,7 @@ describe('PATCH /api/policies/:version/activate', () => {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
           body: '{ effectiveAt: invalid json }',
         },

@@ -1,11 +1,10 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('POST /api/policies/:version/clone', () => {
-  let sessionId: string
+  let accessToken: string
 
   async function requestClonePolicy(version: number, body = '{}') {
     return app.request(
@@ -14,7 +13,7 @@ describe('POST /api/policies/:version/clone', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
+          Cookie: `sb-access-token=${accessToken}`,
         },
         body,
       },
@@ -24,15 +23,12 @@ describe('POST /api/policies/:version/clone', () => {
 
   beforeAll(async () => {
     await policyTestHelper.cleanUp()
-    await activeUserTestHelper.cleanUp()
-    sessionId = await policyTestHelper.setupUserSession()
+    accessToken = await policyTestHelper.setupUserSession()
   })
 
   afterAll(async () => {
     await policyTestHelper.cleanUp()
-    await activeUserTestHelper.cleanUp()
     await policyTestHelper.disconnect()
-    await activeUserTestHelper.disconnect()
   })
 
   describe('正常系', () => {
@@ -106,7 +102,7 @@ describe('POST /api/policies/:version/clone', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
           body: '{}',
         },

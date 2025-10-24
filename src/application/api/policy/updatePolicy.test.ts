@@ -4,11 +4,11 @@ import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('PATCH /api/policies/:version', () => {
-  let sessionId: string
+  let accessToken: string
 
   async function setupTestData(): Promise<void> {
     // 管理者アカウント作成・ログイン
-    sessionId = await policyTestHelper.setupUserSession()
+    accessToken = await policyTestHelper.setupUserSession()
   }
 
   async function requestUpdatePolicy(version: number, body: string) {
@@ -18,7 +18,7 @@ describe('PATCH /api/policies/:version', () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
+          Cookie: `sb-access-token=${accessToken}`,
         },
         body,
       },
@@ -145,7 +145,7 @@ describe('PATCH /api/policies/:version', () => {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
           body: JSON.stringify({ content: 'テスト' }),
         },
@@ -176,7 +176,7 @@ describe('PATCH /api/policies/:version', () => {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
           body: '{ content: invalid json }',
         },
@@ -197,7 +197,7 @@ describe('PATCH /api/policies/:version', () => {
           method: 'PUT', // PATCHでないメソッド
           headers: {
             'Content-Type': 'application/json',
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
           body: JSON.stringify({ content: 'テスト' }),
         },
@@ -219,7 +219,7 @@ describe('PATCH /api/policies/:version', () => {
         {
           method: 'PATCH',
           headers: {
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
           body: JSON.stringify({ content: 'テスト' }),
         },

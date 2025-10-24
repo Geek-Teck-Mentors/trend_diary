@@ -1,12 +1,11 @@
 import { createPrivacyPolicyUseCase, PrivacyPolicyOutput } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('GET /api/policies/:version', () => {
-  let sessionId: string
+  let accessToken: string
   const useCase = createPrivacyPolicyUseCase(getRdbClient(TEST_ENV.DATABASE_URL))
 
   async function requestGetPolicyByVersion(version: number) {
@@ -16,7 +15,7 @@ describe('GET /api/policies/:version', () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
+          Cookie: `sb-access-token=${accessToken}`,
         },
       },
       TEST_ENV,
@@ -24,13 +23,10 @@ describe('GET /api/policies/:version', () => {
   }
 
   beforeEach(async () => {
-    await activeUserTestHelper.cleanUp()
-    sessionId = await policyTestHelper.setupUserSession()
+    accessToken = await policyTestHelper.setupUserSession()
   })
 
-  afterAll(async () => {
-    await activeUserTestHelper.cleanUp()
-  })
+  afterAll(async () => {})
 
   describe('正常系', () => {
     afterEach(async () => {
@@ -100,7 +96,7 @@ describe('GET /api/policies/:version', () => {
         {
           method: 'GET',
           headers: {
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
         },
         TEST_ENV,

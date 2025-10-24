@@ -1,19 +1,20 @@
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
+
+import authTestHelper from '@/test/helper/authTestHelper'
 
 describe('DELETE /api/articles/:article_id/unread', () => {
   let testActiveUserId: bigint
   let testArticleId: bigint
-  let sessionId: string
+  let accessToken: string
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
-    await activeUserTestHelper.create('test@example.com', 'password123')
-    const loginData = await activeUserTestHelper.login('test@example.com', 'password123')
-    testActiveUserId = loginData.userId
-    sessionId = loginData.sessionId
+    const userData = await authTestHelper.create('test@example.com', 'password123')
+    const loginData = await authTestHelper.login('test@example.com', 'password123')
+    testActiveUserId = userData.userId
+    accessToken = loginData.accessToken
 
     // テスト記事作成
     const article = await articleTestHelper.createArticle()
@@ -27,9 +28,9 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     )
   }
 
-  async function requestUnreadArticle(articleId: string, sessionId: string) {
+  async function requestUnreadArticle(articleId: string, accessToken: string) {
     const headers: Record<string, string> = {
-      Cookie: `sid=${sessionId}`,
+      Cookie: `sb-access-token=${accessToken}`,
     }
 
     return app.request(
@@ -43,13 +44,11 @@ describe('DELETE /api/articles/:article_id/unread', () => {
   }
 
   beforeEach(async () => {
-    await activeUserTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await activeUserTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
   })
 
@@ -62,7 +61,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       )
       expect(beforeCount).toBe(1)
 
-      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
+      const response = await requestUnreadArticle(testArticleId.toString(), accessToken)
 
       expect(response.status).toBe(200)
       const json = (await response.json()) as { message: string }
@@ -77,7 +76,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       // 既読履歴を削除
       await articleTestHelper.deleteReadHistory(testActiveUserId, testArticleId)
 
-      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
+      const response = await requestUnreadArticle(testArticleId.toString(), accessToken)
 
       expect(response.status).toBe(200)
       const json = (await response.json()) as { message: string }
@@ -91,7 +90,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
   describe('準正常系', () => {
     it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
-      const response = await requestUnreadArticle('invalid-id', sessionId)
+      const response = await requestUnreadArticle('invalid-id', accessToken)
 
       expect(response.status).toBe(422)
     })
@@ -100,7 +99,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       // 既読履歴を事前に削除
       await articleTestHelper.deleteArticle(testArticleId)
 
-      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
+      const response = await requestUnreadArticle(testArticleId.toString(), accessToken)
       expect(response.status).toBe(404)
     })
   })

@@ -1,15 +1,14 @@
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 import app from '../../server'
 
 describe('POST /api/policies', () => {
-  let sessionId: string
+  let accessToken: string
 
   async function setupTestData(): Promise<void> {
     // 管理者アカウント作成・ログイン
-    sessionId = await policyTestHelper.setupUserSession()
+    accessToken = await policyTestHelper.setupUserSession()
   }
 
   async function requestCreatePolicy(body: string) {
@@ -19,7 +18,7 @@ describe('POST /api/policies', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `sid=${sessionId}`,
+          Cookie: `sb-access-token=${accessToken}`,
         },
         body,
       },
@@ -33,7 +32,7 @@ describe('POST /api/policies', () => {
       {
         method: 'DELETE',
         headers: {
-          Cookie: `sid=${sessionId}`,
+          Cookie: `sb-access-token=${accessToken}`,
         },
       },
       TEST_ENV,
@@ -42,15 +41,12 @@ describe('POST /api/policies', () => {
 
   beforeAll(async () => {
     await policyTestHelper.cleanUp()
-    await activeUserTestHelper.cleanUp()
     await setupTestData()
   })
 
   afterAll(async () => {
     await policyTestHelper.cleanUp()
-    await activeUserTestHelper.cleanUp()
     await policyTestHelper.disconnect()
-    await activeUserTestHelper.disconnect()
   })
 
   describe('正常系', () => {
@@ -166,7 +162,7 @@ describe('POST /api/policies', () => {
         {
           method: 'POST',
           headers: {
-            Cookie: `sid=${sessionId}`,
+            Cookie: `sb-access-token=${accessToken}`,
           },
           body: JSON.stringify({ content: 'テスト' }),
         },

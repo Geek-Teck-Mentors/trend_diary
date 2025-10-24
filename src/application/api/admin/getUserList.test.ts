@@ -1,24 +1,21 @@
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
 import app from '../../server'
 import { UserListResponse } from './getUserList'
 
 describe('GET /api/admin/users', () => {
-  async function requestGetUsers(query?: Record<string, string>, sessionId?: string) {
+  async function requestGetUsers(query?: Record<string, string>, accessToken?: string) {
     const qs = query ? new URLSearchParams(query).toString() : ''
     const url = qs ? `/api/admin/users?${qs}` : '/api/admin/users'
-    const headers = sessionId ? { Cookie: `sid=${sessionId}` } : undefined
+    const headers = accessToken ? { Cookie: `sb-access-token=${accessToken}` } : undefined
     return app.request(url, { method: 'GET', headers }, TEST_ENV)
   }
 
   beforeEach(async () => {
-    await activeUserTestHelper.cleanUp()
     await adminUserTestHelper.cleanUp()
   })
 
   afterEach(async () => {
-    await activeUserTestHelper.cleanUp()
     await adminUserTestHelper.cleanUp()
   })
 
@@ -28,14 +25,13 @@ describe('GET /api/admin/users', () => {
       const adminUser = await adminUserTestHelper.createAdminUser(
         'admin@example.com',
         'password123',
-        'Admin User',
       )
 
       // 通常ユーザーも作成
-      await adminUserTestHelper.createRegularUser('user@example.com', 'password123', 'Regular User')
+      await adminUserTestHelper.createRegularUser('user@example.com', 'password123')
 
       // Admin権限でユーザー一覧取得
-      const res = await requestGetUsers(undefined, adminUser.sessionId)
+      const res = await requestGetUsers(undefined, adminUser.accessToken)
 
       expect(res.status).toBe(200)
       const data = await res.json<UserListResponse>()
@@ -58,15 +54,14 @@ describe('GET /api/admin/users', () => {
       const adminUser = await adminUserTestHelper.createAdminUser(
         'admin@example.com',
         'password123',
-        'Admin User',
       )
 
       // 複数の通常ユーザーを作成
-      await adminUserTestHelper.createRegularUser('john@example.com', 'password123', 'John Doe')
-      await adminUserTestHelper.createRegularUser('jane@example.com', 'password123', 'Jane Smith')
+      await adminUserTestHelper.createRegularUser('john@example.com', 'password123')
+      await adminUserTestHelper.createRegularUser('jane@example.com', 'password123')
 
       // 検索クエリでフィルタリング
-      const res = await requestGetUsers({ searchQuery: 'john' }, adminUser.sessionId)
+      const res = await requestGetUsers({ searchQuery: 'john' }, adminUser.accessToken)
 
       expect(res.status).toBe(200)
       const data = await res.json<UserListResponse>()
@@ -79,16 +74,15 @@ describe('GET /api/admin/users', () => {
       const adminUser = await adminUserTestHelper.createAdminUser(
         'admin@example.com',
         'password123',
-        'Admin User',
       )
 
       // 複数のユーザーを作成（3人）
-      await adminUserTestHelper.createRegularUser('user1@example.com', 'password123', 'User 1')
-      await adminUserTestHelper.createRegularUser('user2@example.com', 'password123', 'User 2')
-      await adminUserTestHelper.createRegularUser('user3@example.com', 'password123', 'User 3')
+      await adminUserTestHelper.createRegularUser('user1@example.com', 'password123')
+      await adminUserTestHelper.createRegularUser('user2@example.com', 'password123')
+      await adminUserTestHelper.createRegularUser('user3@example.com', 'password123')
 
       // 1ページ目（limit=2）
-      const page1 = await requestGetUsers({ page: '1', limit: '2' }, adminUser.sessionId)
+      const page1 = await requestGetUsers({ page: '1', limit: '2' }, adminUser.accessToken)
 
       expect(page1.status).toBe(200)
       const data1 = await page1.json<UserListResponse>()
@@ -98,7 +92,7 @@ describe('GET /api/admin/users', () => {
       expect(data1.limit).toBe(2)
 
       // 2ページ目
-      const page2 = await requestGetUsers({ page: '2', limit: '2' }, adminUser.sessionId)
+      const page2 = await requestGetUsers({ page: '2', limit: '2' }, adminUser.accessToken)
 
       expect(page2.status).toBe(200)
       const data2 = await page2.json<UserListResponse>()
@@ -119,11 +113,10 @@ describe('GET /api/admin/users', () => {
       const regularUser = await adminUserTestHelper.createRegularUser(
         'user@example.com',
         'password123',
-        'Regular User',
       )
 
       // 通常ユーザーでアクセス
-      const res = await requestGetUsers(undefined, regularUser.sessionId)
+      const res = await requestGetUsers(undefined, regularUser.accessToken)
 
       expect(res.status).toBe(403)
     })

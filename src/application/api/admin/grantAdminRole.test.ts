@@ -1,23 +1,20 @@
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
 import app from '../../server'
 import { GrantAdminRoleResponse } from './grantAdminRole'
 
-async function requestPostAdminUser(id: string, sessionId?: string) {
+async function requestPostAdminUser(id: string, accessToken?: string) {
   const url = `/api/admin/users/${id}`
-  const headers = sessionId ? { Cookie: `sid=${sessionId}` } : undefined
+  const headers = accessToken ? { Cookie: `sb-access-token=${accessToken}` } : undefined
   return app.request(url, { method: 'POST', headers }, TEST_ENV)
 }
 
 describe('POST /api/admin/users/:id', () => {
   beforeEach(async () => {
-    await activeUserTestHelper.cleanUp()
     await adminUserTestHelper.cleanUp()
   })
 
   afterEach(async () => {
-    await activeUserTestHelper.cleanUp()
     await adminUserTestHelper.cleanUp()
   })
 
@@ -27,18 +24,16 @@ describe('POST /api/admin/users/:id', () => {
       const adminUser = await adminUserTestHelper.createAdminUser(
         'admin@example.com',
         'password123',
-        'Admin User',
       )
 
       // 通常ユーザーを作成
       const regularUser = await adminUserTestHelper.createRegularUser(
         'user@example.com',
         'password123',
-        'Regular User',
       )
 
       // Admin権限を付与
-      const res = await requestPostAdminUser(regularUser.userId.toString(), adminUser.sessionId)
+      const res = await requestPostAdminUser(regularUser.userId.toString(), adminUser.accessToken)
 
       expect(res.status).toBe(200)
       const data = await res.json<GrantAdminRoleResponse>()
@@ -59,7 +54,6 @@ describe('POST /api/admin/users/:id', () => {
       const regularUser = await adminUserTestHelper.createRegularUser(
         'user@example.com',
         'password123',
-        'Regular User',
       )
 
       const res = await requestPostAdminUser(regularUser.userId.toString())
@@ -72,16 +66,17 @@ describe('POST /api/admin/users/:id', () => {
       const regularUser1 = await adminUserTestHelper.createRegularUser(
         'user1@example.com',
         'password123',
-        'Regular User 1',
       )
       const regularUser2 = await adminUserTestHelper.createRegularUser(
         'user2@example.com',
         'password123',
-        'Regular User 2',
       )
 
       // 通常ユーザーが他のユーザーにAdmin権限を付与しようとする
-      const res = await requestPostAdminUser(regularUser2.userId.toString(), regularUser1.sessionId)
+      const res = await requestPostAdminUser(
+        regularUser2.userId.toString(),
+        regularUser1.accessToken,
+      )
 
       expect(res.status).toBe(403)
     })
@@ -91,12 +86,11 @@ describe('POST /api/admin/users/:id', () => {
       const adminUser = await adminUserTestHelper.createAdminUser(
         'admin@example.com',
         'password123',
-        'Admin User',
       )
 
       // 存在しないユーザーIDでAdmin権限付与を試行
       const nonExistentUserId = '99999'
-      const res = await requestPostAdminUser(nonExistentUserId, adminUser.sessionId)
+      const res = await requestPostAdminUser(nonExistentUserId, adminUser.accessToken)
 
       expect(res.status).toBe(404)
     })
@@ -106,19 +100,17 @@ describe('POST /api/admin/users/:id', () => {
       const adminUser = await adminUserTestHelper.createAdminUser(
         'admin@example.com',
         'password123',
-        'Admin User',
       )
 
       // 通常ユーザーを作成してAdmin権限を付与
       const regularUser = await adminUserTestHelper.createRegularUser(
         'user@example.com',
         'password123',
-        'Regular User',
       )
       await adminUserTestHelper.grantAdminRole(regularUser.userId, adminUser.adminUserId)
 
       // 既にAdmin権限を持つユーザーに再度Admin権限を付与しようとする
-      const res = await requestPostAdminUser(regularUser.userId.toString(), adminUser.sessionId)
+      const res = await requestPostAdminUser(regularUser.userId.toString(), adminUser.accessToken)
 
       expect(res.status).toBe(409)
     })
@@ -128,12 +120,11 @@ describe('POST /api/admin/users/:id', () => {
       const adminUser = await adminUserTestHelper.createAdminUser(
         'admin@example.com',
         'password123',
-        'Admin User',
       )
 
       // 無効なユーザーIDでAdmin権限付与を試行
       const invalidUserId = 'invalid-id'
-      const res = await requestPostAdminUser(invalidUserId, adminUser.sessionId)
+      const res = await requestPostAdminUser(invalidUserId, adminUser.accessToken)
 
       expect(res.status).toBe(422)
     })
@@ -143,11 +134,10 @@ describe('POST /api/admin/users/:id', () => {
       const adminUser = await adminUserTestHelper.createAdminUser(
         'admin@example.com',
         'password123',
-        'Admin User',
       )
 
       // 自分自身にAdmin権限を付与しようとする
-      const res = await requestPostAdminUser(adminUser.userId.toString(), adminUser.sessionId)
+      const res = await requestPostAdminUser(adminUser.userId.toString(), adminUser.accessToken)
 
       expect(res.status).toBe(400)
       const responseText = await res.text()
