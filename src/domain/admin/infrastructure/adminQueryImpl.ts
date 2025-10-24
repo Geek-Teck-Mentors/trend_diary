@@ -4,7 +4,6 @@ import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/type
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
-import { toUserListItem } from './mapper'
 
 export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
@@ -64,7 +63,15 @@ export class AdminQueryImpl implements AdminQuery {
         this.rdb.user.count({ where: whereClause }),
       ])
 
-      const userList = users.map((user) => toUserListItem(user))
+      const userList = users.map((user) => ({
+        userId: user.userId,
+        email: 'email@placeholder.com', // TODO: Supabaseから取得
+        displayName: null,
+        isAdmin: user.adminUser !== null,
+        grantedAt: user.adminUser?.grantedAt || null,
+        grantedByAdminUserId: user.adminUser?.grantedByAdminUserId || null,
+        createdAt: user.createdAt,
+      }))
 
       return resultSuccess({
         users: userList,

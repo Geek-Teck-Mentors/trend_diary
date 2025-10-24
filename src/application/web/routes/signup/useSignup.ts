@@ -9,10 +9,10 @@ export default function useSignup(navigate: NavigateFunction) {
   const { client, apiCall } = createSWRFetcher()
 
   const { trigger, isMutating } = useSWRMutation(
-    'user/signup',
+    'auth/signup',
     async (_key: string, { arg }: { arg: AuthenticateFormData }) => {
       return apiCall(() =>
-        client.user.$post({
+        client.auth.signup.$post({
           json: arg,
         }),
       )

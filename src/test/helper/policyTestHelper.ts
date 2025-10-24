@@ -3,7 +3,7 @@ import { isError } from '@/common/types/utility'
 import { createPrivacyPolicyUseCase } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from './activeUserTestHelper'
+import authTestHelper from './authTestHelper'
 
 process.env.NODE_ENV = 'test'
 
@@ -95,9 +95,9 @@ class PolicyTestHelper {
   // 認証セッション準備
   async setupUserSession(): Promise<string> {
     const email = faker.internet.email()
-    await activeUserTestHelper.create(email, 'password123', 'admin')
-    const loginData = await activeUserTestHelper.login(email, 'password123')
-    return loginData.sessionId
+    await authTestHelper.create(email, 'password123')
+    const loginData = await authTestHelper.login(email, 'password123')
+    return loginData.accessToken
   }
 
   async disconnect(): Promise<void> {

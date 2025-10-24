@@ -2,7 +2,7 @@ import { isError } from '@/common/types/utility'
 import { createAdminUserUseCase } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from './activeUserTestHelper'
+import authTestHelper from './authTestHelper'
 
 process.env.NODE_ENV = 'test'
 
@@ -12,25 +12,16 @@ class AdminUserTestHelper {
   private useCase = createAdminUserUseCase(this.rdb)
 
   async cleanUp(): Promise<void> {
-    // AdminUser関連テーブルをクリーンアップ（テーブルが存在する場合のみ）
-    try {
-      await this.rdb.$queryRaw`TRUNCATE TABLE "admin_users" CASCADE;`
-    } catch (error) {
-      // テーブルが存在しない場合は無視（テスト環境の初期状態）
-      if (error instanceof Error && error.message.includes('does not exist')) {
-        return
-      }
-      throw error
-    }
+    // User関連テーブルをクリーンアップ（CASCADE で admin_users も削除される）
+    await authTestHelper.cleanUp()
   }
 
   async createAdminUser(
     email: string,
     password: string,
-    displayName?: string,
-  ): Promise<{ userId: bigint; adminUserId: number; sessionId: string }> {
+  ): Promise<{ userId: bigint; adminUserId: number; accessToken: string }> {
     // 通常ユーザーを作成
-    const userInfo = await activeUserTestHelper.create(email, password, displayName)
+    const userInfo = await authTestHelper.create(email, password)
 
     // Admin権限を付与
     const adminResult = await this.useCase.grantAdminRole(userInfo.userId, 1)
@@ -38,28 +29,27 @@ class AdminUserTestHelper {
       throw new Error(`Failed to grant admin role: ${adminResult.error.message}`)
     }
 
-    // ログインしてセッションIDを取得
-    const loginInfo = await activeUserTestHelper.login(email, password)
+    // ログインしてアクセストークンを取得
+    const loginInfo = await authTestHelper.login(email, password)
 
     return {
       userId: userInfo.userId,
       adminUserId: adminResult.data.adminUserId,
-      sessionId: loginInfo.sessionId,
+      accessToken: loginInfo.accessToken,
     }
   }
 
   async createRegularUser(
     email: string,
     password: string,
-    displayName?: string,
-  ): Promise<{ userId: bigint; sessionId: string }> {
+  ): Promise<{ userId: bigint; accessToken: string }> {
     // 通常ユーザーを作成（Admin権限は付与しない）
-    const userInfo = await activeUserTestHelper.create(email, password, displayName)
-    const loginInfo = await activeUserTestHelper.login(email, password)
+    const userInfo = await authTestHelper.create(email, password)
+    const loginInfo = await authTestHelper.login(email, password)
 
     return {
       userId: userInfo.userId,
-      sessionId: loginInfo.sessionId,
+      accessToken: loginInfo.accessToken,
     }
   }
 
