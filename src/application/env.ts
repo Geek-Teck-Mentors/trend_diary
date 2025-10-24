@@ -11,19 +11,19 @@ export type SessionUser = {
 }
 
 export type Env = {
-	Bindings: {
-		DATABASE_URL: string
-		DISCORD_WEBHOOK_URL: string
-		FEATURE_USER_ENABLED: string
-		SUPABASE_URL: string
-		SUPABASE_ANON_KEY: string
-	};
-	Variables: {
-		[CONTEXT_KEY.APP_LOG]: typeof logger;
-		[CONTEXT_KEY.SESSION_USER]: SessionUser;
-		[CONTEXT_KEY.SESSION_ID]: string;
-	};
-};
+  Bindings: {
+    DATABASE_URL: string
+    DISCORD_WEBHOOK_URL: string
+    FEATURE_USER_ENABLED: string
+    SUPABASE_URL: string
+    SUPABASE_ANON_KEY: string
+  }
+  Variables: {
+    [CONTEXT_KEY.APP_LOG]: typeof logger
+    [CONTEXT_KEY.SESSION_USER]: SessionUser
+    [CONTEXT_KEY.SESSION_ID]: string
+  }
+}
 
 declare module 'react-router' {
   interface AppLoadContext {
