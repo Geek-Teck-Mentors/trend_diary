@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { getCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
@@ -44,7 +43,7 @@ const authMiddleware = createMiddleware<Env>(async (c, next) => {
   }
 
   // SupabaseIdからUserテーブルの情報を取得
-  const rdb = getRdbClient(c.env.DATABASE_URL) as PrismaClient
+  const rdb = getRdbClient(c.env.DATABASE_URL)
   const user = await rdb.user.findUnique({
     where: { supabaseId: authResult.data.id },
     include: {

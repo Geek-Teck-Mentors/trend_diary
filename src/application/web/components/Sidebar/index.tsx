@@ -1,4 +1,4 @@
-import { BookOpen, TrendingUp } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { isLoggedIn } from '../../features/authenticate/userStatus'
 import { InternalPath } from '../../routes'
@@ -23,16 +23,7 @@ export interface MenuItem {
 }
 
 export const menuItems: MenuItem[] = [
-  {
-    title: 'トレンド記事',
-    url: '/trends',
-    icon: TrendingUp,
-  },
-  // {
-  //   title: '読んだ記事',
-  //   url: '#',
-  //   icon: Newspaper,
-  // },
+  // メニュー項目は今後追加予定
 ]
 
 type Props = {

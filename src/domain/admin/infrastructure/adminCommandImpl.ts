@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
 import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { AdminCommand } from '../repository'
@@ -6,7 +5,7 @@ import type { AdminUser } from '../schema/adminUserSchema'
 import { toDomainAdminUser } from './mapper'
 
 export class AdminCommandImpl implements AdminCommand {
-  constructor(private rdb: PrismaClient) {}
+  constructor(private rdb: any) {}
 
   async grantAdminRole(
     userId: bigint,
@@ -14,7 +13,7 @@ export class AdminCommandImpl implements AdminCommand {
   ): AsyncResult<AdminUser, Error> {
     try {
       // ユーザーが存在するかチェック
-      const existingUser = await this.rdb.activeUser.findUnique({
+      const existingUser = await this.rdb.user.findUnique({
         where: { userId },
       })
 

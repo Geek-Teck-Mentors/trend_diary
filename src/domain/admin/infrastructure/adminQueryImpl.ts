@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { AdminQuery } from '../repository'
@@ -6,7 +5,7 @@ import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
 
 export class AdminQueryImpl implements AdminQuery {
-  constructor(private rdb: PrismaClient) {}
+  constructor(private rdb: any) {}
 
   async findAdminByActiveUserId(userId: bigint): AsyncResult<
     Nullable<{
