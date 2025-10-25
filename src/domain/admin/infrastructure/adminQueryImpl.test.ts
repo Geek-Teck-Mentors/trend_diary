@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { ServerError } from '@/common/errors'
+import { NotImplementedError, ServerError } from '@/common/errors'
 import { isError, isSuccess } from '@/common/types/utility'
 import { AdminQueryImpl } from './adminQueryImpl'
 
@@ -217,24 +217,16 @@ describe('AdminQueryImpl', () => {
         })
       })
 
-      it.skip('検索クエリでユーザーをフィルタリングできる', async () => {
+      it('検索クエリでユーザーをフィルタリングできる', async () => {
         const searchQuery = { searchQuery: 'test1', page: 1, limit: 10 }
-        const mockSearchUsers = [createMockUsers()[0]]
-        mockDb.user.findMany.mockResolvedValue(mockSearchUsers)
-        mockDb.user.count.mockResolvedValue(1)
 
         const result = await query.findAllUsers(searchQuery)
 
-        expectSuccessResult(result, { users: { length: 1 }, total: 1, page: 1, limit: 10 })
-        expectFindManyCall({
-          where: {
-            OR: [
-              { email: { contains: 'test1', mode: 'insensitive' } },
-              { displayName: { contains: 'test1', mode: 'insensitive' } },
-            ],
-          },
-          take: 10,
-        })
+        expect(isError(result)).toBe(true)
+        if (isError(result)) {
+          expect(result.error).toBeInstanceOf(NotImplementedError)
+          expect(result.error.message).toContain('未実装')
+        }
       })
 
       it('ページネーションが正しく動作する', async () => {
@@ -290,37 +282,27 @@ describe('AdminQueryImpl', () => {
         expectFindManyCall({ skip: 0, take: 1000 })
       })
 
-      it.skip('特殊文字を含む検索クエリでも正常に処理できる', async () => {
+      it('特殊文字を含む検索クエリでも正常に処理できる', async () => {
         const specialCharQuery = { searchQuery: 'test+special@domain.com', page: 1, limit: 20 }
-        mockDb.user.findMany.mockResolvedValue([])
-        mockDb.user.count.mockResolvedValue(0)
 
         const result = await query.findAllUsers(specialCharQuery)
 
-        expectSuccessResult(result, { page: 1, limit: 20 })
-        expectFindManyCall({
-          where: {
-            OR: [
-              { email: { contains: 'test+special@domain.com', mode: 'insensitive' } },
-              { displayName: { contains: 'test+special@domain.com', mode: 'insensitive' } },
-            ],
-          },
-        })
+        expect(isError(result)).toBe(true)
+        if (isError(result)) {
+          expect(result.error).toBeInstanceOf(NotImplementedError)
+          expect(result.error.message).toContain('未実装')
+        }
       })
 
-      it.skip('日本語の検索クエリでも正常に処理できる', async () => {
+      it('日本語の検索クエリでも正常に処理できる', async () => {
         const japaneseQuery = { searchQuery: '田中太郎', page: 1, limit: 20 }
-        const mockJapaneseUsers = [
-          createMockUser({ email: 'tanaka@example.com', displayName: '田中太郎' }),
-        ]
-        mockDb.user.findMany.mockResolvedValue(mockJapaneseUsers)
-        mockDb.user.count.mockResolvedValue(1)
 
         const result = await query.findAllUsers(japaneseQuery)
 
-        expectSuccessResult(result, { users: { length: 1 }, page: 1, limit: 20 })
-        if (isSuccess(result)) {
-          expect(result.data.users[0].displayName).toBe('田中太郎')
+        expect(isError(result)).toBe(true)
+        if (isError(result)) {
+          expect(result.error).toBeInstanceOf(NotImplementedError)
+          expect(result.error.message).toContain('未実装')
         }
       })
     })

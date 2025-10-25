@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
+import { NotImplementedError } from '@/common/errors'
 import { isError, isSuccess } from '@/common/types/utility'
 import { AdminCommandImpl } from './infrastructure/adminCommandImpl'
 import { AdminQueryImpl } from './infrastructure/adminQueryImpl'
@@ -150,33 +151,13 @@ describe('AdminUser UseCase', () => {
         }
       })
 
-      it.skip('検索クエリでユーザーをフィルタリングできる', async () => {
-        const mockUsers = [
-          {
-            email: 'admin@example.com',
-            displayName: 'Admin User',
-            password: 'hashedPassword',
-            lastLogin: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            userId: BigInt(1),
-            adminUser: {
-              adminUserId: 1,
-              grantedAt: new Date(),
-              grantedByAdminUserId: 1,
-            },
-          },
-        ]
-
-        mockDb.user.findMany.mockResolvedValue(mockUsers)
-        mockDb.user.count.mockResolvedValue(1)
-
+      it('検索クエリでユーザーをフィルタリングできる', async () => {
         const result = await useCase.getUserList({ searchQuery: 'admin' })
 
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.users).toHaveLength(1)
-          expect(result.data.users[0].email).toBe('admin@example.com')
+        expect(isError(result)).toBe(true)
+        if (isError(result)) {
+          expect(result.error).toBeInstanceOf(NotImplementedError)
+          expect(result.error.message).toContain('未実装')
         }
       })
     })

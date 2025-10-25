@@ -1,4 +1,4 @@
-import { ServerError } from '@/common/errors'
+import { NotImplementedError, ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
@@ -40,7 +40,15 @@ export class AdminQueryImpl implements AdminQuery {
       const { searchQuery, page = 1, limit = 20 } = query || {}
       const offset = (page - 1) * limit
 
-      // TODO: Supabase Authから取得したemail/displayNameで検索する実装を追加
+      // 検索機能は未実装（Supabase Authからemail/displayNameを取得する必要がある）
+      if (searchQuery) {
+        return resultError(
+          new NotImplementedError(
+            'ユーザー検索機能は未実装です。Supabase Authとの統合が必要です。',
+          ),
+        )
+      }
+
       const whereClause = {}
 
       const [users, total] = await Promise.all([
