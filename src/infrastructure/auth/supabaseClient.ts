@@ -12,3 +12,17 @@ export function createAuthClient(supabaseUrl: string, supabaseAnonKey: string): 
     },
   })
 }
+
+// Admin用のSupabaseクライアント（service_role keyを使用）
+export function createAdminAuthClient(
+  supabaseUrl: string,
+  supabaseServiceRoleKey: string,
+): AuthSupabaseClient {
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  })
+}

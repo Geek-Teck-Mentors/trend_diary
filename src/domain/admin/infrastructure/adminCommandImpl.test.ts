@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
@@ -6,7 +5,7 @@ import { isError, isSuccess } from '@/common/types/utility'
 import { AdminCommandImpl } from './adminCommandImpl'
 
 // モックの設定
-const mockDb = mockDeep<PrismaClient>()
+const mockDb = mockDeep<any>()
 
 // ヘルパー関数
 function createMockUser(overrides = {}) {
@@ -50,13 +49,9 @@ function setupDatabaseError(mockMethod: any, errorMessage = 'Database connection
   mockMethod.mockRejectedValue(new Error(errorMessage))
 }
 
-function expectDatabaseCalls(calls: {
-  activeUser?: any
-  adminUserFind?: any
-  adminUserCreate?: any
-}) {
-  if (calls.activeUser) {
-    expect(mockDb.user.findUnique).toHaveBeenCalledWith(calls.activeUser)
+function expectDatabaseCalls(calls: { user?: any; adminUserFind?: any; adminUserCreate?: any }) {
+  if (calls.user) {
+    expect(mockDb.user.findUnique).toHaveBeenCalledWith(calls.user)
   }
   if (calls.adminUserFind) {
     expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith(calls.adminUserFind)
@@ -170,9 +165,7 @@ describe('AdminCommandImpl', () => {
 
       it('bigintの最大値に近いuserIdでも正常に処理できる', async () => {
         const largeActiveUserId = 9223372036854775806n
-        mockDb.user.findUnique.mockResolvedValue(
-          createMockUser({ userId: largeActiveUserId }),
-        )
+        mockDb.user.findUnique.mockResolvedValue(createMockUser({ userId: largeActiveUserId }))
         mockDb.adminUser.findUnique.mockResolvedValue(null)
         mockDb.adminUser.create.mockResolvedValue(
           createMockAdminUser({ userId: largeActiveUserId }),

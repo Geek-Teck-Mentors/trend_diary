@@ -1,11 +1,15 @@
-import { NotImplementedError, ServerError } from '@/common/errors'
+import { ServerError } from '@/common/errors'
 import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
+import type { AuthSupabaseClient } from '@/infrastructure/auth/supabaseClient'
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
 
 export class AdminQueryImpl implements AdminQuery {
-  constructor(private rdb: any) {}
+  constructor(
+    private rdb: any,
+    private supabase: AuthSupabaseClient,
+  ) {}
 
   async findAdminByActiveUserId(userId: bigint): AsyncResult<
     Nullable<{
@@ -38,51 +42,70 @@ export class AdminQueryImpl implements AdminQuery {
   async findAllUsers(query?: UserSearchQuery): AsyncResult<UserListResult, Error> {
     try {
       const { searchQuery, page = 1, limit = 20 } = query || {}
-      const offset = (page - 1) * limit
+      const _offset = (page - 1) * limit
 
-      // 検索機能は未実装（Supabase Authからemail/displayNameを取得する必要がある）
-      if (searchQuery) {
+      // Supabase Admin APIから全ユーザーを取得
+      const { data: supabaseUsers, error: supabaseError } =
+        await this.supabase.auth.admin.listUsers({
+          page,
+          perPage: limit,
+        })
+
+      if (supabaseError) {
         return resultError(
-          new NotImplementedError(
-            'ユーザー検索機能は未実装です。Supabase Authとの統合が必要です。',
-          ),
+          new ServerError(`Supabaseからのユーザー取得に失敗: ${supabaseError.message}`),
         )
       }
 
-      const whereClause = {}
+      // 検索クエリでフィルタリング
+      let filteredUsers = supabaseUsers.users
+      if (searchQuery) {
+        const lowerQuery = searchQuery.toLowerCase()
+        filteredUsers = filteredUsers.filter((user) => {
+          const email = user.email?.toLowerCase() || ''
+          const displayName = user.user_metadata?.display_name?.toLowerCase() || ''
+          return email.includes(lowerQuery) || displayName.includes(lowerQuery)
+        })
+      }
 
-      const [users, total] = await Promise.all([
-        this.rdb.user.findMany({
-          where: whereClause,
-          include: {
-            adminUser: true,
-          },
-          orderBy: { createdAt: 'desc' },
-          skip: offset,
-          take: limit,
-        }),
-        this.rdb.user.count({ where: whereClause }),
-      ])
+      // UserテーブルからsupabaseIdのリストを取得
+      const supabaseIds = filteredUsers.map((u) => u.id)
+      const dbUsers = await this.rdb.user.findMany({
+        where: {
+          supabaseId: { in: supabaseIds },
+        },
+        include: {
+          adminUser: true,
+        },
+      })
 
-      const userList = users.map(
-        (user: {
-          userId: bigint
-          createdAt: Date
-          adminUser: { grantedAt: Date; grantedByAdminUserId: number } | null
-        }) => ({
-          userId: user.userId,
-          email: 'email@placeholder.com', // TODO: Supabaseから取得
-          displayName: null,
-          isAdmin: user.adminUser !== null,
-          grantedAt: user.adminUser?.grantedAt || null,
-          grantedByAdminUserId: user.adminUser?.grantedByAdminUserId || null,
-          createdAt: user.createdAt,
-        }),
+      // supabaseIdでマッピングを作成
+      const dbUserMap = new Map(
+        dbUsers.map((u: any) => [
+          u.supabaseId,
+          u as { userId: bigint; adminUser: any; createdAt: Date },
+        ]),
       )
+
+      // 結合してユーザーリストを作成
+      const userList = filteredUsers.map((supabaseUser) => {
+        const dbUser = dbUserMap.get(supabaseUser.id) as
+          | { userId: bigint; adminUser: any; createdAt: Date }
+          | undefined
+        return {
+          userId: dbUser?.userId || 0n,
+          email: supabaseUser.email || '',
+          displayName: supabaseUser.user_metadata?.display_name || null,
+          isAdmin: dbUser?.adminUser !== null && dbUser?.adminUser !== undefined,
+          grantedAt: dbUser?.adminUser?.grantedAt || null,
+          grantedByAdminUserId: dbUser?.adminUser?.grantedByAdminUserId || null,
+          createdAt: dbUser?.createdAt || new Date(supabaseUser.created_at),
+        }
+      })
 
       return resultSuccess({
         users: userList,
-        total,
+        total: filteredUsers.length,
         page,
         limit,
       })

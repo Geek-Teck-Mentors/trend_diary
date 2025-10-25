@@ -1,11 +1,12 @@
+import type { AuthSupabaseClient } from '@/infrastructure/auth/supabaseClient'
 import { RdbClient } from '@/infrastructure/rdb'
 import { AdminCommandImpl } from './infrastructure/adminCommandImpl'
 import { AdminQueryImpl } from './infrastructure/adminQueryImpl'
 import { UseCase } from './useCase'
 
-export function createAdminUserUseCase(rdb: RdbClient): UseCase {
+export function createAdminUserUseCase(rdb: RdbClient, supabase: AuthSupabaseClient): UseCase {
   const command = new AdminCommandImpl(rdb)
-  const query = new AdminQueryImpl(rdb)
+  const query = new AdminQueryImpl(rdb, supabase)
   return new UseCase(command, query)
 }
 

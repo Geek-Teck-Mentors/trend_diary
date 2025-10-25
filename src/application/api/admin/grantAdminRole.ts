@@ -5,6 +5,7 @@ import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
 import { createAdminUserUseCase } from '@/domain/admin'
+import { createAdminAuthClient } from '@/infrastructure/auth/supabaseClient'
 import getRdbClient from '@/infrastructure/rdb'
 
 export const paramSchema = z.object({
@@ -27,7 +28,8 @@ export default async function grantAdminRole(
   const userId = BigInt(parsedParam.id)
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const adminUserUseCase = createAdminUserUseCase(rdb)
+  const supabase = createAdminAuthClient(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_ROLE_KEY)
+  const adminUserUseCase = createAdminUserUseCase(rdb, supabase)
 
   // 自分に権限を付与しようとしていないかチェック
   if (userId === sessionUser.userId) {

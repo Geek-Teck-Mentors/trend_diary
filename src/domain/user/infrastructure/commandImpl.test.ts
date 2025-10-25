@@ -1,10 +1,9 @@
-import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { isError, isSuccess } from '@/common/types/utility'
 import { UserCommandRepositoryImpl } from './commandImpl'
 
-const mockDb = mockDeep<PrismaClient>()
+const mockDb = mockDeep<any>()
 
 describe('UserCommandRepositoryImpl', () => {
   let repository: UserCommandRepositoryImpl

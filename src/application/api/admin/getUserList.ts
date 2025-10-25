@@ -6,6 +6,7 @@ import { isError } from '@/common/types/utility'
 import { createAdminUserUseCase } from '@/domain/admin'
 import { UserListResult } from '@/domain/admin/schema/userListSchema'
 import { User } from '@/domain/admin/schema/userSchema'
+import { createAdminAuthClient } from '@/infrastructure/auth/supabaseClient'
 import getRdbClient from '@/infrastructure/rdb'
 
 interface ApiUser extends Omit<User, 'userId' | 'grantedAt' | 'createdAt'> {
@@ -31,7 +32,8 @@ export default async function getUserList(
   const parsedQuery = c.req.valid('query')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const adminUserUseCase = createAdminUserUseCase(rdb)
+  const supabase = createAdminAuthClient(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_ROLE_KEY)
+  const adminUserUseCase = createAdminUserUseCase(rdb, supabase)
 
   const result = await adminUserUseCase.getUserList({
     searchQuery: parsedQuery.searchQuery,

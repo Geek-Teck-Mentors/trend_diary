@@ -1,13 +1,13 @@
-import { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { NotImplementedError } from '@/common/errors'
 import { isError, isSuccess } from '@/common/types/utility'
+import type { AuthSupabaseClient } from '@/infrastructure/auth/supabaseClient'
 import { AdminCommandImpl } from './infrastructure/adminCommandImpl'
 import { AdminQueryImpl } from './infrastructure/adminQueryImpl'
 import { UseCase } from './useCase'
 
-const mockDb = mockDeep<PrismaClient>()
+const mockDb = mockDeep<any>()
+const mockSupabase = mockDeep<AuthSupabaseClient>()
 
 describe('AdminUser UseCase', () => {
   let useCase: UseCase
@@ -15,7 +15,7 @@ describe('AdminUser UseCase', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     const command = new AdminCommandImpl(mockDb)
-    const query = new AdminQueryImpl(mockDb)
+    const query = new AdminQueryImpl(mockDb, mockSupabase)
     useCase = new UseCase(command, query)
   })
 
@@ -118,6 +118,26 @@ describe('AdminUser UseCase', () => {
   describe('getUserList', () => {
     describe('正常系', () => {
       it('ユーザー一覧を取得できる', async () => {
+        const mockSupabaseUsers = [
+          {
+            id: 'test-supabase-id-1',
+            email: 'user1@example.com',
+            user_metadata: { display_name: 'User 1' },
+            created_at: '2024-01-10T00:00:00.000Z',
+          },
+          {
+            id: 'test-supabase-id-2',
+            email: 'user2@example.com',
+            user_metadata: {},
+            created_at: '2024-01-11T00:00:00.000Z',
+          },
+        ]
+
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsers },
+          error: null,
+        } as any)
+
         const mockUsers = [
           {
             userId: BigInt(1),
@@ -138,7 +158,6 @@ describe('AdminUser UseCase', () => {
         ]
 
         mockDb.user.findMany.mockResolvedValue(mockUsers)
-        mockDb.user.count.mockResolvedValue(2)
 
         const result = await useCase.getUserList()
 
@@ -152,12 +171,47 @@ describe('AdminUser UseCase', () => {
       })
 
       it('検索クエリでユーザーをフィルタリングできる', async () => {
+        const mockSupabaseUsers = [
+          {
+            id: 'test-supabase-id-1',
+            email: 'admin@example.com',
+            user_metadata: { display_name: 'Admin User' },
+            created_at: '2024-01-10T00:00:00.000Z',
+          },
+          {
+            id: 'test-supabase-id-2',
+            email: 'user@example.com',
+            user_metadata: { display_name: 'Normal User' },
+            created_at: '2024-01-11T00:00:00.000Z',
+          },
+        ]
+
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsers },
+          error: null,
+        } as any)
+
+        const mockUsers = [
+          {
+            userId: BigInt(1),
+            supabaseId: 'test-supabase-id-1',
+            createdAt: new Date(),
+            adminUser: {
+              adminUserId: 1,
+              grantedAt: new Date(),
+              grantedByAdminUserId: 1,
+            },
+          },
+        ]
+
+        mockDb.user.findMany.mockResolvedValue(mockUsers)
+
         const result = await useCase.getUserList({ searchQuery: 'admin' })
 
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
-          expect(result.error).toBeInstanceOf(NotImplementedError)
-          expect(result.error.message).toContain('未実装')
+        expect(isSuccess(result)).toBe(true)
+        if (isSuccess(result)) {
+          expect(result.data.users).toHaveLength(1)
+          expect(result.data.users[0].email).toBe('admin@example.com')
         }
       })
     })

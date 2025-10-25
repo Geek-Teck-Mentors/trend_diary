@@ -1,12 +1,13 @@
-import { PrismaClient } from '@prisma/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { NotImplementedError, ServerError } from '@/common/errors'
+import { ServerError } from '@/common/errors'
 import { isError, isSuccess } from '@/common/types/utility'
+import type { AuthSupabaseClient } from '@/infrastructure/auth/supabaseClient'
 import { AdminQueryImpl } from './adminQueryImpl'
 
 // モックの設定
-const mockDb = mockDeep<PrismaClient>()
+const mockDb = mockDeep<any>()
+const mockSupabase = mockDeep<AuthSupabaseClient>()
 
 // ヘルパー関数
 function createMockAdminUser(overrides = {}) {
@@ -45,16 +46,6 @@ function createMockUser(overrides = {}) {
   }
 }
 
-function expectFindManyCall(expectedQuery: any) {
-  expect(mockDb.user.findMany).toHaveBeenCalledWith({
-    where: expectedQuery.where || {},
-    include: { adminUser: true },
-    orderBy: { createdAt: 'desc' },
-    skip: expectedQuery.skip || 0,
-    take: expectedQuery.take || 20,
-  })
-}
-
 function expectSuccessResult(result: any, expectations: Record<string, any>) {
   expect(isSuccess(result)).toBe(true)
   if (isSuccess(result)) {
@@ -89,7 +80,7 @@ describe('AdminQueryImpl', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    query = new AdminQueryImpl(mockDb)
+    query = new AdminQueryImpl(mockDb, mockSupabase)
   })
 
   afterEach(() => {
@@ -201,50 +192,99 @@ describe('AdminQueryImpl', () => {
   describe('findAllUsers', () => {
     describe('基本動作', () => {
       it('全ユーザーを取得できる', async () => {
+        const mockSupabaseUsers = [
+          {
+            id: 'test-supabase-id-1',
+            email: 'user1@example.com',
+            user_metadata: { display_name: 'User 1' },
+            created_at: '2024-01-10T00:00:00.000Z',
+          },
+          {
+            id: 'test-supabase-id-2',
+            email: 'user2@example.com',
+            user_metadata: {},
+            created_at: '2024-01-11T00:00:00.000Z',
+          },
+        ]
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsers },
+          error: null,
+        } as any)
+
         const mockUsers = createMockUsers()
         mockDb.user.findMany.mockResolvedValue(mockUsers)
-        mockDb.user.count.mockResolvedValue(2)
 
         const result = await query.findAllUsers()
 
         expectSuccessResult(result, { users: { length: 2 }, total: 2, page: 1, limit: 20 })
-        expect(mockDb.user.findMany).toHaveBeenCalledWith({
-          where: {},
-          include: { adminUser: true },
-          orderBy: { createdAt: 'desc' },
-          skip: 0,
-          take: 20,
-        })
+        expect(mockSupabase.auth.admin.listUsers).toHaveBeenCalledWith({ page: 1, perPage: 20 })
       })
 
       it('検索クエリでユーザーをフィルタリングできる', async () => {
-        const searchQuery = { searchQuery: 'test1', page: 1, limit: 10 }
+        const searchQuery = { searchQuery: 'user1', page: 1, limit: 10 }
+        const mockSupabaseUsers = [
+          {
+            id: 'test-supabase-id-1',
+            email: 'user1@example.com',
+            user_metadata: { display_name: 'User 1' },
+            created_at: '2024-01-10T00:00:00.000Z',
+          },
+          {
+            id: 'test-supabase-id-2',
+            email: 'user2@example.com',
+            user_metadata: {},
+            created_at: '2024-01-11T00:00:00.000Z',
+          },
+        ]
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsers },
+          error: null,
+        } as any)
+
+        const mockUsers = [createMockUsers()[0]]
+        mockDb.user.findMany.mockResolvedValue(mockUsers)
 
         const result = await query.findAllUsers(searchQuery)
 
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
-          expect(result.error).toBeInstanceOf(NotImplementedError)
-          expect(result.error.message).toContain('未実装')
-        }
+        expectSuccessResult(result, { users: { length: 1 }, total: 1, page: 1, limit: 10 })
+        expect(mockSupabase.auth.admin.listUsers).toHaveBeenCalledWith({ page: 1, perPage: 10 })
       })
 
       it('ページネーションが正しく動作する', async () => {
         const paginationQuery = { page: 2, limit: 5 }
+        const mockSupabaseUsers = [
+          {
+            id: 'test-supabase-id-6',
+            email: 'test6@example.com',
+            user_metadata: { display_name: 'User 6' },
+            created_at: '2024-01-16T00:00:00.000Z',
+          },
+        ]
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsers },
+          error: null,
+        } as any)
+
         mockDb.user.findMany.mockResolvedValue([
-          createMockUser({ userId: 6n, email: 'test6@example.com' }),
+          createMockUser({
+            userId: 6n,
+            supabaseId: 'test-supabase-id-6',
+            email: 'test6@example.com',
+          }),
         ])
-        mockDb.user.count.mockResolvedValue(10)
 
         const result = await query.findAllUsers(paginationQuery)
 
-        expectSuccessResult(result, { users: { length: 1 }, total: 10, page: 2, limit: 5 })
-        expectFindManyCall({ skip: 5, take: 5 })
+        expectSuccessResult(result, { users: { length: 1 }, total: 1, page: 2, limit: 5 })
+        expect(mockSupabase.auth.admin.listUsers).toHaveBeenCalledWith({ page: 2, perPage: 5 })
       })
 
       it('空の結果でも正常に処理できる', async () => {
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: [] },
+          error: null,
+        } as any)
         mockDb.user.findMany.mockResolvedValue([])
-        mockDb.user.count.mockResolvedValue(0)
 
         const result = await query.findAllUsers()
 
@@ -255,54 +295,89 @@ describe('AdminQueryImpl', () => {
     describe('境界値・特殊値', () => {
       it('大きなページ番号でも正常に処理できる', async () => {
         const largePageQuery = { page: 1000, limit: 20 }
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: [] },
+          error: null,
+        } as any)
         mockDb.user.findMany.mockResolvedValue([])
-        mockDb.user.count.mockResolvedValue(0)
 
         const result = await query.findAllUsers(largePageQuery)
 
         expectSuccessResult(result, { users: { length: 0 }, total: 0, page: 1000, limit: 20 })
-        expectFindManyCall({ skip: 19980, take: 20 })
+        expect(mockSupabase.auth.admin.listUsers).toHaveBeenCalledWith({ page: 1000, perPage: 20 })
       })
 
       it('大きなlimit値でも正常に処理できる', async () => {
         const largeLimitQuery = { page: 1, limit: 1000 }
+        const mockSupabaseUsersLarge = Array.from({ length: 100 }, (_, i) => ({
+          id: `test-supabase-id-${i + 1}`,
+          email: `test${i + 1}@example.com`,
+          user_metadata: { display_name: `テストユーザー${i + 1}` },
+          created_at: '2024-01-10T00:00:00.000Z',
+        }))
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsersLarge },
+          error: null,
+        } as any)
+
         const mockUsersLarge = Array.from({ length: 100 }, (_, i) =>
           createMockUser({
             userId: BigInt(i + 1),
+            supabaseId: `test-supabase-id-${i + 1}`,
             email: `test${i + 1}@example.com`,
             displayName: `テストユーザー${i + 1}`,
           }),
         )
         mockDb.user.findMany.mockResolvedValue(mockUsersLarge)
-        mockDb.user.count.mockResolvedValue(100)
 
         const result = await query.findAllUsers(largeLimitQuery)
 
         expectSuccessResult(result, { users: { length: 100 }, total: 100, page: 1, limit: 1000 })
-        expectFindManyCall({ skip: 0, take: 1000 })
+        expect(mockSupabase.auth.admin.listUsers).toHaveBeenCalledWith({ page: 1, perPage: 1000 })
       })
 
       it('特殊文字を含む検索クエリでも正常に処理できる', async () => {
         const specialCharQuery = { searchQuery: 'test+special@domain.com', page: 1, limit: 20 }
+        const mockSupabaseUsers = [
+          {
+            id: 'test-id',
+            email: 'test+special@domain.com',
+            user_metadata: {},
+            created_at: '2024-01-10T00:00:00.000Z',
+          },
+        ]
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsers },
+          error: null,
+        } as any)
+        mockDb.user.findMany.mockResolvedValue([])
 
         const result = await query.findAllUsers(specialCharQuery)
 
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
-          expect(result.error).toBeInstanceOf(NotImplementedError)
-          expect(result.error.message).toContain('未実装')
-        }
+        expectSuccessResult(result, { page: 1, limit: 20 })
       })
 
       it('日本語の検索クエリでも正常に処理できる', async () => {
         const japaneseQuery = { searchQuery: '田中太郎', page: 1, limit: 20 }
+        const mockSupabaseUsers = [
+          {
+            id: 'test-id',
+            email: 'tanaka@example.com',
+            user_metadata: { display_name: '田中太郎' },
+            created_at: '2024-01-10T00:00:00.000Z',
+          },
+        ]
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsers },
+          error: null,
+        } as any)
+        mockDb.user.findMany.mockResolvedValue([createMockUser({ supabaseId: 'test-id' })])
 
         const result = await query.findAllUsers(japaneseQuery)
 
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
-          expect(result.error).toBeInstanceOf(NotImplementedError)
-          expect(result.error.message).toContain('未実装')
+        expectSuccessResult(result, { users: { length: 1 }, page: 1, limit: 20 })
+        if (isSuccess(result)) {
+          expect(result.data.users[0].displayName).toBe('田中太郎')
         }
       })
     })
@@ -316,16 +391,31 @@ describe('AdminQueryImpl', () => {
         expectErrorResult(result, ServerError, 'ユーザ一覧の取得に失敗しました')
       })
 
-      it('count実行時のデータベースエラーを適切にエラーを返す', async () => {
-        mockDb.user.findMany.mockResolvedValue([createMockUser()])
-        setupDatabaseError(mockDb.user.count)
+      it('Supabase Admin APIエラー時は適切にエラーを返す', async () => {
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: [] },
+          error: { message: 'Service unavailable' },
+        } as any)
 
         const result = await query.findAllUsers()
 
-        expectErrorResult(result, ServerError, 'ユーザ一覧の取得に失敗しました')
+        expectErrorResult(result, ServerError, 'Supabaseからのユーザー取得に失敗')
       })
 
       it('Prismaクエリエラーを適切にハンドリングする', async () => {
+        const mockSupabaseUsers = [
+          {
+            id: 'test-supabase-id-1',
+            email: 'test1@example.com',
+            user_metadata: {},
+            created_at: '2024-01-10T00:00:00.000Z',
+          },
+        ]
+        mockSupabase.auth.admin.listUsers.mockResolvedValue({
+          data: { users: mockSupabaseUsers },
+          error: null,
+        } as any)
+
         const prismaError = {
           code: 'P2021',
           message: 'The table does not exist in the current database.',

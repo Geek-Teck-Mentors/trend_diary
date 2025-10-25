@@ -17,6 +17,7 @@ export type Env = {
     FEATURE_USER_ENABLED: string
     SUPABASE_URL: string
     SUPABASE_ANON_KEY: string
+    SUPABASE_SERVICE_ROLE_KEY: string
   }
   Variables: {
     [CONTEXT_KEY.APP_LOG]: typeof logger
