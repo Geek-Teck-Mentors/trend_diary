@@ -29,12 +29,6 @@ const baseGroup = {
   ],
 } as const satisfies GroupRoute
 
-const trendGroup = {
-  prefix: 'trends',
-  layout: './routes/trends.tsx',
-  routes: [{ path: PATH_INDEX, file: './routes/trends._index/route.tsx' }],
-} as const satisfies GroupRoute
-
 const adminGroup = {
   prefix: 'admin',
   layout: './routes/admin._layout.tsx',
@@ -44,7 +38,7 @@ const adminGroup = {
   ],
 } as const satisfies GroupRoute
 
-const groupRoutes = [baseGroup, trendGroup, adminGroup] as const satisfies GroupRoute[]
+const groupRoutes = [baseGroup, adminGroup] as const satisfies GroupRoute[]
 
 function buildGroupRoute(group: GroupRoute): RouteConfigEntry[] {
   const routes = group.routes.map((value) =>
