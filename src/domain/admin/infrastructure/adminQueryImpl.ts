@@ -40,14 +40,8 @@ export class AdminQueryImpl implements AdminQuery {
       const { searchQuery, page = 1, limit = 20 } = query || {}
       const offset = (page - 1) * limit
 
-      const whereClause = searchQuery
-        ? {
-            OR: [
-              { email: { contains: searchQuery, mode: 'insensitive' as const } },
-              { displayName: { contains: searchQuery, mode: 'insensitive' as const } },
-            ],
-          }
-        : {}
+      // TODO: Supabase Authから取得したemail/displayNameで検索する実装を追加
+      const whereClause = {}
 
       const [users, total] = await Promise.all([
         this.rdb.user.findMany({
