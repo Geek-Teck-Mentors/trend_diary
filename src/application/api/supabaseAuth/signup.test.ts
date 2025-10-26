@@ -1,14 +1,28 @@
+import { vi } from 'vitest'
+import { SupabaseAuthUseCase } from '@/domain/supabaseAuth'
 import TEST_ENV from '@/test/env'
-import supabaseAuthTestHelper from '@/test/helper/supabaseAuthTestHelper'
+import { MockSupabaseAuthRepository } from '@/test/mocks/mockSupabaseAuthRepository'
 import app from '../../server'
 
-describe('POST /api/supabase-auth/signup', () => {
-  beforeAll(async () => {
-    await supabaseAuthTestHelper.cleanUp()
-  })
+const mockRepository = new MockSupabaseAuthRepository()
 
-  afterAll(async () => {
-    await supabaseAuthTestHelper.cleanUp()
+// createSupabaseAuthUseCaseをモックする
+vi.mock('@/domain/supabaseAuth', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('@/domain/supabaseAuth')>()
+  return {
+    ...mod,
+    createSupabaseAuthUseCase: () => new SupabaseAuthUseCase(mockRepository),
+  }
+})
+
+// createSupabaseAuthClientはモックして何も返さない（使われないため）
+vi.mock('@/infrastructure/supabase', () => ({
+  createSupabaseAuthClient: () => ({}),
+}))
+
+describe('POST /api/supabase-auth/signup', () => {
+  beforeEach(() => {
+    mockRepository.clearAll()
   })
 
   async function requestSignup(body: string) {

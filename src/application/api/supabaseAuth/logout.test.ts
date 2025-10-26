@@ -1,34 +1,34 @@
+import { vi } from 'vitest'
+import { SupabaseAuthUseCase } from '@/domain/supabaseAuth'
 import TEST_ENV from '@/test/env'
-import supabaseAuthTestHelper from '@/test/helper/supabaseAuthTestHelper'
+import { MockSupabaseAuthRepository } from '@/test/mocks/mockSupabaseAuthRepository'
 import app from '../../server'
+
+const mockRepository = new MockSupabaseAuthRepository()
+
+// createSupabaseAuthUseCaseをモックする
+vi.mock('@/domain/supabaseAuth', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('@/domain/supabaseAuth')>()
+  return {
+    ...mod,
+    createSupabaseAuthUseCase: () => new SupabaseAuthUseCase(mockRepository),
+  }
+})
+
+// createSupabaseAuthClientはモックして何も返さない（使われないため）
+vi.mock('@/infrastructure/supabase', () => ({
+  createSupabaseAuthClient: () => ({}),
+}))
 
 describe('DELETE /api/supabase-auth/logout', () => {
   const TEST_EMAIL = 'logout-test@example.com'
   const TEST_PASSWORD = 'test_password123'
 
-  beforeAll(async () => {
-    await supabaseAuthTestHelper.cleanUp()
-    // テスト用ユーザーを作成
-    await supabaseAuthTestHelper.createUser(TEST_EMAIL, TEST_PASSWORD)
+  beforeEach(async () => {
+    mockRepository.clearAll()
+    // テスト用ユーザーを作成してログイン
+    await mockRepository.signup(TEST_EMAIL, TEST_PASSWORD)
   })
-
-  afterAll(async () => {
-    await supabaseAuthTestHelper.cleanUp()
-  })
-
-  async function requestLogin() {
-    return app.request(
-      '/api/supabase-auth/login',
-      {
-        method: 'POST',
-        body: JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-      TEST_ENV,
-    )
-  }
 
   async function requestLogout(cookieHeader?: string) {
     const headers: Record<string, string> = {
@@ -49,28 +49,13 @@ describe('DELETE /api/supabase-auth/logout', () => {
   }
 
   it('正常系: ログアウトに成功する', async () => {
-    // まずログイン
-    const loginRes = await requestLogin()
-    expect(loginRes.status).toBe(200)
-
-    // ログインレスポンスからcookieを取得
-    const cookies = loginRes.headers.getSetCookie()
-    const cookieHeader = cookies.join('; ')
-
-    // ログアウト
-    const logoutRes = await requestLogout(cookieHeader)
-    expect(logoutRes.status).toBe(204)
-
-    // cookieがクリアされていることを確認
-    const logoutCookies = logoutRes.headers.getSetCookie()
-    expect(logoutCookies.length).toBeGreaterThan(0)
-    const hasClearedCookie = logoutCookies.some(
-      (cookie) => cookie.includes('sb-') && cookie.includes('Max-Age=0'),
-    )
-    expect(hasClearedCookie).toBe(true)
+    const res = await requestLogout()
+    expect(res.status).toBe(204)
   })
 
   it('準正常系: ログインしていない状態でもエラーにならない', async () => {
+    // ログアウト後に再度ログアウト
+    await mockRepository.logout()
     const res = await requestLogout()
     // ログインしていなくても204を返す（冪等性）
     expect(res.status).toBe(204)

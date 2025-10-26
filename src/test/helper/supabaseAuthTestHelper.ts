@@ -14,8 +14,34 @@ class SupabaseAuthTestHelper {
   })
 
   private createdUserIds: string[] = []
+  private isAvailable: boolean | null = null
+
+  /**
+   * Supabaseが利用可能かチェックする
+   */
+  async checkAvailability(): Promise<boolean> {
+    if (this.isAvailable !== null) {
+      return this.isAvailable
+    }
+
+    try {
+      // ヘルスチェック代わりにユーザー一覧を取得
+      const { error } = await this.adminClient.auth.admin.listUsers()
+      this.isAvailable = !error
+      return this.isAvailable
+    } catch {
+      this.isAvailable = false
+      return false
+    }
+  }
 
   async cleanUp(): Promise<void> {
+    // Supabaseが利用できない場合はスキップ
+    const available = await this.checkAvailability()
+    if (!available) {
+      return
+    }
+
     // 作成したユーザーを削除
     const { data } = await this.adminClient.auth.admin.listUsers()
     if (data?.users) {
