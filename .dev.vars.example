@@ -13,3 +13,7 @@ FEATURE_USER_ENABLED=false
 # Seedで使うルート管理ユーザの認証情報
 ADMIN_EMAIL=
 ADMIN_PASSWORD=
+
+# Supabase設定
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_ANON_KEY=
