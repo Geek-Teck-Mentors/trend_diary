@@ -4,8 +4,8 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-reac
 import type { Matcher } from 'react-day-picker'
 import { Button } from '@/application/web/components/ui/button'
 import { Calendar } from '@/application/web/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/application/web/components/ui/popover'
 import { cn } from '@/application/web/components/ui/lib/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@/application/web/components/ui/popover'
 
 type Props = {
   date: Date
