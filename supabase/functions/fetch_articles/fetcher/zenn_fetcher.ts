@@ -1,6 +1,7 @@
 import { logger } from "../../../logger/logger.ts";
 import { MediaFetchError } from "../error.ts";
 import { ArticleFetcher } from "../model/interface.ts";
+import { resultError, resultSuccess } from "../model/result.ts";
 import { FeedItem, ZennItem } from "../model/types.ts";
 import { fetchRssFeed } from "./fetch.ts";
 
@@ -18,11 +19,11 @@ export class ZennFetcher implements ArticleFetcher {
         url: item.link,
       }));
 
-      return { data: params, error: null };
+      return resultSuccess(params);
     } catch (error: unknown) {
       logger.error("Error fetching Zenn feed:", error);
       const message = `Failed to fetch Zenn feed: ${error}`;
-      return { data: null, error: new MediaFetchError(message) };
+      return resultError<FeedItem[], MediaFetchError>(new MediaFetchError(message));
     }
   }
 }

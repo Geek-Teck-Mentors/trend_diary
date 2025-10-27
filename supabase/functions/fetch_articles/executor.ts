@@ -3,7 +3,11 @@ import {
   ArticleRepository,
   Executor,
 } from "./model/interface.ts";
+import { isError, resultError, resultSuccess } from "./model/result.ts";
 import { FeedItem } from "./model/types.ts";
+import { DatabaseError, MediaFetchError } from "./error.ts";
+
+type ExecutorData = { message: string };
 
 export class ExecutorImpl implements Executor {
   constructor(
@@ -14,23 +18,24 @@ export class ExecutorImpl implements Executor {
 
   async do() {
     console.log("Executing fetcher for media:", this.media);
-    const { data: fetchedItems, error: fetchError } = await this.fetcher
-      .fetch();
+    const fetchResult = await this.fetcher.fetch();
 
-    if (fetchError) {
-      return { data: null, error: fetchError };
+    if (isError(fetchResult)) {
+      return resultError<ExecutorData, MediaFetchError>(fetchResult.error);
     }
+
+    const fetchedItems = fetchResult.data;
 
     if (fetchedItems.length === 0) {
-      return { data: { message: "no items" }, error: null };
+      return resultSuccess<ExecutorData>({ message: "no items" });
     }
 
-    const { data: existingArticles, error: findError } = await this
-      .findExistingArticles(fetchedItems);
-    if (findError) {
-      return { data: null, error: findError };
+    const findResult = await this.findExistingArticles(fetchedItems);
+    if (isError(findResult)) {
+      return resultError<ExecutorData, DatabaseError>(findResult.error);
     }
 
+    const existingArticles = findResult.data;
     const existingUrls = new Set(
       existingArticles.map((article) => article.url),
     );
@@ -38,18 +43,16 @@ export class ExecutorImpl implements Executor {
     const items = fetchedItems.filter((item) => !existingUrls.has(item.url));
 
     console.log("Inserting items into repository:", items.length);
-    const { data: articles, error: bulkCreateError } = await this
-      .bulkCreateArticles(items);
-    if (bulkCreateError) {
-      return { data: null, error: bulkCreateError };
+    const bulkCreateResult = await this.bulkCreateArticles(items);
+    if (isError(bulkCreateResult)) {
+      return resultError<ExecutorData, DatabaseError>(bulkCreateResult.error);
     }
 
-    return {
-      data: {
-        message: `Articles fetched successfully: ${articles.length}`,
-      },
-      error: null,
-    };
+    const articles = bulkCreateResult.data;
+
+    return resultSuccess<ExecutorData>({
+      message: `Articles fetched successfully: ${articles.length}`,
+    });
   }
 
   private async findExistingArticles(items: FeedItem[]) {
