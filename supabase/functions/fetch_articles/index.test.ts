@@ -13,6 +13,7 @@ import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import ArticleRepositoryImpl from "./repository.ts";
 import { DatabaseError, MediaFetchError } from "./error.ts";
 import { Article } from "./model/model.ts";
+import { resultSuccess, resultError } from "./model/result.ts";
 
 import { describe, it } from "jsr:@std/testing/bdd";
 
@@ -38,62 +39,53 @@ describe("POST /fetch_articles/articles/qiita", () => {
         QiitaFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve({
-            data: [
-              {
-                title: "title 1",
-                author: "author",
-                description: "content",
-                url: "https://qiita.example.com/article1",
-              },
-              {
-                title: "title 2",
-                author: "author",
-                description: "content",
-                url: "https://qiita.example.com/article2",
-              },
-            ],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://qiita.example.com/article1",
+            },
+            {
+              title: "title 2",
+              author: "author",
+              description: "content",
+              url: "https://qiita.example.com/article2",
+            },
+          ])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
         () =>
-          Promise.resolve({
-            data: [],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
         () =>
-          Promise.resolve({
-            data: [
-              new Article(
-                BigInt(1),
-                "qiita",
-                "title 1",
-                "author",
-                "content",
-                "https://qiita.example.com/article1",
-                new Date(),
-              ),
-              new Article(
-                BigInt(2),
-                "qiita",
-                "title 2",
-                "author",
-                "content",
-                "https://qiita.example.com/article2",
-                new Date(),
-              ),
-            ],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([
+            new Article(
+              BigInt(1),
+              "qiita",
+              "title 1",
+              "author",
+              "content",
+              "https://qiita.example.com/article1",
+              new Date(),
+            ),
+            new Article(
+              BigInt(2),
+              "qiita",
+              "title 2",
+              "author",
+              "content",
+              "https://qiita.example.com/article2",
+              new Date(),
+            ),
+          ])),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
@@ -114,10 +106,9 @@ describe("POST /fetch_articles/articles/qiita", () => {
         QiitaFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve({
-            data: null,
-            error: new MediaFetchError("Failed to fetch Qiita articles"),
-          }),
+          Promise.resolve(resultError(
+            new MediaFetchError("Failed to fetch Qiita articles"),
+          )),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
@@ -134,37 +125,30 @@ describe("POST /fetch_articles/articles/qiita", () => {
         QiitaFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve({
-            data: [
-              {
-                title: "title 1",
-                author: "author",
-                description: "content",
-                url: "https://qiita.example.com/article1",
-              },
-            ],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://qiita.example.com/article1",
+            },
+          ])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
         () =>
-          Promise.resolve({
-            data: [],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
         () =>
-          Promise.resolve({
-            data: null,
-            error: new DatabaseError("Failed to save to database"),
-          }),
+          Promise.resolve(resultError(
+            new DatabaseError("Failed to save to database"),
+          )),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
@@ -199,62 +183,53 @@ describe("POST /fetch_articles/articles/zenn", () => {
         ZennFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve({
-            data: [
-              {
-                title: "title 1",
-                author: "author",
-                description: "content",
-                url: "https://zenn.example.com/article1",
-              },
-              {
-                title: "title 2",
-                author: "author",
-                description: "content",
-                url: "https://zenn.example.com/article2",
-              },
-            ],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://zenn.example.com/article1",
+            },
+            {
+              title: "title 2",
+              author: "author",
+              description: "content",
+              url: "https://zenn.example.com/article2",
+            },
+          ])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
         () =>
-          Promise.resolve({
-            data: [],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
         () =>
-          Promise.resolve({
-            data: [
-              new Article(
-                BigInt(1),
-                "zenn",
-                "title 1",
-                "author",
-                "content",
-                "https://zenn.example.com/article1",
-                new Date(),
-              ),
-              new Article(
-                BigInt(2),
-                "zenn",
-                "title 2",
-                "author",
-                "content",
-                "https://zenn.example.com/article2",
-                new Date(),
-              ),
-            ],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([
+            new Article(
+              BigInt(1),
+              "zenn",
+              "title 1",
+              "author",
+              "content",
+              "https://zenn.example.com/article1",
+              new Date(),
+            ),
+            new Article(
+              BigInt(2),
+              "zenn",
+              "title 2",
+              "author",
+              "content",
+              "https://zenn.example.com/article2",
+              new Date(),
+            ),
+          ])),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
@@ -275,10 +250,9 @@ describe("POST /fetch_articles/articles/zenn", () => {
         ZennFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve({
-            data: null,
-            error: new MediaFetchError("Failed to fetch Zenn articles"),
-          }),
+          Promise.resolve(resultError(
+            new MediaFetchError("Failed to fetch Zenn articles"),
+          )),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
@@ -295,37 +269,30 @@ describe("POST /fetch_articles/articles/zenn", () => {
         ZennFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve({
-            data: [
-              {
-                title: "title 1",
-                author: "author",
-                description: "content",
-                url: "https://zenn.example.com/article1",
-              },
-            ],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([
+            {
+              title: "title 1",
+              author: "author",
+              description: "content",
+              url: "https://zenn.example.com/article1",
+            },
+          ])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
         () =>
-          Promise.resolve({
-            data: [],
-            error: null,
-          }),
+          Promise.resolve(resultSuccess([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
         () =>
-          Promise.resolve({
-            data: null,
-            error: new DatabaseError("Failed to save to database"),
-          }),
+          Promise.resolve(resultError(
+            new DatabaseError("Failed to save to database"),
+          )),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
