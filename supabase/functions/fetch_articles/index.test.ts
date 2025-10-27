@@ -13,7 +13,7 @@ import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import ArticleRepositoryImpl from "./repository.ts";
 import { DatabaseError, MediaFetchError } from "./error.ts";
 import { Article } from "./model/model.ts";
-import { resultSuccess, resultError } from "./model/result.ts";
+import { resultError, resultSuccess } from "./model/result.ts";
 
 import { describe, it } from "jsr:@std/testing/bdd";
 
@@ -58,8 +58,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
-        () =>
-          Promise.resolve(resultSuccess([])),
+        () => Promise.resolve(resultSuccess([])),
       ));
 
       stubManager.addStub(stub(
@@ -138,8 +137,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
-        () =>
-          Promise.resolve(resultSuccess([])),
+        () => Promise.resolve(resultSuccess([])),
       ));
 
       stubManager.addStub(stub(
@@ -202,8 +200,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
-        () =>
-          Promise.resolve(resultSuccess([])),
+        () => Promise.resolve(resultSuccess([])),
       ));
 
       stubManager.addStub(stub(
@@ -282,8 +279,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
-        () =>
-          Promise.resolve(resultSuccess([])),
+        () => Promise.resolve(resultSuccess([])),
       ));
 
       stubManager.addStub(stub(
