@@ -23,7 +23,9 @@ export class ZennFetcher implements ArticleFetcher {
     } catch (error: unknown) {
       logger.error("Error fetching Zenn feed:", error);
       const message = `Failed to fetch Zenn feed: ${error}`;
-      return resultError<FeedItem[], MediaFetchError>(new MediaFetchError(message));
+      return resultError<FeedItem[], MediaFetchError>(
+        new MediaFetchError(message),
+      );
     }
   }
 }
