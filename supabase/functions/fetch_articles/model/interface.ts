@@ -4,7 +4,8 @@ import {
   MediaFetchError,
 } from "../error.ts";
 import { Article, ArticleInput } from "./model.ts";
-import { FeedItem, Result } from "./types.ts";
+import { FeedItem } from "./types.ts";
+import { Result } from "./result.ts";
 
 export interface ArticleFetcher {
   url: string;
