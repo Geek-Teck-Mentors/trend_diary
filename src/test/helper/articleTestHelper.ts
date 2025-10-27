@@ -8,9 +8,9 @@ process.env.NODE_ENV = 'test'
 class ArticleTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  async createArticle() {
+  async createArticle(options?: { media?: 'qiita' | 'zenn' }) {
     const data = {
-      media: faker.helpers.arrayElement(['qiita', 'zenn']),
+      media: options?.media ?? faker.helpers.arrayElement(['qiita', 'zenn']),
       title: faker.lorem.sentence().substring(0, 100),
       author: faker.person.fullName().substring(0, 30),
       description: faker.lorem.paragraph().substring(0, 255),
