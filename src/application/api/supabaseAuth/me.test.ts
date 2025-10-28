@@ -28,12 +28,9 @@ describe('GET /api/supabase-auth/me', () => {
     mockRepository.clearAll()
   })
 
-  async function requestMe(cookieHeader?: string) {
+  async function requestMe() {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-    }
-    if (cookieHeader) {
-      headers.Cookie = cookieHeader
     }
 
     return app.request(

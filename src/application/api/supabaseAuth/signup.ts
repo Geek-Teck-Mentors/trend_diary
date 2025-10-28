@@ -15,8 +15,22 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
   const result = await useCase.signup(valid.email, valid.password)
   if (isError(result)) throw handleError(result.error, logger)
 
-  const { user } = result.data
+  const { user, session } = result.data
   logger.info('signup success', { userId: user.id })
 
-  return c.json({ user: { id: user.id, email: user.email } }, 201)
+  return c.json(
+    {
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+      session: session
+        ? {
+            expiresIn: session.expiresIn,
+            expiresAt: session.expiresAt,
+          }
+        : null,
+    },
+    201,
+  )
 }

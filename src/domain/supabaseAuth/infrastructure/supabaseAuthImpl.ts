@@ -23,6 +23,52 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
     return new ServerError(error instanceof Error ? error.message : 'Unknown error')
   }
 
+  /**
+   * Supabaseのユーザーオブジェクトを SupabaseAuthUser 型に変換する共通ヘルパー
+   */
+  private toSupabaseAuthUser(
+    user: {
+      id: string
+      email?: string | null
+      email_confirmed_at?: string | null
+      created_at: string
+    },
+    fallbackEmail?: string,
+  ): SupabaseAuthUser {
+    const email = user.email ?? fallbackEmail
+    if (!email) {
+      throw new ServerError('User email is missing from Supabase response')
+    }
+
+    return {
+      id: user.id,
+      email,
+      emailConfirmedAt: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
+      createdAt: new Date(user.created_at),
+    }
+  }
+
+  /**
+   * Supabaseのセッションオブジェクトを session 型に変換する共通ヘルパー
+   */
+  private toSessionObject(
+    session: {
+      access_token: string
+      refresh_token: string
+      expires_in?: number
+      expires_at?: number
+    },
+    user: SupabaseAuthUser,
+  ) {
+    return {
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      expiresIn: session.expires_in ?? 3600,
+      expiresAt: session.expires_at,
+      user,
+    }
+  }
+
   async signup(
     email: string,
     password: string,
@@ -47,24 +93,11 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultError(new ServerError('User creation failed'))
       }
 
-      const user: SupabaseAuthUser = {
-        id: data.user.id,
-        email: data.user.email ?? email,
-        emailConfirmedAt: data.user.email_confirmed_at
-          ? new Date(data.user.email_confirmed_at)
-          : null,
-        createdAt: new Date(data.user.created_at),
-      }
+      const user = this.toSupabaseAuthUser(data.user, email)
 
       let session: SignupResult['session'] = null
       if (data.session) {
-        session = {
-          accessToken: data.session.access_token,
-          refreshToken: data.session.refresh_token,
-          expiresIn: data.session.expires_in ?? 3600,
-          expiresAt: data.session.expires_at,
-          user,
-        }
+        session = this.toSessionObject(data.session, user)
       }
 
       return resultSuccess({
@@ -99,22 +132,8 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultError(new ServerError('Login failed'))
       }
 
-      const user: SupabaseAuthUser = {
-        id: data.user.id,
-        email: data.user.email ?? email,
-        emailConfirmedAt: data.user.email_confirmed_at
-          ? new Date(data.user.email_confirmed_at)
-          : null,
-        createdAt: new Date(data.user.created_at),
-      }
-
-      const session: LoginResult['session'] = {
-        accessToken: data.session.access_token,
-        refreshToken: data.session.refresh_token,
-        expiresIn: data.session.expires_in ?? 3600,
-        expiresAt: data.session.expires_at,
-        user,
-      }
+      const user = this.toSupabaseAuthUser(data.user, email)
+      const session: LoginResult['session'] = this.toSessionObject(data.session, user)
 
       return resultSuccess({
         user,
@@ -154,16 +173,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultSuccess(null)
       }
 
-      if (!user.email) {
-        return resultError(new ServerError('User email is missing from Supabase response'))
-      }
-
-      const authUser: SupabaseAuthUser = {
-        id: user.id,
-        email: user.email,
-        emailConfirmedAt: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
-        createdAt: new Date(user.created_at),
-      }
+      const authUser = this.toSupabaseAuthUser(user)
 
       return resultSuccess(authUser)
     } catch (error) {
@@ -182,28 +192,11 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultError(new ServerError(error?.message ?? 'Session refresh failed'))
       }
 
-      if (!session.user.email) {
-        return resultError(new ServerError('User email is missing from Supabase response'))
-      }
-
-      const user: SupabaseAuthUser = {
-        id: session.user.id,
-        email: session.user.email,
-        emailConfirmedAt: session.user.email_confirmed_at
-          ? new Date(session.user.email_confirmed_at)
-          : null,
-        createdAt: new Date(session.user.created_at),
-      }
+      const user = this.toSupabaseAuthUser(session.user)
 
       return resultSuccess({
         user,
-        session: {
-          accessToken: session.access_token,
-          refreshToken: session.refresh_token,
-          expiresIn: session.expires_in ?? 3600,
-          expiresAt: session.expires_at,
-          user,
-        },
+        session: this.toSessionObject(session, user),
       })
     } catch (error) {
       return resultError(this.handleCatchError(error))

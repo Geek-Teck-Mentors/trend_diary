@@ -38,14 +38,25 @@ class SupabaseAuthTestHelper {
     }
 
     // 作成したユーザーを削除（ページネーション対応）
-    const { data } = await this.adminClient.auth.admin.listUsers({
-      perPage: 1000, // デフォルトは50件まで。テストで大量のユーザーを削除するため大きな値を指定
-    })
-    if (data?.users) {
-      for (const user of data.users) {
-        await this.adminClient.auth.admin.deleteUser(user.id)
+    let page = 1
+    let users
+    do {
+      const { data, error } = await this.adminClient.auth.admin.listUsers({
+        page,
+        perPage: 1000, // デフォルトは50件まで。テストで大量のユーザーを削除するため大きな値を指定
+      })
+      if (error) {
+        console.error('Failed to list users for cleanup:', error)
+        break
       }
-    }
+      users = data.users
+      if (users) {
+        for (const user of users) {
+          await this.adminClient.auth.admin.deleteUser(user.id)
+        }
+      }
+      page++
+    } while (users && users.length > 0)
   }
 
   async createUser(email: string, password: string): Promise<{ userId: string; email: string }> {

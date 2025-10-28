@@ -30,12 +30,9 @@ describe('DELETE /api/supabase-auth/logout', () => {
     await mockRepository.signup(TEST_EMAIL, TEST_PASSWORD)
   })
 
-  async function requestLogout(cookieHeader?: string) {
+  async function requestLogout() {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-    }
-    if (cookieHeader) {
-      headers.Cookie = cookieHeader
     }
 
     return app.request(
