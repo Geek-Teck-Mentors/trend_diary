@@ -83,18 +83,37 @@ class SupabaseAuthTestHelper {
   }
 
   async getUserByEmail(email: string): Promise<{ userId: string; email: string } | null> {
-    const { data } = await this.adminClient.auth.admin.listUsers({
-      perPage: 1000, // デフォルトは50件まで。大量のユーザーがいる場合に備えて大きな値を指定
-    })
-    if (!data?.users) return null
+    let page = 1
+    let hasMore = true
 
-    const user = data.users.find((u) => u.email === email)
-    if (!user) return null
+    while (hasMore) {
+      const { data, error } = await this.adminClient.auth.admin.listUsers({
+        page,
+        perPage: 1000, // デフォルトは50件まで。大量のユーザーがいる場合に備えて大きな値を指定
+      })
 
-    return {
-      userId: user.id,
-      email: user.email ?? email,
+      if (error) {
+        throw new Error(`Failed to list users: ${error.message}`)
+      }
+
+      const users = data.users
+      if (!users || users.length === 0) {
+        break
+      }
+
+      const foundUser = users.find((u) => u.email === email)
+      if (foundUser) {
+        return {
+          userId: foundUser.id,
+          email: foundUser.email ?? email,
+        }
+      }
+
+      hasMore = users.length === 1000
+      page++
     }
+
+    return null
   }
 }
 
