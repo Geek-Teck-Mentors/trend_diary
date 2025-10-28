@@ -1,8 +1,8 @@
 import * as bcrypt from 'bcryptjs'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import type { SupabaseAuthUser } from '@/domain/supabaseAuth/model/user'
-import type { SupabaseAuthRepository } from '@/domain/supabaseAuth/repository'
+import type { SupabaseAuthenticationRepository } from '@/domain/supabaseAuth/repository'
+import type { AuthenticationUser } from '@/domain/supabaseAuth/schema/user'
 import type { LoginResult, SignupResult } from '@/domain/supabaseAuth/useCase'
 
 const BCRYPT_SALT_ROUNDS = 10
@@ -15,7 +15,7 @@ type MockUser = {
   createdAt: Date
 }
 
-export class MockSupabaseAuthRepository implements SupabaseAuthRepository {
+export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticationRepository {
   private users: Map<string, MockUser> = new Map()
   private currentUserId: string | null = null
   private userIdCounter = 1
@@ -45,7 +45,7 @@ export class MockSupabaseAuthRepository implements SupabaseAuthRepository {
     this.users.set(userId, mockUser)
     this.currentUserId = userId
 
-    const user: SupabaseAuthUser = {
+    const user: AuthenticationUser = {
       id: mockUser.id,
       email: mockUser.email,
       emailConfirmedAt: mockUser.emailConfirmedAt,
@@ -81,7 +81,7 @@ export class MockSupabaseAuthRepository implements SupabaseAuthRepository {
 
     this.currentUserId = mockUser.id
 
-    const user: SupabaseAuthUser = {
+    const user: AuthenticationUser = {
       id: mockUser.id,
       email: mockUser.email,
       emailConfirmedAt: mockUser.emailConfirmedAt,
@@ -105,7 +105,7 @@ export class MockSupabaseAuthRepository implements SupabaseAuthRepository {
     return resultSuccess(undefined)
   }
 
-  async getCurrentUser(): AsyncResult<SupabaseAuthUser | null, ServerError> {
+  async getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError> {
     if (!this.currentUserId) {
       return resultSuccess(null)
     }
@@ -115,7 +115,7 @@ export class MockSupabaseAuthRepository implements SupabaseAuthRepository {
       return resultSuccess(null)
     }
 
-    const user: SupabaseAuthUser = {
+    const user: AuthenticationUser = {
       id: mockUser.id,
       email: mockUser.email,
       emailConfirmedAt: mockUser.emailConfirmedAt,
@@ -135,7 +135,7 @@ export class MockSupabaseAuthRepository implements SupabaseAuthRepository {
       return resultError(new ServerError('User not found'))
     }
 
-    const user: SupabaseAuthUser = {
+    const user: AuthenticationUser = {
       id: mockUser.id,
       email: mockUser.email,
       emailConfirmedAt: mockUser.emailConfirmedAt,

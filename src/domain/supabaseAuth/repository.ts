@@ -1,9 +1,9 @@
 import { ClientError, ServerError } from '@/common/errors'
 import { AsyncResult } from '@/common/types/utility'
-import type { SupabaseAuthUser } from './model/user'
+import type { AuthenticationUser } from './schema/user'
 import type { LoginResult, SignupResult } from './useCase'
 
-export interface SupabaseAuthRepository {
+export interface SupabaseAuthenticationRepository {
   /**
    * ユーザーを作成する
    */
@@ -22,7 +22,7 @@ export interface SupabaseAuthRepository {
   /**
    * 現在のユーザーを取得する
    */
-  getCurrentUser(): AsyncResult<SupabaseAuthUser | null, ServerError>
+  getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError>
 
   /**
    * セッションを更新する

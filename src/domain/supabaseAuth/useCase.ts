@@ -1,27 +1,27 @@
 import type { ClientError, ServerError } from '@/common/errors'
 import type { AsyncResult } from '@/common/types/utility'
-import type { SupabaseAuthSession } from './model/session'
-import type { SupabaseAuthUser } from './model/user'
-import type { SupabaseAuthRepository } from './repository'
+import type { SupabaseAuthenticationRepository } from './repository'
+import type { AuthenticationSession } from './schema/session'
+import type { AuthenticationUser } from './schema/user'
 
 /**
  * サインアップ結果
  */
 export type SignupResult = {
-  user: SupabaseAuthUser
-  session: SupabaseAuthSession | null
+  user: AuthenticationUser
+  session: AuthenticationSession | null
 }
 
 /**
  * ログイン結果
  */
 export type LoginResult = {
-  user: SupabaseAuthUser
-  session: SupabaseAuthSession
+  user: AuthenticationUser
+  session: AuthenticationSession
 }
 
-export class SupabaseAuthUseCase {
-  constructor(private readonly repository: SupabaseAuthRepository) {}
+export class SupabaseAuthenticationUseCase {
+  constructor(private readonly repository: SupabaseAuthenticationRepository) {}
 
   async signup(
     email: string,
@@ -41,7 +41,7 @@ export class SupabaseAuthUseCase {
     return this.repository.logout()
   }
 
-  async getCurrentUser(): AsyncResult<SupabaseAuthUser | null, ServerError> {
+  async getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError> {
     return this.repository.getCurrentUser()
   }
 

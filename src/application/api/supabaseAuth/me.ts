@@ -3,14 +3,14 @@ import { HTTPException } from 'hono/http-exception'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
-import { createSupabaseAuthUseCase } from '@/domain/supabaseAuth'
+import { createSupabaseAuthenticationUseCase } from '@/domain/supabaseAuth'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
 
 export default async function me(c: Context) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
   const client = createSupabaseAuthClient(c)
-  const useCase = createSupabaseAuthUseCase(client)
+  const useCase = createSupabaseAuthenticationUseCase(client)
 
   const result = await useCase.getCurrentUser()
   if (isError(result)) throw handleError(result.error, logger)

@@ -1,8 +1,8 @@
 import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supabase-js'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import type { SupabaseAuthUser } from '../model/user'
-import type { SupabaseAuthRepository } from '../repository'
+import type { SupabaseAuthenticationRepository } from '../repository'
+import type { AuthenticationUser } from '../schema/user'
 import type { LoginResult, SignupResult } from '../useCase'
 
 /**
@@ -34,7 +34,7 @@ type SupabaseSession = {
   expires_at?: number
 }
 
-export class SupabaseAuthImpl implements SupabaseAuthRepository {
+export class SupabaseAuthenticationImpl implements SupabaseAuthenticationRepository {
   constructor(private readonly client: SupabaseClient) {}
 
   /**
@@ -45,9 +45,9 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
   }
 
   /**
-   * Supabaseのユーザーオブジェクトを SupabaseAuthUser 型に変換する共通ヘルパー
+   * Supabaseのユーザーオブジェクトを AuthenticationUser 型に変換する共通ヘルパー
    */
-  private toSupabaseAuthUser(user: SupabaseUser, fallbackEmail?: string): SupabaseAuthUser {
+  private toAuthenticationUser(user: SupabaseUser, fallbackEmail?: string): AuthenticationUser {
     const email = user.email ?? fallbackEmail
     if (!email) {
       throw new ServerError('User email is missing from Supabase response')
@@ -64,7 +64,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
   /**
    * Supabaseのセッションオブジェクトを session 型に変換する共通ヘルパー
    */
-  private toSessionObject(session: SupabaseSession, user: SupabaseAuthUser) {
+  private toSessionObject(session: SupabaseSession, user: AuthenticationUser) {
     return {
       accessToken: session.access_token,
       refreshToken: session.refresh_token,
@@ -98,7 +98,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultError(new ServerError('User creation failed'))
       }
 
-      const user = this.toSupabaseAuthUser(data.user, email)
+      const user = this.toAuthenticationUser(data.user, email)
 
       let session: SignupResult['session'] = null
       if (data.session) {
@@ -137,7 +137,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultError(new ServerError('Login failed'))
       }
 
-      const user = this.toSupabaseAuthUser(data.user, email)
+      const user = this.toAuthenticationUser(data.user, email)
       const session: LoginResult['session'] = this.toSessionObject(data.session, user)
 
       return resultSuccess({
@@ -163,7 +163,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
     }
   }
 
-  async getCurrentUser(): AsyncResult<SupabaseAuthUser | null, ServerError> {
+  async getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError> {
     try {
       const {
         data: { user },
@@ -178,7 +178,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultSuccess(null)
       }
 
-      const authUser = this.toSupabaseAuthUser(user)
+      const authUser = this.toAuthenticationUser(user)
 
       return resultSuccess(authUser)
     } catch (error) {
@@ -197,7 +197,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultError(new ServerError(error?.message ?? 'Session refresh failed'))
       }
 
-      const user = this.toSupabaseAuthUser(session.user)
+      const user = this.toAuthenticationUser(session.user)
 
       return resultSuccess({
         user,

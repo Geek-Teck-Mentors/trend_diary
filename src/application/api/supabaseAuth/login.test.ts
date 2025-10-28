@@ -1,17 +1,17 @@
 import { vi } from 'vitest'
-import { SupabaseAuthUseCase } from '@/domain/supabaseAuth'
+import { SupabaseAuthenticationUseCase } from '@/domain/supabaseAuth'
 import TEST_ENV from '@/test/env'
-import { MockSupabaseAuthRepository } from '@/test/mocks/mockSupabaseAuthRepository'
+import { MockSupabaseAuthenticationRepository } from '@/test/mocks/mockSupabaseAuthenticationRepository'
 import app from '../../server'
 
-const mockRepository = new MockSupabaseAuthRepository()
+const mockRepository = new MockSupabaseAuthenticationRepository()
 
-// createSupabaseAuthUseCaseをモックする
+// createSupabaseAuthenticationUseCaseをモックする
 vi.mock('@/domain/supabaseAuth', async (importOriginal) => {
   const mod = await importOriginal<typeof import('@/domain/supabaseAuth')>()
   return {
     ...mod,
-    createSupabaseAuthUseCase: () => new SupabaseAuthUseCase(mockRepository),
+    createSupabaseAuthenticationUseCase: () => new SupabaseAuthenticationUseCase(mockRepository),
   }
 })
 

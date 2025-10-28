@@ -1,7 +1,7 @@
 /**
- * Supabase Auth ユーザーモデル
+ * 認証ユーザーモデル
  */
-export type SupabaseAuthUser = {
+export type AuthenticationUser = {
   id: string
   email: string
   emailConfirmedAt?: Date | null
