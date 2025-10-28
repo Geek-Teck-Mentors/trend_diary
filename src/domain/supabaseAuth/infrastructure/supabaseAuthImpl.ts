@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
+import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import type { LoginResult, SignupResult, SupabaseAuthUser } from '../dto'
 import type { SupabaseAuthRepository } from '../repository'
@@ -74,11 +74,6 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         // 認証失敗
         if (error.message.includes('Invalid login credentials')) {
           return resultError(new ClientError('Invalid email or password', 401))
-        }
-
-        // ユーザーが見つからない
-        if (error.message.includes('not found')) {
-          return resultError(new NotFoundError('User not found'))
         }
 
         return resultError(new ServerError(error.message))
