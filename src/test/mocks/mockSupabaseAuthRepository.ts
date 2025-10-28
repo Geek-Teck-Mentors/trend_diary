@@ -1,8 +1,9 @@
 import * as bcrypt from 'bcryptjs'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import type { LoginResult, SignupResult, SupabaseAuthUser } from '@/domain/supabaseAuth/dto'
+import type { SupabaseAuthUser } from '@/domain/supabaseAuth/model/user'
 import type { SupabaseAuthRepository } from '@/domain/supabaseAuth/repository'
+import type { LoginResult, SignupResult } from '@/domain/supabaseAuth/useCase'
 
 const BCRYPT_SALT_ROUNDS = 10
 

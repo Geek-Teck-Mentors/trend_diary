@@ -7,7 +7,9 @@ export function createSupabaseAuthUseCase(client: SupabaseClient): SupabaseAuthU
   return new SupabaseAuthUseCase(repository)
 }
 
-export * from './dto'
+export type { SupabaseAuthSession } from './model/session'
+export type { SupabaseAuthUser } from './model/user'
 export type { SupabaseAuthRepository } from './repository'
 export * from './schema/authSchema'
+export type { LoginResult, SignupResult } from './useCase'
 export { SupabaseAuthUseCase } from './useCase'

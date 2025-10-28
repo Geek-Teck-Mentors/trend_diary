@@ -1,8 +1,9 @@
 import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supabase-js'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import type { LoginResult, SignupResult, SupabaseAuthUser } from '../dto'
+import type { SupabaseAuthUser } from '../model/user'
 import type { SupabaseAuthRepository } from '../repository'
+import type { LoginResult, SignupResult } from '../useCase'
 
 /**
  * Supabaseのユーザー登録エラーが「既に存在する」ことを示すかチェック

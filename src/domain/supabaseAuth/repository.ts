@@ -1,6 +1,7 @@
 import { ClientError, ServerError } from '@/common/errors'
 import { AsyncResult } from '@/common/types/utility'
-import type { LoginResult, SignupResult, SupabaseAuthUser } from './dto'
+import type { SupabaseAuthUser } from './model/user'
+import type { LoginResult, SignupResult } from './useCase'
 
 export interface SupabaseAuthRepository {
   /**

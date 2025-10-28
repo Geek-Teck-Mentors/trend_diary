@@ -1,7 +1,24 @@
 import type { ClientError, ServerError } from '@/common/errors'
 import type { AsyncResult } from '@/common/types/utility'
-import type { LoginResult, SignupResult, SupabaseAuthUser } from './dto'
+import type { SupabaseAuthSession } from './model/session'
+import type { SupabaseAuthUser } from './model/user'
 import type { SupabaseAuthRepository } from './repository'
+
+/**
+ * サインアップ結果
+ */
+export type SignupResult = {
+  user: SupabaseAuthUser
+  session: SupabaseAuthSession | null
+}
+
+/**
+ * ログイン結果
+ */
+export type LoginResult = {
+  user: SupabaseAuthUser
+  session: SupabaseAuthSession
+}
 
 export class SupabaseAuthUseCase {
   constructor(private readonly repository: SupabaseAuthRepository) {}
