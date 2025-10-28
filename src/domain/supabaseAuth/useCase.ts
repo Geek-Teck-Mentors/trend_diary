@@ -1,40 +1,106 @@
-import type { ClientError, ServerError } from '@/common/errors'
-import type { AsyncResult } from '@/common/types/utility'
+import { type ClientError, ServerError } from '@/common/errors'
+import {
+  type AsyncResult,
+  isError,
+  isNull,
+  resultError,
+  resultSuccess,
+} from '@/common/types/utility'
+import type { Command, Query } from '@/domain/user/repository'
+import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import type { SupabaseAuthenticationRepository } from './repository'
 import type { AuthenticationSession } from './schema/authenticationSession'
 import type { AuthenticationUser } from './schema/authenticationUser'
 
 /**
- * サインアップ結果
+ * サインアップ結果（Supabase認証 + ActiveUser統合）
  */
 export type SignupResult = {
   user: AuthenticationUser
   session: AuthenticationSession | null
+  activeUser: ActiveUser
 }
 
 /**
- * ログイン結果
+ * ログイン結果（Supabase認証 + ActiveUser統合）
  */
 export type LoginResult = {
   user: AuthenticationUser
   session: AuthenticationSession
+  activeUser: ActiveUser
 }
 
 export class SupabaseAuthenticationUseCase {
-  constructor(private readonly repository: SupabaseAuthenticationRepository) {}
+  constructor(
+    private readonly repository: SupabaseAuthenticationRepository,
+    private readonly userQuery: Query,
+    private readonly userCommand: Command,
+  ) {}
 
   async signup(
     email: string,
     password: string,
   ): AsyncResult<SignupResult, ClientError | ServerError> {
-    return this.repository.signup(email, password)
+    // Supabase認証でユーザー作成
+    const authResult = await this.repository.signup(email, password)
+    if (isError(authResult)) return authResult
+
+    const { user, session } = authResult.data
+
+    // active_userを作成（パスワードはダミーハッシュ、Supabase認証を使うため不要）
+    const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
+      user.email,
+      'SUPABASE_AUTH_USER', // ダミーパスワード
+      user.id, // authenticationId
+    )
+
+    if (isError(activeUserResult)) {
+      return resultError(ServerError.handle(activeUserResult.error))
+    }
+
+    return resultSuccess({
+      user,
+      session,
+      activeUser: activeUserResult.data,
+    })
   }
 
   async login(
     email: string,
     password: string,
   ): AsyncResult<LoginResult, ClientError | ServerError> {
-    return this.repository.login(email, password)
+    // Supabase認証でログイン
+    const authResult = await this.repository.login(email, password)
+    if (isError(authResult)) return authResult
+
+    const { user, session } = authResult.data
+
+    // authenticationIdからactive_userを取得
+    let activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
+    if (isError(activeUserResult)) {
+      return resultError(ServerError.handle(activeUserResult.error))
+    }
+
+    // active_userが存在しない場合は作成
+    if (isNull(activeUserResult.data)) {
+      const createResult = await this.userCommand.createActiveWithAuthenticationId(
+        user.email,
+        'SUPABASE_AUTH_USER', // ダミーパスワード
+        user.id, // authenticationId
+      )
+
+      if (isError(createResult)) {
+        return resultError(ServerError.handle(createResult.error))
+      }
+
+      activeUserResult = resultSuccess(createResult.data)
+    }
+
+    return resultSuccess({
+      user,
+      session,
+      activeUser: activeUserResult.data,
+    })
   }
 
   async logout(): AsyncResult<void, ServerError> {

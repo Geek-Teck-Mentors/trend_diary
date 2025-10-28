@@ -29,6 +29,33 @@ export default class CommandImpl implements Command {
     }
   }
 
+  async createActiveWithAuthenticationId(
+    email: string,
+    hashedPassword: string,
+    authenticationId: string,
+    displayName?: string | null,
+  ): AsyncResult<ActiveUser, Error> {
+    try {
+      const activeUser = await this.db.$transaction(async (tx) => {
+        const user = await tx.user.create({})
+        const activeUser = await tx.activeUser.create({
+          data: {
+            userId: user.userId,
+            email,
+            password: hashedPassword,
+            authenticationId,
+            displayName,
+          },
+        })
+        return activeUser
+      })
+
+      return resultSuccess(mapToActiveUser(activeUser))
+    } catch (error) {
+      return resultError(new ServerError(error))
+    }
+  }
+
   async saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, Error> {
     try {
       const updatedActiveUser = await this.db.activeUser.update({

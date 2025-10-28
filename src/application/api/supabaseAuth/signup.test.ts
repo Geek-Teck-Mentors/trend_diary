@@ -1,19 +1,66 @@
 import { vi } from 'vitest'
+import { resultSuccess } from '@/common/types/utility'
 import { SupabaseAuthenticationUseCase } from '@/domain/supabaseAuth'
+import type { Command, Query } from '@/domain/user/repository'
+import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
 import { MockSupabaseAuthenticationRepository } from '@/test/mocks/mockSupabaseAuthenticationRepository'
 import app from '../../server'
 
 const mockRepository = new MockSupabaseAuthenticationRepository()
 
+// モックのActiveUser生成関数
+let activeUserIdCounter = 1n
+function createMockActiveUser(email: string, authenticationId: string): ActiveUser {
+  return {
+    activeUserId: activeUserIdCounter++,
+    userId: activeUserIdCounter,
+    email,
+    password: 'SUPABASE_AUTH_USER',
+    displayName: null,
+    authenticationId,
+    lastLogin: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    adminUserId: null,
+  }
+}
+
+// モックのCommand
+const mockCommand: Command = {
+  createActive: vi.fn(),
+  createActiveWithAuthenticationId: vi.fn((email, _password, authenticationId) => {
+    return Promise.resolve(resultSuccess(createMockActiveUser(email, authenticationId)))
+  }),
+  saveActive: vi.fn(),
+  createSession: vi.fn(),
+  deleteSession: vi.fn(),
+}
+
+// モックのQuery
+const mockQuery: Query = {
+  findActiveById: vi.fn(),
+  findActiveByEmail: vi.fn(),
+  findActiveBySessionId: vi.fn(),
+  findActiveByAuthenticationId: vi.fn((authenticationId) => {
+    return Promise.resolve(resultSuccess(null))
+  }),
+}
+
 // createSupabaseAuthenticationUseCaseをモックする
 vi.mock('@/domain/supabaseAuth', async (importOriginal) => {
   const mod = await importOriginal<typeof import('@/domain/supabaseAuth')>()
   return {
     ...mod,
-    createSupabaseAuthenticationUseCase: () => new SupabaseAuthenticationUseCase(mockRepository),
+    createSupabaseAuthenticationUseCase: () =>
+      new SupabaseAuthenticationUseCase(mockRepository, mockQuery, mockCommand),
   }
 })
+
+// getRdbClientをモックして何も返さない（使われないため）
+vi.mock('@/infrastructure/rdb', () => ({
+  default: () => ({}),
+}))
 
 // createSupabaseAuthClientはモックして何も返さない（使われないため）
 vi.mock('@/infrastructure/supabase', () => ({

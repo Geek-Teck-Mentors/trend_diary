@@ -3,6 +3,7 @@ import { ZodValidatedContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { isError } from '@/common/types/utility'
 import { type AuthInput, createSupabaseAuthenticationUseCase } from '@/domain/supabaseAuth'
+import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
 
 export default async function signup(c: ZodValidatedContext<AuthInput>) {
@@ -10,13 +11,14 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
   const valid = c.req.valid('json')
 
   const client = createSupabaseAuthClient(c)
-  const useCase = createSupabaseAuthenticationUseCase(client)
+  const rdb = getRdbClient(c.env.DATABASE_URL)
+  const useCase = createSupabaseAuthenticationUseCase(client, rdb)
 
   const result = await useCase.signup(valid.email, valid.password)
   if (isError(result)) throw handleError(result.error, logger)
 
-  const { user, session } = result.data
-  logger.info('signup success', { userId: user.id })
+  const { user, session, activeUser } = result.data
+  logger.info('signup success', { userId: user.id, activeUserId: activeUser.activeUserId })
 
   return c.json(
     {
@@ -30,6 +32,10 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
             expiresAt: session.expiresAt,
           }
         : null,
+      activeUser: {
+        activeUserId: activeUser.activeUserId.toString(),
+        email: activeUser.email,
+      },
     },
     201,
   )
