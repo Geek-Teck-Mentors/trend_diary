@@ -13,6 +13,26 @@ function isUserAlreadyExistsError(error: { message: string }): boolean {
   return error.message.includes('already registered')
 }
 
+type SupabaseUser = {
+  id: string
+  email?: string | null
+  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
+  email_confirmed_at?: string | null
+  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
+  created_at: string
+}
+
+type SupabaseSession = {
+  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
+  access_token: string
+  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
+  refresh_token: string
+  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
+  expires_in?: number
+  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
+  expires_at?: number
+}
+
 export class SupabaseAuthImpl implements SupabaseAuthRepository {
   constructor(private readonly client: SupabaseClient) {}
 
@@ -26,15 +46,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
   /**
    * Supabaseのユーザーオブジェクトを SupabaseAuthUser 型に変換する共通ヘルパー
    */
-  private toSupabaseAuthUser(
-    user: {
-      id: string
-      email?: string | null
-      email_confirmed_at?: string | null
-      created_at: string
-    },
-    fallbackEmail?: string,
-  ): SupabaseAuthUser {
+  private toSupabaseAuthUser(user: SupabaseUser, fallbackEmail?: string): SupabaseAuthUser {
     const email = user.email ?? fallbackEmail
     if (!email) {
       throw new ServerError('User email is missing from Supabase response')
@@ -51,15 +63,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
   /**
    * Supabaseのセッションオブジェクトを session 型に変換する共通ヘルパー
    */
-  private toSessionObject(
-    session: {
-      access_token: string
-      refresh_token: string
-      expires_in?: number
-      expires_at?: number
-    },
-    user: SupabaseAuthUser,
-  ) {
+  private toSessionObject(session: SupabaseSession, user: SupabaseAuthUser) {
     return {
       accessToken: session.access_token,
       refreshToken: session.refresh_token,

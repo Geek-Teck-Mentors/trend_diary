@@ -46,7 +46,6 @@ class SupabaseAuthTestHelper {
         perPage: 1000, // デフォルトは50件まで。テストで大量のユーザーを削除するため大きな値を指定
       })
       if (error) {
-        console.error('Failed to list users for cleanup:', error)
         break
       }
       users = data.users
