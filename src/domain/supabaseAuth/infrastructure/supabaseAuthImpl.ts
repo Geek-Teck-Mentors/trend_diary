@@ -1,11 +1,27 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supabase-js'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import type { LoginResult, SignupResult, SupabaseAuthUser } from '../dto'
 import type { SupabaseAuthRepository } from '../repository'
 
+/**
+ * Supabaseのユーザー登録エラーが「既に存在する」ことを示すかチェック
+ * NOTE: Supabaseのバージョンアップでエラーメッセージが変わる可能性がある
+ * 現時点では専用のエラー型が提供されていないため、メッセージ文字列で判定している
+ */
+function isUserAlreadyExistsError(error: { message: string }): boolean {
+  return error.message.includes('already registered')
+}
+
 export class SupabaseAuthImpl implements SupabaseAuthRepository {
   constructor(private readonly client: SupabaseClient) {}
+
+  /**
+   * try-catchブロックで捕捉したエラーをServerErrorに変換する共通ヘルパー
+   */
+  private handleCatchError(error: unknown): ServerError {
+    return new ServerError(error instanceof Error ? error.message : 'Unknown error')
+  }
 
   async signup(
     email: string,
@@ -18,8 +34,8 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
       })
 
       if (error) {
-        // 既に存在する場合
-        if (error.message.includes('already registered')) {
+        // 既に存在する場合（ヘルパー関数で判定）
+        if (isUserAlreadyExistsError(error)) {
           return resultError(new AlreadyExistsError('User already exists'))
         }
 
@@ -56,7 +72,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         session,
       })
     } catch (error) {
-      return resultError(new ServerError(error instanceof Error ? error.message : 'Unknown error'))
+      return resultError(this.handleCatchError(error))
     }
   }
 
@@ -71,8 +87,8 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
       })
 
       if (error) {
-        // 認証失敗
-        if (error.message.includes('Invalid login credentials')) {
+        // 認証失敗（型安全なチェック）
+        if (error instanceof AuthInvalidCredentialsError) {
           return resultError(new ClientError('Invalid email or password', 401))
         }
 
@@ -105,7 +121,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         session,
       })
     } catch (error) {
-      return resultError(new ServerError(error instanceof Error ? error.message : 'Unknown error'))
+      return resultError(this.handleCatchError(error))
     }
   }
 
@@ -119,7 +135,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
 
       return resultSuccess(undefined)
     } catch (error) {
-      return resultError(new ServerError(error instanceof Error ? error.message : 'Unknown error'))
+      return resultError(this.handleCatchError(error))
     }
   }
 
@@ -151,7 +167,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
 
       return resultSuccess(authUser)
     } catch (error) {
-      return resultError(new ServerError(error instanceof Error ? error.message : 'Unknown error'))
+      return resultError(this.handleCatchError(error))
     }
   }
 
@@ -190,7 +206,7 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         },
       })
     } catch (error) {
-      return resultError(new ServerError(error instanceof Error ? error.message : 'Unknown error'))
+      return resultError(this.handleCatchError(error))
     }
   }
 }

@@ -4,6 +4,8 @@ import { type AsyncResult, resultError, resultSuccess } from '@/common/types/uti
 import type { LoginResult, SignupResult, SupabaseAuthUser } from '@/domain/supabaseAuth/dto'
 import type { SupabaseAuthRepository } from '@/domain/supabaseAuth/repository'
 
+const BCRYPT_SALT_ROUNDS = 10
+
 type MockUser = {
   id: string
   email: string
@@ -28,7 +30,7 @@ export class MockSupabaseAuthRepository implements SupabaseAuthRepository {
     }
 
     const userId = `mock-user-${this.userIdCounter++}`
-    const passwordHash = await bcrypt.hash(password, 10)
+    const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS)
     const now = new Date()
 
     const mockUser: MockUser = {

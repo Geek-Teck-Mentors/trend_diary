@@ -37,8 +37,10 @@ class SupabaseAuthTestHelper {
       return
     }
 
-    // 作成したユーザーを削除
-    const { data } = await this.adminClient.auth.admin.listUsers()
+    // 作成したユーザーを削除（ページネーション対応）
+    const { data } = await this.adminClient.auth.admin.listUsers({
+      perPage: 1000, // デフォルトは50件まで。テストで大量のユーザーを削除するため大きな値を指定
+    })
     if (data?.users) {
       for (const user of data.users) {
         await this.adminClient.auth.admin.deleteUser(user.id)
@@ -71,7 +73,9 @@ class SupabaseAuthTestHelper {
   }
 
   async getUserByEmail(email: string): Promise<{ userId: string; email: string } | null> {
-    const { data } = await this.adminClient.auth.admin.listUsers()
+    const { data } = await this.adminClient.auth.admin.listUsers({
+      perPage: 1000, // デフォルトは50件まで。大量のユーザーがいる場合に備えて大きな値を指定
+    })
     if (!data?.users) return null
 
     const user = data.users.find((u) => u.email === email)
