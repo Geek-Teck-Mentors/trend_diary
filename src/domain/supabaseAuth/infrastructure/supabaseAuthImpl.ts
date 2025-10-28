@@ -2,7 +2,7 @@ import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supa
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import type { SupabaseAuthenticationRepository } from '../repository'
-import type { AuthenticationUser } from '../schema/user'
+import type { AuthenticationUser } from '../schema/authenticationUser'
 import type { LoginResult, SignupResult } from '../useCase'
 
 /**

@@ -1,4 +1,4 @@
-import type { AuthenticationUser } from './user'
+import type { AuthenticationUser } from './authenticationUser'
 
 /**
  * 認証セッションモデル

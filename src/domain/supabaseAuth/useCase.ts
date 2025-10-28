@@ -1,8 +1,8 @@
 import type { ClientError, ServerError } from '@/common/errors'
 import type { AsyncResult } from '@/common/types/utility'
 import type { SupabaseAuthenticationRepository } from './repository'
-import type { AuthenticationSession } from './schema/session'
-import type { AuthenticationUser } from './schema/user'
+import type { AuthenticationSession } from './schema/authenticationSession'
+import type { AuthenticationUser } from './schema/authenticationUser'
 
 /**
  * サインアップ結果
