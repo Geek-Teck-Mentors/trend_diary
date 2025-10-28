@@ -143,9 +143,13 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultSuccess(null)
       }
 
+      if (!user.email) {
+        return resultError(new ServerError('User email is missing from Supabase response'))
+      }
+
       const authUser: SupabaseAuthUser = {
         id: user.id,
-        email: user.email ?? '',
+        email: user.email,
         emailConfirmedAt: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
         createdAt: new Date(user.created_at),
       }
@@ -167,9 +171,13 @@ export class SupabaseAuthImpl implements SupabaseAuthRepository {
         return resultError(new ServerError(error?.message ?? 'Session refresh failed'))
       }
 
+      if (!session.user.email) {
+        return resultError(new ServerError('User email is missing from Supabase response'))
+      }
+
       const user: SupabaseAuthUser = {
         id: session.user.id,
-        email: session.user.email ?? '',
+        email: session.user.email,
         emailConfirmedAt: session.user.email_confirmed_at
           ? new Date(session.user.email_confirmed_at)
           : null,
