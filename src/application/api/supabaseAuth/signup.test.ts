@@ -54,7 +54,7 @@ describe('POST /api/supabase-auth/signup', () => {
   describe('準正常系', () => {
     const testCases: Array<{
       name: string
-      input: string | { email: string; password: string }
+      input: { email: string; password: string }
       status: number
     }> = [
       {

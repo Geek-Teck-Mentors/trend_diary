@@ -14,9 +14,7 @@ export function createSupabaseAuthClient(c: Context) {
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
-        const cookies = parseCookieHeader(c.req.header('Cookie') ?? '')
-        // valueがundefinedの場合は空文字列に変換
-        return cookies.map(({ name, value }) => ({ name, value: value ?? '' }))
+        return parseCookieHeader(c.req.header('Cookie') ?? '') as { name: string; value: string }[]
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => {
