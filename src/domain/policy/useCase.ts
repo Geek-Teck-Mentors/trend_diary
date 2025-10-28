@@ -1,7 +1,8 @@
 import { PrivacyPolicy } from '@prisma/client'
+import { failure, isFailure, Result, success } from '@yuukihayashi0510/core'
 import { ClientError, NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
-import { isError, isNull, Result, resultError, resultSuccess } from '@/common/types/utility'
+import { isNull } from '@/common/types/utility'
 import { Command, Query } from './repository'
 import { activate, isActive, newPrivacyPolicy, updateContent } from './schema/method'
 
@@ -22,9 +23,9 @@ export class UseCase {
     limit: number,
   ): Promise<Result<OffsetPaginationResult<PrivacyPolicy>, Error>> {
     const result = await this.query.findAll(page, limit)
-    if (isError(result)) return resultError(ServerError.handle(result.error))
+    if (isFailure(result)) return failure(ServerError.handle(result.error))
 
-    return resultSuccess(result.data)
+    return success(result.data)
   }
 
   /**
@@ -34,14 +35,14 @@ export class UseCase {
    */
   async getPolicyByVersion(version: number): Promise<Result<PrivacyPolicy, Error>> {
     const result = await this.query.findByVersion(version)
-    if (isError(result)) return resultError(ServerError.handle(result.error))
+    if (isFailure(result)) return failure(ServerError.handle(result.error))
     if (isNull(result.data)) {
-      return resultError(
+      return failure(
         new NotFoundError('指定されたバージョンのプライバシーポリシーが見つかりません'),
       )
     }
 
-    return resultSuccess(result.data)
+    return success(result.data)
   }
 
   /**
@@ -51,13 +52,13 @@ export class UseCase {
    */
   async createPolicy(content: string): Promise<Result<PrivacyPolicy, Error>> {
     const versionResult = await this.query.getNextVersion()
-    if (isError(versionResult)) return resultError(ServerError.handle(versionResult.error))
+    if (isFailure(versionResult)) return failure(ServerError.handle(versionResult.error))
 
     const newPolicy = newPrivacyPolicy(versionResult.data, content)
     const saveResult = await this.command.save(newPolicy)
-    if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
+    if (isFailure(saveResult)) return failure(ServerError.handle(saveResult.error))
 
-    return resultSuccess(saveResult.data)
+    return success(saveResult.data)
   }
 
   /**
@@ -68,23 +69,23 @@ export class UseCase {
    */
   async updatePolicy(version: number, content: string): Promise<Result<PrivacyPolicy, Error>> {
     const policyResult = await this.query.findByVersion(version)
-    if (isError(policyResult)) return resultError(ServerError.handle(policyResult.error))
+    if (isFailure(policyResult)) return failure(ServerError.handle(policyResult.error))
     if (isNull(policyResult.data)) {
-      return resultError(
+      return failure(
         new NotFoundError('指定されたバージョンのプライバシーポリシーが見つかりません'),
       )
     }
 
     const policy = policyResult.data
     if (isActive(policy)) {
-      return resultError(new ClientError('有効化されたポリシーは更新できません'))
+      return failure(new ClientError('有効化されたポリシーは更新できません'))
     }
 
     const updatedPolicyResult = updateContent(policy, content)
-    if (isError(updatedPolicyResult)) return updatedPolicyResult
+    if (isFailure(updatedPolicyResult)) return updatedPolicyResult
 
     const saveResult = await this.command.save(updatedPolicyResult.data)
-    if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
+    if (isFailure(saveResult)) return failure(ServerError.handle(saveResult.error))
 
     return saveResult
   }
@@ -96,20 +97,20 @@ export class UseCase {
    */
   async deletePolicy(version: number): Promise<Result<void, Error>> {
     const policyResult = await this.query.findByVersion(version)
-    if (isError(policyResult)) return resultError(ServerError.handle(policyResult.error))
+    if (isFailure(policyResult)) return failure(ServerError.handle(policyResult.error))
     if (isNull(policyResult.data)) {
-      return resultError(
+      return failure(
         new NotFoundError('指定されたバージョンのプライバシーポリシーが見つかりません'),
       )
     }
     if (isActive(policyResult.data)) {
-      return resultError(new ClientError('有効化されたポリシーは削除できません'))
+      return failure(new ClientError('有効化されたポリシーは削除できません'))
     }
 
     const deleteResult = await this.command.deleteByVersion(version)
-    if (isError(deleteResult)) return resultError(ServerError.handle(deleteResult.error))
+    if (isFailure(deleteResult)) return failure(ServerError.handle(deleteResult.error))
 
-    return resultSuccess(undefined)
+    return success(undefined)
   }
 
   /**
@@ -119,19 +120,18 @@ export class UseCase {
    */
   async clonePolicy(sourceVersion: number): Promise<Result<PrivacyPolicy, Error>> {
     const sourcePolicyResult = await this.query.findByVersion(sourceVersion)
-    if (isError(sourcePolicyResult))
-      return resultError(ServerError.handle(sourcePolicyResult.error))
+    if (isFailure(sourcePolicyResult)) return failure(ServerError.handle(sourcePolicyResult.error))
     if (isNull(sourcePolicyResult.data)) {
-      return resultError(new NotFoundError('複製元のプライバシーポリシーが見つかりません'))
+      return failure(new NotFoundError('複製元のプライバシーポリシーが見つかりません'))
     }
 
     const versionResult = await this.query.getNextVersion()
-    if (isError(versionResult)) return resultError(ServerError.handle(versionResult.error))
+    if (isFailure(versionResult)) return failure(ServerError.handle(versionResult.error))
 
     const clonedPolicy = newPrivacyPolicy(versionResult.data, sourcePolicyResult.data.content)
 
     const saveResult = await this.command.save(clonedPolicy)
-    if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
+    if (isFailure(saveResult)) return failure(ServerError.handle(saveResult.error))
 
     return saveResult
   }
@@ -147,23 +147,23 @@ export class UseCase {
     effectiveDate: Date,
   ): Promise<Result<PrivacyPolicy, Error>> {
     const policyResult = await this.query.findByVersion(version)
-    if (isError(policyResult)) return resultError(ServerError.handle(policyResult.error))
+    if (isFailure(policyResult)) return failure(ServerError.handle(policyResult.error))
     if (isNull(policyResult.data)) {
-      return resultError(
+      return failure(
         new NotFoundError('指定されたバージョンのプライバシーポリシーが見つかりません'),
       )
     }
 
     const policy = policyResult.data
     if (isActive(policy)) {
-      return resultError(new ClientError('このポリシーは既に有効化されています'))
+      return failure(new ClientError('このポリシーは既に有効化されています'))
     }
 
     const activatedPolicyResult = activate(policy, effectiveDate)
-    if (isError(activatedPolicyResult)) return activatedPolicyResult
+    if (isFailure(activatedPolicyResult)) return activatedPolicyResult
 
     const saveResult = await this.command.save(activatedPolicyResult.data)
-    if (isError(saveResult)) return resultError(ServerError.handle(saveResult.error))
+    if (isFailure(saveResult)) return failure(ServerError.handle(saveResult.error))
 
     return saveResult
   }

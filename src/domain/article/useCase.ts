@@ -1,7 +1,8 @@
+import { AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import { NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
-import { AsyncResult, isError, isNull, resultError, resultSuccess } from '@/common/types/utility'
+import { isNull } from '@/common/types/utility'
 import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import type { Article } from '@/domain/article/schema/articleSchema'
@@ -36,26 +37,26 @@ export class UseCase {
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
-    if (isError(articleValidation)) return articleValidation
+    if (isFailure(articleValidation)) return articleValidation
 
     return this.articleCommand.createReadHistory(activeUserId, articleId, readAt)
   }
 
   async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
-    if (isError(articleValidation)) return articleValidation
+    if (isFailure(articleValidation)) return articleValidation
 
     return this.articleCommand.deleteAllReadHistory(activeUserId, articleValidation.data.articleId)
   }
 
   private async validateArticleExists(articleId: bigint): AsyncResult<Article, Error> {
     const res = await this.articleQuery.findArticleById(articleId)
-    if (isError(res)) return res
+    if (isFailure(res)) return res
 
     if (isNull(res.data)) {
-      return resultError(new NotFoundError(`Article with ID ${articleId} not found`))
+      return failure(new NotFoundError(`Article with ID ${articleId} not found`))
     }
 
-    return resultSuccess(res.data)
+    return success(res.data)
   }
 }

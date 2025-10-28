@@ -1,3 +1,4 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import { getConnInfo } from 'hono/cloudflare-workers'
 import { setCookie } from 'hono/cookie'
 import { HTTPException } from 'hono/http-exception'
@@ -6,7 +7,6 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedContext } from '@/application/middleware/zodValidator'
 import { SESSION_NAME } from '@/common/constants'
 import { ClientError, ServerError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { ActiveUserInput, createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -23,7 +23,7 @@ export default async function login(c: ZodValidatedContext<ActiveUserInput>) {
   const userAgent = c.req.header('user-agent') || ''
 
   const result = await useCase.login(valid.email, valid.password, ipAddress, userAgent)
-  if (isError(result)) {
+  if (isFailure(result)) {
     const { error } = result
     if (error instanceof ClientError) {
       throw new HTTPException(error.statusCode as ContentfulStatusCode, {

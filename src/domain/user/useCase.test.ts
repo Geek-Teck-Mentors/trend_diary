@@ -1,8 +1,8 @@
+import { isFailure, isSuccess, success } from '@yuukihayashi0510/core'
 import bcrypt from 'bcryptjs'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError } from '@/common/errors'
-import { isError, isSuccess, resultSuccess } from '@/common/types/utility'
 import { Command, Query } from './repository'
 import { UseCase } from './useCase'
 
@@ -25,7 +25,7 @@ describe('User UseCase', () => {
         const password = 'password123'
 
         // Arrange - 重複チェックでnullを返す
-        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(null))
+        mockQuery.findActiveByEmail.mockResolvedValue(success(null))
 
         // ActiveUser作成
         const mockActiveUser = {
@@ -39,7 +39,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockCommand.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockCommand.createActive.mockResolvedValue(success(mockActiveUser))
 
         // Act
         const result = await useCase.signup(email, password)
@@ -60,7 +60,7 @@ describe('User UseCase', () => {
         const password = 'password123'
 
         // Arrange
-        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(null))
+        mockQuery.findActiveByEmail.mockResolvedValue(success(null))
 
         const mockActiveUser = {
           activeUserId: 1n,
@@ -73,7 +73,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockCommand.createActive.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockCommand.createActive.mockResolvedValue(success(mockActiveUser))
 
         // Act
         const result = await useCase.signup(email, password)
@@ -103,14 +103,14 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(existingUser))
+        mockQuery.findActiveByEmail.mockResolvedValue(success(existingUser))
 
         // Act
         const result = await useCase.signup(email, password)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error).toBeInstanceOf(AlreadyExistsError)
         }
       })
@@ -136,10 +136,10 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockQuery.findActiveByEmail.mockResolvedValue(success(mockActiveUser))
 
         mockCommand.createSession.mockResolvedValue(
-          resultSuccess({
+          success({
             sessionId: 'session-123',
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
           }),
@@ -157,7 +157,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockCommand.saveActive.mockResolvedValue(resultSuccess(updatedActiveUser))
+        mockCommand.saveActive.mockResolvedValue(success(updatedActiveUser))
 
         // Act
         const result = await useCase.login(email, password, '192.168.1.1', 'Mozilla/5.0')
@@ -177,14 +177,14 @@ describe('User UseCase', () => {
         const password = 'password123'
 
         // Arrange
-        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(null))
+        mockQuery.findActiveByEmail.mockResolvedValue(success(null))
 
         // Act
         const result = await useCase.login(email, password, '192.168.1.1', 'Mozilla/5.0')
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error).toBeInstanceOf(NotFoundError)
         }
       })
@@ -207,14 +207,14 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockQuery.findActiveByEmail.mockResolvedValue(resultSuccess(mockActiveUser))
+        mockQuery.findActiveByEmail.mockResolvedValue(success(mockActiveUser))
 
         // Act
         const result = await useCase.login(email, wrongPassword, '192.168.1.1', 'Mozilla/5.0')
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toContain('Invalid credentials')
         }
       })

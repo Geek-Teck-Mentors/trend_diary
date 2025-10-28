@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
-import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { AdminCommand } from '../repository'
 import type { AdminUser } from '../schema/adminUserSchema'
 import { toDomainAdminUser } from './mapper'
@@ -19,7 +19,7 @@ export class AdminCommandImpl implements AdminCommand {
       })
 
       if (!existingUser) {
-        return resultError(new NotFoundError('ユーザーが見つかりません'))
+        return failure(new NotFoundError('ユーザーが見つかりません'))
       }
 
       // 既にAdmin権限を持っているかチェック
@@ -28,7 +28,7 @@ export class AdminCommandImpl implements AdminCommand {
       })
 
       if (existingAdmin) {
-        return resultError(new AlreadyExistsError('既にAdmin権限を持っています'))
+        return failure(new AlreadyExistsError('既にAdmin権限を持っています'))
       }
 
       // Admin権限付与
@@ -39,9 +39,9 @@ export class AdminCommandImpl implements AdminCommand {
         },
       })
 
-      return resultSuccess(toDomainAdminUser(adminUser))
+      return success(toDomainAdminUser(adminUser))
     } catch (error) {
-      return resultError(new ServerError(`Admin権限の付与に失敗しました: ${error}`))
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${error}`))
     }
   }
 }

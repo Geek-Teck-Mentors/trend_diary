@@ -1,7 +1,7 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createAdminUserUseCase } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env } from '../env'
@@ -22,7 +22,7 @@ const requiredAdmin = createMiddleware<Env>(async (c, next) => {
 
   // Admin権限チェック
   const result = await adminUserUseCase.isAdmin(sessionUser.activeUserId)
-  if (isError(result)) {
+  if (isFailure(result)) {
     throw handleError(result.error, logger)
   }
 

@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { isError } from '@/common/types/utility'
+import { isFailure } from '@yuukihayashi0510/core'
 import { createPrivacyPolicyUseCase } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
@@ -24,7 +24,7 @@ class PolicyTestHelper {
     updatedAt: Date
   }> {
     const result = await this.useCase.createPolicy(content)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to create policy: ${result.error.message}`)
     }
     return {
@@ -47,7 +47,7 @@ class PolicyTestHelper {
     updatedAt: Date
   }> {
     const result = await this.useCase.activatePolicy(version, effectiveAt)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to activate policy: ${result.error.message}`)
     }
     return {
@@ -61,7 +61,7 @@ class PolicyTestHelper {
 
   async deletePolicy(version: number): Promise<void> {
     const result = await this.useCase.deletePolicy(version)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to delete policy: ${result.error.message}`)
     }
   }
@@ -74,7 +74,7 @@ class PolicyTestHelper {
     updatedAt: Date
   } | null> {
     const result = await this.useCase.getPolicyByVersion(version)
-    if (isError(result)) {
+    if (isFailure(result)) {
       // NotFoundErrorの場合はnullを返す（削除されたポリシーの確認に使用）
       if (result.error.message.includes('見つかりません')) {
         return null

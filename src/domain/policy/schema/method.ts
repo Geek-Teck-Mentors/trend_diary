@@ -1,5 +1,5 @@
+import { failure, Result, success } from '@yuukihayashi0510/core'
 import { ClientError } from '@/common/errors'
-import { Result, resultError, resultSuccess } from '@/common/types/utility'
 import { PrivacyPolicy } from './privacyPolicySchema'
 
 export function newPrivacyPolicy(nextVersion: number, content: string): PrivacyPolicy {
@@ -21,10 +21,10 @@ export function updateContent(
   content: string,
 ): Result<PrivacyPolicy, ClientError> {
   if (isActive(policy)) {
-    return resultError(new ClientError('有効化されたポリシーは更新できません'))
+    return failure(new ClientError('有効化されたポリシーは更新できません'))
   }
 
-  return resultSuccess({
+  return success({
     ...policy,
     content,
     updatedAt: new Date(),
@@ -36,10 +36,10 @@ export function activate(
   effectiveAt: Date,
 ): Result<PrivacyPolicy, ClientError> {
   if (isActive(policy)) {
-    return resultError(new ClientError('このポリシーは既に有効化されています'))
+    return failure(new ClientError('このポリシーは既に有効化されています'))
   }
 
-  return resultSuccess({
+  return success({
     ...policy,
     effectiveAt,
     updatedAt: new Date(),

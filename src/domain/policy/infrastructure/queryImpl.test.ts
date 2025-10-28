@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
+import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { isError, isSuccess } from '@/common/types/utility'
 import QueryImpl from './queryImpl'
 
 // モックの設定
@@ -116,8 +116,8 @@ describe('QueryImpl', () => {
         const result = await useCase.findAll(1, 10)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(error.message)
         }
       })
@@ -205,8 +205,8 @@ describe('QueryImpl', () => {
         const result = await useCase.findByVersion(1)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(error.message)
         }
       })
@@ -270,8 +270,8 @@ describe('QueryImpl', () => {
         const result = await useCase.getLatestDraft()
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(error.message)
         }
       })
@@ -354,8 +354,8 @@ describe('QueryImpl', () => {
         const result = await useCase.getNextVersion()
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(error.message)
         }
       })

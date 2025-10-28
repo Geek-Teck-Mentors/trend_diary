@@ -1,8 +1,8 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { OffsetPaginationParams } from '@/common/pagination'
-import { isError } from '@/common/types/utility'
 import { createPrivacyPolicyUseCase, PrivacyPolicy } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 import { PolicyListResponse, PolicyResponse } from './response'
@@ -25,7 +25,7 @@ export default async function getPolicies(c: ZodValidatedQueryContext<OffsetPagi
   const useCase = createPrivacyPolicyUseCase(rdb)
 
   const result = await useCase.getAllPolicies(page, limit)
-  if (isError(result)) throw handleError(result.error, logger)
+  if (isFailure(result)) throw handleError(result.error, logger)
 
   logger.info('Privacy policies retrieved successfully', {
     count: result.data.data.length,

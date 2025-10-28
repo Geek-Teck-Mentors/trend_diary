@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client'
+import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { ServerError } from '@/common/errors'
-import { isError, isSuccess } from '@/common/types/utility'
 import { AdminQueryImpl } from './adminQueryImpl'
 
 // モックの設定
@@ -88,8 +88,8 @@ function expectSuccessResult(result: any, expectations: Record<string, any>) {
 }
 
 function expectErrorResult(result: any, errorType: any, messageContains: string) {
-  expect(isError(result)).toBe(true)
-  if (isError(result)) {
+  expect(isFailure(result)).toBe(true)
+  if (isFailure(result)) {
     expect(result.error).toBeInstanceOf(errorType)
     expect(result.error.message).toContain(messageContains)
   }

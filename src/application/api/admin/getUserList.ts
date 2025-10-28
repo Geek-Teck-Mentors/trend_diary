@@ -1,8 +1,8 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createAdminUserUseCase } from '@/domain/admin'
 import { UserListResult } from '@/domain/admin/schema/userListSchema'
 import { User } from '@/domain/admin/schema/userSchema'
@@ -38,7 +38,7 @@ export default async function getUserList(
     page: parsedQuery.page,
     limit: parsedQuery.limit,
   })
-  if (isError(result)) {
+  if (isFailure(result)) {
     logger.error('Failed to get user list', { error: result.error })
     throw handleError(result.error, logger)
   }

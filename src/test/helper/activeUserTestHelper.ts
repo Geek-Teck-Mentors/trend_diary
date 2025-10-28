@@ -1,4 +1,4 @@
-import { isError } from '@/common/types/utility'
+import { isFailure } from '@yuukihayashi0510/core'
 import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
@@ -27,7 +27,7 @@ class ActiveUserTestHelper {
     displayName?: string,
   ): Promise<{ userId: bigint; activeUserId: bigint }> {
     const result = await this.useCase.signup(email, password)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to create user: ${result.error.message}`)
     }
     return {
@@ -47,7 +47,7 @@ class ActiveUserTestHelper {
     expiresAt: Date
   }> {
     const loginResult = await this.useCase.login(email, password, ipAddress, userAgent)
-    if (isError(loginResult)) {
+    if (isFailure(loginResult)) {
       throw new Error(`Failed to login: ${loginResult.error.message}`)
     }
     return {
@@ -59,14 +59,14 @@ class ActiveUserTestHelper {
 
   async logout(sessionId: string): Promise<void> {
     const result = await this.useCase.logout(sessionId)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to logout: ${result.error.message}`)
     }
   }
 
   async findBySessionId(sessionId: string): Promise<{ activeUserId: bigint } | null> {
     const result = await this.useCase.getCurrentUser(sessionId)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to find user by session: ${result.error.message}`)
     }
     if (!result.data) return null
