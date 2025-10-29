@@ -3,7 +3,7 @@ import {
   ArticleRepository,
   Executor,
 } from "./model/interface.ts";
-import { failure, isFailure, success } from "@yuukihayashi0510/core";
+import { isFailure, success } from "@yuukihayashi0510/core";
 import { FeedItem } from "./model/types.ts";
 
 type ExecutorData = { message: string };
@@ -20,7 +20,7 @@ export class ExecutorImpl implements Executor {
     const fetchResult = await this.fetcher.fetch();
 
     if (isFailure(fetchResult)) {
-      return failure(fetchResult.error);
+      return fetchResult;
     }
 
     const fetchedItems = fetchResult.data;
@@ -31,7 +31,7 @@ export class ExecutorImpl implements Executor {
 
     const findResult = await this.findExistingArticles(fetchedItems);
     if (isFailure(findResult)) {
-      return failure(findResult.error);
+      return findResult;
     }
 
     const existingArticles = findResult.data;
@@ -44,7 +44,7 @@ export class ExecutorImpl implements Executor {
     console.log("Inserting items into repository:", items.length);
     const bulkCreateResult = await this.bulkCreateArticles(items);
     if (isFailure(bulkCreateResult)) {
-      return failure(bulkCreateResult.error);
+      return bulkCreateResult;
     }
 
     const articles = bulkCreateResult.data;
