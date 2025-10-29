@@ -1,8 +1,9 @@
 import * as React from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { DayPicker } from 'react-day-picker'
-import type { DayPickerProps, DateFormatter } from 'react-day-picker'
+import type { DayPickerProps } from 'react-day-picker'
 import { format } from 'date-fns'
+import type { Locale } from 'date-fns'
 import { ja } from 'date-fns/locale'
 
 import { cn } from '@/application/web/components/ui/lib/utils'
@@ -11,7 +12,7 @@ import { buttonVariants } from '@/application/web/components/ui/button'
 export type CalendarProps = DayPickerProps
 
 function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
-  const formatCaption: DateFormatter = (date, options) => {
+  const formatCaption = (date: Date, options?: { locale?: Locale }): string => {
     const y = format(date, 'yyyy')
     const m = format(date, 'MM', { locale: options?.locale })
     return `${y}年${m}月`
