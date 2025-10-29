@@ -5,7 +5,7 @@ import {
 } from "../error.ts";
 import { Article, ArticleInput } from "./model.ts";
 import { FeedItem } from "./types.ts";
-import { Result } from "./result.ts";
+import { Result } from "@yuukihayashi0510/core";
 
 export interface ArticleFetcher {
   url: string;

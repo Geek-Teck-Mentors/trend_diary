@@ -5,7 +5,7 @@ import { ExecutorImpl } from "./executor.ts";
 import ArticleRepositoryImpl from "./repository.ts";
 import { rdbClient } from "../../infrastructure/supabase_client.ts";
 import { logger } from "../../logger/logger.ts";
-import { isError } from "./model/result.ts";
+import { isFailure } from "@yuukihayashi0510/core";
 // functionNameはsupabase functionsの名前に一致させないとsupabaseがリクエストを振り分けない
 const functionName = "fetch_articles";
 export const app = new Hono().basePath(`/${functionName}`);
@@ -18,7 +18,7 @@ app.post("/articles/qiita", async (c) => {
 
     const exec = new ExecutorImpl("qiita", fetcher, repository);
     const result = await exec.do();
-    if (isError(result)) {
+    if (isFailure(result)) {
       logger.error(result.error.name, result.error.message);
       return c.json({ message: "internal server error" }, 500);
     }
@@ -37,7 +37,7 @@ app.post("/articles/zenn", async (c) => {
 
     const exec = new ExecutorImpl("zenn", fetcher, repository);
     const result = await exec.do();
-    if (isError(result)) {
+    if (isFailure(result)) {
       logger.error(result.error.name, result.error.message);
       return c.json({ message: "internal server error" }, 500);
     }

@@ -13,7 +13,7 @@ import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import ArticleRepositoryImpl from "./repository.ts";
 import { DatabaseError, MediaFetchError } from "./error.ts";
 import { Article } from "./model/model.ts";
-import { resultError, resultSuccess } from "./model/result.ts";
+import { failure, success } from "@yuukihayashi0510/core";
 
 import { describe, it } from "jsr:@std/testing/bdd";
 
@@ -39,7 +39,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
         QiitaFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve(resultSuccess([
+          Promise.resolve(success([
             {
               title: "title 1",
               author: "author",
@@ -58,14 +58,14 @@ describe("POST /fetch_articles/articles/qiita", () => {
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
-        () => Promise.resolve(resultSuccess([])),
+        () => Promise.resolve(success([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
         () =>
-          Promise.resolve(resultSuccess([
+          Promise.resolve(success([
             new Article(
               BigInt(1),
               "qiita",
@@ -105,7 +105,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
         QiitaFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve(resultError(
+          Promise.resolve(failure(
             new MediaFetchError("Failed to fetch Qiita articles"),
           )),
       ));
@@ -124,7 +124,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
         QiitaFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve(resultSuccess([
+          Promise.resolve(success([
             {
               title: "title 1",
               author: "author",
@@ -137,14 +137,14 @@ describe("POST /fetch_articles/articles/qiita", () => {
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
-        () => Promise.resolve(resultSuccess([])),
+        () => Promise.resolve(success([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
         () =>
-          Promise.resolve(resultError(
+          Promise.resolve(failure(
             new DatabaseError("Failed to save to database"),
           )),
       ));
@@ -181,7 +181,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
         ZennFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve(resultSuccess([
+          Promise.resolve(success([
             {
               title: "title 1",
               author: "author",
@@ -200,14 +200,14 @@ describe("POST /fetch_articles/articles/zenn", () => {
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
-        () => Promise.resolve(resultSuccess([])),
+        () => Promise.resolve(success([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
         () =>
-          Promise.resolve(resultSuccess([
+          Promise.resolve(success([
             new Article(
               BigInt(1),
               "zenn",
@@ -247,7 +247,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
         ZennFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve(resultError(
+          Promise.resolve(failure(
             new MediaFetchError("Failed to fetch Zenn articles"),
           )),
       ));
@@ -266,7 +266,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
         ZennFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve(resultSuccess([
+          Promise.resolve(success([
             {
               title: "title 1",
               author: "author",
@@ -279,14 +279,14 @@ describe("POST /fetch_articles/articles/zenn", () => {
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "fetchArticlesByUrls",
-        () => Promise.resolve(resultSuccess([])),
+        () => Promise.resolve(success([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
         () =>
-          Promise.resolve(resultError(
+          Promise.resolve(failure(
             new DatabaseError("Failed to save to database"),
           )),
       ));

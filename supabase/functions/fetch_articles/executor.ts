@@ -3,9 +3,8 @@ import {
   ArticleRepository,
   Executor,
 } from "./model/interface.ts";
-import { isError, resultError, resultSuccess } from "./model/result.ts";
+import { failure, isFailure, success } from "@yuukihayashi0510/core";
 import { FeedItem } from "./model/types.ts";
-import { DatabaseError, MediaFetchError } from "./error.ts";
 
 type ExecutorData = { message: string };
 
@@ -20,19 +19,19 @@ export class ExecutorImpl implements Executor {
     console.log("Executing fetcher for media:", this.media);
     const fetchResult = await this.fetcher.fetch();
 
-    if (isError(fetchResult)) {
-      return resultError<ExecutorData, MediaFetchError>(fetchResult.error);
+    if (isFailure(fetchResult)) {
+      return failure(fetchResult.error);
     }
 
     const fetchedItems = fetchResult.data;
 
     if (fetchedItems.length === 0) {
-      return resultSuccess<ExecutorData>({ message: "no items" });
+      return success<ExecutorData>({ message: "no items" });
     }
 
     const findResult = await this.findExistingArticles(fetchedItems);
-    if (isError(findResult)) {
-      return resultError<ExecutorData, DatabaseError>(findResult.error);
+    if (isFailure(findResult)) {
+      return failure(findResult.error);
     }
 
     const existingArticles = findResult.data;
@@ -44,13 +43,13 @@ export class ExecutorImpl implements Executor {
 
     console.log("Inserting items into repository:", items.length);
     const bulkCreateResult = await this.bulkCreateArticles(items);
-    if (isError(bulkCreateResult)) {
-      return resultError<ExecutorData, DatabaseError>(bulkCreateResult.error);
+    if (isFailure(bulkCreateResult)) {
+      return failure(bulkCreateResult.error);
     }
 
     const articles = bulkCreateResult.data;
 
-    return resultSuccess<ExecutorData>({
+    return success({
       message: `Articles fetched successfully: ${articles.length}`,
     });
   }

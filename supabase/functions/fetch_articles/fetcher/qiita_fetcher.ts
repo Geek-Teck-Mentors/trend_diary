@@ -1,7 +1,7 @@
 import { logger } from "../../../logger/logger.ts";
 import { MediaFetchError } from "../error.ts";
 import { ArticleFetcher } from "../model/interface.ts";
-import { resultError, resultSuccess } from "../model/result.ts";
+import { failure, success } from "@yuukihayashi0510/core";
 import { FeedItem, QiitaItem } from "../model/types.ts";
 import { fetchRssFeed } from "./fetch.ts";
 
@@ -20,11 +20,11 @@ export class QiitaFetcher implements ArticleFetcher {
         url: item.link,
       }));
 
-      return resultSuccess(params);
+      return success(params);
     } catch (error: unknown) {
       logger.error("Error fetching Qiita feed:", error);
       const message = `Failed to fetch Qiita feed: ${error}`;
-      return resultError<FeedItem[], MediaFetchError>(
+      return failure(
         new MediaFetchError(message),
       );
     }
