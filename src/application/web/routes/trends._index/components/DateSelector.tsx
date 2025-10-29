@@ -49,7 +49,7 @@ export default function DateSelector({ date, onDateChange }: Props) {
         variant='outline'
         size='icon'
         onClick={handlePrevDay}
-        className='h-8 w-8'
+        className='h-9 w-9'
         aria-label='前日'
       >
         <ChevronLeft className='h-4 w-4' />
@@ -59,13 +59,17 @@ export default function DateSelector({ date, onDateChange }: Props) {
         <PopoverTrigger asChild={true}>
           <Button
             variant='outline'
-            className={cn('justify-start text-left font-normal', !date && 'text-muted-foreground')}
+            data-empty={!date}
+            className={cn(
+              'w-[240px] justify-start text-left font-normal',
+              !date && 'text-muted-foreground',
+            )}
           >
             <CalendarIcon className='mr-2 h-4 w-4' />
             {date ? format(date, 'PPP', { locale: ja }) : '日付を選択'}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className='w-auto p-0'>
+        <PopoverContent className='w-auto p-0' align='center'>
           <Calendar
             mode='single'
             selected={date}
@@ -81,7 +85,7 @@ export default function DateSelector({ date, onDateChange }: Props) {
         size='icon'
         onClick={handleNextDay}
         disabled={isToday}
-        className='h-8 w-8'
+        className='h-9 w-9'
         aria-label='翌日'
       >
         <ChevronRight className='h-4 w-4' />
