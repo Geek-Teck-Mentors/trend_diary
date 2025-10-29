@@ -1,18 +1,40 @@
 import { ClientError, ServerError } from '@/common/errors'
 import { AsyncResult } from '@/common/types/utility'
+import type { AuthenticationSession } from './schema/authenticationSession'
 import type { AuthenticationUser } from './schema/authenticationUser'
-import type { LoginResult, SignupResult } from './useCase'
+
+/**
+ * Supabase認証のサインアップ結果
+ */
+export type SupabaseSignupResult = {
+  user: AuthenticationUser
+  session: AuthenticationSession | null
+}
+
+/**
+ * Supabase認証のログイン結果
+ */
+export type SupabaseLoginResult = {
+  user: AuthenticationUser
+  session: AuthenticationSession
+}
 
 export interface SupabaseAuthenticationRepository {
   /**
    * ユーザーを作成する
    */
-  signup(email: string, password: string): AsyncResult<SignupResult, ClientError | ServerError>
+  signup(
+    email: string,
+    password: string,
+  ): AsyncResult<SupabaseSignupResult, ClientError | ServerError>
 
   /**
    * ログインする
    */
-  login(email: string, password: string): AsyncResult<LoginResult, ClientError | ServerError>
+  login(
+    email: string,
+    password: string,
+  ): AsyncResult<SupabaseLoginResult, ClientError | ServerError>
 
   /**
    * ログアウトする
@@ -27,5 +49,5 @@ export interface SupabaseAuthenticationRepository {
   /**
    * セッションを更新する
    */
-  refreshSession(): AsyncResult<LoginResult, ServerError>
+  refreshSession(): AsyncResult<SupabaseLoginResult, ServerError>
 }

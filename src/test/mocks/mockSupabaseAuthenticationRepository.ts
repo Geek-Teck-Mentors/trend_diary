@@ -1,9 +1,12 @@
 import * as bcrypt from 'bcryptjs'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
-import type { SupabaseAuthenticationRepository } from '@/domain/supabaseAuth/repository'
+import type {
+  SupabaseAuthenticationRepository,
+  SupabaseLoginResult,
+  SupabaseSignupResult,
+} from '@/domain/supabaseAuth/repository'
 import type { AuthenticationUser } from '@/domain/supabaseAuth/schema/authenticationUser'
-import type { LoginResult, SignupResult } from '@/domain/supabaseAuth/useCase'
 
 const BCRYPT_SALT_ROUNDS = 10
 
@@ -23,7 +26,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
   async signup(
     email: string,
     password: string,
-  ): AsyncResult<SignupResult, ClientError | ServerError> {
+  ): AsyncResult<SupabaseSignupResult, ClientError | ServerError> {
     // メールアドレスの重複チェック
     const existingUser = Array.from(this.users.values()).find((u) => u.email === email)
     if (existingUser) {
@@ -67,7 +70,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
   async login(
     email: string,
     password: string,
-  ): AsyncResult<LoginResult, ClientError | ServerError> {
+  ): AsyncResult<SupabaseLoginResult, ClientError | ServerError> {
     const mockUser = Array.from(this.users.values()).find((u) => u.email === email)
 
     if (!mockUser) {
@@ -125,7 +128,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
     return resultSuccess(user)
   }
 
-  async refreshSession(): AsyncResult<LoginResult, ServerError> {
+  async refreshSession(): AsyncResult<SupabaseLoginResult, ServerError> {
     if (!this.currentUserId) {
       return resultError(new ServerError('No active session'))
     }

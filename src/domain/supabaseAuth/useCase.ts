@@ -55,7 +55,11 @@ export class SupabaseAuthenticationUseCase {
     )
 
     if (isError(activeUserResult)) {
-      return resultError(ServerError.handle(activeUserResult.error))
+      return resultError(
+        activeUserResult.error instanceof ServerError
+          ? activeUserResult.error
+          : new ServerError(activeUserResult.error.message),
+      )
     }
 
     return resultSuccess({
@@ -76,9 +80,13 @@ export class SupabaseAuthenticationUseCase {
     const { user, session } = authResult.data
 
     // authenticationIdからactive_userを取得
-    let activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
+    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
     if (isError(activeUserResult)) {
-      return resultError(ServerError.handle(activeUserResult.error))
+      return resultError(
+        activeUserResult.error instanceof ServerError
+          ? activeUserResult.error
+          : new ServerError(activeUserResult.error.message),
+      )
     }
 
     // active_userが存在しない場合は作成
@@ -90,10 +98,18 @@ export class SupabaseAuthenticationUseCase {
       )
 
       if (isError(createResult)) {
-        return resultError(ServerError.handle(createResult.error))
+        return resultError(
+          createResult.error instanceof ServerError
+            ? createResult.error
+            : new ServerError(createResult.error.message),
+        )
       }
 
-      activeUserResult = resultSuccess(createResult.data)
+      return resultSuccess({
+        user,
+        session,
+        activeUser: createResult.data,
+      })
     }
 
     return resultSuccess({
@@ -112,6 +128,49 @@ export class SupabaseAuthenticationUseCase {
   }
 
   async refreshSession(): AsyncResult<LoginResult, ServerError> {
-    return this.repository.refreshSession()
+    // Supabase認証でセッション更新
+    const authResult = await this.repository.refreshSession()
+    if (isError(authResult)) return authResult
+
+    const { user, session } = authResult.data
+
+    // authenticationIdからactive_userを取得
+    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
+    if (isError(activeUserResult)) {
+      return resultError(
+        activeUserResult.error instanceof ServerError
+          ? activeUserResult.error
+          : new ServerError(activeUserResult.error.message),
+      )
+    }
+
+    // active_userが存在しない場合は作成
+    if (isNull(activeUserResult.data)) {
+      const createResult = await this.userCommand.createActiveWithAuthenticationId(
+        user.email,
+        'SUPABASE_AUTH_USER', // ダミーパスワード
+        user.id, // authenticationId
+      )
+
+      if (isError(createResult)) {
+        return resultError(
+          createResult.error instanceof ServerError
+            ? createResult.error
+            : new ServerError(createResult.error.message),
+        )
+      }
+
+      return resultSuccess({
+        user,
+        session,
+        activeUser: createResult.data,
+      })
+    }
+
+    return resultSuccess({
+      user,
+      session,
+      activeUser: activeUserResult.data,
+    })
   }
 }
