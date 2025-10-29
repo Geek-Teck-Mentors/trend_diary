@@ -11,7 +11,7 @@ export default class CommandImpl implements Command {
 
   async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error> {
     try {
-      const activeUser = await this.db.$transaction(async (tx) => {
+      const activeUser = await this.db.$transaction(async (tx: any) => {
         const user = await tx.user.create({})
         const activeUser = await tx.activeUser.create({
           data: {
@@ -36,7 +36,7 @@ export default class CommandImpl implements Command {
     displayName?: string | null,
   ): AsyncResult<ActiveUser, Error> {
     try {
-      const activeUser = await this.db.$transaction(async (tx) => {
+      const activeUser = await this.db.$transaction(async (tx: any) => {
         const user = await tx.user.create({})
         const activeUser = await tx.activeUser.create({
           data: {

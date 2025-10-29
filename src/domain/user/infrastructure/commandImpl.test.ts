@@ -37,7 +37,7 @@ describe('CommandImpl', () => {
           updatedAt: new Date(),
         }
 
-        mockDb.$transaction.mockImplementation(async (callback) => {
+        mockDb.$transaction.mockImplementation(async (callback: any) => {
           return await callback({
             user: { create: vi.fn().mockResolvedValue(mockUser) } as any,
             activeUser: { create: vi.fn().mockResolvedValue(mockActiveUser) } as any,
