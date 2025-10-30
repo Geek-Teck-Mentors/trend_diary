@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import useSWRMutation from 'swr/mutation'
 import { useIsMobile } from '@/application/web/components/ui/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
@@ -28,67 +29,82 @@ export default function useTrends() {
   const [limit, setLimit] = useState(20)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-  const isLoadingRef = useRef(false)
   const isMobile = useIsMobile()
 
   const date = useMemo(() => new Date(), [])
 
-  const fetchArticles: FetchArticles = useCallback(
-    async ({ date, page = 1, limit = 20, media = null }) => {
-      if (isLoadingRef.current) return
+  interface ArticlesResponse {
+    data: Array<{
+      articleId: string | number | bigint
+      media: string
+      title: string
+      author: string
+      description: string
+      url: string
+      createdAt: string
+    }>
+    page: number
+    limit: number
+    totalPages: number
+  }
 
-      isLoadingRef.current = true
-      setIsLoading(true)
-      try {
-        const queryDate = formatDate(date)
-
+  const { trigger } = useSWRMutation(
+      'articles/fetch',
+      async (_key: string, { arg }: { arg: { date: Date; page?: number; limit?: number; media?: MediaType } }) => {
+        const queryDate = formatDate(arg.date)
         const res = await getApiClientForClient().articles.$get({
           query: {
             to: queryDate,
             from: queryDate,
-            page,
-            limit,
-            ...(media && { media }),
+            page: arg.page ?? 1,
+            limit: arg.limit ?? 20,
+            ...(arg.media && { media: arg.media }),
           },
         })
         if (res.status === 200) {
-          const resJson = await res.json()
-          setArticles(
-            resJson.data.map((data) => ({
-              articleId: BigInt(data.articleId),
-              media: data.media,
-              title: data.title,
-              author: data.author,
-              description: data.description,
-              url: data.url,
-              createdAt: new Date(data.createdAt),
-            })),
-          )
-          setPage(resJson.page)
-          setLimit(resJson.limit)
-          setTotalPages(resJson.totalPages)
-
-          // 400番台
-        } else if (res.status >= 400 && res.status < 500) {
-          throw new Error('不正なパラメータです')
-        } else if (res.status >= 500) {
-          throw new Error('不明なエラーが発生しました')
+          return await res.json()
         }
+        if (res.status >= 400 && res.status < 500) throw new Error('不正なパラメータです')
+        if (res.status >= 500) throw new Error('不明なエラーが発生しました')
+      },
+      )
+
+  const isLoadingRef = useRef(false)
+
+  const fetchArticles: FetchArticles = useCallback(
+    async ({ date, page = 1, limit = 20, media = null }) => {
+      if (isLoadingRef.current) return
+      isLoadingRef.current = true
+      setIsLoading(true)
+      try {
+        const resJson = (await trigger({ date, page, limit, media })) as ArticlesResponse | undefined
+        if (!resJson) return
+        setArticles(
+          resJson.data.map((data) => ({
+            articleId: BigInt(data.articleId),
+            media: data.media,
+            title: data.title,
+            author: data.author,
+            description: data.description,
+            url: data.url,
+            createdAt: new Date(data.createdAt),
+          })),
+        )
+        setPage(resJson.page)
+        setLimit(resJson.limit)
+        setTotalPages(resJson.totalPages)
       } catch (error) {
         if (error instanceof Error) {
-          const errorMessage = error.message || 'エラーが発生しました'
-          toast.error(errorMessage)
+          toast.error(error.message || 'エラーが発生しました')
         } else {
           toast.error('不明なエラーが発生しました')
-          // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
-          console.error(error)
         }
       } finally {
         isLoadingRef.current = false
         setIsLoading(false)
       }
     },
-    [],
+    [trigger],
   )
 
   const selectedMedia = useMemo<MediaType>(() => {
