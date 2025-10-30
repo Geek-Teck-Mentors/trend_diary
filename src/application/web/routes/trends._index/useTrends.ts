@@ -49,25 +49,28 @@ export default function useTrends() {
   }
 
   const { trigger } = useSWRMutation(
-      'articles/fetch',
-      async (_key: string, { arg }: { arg: { date: Date; page?: number; limit?: number; media?: MediaType } }) => {
-        const queryDate = formatDate(arg.date)
-        const res = await getApiClientForClient().articles.$get({
-          query: {
-            to: queryDate,
-            from: queryDate,
-            page: arg.page ?? 1,
-            limit: arg.limit ?? 20,
-            ...(arg.media && { media: arg.media }),
-          },
-        })
-        if (res.status === 200) {
-          return await res.json()
-        }
-        if (res.status >= 400 && res.status < 500) throw new Error('不正なパラメータです')
-        if (res.status >= 500) throw new Error('不明なエラーが発生しました')
-      },
-      )
+    'articles/fetch',
+    async (
+      _key: string,
+      { arg }: { arg: { date: Date; page?: number; limit?: number; media?: MediaType } },
+    ) => {
+      const queryDate = formatDate(arg.date)
+      const res = await getApiClientForClient().articles.$get({
+        query: {
+          to: queryDate,
+          from: queryDate,
+          page: arg.page ?? 1,
+          limit: arg.limit ?? 20,
+          ...(arg.media && { media: arg.media }),
+        },
+      })
+      if (res.status === 200) {
+        return await res.json()
+      }
+      if (res.status >= 400 && res.status < 500) throw new Error('不正なパラメータです')
+      if (res.status >= 500) throw new Error('不明なエラーが発生しました')
+    },
+  )
 
   const isLoadingRef = useRef(false)
 
