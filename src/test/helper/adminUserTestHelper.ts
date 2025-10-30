@@ -1,4 +1,4 @@
-import { isError } from '@/common/types/utility'
+import { isFailure } from '@yuukihayashi0510/core'
 import { createAdminUserUseCase } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
@@ -34,7 +34,7 @@ class AdminUserTestHelper {
 
     // Admin権限を付与
     const adminResult = await this.useCase.grantAdminRole(userInfo.activeUserId, 1)
-    if (isError(adminResult)) {
+    if (isFailure(adminResult)) {
       throw new Error(`Failed to grant admin role: ${adminResult.error.message}`)
     }
 
@@ -68,7 +68,7 @@ class AdminUserTestHelper {
     grantedByAdminUserId: number,
   ): Promise<{ adminUserId: number }> {
     const result = await this.useCase.grantAdminRole(activeUserId, grantedByAdminUserId)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to grant admin role: ${result.error.message}`)
     }
     return {
@@ -78,7 +78,7 @@ class AdminUserTestHelper {
 
   async isAdmin(activeUserId: bigint): Promise<boolean> {
     const result = await this.useCase.isAdmin(activeUserId)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to check admin status: ${result.error.message}`)
     }
     return result.data
@@ -97,7 +97,7 @@ class AdminUserTestHelper {
     total: number
   }> {
     const result = await this.useCase.getUserList(query)
-    if (isError(result)) {
+    if (isFailure(result)) {
       throw new Error(`Failed to get user list: ${result.error.message}`)
     }
     return result.data

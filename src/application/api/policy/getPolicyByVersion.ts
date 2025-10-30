@@ -1,7 +1,7 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createPrivacyPolicyUseCase, VersionParam } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -13,7 +13,7 @@ export default async function getPolicyByVersion(c: ZodValidatedParamContext<Ver
   const useCase = createPrivacyPolicyUseCase(rdb)
 
   const result = await useCase.getPolicyByVersion(version)
-  if (isError(result)) throw handleError(result.error, logger)
+  if (isFailure(result)) throw handleError(result.error, logger)
 
   logger.info('Policy retrieved', { version })
   return c.json(result.data)

@@ -1,7 +1,7 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { ArticleIdParam, CreateReadHistoryApiInput, createArticleUseCase } from '@/domain/article'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -22,7 +22,7 @@ export default async function readArticle(
   const useCase = createArticleUseCase(rdb)
 
   const result = await useCase.createReadHistory(user.activeUserId, articleId, new Date(readAt))
-  if (isError(result)) throw handleError(result.error, logger)
+  if (isFailure(result)) throw handleError(result.error, logger)
 
   logger.info('Read history created successfully', {
     activeUserId: user.activeUserId,

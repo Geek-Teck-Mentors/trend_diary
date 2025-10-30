@@ -1,5 +1,5 @@
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { Command } from '../repository'
 import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
@@ -26,9 +26,9 @@ export default class CommandImpl implements Command {
         },
       })
 
-      return resultSuccess(mapToPrivacyPolicy(savedPolicy))
+      return success(mapToPrivacyPolicy(savedPolicy))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -38,9 +38,9 @@ export default class CommandImpl implements Command {
         where: { version },
       })
 
-      return resultSuccess(undefined)
+      return success(undefined)
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 }

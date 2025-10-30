@@ -1,3 +1,4 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import { getCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
@@ -5,7 +6,6 @@ import { ContentfulStatusCode } from 'hono/utils/http-status'
 import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants'
 import { ClientError, ServerError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env, SessionUser } from '../env'
@@ -28,7 +28,7 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   const useCase = createUserUseCase(rdb)
 
   const result = await useCase.getCurrentUser(sessionId)
-  if (isError(result)) {
+  if (isFailure(result)) {
     if (result.error instanceof ClientError) {
       throw new HTTPException(result.error.statusCode as ContentfulStatusCode, {
         message: result.error.message,

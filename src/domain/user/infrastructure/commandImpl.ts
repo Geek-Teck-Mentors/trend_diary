@@ -1,5 +1,5 @@
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { CreateSessionInput } from '../dto'
 import { Command } from '../repository'
@@ -23,9 +23,9 @@ export default class CommandImpl implements Command {
         return activeUser
       })
 
-      return resultSuccess(mapToActiveUser(activeUser))
+      return success(mapToActiveUser(activeUser))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -41,9 +41,9 @@ export default class CommandImpl implements Command {
         },
       })
 
-      return resultSuccess(mapToActiveUser(updatedActiveUser))
+      return success(mapToActiveUser(updatedActiveUser))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -62,12 +62,12 @@ export default class CommandImpl implements Command {
         },
       })
 
-      return resultSuccess({
+      return success({
         sessionId: session.sessionId,
         expiresAt: session.expiresAt,
       })
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -77,9 +77,9 @@ export default class CommandImpl implements Command {
         where: { sessionId },
       })
 
-      return resultSuccess(undefined)
+      return success(undefined)
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 }

@@ -1,5 +1,5 @@
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import { ArticleCommand } from '@/domain/article/repository'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 import { RdbClient } from '@/infrastructure/rdb'
@@ -29,9 +29,9 @@ export default class ArticleCommandImpl implements ArticleCommand {
         createdAt: createdReadHistory.createdAt,
       }
 
-      return resultSuccess(readHistory)
+      return success(readHistory)
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -44,9 +44,9 @@ export default class ArticleCommandImpl implements ArticleCommand {
         },
       })
 
-      return resultSuccess(undefined)
+      return success(undefined)
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 }
