@@ -1,9 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import useSWR, { mutate as globalMutate } from 'swr'
 import { useIsMobile } from '@/application/web/components/ui/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
+
+export interface ArticlesResponse {
+  data: Array<{
+    articleId: string | number | bigint
+    media: string
+    title: string
+    author: string
+    description: string
+    url: string
+    createdAt: string
+  }>
+  page: number
+  limit: number
+  totalPages: number
+}
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
@@ -28,20 +44,29 @@ export default function useTrends() {
   const [limit, setLimit] = useState(20)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-  const isLoadingRef = useRef(false)
   const isMobile = useIsMobile()
 
   const date = useMemo(() => new Date(), [])
 
+  // SWR: 軽量キャッシュ層。現状 UI で直接 data を使わないが、背景で最新取得結果を保持し他コンポーネント流用を可能にする。
+  // フェッチは手動 fetchArticles に一本化し、成功時に mutate でキャッシュ同期する。
+  useSWR<ArticlesResponse>('articles/fetch', {
+    // fetcher は手動制御のため最低限の初期構造を返す
+    fetcher: async () => ({ data: [], page: 1, limit: 20, totalPages: 1 }),
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    shouldRetryOnError: false,
+  })
+
+  const isLoadingRef = useRef(false)
+
   const fetchArticles: FetchArticles = useCallback(
     async ({ date, page = 1, limit = 20, media = null }) => {
       if (isLoadingRef.current) return
-
       isLoadingRef.current = true
       setIsLoading(true)
       try {
         const queryDate = formatDate(date)
-
         const res = await getApiClientForClient().articles.$get({
           query: {
             to: queryDate,
@@ -53,35 +78,42 @@ export default function useTrends() {
         })
         if (res.status === 200) {
           const resJson = await res.json()
-          setArticles(
-            resJson.data.map((data) => ({
-              articleId: BigInt(data.articleId),
-              media: data.media,
-              title: data.title,
-              author: data.author,
-              description: data.description,
-              url: data.url,
-              createdAt: new Date(data.createdAt),
-            })),
-          )
+          const mapped = resJson.data.map((data: any) => ({
+            articleId: BigInt(data.articleId),
+            media: data.media,
+            title: data.title,
+            author: data.author,
+            description: data.description,
+            url: data.url,
+            createdAt: new Date(data.createdAt),
+          }))
+          setArticles(mapped)
           setPage(resJson.page)
           setLimit(resJson.limit)
           setTotalPages(resJson.totalPages)
-
-          // 400番台
+          // SWR キャッシュへ格納（他で共有可能）。
+          globalMutate(
+            'articles/fetch',
+            {
+              data: resJson.data,
+              page: resJson.page,
+              limit: resJson.limit,
+              totalPages: resJson.totalPages,
+            } satisfies ArticlesResponse,
+            false,
+          )
         } else if (res.status >= 400 && res.status < 500) {
           throw new Error('不正なパラメータです')
         } else if (res.status >= 500) {
           throw new Error('不明なエラーが発生しました')
+        } else {
+          throw new Error(`予期せぬレスポンスステータスです: ${res.status}`)
         }
       } catch (error) {
         if (error instanceof Error) {
-          const errorMessage = error.message || 'エラーが発生しました'
-          toast.error(errorMessage)
+          toast.error(error.message || 'エラーが発生しました')
         } else {
           toast.error('不明なエラーが発生しました')
-          // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
-          console.error(error)
         }
       } finally {
         isLoadingRef.current = false
