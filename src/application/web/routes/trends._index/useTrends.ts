@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import useSWR from 'swr'
+import useSWR, { mutate as globalMutate } from 'swr'
 import { useIsMobile } from '@/application/web/components/ui/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
@@ -48,28 +48,15 @@ export default function useTrends() {
 
   const date = useMemo(() => new Date(), [])
 
-  useSWR<ArticlesResponse, Error>(
-    'articles/fetch',
-    async () => {
-      // This function should not use arguments, so use state values directly
-      const queryDate = formatDate(date)
-      const res = await getApiClientForClient().articles.$get({
-        query: {
-          to: queryDate,
-          from: queryDate,
-          page: page ?? 1,
-          limit: limit ?? 20,
-          ...(selectedMedia && { media: selectedMedia }),
-        },
-      })
-      if (res.status === 200) {
-        return await res.json()
-      }
-      if (res.status >= 400 && res.status < 500) throw new Error('不正なパラメータです')
-      if (res.status >= 500) throw new Error('不明なエラーが発生しました')
-      throw new Error(`予期せぬレスポンスステータスです: ${res.status}`)
-    },
-  )
+  // SWR: 軽量キャッシュ層。現状 UI で直接 data を使わないが、背景で最新取得結果を保持し他コンポーネント流用を可能にする。
+  // フェッチは手動 fetchArticles に一本化し、成功時に mutate でキャッシュ同期する。
+  useSWR<ArticlesResponse>('articles/fetch', {
+    // fetcher は手動制御のため最低限の初期構造を返す
+    fetcher: async () => ({ data: [], page: 1, limit: 20, totalPages: 1 }),
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    shouldRetryOnError: false,
+  })
 
   const isLoadingRef = useRef(false)
 
@@ -91,20 +78,30 @@ export default function useTrends() {
         })
         if (res.status === 200) {
           const resJson = await res.json()
-          setArticles(
-            resJson.data.map((data: any) => ({
-              articleId: BigInt(data.articleId),
-              media: data.media,
-              title: data.title,
-              author: data.author,
-              description: data.description,
-              url: data.url,
-              createdAt: new Date(data.createdAt),
-            })),
-          )
+          const mapped = resJson.data.map((data: any) => ({
+            articleId: BigInt(data.articleId),
+            media: data.media,
+            title: data.title,
+            author: data.author,
+            description: data.description,
+            url: data.url,
+            createdAt: new Date(data.createdAt),
+          }))
+          setArticles(mapped)
           setPage(resJson.page)
           setLimit(resJson.limit)
           setTotalPages(resJson.totalPages)
+          // SWR キャッシュへ格納（他で共有可能）。
+          globalMutate(
+            'articles/fetch',
+            {
+              data: resJson.data,
+              page: resJson.page,
+              limit: resJson.limit,
+              totalPages: resJson.totalPages,
+            } satisfies ArticlesResponse,
+            false,
+          )
         } else if (res.status >= 400 && res.status < 500) {
           throw new Error('不正なパラメータです')
         } else if (res.status >= 500) {
@@ -125,7 +122,6 @@ export default function useTrends() {
     },
     [],
   )
-
 
   const selectedMedia = useMemo<MediaType>(() => {
     const mediaParam = searchParams.get('media')
