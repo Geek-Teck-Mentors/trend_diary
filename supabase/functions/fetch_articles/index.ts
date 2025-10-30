@@ -1,11 +1,11 @@
 import { Hono } from "jsr:@hono/hono";
 import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
 import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
-import { Executor } from "./executor.ts";
+import { ExecutorImpl } from "./executor.ts";
 import ArticleRepositoryImpl from "./repository.ts";
-import { InternalServerError } from "./error.ts";
 import { rdbClient } from "../../infrastructure/supabase_client.ts";
 import { logger } from "../../logger/logger.ts";
+import { isFailure } from "@yuukihayashi0510/core";
 // functionNameはsupabase functionsの名前に一致させないとsupabaseがリクエストを振り分けない
 const functionName = "fetch_articles";
 export const app = new Hono().basePath(`/${functionName}`);
@@ -16,17 +16,16 @@ app.post("/articles/qiita", async (c) => {
     const fetcher = new QiitaFetcher();
     const repository = new ArticleRepositoryImpl(rdbClient);
 
-    const exec = new Executor("qiita", fetcher, repository);
-    const res = await exec.do();
-    return c.json(res, 201);
-  } catch (error) {
-    if (error instanceof InternalServerError) {
-      logger.error(error.name, error.message);
+    const exec = new ExecutorImpl("qiita", fetcher, repository);
+    const result = await exec.do();
+    if (isFailure(result)) {
+      logger.error(result.error.name, result.error.message);
       return c.json({ message: "internal server error" }, 500);
-    } else {
-      logger.error("unknown error", error);
-      return c.json({ message: "unknown error" }, 500);
     }
+    return c.json({ message: result.data.message }, 201);
+  } catch (error) {
+    logger.error("unknown error", error);
+    return c.json({ message: "unknown error" }, 500);
   }
 });
 
@@ -36,17 +35,16 @@ app.post("/articles/zenn", async (c) => {
     const fetcher = new ZennFetcher();
     const repository = new ArticleRepositoryImpl(rdbClient);
 
-    const exec = new Executor("zenn", fetcher, repository);
-    const res = await exec.do();
-    return c.json(res, 201);
-  } catch (error) {
-    if (error instanceof InternalServerError) {
-      logger.error(error.name, error.message);
+    const exec = new ExecutorImpl("zenn", fetcher, repository);
+    const result = await exec.do();
+    if (isFailure(result)) {
+      logger.error(result.error.name, result.error.message);
       return c.json({ message: "internal server error" }, 500);
-    } else {
-      logger.error("unknown error", error);
-      return c.json({ message: "unknown error" }, 500);
     }
+    return c.json({ message: result.data.message }, 201);
+  } catch (error) {
+    logger.error("unknown error", error);
+    return c.json({ message: "unknown error" }, 500);
   }
 });
 

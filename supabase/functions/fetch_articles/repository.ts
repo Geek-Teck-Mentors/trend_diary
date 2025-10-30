@@ -5,6 +5,7 @@ import { ArticleRepository } from "./model/interface.ts";
 import { DatabaseError } from "./error.ts";
 import { RdbClient } from "../../infrastructure/supabase_client.ts";
 import { logger } from "../../logger/logger.ts";
+import { failure, success } from "@yuukihayashi0510/core";
 
 export default class ArticleRepositoryImpl implements ArticleRepository {
   constructor(
@@ -22,20 +23,23 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       .returns<Article[]>();
 
     if (error) {
-      throw new DatabaseError(
-        "Failed to fetch articles by URLs: " + JSON.stringify(error),
-      );
+      const message = `Failed to fetch articles by URLs: ${
+        JSON.stringify(error)
+      }`;
+
+      return failure(new DatabaseError(message));
     }
 
     if (!data) {
-      throw new DatabaseError("No data returned from Supabase");
+      const message = "No data returned from Supabase";
+      return failure(new DatabaseError(message));
     }
 
     logger.info(
       `Fetched ${data.length} articles from Supabase for ${urls.length} URLs.`,
     );
 
-    return data;
+    return success(data);
   }
 
   async bulkCreateArticle(params: ArticleInput[]) {
@@ -53,18 +57,20 @@ export default class ArticleRepositoryImpl implements ArticleRepository {
       .returns<Article[]>();
 
     if (error) {
-      throw new DatabaseError(
-        "Failed to create article: " + JSON.stringify(error),
-      );
+      const message = `Failed to bulk create articles: ${
+        JSON.stringify(error)
+      }`;
+      return failure(new DatabaseError(message));
     }
 
     if (!data) {
-      throw new DatabaseError("No data returned from Supabase");
+      const message = "No data returned from Supabase";
+      return failure(new DatabaseError(message));
     }
 
     logger.info("Inserted articles into Supabase successfully");
 
-    return data;
+    return success(data);
   }
 
   private normalizeForArticleInput = (params: ArticleInput): ArticleInput => ({
