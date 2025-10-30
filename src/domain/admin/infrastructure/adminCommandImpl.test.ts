@@ -16,6 +16,7 @@ function createMockActiveUser(overrides = {}) {
     email: 'test@example.com',
     password: 'hashedPassword123',
     displayName: 'テストユーザー',
+    authenticationId: null,
     lastLogin: null,
     createdAt: new Date(),
     updatedAt: new Date(),
