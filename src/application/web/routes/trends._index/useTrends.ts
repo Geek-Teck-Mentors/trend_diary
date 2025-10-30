@@ -48,20 +48,20 @@ export default function useTrends() {
     totalPages: number
   }
 
-  const { trigger } = useSWRMutation(
+  type ArticlesFetcherArg = { date: Date; page?: number; limit?: number; media?: MediaType }
+
+  const { trigger } = useSWRMutation<ArticlesResponse, Error, 'articles/fetch', ArticlesFetcherArg>(
     'articles/fetch',
-    async (
-      _key: string,
-      { arg }: { arg: { date: Date; page?: number; limit?: number; media?: MediaType } },
-    ) => {
-      const queryDate = formatDate(arg.date)
+    async (_key: string, { arg }: { arg: ArticlesFetcherArg }) => {
+      const { date, page, limit, media } = arg
+      const queryDate = formatDate(date)
       const res = await getApiClientForClient().articles.$get({
         query: {
           to: queryDate,
           from: queryDate,
-          page: arg.page ?? 1,
-          limit: arg.limit ?? 20,
-          ...(arg.media && { media: arg.media }),
+          page: page ?? 1,
+          limit: limit ?? 20,
+          ...(media && { media }),
         },
       })
       if (res.status === 200) {
@@ -69,6 +69,7 @@ export default function useTrends() {
       }
       if (res.status >= 400 && res.status < 500) throw new Error('不正なパラメータです')
       if (res.status >= 500) throw new Error('不明なエラーが発生しました')
+      throw new Error(`予期せぬレスポンスステータスです: ${res.status}`)
     },
   )
 
@@ -80,8 +81,7 @@ export default function useTrends() {
       isLoadingRef.current = true
       setIsLoading(true)
       try {
-        const resJson = (await trigger({ date, page, limit, media })) as ArticlesResponse | undefined
-        if (!resJson) return
+        const resJson = await trigger({ date, page, limit, media })
         setArticles(
           resJson.data.map((data) => ({
             articleId: BigInt(data.articleId),
