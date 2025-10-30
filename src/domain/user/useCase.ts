@@ -22,7 +22,7 @@ export class UseCase {
 
   async signup(email: string, plainPassword: string): Promise<Result<ActiveUser, Error>> {
     const existingResult = await this.query.findActiveByEmail(email)
-    if (isFailure(existingResult)) return failure(ServerError.handle(existingResult.error))
+    if (isFailure(existingResult)) return existingResult
     if (!isNull(existingResult.data)) {
       return failure(new AlreadyExistsError('Email already exists'))
     }
