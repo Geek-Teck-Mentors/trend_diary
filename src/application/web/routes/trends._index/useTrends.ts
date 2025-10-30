@@ -6,6 +6,22 @@ import { useIsMobile } from '@/application/web/components/ui/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 
+// APIレスポンスの型（フック外へ移動して再利用性と可読性向上）
+export interface ArticlesResponse {
+  data: Array<{
+    articleId: string | number | bigint
+    media: string
+    title: string
+    author: string
+    description: string
+    url: string
+    createdAt: string
+  }>
+  page: number
+  limit: number
+  totalPages: number
+}
+
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
   const month = String(rawDate.getMonth() + 1).padStart(2, '0')
@@ -32,21 +48,6 @@ export default function useTrends() {
   const isMobile = useIsMobile()
 
   const date = useMemo(() => new Date(), [])
-
-  interface ArticlesResponse {
-    data: Array<{
-      articleId: string | number | bigint
-      media: string
-      title: string
-      author: string
-      description: string
-      url: string
-      createdAt: string
-    }>
-    page: number
-    limit: number
-    totalPages: number
-  }
 
   type ArticlesFetcherArg = { date: Date; page?: number; limit?: number; media?: MediaType }
 
