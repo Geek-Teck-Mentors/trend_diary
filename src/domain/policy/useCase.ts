@@ -23,7 +23,7 @@ export class UseCase {
     limit: number,
   ): Promise<Result<OffsetPaginationResult<PrivacyPolicy>, Error>> {
     const result = await this.query.findAll(page, limit)
-    if (isFailure(result)) return failure(ServerError.handle(result.error))
+    if (isFailure(result)) return result
 
     return success(result.data)
   }
