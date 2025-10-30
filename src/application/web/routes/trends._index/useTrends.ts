@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import useSWRMutation from 'swr/mutation'
+import useSWR from 'swr'
 import { useIsMobile } from '@/application/web/components/ui/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 
-// APIレスポンスの型（フック外へ移動して再利用性と可読性向上）
 export interface ArticlesResponse {
   data: Array<{
     articleId: string | number | bigint
@@ -49,12 +48,10 @@ export default function useTrends() {
 
   const date = useMemo(() => new Date(), [])
 
-  type ArticlesFetcherArg = { date: Date; page?: number; limit?: number; media?: MediaType }
-
-  const { trigger } = useSWRMutation<ArticlesResponse, Error, 'articles/fetch', ArticlesFetcherArg>(
+  useSWR<ArticlesResponse, Error>(
     'articles/fetch',
-    async (_key: string, { arg }: { arg: ArticlesFetcherArg }) => {
-      const { date, page, limit, media } = arg
+    async () => {
+      // This function should not use arguments, so use state values directly
       const queryDate = formatDate(date)
       const res = await getApiClientForClient().articles.$get({
         query: {
@@ -62,7 +59,7 @@ export default function useTrends() {
           from: queryDate,
           page: page ?? 1,
           limit: limit ?? 20,
-          ...(media && { media }),
+          ...(selectedMedia && { media: selectedMedia }),
         },
       })
       if (res.status === 200) {
@@ -82,21 +79,39 @@ export default function useTrends() {
       isLoadingRef.current = true
       setIsLoading(true)
       try {
-        const resJson = await trigger({ date, page, limit, media })
-        setArticles(
-          resJson.data.map((data) => ({
-            articleId: BigInt(data.articleId),
-            media: data.media,
-            title: data.title,
-            author: data.author,
-            description: data.description,
-            url: data.url,
-            createdAt: new Date(data.createdAt),
-          })),
-        )
-        setPage(resJson.page)
-        setLimit(resJson.limit)
-        setTotalPages(resJson.totalPages)
+        const queryDate = formatDate(date)
+        const res = await getApiClientForClient().articles.$get({
+          query: {
+            to: queryDate,
+            from: queryDate,
+            page,
+            limit,
+            ...(media && { media }),
+          },
+        })
+        if (res.status === 200) {
+          const resJson = await res.json()
+          setArticles(
+            resJson.data.map((data: any) => ({
+              articleId: BigInt(data.articleId),
+              media: data.media,
+              title: data.title,
+              author: data.author,
+              description: data.description,
+              url: data.url,
+              createdAt: new Date(data.createdAt),
+            })),
+          )
+          setPage(resJson.page)
+          setLimit(resJson.limit)
+          setTotalPages(resJson.totalPages)
+        } else if (res.status >= 400 && res.status < 500) {
+          throw new Error('不正なパラメータです')
+        } else if (res.status >= 500) {
+          throw new Error('不明なエラーが発生しました')
+        } else {
+          throw new Error(`予期せぬレスポンスステータスです: ${res.status}`)
+        }
       } catch (error) {
         if (error instanceof Error) {
           toast.error(error.message || 'エラーが発生しました')
@@ -108,8 +123,9 @@ export default function useTrends() {
         setIsLoading(false)
       }
     },
-    [trigger],
+    [],
   )
+
 
   const selectedMedia = useMemo<MediaType>(() => {
     const mediaParam = searchParams.get('media')
