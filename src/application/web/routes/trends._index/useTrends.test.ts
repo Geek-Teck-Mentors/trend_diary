@@ -325,6 +325,49 @@ describe('useTrends', () => {
         },
       })
     })
+
+    it('URLパラメータにdate=2024-06-15がある場合、その日付が使用される', async () => {
+      const fakeResponse = generateFakeResponse()
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?date=2024-06-15'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
+        query: {
+          to: '2024-06-15',
+          from: '2024-06-15',
+          page: 1,
+          limit: 20,
+        },
+      })
+      expect(result.current.date).toEqual(new Date('2024-06-15'))
+    })
+
+    it('URLパラメータのdateが不正な値の場合、今日の日付が使用される', async () => {
+      const fakeResponse = generateFakeResponse()
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?date=invalid'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
+        query: {
+          to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          page: 1,
+          limit: 20,
+        },
+      })
+    })
   })
 
   describe('エッジケース', () => {
@@ -367,6 +410,67 @@ describe('useTrends', () => {
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
+      })
+    })
+  })
+
+  describe('日付変更', () => {
+    it('handleDateChangeを呼び出すと、URLパラメータが更新される', async () => {
+      const fakeResponse = generateFakeResponse()
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook()
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      act(() => {
+        result.current.handleDateChange(new Date('2024-07-20'))
+      })
+
+      // URLパラメータが更新されたことを確認
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              to: '2024-07-20',
+              from: '2024-07-20',
+            }),
+          }),
+        )
+      })
+    })
+
+    it('handleDateChangeを呼び出すと、ページが1にリセットされる', async () => {
+      const initialResponse = generateFakeResponse({ page: 1 })
+      const page2Response = generateFakeResponse({ page: 2 })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
+
+      const { result } = setupHook(['/?page=2'])
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(1)
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(page2Response)
+
+      act(() => {
+        result.current.handleDateChange(new Date('2024-08-01'))
+      })
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              page: 1,
+              to: '2024-08-01',
+              from: '2024-08-01',
+            }),
+          }),
+        )
       })
     })
   })

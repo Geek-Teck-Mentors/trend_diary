@@ -31,7 +31,17 @@ export default function useTrends() {
   const isLoadingRef = useRef(false)
   const isMobile = useIsMobile()
 
-  const date = useMemo(() => new Date(), [])
+  const date = useMemo(() => {
+    const dateParam = searchParams.get('date')
+    if (dateParam) {
+      const parsedDate = new Date(dateParam)
+      // 有効な日付かチェック
+      if (!Number.isNaN(parsedDate.getTime())) {
+        return parsedDate
+      }
+    }
+    return new Date()
+  }, [searchParams])
 
   const fetchArticles: FetchArticles = useCallback(
     async ({ date, page = 1, limit = 20, media = null }) => {
@@ -134,6 +144,18 @@ export default function useTrends() {
     [searchParams, setSearchParams],
   )
 
+  const handleDateChange = useCallback(
+    (newDate: Date) => {
+      const newParams = new URLSearchParams(searchParams)
+      const formattedDate = formatDate(newDate)
+      newParams.set('date', formattedDate)
+      // 日付を変更したらページを1にリセット
+      newParams.delete('page')
+      setSearchParams(newParams)
+    },
+    [searchParams, setSearchParams],
+  )
+
   return {
     date,
     articles,
@@ -144,6 +166,7 @@ export default function useTrends() {
     isLoading,
     setSearchParams,
     handleMediaChange,
+    handleDateChange,
     selectedMedia,
   }
 }
