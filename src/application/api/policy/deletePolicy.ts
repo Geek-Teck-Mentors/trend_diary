@@ -1,7 +1,7 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createPrivacyPolicyUseCase, VersionParam } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -13,7 +13,7 @@ export default async function deletePolicy(c: ZodValidatedParamContext<VersionPa
   const useCase = createPrivacyPolicyUseCase(rdb)
 
   const result = await useCase.deletePolicy(version)
-  if (isError(result)) throw handleError(result.error, logger)
+  if (isFailure(result)) throw handleError(result.error, logger)
 
   logger.info('Policy deleted', { version })
   return c.body(null, 204)

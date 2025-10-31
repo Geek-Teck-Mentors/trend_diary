@@ -1,5 +1,6 @@
+import { AsyncResult } from '@yuukihayashi0510/core'
 import { OffsetPaginationResult } from '@/common/pagination'
-import { AsyncResult, Nullable } from '@/common/types/utility'
+import { Nullable } from '@/common/types/utility'
 import type { PrivacyPolicy } from './schema/privacyPolicySchema'
 
 export interface Query {

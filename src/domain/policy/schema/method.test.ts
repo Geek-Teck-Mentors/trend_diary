@@ -1,5 +1,5 @@
+import { failure, success } from '@yuukihayashi0510/core'
 import { ClientError } from '@/common/errors'
-import { resultError, resultSuccess } from '@/common/types/utility'
 import { activate, isActive, newPrivacyPolicy, updateContent } from './method'
 
 describe('PrivacyPolicy Method', () => {
@@ -30,12 +30,12 @@ describe('PrivacyPolicy Method', () => {
   })
 
   describe('updateContent', () => {
-    it('下書きのポリシーは更新でき、resultSuccessを返す', () => {
+    it('下書きのポリシーは更新でき、successを返す', () => {
       const policy = newPrivacyPolicy(1, 'old')
       const result = updateContent(policy, 'new')
 
       expect(result).toEqual(
-        resultSuccess({
+        success({
           ...policy,
           content: 'new',
           updatedAt: expect.any(Date),
@@ -43,12 +43,12 @@ describe('PrivacyPolicy Method', () => {
       )
     })
 
-    it('有効化済みのポリシーは更新できずresultErrorを返す', () => {
+    it('有効化済みのポリシーは更新できずfailureを返す', () => {
       const policy = newPrivacyPolicy(2, 'old')
       policy.effectiveAt = new Date()
       const result = updateContent(policy, 'new')
 
-      expect(result).toEqual(resultError(new ClientError('有効化されたポリシーは更新できません')))
+      expect(result).toEqual(failure(new ClientError('有効化されたポリシーは更新できません')))
     })
   })
 
@@ -59,7 +59,7 @@ describe('PrivacyPolicy Method', () => {
       const result = activate(policy, effectiveAt)
 
       expect(result).toEqual(
-        resultSuccess({
+        success({
           ...policy,
           effectiveAt,
           updatedAt: expect.any(Date),
@@ -67,12 +67,12 @@ describe('PrivacyPolicy Method', () => {
       )
     })
 
-    it('既に有効化済みのポリシーは再度有効化できずresultErrorを返す', () => {
+    it('既に有効化済みのポリシーは再度有効化できずfailureを返す', () => {
       const policy = newPrivacyPolicy(1, 'content')
       policy.effectiveAt = new Date()
       const result = activate(policy, new Date())
 
-      expect(result).toEqual(resultError(new ClientError('このポリシーは既に有効化されています')))
+      expect(result).toEqual(failure(new ClientError('このポリシーは既に有効化されています')))
     })
   })
 })

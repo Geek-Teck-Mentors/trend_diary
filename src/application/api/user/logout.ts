@@ -1,3 +1,4 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import { Context } from 'hono'
 import { deleteCookie } from 'hono/cookie'
 import { HTTPException } from 'hono/http-exception'
@@ -6,7 +7,6 @@ import { Env } from '@/application/env'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { SESSION_NAME } from '@/common/constants'
 import { NotFoundError, ServerError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -17,7 +17,7 @@ export default async function logout(c: Context<Env>) {
   const useCase = createUserUseCase(rdb)
 
   const result = await useCase.logout(sessionId)
-  if (isError(result)) {
+  if (isFailure(result)) {
     const { error } = result
     if (error instanceof NotFoundError) {
       logger.warn('session not found', { sessionId })

@@ -1,4 +1,5 @@
-import { AsyncResult, Nullable } from '@/common/types/utility'
+import { AsyncResult } from '@yuukihayashi0510/core'
+import { Nullable } from '@/common/types/utility'
 import { CreateSessionInput } from './dto'
 import type { ActiveUser } from './schema/activeUserSchema'
 

@@ -1,7 +1,7 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { ArticleIdParam, createArticleUseCase } from '@/domain/article'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -16,7 +16,7 @@ export default async function unreadArticle(c: ZodValidatedParamContext<ArticleI
   const useCase = createArticleUseCase(rdb)
 
   const result = await useCase.deleteAllReadHistory(user.activeUserId, articleId)
-  if (isError(result)) throw handleError(result.error, logger)
+  if (isFailure(result)) throw handleError(result.error, logger)
 
   logger.info('Read history deleted successfully', {
     activeUserId: user.activeUserId,

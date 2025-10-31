@@ -1,5 +1,6 @@
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
+import { Nullable } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { Query } from '../repository'
 import type { ActiveUser } from '../schema/activeUserSchema'
@@ -15,12 +16,12 @@ export default class QueryImpl implements Query {
       })
 
       if (!activeUser) {
-        return resultSuccess(null)
+        return success(null)
       }
 
-      return resultSuccess(mapToActiveUser(activeUser))
+      return success(mapToActiveUser(activeUser))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -31,12 +32,12 @@ export default class QueryImpl implements Query {
       })
 
       if (!activeUser) {
-        return resultSuccess(null)
+        return success(null)
       }
 
-      return resultSuccess(mapToActiveUser(activeUser))
+      return success(mapToActiveUser(activeUser))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -51,12 +52,12 @@ export default class QueryImpl implements Query {
       })
 
       if (!session) {
-        return resultSuccess(null)
+        return success(null)
       }
 
-      return resultSuccess(mapToActiveUser(session.activeUser))
+      return success(mapToActiveUser(session.activeUser))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 

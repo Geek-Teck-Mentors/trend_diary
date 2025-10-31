@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
+import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { isError, isSuccess } from '@/common/types/utility'
 import { AdminCommandImpl } from './infrastructure/adminCommandImpl'
 import { AdminQueryImpl } from './infrastructure/adminQueryImpl'
 import { UseCase } from './useCase'
@@ -58,8 +58,8 @@ describe('AdminUser UseCase', () => {
 
         const result = await useCase.grantAdminRole(BigInt(999), 1)
 
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe('ユーザーが見つかりません')
         }
       })
@@ -85,8 +85,8 @@ describe('AdminUser UseCase', () => {
 
         const result = await useCase.grantAdminRole(BigInt(100), 1)
 
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe('既にAdmin権限を持っています')
         }
       })

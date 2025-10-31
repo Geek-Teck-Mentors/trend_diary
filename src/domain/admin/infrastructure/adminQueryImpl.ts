@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
+import { Nullable } from '@/common/types/utility'
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
@@ -23,17 +24,17 @@ export class AdminQueryImpl implements AdminQuery {
         where: { activeUserId: activeUserId },
       })
       if (!adminUser) {
-        return resultSuccess(null)
+        return success(null)
       }
 
-      return resultSuccess({
+      return success({
         adminUserId: adminUser.adminUserId,
         activeUserId: adminUser.activeUserId,
         grantedAt: adminUser.grantedAt,
         grantedByAdminUserId: adminUser.grantedByAdminUserId,
       })
     } catch (error) {
-      return resultError(new ServerError(`Admin情報の取得に失敗しました: ${error}`))
+      return failure(new ServerError(`Admin情報の取得に失敗しました: ${error}`))
     }
   }
 
@@ -66,14 +67,14 @@ export class AdminQueryImpl implements AdminQuery {
 
       const userList = users.map((user: any) => toUserListItem(user))
 
-      return resultSuccess({
+      return success({
         users: userList,
         total,
         page,
         limit,
       })
     } catch (error) {
-      return resultError(new ServerError(`ユーザ一覧の取得に失敗しました: ${error}`))
+      return failure(new ServerError(`ユーザ一覧の取得に失敗しました: ${error}`))
     }
   }
 }

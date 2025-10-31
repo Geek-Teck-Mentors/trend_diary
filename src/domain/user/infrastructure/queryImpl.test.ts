@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
+import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { isError, isSuccess } from '@/common/types/utility'
 import QueryImpl from './queryImpl'
 
 // モックの設定
@@ -76,8 +76,8 @@ describe('QueryImpl', () => {
         const result = await useCase.findActiveById(activeUserId)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe('Database connection failed')
         }
       })
@@ -145,8 +145,8 @@ describe('QueryImpl', () => {
         const result = await useCase.findActiveByEmail(email)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe('Database connection failed')
         }
       })
@@ -239,8 +239,8 @@ describe('QueryImpl', () => {
         const result = await useCase.findActiveBySessionId(sessionId)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe('Database connection failed')
         }
       })

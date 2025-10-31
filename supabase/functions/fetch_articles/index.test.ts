@@ -7,11 +7,13 @@ import {
   stub,
 } from "https://deno.land/std@0.152.0/testing/mock.ts";
 import { app } from "./index.ts";
-import { Executor } from "./executor.ts";
+import { ExecutorImpl } from "./executor.ts";
 import { QiitaFetcher } from "./fetcher/qiita_fetcher.ts";
 import { ZennFetcher } from "./fetcher/zenn_fetcher.ts";
 import ArticleRepositoryImpl from "./repository.ts";
 import { DatabaseError, MediaFetchError } from "./error.ts";
+import { Article } from "./model/model.ts";
+import { failure, success } from "@yuukihayashi0510/core";
 
 import { describe, it } from "jsr:@std/testing/bdd";
 
@@ -37,7 +39,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
         QiitaFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve([
+          Promise.resolve(success([
             {
               title: "title 1",
               author: "author",
@@ -50,7 +52,39 @@ describe("POST /fetch_articles/articles/qiita", () => {
               description: "content",
               url: "https://qiita.example.com/article2",
             },
-          ]),
+          ])),
+      ));
+
+      stubManager.addStub(stub(
+        ArticleRepositoryImpl.prototype,
+        "fetchArticlesByUrls",
+        () => Promise.resolve(success([])),
+      ));
+
+      stubManager.addStub(stub(
+        ArticleRepositoryImpl.prototype,
+        "bulkCreateArticle",
+        () =>
+          Promise.resolve(success([
+            new Article(
+              BigInt(1),
+              "qiita",
+              "title 1",
+              "author",
+              "content",
+              "https://qiita.example.com/article1",
+              new Date(),
+            ),
+            new Article(
+              BigInt(2),
+              "qiita",
+              "title 2",
+              "author",
+              "content",
+              "https://qiita.example.com/article2",
+              new Date(),
+            ),
+          ])),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
@@ -67,9 +101,14 @@ describe("POST /fetch_articles/articles/qiita", () => {
     it("Qiitaの記事の取得でエラーが発生した場合、500エラーを返すこと", async () => {
       using stubManager = new StubManager();
 
-      stubManager.addStub(stub(QiitaFetcher.prototype, "fetch", () => {
-        throw new MediaFetchError("Failed to fetch Qiita articles");
-      }));
+      stubManager.addStub(stub(
+        QiitaFetcher.prototype,
+        "fetch",
+        () =>
+          Promise.resolve(failure(
+            new MediaFetchError("Failed to fetch Qiita articles"),
+          )),
+      ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
@@ -85,25 +124,32 @@ describe("POST /fetch_articles/articles/qiita", () => {
         QiitaFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve([
+          Promise.resolve(success([
             {
               title: "title 1",
               author: "author",
               description: "content",
               url: "https://qiita.example.com/article1",
             },
-          ]),
+          ])),
+      ));
+
+      stubManager.addStub(stub(
+        ArticleRepositoryImpl.prototype,
+        "fetchArticlesByUrls",
+        () => Promise.resolve(success([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
-        () => {
-          throw new DatabaseError("Failed to save to database");
-        },
+        () =>
+          Promise.resolve(failure(
+            new DatabaseError("Failed to save to database"),
+          )),
       ));
 
-      const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
+      const res = await sendRequest("POST", "/fetch_articles/articles/qiita");
 
       assertEquals(res.status, 500);
       const jsonRes = await res.json();
@@ -113,7 +159,7 @@ describe("POST /fetch_articles/articles/qiita", () => {
     it("予期せぬエラーが発生した場合、500エラーを返すこと", async () => {
       using stubManager = new StubManager();
 
-      stubManager.addStub(stub(Executor.prototype, "do", () => {
+      stubManager.addStub(stub(ExecutorImpl.prototype, "do", () => {
         throw new Error();
       }));
 
@@ -135,7 +181,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
         ZennFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve([
+          Promise.resolve(success([
             {
               title: "title 1",
               author: "author",
@@ -148,7 +194,39 @@ describe("POST /fetch_articles/articles/zenn", () => {
               description: "content",
               url: "https://zenn.example.com/article2",
             },
-          ]),
+          ])),
+      ));
+
+      stubManager.addStub(stub(
+        ArticleRepositoryImpl.prototype,
+        "fetchArticlesByUrls",
+        () => Promise.resolve(success([])),
+      ));
+
+      stubManager.addStub(stub(
+        ArticleRepositoryImpl.prototype,
+        "bulkCreateArticle",
+        () =>
+          Promise.resolve(success([
+            new Article(
+              BigInt(1),
+              "zenn",
+              "title 1",
+              "author",
+              "content",
+              "https://zenn.example.com/article1",
+              new Date(),
+            ),
+            new Article(
+              BigInt(2),
+              "zenn",
+              "title 2",
+              "author",
+              "content",
+              "https://zenn.example.com/article2",
+              new Date(),
+            ),
+          ])),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
@@ -165,9 +243,14 @@ describe("POST /fetch_articles/articles/zenn", () => {
     it("Zennの記事のでエラーが発生した場合、500エラーを返すこと", async () => {
       using stubManager = new StubManager();
 
-      stubManager.addStub(stub(ZennFetcher.prototype, "fetch", () => {
-        throw new MediaFetchError("Failed to fetch Zenn articles");
-      }));
+      stubManager.addStub(stub(
+        ZennFetcher.prototype,
+        "fetch",
+        () =>
+          Promise.resolve(failure(
+            new MediaFetchError("Failed to fetch Zenn articles"),
+          )),
+      ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
 
@@ -183,22 +266,29 @@ describe("POST /fetch_articles/articles/zenn", () => {
         ZennFetcher.prototype,
         "fetch",
         () =>
-          Promise.resolve([
+          Promise.resolve(success([
             {
               title: "title 1",
               author: "author",
               description: "content",
               url: "https://zenn.example.com/article1",
             },
-          ]),
+          ])),
+      ));
+
+      stubManager.addStub(stub(
+        ArticleRepositoryImpl.prototype,
+        "fetchArticlesByUrls",
+        () => Promise.resolve(success([])),
       ));
 
       stubManager.addStub(stub(
         ArticleRepositoryImpl.prototype,
         "bulkCreateArticle",
-        () => {
-          throw new DatabaseError("Failed to save to database");
-        },
+        () =>
+          Promise.resolve(failure(
+            new DatabaseError("Failed to save to database"),
+          )),
       ));
 
       const res = await sendRequest("POST", "/fetch_articles/articles/zenn");
@@ -211,7 +301,7 @@ describe("POST /fetch_articles/articles/zenn", () => {
     it("予期せぬエラーが発生した場合、500エラーを返すこと", async () => {
       using stubManager = new StubManager();
 
-      stubManager.addStub(stub(Executor.prototype, "do", () => {
+      stubManager.addStub(stub(ExecutorImpl.prototype, "do", () => {
         throw new Error();
       }));
 

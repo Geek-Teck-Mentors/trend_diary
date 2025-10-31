@@ -1,7 +1,8 @@
 import { Prisma } from '@prisma/client'
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
-import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
+import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
 import { ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
@@ -47,9 +48,9 @@ export default class ArticleQueryImpl implements ArticleQuery {
         hasPrev: page > 1,
       }
 
-      return resultSuccess(result)
+      return success(result)
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -58,10 +59,10 @@ export default class ArticleQueryImpl implements ArticleQuery {
       const article = await this.db.article.findUnique({
         where: { articleId },
       })
-      if (!article) return resultSuccess(null)
-      return resultSuccess(fromPrismaToArticle(article))
+      if (!article) return success(null)
+      return success(fromPrismaToArticle(article))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 

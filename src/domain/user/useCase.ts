@@ -1,16 +1,9 @@
+import { AsyncResult, failure, isFailure, Result, success } from '@yuukihayashi0510/core'
 import bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 import { SESSION_DURATION } from '@/common/constants'
 import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
-import {
-  AsyncResult,
-  isError,
-  isNull,
-  Nullable,
-  Result,
-  resultError,
-  resultSuccess,
-} from '@/common/types/utility'
+import { isNull, Nullable } from '@/common/types/utility'
 import { Command, Query } from './repository'
 import type { ActiveUser } from './schema/activeUserSchema'
 import { recordLogin } from './schema/method'
@@ -29,19 +22,19 @@ export class UseCase {
 
   async signup(email: string, plainPassword: string): Promise<Result<ActiveUser, Error>> {
     const existingResult = await this.query.findActiveByEmail(email)
-    if (isError(existingResult)) return resultError(ServerError.handle(existingResult.error))
+    if (isFailure(existingResult)) return existingResult
     if (!isNull(existingResult.data)) {
-      return resultError(new AlreadyExistsError('Email already exists'))
+      return failure(new AlreadyExistsError('Email already exists'))
     }
 
     const hashedPassword = await bcrypt.hash(plainPassword, 10)
 
     const activeUserResult = await this.command.createActive(email, hashedPassword)
-    if (isError(activeUserResult)) {
-      return resultError(ServerError.handle(activeUserResult.error))
+    if (isFailure(activeUserResult)) {
+      return failure(ServerError.handle(activeUserResult.error))
     }
 
-    return resultSuccess(activeUserResult.data)
+    return success(activeUserResult.data)
   }
 
   async login(
@@ -51,22 +44,22 @@ export class UseCase {
     userAgent?: string,
   ): Promise<Result<LoginResult, Error>> {
     const authResult = await this.authenticateUser(email, plainPassword)
-    if (isError(authResult)) return resultError(authResult.error)
+    if (isFailure(authResult)) return failure(authResult.error)
 
     const sessionResult = await this.createLoginSession(
       authResult.data.activeUserId,
       ipAddress,
       userAgent,
     )
-    if (isError(sessionResult)) return resultError(sessionResult.error)
+    if (isFailure(sessionResult)) return failure(sessionResult.error)
 
     const { sessionId, expiresAt } = sessionResult.data
 
     const updatedUser = recordLogin(authResult.data)
     const updateResult = await this.command.saveActive(updatedUser)
-    if (isError(updateResult)) return resultError(updateResult.error)
+    if (isFailure(updateResult)) return failure(updateResult.error)
 
-    return resultSuccess({
+    return success({
       activeUser: updateResult.data,
       sessionId,
       expiresAt,
@@ -78,18 +71,18 @@ export class UseCase {
     plainPassword: string,
   ): Promise<Result<ActiveUser, Error>> {
     const activeUserResult = await this.query.findActiveByEmail(email)
-    if (isError(activeUserResult)) return resultError(ServerError.handle(activeUserResult.error))
+    if (isFailure(activeUserResult)) return failure(ServerError.handle(activeUserResult.error))
     if (isNull(activeUserResult.data)) {
-      return resultError(new NotFoundError('User not found'))
+      return failure(new NotFoundError('User not found'))
     }
 
     const activeUser = activeUserResult.data
 
     // パスワードチェック
     const validationResult = await this.validateCredentials(plainPassword, activeUser.password)
-    if (isError(validationResult)) return resultError(validationResult.error)
+    if (isFailure(validationResult)) return failure(validationResult.error)
 
-    return resultSuccess(activeUser)
+    return success(activeUser)
   }
 
   private async validateCredentials(
@@ -98,9 +91,9 @@ export class UseCase {
   ): Promise<Result<void, Error>> {
     const isValidPassword = await bcrypt.compare(plainPassword, hashedPassword)
     if (!isValidPassword) {
-      return resultError(new ClientError('Invalid credentials'))
+      return failure(new ClientError('Invalid credentials'))
     }
-    return resultSuccess(undefined)
+    return success(undefined)
   }
 
   private async createLoginSession(
@@ -120,23 +113,23 @@ export class UseCase {
       userAgent,
     })
 
-    if (isError(sessionResult)) {
-      return resultError(ServerError.handle(sessionResult.error))
+    if (isFailure(sessionResult)) {
+      return failure(ServerError.handle(sessionResult.error))
     }
 
-    return resultSuccess({ sessionId, expiresAt })
+    return success({ sessionId, expiresAt })
   }
 
   async logout(sessionId: string): Promise<Result<void, Error>> {
     const result = await this.command.deleteSession(sessionId)
-    if (isError(result)) return resultError(ServerError.handle(result.error))
-    return resultSuccess(undefined)
+    if (isFailure(result)) return failure(ServerError.handle(result.error))
+    return success(undefined)
   }
 
   async getCurrentUser(sessionId: string): AsyncResult<Nullable<ActiveUser>, Error> {
     const result = await this.query.findActiveBySessionId(sessionId)
-    if (isError(result)) return resultError(ServerError.handle(result.error))
+    if (isFailure(result)) return failure(ServerError.handle(result.error))
 
-    return resultSuccess(result.data)
+    return success(result.data)
   }
 }

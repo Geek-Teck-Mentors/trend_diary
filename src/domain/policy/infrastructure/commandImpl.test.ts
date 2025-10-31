@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
+import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { isError, isSuccess } from '@/common/types/utility'
 import CommandImpl from './commandImpl'
 
 // モックの設定
@@ -210,8 +210,8 @@ describe('CommandImpl', () => {
         const result = await useCase.save(policy)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(error.message)
         }
       })
@@ -233,8 +233,8 @@ describe('CommandImpl', () => {
         const result = await useCase.save(policy)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(constraintError.message)
         }
       })
@@ -305,8 +305,8 @@ describe('CommandImpl', () => {
         const result = await useCase.deleteByVersion(version)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(error.message)
         }
       })
@@ -321,8 +321,8 @@ describe('CommandImpl', () => {
         const result = await useCase.deleteByVersion(version)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(error.message)
         }
       })
@@ -337,8 +337,8 @@ describe('CommandImpl', () => {
         const result = await useCase.deleteByVersion(version)
 
         // Assert
-        expect(isError(result)).toBe(true)
-        if (isError(result)) {
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
           expect(result.error.message).toBe(constraintError.message)
         }
       })
