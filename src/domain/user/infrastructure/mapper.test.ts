@@ -15,6 +15,7 @@ describe('mapToActiveUser', () => {
       email: 'john.doe@example.com',
       password: '$2b$10$N9qo8uLOickgx2ZMRZoMye.sJkOIAg8VCLkDlV4EQOp7/Eo/qGJOm', // bcryptハッシュ例
       displayName: '田中太郎',
+      authenticationId: null,
       lastLogin: lastWeek,
       createdAt: new Date('2023-11-20T10:15:30Z'),
       updatedAt: now,
