@@ -71,12 +71,12 @@ export default class QueryImpl implements Query {
       })
 
       if (!activeUser) {
-        return resultSuccess(null)
+        return success(null)
       }
 
-      return resultSuccess(mapToActiveUser(activeUser))
+      return success(mapToActiveUser(activeUser))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 }

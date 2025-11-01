@@ -1,11 +1,6 @@
+import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import { type ClientError, ServerError } from '@/common/errors'
-import {
-  type AsyncResult,
-  isError,
-  isNull,
-  resultError,
-  resultSuccess,
-} from '@/common/types/utility'
+import { isNull } from '@/common/types/utility'
 import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import type { SupabaseAuthenticationRepository } from './repository'
@@ -43,7 +38,7 @@ export class SupabaseAuthenticationUseCase {
   ): AsyncResult<SignupResult, ClientError | ServerError> {
     // Supabase認証でユーザー作成
     const authResult = await this.repository.signup(email, password)
-    if (isError(authResult)) return authResult
+    if (isFailure(authResult)) return authResult
 
     const { user, session } = authResult.data
 
@@ -54,15 +49,15 @@ export class SupabaseAuthenticationUseCase {
       user.id, // authenticationId
     )
 
-    if (isError(activeUserResult)) {
-      return resultError(
+    if (isFailure(activeUserResult)) {
+      return failure(
         activeUserResult.error instanceof ServerError
           ? activeUserResult.error
           : new ServerError(activeUserResult.error.message),
       )
     }
 
-    return resultSuccess({
+    return success({
       user,
       session,
       activeUser: activeUserResult.data,
@@ -75,14 +70,14 @@ export class SupabaseAuthenticationUseCase {
   ): AsyncResult<LoginResult, ClientError | ServerError> {
     // Supabase認証でログイン
     const authResult = await this.repository.login(email, password)
-    if (isError(authResult)) return authResult
+    if (isFailure(authResult)) return authResult
 
     const { user, session } = authResult.data
 
     // authenticationIdからactive_userを取得
     const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
-    if (isError(activeUserResult)) {
-      return resultError(
+    if (isFailure(activeUserResult)) {
+      return failure(
         activeUserResult.error instanceof ServerError
           ? activeUserResult.error
           : new ServerError(activeUserResult.error.message),
@@ -97,22 +92,22 @@ export class SupabaseAuthenticationUseCase {
         user.id, // authenticationId
       )
 
-      if (isError(createResult)) {
-        return resultError(
+      if (isFailure(createResult)) {
+        return failure(
           createResult.error instanceof ServerError
             ? createResult.error
             : new ServerError(createResult.error.message),
         )
       }
 
-      return resultSuccess({
+      return success({
         user,
         session,
         activeUser: createResult.data,
       })
     }
 
-    return resultSuccess({
+    return success({
       user,
       session,
       activeUser: activeUserResult.data,
@@ -130,14 +125,14 @@ export class SupabaseAuthenticationUseCase {
   async refreshSession(): AsyncResult<LoginResult, ServerError> {
     // Supabase認証でセッション更新
     const authResult = await this.repository.refreshSession()
-    if (isError(authResult)) return authResult
+    if (isFailure(authResult)) return authResult
 
     const { user, session } = authResult.data
 
     // authenticationIdからactive_userを取得
     const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
-    if (isError(activeUserResult)) {
-      return resultError(
+    if (isFailure(activeUserResult)) {
+      return failure(
         activeUserResult.error instanceof ServerError
           ? activeUserResult.error
           : new ServerError(activeUserResult.error.message),
@@ -152,22 +147,22 @@ export class SupabaseAuthenticationUseCase {
         user.id, // authenticationId
       )
 
-      if (isError(createResult)) {
-        return resultError(
+      if (isFailure(createResult)) {
+        return failure(
           createResult.error instanceof ServerError
             ? createResult.error
             : new ServerError(createResult.error.message),
         )
       }
 
-      return resultSuccess({
+      return success({
         user,
         session,
         activeUser: createResult.data,
       })
     }
 
-    return resultSuccess({
+    return success({
       user,
       session,
       activeUser: activeUserResult.data,

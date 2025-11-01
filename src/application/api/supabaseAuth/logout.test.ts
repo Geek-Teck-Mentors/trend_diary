@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import { resultSuccess } from '@/common/types/utility'
+import { success } from '@yuukihayashi0510/core'
 import { SupabaseAuthenticationUseCase } from '@/domain/supabaseAuth'
 import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
@@ -34,7 +34,7 @@ const mockCommand: Command = {
   createActiveWithAuthenticationId: vi.fn((email, _password, authenticationId) => {
     const activeUser = createMockActiveUser(email, authenticationId)
     mockActiveUsers.set(authenticationId, activeUser)
-    return Promise.resolve(resultSuccess(activeUser))
+    return Promise.resolve(success(activeUser))
   }),
   saveActive: vi.fn(),
   createSession: vi.fn(),
@@ -48,7 +48,7 @@ const mockQuery: Query = {
   findActiveBySessionId: vi.fn(),
   findActiveByAuthenticationId: vi.fn((authenticationId) => {
     const activeUser = mockActiveUsers.get(authenticationId) || null
-    return Promise.resolve(resultSuccess(activeUser))
+    return Promise.resolve(success(activeUser))
   }),
 }
 

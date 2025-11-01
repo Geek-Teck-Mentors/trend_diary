@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcryptjs'
+import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
-import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import type {
   SupabaseAuthenticationRepository,
   SupabaseLoginResult,
@@ -30,7 +30,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
     // メールアドレスの重複チェック
     const existingUser = Array.from(this.users.values()).find((u) => u.email === email)
     if (existingUser) {
-      return resultError(new AlreadyExistsError('User already exists'))
+      return failure(new AlreadyExistsError('User already exists'))
     }
 
     const userId = `mock-user-${this.userIdCounter++}`
@@ -55,7 +55,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
       createdAt: mockUser.createdAt,
     }
 
-    return resultSuccess({
+    return success({
       user,
       session: {
         accessToken: `mock-access-token-${userId}`,
@@ -74,12 +74,12 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
     const mockUser = Array.from(this.users.values()).find((u) => u.email === email)
 
     if (!mockUser) {
-      return resultError(new ClientError('Invalid email or password', 401))
+      return failure(new ClientError('Invalid email or password', 401))
     }
 
     const isValid = await bcrypt.compare(password, mockUser.passwordHash)
     if (!isValid) {
-      return resultError(new ClientError('Invalid email or password', 401))
+      return failure(new ClientError('Invalid email or password', 401))
     }
 
     this.currentUserId = mockUser.id
@@ -91,7 +91,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
       createdAt: mockUser.createdAt,
     }
 
-    return resultSuccess({
+    return success({
       user,
       session: {
         accessToken: `mock-access-token-${mockUser.id}`,
@@ -105,17 +105,17 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
 
   async logout(): AsyncResult<void, ServerError> {
     this.currentUserId = null
-    return resultSuccess(undefined)
+    return success(undefined)
   }
 
   async getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError> {
     if (!this.currentUserId) {
-      return resultSuccess(null)
+      return success(null)
     }
 
     const mockUser = this.users.get(this.currentUserId)
     if (!mockUser) {
-      return resultSuccess(null)
+      return success(null)
     }
 
     const user: AuthenticationUser = {
@@ -125,17 +125,17 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
       createdAt: mockUser.createdAt,
     }
 
-    return resultSuccess(user)
+    return success(user)
   }
 
   async refreshSession(): AsyncResult<SupabaseLoginResult, ServerError> {
     if (!this.currentUserId) {
-      return resultError(new ServerError('No active session'))
+      return failure(new ServerError('No active session'))
     }
 
     const mockUser = this.users.get(this.currentUserId)
     if (!mockUser) {
-      return resultError(new ServerError('User not found'))
+      return failure(new ServerError('User not found'))
     }
 
     const user: AuthenticationUser = {
@@ -145,7 +145,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
       createdAt: mockUser.createdAt,
     }
 
-    return resultSuccess({
+    return success({
       user,
       session: {
         accessToken: `mock-access-token-${mockUser.id}`,

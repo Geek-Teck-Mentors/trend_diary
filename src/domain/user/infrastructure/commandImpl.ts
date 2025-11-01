@@ -50,9 +50,9 @@ export default class CommandImpl implements Command {
         return activeUser
       })
 
-      return resultSuccess(mapToActiveUser(activeUser))
+      return success(mapToActiveUser(activeUser))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 

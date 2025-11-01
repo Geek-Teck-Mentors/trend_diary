@@ -1,6 +1,6 @@
 import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supabase-js'
+import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
-import { type AsyncResult, resultError, resultSuccess } from '@/common/types/utility'
 import type {
   SupabaseAuthenticationRepository,
   SupabaseLoginResult,
@@ -90,15 +90,15 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
       if (error) {
         // 既に存在する場合（ヘルパー関数で判定）
         if (isUserAlreadyExistsError(error)) {
-          return resultError(new AlreadyExistsError('User already exists'))
+          return failure(new AlreadyExistsError('User already exists'))
         }
 
         // その他のエラー
-        return resultError(new ServerError(error.message))
+        return failure(new ServerError(error.message))
       }
 
       if (!data.user) {
-        return resultError(new ServerError('User creation failed'))
+        return failure(new ServerError('User creation failed'))
       }
 
       const user = this.toAuthenticationUser(data.user, email)
@@ -108,12 +108,12 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
         session = this.toSessionObject(data.session, user)
       }
 
-      return resultSuccess({
+      return success({
         user,
         session,
       })
     } catch (error) {
-      return resultError(this.handleCatchError(error))
+      return failure(this.handleCatchError(error))
     }
   }
 
@@ -130,25 +130,25 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
       if (error) {
         // 認証失敗（型安全なチェック）
         if (error instanceof AuthInvalidCredentialsError) {
-          return resultError(new ClientError('Invalid email or password', 401))
+          return failure(new ClientError('Invalid email or password', 401))
         }
 
-        return resultError(new ServerError(error.message))
+        return failure(new ServerError(error.message))
       }
 
       if (!data.user || !data.session) {
-        return resultError(new ServerError('Login failed'))
+        return failure(new ServerError('Login failed'))
       }
 
       const user = this.toAuthenticationUser(data.user, email)
       const session = this.toSessionObject(data.session, user)
 
-      return resultSuccess({
+      return success({
         user,
         session,
       })
     } catch (error) {
-      return resultError(this.handleCatchError(error))
+      return failure(this.handleCatchError(error))
     }
   }
 
@@ -157,12 +157,12 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
       const { error } = await this.client.auth.signOut()
 
       if (error) {
-        return resultError(new ServerError(error.message))
+        return failure(new ServerError(error.message))
       }
 
-      return resultSuccess(undefined)
+      return success(undefined)
     } catch (error) {
-      return resultError(this.handleCatchError(error))
+      return failure(this.handleCatchError(error))
     }
   }
 
@@ -174,18 +174,18 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
       } = await this.client.auth.getUser()
 
       if (error) {
-        return resultError(new ServerError(error.message))
+        return failure(new ServerError(error.message))
       }
 
       if (!user) {
-        return resultSuccess(null)
+        return success(null)
       }
 
       const authUser = this.toAuthenticationUser(user)
 
-      return resultSuccess(authUser)
+      return success(authUser)
     } catch (error) {
-      return resultError(this.handleCatchError(error))
+      return failure(this.handleCatchError(error))
     }
   }
 
@@ -197,17 +197,17 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
       } = await this.client.auth.refreshSession()
 
       if (error || !session) {
-        return resultError(new ServerError(error?.message ?? 'Session refresh failed'))
+        return failure(new ServerError(error?.message ?? 'Session refresh failed'))
       }
 
       const user = this.toAuthenticationUser(session.user)
 
-      return resultSuccess({
+      return success({
         user,
         session: this.toSessionObject(session, user),
       })
     } catch (error) {
-      return resultError(this.handleCatchError(error))
+      return failure(this.handleCatchError(error))
     }
   }
 }

@@ -1,8 +1,8 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createSupabaseAuthenticationUseCase } from '@/domain/supabaseAuth'
 import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
@@ -15,7 +15,7 @@ export default async function me(c: Context) {
   const useCase = createSupabaseAuthenticationUseCase(client, rdb)
 
   const result = await useCase.getCurrentUser()
-  if (isError(result)) throw handleError(result.error, logger)
+  if (isFailure(result)) throw handleError(result.error, logger)
 
   const user = result.data
   if (!user) {

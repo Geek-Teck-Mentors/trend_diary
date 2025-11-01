@@ -1,5 +1,5 @@
+import { type AsyncResult } from '@yuukihayashi0510/core'
 import { ClientError, ServerError } from '@/common/errors'
-import { AsyncResult } from '@/common/types/utility'
 import type { AuthenticationSession } from './schema/authenticationSession'
 import type { AuthenticationUser } from './schema/authenticationUser'
 
