@@ -60,4 +60,23 @@ export default class QueryImpl implements Query {
       return failure(new ServerError(error))
     }
   }
+
+  async findActiveByAuthenticationId(
+    authenticationId: string,
+  ): AsyncResult<Nullable<ActiveUser>, Error> {
+    try {
+      const activeUser = await this.db.activeUser.findUnique({
+        where: { authenticationId },
+        include: { adminUser: true },
+      })
+
+      if (!activeUser) {
+        return success(null)
+      }
+
+      return success(mapToActiveUser(activeUser))
+    } catch (error) {
+      return failure(new ServerError(error))
+    }
+  }
 }

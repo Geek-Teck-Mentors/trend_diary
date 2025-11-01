@@ -65,7 +65,7 @@ export class AdminQueryImpl implements AdminQuery {
         this.rdb.activeUser.count({ where: whereClause }),
       ])
 
-      const userList = users.map((user) => toUserListItem(user))
+      const userList = users.map((user: any) => toUserListItem(user))
 
       return success({
         users: userList,

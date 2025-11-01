@@ -11,13 +11,40 @@ export default class CommandImpl implements Command {
 
   async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error> {
     try {
-      const activeUser = await this.db.$transaction(async (tx) => {
+      const activeUser = await this.db.$transaction(async (tx: any) => {
         const user = await tx.user.create({})
         const activeUser = await tx.activeUser.create({
           data: {
             userId: user.userId,
             email,
             password: hashedPassword,
+          },
+        })
+        return activeUser
+      })
+
+      return success(mapToActiveUser(activeUser))
+    } catch (error) {
+      return failure(new ServerError(error))
+    }
+  }
+
+  async createActiveWithAuthenticationId(
+    email: string,
+    hashedPassword: string,
+    authenticationId: string,
+    displayName?: string | null,
+  ): AsyncResult<ActiveUser, Error> {
+    try {
+      const activeUser = await this.db.$transaction(async (tx: any) => {
+        const user = await tx.user.create({})
+        const activeUser = await tx.activeUser.create({
+          data: {
+            userId: user.userId,
+            email,
+            password: hashedPassword,
+            authenticationId,
+            displayName,
           },
         })
         return activeUser

@@ -32,12 +32,13 @@ describe('CommandImpl', () => {
           email,
           password: hashedPassword,
           displayName: 'テストユーザー',
+          authenticationId: null,
           lastLogin: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         }
 
-        mockDb.$transaction.mockImplementation(async (callback) => {
+        mockDb.$transaction.mockImplementation(async (callback: any) => {
           return await callback({
             user: { create: vi.fn().mockResolvedValue(mockUser) } as any,
             activeUser: { create: vi.fn().mockResolvedValue(mockActiveUser) } as any,
@@ -87,6 +88,7 @@ describe('CommandImpl', () => {
           email: 'test@example.com',
           password: 'hashedPassword123',
           displayName: 'テストユーザー',
+          authenticationId: null,
           lastLogin: undefined,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -99,6 +101,7 @@ describe('CommandImpl', () => {
           email: 'test@example.com',
           password: 'hashedPassword123',
           displayName: 'テストユーザー',
+          authenticationId: null,
           lastLogin: null,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -128,6 +131,7 @@ describe('CommandImpl', () => {
           email: 'test@example.com',
           password: 'hashedPassword123',
           displayName: 'テストユーザー',
+          authenticationId: null,
           lastLogin: undefined,
           createdAt: new Date(),
           updatedAt: new Date(),

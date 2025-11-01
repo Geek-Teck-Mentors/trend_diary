@@ -10,6 +10,7 @@ describe('ActiveUserスキーマ', () => {
         email: 'test@example.com',
         password: 'password123',
         displayName: 'テストユーザー',
+        authenticationId: null,
         lastLogin: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),

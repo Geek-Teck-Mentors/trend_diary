@@ -11,6 +11,7 @@ export type UserWithAdminRow = {
   activeUserId: bigint
   email: string
   displayName: string | null
+  authenticationId: string | null
   createdAt: Date
   adminUser: {
     adminUserId: number
