@@ -166,10 +166,16 @@ describe('useTrends', () => {
       mockApiClient.articles.$get.mockResolvedValueOnce(nextPageFakeResponse)
 
       await act(async () => {
-        await result.current.fetchArticles({ page: 2 })
+        // fetchArticles 廃止に伴い URL パラメータ直接更新で再フェッチを誘発
+        const params = new URLSearchParams()
+        params.set('page', '2')
+        result.current.setSearchParams(params)
       })
 
-      // URL 更新 → 新しいキーでフェッチ（today 日付）
+      // URL 更新 → SWR が再フェッチし page が 2 になるのを待ってから API 呼び出し内容を確認
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
       expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith({
         query: {
           to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
@@ -178,10 +184,7 @@ describe('useTrends', () => {
           limit: 20,
         },
       })
-      await waitFor(() => {
-        expect(result.current.page).toBe(2)
-        expect(result.current.articles).toHaveLength(1)
-      })
+      expect(result.current.articles).toHaveLength(1)
       expect(result.current.articles[0].title).toBe('記事3')
     })
 
@@ -236,7 +239,14 @@ describe('useTrends', () => {
       mockApiClient.articles.$get.mockResolvedValueOnce(limitFakeResponse)
 
       await act(async () => {
-        await result.current.fetchArticles({ limit: 10 })
+        const params = new URLSearchParams()
+        params.set('limit', '10')
+        result.current.setSearchParams(params)
+      })
+
+      // limit が 10 に更新された後の再フェッチ完了を待つ
+      await waitFor(() => {
+        expect(result.current.limit).toBe(10)
       })
 
       expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith({
@@ -258,15 +268,15 @@ describe('useTrends', () => {
         totalPages: 3,
       })
 
-      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(fakeResponse)
 
       const { result } = setupHook()
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
+        // 取得完了後に page(=URL由来の1) と totalPages(=レスポンス3) の両方を同時に確認
+        expect(result.current.page).toBe(1)
+        expect(result.current.totalPages).toBe(3)
       })
-      expect(result.current.page).toBe(1)
-      expect(result.current.totalPages).toBe(3)
     })
 
     it('記事が0件でも正しく処理される', async () => {
@@ -335,7 +345,7 @@ describe('useTrends', () => {
   })
 
   describe('エッジケース', () => {
-    it('同一条件で fetchArticles を呼ぶと URL 変更なく再取得 (mutate) が実行される', async () => {
+    it('同一条件で mutate を呼ぶと URL 変更なく再取得が実行される', async () => {
       const firstResponse = generateFakeResponse({ articles: [generateFakeArticle()] })
       const secondResponse = generateFakeResponse({
         articles: [generateFakeArticle({ articleId: BigInt(2), title: '再取得後' })],
@@ -351,7 +361,8 @@ describe('useTrends', () => {
       const before = mockApiClient.articles.$get.mock.calls.length
 
       await act(async () => {
-        await result.current.fetchArticles() // 条件変更なし → mutate 強制再取得
+        // fetchArticles 廃止 → mutate() で強制再取得
+        await result.current.mutate()
       })
 
       // 再取得で最低 1 回は追加される
@@ -368,7 +379,7 @@ describe('useTrends', () => {
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
       const { result } = setupHook()
       await waitFor(() => {
-        expect(result.current.error).toBeDefined()
+        expect(result.current.error?.message).toBe('不正なパラメータです')
       })
       expect(toast.error).toHaveBeenCalledWith('不正なパラメータです')
     })
@@ -378,7 +389,7 @@ describe('useTrends', () => {
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
       const { result } = setupHook()
       await waitFor(() => {
-        expect(result.current.error).toBeDefined()
+        expect(result.current.error?.message).toBe('不明なエラーが発生しました')
       })
       expect(toast.error).toHaveBeenCalledWith('不明なエラーが発生しました')
     })
@@ -389,7 +400,7 @@ describe('useTrends', () => {
       mockApiClient.articles.$get.mockRejectedValue(networkError)
       const { result } = setupHook()
       await waitFor(() => {
-        expect(result.current.error).toBeDefined()
+        expect(result.current.error?.message).toBe(otherErrorMessage)
       })
       expect(toast.error).toHaveBeenCalledWith(otherErrorMessage)
     })
