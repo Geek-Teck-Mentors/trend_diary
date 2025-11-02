@@ -43,7 +43,7 @@ interface ArticlesResponse {
   totalPages: number
 }
 
-export default function useTrends() {
+export default function useTrends(): UseTrendsResult {
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useIsMobile()
   // 初期化日付は不変
@@ -88,9 +88,8 @@ export default function useTrends() {
       })
       if (res.status === 200) {
         const raw = await res.json()
-        const list = (raw as any).articles ? (raw as any).articles : raw.data
         return {
-          articles: list,
+          articles: raw.data,
           page: raw.page,
           limit: raw.limit,
           totalPages: raw.totalPages,
@@ -143,7 +142,7 @@ export default function useTrends() {
     date,
     articles,
     error,
-    isLoading: isLoading,
+    isLoading,
     page,
     limit,
     totalPages,
@@ -151,5 +150,5 @@ export default function useTrends() {
     handleMediaChange,
     selectedMedia,
     mutate,
-  } as UseTrendsResult
+  }
 }

@@ -301,9 +301,7 @@ describe('useTrends', () => {
         page: 2,
         totalPages: 3,
       })
-
-      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
-
+      mockApiClient.articles.$get.mockResolvedValueOnce(fakeResponse)
       const { result } = setupHook(['/?page=2'])
 
       await waitFor(() => {
@@ -325,7 +323,7 @@ describe('useTrends', () => {
     it('URLパラメータのpageが不正な値の場合、page=1として扱う', async () => {
       const fakeResponse = generateFakeResponse()
 
-      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(fakeResponse)
 
       const { result } = setupHook(['/?page=invalid'])
 
@@ -386,7 +384,7 @@ describe('useTrends', () => {
 
     it('API呼び出しで500番台の時、エラーのtoastが表示される', async () => {
       const fakeResponse = generateFakeResponse({ status: 500 })
-      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+      mockApiClient.articles.$get.mockResolvedValueOnce(fakeResponse)
       const { result } = setupHook()
       await waitFor(() => {
         expect(result.current.error?.message).toBe('不明なエラーが発生しました')
