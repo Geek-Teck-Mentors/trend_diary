@@ -1,6 +1,7 @@
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
-import { AsyncResult, Nullable, resultError, resultSuccess } from '@/common/types/utility'
+import { Nullable } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { Query } from '../repository'
 import type { PrivacyPolicy } from '../schema/privacyPolicySchema'
@@ -37,9 +38,9 @@ export default class QueryImpl implements Query {
         hasPrev,
       }
 
-      return resultSuccess(result)
+      return success(result)
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -50,12 +51,12 @@ export default class QueryImpl implements Query {
       })
 
       if (!policy) {
-        return resultSuccess(null)
+        return success(null)
       }
 
-      return resultSuccess(mapToPrivacyPolicy(policy))
+      return success(mapToPrivacyPolicy(policy))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -67,12 +68,12 @@ export default class QueryImpl implements Query {
       })
 
       if (!policy) {
-        return resultSuccess(null)
+        return success(null)
       }
 
-      return resultSuccess(mapToPrivacyPolicy(policy))
+      return success(mapToPrivacyPolicy(policy))
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 
@@ -83,12 +84,12 @@ export default class QueryImpl implements Query {
       })
 
       if (!latestPolicy) {
-        return resultSuccess(1)
+        return success(1)
       }
 
-      return resultSuccess(latestPolicy.version + 1)
+      return success(latestPolicy.version + 1)
     } catch (error) {
-      return resultError(new ServerError(error))
+      return failure(new ServerError(error))
     }
   }
 }

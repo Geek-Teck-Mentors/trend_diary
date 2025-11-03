@@ -1,7 +1,7 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { Article, createArticleUseCase } from '@/domain/article'
 import { ApiArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import getRdbClient from '@/infrastructure/rdb'
@@ -28,7 +28,7 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   const useCase = createArticleUseCase(rdb)
 
   const result = await useCase.searchArticles(convertApiArticleQueryParams(transformedParams))
-  if (isError(result)) {
+  if (isFailure(result)) {
     throw handleError(result.error, logger)
   }
 

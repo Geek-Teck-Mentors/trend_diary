@@ -49,6 +49,7 @@
     "@react-router/cloudflare": "^7.0.0",
     "@tailwindcss/vite": "^4.0.8",
     "@tanstack/react-table": "^8.21.3",
+    "@yuukihayashi0510/core": "npm:@jsr/yuukihayashi0510__core@^0.1.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

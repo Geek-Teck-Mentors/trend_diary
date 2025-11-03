@@ -1,5 +1,7 @@
 {
-  "imports": {},
+  "imports": {
+    "@yuukihayashi0510/core": "jsr:@yuukihayashi0510/core@^0.1.0"
+  },
   "nodeModulesDir": "auto",
   "test": {
     "exclude": [

@@ -1,7 +1,7 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createPrivacyPolicyUseCase, PrivacyPolicyActivate, VersionParam } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -16,7 +16,7 @@ export default async function activatePolicy(
   const useCase = createPrivacyPolicyUseCase(rdb)
 
   const result = await useCase.activatePolicy(version, effectiveAt)
-  if (isError(result)) throw handleError(result.error, logger)
+  if (isFailure(result)) throw handleError(result.error, logger)
 
   logger.info('Policy activated', { version, effectiveAt })
   return c.json(result.data)

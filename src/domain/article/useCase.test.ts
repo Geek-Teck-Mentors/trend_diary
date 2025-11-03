@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
+import { failure, isFailure, isSuccess, success } from '@yuukihayashi0510/core'
 import { mockDeep } from 'vitest-mock-extended'
 import { NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
-import { isError, isSuccess, resultError, resultSuccess } from '@/common/types/utility'
 import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
 import type { Article } from '@/domain/article/schema/articleSchema'
@@ -53,11 +53,11 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledTimes(1)
         const calledArgs = mockArticleQuery.searchArticles.mock.calls[0][0]
         expect(calledArgs).toEqual(params)
@@ -75,11 +75,11 @@ describe('ArticleUseCase', () => {
           page: 2,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledTimes(1)
         const calledArgs = mockArticleQuery.searchArticles.mock.calls[0][0]
         expect(calledArgs).toEqual(params)
@@ -92,11 +92,11 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           title: 'test title',
           limit: 20,
@@ -111,11 +111,11 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           author: 'test author',
           limit: 20,
@@ -130,11 +130,11 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           media: 'zenn',
           limit: 20,
@@ -149,11 +149,11 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           from: '2024-01-01',
           limit: 20,
@@ -168,11 +168,11 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           to: '2024-01-31',
           limit: 20,
@@ -188,11 +188,11 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           from: '2024-01-01',
           to: '2024-01-31',
@@ -208,11 +208,11 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(resultSuccess(mockPaginationResult))
+        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
-        expect(result).toEqual(resultSuccess(mockPaginationResult))
+        expect(result).toEqual(success(mockPaginationResult))
         expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
           readStatus: true,
           limit: 20,
@@ -229,11 +229,11 @@ describe('ArticleUseCase', () => {
       }
 
       const dbError = new ServerError('Database error')
-      mockArticleQuery.searchArticles.mockResolvedValue(resultError(dbError))
+      mockArticleQuery.searchArticles.mockResolvedValue(failure(dbError))
 
       const result = await useCase.searchArticles(params)
 
-      expect(result).toEqual(resultError(dbError))
+      expect(result).toEqual(failure(dbError))
     })
   })
 
@@ -244,7 +244,7 @@ describe('ArticleUseCase', () => {
       const readAt = new Date('2024-01-01T10:00:00Z')
 
       // 記事存在確認のモック
-      mockArticleQuery.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+      mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
 
       const mockReadHistory: ReadHistory = {
         readHistoryId: 1n,
@@ -253,7 +253,7 @@ describe('ArticleUseCase', () => {
         readAt: readAt,
         createdAt: new Date(),
       }
-      mockArticleCommand.createReadHistory.mockResolvedValue(resultSuccess(mockReadHistory))
+      mockArticleCommand.createReadHistory.mockResolvedValue(success(mockReadHistory))
 
       const result = await useCase.createReadHistory(userId, articleId, readAt)
 
@@ -274,15 +274,15 @@ describe('ArticleUseCase', () => {
       const readAt = new Date('2024-01-01T10:00:00Z')
 
       // 記事存在確認のモック
-      mockArticleQuery.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+      mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
 
       const dbError = new ServerError('Database error')
-      mockArticleCommand.createReadHistory.mockResolvedValue(resultError(dbError))
+      mockArticleCommand.createReadHistory.mockResolvedValue(failure(dbError))
 
       const result = await useCase.createReadHistory(userId, articleId, readAt)
 
-      expect(isError(result)).toBe(true)
-      if (isError(result)) {
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
         expect(result.error).toBe(dbError)
       }
     })
@@ -293,12 +293,12 @@ describe('ArticleUseCase', () => {
       const readAt = new Date('2024-01-01T10:00:00Z')
 
       // 記事が存在しない場合のモック
-      mockArticleQuery.findArticleById.mockResolvedValue(resultSuccess(null))
+      mockArticleQuery.findArticleById.mockResolvedValue(success(null))
 
       const result = await useCase.createReadHistory(userId, articleId, readAt)
 
-      expect(isError(result)).toBe(true)
-      if (isError(result)) {
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
         expect(result.error).toBeInstanceOf(NotFoundError)
         expect(result.error.message).toBe('Article with ID 999 not found')
       }
@@ -313,8 +313,8 @@ describe('ArticleUseCase', () => {
       const userId = 100n
       const articleId = 200n
 
-      mockArticleQuery.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
-      mockArticleCommand.deleteAllReadHistory.mockResolvedValue(resultSuccess(undefined))
+      mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
+      mockArticleCommand.deleteAllReadHistory.mockResolvedValue(success(undefined))
 
       const result = await useCase.deleteAllReadHistory(userId, articleId)
 
@@ -329,14 +329,14 @@ describe('ArticleUseCase', () => {
       const userId = 100n
       const articleId = 200n
 
-      mockArticleQuery.findArticleById.mockResolvedValue(resultSuccess(mockArticle))
+      mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
       const dbError = new ServerError('Database error')
-      mockArticleCommand.deleteAllReadHistory.mockResolvedValue(resultError(dbError))
+      mockArticleCommand.deleteAllReadHistory.mockResolvedValue(failure(dbError))
 
       const result = await useCase.deleteAllReadHistory(userId, articleId)
 
-      expect(isError(result)).toBe(true)
-      if (isError(result)) {
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
         expect(result.error).toBe(dbError)
       }
     })

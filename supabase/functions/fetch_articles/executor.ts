@@ -1,7 +1,14 @@
-import { ArticleFetcher, ArticleRepository } from "./model/interface.ts";
+import {
+  ArticleFetcher,
+  ArticleRepository,
+  Executor,
+} from "./model/interface.ts";
+import { isFailure, success } from "@yuukihayashi0510/core";
 import { FeedItem } from "./model/types.ts";
 
-export class Executor {
+type ExecutorData = { message: string };
+
+export class ExecutorImpl implements Executor {
   constructor(
     private media: string,
     private fetcher: ArticleFetcher,
@@ -10,12 +17,24 @@ export class Executor {
 
   async do() {
     console.log("Executing fetcher for media:", this.media);
-    const fetchedItems = await this.fetcher.fetch();
-    if (fetchedItems.length === 0) {
-      return { message: "no items" };
+    const fetchResult = await this.fetcher.fetch();
+
+    if (isFailure(fetchResult)) {
+      return fetchResult;
     }
 
-    const existingArticles = await this.findExistingArticles(fetchedItems);
+    const fetchedItems = fetchResult.data;
+
+    if (fetchedItems.length === 0) {
+      return success<ExecutorData>({ message: "no items" });
+    }
+
+    const findResult = await this.findExistingArticles(fetchedItems);
+    if (isFailure(findResult)) {
+      return findResult;
+    }
+
+    const existingArticles = findResult.data;
     const existingUrls = new Set(
       existingArticles.map((article) => article.url),
     );
@@ -23,11 +42,16 @@ export class Executor {
     const items = fetchedItems.filter((item) => !existingUrls.has(item.url));
 
     console.log("Inserting items into repository:", items.length);
-    const articles = await this.bulkCreateArticles(items);
+    const bulkCreateResult = await this.bulkCreateArticles(items);
+    if (isFailure(bulkCreateResult)) {
+      return bulkCreateResult;
+    }
 
-    return {
+    const articles = bulkCreateResult.data;
+
+    return success({
       message: `Articles fetched successfully: ${articles.length}`,
-    };
+    });
   }
 
   private async findExistingArticles(items: FeedItem[]) {

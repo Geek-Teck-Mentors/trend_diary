@@ -1,9 +1,9 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { isError } from '@/common/types/utility'
 import { createAdminUserUseCase } from '@/domain/admin'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -39,7 +39,7 @@ export default async function grantAdminRole(
 
   // Admin権限付与
   const result = await adminUserUseCase.grantAdminRole(activeUserId, sessionUser.adminUserId)
-  if (isError(result)) {
+  if (isFailure(result)) {
     throw handleError(result.error, logger)
   }
 
