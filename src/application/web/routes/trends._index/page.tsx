@@ -8,10 +8,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/application/web/components/ui/pagination'
-import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ArticleCard from './components/ArticleCard'
+import DateNavigator from './components/DateNavigator'
 import MediaFilter from './components/MediaFilter'
 import type { MediaType } from './useTrends'
 
@@ -26,6 +26,7 @@ type Props = {
   totalPages: number
   selectedMedia: MediaType
   onMediaChange: (media: MediaType) => void
+  onDateChange: (date: Date) => void
 }
 
 export default function TrendsPage({
@@ -39,6 +40,7 @@ export default function TrendsPage({
   totalPages,
   selectedMedia,
   onMediaChange,
+  onDateChange,
 }: Props) {
   const [searchParams] = useSearchParams()
 
@@ -89,7 +91,9 @@ export default function TrendsPage({
 
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
-      <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
+      <div className='pb-4'>
+        <DateNavigator date={date} onDateChange={onDateChange} />
+      </div>
       <div className='mb-4'>
         <MediaFilter selectedMedia={selectedMedia} onMediaChange={onMediaChange} />
       </div>

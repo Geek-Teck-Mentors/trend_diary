@@ -325,6 +325,83 @@ describe('useTrends', () => {
         },
       })
     })
+
+    it('URLパラメータにdate=2024-01-15がある場合、その日付で記事を取得する', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle({ title: '2024-01-15の記事' })],
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?date=2024-01-15'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
+        query: {
+          to: '2024-01-15',
+          from: '2024-01-15',
+          page: 1,
+          limit: 20,
+        },
+      })
+      expect(result.current.date.toISOString()).toContain('2024-01-15')
+    })
+
+    it('URLパラメータのdateが不正な値の場合、今日の日付として扱う', async () => {
+      const fakeResponse = generateFakeResponse()
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?date=invalid'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith({
+        query: {
+          to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+          page: 1,
+          limit: 20,
+        },
+      })
+    })
+
+    it('handleDateChangeを呼び出すと、URLパラメータが更新され、記事が再取得される', async () => {
+      const initialFakeResponse = generateFakeResponse()
+      const nextDateFakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle({ title: '2024-02-01の記事' })],
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
+
+      const { result } = setupHook()
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(nextDateFakeResponse)
+
+      await act(async () => {
+        result.current.handleDateChange(new Date('2024-02-01'))
+      })
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith({
+          query: {
+            to: '2024-02-01',
+            from: '2024-02-01',
+            page: 1,
+            limit: 20,
+          },
+        })
+      })
+    })
   })
 
   describe('エッジケース', () => {

@@ -16,6 +16,7 @@ export default function Trends() {
     date,
     setSearchParams,
     handleMediaChange,
+    handleDateChange,
     selectedMedia,
   } = useTrends()
   const {
@@ -38,6 +39,7 @@ export default function Trends() {
         totalPages={totalPages}
         selectedMedia={selectedMedia}
         onMediaChange={handleMediaChange}
+        onDateChange={handleDateChange}
       />
       {selectedArticle && (
         <ArticleDrawer article={selectedArticle} isOpen={isDrawerOpen} onClose={closeDrawer} />
