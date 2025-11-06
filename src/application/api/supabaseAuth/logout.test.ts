@@ -11,8 +11,6 @@ const mockRepository = new MockSupabaseAuthenticationRepository()
 
 // モックのActiveUser生成関数
 let activeUserIdCounter = 1n
-const mockActiveUsers = new Map<string, ActiveUser>()
-
 function createMockActiveUser(email: string, authenticationId: string): ActiveUser {
   return {
     activeUserId: activeUserIdCounter++,
@@ -32,9 +30,7 @@ function createMockActiveUser(email: string, authenticationId: string): ActiveUs
 const mockCommand: Command = {
   createActive: vi.fn(),
   createActiveWithAuthenticationId: vi.fn((email, _password, authenticationId) => {
-    const activeUser = createMockActiveUser(email, authenticationId)
-    mockActiveUsers.set(authenticationId, activeUser)
-    return Promise.resolve(success(activeUser))
+    return Promise.resolve(success(createMockActiveUser(email, authenticationId)))
   }),
   saveActive: vi.fn(),
   createSession: vi.fn(),
@@ -46,9 +42,8 @@ const mockQuery: Query = {
   findActiveById: vi.fn(),
   findActiveByEmail: vi.fn(),
   findActiveBySessionId: vi.fn(),
-  findActiveByAuthenticationId: vi.fn((authenticationId) => {
-    const activeUser = mockActiveUsers.get(authenticationId) || null
-    return Promise.resolve(success(activeUser))
+  findActiveByAuthenticationId: vi.fn(() => {
+    return Promise.resolve(success(null))
   }),
 }
 
