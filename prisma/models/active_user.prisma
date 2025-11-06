@@ -11,7 +11,8 @@ model ActiveUser {
   lastLogin         DateTime? @default(now()) @map("last_login") @db.Timestamptz()
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
-  userId            BigInt    @unique @map("user_id") @db.BigInt
+
+  userId BigInt @unique @map("user_id") @db.BigInt
 
   user          User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
   session       Session[]
