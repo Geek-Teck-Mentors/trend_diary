@@ -4,8 +4,8 @@ import { AuthV2UseCase } from '@/domain/auth-v2'
 import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
-import { MockAuthV2Repository } from '@/test/mocks/mockSupabaseAuthenticationRepository'
-import app from '../../server'
+import { MockAuthV2Repository } from '@/test/mocks/mockAuthV2Repository'
+import app from '../../../server'
 
 const mockRepository = new MockAuthV2Repository()
 
