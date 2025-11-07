@@ -8,6 +8,12 @@ import type { AuthenticationSession } from './schema/authenticationSession'
 import type { AuthenticationUser } from './schema/authenticationUser'
 
 /**
+ * Supabase認証ユーザーのダミーパスワード
+ * Supabase Authを使用するため、active_userテーブルのpasswordフィールドには実際のパスワードを保存しない
+ */
+const SUPABASE_AUTH_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
+
+/**
  * サインアップ結果（Supabase認証 + ActiveUser統合）
  */
 export type SignupResult = {
@@ -32,6 +38,44 @@ export class SupabaseAuthenticationUseCase {
     private readonly userCommand: Command,
   ) {}
 
+  /**
+   * AuthenticationUserに対応するActiveUserを取得、存在しない場合は作成する
+   */
+  private async getOrCreateActiveUser(
+    user: AuthenticationUser,
+  ): AsyncResult<ActiveUser, ServerError> {
+    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
+    if (isFailure(activeUserResult)) {
+      return failure(this.toServerError(activeUserResult.error))
+    }
+
+    if (isNull(activeUserResult.data)) {
+      const createResult = await this.userCommand.createActiveWithAuthenticationId(
+        user.email,
+        SUPABASE_AUTH_DUMMY_PASSWORD,
+        user.id,
+      )
+
+      if (isFailure(createResult)) {
+        return failure(this.toServerError(createResult.error))
+      }
+
+      return success(createResult.data)
+    }
+
+    return success(activeUserResult.data)
+  }
+
+  /**
+   * ClientErrorまたはServerErrorをServerErrorに変換する
+   */
+  private toServerError(error: ClientError | ServerError | Error): ServerError {
+    if (error instanceof ServerError) {
+      return error
+    }
+    return new ServerError(error.message)
+  }
+
   async signup(
     email: string,
     password: string,
@@ -45,16 +89,12 @@ export class SupabaseAuthenticationUseCase {
     // active_userを作成（パスワードはダミーハッシュ、Supabase認証を使うため不要）
     const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
       user.email,
-      'SUPABASE_AUTH_USER', // ダミーパスワード
-      user.id, // authenticationId
+      SUPABASE_AUTH_DUMMY_PASSWORD,
+      user.id,
     )
 
     if (isFailure(activeUserResult)) {
-      return failure(
-        activeUserResult.error instanceof ServerError
-          ? activeUserResult.error
-          : new ServerError(activeUserResult.error.message),
-      )
+      return failure(this.toServerError(activeUserResult.error))
     }
 
     return success({
@@ -74,38 +114,9 @@ export class SupabaseAuthenticationUseCase {
 
     const { user, session } = authResult.data
 
-    // authenticationIdからactive_userを取得
-    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
-    if (isFailure(activeUserResult)) {
-      return failure(
-        activeUserResult.error instanceof ServerError
-          ? activeUserResult.error
-          : new ServerError(activeUserResult.error.message),
-      )
-    }
-
-    // active_userが存在しない場合は作成
-    if (isNull(activeUserResult.data)) {
-      const createResult = await this.userCommand.createActiveWithAuthenticationId(
-        user.email,
-        'SUPABASE_AUTH_USER', // ダミーパスワード
-        user.id, // authenticationId
-      )
-
-      if (isFailure(createResult)) {
-        return failure(
-          createResult.error instanceof ServerError
-            ? createResult.error
-            : new ServerError(createResult.error.message),
-        )
-      }
-
-      return success({
-        user,
-        session,
-        activeUser: createResult.data,
-      })
-    }
+    // authenticationIdからactive_userを取得または作成
+    const activeUserResult = await this.getOrCreateActiveUser(user)
+    if (isFailure(activeUserResult)) return activeUserResult
 
     return success({
       user,
@@ -129,38 +140,9 @@ export class SupabaseAuthenticationUseCase {
 
     const { user, session } = authResult.data
 
-    // authenticationIdからactive_userを取得
-    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
-    if (isFailure(activeUserResult)) {
-      return failure(
-        activeUserResult.error instanceof ServerError
-          ? activeUserResult.error
-          : new ServerError(activeUserResult.error.message),
-      )
-    }
-
-    // active_userが存在しない場合は作成
-    if (isNull(activeUserResult.data)) {
-      const createResult = await this.userCommand.createActiveWithAuthenticationId(
-        user.email,
-        'SUPABASE_AUTH_USER', // ダミーパスワード
-        user.id, // authenticationId
-      )
-
-      if (isFailure(createResult)) {
-        return failure(
-          createResult.error instanceof ServerError
-            ? createResult.error
-            : new ServerError(createResult.error.message),
-        )
-      }
-
-      return success({
-        user,
-        session,
-        activeUser: createResult.data,
-      })
-    }
+    // authenticationIdからactive_userを取得または作成
+    const activeUserResult = await this.getOrCreateActiveUser(user)
+    if (isFailure(activeUserResult)) return activeUserResult
 
     return success({
       user,
