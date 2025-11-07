@@ -1,13 +1,13 @@
 import { success } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
-import { SupabaseAuthenticationUseCase } from '@/domain/supabaseAuth'
+import { AuthV2UseCase } from '@/domain/auth-v2'
 import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
-import { MockSupabaseAuthenticationRepository } from '@/test/mocks/mockSupabaseAuthenticationRepository'
+import { MockAuthV2Repository } from '@/test/mocks/mockSupabaseAuthenticationRepository'
 import app from '../../server'
 
-const mockRepository = new MockSupabaseAuthenticationRepository()
+const mockRepository = new MockAuthV2Repository()
 
 // モックのActiveUser生成関数
 let activeUserIdCounter = 1n
@@ -47,13 +47,12 @@ const mockQuery: Query = {
   }),
 }
 
-// createSupabaseAuthenticationUseCaseをモックする
-vi.mock('@/domain/supabaseAuth', async (importOriginal) => {
-  const mod = await importOriginal<typeof import('@/domain/supabaseAuth')>()
+// createAuthV2UseCaseをモックする
+vi.mock('@/domain/auth-v2', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('@/domain/auth-v2')>()
   return {
     ...mod,
-    createSupabaseAuthenticationUseCase: () =>
-      new SupabaseAuthenticationUseCase(mockRepository, mockQuery, mockCommand),
+    createAuthV2UseCase: () => new AuthV2UseCase(mockRepository, mockQuery, mockCommand),
   }
 })
 
@@ -67,7 +66,7 @@ vi.mock('@/infrastructure/supabase', () => ({
   createSupabaseAuthClient: () => ({}),
 }))
 
-describe('POST /api/supabase-auth/login', () => {
+describe('POST /api/v2/auth/login', () => {
   const TEST_EMAIL = 'login-test@example.com'
   const TEST_PASSWORD = 'test_password123'
 
@@ -81,7 +80,7 @@ describe('POST /api/supabase-auth/login', () => {
 
   async function requestLogin(body: string) {
     return app.request(
-      '/api/supabase-auth/login',
+      '/api/v2/auth/login',
       {
         method: 'POST',
         body,

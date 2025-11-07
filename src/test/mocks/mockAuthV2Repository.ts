@@ -2,11 +2,11 @@ import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import * as bcrypt from 'bcryptjs'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import type {
-  SupabaseAuthenticationRepository,
-  SupabaseLoginResult,
-  SupabaseSignupResult,
-} from '@/domain/supabaseAuth/repository'
-import type { AuthenticationUser } from '@/domain/supabaseAuth/schema/authenticationUser'
+  AuthV2LoginResult,
+  AuthV2Repository,
+  AuthV2SignupResult,
+} from '@/domain/auth-v2/repository'
+import type { AuthenticationUser } from '@/domain/auth-v2/schema/authenticationUser'
 
 const BCRYPT_SALT_ROUNDS = 10
 
@@ -18,7 +18,7 @@ type MockUser = {
   createdAt: Date
 }
 
-export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticationRepository {
+export class MockAuthV2Repository implements AuthV2Repository {
   private users: Map<string, MockUser> = new Map()
   private currentUserId: string | null = null
   private userIdCounter = 1
@@ -26,7 +26,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
   async signup(
     email: string,
     password: string,
-  ): AsyncResult<SupabaseSignupResult, ClientError | ServerError> {
+  ): AsyncResult<AuthV2SignupResult, ClientError | ServerError> {
     // メールアドレスの重複チェック
     const existingUser = Array.from(this.users.values()).find((u) => u.email === email)
     if (existingUser) {
@@ -70,7 +70,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
   async login(
     email: string,
     password: string,
-  ): AsyncResult<SupabaseLoginResult, ClientError | ServerError> {
+  ): AsyncResult<AuthV2LoginResult, ClientError | ServerError> {
     const mockUser = Array.from(this.users.values()).find((u) => u.email === email)
 
     if (!mockUser) {
@@ -128,7 +128,7 @@ export class MockSupabaseAuthenticationRepository implements SupabaseAuthenticat
     return success(user)
   }
 
-  async refreshSession(): AsyncResult<SupabaseLoginResult, ServerError> {
+  async refreshSession(): AsyncResult<AuthV2LoginResult, ServerError> {
     if (!this.currentUserId) {
       return failure(new ServerError('No active session'))
     }

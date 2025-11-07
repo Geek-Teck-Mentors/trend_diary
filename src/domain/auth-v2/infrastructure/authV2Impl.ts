@@ -1,11 +1,7 @@
 import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supabase-js'
 import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
-import type {
-  SupabaseAuthenticationRepository,
-  SupabaseLoginResult,
-  SupabaseSignupResult,
-} from '../repository'
+import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
 import type { AuthenticationUser } from '../schema/authenticationUser'
 
 /**
@@ -37,7 +33,7 @@ type SupabaseSession = {
   expires_at?: number
 }
 
-export class SupabaseAuthenticationImpl implements SupabaseAuthenticationRepository {
+export class AuthV2Impl implements AuthV2Repository {
   constructor(private readonly client: SupabaseClient) {}
 
   /**
@@ -80,7 +76,7 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
   async signup(
     email: string,
     password: string,
-  ): AsyncResult<SupabaseSignupResult, ClientError | ServerError> {
+  ): AsyncResult<AuthV2SignupResult, ClientError | ServerError> {
     try {
       const { data, error } = await this.client.auth.signUp({
         email,
@@ -103,7 +99,7 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
 
       const user = this.toAuthenticationUser(data.user, email)
 
-      let session: SupabaseSignupResult['session'] = null
+      let session: AuthV2SignupResult['session'] = null
       if (data.session) {
         session = this.toSessionObject(data.session, user)
       }
@@ -120,7 +116,7 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
   async login(
     email: string,
     password: string,
-  ): AsyncResult<SupabaseLoginResult, ClientError | ServerError> {
+  ): AsyncResult<AuthV2LoginResult, ClientError | ServerError> {
     try {
       const { data, error } = await this.client.auth.signInWithPassword({
         email,
@@ -189,7 +185,7 @@ export class SupabaseAuthenticationImpl implements SupabaseAuthenticationReposit
     }
   }
 
-  async refreshSession(): AsyncResult<SupabaseLoginResult, ServerError> {
+  async refreshSession(): AsyncResult<AuthV2LoginResult, ServerError> {
     try {
       const {
         data: { session },

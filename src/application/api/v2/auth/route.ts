@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
 import zodValidator from '@/application/middleware/zodValidator'
-import { authInputSchema } from '@/domain/supabaseAuth'
+import { authInputSchema } from '@/domain/auth-v2'
 import login from './login'
 import logout from './logout'
 import me from './me'

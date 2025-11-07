@@ -4,37 +4,34 @@ import type { AuthenticationSession } from './schema/authenticationSession'
 import type { AuthenticationUser } from './schema/authenticationUser'
 
 /**
- * Supabase認証のサインアップ結果
+ * 認証v2のサインアップ結果
  */
-export type SupabaseSignupResult = {
+export type AuthV2SignupResult = {
   user: AuthenticationUser
   session: AuthenticationSession | null
 }
 
 /**
- * Supabase認証のログイン結果
+ * 認証v2のログイン結果
  */
-export type SupabaseLoginResult = {
+export type AuthV2LoginResult = {
   user: AuthenticationUser
   session: AuthenticationSession
 }
 
-export interface SupabaseAuthenticationRepository {
+export interface AuthV2Repository {
   /**
    * ユーザーを作成する
    */
   signup(
     email: string,
     password: string,
-  ): AsyncResult<SupabaseSignupResult, ClientError | ServerError>
+  ): AsyncResult<AuthV2SignupResult, ClientError | ServerError>
 
   /**
    * ログインする
    */
-  login(
-    email: string,
-    password: string,
-  ): AsyncResult<SupabaseLoginResult, ClientError | ServerError>
+  login(email: string, password: string): AsyncResult<AuthV2LoginResult, ClientError | ServerError>
 
   /**
    * ログアウトする
@@ -49,5 +46,5 @@ export interface SupabaseAuthenticationRepository {
   /**
    * セッションを更新する
    */
-  refreshSession(): AsyncResult<SupabaseLoginResult, ServerError>
+  refreshSession(): AsyncResult<AuthV2LoginResult, ServerError>
 }

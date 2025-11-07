@@ -3,18 +3,18 @@ import { type ClientError, ServerError } from '@/common/errors'
 import { isNull } from '@/common/types/utility'
 import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
-import type { SupabaseAuthenticationRepository } from './repository'
+import type { AuthV2Repository } from './repository'
 import type { AuthenticationSession } from './schema/authenticationSession'
 import type { AuthenticationUser } from './schema/authenticationUser'
 
 /**
- * Supabase認証ユーザーのダミーパスワード
+ * 認証v2ユーザーのダミーパスワード
  * Supabase Authを使用するため、active_userテーブルのpasswordフィールドには実際のパスワードを保存しない
  */
-const SUPABASE_AUTH_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
+const AUTH_V2_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
 
 /**
- * サインアップ結果（Supabase認証 + ActiveUser統合）
+ * サインアップ結果（認証v2 + ActiveUser統合）
  */
 export type SignupResult = {
   user: AuthenticationUser
@@ -23,7 +23,7 @@ export type SignupResult = {
 }
 
 /**
- * ログイン結果（Supabase認証 + ActiveUser統合）
+ * ログイン結果（認証v2 + ActiveUser統合）
  */
 export type LoginResult = {
   user: AuthenticationUser
@@ -31,9 +31,9 @@ export type LoginResult = {
   activeUser: ActiveUser
 }
 
-export class SupabaseAuthenticationUseCase {
+export class AuthV2UseCase {
   constructor(
-    private readonly repository: SupabaseAuthenticationRepository,
+    private readonly repository: AuthV2Repository,
     private readonly userQuery: Query,
     private readonly userCommand: Command,
   ) {}
@@ -52,7 +52,7 @@ export class SupabaseAuthenticationUseCase {
     if (isNull(activeUserResult.data)) {
       const createResult = await this.userCommand.createActiveWithAuthenticationId(
         user.email,
-        SUPABASE_AUTH_DUMMY_PASSWORD,
+        AUTH_V2_DUMMY_PASSWORD,
         user.id,
       )
 
@@ -80,16 +80,16 @@ export class SupabaseAuthenticationUseCase {
     email: string,
     password: string,
   ): AsyncResult<SignupResult, ClientError | ServerError> {
-    // Supabase認証でユーザー作成
+    // 認証v2でユーザー作成
     const authResult = await this.repository.signup(email, password)
     if (isFailure(authResult)) return authResult
 
     const { user, session } = authResult.data
 
-    // active_userを作成（パスワードはダミーハッシュ、Supabase認証を使うため不要）
+    // active_userを作成（パスワードはダミーハッシュ、認証v2を使うため不要）
     const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
       user.email,
-      SUPABASE_AUTH_DUMMY_PASSWORD,
+      AUTH_V2_DUMMY_PASSWORD,
       user.id,
     )
 
@@ -108,7 +108,7 @@ export class SupabaseAuthenticationUseCase {
     email: string,
     password: string,
   ): AsyncResult<LoginResult, ClientError | ServerError> {
-    // Supabase認証でログイン
+    // 認証v2でログイン
     const authResult = await this.repository.login(email, password)
     if (isFailure(authResult)) return authResult
 
@@ -134,7 +134,7 @@ export class SupabaseAuthenticationUseCase {
   }
 
   async refreshSession(): AsyncResult<LoginResult, ServerError> {
-    // Supabase認証でセッション更新
+    // 認証v2でセッション更新
     const authResult = await this.repository.refreshSession()
     if (isFailure(authResult)) return authResult
 
