@@ -1,6 +1,5 @@
 import { success } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
-import { AuthV2UseCase } from '@/domain/auth-v2'
 import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
@@ -47,14 +46,32 @@ const mockQuery: Query = {
   }),
 }
 
-// createAuthV2UseCaseをモックする
-vi.mock('@/domain/auth-v2', async (importOriginal) => {
-  const mod = await importOriginal<typeof import('@/domain/auth-v2')>()
-  return {
-    ...mod,
-    createAuthV2UseCase: () => new AuthV2UseCase(mockRepository, mockQuery, mockCommand),
-  }
-})
+// AuthV2Implをモックして、MockAuthV2Repositoryを使う
+vi.mock('@/domain/auth-v2/infrastructure/authV2Impl', () => ({
+  AuthV2Impl: class {
+    constructor() {
+      return mockRepository
+    }
+  },
+}))
+
+// CommandImplをモック
+vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
+  default: class {
+    constructor() {
+      return mockCommand
+    }
+  },
+}))
+
+// QueryImplをモック
+vi.mock('@/domain/user/infrastructure/queryImpl', () => ({
+  default: class {
+    constructor() {
+      return mockQuery
+    }
+  },
+}))
 
 // getRdbClientをモックして何も返さない（使われないため）
 vi.mock('@/infrastructure/rdb', () => ({
