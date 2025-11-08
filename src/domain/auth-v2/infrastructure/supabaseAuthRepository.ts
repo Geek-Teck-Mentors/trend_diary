@@ -1,6 +1,6 @@
 import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supabase-js'
 import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
-import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
+import { ClientError, ServerError } from '@/common/errors'
 import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
 import type { AuthenticationUser } from '../schema/authenticationUser'
 
@@ -38,9 +38,12 @@ export class SupabaseAuthRepository implements AuthV2Repository {
 
   /**
    * try-catchブロックで捕捉したエラーをServerErrorに変換する共通ヘルパー
+   * セキュリティのため、内部エラーの詳細は隠蔽し一般的なメッセージを返す
    */
   private handleCatchError(error: unknown): ServerError {
-    return new ServerError(error instanceof Error ? error.message : 'Unknown error')
+    // 内部エラーの詳細はログに記録されるべきだが、ユーザーには一般的なメッセージのみ返す
+    // TODO: ロガーを注入してエラー詳細をログに記録する
+    return new ServerError('An unexpected error occurred')
   }
 
   /**
@@ -84,17 +87,19 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       })
 
       if (error) {
-        // 既に存在する場合（ヘルパー関数で判定）
+        // セキュリティ: ユーザー列挙攻撃を防ぐため、既存ユーザーの場合も一般的なエラーメッセージを返す
+        // 既に存在する場合でもエラーメッセージで区別しない
         if (isUserAlreadyExistsError(error)) {
-          return failure(new AlreadyExistsError('User already exists'))
+          // 既存ユーザーの場合も認証エラーとして扱い、詳細を明かさない
+          return failure(new ServerError('Authentication service error'))
         }
 
-        // その他のエラー
-        return failure(new ServerError(error.message))
+        // その他のエラーも一般化（Supabaseの内部エラーメッセージを露出しない）
+        return failure(new ServerError('Authentication service error'))
       }
 
       if (!data.user) {
-        return failure(new ServerError('User creation failed'))
+        return failure(new ServerError('User registration failed'))
       }
 
       const user = this.toAuthenticationUser(data.user, email)
@@ -129,11 +134,12 @@ export class SupabaseAuthRepository implements AuthV2Repository {
           return failure(new ClientError('Invalid email or password', 401))
         }
 
-        return failure(new ServerError(error.message))
+        // その他のエラーも一般化（Supabaseの内部エラーメッセージを露出しない）
+        return failure(new ServerError('Authentication service error'))
       }
 
       if (!data.user || !data.session) {
-        return failure(new ServerError('Login failed'))
+        return failure(new ServerError('Authentication failed'))
       }
 
       const user = this.toAuthenticationUser(data.user, email)
@@ -153,7 +159,8 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       const { error } = await this.client.auth.signOut()
 
       if (error) {
-        return failure(new ServerError(error.message))
+        // Supabaseの内部エラーメッセージを露出しない
+        return failure(new ServerError('Logout failed'))
       }
 
       return success(undefined)
@@ -170,7 +177,8 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       } = await this.client.auth.getUser()
 
       if (error) {
-        return failure(new ServerError(error.message))
+        // Supabaseの内部エラーメッセージを露出しない
+        return failure(new ServerError('Failed to get user information'))
       }
 
       if (!user) {
@@ -193,7 +201,8 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       } = await this.client.auth.refreshSession()
 
       if (error || !session) {
-        return failure(new ServerError(error?.message ?? 'Session refresh failed'))
+        // Supabaseの内部エラーメッセージを露出しない
+        return failure(new ServerError('Session refresh failed'))
       }
 
       const user = this.toAuthenticationUser(session.user)
