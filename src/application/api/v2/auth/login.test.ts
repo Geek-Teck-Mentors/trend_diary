@@ -1,6 +1,6 @@
 import { success } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
-import type { Command, Query } from '@/domain/user/repository'
+import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
 import { MockAuthV2Repository } from '@/test/mocks/mockAuthV2Repository'
@@ -36,15 +36,6 @@ const mockCommand: Command = {
   deleteSession: vi.fn(),
 }
 
-// モックのQuery
-const mockQuery: Query = {
-  findActiveById: vi.fn(),
-  findActiveByEmail: vi.fn(),
-  findActiveBySessionId: vi.fn(),
-  findActiveByAuthenticationId: vi.fn(() => {
-    return Promise.resolve(success(null))
-  }),
-}
 
 // AuthV2Implをモックして、MockAuthV2Repositoryを使う
 vi.mock('@/domain/auth-v2/infrastructure/authV2Impl', () => ({
@@ -64,14 +55,6 @@ vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
   },
 }))
 
-// QueryImplをモック
-vi.mock('@/domain/user/infrastructure/queryImpl', () => ({
-  default: class {
-    constructor() {
-      return mockQuery
-    }
-  },
-}))
 
 // getRdbClientをモックして何も返さない（使われないため）
 vi.mock('@/infrastructure/rdb', () => ({

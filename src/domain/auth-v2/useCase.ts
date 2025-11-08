@@ -34,37 +34,8 @@ export type LoginResult = {
 export class AuthV2UseCase {
   constructor(
     private readonly repository: AuthV2Repository,
-    private readonly userQuery: Query,
     private readonly userCommand: Command,
   ) {}
-
-  /**
-   * AuthenticationUserに対応するActiveUserを取得、存在しない場合は作成する
-   */
-  private async getOrCreateActiveUser(
-    user: AuthenticationUser,
-  ): AsyncResult<ActiveUser, ServerError> {
-    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
-    if (isFailure(activeUserResult)) {
-      return failure(this.toServerError(activeUserResult.error))
-    }
-
-    if (isNull(activeUserResult.data)) {
-      const createResult = await this.userCommand.createActiveWithAuthenticationId(
-        user.email,
-        AUTH_V2_DUMMY_PASSWORD,
-        user.id,
-      )
-
-      if (isFailure(createResult)) {
-        return failure(this.toServerError(createResult.error))
-      }
-
-      return success(createResult.data)
-    }
-
-    return success(activeUserResult.data)
-  }
 
   /**
    * ClientErrorまたはServerErrorをServerErrorに変換する
@@ -114,9 +85,16 @@ export class AuthV2UseCase {
 
     const { user, session } = authResult.data
 
-    // authenticationIdからactive_userを取得または作成
-    const activeUserResult = await this.getOrCreateActiveUser(user)
-    if (isFailure(activeUserResult)) return activeUserResult
+    // active_userを作成
+    const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
+      user.email,
+      AUTH_V2_DUMMY_PASSWORD,
+      user.id,
+    )
+
+    if (isFailure(activeUserResult)) {
+      return failure(this.toServerError(activeUserResult.error))
+    }
 
     return success({
       user,
@@ -140,9 +118,16 @@ export class AuthV2UseCase {
 
     const { user, session } = authResult.data
 
-    // authenticationIdからactive_userを取得または作成
-    const activeUserResult = await this.getOrCreateActiveUser(user)
-    if (isFailure(activeUserResult)) return activeUserResult
+    // active_userを作成
+    const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
+      user.email,
+      AUTH_V2_DUMMY_PASSWORD,
+      user.id,
+    )
+
+    if (isFailure(activeUserResult)) {
+      return failure(this.toServerError(activeUserResult.error))
+    }
 
     return success({
       user,
