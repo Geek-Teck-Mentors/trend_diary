@@ -38,20 +38,12 @@ const mockCommand: Command = {
 
 // AuthV2Implをモックして、MockAuthV2Repositoryを使う
 vi.mock('@/domain/auth-v2/infrastructure/authV2Impl', () => ({
-  AuthV2Impl: class {
-    constructor() {
-      return mockRepository
-    }
-  },
+  AuthV2Impl: vi.fn(() => mockRepository),
 }))
 
 // CommandImplをモック
 vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
-  default: class {
-    constructor() {
-      return mockCommand
-    }
-  },
+  default: vi.fn(() => mockCommand),
 }))
 
 // getRdbClientをモックして何も返さない（使われないため）
