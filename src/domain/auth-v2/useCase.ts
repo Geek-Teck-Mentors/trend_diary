@@ -1,7 +1,6 @@
 import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import { type ClientError, ServerError } from '@/common/errors'
-import { isNull } from '@/common/types/utility'
-import type { Command, Query } from '@/domain/user/repository'
+import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import type { AuthV2Repository } from './repository'
 import type { AuthenticationSession } from './schema/authenticationSession'

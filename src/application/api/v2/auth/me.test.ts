@@ -36,7 +36,6 @@ const mockCommand: Command = {
   deleteSession: vi.fn(),
 }
 
-
 // AuthV2Implをモックして、MockAuthV2Repositoryを使う
 vi.mock('@/domain/auth-v2/infrastructure/authV2Impl', () => ({
   AuthV2Impl: class {
@@ -54,7 +53,6 @@ vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
     }
   },
 }))
-
 
 // getRdbClientをモックして何も返さない（使われないため）
 vi.mock('@/infrastructure/rdb', () => ({
