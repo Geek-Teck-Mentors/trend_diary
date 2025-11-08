@@ -33,7 +33,7 @@ type SupabaseSession = {
   expires_at?: number
 }
 
-export class AuthV2Impl implements AuthV2Repository {
+export class SupabaseAuthRepository implements AuthV2Repository {
   constructor(private readonly client: SupabaseClient) {}
 
   /**

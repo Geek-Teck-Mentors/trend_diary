@@ -36,9 +36,9 @@ const mockCommand: Command = {
   deleteSession: vi.fn(),
 }
 
-// AuthV2Implをモックして、MockAuthV2Repositoryを使う
-vi.mock('@/domain/auth-v2/infrastructure/authV2Impl', () => ({
-  AuthV2Impl: vi.fn(() => mockRepository),
+// SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
+vi.mock('@/domain/auth-v2/infrastructure/supabaseAuthRepository', () => ({
+  SupabaseAuthRepository: vi.fn(() => mockRepository),
 }))
 
 // CommandImplをモック
