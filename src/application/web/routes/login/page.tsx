@@ -1,4 +1,4 @@
-import Footer from '../../components/Footer'
+import Footer from '../../components/footer'
 import LandingHeader from '../../components/landing-header'
 import { AnchorLink } from '../../components/link'
 import PageError from '../../components/page-error'

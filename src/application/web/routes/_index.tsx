@@ -1,7 +1,7 @@
 import { BookOpen, Calendar, Monitor, TrendingUp, Users } from 'lucide-react'
 import { type LoaderFunctionArgs, type MetaFunction, useLoaderData } from 'react-router'
 import { ClipText } from '../components/clip-text'
-import Footer from '../components/Footer'
+import Footer from '../components/footer'
 import LandingHeader from '../components/landing-header'
 import { AnchorLink } from '../components/link'
 import { isUserFeatureEnabled } from '../features/featureFlag'
