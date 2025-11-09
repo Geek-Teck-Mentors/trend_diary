@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from '@/application/web/components/ui/dropdown-menu'
 import { cn } from '@/application/web/components/ui/lib/utils'
-import type { MediaType } from '../useTrends'
+import type { MediaType } from '../use-trends'
 
 type Props = {
   selectedMedia: MediaType
