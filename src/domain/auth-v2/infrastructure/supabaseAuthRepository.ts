@@ -97,11 +97,11 @@ export class SupabaseAuthRepository implements AuthV2Repository {
 
       let session: AuthV2SignupResult['session'] = null
       if (data.session) {
-        session = this.toSessionObject(data.session, userResult.value)
+        session = this.toSessionObject(data.session, userResult.data)
       }
 
       return success({
-        user: userResult.value,
+        user: userResult.data,
         session,
       })
     } catch (error) {
@@ -138,10 +138,10 @@ export class SupabaseAuthRepository implements AuthV2Repository {
         return userResult
       }
 
-      const session = this.toSessionObject(data.session, userResult.value)
+      const session = this.toSessionObject(data.session, userResult.data)
 
       return success({
-        user: userResult.value,
+        user: userResult.data,
         session,
       })
     } catch (error) {
@@ -185,7 +185,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
         return authUserResult
       }
 
-      return success(authUserResult.value)
+      return success(authUserResult.data)
     } catch (error) {
       return failure(this.handleCatchError(error))
     }
@@ -209,8 +209,8 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       }
 
       return success({
-        user: userResult.value,
-        session: this.toSessionObject(session, userResult.value),
+        user: userResult.data,
+        session: this.toSessionObject(session, userResult.data),
       })
     } catch (error) {
       return failure(this.handleCatchError(error))

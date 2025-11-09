@@ -1,10 +1,10 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
 import CONTEXT_KEY from '@/application/middleware/context'
+import { handleError } from '@/common/errors'
 import { createAuthV2UseCase } from '@/domain/auth-v2'
 import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
-import { handleError } from '../errorHandler'
 
 export default async function logout(c: Context) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
