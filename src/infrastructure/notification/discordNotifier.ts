@@ -1,4 +1,4 @@
-import { ChatNotifier, RequestInfo } from '@/adapters/notification'
+import { ChatNotifier, RequestInfo } from './notification'
 
 type DiscordEmbed = {
   title: string
@@ -16,7 +16,7 @@ type DiscordWebhookPayload = {
   embeds: DiscordEmbed[]
 }
 
-class DiscordNotifier implements ChatNotifier {
+export class DiscordNotifier implements ChatNotifier {
   private readonly webhookUrl: string
 
   private readonly maxFieldLength = 1018 // Discord field limit (1024) minus code block chars (6)
@@ -89,5 +89,3 @@ class DiscordNotifier implements ChatNotifier {
     return text.substring(0, maxContentLength) + truncatedSuffix
   }
 }
-
-export default DiscordNotifier
