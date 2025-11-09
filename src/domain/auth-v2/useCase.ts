@@ -36,16 +36,6 @@ export class AuthV2UseCase {
     private readonly userCommand: Command,
   ) {}
 
-  /**
-   * ClientErrorまたはServerErrorをServerErrorに変換する
-   */
-  private toServerError(error: ClientError | ServerError | Error): ServerError {
-    if (error instanceof ServerError) {
-      return error
-    }
-    return new ServerError(error.message)
-  }
-
   async signup(
     email: string,
     password: string,
@@ -64,7 +54,8 @@ export class AuthV2UseCase {
     )
 
     if (isFailure(activeUserResult)) {
-      return failure(this.toServerError(activeUserResult.error))
+      // commandImplは常にServerErrorを返すため、型アサーションで変換
+      return failure(activeUserResult.error as ServerError)
     }
 
     return success({
@@ -92,7 +83,8 @@ export class AuthV2UseCase {
     )
 
     if (isFailure(activeUserResult)) {
-      return failure(this.toServerError(activeUserResult.error))
+      // commandImplは常にServerErrorを返すため、型アサーションで変換
+      return failure(activeUserResult.error as ServerError)
     }
 
     return success({
@@ -125,7 +117,8 @@ export class AuthV2UseCase {
     )
 
     if (isFailure(activeUserResult)) {
-      return failure(this.toServerError(activeUserResult.error))
+      // commandImplは常にServerErrorを返すため、型アサーションで変換
+      return failure(activeUserResult.error as ServerError)
     }
 
     return success({
