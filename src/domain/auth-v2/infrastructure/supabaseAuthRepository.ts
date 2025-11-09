@@ -1,6 +1,6 @@
 import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supabase-js'
 import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
-import { ClientError, ServerError } from '@/common/errors'
+import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
 import type { AuthenticationUser } from '../schema/authenticationUser'
 
@@ -87,14 +87,14 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       })
 
       if (error) {
-        // セキュリティ: ユーザー列挙攻撃を防ぐため、既存ユーザーの場合も一般的なエラーメッセージを返す
-        // 既に存在する場合でもエラーメッセージで区別しない
+        // 既に存在するユーザーの場合は AlreadyExistsError を返す
+        // UX上、「既に使用されています」と明示することは一般的であり、
+        // セキュリティリスクも比較的小さいと判断
         if (isUserAlreadyExistsError(error)) {
-          // 既存ユーザーの場合も認証エラーとして扱い、詳細を明かさない
-          return failure(new ServerError('Authentication service error'))
+          return failure(new AlreadyExistsError('User already exists'))
         }
 
-        // その他のエラーも一般化（Supabaseの内部エラーメッセージを露出しない）
+        // その他のエラーは一般化（Supabaseの内部エラーメッセージを露出しない）
         return failure(new ServerError('Authentication service error'))
       }
 
