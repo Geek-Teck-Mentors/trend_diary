@@ -1,8 +1,8 @@
 import type { MetaFunction } from 'react-router'
 import ArticleDrawer from './components/article-drawer'
+import useArticleDrawer from './hooks/use-article-drawer'
+import useTrends from './hooks/use-trends'
 import TrendsPage from './page'
-import useArticleDrawer from './use-article-drawer'
-import useTrends from './use-trends'
 
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
 

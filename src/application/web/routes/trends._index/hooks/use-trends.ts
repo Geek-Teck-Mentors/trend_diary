@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import getApiClientForClient from '../../infrastructure/api'
+import getApiClientForClient from '../../../infrastructure/api'
+import { MediaType } from '../components/media-filter'
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
@@ -11,8 +12,6 @@ const formatDate = (rawDate: Date) => {
   const day = String(rawDate.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
-
-export type MediaType = 'qiita' | 'zenn' | null
 
 export type FetchArticles = (params: {
   date: Date

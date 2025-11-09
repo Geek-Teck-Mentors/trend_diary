@@ -6,7 +6,8 @@ import {
   DropdownMenuTrigger,
 } from '@/application/web/components/shadcn/dropdown-menu'
 import { cn } from '@/application/web/components/shadcn/lib/utils'
-import type { MediaType } from '../use-trends'
+
+export type MediaType = 'qiita' | 'zenn' | null
 
 type Props = {
   selectedMedia: MediaType
