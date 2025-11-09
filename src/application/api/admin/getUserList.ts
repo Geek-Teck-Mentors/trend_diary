@@ -44,7 +44,7 @@ export default async function getUserList(
   }
 
   return c.json({
-    users: result.data.users.map((user: User) => ({
+    users: result.data.users.map((user) => ({
       activeUserId: user.activeUserId.toString(),
       email: user.email,
       displayName: user.displayName,
