@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect } from 'storybook/test'
-import { AuthenticateForm } from './AuthenticateForm'
+import { AuthenticateForm } from './authenticate-form'
 
 const meta: Meta<typeof AuthenticateForm> = {
   component: AuthenticateForm,

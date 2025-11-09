@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui/card'
-import { AuthenticateForm } from '../../features/authenticate/AuthenticateForm'
+import { AuthenticateForm } from '../../features/authenticate/authenticate-form'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 
 type Props = {
