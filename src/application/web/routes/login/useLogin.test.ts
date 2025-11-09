@@ -3,7 +3,7 @@ import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import useLogin from './useLogin'
 
-vi.mock('../../components/PageError/usePageError', () => {
+vi.mock('../../components/page-error/usePageError', () => {
   return {
     usePageError: () => ({
       pageError: null,

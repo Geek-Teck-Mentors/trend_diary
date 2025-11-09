@@ -1,6 +1,6 @@
 import { NavigateFunction } from 'react-router'
 import useSWRMutation from 'swr/mutation'
-import { usePageError } from '../../components/PageError/usePageError'
+import { usePageError } from '../../components/page-error/usePageError'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { createSWRFetcher } from '../../features/createSWRFetcher'
 
