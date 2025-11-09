@@ -1,6 +1,6 @@
 import { createMiddleware } from 'hono/factory'
 import { v4 as uuidv4 } from 'uuid'
-import { logger } from '@/logger/logger'
+import { logger } from '@/common/logger'
 import CONTEXT_KEY from './context'
 
 const requestLogger = createMiddleware(async (c, next) => {

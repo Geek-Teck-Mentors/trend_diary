@@ -12,16 +12,16 @@ import {
 import { ArrowUpDown, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
 import * as React from 'react'
 import { UserListResponse } from '@/application/api/admin/getUserList'
-import { Badge } from '@/application/web/components/ui/badge'
-import { Button } from '@/application/web/components/ui/button'
-import { Checkbox } from '@/application/web/components/ui/checkbox'
+import { Badge } from '@/application/web/components/shadcn/badge'
+import { Button } from '@/application/web/components/shadcn/button'
+import { Checkbox } from '@/application/web/components/shadcn/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/application/web/components/ui/dropdown-menu'
+} from '@/application/web/components/shadcn/dropdown-menu'
 import {
   Table,
   TableBody,
@@ -29,7 +29,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/application/web/components/ui/table'
+} from '@/application/web/components/shadcn/table'
 import { toJaDateString } from '@/common/locale'
 
 export type DataTableProps = {

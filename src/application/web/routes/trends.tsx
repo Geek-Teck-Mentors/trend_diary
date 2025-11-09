@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
-import AppHeader from '../components/app-header'
-import AppSidebar from '../components/sidebar'
-import { SidebarProvider } from '../components/ui/sidebar'
+import { SidebarProvider } from '../components/shadcn/sidebar'
+import AppHeader from '../components/ui/app-header'
+import AppSidebar from '../components/ui/sidebar'
 import { isUserFeatureEnabled } from '../features/feature-flag'
 import getApiClientForClient from '../infrastructure/api'
 

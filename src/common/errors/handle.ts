@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
-import { LoggerType } from '@/logger/logger'
+import { LoggerType } from '@/common/logger'
 import ClientError from './clientError'
 import ServerError from './serverError'
 

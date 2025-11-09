@@ -1,5 +1,5 @@
 import { UserListResponse } from '@/application/api/admin/getUserList'
-import LoadingSpinner from '../../components/loading-spinner'
+import LoadingSpinner from '../../components/ui/loading-spinner'
 import DataTable, { DataTableProps } from './components/data-table'
 import SearchForm from './components/search-form'
 
