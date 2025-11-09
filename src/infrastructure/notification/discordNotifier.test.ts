@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import DiscordNotifier from './discordNotifier'
+import { DiscordNotifier } from './discordNotifier'
 
 // fetchをモック
 const mockFetch = vi.fn()
