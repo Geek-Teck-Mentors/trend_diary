@@ -30,8 +30,8 @@
     "test-storybook": "vitest run -c vitest/config.storybook.ts"
   },
   "prisma": {
-    "schema": "./prisma",
-    "seed": "npx tsx prisma/seed.ts"
+    "schema": "./src/infrastructure/prisma-orm",
+    "seed": "npx tsx ./src/infrastructure/prisma-orm/seed.ts"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.5.0",
