@@ -1,4 +1,6 @@
 import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
+import { v4 as uuidv4 } from 'uuid'
+import { SESSION_DURATION } from '@/common/constants'
 import { ClientError, ServerError } from '@/common/errors'
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
@@ -18,6 +20,8 @@ const AUTH_V2_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
 export type SignupResult = {
   session: AuthenticationSession | null
   activeUser: ActiveUser
+  sessionId: string
+  expiresAt: Date
 }
 
 /**
@@ -26,6 +30,8 @@ export type SignupResult = {
 export type LoginResult = {
   session: AuthenticationSession
   activeUser: ActiveUser
+  sessionId: string
+  expiresAt: Date
 }
 
 export class AuthV2UseCase {
@@ -55,9 +61,25 @@ export class AuthV2UseCase {
       return failure(activeUserResult.error)
     }
 
+    // HTTPセッションを作成
+    const sessionId = uuidv4()
+    const expiresAt = new Date(Date.now() + SESSION_DURATION)
+    const sessionResult = await this.userCommand.createSession({
+      sessionId,
+      activeUserId: activeUserResult.data.activeUserId,
+      sessionToken: uuidv4(),
+      expiresAt,
+    })
+
+    if (isFailure(sessionResult)) {
+      return failure(sessionResult.error)
+    }
+
     return success({
       session,
       activeUser: activeUserResult.data,
+      sessionId,
+      expiresAt,
     })
   }
 
@@ -82,14 +104,34 @@ export class AuthV2UseCase {
       return failure(activeUserResult.error)
     }
 
+    // HTTPセッションを作成
+    const sessionId = uuidv4()
+    const expiresAt = new Date(Date.now() + SESSION_DURATION)
+    const sessionResult = await this.userCommand.createSession({
+      sessionId,
+      activeUserId: activeUserResult.data.activeUserId,
+      sessionToken: uuidv4(),
+      expiresAt,
+    })
+
+    if (isFailure(sessionResult)) {
+      return failure(sessionResult.error)
+    }
+
     return success({
       session,
       activeUser: activeUserResult.data,
+      sessionId,
+      expiresAt,
     })
   }
 
   async logout(): AsyncResult<void, ServerError> {
     return this.repository.logout()
+  }
+
+  async deleteSession(sessionId: string): AsyncResult<void, ServerError> {
+    return this.userCommand.deleteSession(sessionId)
   }
 
   async getCurrentUser(): AsyncResult<AuthenticationUser, ClientError | ServerError> {
@@ -121,9 +163,25 @@ export class AuthV2UseCase {
       return failure(activeUserResult.error)
     }
 
+    // HTTPセッションを作成
+    const sessionId = uuidv4()
+    const expiresAt = new Date(Date.now() + SESSION_DURATION)
+    const sessionResult = await this.userCommand.createSession({
+      sessionId,
+      activeUserId: activeUserResult.data.activeUserId,
+      sessionToken: uuidv4(),
+      expiresAt,
+    })
+
+    if (isFailure(sessionResult)) {
+      return failure(sessionResult.error)
+    }
+
     return success({
       session,
       activeUser: activeUserResult.data,
+      sessionId,
+      expiresAt,
     })
   }
 }

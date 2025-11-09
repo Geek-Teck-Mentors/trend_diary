@@ -1,6 +1,8 @@
 import { isFailure } from '@yuukihayashi0510/core'
+import { setCookie } from 'hono/cookie'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedContext } from '@/application/middleware/zodValidator'
+import { SESSION_NAME } from '@/common/constants'
 import { handleError } from '@/common/errors'
 import { type AuthInput, createAuthV2UseCase } from '@/domain/auth-v2'
 import getRdbClient from '@/infrastructure/rdb'
@@ -17,8 +19,16 @@ export default async function login(c: ZodValidatedContext<AuthInput>) {
   const result = await useCase.login(valid.email, valid.password)
   if (isFailure(result)) throw handleError(result.error, logger)
 
-  const { activeUser } = result.data
+  const { activeUser, sessionId, expiresAt } = result.data
   logger.info('login success', { activeUserId: activeUser.activeUserId })
+
+  // セッションIDをCookieにセット
+  setCookie(c, SESSION_NAME, sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== 'development',
+    expires: expiresAt,
+    sameSite: 'lax',
+  })
 
   return c.json(
     {
