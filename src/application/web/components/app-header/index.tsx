@@ -5,7 +5,6 @@ import { AnchorLink } from '../link'
 import NavMenu from '../nav-menu'
 import { menuItems } from '../Sidebar'
 import useSidebar from '../Sidebar/useSidebar'
-import UserSection from '../UserSection'
 import { Button } from '../ui/button'
 import {
   Sheet,
@@ -15,6 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../ui/sheet'
+import UserSection from '../user-section'
 
 type Props = {
   displayName: string

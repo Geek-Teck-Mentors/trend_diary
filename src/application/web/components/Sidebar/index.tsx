@@ -4,7 +4,6 @@ import { isLoggedIn } from '../../features/authenticate/userStatus'
 import { InternalPath } from '../../routes'
 import { AnchorLink } from '../link'
 import NavMenu from '../nav-menu'
-import UserSection from '../UserSection'
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +13,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
 } from '../ui/sidebar'
+import UserSection from '../user-section'
 import useSidebar from './useSidebar'
 
 export interface MenuItem {
