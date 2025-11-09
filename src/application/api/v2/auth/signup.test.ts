@@ -77,7 +77,7 @@ describe('POST /api/v2/auth/signup', () => {
 
   it('正常系: signupが成功する', async () => {
     const res = await requestSignup(
-      JSON.stringify({ email: 'signup@test.com', password: 'test_password123' }),
+      JSON.stringify({ email: 'signup@test.com', password: 'Test@password123' }),
     )
 
     expect(res.status).toBe(201)
@@ -95,7 +95,7 @@ describe('POST /api/v2/auth/signup', () => {
     }> = [
       {
         name: '不正なメールアドレス',
-        input: { email: 'invalid-email', password: 'test_password123' },
+        input: { email: 'invalid-email', password: 'Test@password123' },
         status: 422,
       },
       {
@@ -116,11 +116,11 @@ describe('POST /api/v2/auth/signup', () => {
       const email = 'duplicate@example.com'
 
       // 1回目の登録
-      const res1 = await requestSignup(JSON.stringify({ email, password: 'test_password123' }))
+      const res1 = await requestSignup(JSON.stringify({ email, password: 'Test@password123' }))
       expect(res1.status).toBe(201)
 
       // 2回目の登録
-      const res2 = await requestSignup(JSON.stringify({ email, password: 'test_password123' }))
+      const res2 = await requestSignup(JSON.stringify({ email, password: 'Test@password123' }))
       expect(res2.status).toBe(409)
     })
   })

@@ -58,7 +58,7 @@ vi.mock('@/infrastructure/supabase', () => ({
 
 describe('POST /api/v2/auth/login', () => {
   const TEST_EMAIL = 'login-test@example.com'
-  const TEST_PASSWORD = 'test_password123'
+  const TEST_PASSWORD = 'Test@password123'
 
   beforeEach(async () => {
     mockRepository.clearAll()
@@ -100,7 +100,7 @@ describe('POST /api/v2/auth/login', () => {
     }> = [
       {
         name: '不正なメールアドレス',
-        input: { email: 'invalid-email', password: 'test_password123' },
+        input: { email: 'invalid-email', password: 'Test@password123' },
         status: 422,
       },
       {
@@ -110,12 +110,12 @@ describe('POST /api/v2/auth/login', () => {
       },
       {
         name: 'パスワードが間違っている',
-        input: { email: TEST_EMAIL, password: 'wrong_password123' },
+        input: { email: TEST_EMAIL, password: 'Wrong@password123' },
         status: 401,
       },
       {
         name: '存在しないユーザー',
-        input: { email: 'nonexistent@example.com', password: 'test_password123' },
+        input: { email: 'nonexistent@example.com', password: 'Test@password123' },
         status: 401,
       },
     ]
