@@ -1,18 +1,25 @@
 import { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { DiscordNotifier } from '@/infrastructure/notification'
-import { RequestInfo } from '@/infrastructure/notification/notification'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'
+
+export interface RequestInfo {
+  url: string
+  method: string
+  userAgent: string
+}
+
+export interface ChatNotifier {
+  error(error: Error, requestInfo: RequestInfo): Promise<void>
+}
 
 /**
  * Discordにエラー通知を送信する
  */
-const notifyDiscord = (err: Error, webhookUrl: string, requestInfo: RequestInfo): void => {
-  const notifier = new DiscordNotifier(webhookUrl)
-
+const notifyDiscord = (chatNotifier: ChatNotifier, err: Error, requestInfo: RequestInfo): void => {
   // Discord通知をバックグラウンドで実行
-  notifier.error(err, requestInfo)
+  chatNotifier.error(err, requestInfo)
 }
 
 const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
@@ -26,8 +33,9 @@ const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
     userAgent: c.req.header('User-Agent') || '',
   }
 
+  const chatNotifier = new DiscordNotifier(discordWebhookUrl)
   if (err instanceof HTTPException) {
-    if (err.status >= 500) notifyDiscord(err, discordWebhookUrl, requestInfo)
+    if (err.status >= 500) notifyDiscord(chatNotifier, err, requestInfo)
 
     return c.json(
       {
@@ -41,7 +49,7 @@ const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
 
   // 予期しないエラーの場合
   logger.error('Unhandled error', err)
-  notifyDiscord(err, discordWebhookUrl, requestInfo)
+  notifyDiscord(chatNotifier, err, requestInfo)
 
   return c.json('Internal Server Error', { status: 500 })
 }
