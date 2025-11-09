@@ -22,7 +22,7 @@ vi.mock('swr/mutation', () => {
   }
 })
 
-vi.mock('../../features/createSWRFetcher', () => {
+vi.mock('../../features/create-swr-fetcher', () => {
   const mockClient = {
     account: {
       logout: {
