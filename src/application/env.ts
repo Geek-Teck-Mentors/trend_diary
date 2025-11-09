@@ -15,6 +15,8 @@ export type Env = {
     DATABASE_URL: string
     DISCORD_WEBHOOK_URL: string
     FEATURE_USER_ENABLED: string
+    SUPABASE_URL: string
+    SUPABASE_ANON_KEY: string
   }
   Variables: {
     [CONTEXT_KEY.APP_LOG]: typeof logger

@@ -1,0 +1,29 @@
+import { isFailure } from '@yuukihayashi0510/core'
+import type { Context } from 'hono'
+import CONTEXT_KEY from '@/application/middleware/context'
+import { handleError } from '@/common/errors'
+import { createAuthV2UseCase } from '@/domain/auth-v2'
+import getRdbClient from '@/infrastructure/rdb'
+import { createSupabaseAuthClient } from '@/infrastructure/supabase'
+
+export default async function me(c: Context) {
+  const logger = c.get(CONTEXT_KEY.APP_LOG)
+
+  const client = createSupabaseAuthClient(c)
+  const rdb = getRdbClient(c.env.DATABASE_URL)
+  const useCase = createAuthV2UseCase(client, rdb)
+
+  const result = await useCase.getCurrentUser()
+  if (isFailure(result)) throw handleError(result.error, logger)
+
+  const user = result.data
+
+  logger.info('get current user success', { userId: user.id })
+
+  return c.json({
+    user: {
+      id: user.id,
+      email: user.email,
+    },
+  })
+}

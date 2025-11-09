@@ -6,6 +6,7 @@ erDiagram
     String email 
     String password 
     String display_name "❓"
+    String authentication_id "❓"
     DateTime last_login "❓"
     DateTime created_at 
     DateTime updated_at 

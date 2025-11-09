@@ -9,6 +9,7 @@ function makeActiveUser(overrides: Partial<ActiveUser> = {}): ActiveUser {
     email: 'test@example.com',
     password: 'password123',
     displayName: 'テストユーザー',
+    authenticationId: null,
     // lastLogin は省略可能
     createdAt: new Date('2020-01-01T00:00:00Z'),
     updatedAt: new Date('2020-01-02T00:00:00Z'),
