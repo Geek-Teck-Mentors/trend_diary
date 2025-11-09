@@ -54,8 +54,7 @@ export class AuthV2UseCase {
     )
 
     if (isFailure(activeUserResult)) {
-      // commandImplは常にServerErrorを返すため、型アサーションで変換
-      return failure(activeUserResult.error as ServerError)
+      return failure(activeUserResult.error)
     }
 
     return success({
@@ -83,8 +82,7 @@ export class AuthV2UseCase {
     )
 
     if (isFailure(activeUserResult)) {
-      // commandImplは常にServerErrorを返すため、型アサーションで変換
-      return failure(activeUserResult.error as ServerError)
+      return failure(activeUserResult.error)
     }
 
     return success({
@@ -117,8 +115,7 @@ export class AuthV2UseCase {
     )
 
     if (isFailure(activeUserResult)) {
-      // commandImplは常にServerErrorを返すため、型アサーションで変換
-      return failure(activeUserResult.error as ServerError)
+      return failure(activeUserResult.error)
     }
 
     return success({

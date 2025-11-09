@@ -10,7 +10,7 @@ import { mapToActiveUser } from './mapper'
 export default class CommandImpl implements Command {
   constructor(private readonly db: RdbClient) {}
 
-  async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error> {
+  async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, ServerError> {
     try {
       const activeUser = await this.db.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.create({})
@@ -35,7 +35,7 @@ export default class CommandImpl implements Command {
     hashedPassword: string,
     authenticationId: string,
     displayName?: string | null,
-  ): AsyncResult<ActiveUser, Error> {
+  ): AsyncResult<ActiveUser, ServerError> {
     try {
       const activeUser = await this.db.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.create({})
@@ -57,7 +57,7 @@ export default class CommandImpl implements Command {
     }
   }
 
-  async saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, Error> {
+  async saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, ServerError> {
     try {
       const updatedActiveUser = await this.db.activeUser.update({
         where: { activeUserId: activeUser.activeUserId },
@@ -77,7 +77,7 @@ export default class CommandImpl implements Command {
 
   async createSession(
     input: CreateSessionInput,
-  ): AsyncResult<{ sessionId: string; expiresAt: Date }, Error> {
+  ): AsyncResult<{ sessionId: string; expiresAt: Date }, ServerError> {
     try {
       const session = await this.db.session.create({
         data: {
@@ -99,7 +99,7 @@ export default class CommandImpl implements Command {
     }
   }
 
-  async deleteSession(sessionId: string): AsyncResult<void, Error> {
+  async deleteSession(sessionId: string): AsyncResult<void, ServerError> {
     try {
       await this.db.session.delete({
         where: { sessionId },

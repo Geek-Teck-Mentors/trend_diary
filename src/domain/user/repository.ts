@@ -1,4 +1,5 @@
 import { AsyncResult } from '@yuukihayashi0510/core'
+import { ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 import { CreateSessionInput } from './dto'
 import type { ActiveUser } from './schema/activeUserSchema'
@@ -11,16 +12,16 @@ export interface Query {
 }
 
 export interface Command {
-  createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error>
+  createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, ServerError>
   createActiveWithAuthenticationId(
     email: string,
     hashedPassword: string,
     authenticationId: string,
     displayName?: string | null,
-  ): AsyncResult<ActiveUser, Error>
-  saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, Error>
+  ): AsyncResult<ActiveUser, ServerError>
+  saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, ServerError>
   createSession(
     input: CreateSessionInput,
-  ): AsyncResult<{ sessionId: string; expiresAt: Date }, Error>
-  deleteSession(sessionId: string): AsyncResult<void, Error>
+  ): AsyncResult<{ sessionId: string; expiresAt: Date }, ServerError>
+  deleteSession(sessionId: string): AsyncResult<void, ServerError>
 }
