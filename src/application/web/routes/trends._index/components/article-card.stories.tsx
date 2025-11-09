@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, userEvent, waitFor } from 'storybook/test'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import ArticleCard from './ArticleCard'
+import ArticleCard from './article-card'
 
 const defaultArticle: Article = {
   articleId: BigInt(1),

@@ -11,7 +11,7 @@ import {
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/loading-spinner'
-import ArticleCard from './components/ArticleCard'
+import ArticleCard from './components/article-card'
 import MediaFilter from './components/MediaFilter'
 import type { MediaType } from './useTrends'
 
