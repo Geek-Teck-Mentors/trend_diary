@@ -4,7 +4,7 @@ import { ClipText } from '../components/clip-text'
 import Footer from '../components/footer'
 import LandingHeader from '../components/landing-header'
 import { AnchorLink } from '../components/link'
-import { isUserFeatureEnabled } from '../features/featureFlag'
+import { isUserFeatureEnabled } from '../features/feature-flag'
 
 export const meta: MetaFunction = () => [
   { property: 'og:title', content: 'TrendDiary | 技術トレンドを効率的に管理' },

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createSWRFetcher } from './createSWRFetcher'
+import { createSWRFetcher } from './create-swr-fetcher'
 
 // モック設定
 vi.mock('../infrastructure/api', () => {

@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, type MetaFunction, redirect, useNavigate } from 'react-router'
-import { isUserFeatureEnabled } from '../../features/featureFlag'
+import { isUserFeatureEnabled } from '../../features/feature-flag'
 import SignupPage from './page'
 import useSignup from './useSignup'
 

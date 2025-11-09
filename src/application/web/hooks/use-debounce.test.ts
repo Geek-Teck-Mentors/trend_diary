@@ -1,6 +1,6 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
-import { useDebounce } from './useDebounce'
+import { useDebounce } from './use-debounce'
 
 type UseDebounceHook<T> = ReturnType<typeof useDebounce<T>>
 
