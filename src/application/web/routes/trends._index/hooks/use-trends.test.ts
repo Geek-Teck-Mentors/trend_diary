@@ -6,7 +6,7 @@ import { MemoryRouter } from 'react-router'
 import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
 import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import getApiClientForClient from '@/infrastructure/api'
+import getApiClientForClient from '../../../infrastructure/api'
 import useTrends from './use-trends'
 
 // window.matchMediaのモック
@@ -30,7 +30,7 @@ vi.mock('sonner', () => ({
   },
 }))
 
-vi.mock('../../infrastructure/api', () => ({
+vi.mock('../../../infrastructure/api', () => ({
   default: vi.fn(),
 }))
 
