@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor } from 'storybook/test'
-import MediaFilter from './MediaFilter'
+import MediaFilter from './media-filter'
 
 const meta: Meta<typeof MediaFilter> = {
   component: MediaFilter,

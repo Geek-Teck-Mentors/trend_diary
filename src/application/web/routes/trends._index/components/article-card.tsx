@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardTitle } from '@/application/web/components/ui/card'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import MediaIcon from './MediaIcon'
+import MediaIcon from './media-icon'
 
 type Props = {
   article: Article

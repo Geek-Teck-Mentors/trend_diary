@@ -10,7 +10,7 @@ import {
 } from '@/application/web/components/ui/drawer'
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import MediaIcon from './MediaIcon'
+import MediaIcon from './media-icon'
 
 type Props = {
   article: Article
