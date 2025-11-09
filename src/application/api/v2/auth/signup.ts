@@ -23,7 +23,6 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
   return c.json(
     {
       user: {
-        id: activeUser.authenticationId,
         email: activeUser.email,
       },
       session: session
