@@ -1,9 +1,7 @@
 import { BookOpen, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { isLoggedIn } from '../../features/authenticate/user-status'
-import { InternalPath } from '../../routes'
-import { AnchorLink } from '../link'
-import NavMenu from '../nav-menu'
+import { isLoggedIn } from '../../../features/authenticate/user-status'
+import { InternalPath } from '../../../routes'
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +10,9 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-} from '../shadcn/sidebar'
+} from '../../shadcn/sidebar'
+import { AnchorLink } from '../link'
+import NavMenu from '../nav-menu'
 import UserSection from '../user-section'
 import useSidebar from './use-sidebar'
 

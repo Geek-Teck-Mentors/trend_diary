@@ -6,7 +6,7 @@ import {
   CardFooter,
   CardTitle,
 } from '@/application/web/components/shadcn/card'
-import { LinkAsButton } from '../components/link'
+import { LinkAsButton } from '../components/ui/link'
 
 export default function AdminDashboard() {
   return (

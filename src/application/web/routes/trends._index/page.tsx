@@ -10,7 +10,7 @@ import {
 } from '@/application/web/components/shadcn/pagination'
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
-import LoadingSpinner from '../../components/loading-spinner'
+import LoadingSpinner from '../../components/ui/loading-spinner'
 import ArticleCard from './components/article-card'
 import MediaFilter from './components/media-filter'
 import type { MediaType } from './use-trends'

@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react'
 import { Link } from 'react-router'
-import { InternalPath } from '../routes'
-import { Button } from './shadcn/button'
+import { InternalPath } from '../../routes'
+import { Button } from '../shadcn/button'
 
 interface BaseProps {
   className?: string

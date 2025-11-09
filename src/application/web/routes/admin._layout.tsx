@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import { LinkAsButton } from '../components/link'
+import { LinkAsButton } from '../components/ui/link'
 import getApiClientForClient from '../infrastructure/api'
 
 export default function AdminLayout() {

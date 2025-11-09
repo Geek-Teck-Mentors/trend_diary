@@ -1,5 +1,5 @@
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../shadcn/sidebar'
 import { AnchorLink } from '../link'
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../shadcn/sidebar'
 import type { MenuItem } from '../sidebar'
 
 type NavMenuProps = {
