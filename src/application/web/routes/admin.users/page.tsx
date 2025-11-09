@@ -1,7 +1,7 @@
 import { UserListResponse } from '@/application/api/admin/getUserList'
-import LoadingSpinner from '../../components/LoadingSpinner'
-import DataTable, { DataTableProps } from './components/dataTable'
-import SearchForm from './components/searchForm'
+import LoadingSpinner from '../../components/loading-spinner'
+import DataTable, { DataTableProps } from './components/data-table'
+import SearchForm from './components/search-form'
 
 type Props = {
   data?: UserListResponse

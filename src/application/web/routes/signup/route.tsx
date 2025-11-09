@@ -1,7 +1,7 @@
 import { LoaderFunctionArgs, type MetaFunction, redirect, useNavigate } from 'react-router'
-import { isUserFeatureEnabled } from '../../features/featureFlag'
+import { isUserFeatureEnabled } from '../../features/feature-flag'
 import SignupPage from './page'
-import useSignup from './useSignup'
+import useSignup from './use-signup'
 
 export const meta: MetaFunction = () => [
   { title: 'アカウント作成 | TrendDiary' },

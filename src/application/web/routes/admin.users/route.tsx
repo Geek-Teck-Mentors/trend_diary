@@ -5,8 +5,8 @@ import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
 import { UserListResponse } from '@/application/api/admin/getUserList'
 import { Alert, AlertDescription, AlertTitle } from '@/application/web/components/ui/alert'
-import { useDebounce } from '@/application/web/hooks/useDebounce'
-import createSWRFetcher from '../../features/createSWRFetcher'
+import { useDebounce } from '@/application/web/hooks/use-debounce'
+import createSWRFetcher from '../../features/create-swr-fetcher'
 import Page from './page'
 
 export default function AdminUsers() {
