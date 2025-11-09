@@ -1,5 +1,5 @@
 import Footer from '../../components/Footer'
-import LandingHeader from '../../components/LandingHeader'
+import LandingHeader from '../../components/landing-header'
 import { AnchorLink } from '../../components/link'
 import PageError from '../../components/PageError'
 import { PageErrorType } from '../../components/PageError/usePageError'
