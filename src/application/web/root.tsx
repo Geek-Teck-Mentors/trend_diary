@@ -11,7 +11,7 @@ import {
 } from 'react-router'
 
 import './styles.css'
-import { Toaster } from './components/ui/sonner'
+import { Toaster } from './components/shadcn/sonner'
 
 export const meta: MetaFunction = () => [
   { charSet: 'utf-8' },

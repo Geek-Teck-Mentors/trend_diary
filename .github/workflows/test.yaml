@@ -60,7 +60,7 @@ jobs:
         uses: ./.github/actions/diff
         with:
           subdir: 'src/application/web src/application/web/components vitest/'
-          exclude_pattern: 'src/application/web/components/ui'
+          exclude_pattern: 'src/application/web/components/shadcn'
 
       - name: E2Eの差分チェック
         id: check-e2e

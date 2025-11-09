@@ -4,9 +4,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/application/web/components/ui/dropdown-menu'
-import { cn } from '@/application/web/components/ui/lib/utils'
-import type { MediaType } from '../use-trends'
+} from '@/application/web/components/shadcn/dropdown-menu'
+import { cn } from '@/application/web/components/shadcn/lib/utils'
+
+export type MediaType = 'qiita' | 'zenn' | null
 
 type Props = {
   selectedMedia: MediaType

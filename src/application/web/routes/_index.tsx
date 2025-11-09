@@ -1,9 +1,9 @@
 import { BookOpen, Calendar, Monitor, TrendingUp, Users } from 'lucide-react'
 import { type LoaderFunctionArgs, type MetaFunction, useLoaderData } from 'react-router'
-import { ClipText } from '../components/clip-text'
-import Footer from '../components/footer'
-import LandingHeader from '../components/landing-header'
-import { AnchorLink } from '../components/link'
+import { ClipText } from '../components/ui/clip-text'
+import Footer from '../components/ui/footer'
+import LandingHeader from '../components/ui/landing-header'
+import { AnchorLink } from '../components/ui/link'
 import { isUserFeatureEnabled } from '../features/feature-flag'
 
 export const meta: MetaFunction = () => [

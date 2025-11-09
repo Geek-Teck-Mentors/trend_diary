@@ -1,13 +1,13 @@
 import { Calendar, ExternalLink, User, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
-import { AnchorLink, ExternalPath } from '@/application/web/components/link'
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-} from '@/application/web/components/ui/drawer'
+} from '@/application/web/components/shadcn/drawer'
+import { AnchorLink, ExternalPath } from '@/application/web/components/ui/link'
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import MediaIcon from './media-icon'

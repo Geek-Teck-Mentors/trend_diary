@@ -7,7 +7,7 @@
       "**",
       "!**/.vscode/",
       "!prisma/ERD.md",
-      "!src/application/web/components/ui",
+      "!src/application/web/components/shadcn",
       "!src/application/web/components/customized",
       "!**/supabase"
     ]
@@ -350,5 +350,5 @@
     "enabled": true,
     "actions": { "source": { "organizeImports": "on" } }
   },
-  "plugins": ["./plugin/biome/no-use-direct-dom-a-element.grit"]
+  "plugins": ["./src/plugin/biome/no-use-direct-dom-a-element.grit"]
 }
