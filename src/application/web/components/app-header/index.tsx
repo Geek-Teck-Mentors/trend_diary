@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router'
 import { isLoggedIn } from '../../features/authenticate/userStatus'
 import { AnchorLink } from '../link'
 import NavMenu from '../nav-menu'
-import { menuItems } from '../Sidebar'
-import useSidebar from '../Sidebar/useSidebar'
+import { menuItems } from '../sidebar'
+import useSidebar from '../sidebar/useSidebar'
 import { Button } from '../ui/button'
 import {
   Sheet,

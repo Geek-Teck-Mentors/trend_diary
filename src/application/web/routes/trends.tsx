@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
 import AppHeader from '../components/app-header'
-import AppSidebar from '../components/Sidebar'
+import AppSidebar from '../components/sidebar'
 import { SidebarProvider } from '../components/ui/sidebar'
 import { isUserFeatureEnabled } from '../features/featureFlag'
 import getApiClientForClient from '../infrastructure/api'
