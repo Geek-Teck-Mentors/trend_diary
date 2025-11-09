@@ -10,9 +10,9 @@
     "start": "react-router dev",
     "poststart": "docker compose down",
     "build": "react-router build",
-    "test:frontend": "vitest run -c vitest/config.frontend.ts",
-    "test:domain": "vitest run -c vitest/config.domain.ts",
-    "test:api": "vitest run -c vitest/config.api.ts",
+    "test:frontend": "vitest run -c src/test/vitest-config/config.frontend.ts",
+    "test:domain": "vitest run -c src/test/vitest-config/config.domain.ts",
+    "test:api": "vitest run -c src/test/vitest-config/config.api.ts",
     "e2e": "playwright test",
     "e2e:report": "playwright show-report",
     "e2e:gen": "playwright codegen",
@@ -23,11 +23,11 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:sql-only": "prisma migrate dev --skip-seed --skip-generate",
     "db:reset": "prisma migrate reset",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "tsx ./src/infrastructure/prisma-orm/seed.ts",
     "db:deploy": "prisma migrate deploy",
     "supabase:db:type-gen": "supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
-    "test-storybook": "vitest run -c vitest/config.storybook.ts"
+    "test-storybook": "vitest run -c src/test/vitest-config/config.storybook.ts"
   },
   "prisma": {
     "schema": "./src/infrastructure/prisma-orm",
