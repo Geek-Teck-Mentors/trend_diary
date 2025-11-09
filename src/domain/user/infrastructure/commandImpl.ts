@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { RdbClient } from '@/infrastructure/rdb'
@@ -11,7 +12,7 @@ export default class CommandImpl implements Command {
 
   async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, Error> {
     try {
-      const activeUser = await this.db.$transaction(async (tx: any) => {
+      const activeUser = await this.db.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.create({})
         const activeUser = await tx.activeUser.create({
           data: {
@@ -36,7 +37,7 @@ export default class CommandImpl implements Command {
     displayName?: string | null,
   ): AsyncResult<ActiveUser, Error> {
     try {
-      const activeUser = await this.db.$transaction(async (tx: any) => {
+      const activeUser = await this.db.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.create({})
         const activeUser = await tx.activeUser.create({
           data: {
