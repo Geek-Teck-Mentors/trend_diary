@@ -7,7 +7,7 @@ import {
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
-} from '@/application/web/components/ui/pagination'
+} from '@/application/web/components/shadcn/pagination'
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/loading-spinner'

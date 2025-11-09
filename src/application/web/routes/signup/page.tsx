@@ -10,7 +10,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../../components/ui/card'
+} from '../../components/shadcn/card'
 import { AuthenticateForm } from '../../features/authenticate/authenticate-form'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 

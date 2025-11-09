@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardFooter,
   CardTitle,
-} from '@/application/web/components/ui/card'
+} from '@/application/web/components/shadcn/card'
 import { LinkAsButton } from '../components/link'
 
 export default function AdminDashboard() {

@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router'
 import { isLoggedIn } from '../../features/authenticate/user-status'
 import { AnchorLink } from '../link'
 import NavMenu from '../nav-menu'
-import { menuItems } from '../sidebar'
-import useSidebar from '../sidebar/use-sidebar'
-import { Button } from '../ui/button'
+import { Button } from '../shadcn/button'
 import {
   Sheet,
   SheetContent,
@@ -13,7 +11,9 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../ui/sheet'
+} from '../shadcn/sheet'
+import { menuItems } from '../sidebar'
+import useSidebar from '../sidebar/use-sidebar'
 import UserSection from '../user-section'
 
 type Props = {

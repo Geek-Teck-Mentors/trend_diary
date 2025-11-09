@@ -1,6 +1,6 @@
 import { AnchorLink } from '../link'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../shadcn/sidebar'
 import type { MenuItem } from '../sidebar'
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar'
 
 type NavMenuProps = {
   variant: 'sidebar' | 'sheet'

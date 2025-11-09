@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { useIsMobile } from '@/application/web/components/ui/hooks/use-mobile'
+import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
 

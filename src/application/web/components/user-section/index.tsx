@@ -1,5 +1,5 @@
-import { Button } from '../ui/button'
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar'
+import { Button } from '../shadcn/button'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../shadcn/sidebar'
 
 type UserSectionProps = {
   variant: 'sidebar' | 'sheet'

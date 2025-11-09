@@ -3,7 +3,7 @@ import LandingHeader from '../../components/landing-header'
 import { AnchorLink } from '../../components/link'
 import PageError from '../../components/page-error'
 import { PageErrorType } from '../../components/page-error/use-page-error'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/shadcn/card'
 import { AuthenticateForm } from '../../features/authenticate/authenticate-form'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 

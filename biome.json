@@ -7,7 +7,7 @@
       "**",
       "!**/.vscode/",
       "!prisma/ERD.md",
-      "!src/application/web/components/ui",
+      "!src/application/web/components/shadcn",
       "!src/application/web/components/customized",
       "!**/supabase"
     ]

@@ -7,7 +7,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-} from '@/application/web/components/ui/drawer'
+} from '@/application/web/components/shadcn/drawer'
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import MediaIcon from './media-icon'

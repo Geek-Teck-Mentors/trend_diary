@@ -12,7 +12,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-} from '../ui/sidebar'
+} from '../shadcn/sidebar'
 import UserSection from '../user-section'
 import useSidebar from './use-sidebar'
 

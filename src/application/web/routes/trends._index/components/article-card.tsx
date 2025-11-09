@@ -1,4 +1,9 @@
-import { Card, CardContent, CardDescription, CardTitle } from '@/application/web/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from '@/application/web/components/shadcn/card'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import MediaIcon from './media-icon'
 
