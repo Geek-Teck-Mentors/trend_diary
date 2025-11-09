@@ -1,6 +1,6 @@
 import { BookOpen, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { isLoggedIn } from '../../features/authenticate/userStatus'
+import { isLoggedIn } from '../../features/authenticate/user-status'
 import { InternalPath } from '../../routes'
 import { AnchorLink } from '../link'
 import NavMenu from '../nav-menu'

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { isLoggedIn } from './userStatus'
+import { isLoggedIn } from './user-status'
 
 describe('userStatus', () => {
   describe('isLoggedIn', () => {
