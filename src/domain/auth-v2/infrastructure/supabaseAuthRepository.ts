@@ -1,4 +1,9 @@
-import { AuthInvalidCredentialsError, type SupabaseClient } from '@supabase/supabase-js'
+import {
+  AuthInvalidCredentialsError,
+  type Session,
+  type SupabaseClient,
+  type User,
+} from '@supabase/supabase-js'
 import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
@@ -11,26 +16,6 @@ import type { AuthenticationUser } from '../schema/authenticationUser'
  */
 function isUserAlreadyExistsError(error: { message: string }): boolean {
   return error.message.includes('already registered')
-}
-
-type SupabaseUser = {
-  id: string
-  email?: string | null
-  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
-  email_confirmed_at?: string | null
-  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
-  created_at: string
-}
-
-type SupabaseSession = {
-  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
-  access_token: string
-  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
-  refresh_token: string
-  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
-  expires_in?: number
-  // biome-ignore lint/style/useNamingConvention: Supabase API response uses snake_case
-  expires_at?: number
 }
 
 export class SupabaseAuthRepository implements AuthV2Repository {
@@ -49,7 +34,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
   /**
    * Supabaseのユーザーオブジェクトを AuthenticationUser 型に変換する共通ヘルパー
    */
-  private toAuthenticationUser(user: SupabaseUser, fallbackEmail?: string): AuthenticationUser {
+  private toAuthenticationUser(user: User, fallbackEmail?: string): AuthenticationUser {
     const email = user.email ?? fallbackEmail
     if (!email) {
       throw new ServerError('User email is missing from Supabase response')
@@ -66,7 +51,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
   /**
    * Supabaseのセッションオブジェクトを session 型に変換する共通ヘルパー
    */
-  private toSessionObject(session: SupabaseSession, user: AuthenticationUser) {
+  private toSessionObject(session: Session, user: AuthenticationUser) {
     return {
       accessToken: session.access_token,
       refreshToken: session.refresh_token,
