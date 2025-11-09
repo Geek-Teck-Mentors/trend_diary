@@ -26,9 +26,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
    * セキュリティのため、内部エラーの詳細は隠蔽し一般的なメッセージを返す
    */
   private handleCatchError(error: unknown): ServerError {
-    // 内部エラーの詳細はログに記録されるべきだが、ユーザーには一般的なメッセージのみ返す
-    // TODO: ロガーを注入してエラー詳細をログに記録する
-    return new ServerError('An unexpected error occurred')
+    return new ServerError(error)
   }
 
   /**
