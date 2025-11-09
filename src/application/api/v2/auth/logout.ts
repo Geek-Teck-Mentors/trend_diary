@@ -21,7 +21,7 @@ export default async function logout(c: Context) {
   // エラーが返ってきた場合は実際の問題（ネットワークエラー、サーバーエラーなど）
   if (isFailure(result)) {
     logger.error('logout failed', { error: result.error })
-    throw handleError(result.error)
+    throw handleError(result.error, logger)
   }
 
   logger.info('logout success')
