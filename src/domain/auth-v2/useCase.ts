@@ -1,5 +1,5 @@
 import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
-import { type ClientError, ServerError } from '@/common/errors'
+import { ClientError, ServerError } from '@/common/errors'
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import type { AuthV2Repository } from './repository'
@@ -96,8 +96,15 @@ export class AuthV2UseCase {
     return this.repository.logout()
   }
 
-  async getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError> {
-    return this.repository.getCurrentUser()
+  async getCurrentUser(): AsyncResult<AuthenticationUser, ClientError | ServerError> {
+    const result = await this.repository.getCurrentUser()
+    if (isFailure(result)) return result
+
+    if (!result.data) {
+      return failure(new ClientError('Unauthorized', 401))
+    }
+
+    return success(result.data)
   }
 
   async refreshSession(): AsyncResult<LoginResult, ServerError> {

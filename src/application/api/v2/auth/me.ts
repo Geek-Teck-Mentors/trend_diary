@@ -1,6 +1,5 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
-import { HTTPException } from 'hono/http-exception'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { handleError } from '@/common/errors'
 import { createAuthV2UseCase } from '@/domain/auth-v2'
@@ -18,9 +17,6 @@ export default async function me(c: Context) {
   if (isFailure(result)) throw handleError(result.error, logger)
 
   const user = result.data
-  if (!user) {
-    throw new HTTPException(401, { message: 'Unauthorized' })
-  }
 
   logger.info('get current user success', { userId: user.id })
 
