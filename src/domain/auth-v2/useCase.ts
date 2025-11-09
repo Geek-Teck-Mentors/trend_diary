@@ -13,19 +13,17 @@ import type { AuthenticationUser } from './schema/authenticationUser'
 const AUTH_V2_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
 
 /**
- * サインアップ結果（認証v2 + ActiveUser統合）
+ * サインアップ結果
  */
 export type SignupResult = {
-  user: AuthenticationUser
   session: AuthenticationSession | null
   activeUser: ActiveUser
 }
 
 /**
- * ログイン結果（認証v2 + ActiveUser統合）
+ * ログイン結果
  */
 export type LoginResult = {
-  user: AuthenticationUser
   session: AuthenticationSession
   activeUser: ActiveUser
 }
@@ -58,7 +56,6 @@ export class AuthV2UseCase {
     }
 
     return success({
-      user,
       session,
       activeUser: activeUserResult.data,
     })
@@ -86,7 +83,6 @@ export class AuthV2UseCase {
     }
 
     return success({
-      user,
       session,
       activeUser: activeUserResult.data,
     })
@@ -126,7 +122,6 @@ export class AuthV2UseCase {
     }
 
     return success({
-      user,
       session,
       activeUser: activeUserResult.data,
     })

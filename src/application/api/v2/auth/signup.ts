@@ -17,14 +17,14 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
   const result = await useCase.signup(valid.email, valid.password)
   if (isFailure(result)) throw handleError(result.error, logger)
 
-  const { user, session, activeUser } = result.data
-  logger.info('signup success', { userId: user.id, activeUserId: activeUser.activeUserId })
+  const { session, activeUser } = result.data
+  logger.info('signup success', { activeUserId: activeUser.activeUserId })
 
   return c.json(
     {
       user: {
-        id: user.id,
-        email: user.email,
+        id: activeUser.authenticationId,
+        email: activeUser.email,
       },
       session: session
         ? {
@@ -32,10 +32,6 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
             expiresAt: session.expiresAt,
           }
         : null,
-      activeUser: {
-        activeUserId: activeUser.activeUserId.toString(),
-        email: activeUser.email,
-      },
     },
     201,
   )
