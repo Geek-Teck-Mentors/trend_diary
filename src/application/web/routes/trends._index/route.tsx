@@ -1,5 +1,5 @@
 import type { MetaFunction } from 'react-router'
-import ArticleDrawer from './components/ArticleDrawer'
+import ArticleDrawer from './components/article-drawer'
 import TrendsPage from './page'
 import useArticleDrawer from './useArticleDrawer'
 import useTrends from './useTrends'
