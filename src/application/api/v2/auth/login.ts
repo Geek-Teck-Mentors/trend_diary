@@ -17,18 +17,12 @@ export default async function login(c: ZodValidatedContext<AuthInput>) {
   const result = await useCase.login(valid.email, valid.password)
   if (isFailure(result)) throw handleError(result.error, logger)
 
-  const { session, activeUser } = result.data
+  const { activeUser } = result.data
   logger.info('login success', { activeUserId: activeUser.activeUserId })
 
   return c.json(
     {
-      user: {
-        email: activeUser.email,
-      },
-      session: {
-        expiresIn: session.expiresIn,
-        expiresAt: session.expiresAt,
-      },
+      displayName: activeUser.displayName,
     },
     200,
   )

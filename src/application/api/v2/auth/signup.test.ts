@@ -81,9 +81,8 @@ describe('POST /api/v2/auth/signup', () => {
     )
 
     expect(res.status).toBe(201)
-    const body = (await res.json()) as { user: { email: string } }
-    expect(body).toHaveProperty('user')
-    expect(body.user).toHaveProperty('email', 'signup@test.com')
+    const body = (await res.json()) as Record<string, never>
+    expect(body).toEqual({})
   })
 
   describe('準正常系', () => {
