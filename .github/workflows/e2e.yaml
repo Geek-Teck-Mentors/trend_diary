@@ -1,0 +1,131 @@
+name: E2E Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/e2e.yaml'
+      - 'src/**'
+      - 'public/**'
+      - 'prisma/**'
+      - 'package.json'
+      - 'package-lock.json'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - '.github/workflows/e2e.yaml'
+      - 'vitest/**'
+      - 'prisma/**'
+      - 'package.json'
+      - 'package-lock.json'
+
+# カバレッジの可視化で、コメントを残すための権限
+permissions:
+  contents: read
+  pull-requests: write
+
+# 連続push時に同じジョブが並列で実行されるのを防ぐ
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 共通の設定を定義
+env:
+  NODE_VERSION_FILE: .node-version
+  DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      test_runner: ubuntu-latest
+      run_e2e_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-e2e.outputs.diff-count != 0 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: テスト設定ファイルの差分チェック
+        id: check-test-config
+        uses: ./.github/actions/diff
+        with:
+          subdir: '.github/workflows/e2e.yaml vitest/'
+
+      - name: E2Eの差分チェック
+        id: check-e2e
+        uses: ./.github/actions/diff
+        with:
+          subdir: 'src/test/e2e src/application/web/routes'
+
+      - name: 差分結果の表示
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "メインブランチなので、リグレッションテストとして全て実行"
+          else
+            echo "テスト設定差分: ${{ steps.check-test-config.outputs.diff-count }} ファイル"
+            echo "E2E差分: ${{ steps.check-e2e.outputs.diff-count }} ファイル"
+            if [[ "${{ steps.check-test-config.outputs.diff-count }}" != "0" ]]; then
+              echo "テスト設定ファイルに変更があるため、全テストを実行"
+            fi
+            echo "テストの準備完了"
+          fi
+        shell: bash
+
+  e2e:
+    # E2Eテストは時間がかかるため、タイムアウトを設定
+    timeout-minutes: 10
+    needs: setup
+    runs-on: ${{ needs.setup.outputs.test_runner }}
+    if: ${{ needs.setup.outputs.run_e2e_test == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 完全な履歴を取得して差分比較できるようにする
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: Playwrightブラウザのキャッシュ
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+      - name: Playwrightのセットアップ
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      # ページの結合、シナリオテスト実施のためにDBが必要
+      - name: PostgreSQLのセットアップ
+        run: docker compose build && docker compose up -d
+
+      - name: PostgreSQLが起動するまで待機
+        uses: ./.github/actions/backoff
+        with:
+          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
+          fail_command: docker compose down
+
+      - name: DB Migration
+        env:
+          DIRECT_URL: ${{ env.DATABASE_URL }}
+        run: npm run db:migrate
+
+      - name: E2Eテストの差分実行
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run e2e -- --reporter=github --only-changed=origin/$GITHUB_BASE_REF
+
+      - name: E2Eテストの実行
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npm run e2e -- --pass-with-no-tests
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !cancelled()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

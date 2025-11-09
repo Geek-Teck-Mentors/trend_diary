@@ -43,7 +43,6 @@ jobs:
     outputs:
       test_runner: ubuntu-latest
       run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-frontend.outputs.diff-count != 0 }}
-      run_e2e_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-e2e.outputs.diff-count != 0 }}
       run_domain_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-domain.outputs.diff-count != 0 }}
       run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-api.outputs.diff-count != 0 }}
     steps:
@@ -61,12 +60,6 @@ jobs:
         with:
           subdir: 'src/application/web src/application/web/components vitest/'
           exclude_pattern: 'src/application/web/components/shadcn'
-
-      - name: E2Eの差分チェック
-        id: check-e2e
-        uses: ./.github/actions/diff
-        with:
-          subdir: 'src/test/e2e src/application/web/routes'
 
       - name: ドメインの差分チェック
         id: check-domain
@@ -87,7 +80,6 @@ jobs:
           else
             echo "テスト設定差分: ${{ steps.check-test-config.outputs.diff-count }} ファイル"
             echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
-            echo "E2E差分: ${{ steps.check-e2e.outputs.diff-count }} ファイル"
             echo "ドメイン差分: ${{ steps.check-domain.outputs.diff-count }} ファイル"
             echo "API差分: ${{ steps.check-api.outputs.diff-count }} ファイル"
             if [[ "${{ steps.check-test-config.outputs.diff-count }}" != "0" ]]; then
@@ -112,64 +104,6 @@ jobs:
         uses: ./.github/actions/test_cov
         with:
           target: frontend
-
-  e2e:
-    # E2Eテストは時間がかかるため、タイムアウトを設定
-    timeout-minutes: 10
-    needs: setup
-    runs-on: ${{ needs.setup.outputs.test_runner }}
-    if: ${{ needs.setup.outputs.run_e2e_test == 'true' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # 完全な履歴を取得して差分比較できるようにする
-      - name: Node.jsの構築
-        uses: ./.github/actions/setup_node
-        with:
-          node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: Playwrightブラウザのキャッシュ
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-      - name: Playwrightのセットアップ
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium --with-deps
-
-      # ページの結合、シナリオテスト実施のためにDBが必要
-      - name: PostgreSQLのセットアップ
-        run: docker compose build && docker compose up -d
-
-      - name: PostgreSQLが起動するまで待機
-        uses: ./.github/actions/backoff
-        with:
-          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
-          fail_command: docker compose down
-
-      - name: DB Migration
-        env:
-          DIRECT_URL: ${{ env.DATABASE_URL }}
-        run: npm run db:migrate
-
-      - name: E2Eテストの差分実行
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm run e2e -- --reporter=github --only-changed=origin/$GITHUB_BASE_REF
-
-      - name: E2Eテストの実行
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: npm run e2e -- --pass-with-no-tests
-
-      - uses: actions/upload-artifact@v4
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !cancelled()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
 
   domain:
     needs: setup
