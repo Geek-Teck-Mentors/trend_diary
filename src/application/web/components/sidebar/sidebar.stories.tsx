@@ -6,7 +6,7 @@ import AppSidebar from './index'
 import useSidebar from './use-sidebar'
 
 // useSidebarフックをモック
-vi.mock('./useSidebar', () => ({
+vi.mock('./use-sidebar', () => ({
   default: vi.fn(() => ({
     handleLogout: vi.fn(),
     isLoading: false,
