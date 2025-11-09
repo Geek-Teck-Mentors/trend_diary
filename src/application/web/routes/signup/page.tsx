@@ -2,7 +2,7 @@ import Footer from '../../components/footer'
 import LandingHeader from '../../components/landing-header'
 import { AnchorLink } from '../../components/link'
 import PageError from '../../components/page-error'
-import { PageErrorType } from '../../components/page-error/usePageError'
+import { PageErrorType } from '../../components/page-error/use-page-error'
 import {
   Card,
   CardContent,

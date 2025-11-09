@@ -1,7 +1,7 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { usePageError } from './usePageError'
+import { usePageError } from './use-page-error'
 
 const TEST_ERROR_DATA = {
   STANDARD: { title: 'エラータイトル', description: 'エラー内容' },

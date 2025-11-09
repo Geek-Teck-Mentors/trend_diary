@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
-import { PageErrorType } from './usePageError'
+import { PageErrorType } from './use-page-error'
 
 type Props = {
   pageError: PageErrorType

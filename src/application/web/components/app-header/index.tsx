@@ -4,7 +4,7 @@ import { isLoggedIn } from '../../features/authenticate/user-status'
 import { AnchorLink } from '../link'
 import NavMenu from '../nav-menu'
 import { menuItems } from '../sidebar'
-import useSidebar from '../sidebar/useSidebar'
+import useSidebar from '../sidebar/use-sidebar'
 import { Button } from '../ui/button'
 import {
   Sheet,

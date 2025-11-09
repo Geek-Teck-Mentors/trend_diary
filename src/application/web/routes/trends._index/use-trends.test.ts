@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
 import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../infrastructure/api'
-import useTrends from './useTrends'
+import useTrends from './use-trends'
 
 // window.matchMediaのモック
 Object.defineProperty(window, 'matchMedia', {

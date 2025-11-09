@@ -1,7 +1,7 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import useSidebar from './useSidebar'
+import useSidebar from './use-sidebar'
 
 vi.mock('sonner', () => {
   return {

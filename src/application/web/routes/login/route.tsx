@@ -1,7 +1,7 @@
 import { LoaderFunctionArgs, type MetaFunction, redirect, useNavigate } from 'react-router'
 import { isUserFeatureEnabled } from '../../features/feature-flag'
 import LoginPage from './page'
-import useLogin from './useLogin'
+import useLogin from './use-login'
 
 export const meta: MetaFunction = () => [
   { title: 'ログイン | TrendDiary' },

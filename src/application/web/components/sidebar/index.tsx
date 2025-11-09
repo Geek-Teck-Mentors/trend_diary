@@ -14,7 +14,7 @@ import {
   SidebarHeader,
 } from '../ui/sidebar'
 import UserSection from '../user-section'
-import useSidebar from './useSidebar'
+import useSidebar from './use-sidebar'
 
 export interface MenuItem {
   title: string

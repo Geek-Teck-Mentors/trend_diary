@@ -1,7 +1,7 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
-import useArticleDrawer from './useArticleDrawer'
+import useArticleDrawer from './use-article-drawer'
 
 type UseArticleDrawerHook = ReturnType<typeof useArticleDrawer>
 

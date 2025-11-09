@@ -3,7 +3,7 @@ import { expect, userEvent } from 'storybook/test'
 import { vi } from 'vitest'
 import { SidebarProvider } from '../ui/sidebar'
 import AppSidebar from './index'
-import useSidebar from './useSidebar'
+import useSidebar from './use-sidebar'
 
 // useSidebarフックをモック
 vi.mock('./useSidebar', () => ({

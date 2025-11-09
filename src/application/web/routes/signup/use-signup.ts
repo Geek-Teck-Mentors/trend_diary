@@ -1,34 +1,31 @@
 import { NavigateFunction } from 'react-router'
 import useSWRMutation from 'swr/mutation'
-import { usePageError } from '../../components/page-error/usePageError'
+import { usePageError } from '../../components/page-error/use-page-error'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { createSWRFetcher } from '../../features/create-swr-fetcher'
 
-export default function useLogin(navigate: NavigateFunction) {
+export default function useSignup(navigate: NavigateFunction) {
   const { pageError, newPageError, clearPageError } = usePageError()
   const { client, apiCall } = createSWRFetcher()
 
   const { trigger, isMutating } = useSWRMutation(
-    'user/login',
+    'user/signup',
     async (_key: string, { arg }: { arg: AuthenticateFormData }) => {
       return apiCall(() =>
-        client.user.login.$post({
-          json: {
-            email: arg.email,
-            password: arg.password,
-          },
+        client.user.$post({
+          json: arg,
         }),
       )
     },
     {
       onSuccess: () => {
-        navigate('/trends')
+        navigate('/login')
       },
       onError: (error: Error) => {
-        if (error.message.includes('401') || error.message.includes('404')) {
-          newPageError('認証エラー', 'メールアドレスまたはパスワードが正しくありません')
+        if (error.message.includes('409')) {
+          newPageError('認証エラー', 'このメールアドレスは既に使用されています')
         } else if (error.message.includes('500')) {
-          newPageError('サーバーエラー', '不明なエラーが発生しました')
+          newPageError('サーバーエラー', 'サインアップに失敗しました')
         } else {
           newPageError('ネットワークエラー', 'ネットワークエラーが発生しました')
         }

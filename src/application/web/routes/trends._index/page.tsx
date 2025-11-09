@@ -13,7 +13,7 @@ import type { ArticleOutput as Article } from '@/domain/article/schema/articleSc
 import LoadingSpinner from '../../components/loading-spinner'
 import ArticleCard from './components/article-card'
 import MediaFilter from './components/media-filter'
-import type { MediaType } from './useTrends'
+import type { MediaType } from './use-trends'
 
 type Props = {
   date: Date
