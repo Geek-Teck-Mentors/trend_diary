@@ -281,6 +281,7 @@ describe('Admin Mapper', () => {
         activeUserId: 123456789n,
         email: 'test@example.com',
         displayName: 'テストユーザー',
+        authenticationId: null,
         createdAt: now,
         adminUser: {
           adminUserId: 1,

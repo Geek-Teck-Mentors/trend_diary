@@ -5,7 +5,7 @@ import { Nullable } from '@/common/types/utility'
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
-import { toUserListItem } from './mapper'
+import { toUserListItem, type UserWithAdminRow } from './mapper'
 
 export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
@@ -65,7 +65,7 @@ export class AdminQueryImpl implements AdminQuery {
         this.rdb.activeUser.count({ where: whereClause }),
       ])
 
-      const userList = users.map((user) => toUserListItem(user))
+      const userList = users.map((user) => toUserListItem(user as UserWithAdminRow))
 
       return success({
         users: userList,

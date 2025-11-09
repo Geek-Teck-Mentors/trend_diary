@@ -46,6 +46,8 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.4",
     "@react-router/cloudflare": "^7.0.0",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.76.1",
     "@tailwindcss/vite": "^4.0.8",
     "@tanstack/react-table": "^8.21.3",
     "@yuukihayashi0510/core": "npm:@jsr/yuukihayashi0510__core@^0.1.0",
