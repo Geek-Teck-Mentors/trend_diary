@@ -5,7 +5,7 @@ services:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./prisma/setup_config.sql:/docker-entrypoint-initdb.d/setup_config.sql
+      - ./src/infrastructure/prisma-orm/setup_config.sql:/docker-entrypoint-initdb.d/setup_config.sql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
