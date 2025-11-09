@@ -4,7 +4,7 @@ import {
   type SupabaseClient,
   type User,
 } from '@supabase/supabase-js'
-import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { type AsyncResult, failure, isFailure, type Result, success } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
 import type { AuthenticationUser } from '../schema/authenticationUser'
@@ -34,18 +34,21 @@ export class SupabaseAuthRepository implements AuthV2Repository {
   /**
    * Supabaseのユーザーオブジェクトを AuthenticationUser 型に変換する共通ヘルパー
    */
-  private toAuthenticationUser(user: User, fallbackEmail?: string): AuthenticationUser {
+  private toAuthenticationUser(
+    user: User,
+    fallbackEmail?: string,
+  ): Result<AuthenticationUser, ServerError> {
     const email = user.email ?? fallbackEmail
     if (!email) {
-      throw new ServerError('User email is missing from Supabase response')
+      return failure(new ServerError('User email is missing from Supabase response'))
     }
 
-    return {
+    return success({
       id: user.id,
       email,
       emailConfirmedAt: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
       createdAt: new Date(user.created_at),
-    }
+    })
   }
 
   /**
@@ -87,15 +90,18 @@ export class SupabaseAuthRepository implements AuthV2Repository {
         return failure(new ServerError('User registration failed'))
       }
 
-      const user = this.toAuthenticationUser(data.user, email)
+      const userResult = this.toAuthenticationUser(data.user, email)
+      if (isFailure(userResult)) {
+        return userResult
+      }
 
       let session: AuthV2SignupResult['session'] = null
       if (data.session) {
-        session = this.toSessionObject(data.session, user)
+        session = this.toSessionObject(data.session, userResult.value)
       }
 
       return success({
-        user,
+        user: userResult.value,
         session,
       })
     } catch (error) {
@@ -127,11 +133,15 @@ export class SupabaseAuthRepository implements AuthV2Repository {
         return failure(new ServerError('Authentication failed'))
       }
 
-      const user = this.toAuthenticationUser(data.user, email)
-      const session = this.toSessionObject(data.session, user)
+      const userResult = this.toAuthenticationUser(data.user, email)
+      if (isFailure(userResult)) {
+        return userResult
+      }
+
+      const session = this.toSessionObject(data.session, userResult.value)
 
       return success({
-        user,
+        user: userResult.value,
         session,
       })
     } catch (error) {
@@ -170,9 +180,12 @@ export class SupabaseAuthRepository implements AuthV2Repository {
         return success(null)
       }
 
-      const authUser = this.toAuthenticationUser(user)
+      const authUserResult = this.toAuthenticationUser(user)
+      if (isFailure(authUserResult)) {
+        return authUserResult
+      }
 
-      return success(authUser)
+      return success(authUserResult.value)
     } catch (error) {
       return failure(this.handleCatchError(error))
     }
@@ -190,11 +203,14 @@ export class SupabaseAuthRepository implements AuthV2Repository {
         return failure(new ServerError('Session refresh failed'))
       }
 
-      const user = this.toAuthenticationUser(session.user)
+      const userResult = this.toAuthenticationUser(session.user)
+      if (isFailure(userResult)) {
+        return userResult
+      }
 
       return success({
-        user,
-        session: this.toSessionObject(session, user),
+        user: userResult.value,
+        session: this.toSessionObject(session, userResult.value),
       })
     } catch (error) {
       return failure(this.handleCatchError(error))
