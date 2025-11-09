@@ -1,5 +1,5 @@
 import { AnchorLink } from '../link'
-import type { MenuItem } from '../Sidebar'
+import type { MenuItem } from '../sidebar'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar'
 
 type NavMenuProps = {
