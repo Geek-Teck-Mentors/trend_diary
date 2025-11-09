@@ -1,10 +1,10 @@
-import Footer from '../../components/Footer'
-import LandingHeader from '../../components/LandingHeader'
+import Footer from '../../components/footer'
+import LandingHeader from '../../components/landing-header'
 import { AnchorLink } from '../../components/link'
-import PageError from '../../components/PageError'
-import { PageErrorType } from '../../components/PageError/usePageError'
+import PageError from '../../components/page-error'
+import { PageErrorType } from '../../components/page-error/use-page-error'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
-import { AuthenticateForm } from '../../features/authenticate/AuthenticateForm'
+import { AuthenticateForm } from '../../features/authenticate/authenticate-form'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 
 type Props = {
