@@ -1,11 +1,57 @@
+import { z } from 'zod'
 import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
+import { OffsetPaginationResult, offsetPaginationSchema } from '@/common/pagination'
 import { Article, ArticleQueryParams, createArticleUseCase } from '@/domain/article'
+import { ArticleOutput } from '@/domain/article/schema/articleSchema'
 import getRdbClient from '@/infrastructure/rdb'
-import { ApiArticleQueryParams } from '../schema/apiArticleQuerySchema'
-import { ArticleListResponse, ArticleResponse } from '../schema/articleResponseSchema'
+
+const mediaEnum = z.enum(['qiita', 'zenn'])
+const readStatusEnum = z.enum(['0', '1'])
+
+const baseArticleSearchSchema = z.object({
+  title: z.string().optional(),
+  author: z.string().optional(),
+  media: mediaEnum.optional(),
+  from: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  to: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+})
+
+// 日付の範囲チェック用のrefine関数
+const dateRangeRefine = <T extends { from?: string; to?: string }>(data: T) => {
+  if (data.from && data.to) {
+    return data.from <= data.to
+  }
+  return true
+}
+
+// エラーメッセージ
+const DATE_RANGE_ERROR_MESSAGE = 'fromはtoより前の日付を指定してください'
+
+export const apiArticleQuerySchema = baseArticleSearchSchema
+  .extend({
+    read_status: readStatusEnum.optional(),
+  })
+  .merge(offsetPaginationSchema)
+  .refine(dateRangeRefine, {
+    message: DATE_RANGE_ERROR_MESSAGE,
+  })
+
+export type ApiArticleQueryParams = z.infer<typeof apiArticleQuerySchema>
+
+export type ArticleResponse = Omit<ArticleOutput, 'articleId'> & {
+  articleId: string
+}
+
+export type ArticleListResponse = OffsetPaginationResult<ArticleResponse>
 
 export default async function getArticles(c: ZodValidatedQueryContext<ApiArticleQueryParams>) {
   const transformedParams = c.req.valid('query')
