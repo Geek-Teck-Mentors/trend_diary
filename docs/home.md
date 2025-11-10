@@ -14,25 +14,72 @@
 
 ```sh
 ./src
-├── application # 今回作成するアプリケーションサーバ用のディレクトリ
-│   ├── api # hono api
+├── application # アプリケーション層
+│   ├── api # Hono API
+│   │   ├── admin # 管理者API
+│   │   ├── article # 記事API
+│   │   ├── policy # ポリシーAPI
+│   │   ├── user # ユーザーAPI
+│   │   ├── v2 # API v2
+│   │   └── route.ts
+│   ├── middleware # ミドルウェア
+│   │   ├── authenticator.ts
+│   │   ├── errorHandler.ts
+│   │   ├── requestLogger.ts
+│   │   └── zodValidator.ts
+│   ├── server.ts # アプリケーションサーバ
 │   ├── env.ts
-│   ├── middleware
-│   ├── server.ts # アプリケーションを起動するサーバ
-│   └── web # Remix Frontend
-├── common # src配下のディレクトリ間で共通使用するものを入れる
-├── domain # DDDにおけるドメインと同じ
-│   └── account
-│       ├── index.ts # package外で使用できるクラスなどをexport
-│       ├── infrastructure # repositoryの実装詳細
+│   └── web # React Router v7 フロントエンド
+│       ├── components # 共通コンポーネント
+│       ├── features # 機能別コンポーネント
+│       ├── hooks # カスタムフック
+│       ├── routes # ページルート
+│       └── infrastructure # フロントエンド用インフラ
+├── common # src配下で共通使用するもの
+│   ├── errors # エラー型定義
+│   ├── locale # 地域化・日付処理
+│   ├── pagination # ページネーション
+│   ├── sanitization # サニタイゼーション
+│   ├── types # 共通型定義
+│   ├── logger.ts # ロガー
+│   └── schemas.ts # 共通スキーマ
+├── domain # ドメイン層（DDD）
+│   ├── admin # 管理者集約
+│   ├── article # 記事集約
+│   ├── auth-v2 # 認証v2集約
+│   ├── policy # ポリシー集約
+│   └── user # ユーザー集約
+│       ├── index.ts # 集約エクスポート、factory
+│       ├── infrastructure # リポジトリ実装
 │       ├── schema # バリデーションスキーマ
 │       ├── repository.ts # リポジトリインターフェース
-│       └── useCase.ts
-├── infrastructure # インフラ関連. 永続化層との接続などネットワーク的な意味合いが強い
-│   └── rdb.ts
-└── logger
-    └── logger.ts
+│       └── useCase.ts # ビジネスロジック
+├── infrastructure # インフラストラクチャ層
+│   ├── notification # 通知機能
+│   ├── prisma-orm # Prisma ORM設定
+│   │   ├── models # Prismaモデル
+│   │   ├── migrations # マイグレーション
+│   │   └── main.prisma
+│   ├── rdb.ts # RDB接続
+│   └── supabase.ts # Supabase接続
+├── test # テスト関連
+│   ├── __mocks__ # モック
+│   ├── e2e # E2Eテスト
+│   ├── helper # テストヘルパー
+│   └── vitest-config # Vitest設定
+│       ├── config.domain.ts
+│       ├── config.api.ts
+│       ├── config.frontend.ts
+│       └── config.storybook.ts
+├── plugin # カスタムプラグイン
+└── worker.ts # Cloudflare Workersエントリーポイント
 ```
 
 環境変数は.dev.vars.exampleファイルを参考に与える。
-テストファイルは`test`というフォルダを切らず、実装されているコードと同じ階層に置くものとする。
+
+テストファイルの配置は以下のルールに従う:
+- ユニットテスト（`*.test.ts`）: 実装されているコードと同じ階層に配置
+- E2Eテスト: `src/test/e2e`に配置
+- テストヘルパー: `src/test/helper`に配置
+- テストモック: `src/test/__mocks__`に配置（ドメイン層テストで使用）
+- Vitest設定: `src/test/vitest-config`に配置

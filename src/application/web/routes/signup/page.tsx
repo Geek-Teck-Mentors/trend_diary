@@ -1,8 +1,3 @@
-import Footer from '../../components/footer'
-import LandingHeader from '../../components/landing-header'
-import { AnchorLink } from '../../components/link'
-import PageError from '../../components/page-error'
-import { PageErrorType } from '../../components/page-error/use-page-error'
 import {
   Card,
   CardContent,
@@ -10,7 +5,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../../components/ui/card'
+} from '../../components/shadcn/card'
+import Footer from '../../components/ui/footer'
+import LandingHeader from '../../components/ui/landing-header'
+import { AnchorLink } from '../../components/ui/link'
+import PageError from '../../components/ui/page-error'
+import { PageErrorType } from '../../components/ui/page-error/use-page-error'
 import { AuthenticateForm } from '../../features/authenticate/authenticate-form'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 

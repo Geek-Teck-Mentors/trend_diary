@@ -106,7 +106,6 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
 
 ```
 src/domain/{aggregate}/
-├── model/           # ドメインエンティティ
 ├── schema/          # Zodバリデーションスキーマ
 ├── infrastructure/  # リポジトリ実装
 ├── repository.ts    # リポジトリインターフェース
@@ -116,10 +115,10 @@ src/domain/{aggregate}/
 
 **テスト戦略**（多層構造）:
 
-- **ドメイン層**: `vitest/config.domain.ts`でモックPrismaクライアントを使用したユニットテスト
-- **API層**: `vitest/config.api.ts`で実際のデータベースを使用した統合テスト
-- **フロントエンド**: `vitest/config.frontend.ts`でコンポーネントとフックのテスト
-- **Storybook**: `vitest/config.storybook.ts`でUIコンポーネントのビジュアルテスト
+- **ドメイン層**: `src/test/vitest-config/config.domain.ts`でモックPrismaクライアントを使用したユニットテスト
+- **API層**: `src/test/vitest-config/config.api.ts`で実際のデータベースを使用した統合テスト
+- **フロントエンド**: `src/test/vitest-config/config.frontend.ts`でコンポーネントとフックのテスト
+- **Storybook**: `src/test/vitest-config/config.storybook.ts`でUIコンポーネントのビジュアルテスト
 - **E2Eテスト**: エンドツーエンドシナリオのPlaywrightテスト
 
 ### 技術スタック
@@ -140,7 +139,7 @@ src/domain/{aggregate}/
 
 ### データベーススキーマ
 
-Prismaモデルは`prisma/models/`内のファイルに分割:
+Prismaモデルは`src/infrastructure/prisma-orm/models/`内のファイルに分割:
 
 - `user.prisma` - ユーザー管理
 - `active_user.prisma` - アクティブユーザー管理

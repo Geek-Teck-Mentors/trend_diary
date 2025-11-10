@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { offsetPaginationSchema } from '@/common/pagination'
 
 const mediaEnum = z.enum(['qiita', 'zenn'])
-const readStatusEnum = z.enum(['0', '1'])
 
 const baseArticleSearchSchema = z.object({
   title: z.string().optional(),
@@ -39,14 +38,3 @@ export const articleQuerySchema = baseArticleSearchSchema
   })
 
 export type ArticleQueryParams = z.infer<typeof articleQuerySchema>
-
-export const apiArticleQuerySchema = baseArticleSearchSchema
-  .extend({
-    read_status: readStatusEnum.optional(),
-  })
-  .merge(offsetPaginationSchema)
-  .refine(dateRangeRefine, {
-    message: DATE_RANGE_ERROR_MESSAGE,
-  })
-
-export type ApiArticleQueryParams = z.infer<typeof apiArticleQuerySchema>

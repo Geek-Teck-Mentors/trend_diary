@@ -9,13 +9,13 @@ import {
   privacyPolicyUpdateSchema,
   versionParamSchema,
 } from '@/domain/policy'
-import activatePolicy from './activatePolicy'
-import clonePolicy from './clonePolicy'
-import createPolicy from './createPolicy'
-import deletePolicy from './deletePolicy'
-import getPolicies from './getPolicies'
-import getPolicyByVersion from './getPolicyByVersion'
-import updatePolicy from './updatePolicy'
+import activatePolicy from './handler/activatePolicy'
+import clonePolicy from './handler/clonePolicy'
+import createPolicy from './handler/createPolicy'
+import deletePolicy from './handler/deletePolicy'
+import getPolicies from './handler/getPolicies'
+import getPolicyByVersion from './handler/getPolicyByVersion'
+import updatePolicy from './handler/updatePolicy'
 
 const app = new Hono<Env>()
   .get('/', authenticator, zodValidator('query', offsetPaginationSchema), getPolicies)

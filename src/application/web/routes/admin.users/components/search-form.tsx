@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { Button } from '@/application/web/components/ui/button'
-import { Input } from '@/application/web/components/ui/input'
-import { Label } from '@/application/web/components/ui/label'
+import { Button } from '@/application/web/components/shadcn/button'
+import { Input } from '@/application/web/components/shadcn/input'
+import { Label } from '@/application/web/components/shadcn/label'
 
 type Props = {
   searchQuery: string

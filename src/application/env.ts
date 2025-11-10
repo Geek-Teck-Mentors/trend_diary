@@ -1,5 +1,5 @@
+import { logger } from '@/common/logger'
 import { Nullable } from '@/common/types/utility'
-import { logger } from '@/logger/logger'
 import CONTEXT_KEY from './middleware/context'
 
 export type SessionUser = {

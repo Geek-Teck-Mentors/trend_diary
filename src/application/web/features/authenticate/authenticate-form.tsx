@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
+import { Button } from '../../components/shadcn/button'
+import { Input } from '../../components/shadcn/input'
+import { Label } from '../../components/shadcn/label'
 import { AuthenticateErrors, AuthenticateFormData, validateAuthenticateForm } from './validation'
 
 type Props = {
