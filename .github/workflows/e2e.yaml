@@ -37,35 +37,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Node.jsの構築
-        uses: ./.github/actions/setup_node
+      - name: E2E環境のセットアップ
+        uses: ./.github/actions/setup_e2e
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: Playwrightブラウザのキャッシュ
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Playwrightのセットアップ
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium --with-deps
-
-      - name: PostgreSQLのセットアップ
-        run: docker compose build && docker compose up -d
-
-      - name: PostgreSQLが起動するまで待機
-        uses: ./.github/actions/backoff
-        with:
-          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
-          fail_command: docker compose down
-
-      - name: DB Migration
-        env:
-          DIRECT_URL: ${{ env.DATABASE_URL }}
-        run: npm run db:migrate
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: E2Eテストの実行
         run: npm run e2e -- --pass-with-no-tests
@@ -86,35 +62,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Node.jsの構築
-        uses: ./.github/actions/setup_node
+      - name: E2E環境のセットアップ
+        uses: ./.github/actions/setup_e2e
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: Playwrightブラウザのキャッシュ
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Playwrightのセットアップ
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium --with-deps
-
-      - name: PostgreSQLのセットアップ
-        run: docker compose build && docker compose up -d
-
-      - name: PostgreSQLが起動するまで待機
-        uses: ./.github/actions/backoff
-        with:
-          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
-          fail_command: docker compose down
-
-      - name: DB Migration
-        env:
-          DIRECT_URL: ${{ env.DATABASE_URL }}
-        run: npm run db:migrate
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: E2Eテストの差分実行
         shell: bash
