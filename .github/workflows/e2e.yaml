@@ -31,6 +31,7 @@ env:
 
 jobs:
   test:
+    name: E2Eテスト（main）
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -54,6 +55,7 @@ jobs:
           retention-days: 30
 
   test-diff:
+    name: E2Eテスト（差分実行）
     if: github.event_name == 'pull_request'
     timeout-minutes: 10
     runs-on: ubuntu-latest
