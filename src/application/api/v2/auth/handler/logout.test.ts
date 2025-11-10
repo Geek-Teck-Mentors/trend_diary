@@ -1,6 +1,6 @@
 import { success } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
-import { MockAuthV2Repository } from '@/application/api/v2/auth/mocks/mockAuthV2Repository'
+import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2Repository'
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
