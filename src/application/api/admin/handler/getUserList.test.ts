@@ -1,7 +1,7 @@
-import app from '../route'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
+import app from '../route'
 import { UserListResponse } from './getUserList'
 
 describe('GET /users', () => {

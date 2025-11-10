@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
-import app from '../route'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
+import app from '../route'
 
 describe('POST /:article_id/read', () => {
   let testActiveUserId: bigint

@@ -1,7 +1,7 @@
-import app from '../route'
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
+import app from '../route'
 
 describe('PATCH /:version', () => {
   let sessionId: string
