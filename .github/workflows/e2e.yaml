@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '.github/workflows/e2e.yaml'
-      - 'src/test/e2e/**'
-      - 'src/application/web/routes/**'
-      - 'package.json'
-      - 'package-lock.json'
   pull_request:
     branches:
       - main
