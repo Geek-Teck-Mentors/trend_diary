@@ -1,9 +1,26 @@
 import { isFailure } from '@yuukihayashi0510/core'
+import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { ArticleIdParam, CreateReadHistoryApiInput, createArticleUseCase } from '@/domain/article'
+import { createArticleUseCase } from '@/domain/article'
 import getRdbClient from '@/infrastructure/rdb'
+
+// API用スキーマ
+export const createReadHistoryApiSchema = z.object({
+  read_at: z.string().datetime(),
+})
+
+export const articleIdParamSchema = z.object({
+  article_id: z
+    .string()
+    .min(1)
+    .regex(/^\d+$/, { message: 'article_id must be a valid number' })
+    .transform((val) => BigInt(val)),
+})
+
+export type CreateReadHistoryApiInput = z.input<typeof createReadHistoryApiSchema>
+export type ArticleIdParam = z.output<typeof articleIdParamSchema>
 
 export default async function readArticle(
   c: ZodValidatedParamJsonContext<ArticleIdParam, CreateReadHistoryApiInput>,

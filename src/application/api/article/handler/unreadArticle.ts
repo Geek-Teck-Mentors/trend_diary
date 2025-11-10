@@ -2,8 +2,9 @@ import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { ArticleIdParam, createArticleUseCase } from '@/domain/article'
+import { createArticleUseCase } from '@/domain/article'
 import getRdbClient from '@/infrastructure/rdb'
+import { ArticleIdParam } from './readArticle'
 
 export default async function unreadArticle(c: ZodValidatedParamContext<ArticleIdParam>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
