@@ -4,7 +4,7 @@ import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2R
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
-import app from '../../../../server'
+import app from '../route'
 
 const mockRepository = new MockAuthV2Repository()
 
@@ -56,7 +56,7 @@ vi.mock('@/infrastructure/supabase', () => ({
   createSupabaseAuthClient: () => ({}),
 }))
 
-describe('DELETE /api/v2/auth/logout', () => {
+describe('DELETE /logout', () => {
   const TEST_EMAIL = 'logout-test@example.com'
   const TEST_PASSWORD = 'test_password123'
 
@@ -72,7 +72,7 @@ describe('DELETE /api/v2/auth/logout', () => {
     }
 
     return app.request(
-      '/api/v2/auth/logout',
+      '/logout',
       {
         method: 'DELETE',
         headers,

@@ -4,7 +4,7 @@ import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2R
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
-import app from '../../../../server'
+import app from '../route'
 
 const mockRepository = new MockAuthV2Repository()
 
@@ -56,7 +56,7 @@ vi.mock('@/infrastructure/supabase', () => ({
   createSupabaseAuthClient: () => ({}),
 }))
 
-describe('GET /api/v2/auth/me', () => {
+describe('GET /me', () => {
   const TEST_EMAIL = 'me-test@example.com'
   const TEST_PASSWORD = 'test_password123'
 
@@ -70,7 +70,7 @@ describe('GET /api/v2/auth/me', () => {
     }
 
     return app.request(
-      '/api/v2/auth/me',
+      '/me',
       {
         method: 'GET',
         headers,

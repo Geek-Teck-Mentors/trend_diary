@@ -4,7 +4,7 @@ import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2R
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
-import app from '../../../../server'
+import app from '../route'
 
 const mockRepository = new MockAuthV2Repository()
 
@@ -56,14 +56,14 @@ vi.mock('@/infrastructure/supabase', () => ({
   createSupabaseAuthClient: () => ({}),
 }))
 
-describe('POST /api/v2/auth/signup', () => {
+describe('POST /signup', () => {
   beforeEach(() => {
     mockRepository.clearAll()
   })
 
   async function requestSignup(body: string) {
     return app.request(
-      '/api/v2/auth/signup',
+      '/signup',
       {
         method: 'POST',
         body,
