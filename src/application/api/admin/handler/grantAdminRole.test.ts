@@ -1,16 +1,16 @@
-import app from '@/application/server'
+import app from '../route'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
 import { GrantAdminRoleResponse } from './grantAdminRole'
 
 async function requestPostAdminUser(id: string, sessionId?: string) {
-  const url = `/api/admin/users/${id}`
+  const url = `/users/${id}`
   const headers = sessionId ? { Cookie: `sid=${sessionId}` } : undefined
   return app.request(url, { method: 'POST', headers }, TEST_ENV)
 }
 
-describe('POST /api/admin/users/:id', () => {
+describe('POST /users/:id', () => {
   beforeEach(async () => {
     await activeUserTestHelper.cleanUp()
     await adminUserTestHelper.cleanUp()

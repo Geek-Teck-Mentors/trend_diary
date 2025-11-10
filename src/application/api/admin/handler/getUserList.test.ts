@@ -1,13 +1,13 @@
-import app from '@/application/server'
+import app from '../route'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
 import { UserListResponse } from './getUserList'
 
-describe('GET /api/admin/users', () => {
+describe('GET /users', () => {
   async function requestGetUsers(query?: Record<string, string>, sessionId?: string) {
     const qs = query ? new URLSearchParams(query).toString() : ''
-    const url = qs ? `/api/admin/users?${qs}` : '/api/admin/users'
+    const url = qs ? `/users?${qs}` : '/users'
     const headers = sessionId ? { Cookie: `sid=${sessionId}` } : undefined
     return app.request(url, { method: 'GET', headers }, TEST_ENV)
   }
