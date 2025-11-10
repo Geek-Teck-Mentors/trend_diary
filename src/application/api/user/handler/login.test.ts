@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
-import app from '../../../server'
+import app from '../route'
 
 type LoginTestCase = {
   name: string
@@ -9,13 +9,13 @@ type LoginTestCase = {
   status: number
 }
 
-describe('POST /api/user/login', () => {
+describe('POST /login', () => {
   const TEST_EMAIL = faker.internet.email()
   const TEST_PASSWORD = 'test_password'
 
   async function requestLogin(body: string) {
     return app.request(
-      '/api/user/login',
+      '/login',
       {
         method: 'POST',
         headers: {

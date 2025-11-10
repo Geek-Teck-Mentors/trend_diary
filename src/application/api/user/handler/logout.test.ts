@@ -3,9 +3,9 @@ import { SESSION_NAME } from '@/common/constants'
 import { UseCase } from '@/domain/user/useCase'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
-import app from '../../../server'
+import app from '../route'
 
-describe('DELETE /api/user/logout', () => {
+describe('DELETE /logout', () => {
   let setCookie: string[]
 
   const TEST_EMAIL = faker.internet.email()
@@ -13,7 +13,7 @@ describe('DELETE /api/user/logout', () => {
 
   async function requestLogout() {
     return app.request(
-      '/api/user/logout',
+      '/logout',
       {
         method: 'DELETE',
         headers: {
@@ -39,7 +39,7 @@ describe('DELETE /api/user/logout', () => {
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(
-      '/api/user/login',
+      '/login',
       {
         method: 'POST',
         headers: {

@@ -1,8 +1,8 @@
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
-import app from '../../../server'
+import app from '../route'
 
-describe('POST /api/user', () => {
+describe('POST /', () => {
   beforeAll(async () => {
     await activeUserTestHelper.cleanUp()
   })
@@ -14,7 +14,7 @@ describe('POST /api/user', () => {
 
   async function requestShort(body: string) {
     return app.request(
-      '/api/user',
+      '/',
       {
         method: 'POST',
         body,

@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
-import app from '../../../server'
+import app from '../route'
 
-describe('GET /api/user/me', () => {
+describe('GET /me', () => {
   let setCookie: string[]
 
   const TEST_EMAIL = faker.internet.email()
@@ -11,7 +11,7 @@ describe('GET /api/user/me', () => {
 
   async function requestLoginUser() {
     return app.request(
-      '/api/user/me',
+      '/me',
       {
         method: 'GET',
         headers: {
@@ -36,7 +36,7 @@ describe('GET /api/user/me', () => {
     const body = JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD })
 
     const res = await app.request(
-      '/api/user/login',
+      '/login',
       {
         method: 'POST',
         headers: {
