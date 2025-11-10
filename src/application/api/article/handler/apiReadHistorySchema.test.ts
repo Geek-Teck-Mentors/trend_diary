@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { articleIdParamSchema, createReadHistoryApiSchema } from './readHistorySchema'
+import { articleIdParamSchema, createReadHistoryApiSchema } from './readArticle'
 
-describe('ReadHistoryスキーマ', () => {
+describe('API ReadHistoryスキーマ', () => {
   describe('createReadHistoryApiSchema', () => {
     it('有効なISO8601文字列を受け入れること', () => {
       const validRequest = {
