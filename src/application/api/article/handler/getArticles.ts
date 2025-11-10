@@ -2,20 +2,10 @@ import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { OffsetPaginationResult } from '@/common/pagination'
-import { Article, createArticleUseCase } from '@/domain/article'
-import {
-  ApiArticleQueryParams,
-  ArticleQueryParams,
-} from '@/domain/article/schema/articleQuerySchema'
-import { ArticleOutput } from '@/domain/article/schema/articleSchema'
+import { Article, ArticleQueryParams, createArticleUseCase } from '@/domain/article'
 import getRdbClient from '@/infrastructure/rdb'
-
-export type ArticleResponse = Omit<ArticleOutput, 'articleId'> & {
-  articleId: string
-}
-
-export type ArticleListResponse = OffsetPaginationResult<ArticleResponse>
+import { ApiArticleQueryParams } from '../schema/apiArticleQuerySchema'
+import { ArticleListResponse, ArticleResponse } from '../schema/articleResponseSchema'
 
 export default async function getArticles(c: ZodValidatedQueryContext<ApiArticleQueryParams>) {
   const transformedParams = c.req.valid('query')

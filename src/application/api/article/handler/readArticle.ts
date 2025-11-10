@@ -2,8 +2,9 @@ import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { ArticleIdParam, CreateReadHistoryApiInput, createArticleUseCase } from '@/domain/article'
+import { createArticleUseCase } from '@/domain/article'
 import getRdbClient from '@/infrastructure/rdb'
+import { ArticleIdParam, CreateReadHistoryApiInput } from '../schema/apiReadHistorySchema'
 
 export default async function readArticle(
   c: ZodValidatedParamJsonContext<ArticleIdParam, CreateReadHistoryApiInput>,

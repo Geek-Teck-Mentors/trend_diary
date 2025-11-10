@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { offsetPaginationSchema } from '@/common/pagination'
 
 const mediaEnum = z.enum(['qiita', 'zenn'])
+const readStatusEnum = z.enum(['0', '1'])
 
 const baseArticleSearchSchema = z.object({
   title: z.string().optional(),
@@ -28,13 +29,13 @@ const dateRangeRefine = <T extends { from?: string; to?: string }>(data: T) => {
 // エラーメッセージ
 const DATE_RANGE_ERROR_MESSAGE = 'fromはtoより前の日付を指定してください'
 
-export const articleQuerySchema = baseArticleSearchSchema
+export const apiArticleQuerySchema = baseArticleSearchSchema
   .extend({
-    readStatus: z.boolean().optional(),
+    read_status: readStatusEnum.optional(),
   })
   .merge(offsetPaginationSchema)
   .refine(dateRangeRefine, {
     message: DATE_RANGE_ERROR_MESSAGE,
   })
 
-export type ArticleQueryParams = z.infer<typeof articleQuerySchema>
+export type ApiArticleQueryParams = z.infer<typeof apiArticleQuerySchema>
