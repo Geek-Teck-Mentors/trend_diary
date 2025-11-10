@@ -6,8 +6,9 @@ on:
       - main
     paths:
       - '.github/workflows/e2e.yaml'
-      - 'src/**'
-      - 'public/**'
+      - 'src/test/e2e/**'
+      - 'src/application/web/routes/**'
+      - 'vitest/**'
       - 'prisma/**'
       - 'package.json'
       - 'package-lock.json'
@@ -15,8 +16,9 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
       - '.github/workflows/e2e.yaml'
+      - 'src/test/e2e/**'
+      - 'src/application/web/routes/**'
       - 'vitest/**'
       - 'prisma/**'
       - 'package.json'
