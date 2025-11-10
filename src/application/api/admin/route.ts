@@ -6,6 +6,7 @@ import zodValidator from '@/application/middleware/zodValidator'
 import getUserList, { querySchema } from './handler/getUserList'
 import grantAdminRole, { paramSchema } from './handler/grantAdminRole'
 
+// TODO: 変更の影響範囲がフロントに及んでいるので治す
 const app = new Hono<Env>()
   .get('/users', authenticator, requiredAdmin, zodValidator('query', querySchema), getUserList)
   .post(
