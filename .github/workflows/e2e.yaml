@@ -8,8 +8,6 @@ on:
       - '.github/workflows/e2e.yaml'
       - 'src/test/e2e/**'
       - 'src/application/web/routes/**'
-      - 'vitest/**'
-      - 'prisma/**'
       - 'package.json'
       - 'package-lock.json'
   pull_request:
@@ -19,8 +17,6 @@ on:
       - '.github/workflows/e2e.yaml'
       - 'src/test/e2e/**'
       - 'src/application/web/routes/**'
-      - 'vitest/**'
-      - 'prisma/**'
       - 'package.json'
       - 'package-lock.json'
 
@@ -52,7 +48,7 @@ jobs:
         id: check-test-config
         uses: ./.github/actions/diff
         with:
-          subdir: '.github/workflows/e2e.yaml vitest/'
+          subdir: '.github/workflows/e2e.yaml'
 
       - name: E2Eの差分チェック
         id: check-e2e
