@@ -4,7 +4,7 @@ import { MockAuthV2Repository } from '@/application/api/v2/auth/mocks/mockAuthV2
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
-import app from '../../../server'
+import app from '../../../../server'
 
 const mockRepository = new MockAuthV2Repository()
 

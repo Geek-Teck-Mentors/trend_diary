@@ -4,7 +4,7 @@ import { MockAuthV2Repository } from '@/application/api/v2/auth/mocks/mockAuthV2
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
-import app from '../../../server'
+import app from '../../../../server'
 
 const mockRepository = new MockAuthV2Repository()
 
@@ -56,56 +56,73 @@ vi.mock('@/infrastructure/supabase', () => ({
   createSupabaseAuthClient: () => ({}),
 }))
 
-describe('GET /api/v2/auth/me', () => {
-  const TEST_EMAIL = 'me-test@example.com'
-  const TEST_PASSWORD = 'test_password123'
+describe('POST /api/v2/auth/login', () => {
+  const TEST_EMAIL = 'login-test@example.com'
+  const TEST_PASSWORD = 'Test@password123'
 
   beforeEach(async () => {
     mockRepository.clearAll()
+    // テスト用ユーザーを作成
+    await mockRepository.signup(TEST_EMAIL, TEST_PASSWORD)
+    // ログアウトして初期状態に戻す
+    await mockRepository.logout()
   })
 
-  async function requestMe() {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-
+  async function requestLogin(body: string) {
     return app.request(
-      '/api/v2/auth/me',
+      '/api/v2/auth/login',
       {
-        method: 'GET',
-        headers,
+        method: 'POST',
+        body,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
       TEST_ENV,
     )
   }
 
-  it('正常系: 現在のユーザー情報を取得できる', async () => {
-    // ユーザーを作成してログイン状態にする
-    await mockRepository.signup(TEST_EMAIL, TEST_PASSWORD)
+  it('正常系: ログインに成功する', async () => {
+    const res = await requestLogin(JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD }))
 
-    // ユーザー情報取得
-    const meRes = await requestMe()
-    expect(meRes.status).toBe(200)
-
-    const body = (await meRes.json()) as { user: { id: string; email: string } }
-    expect(body).toHaveProperty('user')
-    expect(body.user).toHaveProperty('id')
-    expect(body.user).toHaveProperty('email', TEST_EMAIL)
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { displayName: string | null }
+    expect(body).toHaveProperty('displayName')
   })
 
-  it('準正常系: ログインしていない場合は401を返す', async () => {
-    const res = await requestMe()
-    expect(res.status).toBe(401)
-  })
+  describe('準正常系', () => {
+    const testCases: Array<{
+      name: string
+      input: { email: string; password: string }
+      status: number
+    }> = [
+      {
+        name: '不正なメールアドレス',
+        input: { email: 'invalid-email', password: 'Test@password123' },
+        status: 422,
+      },
+      {
+        name: '不正なパスワード（短すぎる）',
+        input: { email: 'test@test.com', password: 'abc' },
+        status: 422,
+      },
+      {
+        name: 'パスワードが間違っている',
+        input: { email: TEST_EMAIL, password: 'Wrong@password123' },
+        status: 401,
+      },
+      {
+        name: '存在しないユーザー',
+        input: { email: 'nonexistent@example.com', password: 'Test@password123' },
+        status: 401,
+      },
+    ]
 
-  it('準正常系: ログアウト後は401を返す', async () => {
-    // ユーザーを作成してログイン
-    await mockRepository.signup(TEST_EMAIL, TEST_PASSWORD)
-
-    // ログアウト
-    await mockRepository.logout()
-
-    const res = await requestMe()
-    expect(res.status).toBe(401)
+    testCases.forEach((testCase) => {
+      it(testCase.name, async () => {
+        const res = await requestLogin(JSON.stringify(testCase.input))
+        expect(res.status).toBe(testCase.status)
+      })
+    })
   })
 })
