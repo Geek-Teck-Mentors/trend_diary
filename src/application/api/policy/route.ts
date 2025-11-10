@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
+import requestLogger from '@/application/middleware/requestLogger'
 import zodValidator from '@/application/middleware/zodValidator'
 import { offsetPaginationSchema } from '@/common/pagination'
 import {
@@ -18,6 +19,7 @@ import getPolicyByVersion from './handler/getPolicyByVersion'
 import updatePolicy from './handler/updatePolicy'
 
 const app = new Hono<Env>()
+  .use(requestLogger)
   .get('/', authenticator, zodValidator('query', offsetPaginationSchema), getPolicies)
   .post('/', authenticator, zodValidator('json', privacyPolicyInputSchema), createPolicy)
   .get('/:version', authenticator, zodValidator('param', versionParamSchema), getPolicyByVersion)

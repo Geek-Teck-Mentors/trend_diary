@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
+import requestLogger from '@/application/middleware/requestLogger'
 import zodValidator from '@/application/middleware/zodValidator'
 import { articleIdParamSchema, createReadHistoryApiSchema } from '@/domain/article'
 import { apiArticleQuerySchema } from '@/domain/article/schema/articleQuerySchema'
@@ -9,6 +10,7 @@ import readArticle from './handler/readArticle'
 import unreadArticle from './handler/unreadArticle'
 
 const app = new Hono<Env>()
+  .use(requestLogger)
   .get('/', zodValidator('query', apiArticleQuerySchema), getArticles)
   .post(
     '/:article_id/read',

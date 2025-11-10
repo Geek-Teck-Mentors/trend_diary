@@ -8,7 +8,13 @@ import requestLogger from './middleware/requestLogger'
 
 const app = new Hono<Env>()
 
-app.use(requestLogger)
+// requestLoggerは各route.tsで適用されるため、/api以外のパスにのみ適用
+app.use('*', async (c, next) => {
+  if (c.req.path.startsWith('/api')) {
+    return next()
+  }
+  return requestLogger(c, next)
+})
 app.onError(errorHandler)
 
 app.use('/api', timeout(5000))

@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { createMiddleware } from 'hono/factory'
 import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
+import requestLogger from '@/application/middleware/requestLogger'
 import zodValidator from '@/application/middleware/zodValidator'
 import { activeUserInputSchema } from '@/domain/user'
 import login from './handler/login'
@@ -17,6 +18,7 @@ const userFeatureGuard = createMiddleware(async (c, next) => {
 })
 
 const app = new Hono<Env>()
+  .use(requestLogger)
   .use(userFeatureGuard)
   .get('/me', authenticator, loginUser)
   .post('/', zodValidator('json', activeUserInputSchema), signup)
