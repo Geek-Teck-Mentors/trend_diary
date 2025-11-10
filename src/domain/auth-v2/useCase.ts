@@ -1,6 +1,6 @@
 import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import { ClientError, ServerError } from '@/common/errors'
-import type { Command } from '@/domain/user/repository'
+import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import type { AuthV2Repository } from './repository'
 import type { AuthenticationSession } from './schema/authenticationSession'
@@ -32,6 +32,7 @@ export class AuthV2UseCase {
   constructor(
     private readonly repository: AuthV2Repository,
     private readonly userCommand: Command,
+    private readonly userQuery: Query,
   ) {}
 
   async signup(
@@ -71,15 +72,15 @@ export class AuthV2UseCase {
 
     const { user, session } = authResult.data
 
-    // active_userを作成
-    const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
-      user.email,
-      AUTH_V2_DUMMY_PASSWORD,
-      user.id,
-    )
+    // authentication_idで既存のactive_userを取得
+    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
 
     if (isFailure(activeUserResult)) {
-      return failure(activeUserResult.error)
+      return failure(new ServerError('Failed to find active user'))
+    }
+
+    if (!activeUserResult.data) {
+      return failure(new ClientError('User not found', 404))
     }
 
     return success({
@@ -103,22 +104,22 @@ export class AuthV2UseCase {
     return success(result.data)
   }
 
-  async refreshSession(): AsyncResult<LoginResult, ServerError> {
+  async refreshSession(): AsyncResult<LoginResult, ClientError | ServerError> {
     // 認証v2でセッション更新
     const authResult = await this.repository.refreshSession()
     if (isFailure(authResult)) return authResult
 
     const { user, session } = authResult.data
 
-    // active_userを作成
-    const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
-      user.email,
-      AUTH_V2_DUMMY_PASSWORD,
-      user.id,
-    )
+    // authentication_idで既存のactive_userを取得
+    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
 
     if (isFailure(activeUserResult)) {
-      return failure(activeUserResult.error)
+      return failure(new ServerError('Failed to find active user'))
+    }
+
+    if (!activeUserResult.data) {
+      return failure(new ClientError('User not found', 404))
     }
 
     return success({
