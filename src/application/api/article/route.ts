@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
+import errorHandler from '@/application/middleware/errorHandler'
 import requestLogger from '@/application/middleware/requestLogger'
 import zodValidator from '@/application/middleware/zodValidator'
 import { articleIdParamSchema, createReadHistoryApiSchema } from '@/domain/article'
@@ -25,5 +26,7 @@ const app = new Hono<Env>()
     zodValidator('param', articleIdParamSchema),
     unreadArticle,
   )
+
+app.onError(errorHandler)
 
 export default app

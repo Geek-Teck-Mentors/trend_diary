@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { createMiddleware } from 'hono/factory'
 import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
+import errorHandler from '@/application/middleware/errorHandler'
 import requestLogger from '@/application/middleware/requestLogger'
 import zodValidator from '@/application/middleware/zodValidator'
 import { activeUserInputSchema } from '@/domain/user'
@@ -28,5 +29,7 @@ const app = new Hono<Env>()
     login,
   )
   .delete('/logout', authenticator, logout)
+
+app.onError(errorHandler)
 
 export default app

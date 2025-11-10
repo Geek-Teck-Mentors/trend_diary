@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
+import errorHandler from '@/application/middleware/errorHandler'
 import requestLogger from '@/application/middleware/requestLogger'
 import requiredAdmin from '@/application/middleware/requiredAdmin'
 import zodValidator from '@/application/middleware/zodValidator'
@@ -18,5 +19,7 @@ const app = new Hono<Env>()
     zodValidator('param', paramSchema),
     grantAdminRole,
   )
+
+app.onError(errorHandler)
 
 export default app

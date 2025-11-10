@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
+import errorHandler from '@/application/middleware/errorHandler'
 import requestLogger from '@/application/middleware/requestLogger'
 import zodValidator from '@/application/middleware/zodValidator'
 import { authInputSchema } from '@/domain/auth-v2'
@@ -14,5 +15,7 @@ const app = new Hono<Env>()
   .post('/login', zodValidator('json', authInputSchema), login)
   .delete('/logout', logout)
   .get('/me', me)
+
+app.onError(errorHandler)
 
 export default app

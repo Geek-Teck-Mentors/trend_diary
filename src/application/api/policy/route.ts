@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
+import errorHandler from '@/application/middleware/errorHandler'
 import requestLogger from '@/application/middleware/requestLogger'
 import zodValidator from '@/application/middleware/zodValidator'
 import { offsetPaginationSchema } from '@/common/pagination'
@@ -39,5 +40,7 @@ const app = new Hono<Env>()
     zodValidator('json', privacyPolicyActivateSchema),
     activatePolicy,
   )
+
+app.onError(errorHandler)
 
 export default app
