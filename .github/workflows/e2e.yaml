@@ -1,0 +1,77 @@
+name: E2E
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/e2e.yaml'
+      - 'src/test/e2e/**'
+      - 'src/application/web/routes/**'
+      - 'package.json'
+      - 'package-lock.json'
+
+# カバレッジの可視化で、コメントを残すための権限
+permissions:
+  contents: read
+  pull-requests: write
+
+# 連続push時に同じジョブが並列で実行されるのを防ぐ
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 共通の設定を定義
+env:
+  NODE_VERSION_FILE: .node-version
+  DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
+
+jobs:
+  test:
+    name: Main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: E2E環境のセットアップ
+        uses: ./.github/actions/setup_e2e
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+          database-url: ${{ env.DATABASE_URL }}
+
+      - name: E2Eテストの実行
+        run: npm run e2e -- --pass-with-no-tests
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  test-diff:
+    name: Diff
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: E2E環境のセットアップ
+        uses: ./.github/actions/setup_e2e
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+          database-url: ${{ env.DATABASE_URL }}
+
+      - name: E2Eテストの差分実行
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run e2e -- --reporter=github --only-changed=origin/$GITHUB_BASE_REF

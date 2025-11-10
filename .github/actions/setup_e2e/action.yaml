@@ -1,0 +1,46 @@
+name: E2Eテスト環境のセットアップ
+description: Node.js、Playwright、PostgreSQLをセットアップしてE2Eテストを実行可能にする
+
+inputs:
+  node-version-file:
+    description: Node.jsバージョンファイルのパス
+    required: true
+  database-url:
+    description: データベース接続URL
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Node.jsの構築
+      uses: ./.github/actions/setup_node
+      with:
+        node-version-file: ${{ inputs.node-version-file }}
+
+    - name: Playwrightブラウザのキャッシュ
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+    - name: Playwrightのセットアップ
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: npx playwright install chromium --with-deps
+
+    - name: PostgreSQLのセットアップ
+      shell: bash
+      run: docker compose build && docker compose up -d
+
+    - name: PostgreSQLが起動するまで待機
+      uses: ./.github/actions/backoff
+      with:
+        command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
+        fail_command: docker compose down
+
+    - name: DB Migration
+      shell: bash
+      env:
+        DIRECT_URL: ${{ inputs.database-url }}
+      run: npm run db:migrate
