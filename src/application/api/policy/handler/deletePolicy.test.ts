@@ -1,7 +1,7 @@
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../server'
+import app from '../../../server'
 
 describe('DELETE /api/policies/:version', () => {
   let sessionId: string

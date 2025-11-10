@@ -1,7 +1,7 @@
+import app from '@/application/server'
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../server'
 
 describe('PATCH /api/policies/:version', () => {
   let sessionId: string

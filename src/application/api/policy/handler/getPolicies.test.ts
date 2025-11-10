@@ -2,8 +2,8 @@ import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../server'
-import { PolicyListResponse } from './response'
+import app from '../../../server'
+import { PolicyListResponse } from './getPolicies'
 
 describe('GET /api/policies', () => {
   let db: RdbClient

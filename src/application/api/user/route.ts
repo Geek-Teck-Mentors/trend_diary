@@ -4,10 +4,10 @@ import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
 import zodValidator from '@/application/middleware/zodValidator'
 import { activeUserInputSchema } from '@/domain/user'
-import login from './login'
-import loginUser from './loginUser'
-import logout from './logout'
-import signup from './signup'
+import login from './handler/login'
+import loginUser from './handler/loginUser'
+import logout from './handler/logout'
+import signup from './handler/signup'
 
 const userFeatureGuard = createMiddleware(async (c, next) => {
   if (c.env.FEATURE_USER_ENABLED !== 'true') {

@@ -1,10 +1,10 @@
 import { success } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
-import { MockAuthV2Repository } from '@/application/api/v2/auth/mocks/mockAuthV2Repository'
+import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2Repository'
 import type { Command } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
-import app from '../../../server'
+import app from '../../../../server'
 
 const mockRepository = new MockAuthV2Repository()
 
@@ -56,21 +56,14 @@ vi.mock('@/infrastructure/supabase', () => ({
   createSupabaseAuthClient: () => ({}),
 }))
 
-describe('POST /api/v2/auth/login', () => {
-  const TEST_EMAIL = 'login-test@example.com'
-  const TEST_PASSWORD = 'Test@password123'
-
-  beforeEach(async () => {
+describe('POST /api/v2/auth/signup', () => {
+  beforeEach(() => {
     mockRepository.clearAll()
-    // テスト用ユーザーを作成
-    await mockRepository.signup(TEST_EMAIL, TEST_PASSWORD)
-    // ログアウトして初期状態に戻す
-    await mockRepository.logout()
   })
 
-  async function requestLogin(body: string) {
+  async function requestSignup(body: string) {
     return app.request(
-      '/api/v2/auth/login',
+      '/api/v2/auth/signup',
       {
         method: 'POST',
         body,
@@ -82,12 +75,14 @@ describe('POST /api/v2/auth/login', () => {
     )
   }
 
-  it('正常系: ログインに成功する', async () => {
-    const res = await requestLogin(JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD }))
+  it('正常系: signupが成功する', async () => {
+    const res = await requestSignup(
+      JSON.stringify({ email: 'signup@test.com', password: 'Test@password123' }),
+    )
 
-    expect(res.status).toBe(200)
-    const body = (await res.json()) as { displayName: string | null }
-    expect(body).toHaveProperty('displayName')
+    expect(res.status).toBe(201)
+    const body = (await res.json()) as Record<string, never>
+    expect(body).toEqual({})
   })
 
   describe('準正常系', () => {
@@ -106,23 +101,25 @@ describe('POST /api/v2/auth/login', () => {
         input: { email: 'test@test.com', password: 'abc' },
         status: 422,
       },
-      {
-        name: 'パスワードが間違っている',
-        input: { email: TEST_EMAIL, password: 'Wrong@password123' },
-        status: 401,
-      },
-      {
-        name: '存在しないユーザー',
-        input: { email: 'nonexistent@example.com', password: 'Test@password123' },
-        status: 401,
-      },
     ]
 
     testCases.forEach((testCase) => {
       it(testCase.name, async () => {
-        const res = await requestLogin(JSON.stringify(testCase.input))
+        const res = await requestSignup(JSON.stringify(testCase.input))
         expect(res.status).toBe(testCase.status)
       })
+    })
+
+    it('既に存在するメールアドレスの場合', async () => {
+      const email = 'duplicate@example.com'
+
+      // 1回目の登録
+      const res1 = await requestSignup(JSON.stringify({ email, password: 'Test@password123' }))
+      expect(res1.status).toBe(201)
+
+      // 2回目の登録
+      const res2 = await requestSignup(JSON.stringify({ email, password: 'Test@password123' }))
+      expect(res2.status).toBe(409)
     })
   })
 })

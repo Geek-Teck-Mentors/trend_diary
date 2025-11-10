@@ -11,7 +11,7 @@ import {
 } from '@tanstack/react-table'
 import { ArrowUpDown, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
 import * as React from 'react'
-import { UserListResponse } from '@/application/api/admin/getUserList'
+import { UserListResponse } from '@/application/api/admin/handler/getUserList'
 import { Badge } from '@/application/web/components/shadcn/badge'
 import { Button } from '@/application/web/components/shadcn/button'
 import { Checkbox } from '@/application/web/components/shadcn/checkbox'
