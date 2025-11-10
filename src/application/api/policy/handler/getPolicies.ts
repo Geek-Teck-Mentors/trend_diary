@@ -2,20 +2,19 @@ import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { OffsetPaginationParams } from '@/common/pagination'
+import { OffsetPaginationParams, OffsetPaginationResult } from '@/common/pagination'
 import { createPrivacyPolicyUseCase, PrivacyPolicy } from '@/domain/policy'
 import getRdbClient from '@/infrastructure/rdb'
-import { PolicyListResponse, PolicyResponse } from './response'
 
-function convertToResponse(policy: PrivacyPolicy): PolicyResponse {
-  return {
-    version: policy.version,
-    content: policy.content,
-    effectiveAt: policy.effectiveAt,
-    createdAt: policy.createdAt,
-    updatedAt: policy.updatedAt,
-  }
+export type PolicyResponse = {
+  version: number
+  content: string
+  effectiveAt: Date | null
+  createdAt: Date
+  updatedAt: Date
 }
+
+export type PolicyListResponse = OffsetPaginationResult<PolicyResponse>
 
 export default async function getPolicies(c: ZodValidatedQueryContext<OffsetPaginationParams>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
@@ -45,4 +44,14 @@ export default async function getPolicies(c: ZodValidatedQueryContext<OffsetPagi
   }
 
   return c.json(response)
+}
+
+function convertToResponse(policy: PrivacyPolicy): PolicyResponse {
+  return {
+    version: policy.version,
+    content: policy.content,
+    effectiveAt: policy.effectiveAt,
+    createdAt: policy.createdAt,
+    updatedAt: policy.updatedAt,
+  }
 }
