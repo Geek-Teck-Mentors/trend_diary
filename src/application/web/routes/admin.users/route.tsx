@@ -3,11 +3,11 @@ import React, { useState } from 'react'
 import { toast } from 'sonner'
 import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
-import { UserListResponse } from '@/application/api/admin/handler/getUserList'
 import { Alert, AlertDescription, AlertTitle } from '@/application/web/components/shadcn/alert'
 import { useDebounce } from '@/application/web/hooks/use-debounce'
 import createSWRFetcher from '../../features/create-swr-fetcher'
 import Page from './page'
+import type { UserListResponse } from './types'
 
 export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState('')
