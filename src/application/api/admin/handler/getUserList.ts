@@ -20,8 +20,8 @@ export interface UserListResponse extends Omit<UserListResult, 'users'> {
 
 export const querySchema = z.object({
   searchQuery: z.string().optional(),
-  page: z.string().transform(Number).default('1'),
-  limit: z.string().transform(Number).default('20'),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().default(20),
 })
 
 export default async function getUserList(
