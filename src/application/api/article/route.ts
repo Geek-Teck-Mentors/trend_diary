@@ -4,9 +4,9 @@ import authenticator from '@/application/middleware/authenticator'
 import zodValidator from '@/application/middleware/zodValidator'
 import { articleIdParamSchema, createReadHistoryApiSchema } from '@/domain/article'
 import { apiArticleQuerySchema } from '@/domain/article/schema/articleQuerySchema'
-import getArticles from './getArticles'
-import readArticle from './readArticle'
-import unreadArticle from './unreadArticle'
+import getArticles from './handler/getArticles'
+import readArticle from './handler/readArticle'
+import unreadArticle from './handler/unreadArticle'
 
 const app = new Hono<Env>()
   .get('/', zodValidator('query', apiArticleQuerySchema), getArticles)
