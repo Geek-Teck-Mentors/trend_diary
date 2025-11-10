@@ -3,7 +3,10 @@ import { Env } from '@/application/env'
 import authenticator from '@/application/middleware/authenticator'
 import zodValidator from '@/application/middleware/zodValidator'
 import getArticles, { apiArticleQuerySchema } from './handler/getArticles'
-import readArticle, { articleIdParamSchema, createReadHistoryApiSchema } from './handler/readArticle'
+import readArticle, {
+  articleIdParamSchema,
+  createReadHistoryApiSchema,
+} from './handler/readArticle'
 import unreadArticle from './handler/unreadArticle'
 
 const app = new Hono<Env>()
