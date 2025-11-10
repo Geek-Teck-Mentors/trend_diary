@@ -7,18 +7,14 @@ on:
     paths:
       - '.github/workflows/test.yaml'
       - 'src/**'
-      - 'public/**'
-      - 'prisma/**'
       - 'package.json'
       - 'package-lock.json'
   pull_request:
     branches:
       - main
     paths:
-      - 'src/**'
       - '.github/workflows/test.yaml'
-      - 'src/test/vitest-config/**'
-      - 'prisma/**'
+      - 'src/**'
       - 'package.json'
       - 'package-lock.json'
 
