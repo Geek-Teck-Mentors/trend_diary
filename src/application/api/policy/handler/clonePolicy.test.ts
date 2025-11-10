@@ -2,14 +2,14 @@ import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../../server'
+import app from '../route'
 
-describe('POST /api/policies/:version/clone', () => {
+describe('POST /:version/clone', () => {
   let sessionId: string
 
   async function requestClonePolicy(version: number, body = '{}') {
     return app.request(
-      `/api/policies/${version}/clone`,
+      `/${version}/clone`,
       {
         method: 'POST',
         headers: {
@@ -77,7 +77,7 @@ describe('POST /api/policies/:version/clone', () => {
     it('認証されていない場合は401エラー', async () => {
       // 認証情報なしでリクエスト
       const response = await app.request(
-        '/api/policies/1/clone',
+        '/1/clone',
         {
           method: 'POST',
           headers: {
@@ -101,7 +101,7 @@ describe('POST /api/policies/:version/clone', () => {
 
     it('無効なバージョン番号時は422エラー', async () => {
       const response = await app.request(
-        '/api/policies/invalid/clone',
+        '/invalid/clone',
         {
           method: 'POST',
           headers: {

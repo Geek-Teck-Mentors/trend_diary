@@ -2,15 +2,15 @@ import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../../server'
+import app from '../route'
 import { PolicyListResponse } from './getPolicies'
 
-describe('GET /api/policies', () => {
+describe('GET /', () => {
   let db: RdbClient
   let sessionId: string
 
   async function requestGetPolicies(query: string = '', sessionId?: string) {
-    const url = query ? `/api/policies?${query}` : '/api/policies'
+    const url = query ? `/?${query}` : '/'
     const headers: Record<string, string> = {}
     if (sessionId) {
       headers.Cookie = `sid=${sessionId}`

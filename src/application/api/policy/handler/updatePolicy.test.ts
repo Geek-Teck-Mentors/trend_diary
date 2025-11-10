@@ -1,9 +1,9 @@
-import app from '@/application/server'
+import app from '../route'
 import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import policyTestHelper from '@/test/helper/policyTestHelper'
 
-describe('PATCH /api/policies/:version', () => {
+describe('PATCH /:version', () => {
   let sessionId: string
 
   async function setupTestData(): Promise<void> {
@@ -13,7 +13,7 @@ describe('PATCH /api/policies/:version', () => {
 
   async function requestUpdatePolicy(version: number, body: string) {
     return app.request(
-      `/api/policies/${version}`,
+      `/${version}`,
       {
         method: 'PATCH',
         headers: {
@@ -140,7 +140,7 @@ describe('PATCH /api/policies/:version', () => {
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
       const res = await app.request(
-        '/api/policies/invalid',
+        '/invalid',
         {
           method: 'PATCH',
           headers: {
@@ -171,7 +171,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Act
       const res = await app.request(
-        `/api/policies/${version}`,
+        `/${version}`,
         {
           method: 'PATCH',
           headers: {
@@ -192,7 +192,7 @@ describe('PATCH /api/policies/:version', () => {
     it('メソッドが間違っている場合は404を返す', async () => {
       // Act
       const res = await app.request(
-        '/api/policies/1',
+        '/1',
         {
           method: 'PUT', // PATCHでないメソッド
           headers: {
@@ -215,7 +215,7 @@ describe('PATCH /api/policies/:version', () => {
 
       // Act
       const res = await app.request(
-        `/api/policies/${version}`,
+        `/${version}`,
         {
           method: 'PATCH',
           headers: {

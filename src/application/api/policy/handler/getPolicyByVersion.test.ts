@@ -3,15 +3,15 @@ import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../../server'
+import app from '../route'
 
-describe('GET /api/policies/:version', () => {
+describe('GET /:version', () => {
   let sessionId: string
   const useCase = createPrivacyPolicyUseCase(getRdbClient(TEST_ENV.DATABASE_URL))
 
   async function requestGetPolicyByVersion(version: number) {
     return app.request(
-      `/api/policies/${version}`,
+      `/${version}`,
       {
         method: 'GET',
         headers: {
@@ -96,7 +96,7 @@ describe('GET /api/policies/:version', () => {
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
       const res = await app.request(
-        '/api/policies/invalid',
+        '/invalid',
         {
           method: 'GET',
           headers: {

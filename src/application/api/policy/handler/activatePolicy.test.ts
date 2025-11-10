@@ -2,14 +2,14 @@ import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../../server'
+import app from '../route'
 
-describe('PATCH /api/policies/:version/activate', () => {
+describe('PATCH /:version/activate', () => {
   let sessionId: string
 
   async function requestActivatePolicy(version: number, body: string) {
     return app.request(
-      `/api/policies/${version}/activate`,
+      `/${version}/activate`,
       {
         method: 'PATCH',
         headers: {
@@ -107,7 +107,7 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Act
       const res = await app.request(
-        `/api/policies/${version}/activate`,
+        `/${version}/activate`,
         {
           method: 'PATCH',
           headers: {
@@ -163,7 +163,7 @@ describe('PATCH /api/policies/:version/activate', () => {
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
       const res = await app.request(
-        '/api/policies/invalid/activate',
+        '/invalid/activate',
         {
           method: 'PATCH',
           headers: {
@@ -209,7 +209,7 @@ describe('PATCH /api/policies/:version/activate', () => {
 
       // Act
       const res = await app.request(
-        `/api/policies/${version}/activate`,
+        `/${version}/activate`,
         {
           method: 'PATCH',
           headers: {

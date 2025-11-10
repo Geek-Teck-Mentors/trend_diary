@@ -1,9 +1,9 @@
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../../server'
+import app from '../route'
 
-describe('DELETE /api/policies/:version', () => {
+describe('DELETE /:version', () => {
   let sessionId: string
   beforeAll(async () => {
     await policyTestHelper.cleanUp()
@@ -19,7 +19,7 @@ describe('DELETE /api/policies/:version', () => {
 
   async function requestDeletePolicy(version: number) {
     return app.request(
-      `/api/policies/${version}`,
+      `/${version}`,
       {
         method: 'DELETE',
         headers: {
@@ -70,7 +70,7 @@ describe('DELETE /api/policies/:version', () => {
   describe('準正常系', () => {
     it('認証なしの場合は401を返す', async () => {
       // Act - セッションIDなしでリクエスト
-      const res = await app.request('/api/policies/1', { method: 'DELETE' }, TEST_ENV)
+      const res = await app.request('/1', { method: 'DELETE' }, TEST_ENV)
 
       // Assert
       expect(res.status).toBe(401)
@@ -110,7 +110,7 @@ describe('DELETE /api/policies/:version', () => {
     it('無効なバージョン形式（文字列）は422を返す', async () => {
       // Act
       const res = await app.request(
-        '/api/policies/invalid',
+        '/invalid',
         {
           method: 'DELETE',
           headers: {

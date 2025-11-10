@@ -2,9 +2,9 @@ import { PrivacyPolicyOutput } from '@/domain/policy'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
-import app from '../../../server'
+import app from '../route'
 
-describe('POST /api/policies', () => {
+describe('POST /', () => {
   let sessionId: string
 
   async function setupTestData(): Promise<void> {
@@ -14,7 +14,7 @@ describe('POST /api/policies', () => {
 
   async function requestCreatePolicy(body: string) {
     return app.request(
-      '/api/policies',
+      '/',
       {
         method: 'POST',
         headers: {
@@ -29,7 +29,7 @@ describe('POST /api/policies', () => {
 
   async function _deleteTestPolicy(version: number) {
     return app.request(
-      `/api/policies/${version}`,
+      `/${version}`,
       {
         method: 'DELETE',
         headers: {
@@ -162,7 +162,7 @@ describe('POST /api/policies', () => {
     it('Content-Typeが指定されていない場合は422を返す', async () => {
       // Act
       const res = await app.request(
-        '/api/policies',
+        '/',
         {
           method: 'POST',
           headers: {
