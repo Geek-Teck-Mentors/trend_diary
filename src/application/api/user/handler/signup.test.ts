@@ -1,6 +1,6 @@
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
-import app from '../../server'
+import app from '../../../server'
 
 describe('POST /api/user', () => {
   beforeAll(async () => {
