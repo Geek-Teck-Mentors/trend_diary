@@ -10,19 +10,17 @@ import getRdbClient from '@/infrastructure/rdb'
 
 const mediaEnum = z.enum(['qiita', 'zenn'])
 const readStatusEnum = z.enum(['0', '1'])
+const dateStringSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .optional()
 
 const baseArticleSearchSchema = z.object({
   title: z.string().optional(),
   author: z.string().optional(),
   media: mediaEnum.optional(),
-  from: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional(),
-  to: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional(),
+  from: dateStringSchema,
+  to: dateStringSchema,
 })
 
 // 日付の範囲チェック用のrefine関数
