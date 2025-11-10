@@ -1,9 +1,9 @@
-import app from '@/application/server'
+import app from '../route'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
-describe('DELETE /api/articles/:article_id/unread', () => {
+describe('DELETE /:article_id/unread', () => {
   let testActiveUserId: bigint
   let testArticleId: bigint
   let sessionId: string
@@ -33,7 +33,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     }
 
     return app.request(
-      `/api/articles/${articleId}/unread`,
+      `/${articleId}/unread`,
       {
         method: 'DELETE',
         headers,

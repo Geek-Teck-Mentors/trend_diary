@@ -1,6 +1,6 @@
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
-import app from '../../../server'
+import app from '../route'
 import { ArticleListResponse } from './getArticles'
 
 type GetArticlesTestCase = {
@@ -9,7 +9,7 @@ type GetArticlesTestCase = {
   status: number
 }
 
-describe('GET /api/articles', () => {
+describe('GET /', () => {
   let db: RdbClient
 
   const testArticles = [
@@ -40,7 +40,7 @@ describe('GET /api/articles', () => {
   }
 
   async function requestGetArticles(query: string = '') {
-    const url = query ? `/api/articles?${query}` : '/api/articles'
+    const url = query ? `/?${query}` : '/'
     return app.request(url, { method: 'GET' }, TEST_ENV)
   }
 

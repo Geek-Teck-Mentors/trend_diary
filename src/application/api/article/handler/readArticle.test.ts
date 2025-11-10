@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker'
-import app from '@/application/server'
+import app from '../route'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 
-describe('POST /api/articles/:article_id/read', () => {
+describe('POST /:article_id/read', () => {
   let testActiveUserId: bigint
   let testArticleId: bigint
   let sessionId: string
@@ -28,7 +28,7 @@ describe('POST /api/articles/:article_id/read', () => {
     }
 
     return app.request(
-      `/api/articles/${articleId}/read`,
+      `/${articleId}/read`,
       {
         method: 'POST',
         headers,
