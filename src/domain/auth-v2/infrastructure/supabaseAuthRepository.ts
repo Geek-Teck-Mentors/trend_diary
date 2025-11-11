@@ -1,5 +1,6 @@
 import {
   AuthInvalidCredentialsError,
+  AuthSessionMissingError,
   type Session,
   type SupabaseClient,
   type User,
@@ -170,8 +171,12 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       } = await this.client.auth.getUser()
 
       if (error) {
-        // Supabaseの内部エラーメッセージを露出しない
-        return failure(new ServerError('Failed to get user information'))
+        switch (error.constructor) {
+          case AuthSessionMissingError:
+            return success(null)
+          default:
+            return failure(new ServerError('Failed to get user information'))
+        }
       }
 
       if (!user) {
