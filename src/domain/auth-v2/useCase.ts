@@ -72,16 +72,9 @@ export class AuthV2UseCase {
 
     const { user, session } = authResult.data
 
-    // authentication_idで既存のactive_userを取得
-    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
+    const activeUserResult = await this.findActiveUserByAuthenticationId(user.id)
 
-    if (isFailure(activeUserResult)) {
-      return failure(new ServerError('Failed to find active user'))
-    }
-
-    if (!activeUserResult.data) {
-      return failure(new ClientError('User not found', 404))
-    }
+    if (isFailure(activeUserResult)) return activeUserResult
 
     return success({
       session,
@@ -111,8 +104,20 @@ export class AuthV2UseCase {
 
     const { user, session } = authResult.data
 
-    // authentication_idで既存のactive_userを取得
-    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(user.id)
+    const activeUserResult = await this.findActiveUserByAuthenticationId(user.id)
+
+    if (isFailure(activeUserResult)) return activeUserResult
+
+    return success({
+      session,
+      activeUser: activeUserResult.data,
+    })
+  }
+
+  private async findActiveUserByAuthenticationId(
+    authenticationId: string,
+  ): AsyncResult<ActiveUser, ClientError | ServerError> {
+    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(authenticationId)
 
     if (isFailure(activeUserResult)) {
       return failure(new ServerError('Failed to find active user'))
@@ -122,9 +127,6 @@ export class AuthV2UseCase {
       return failure(new ClientError('User not found', 404))
     }
 
-    return success({
-      session,
-      activeUser: activeUserResult.data,
-    })
+    return success(activeUserResult.data)
   }
 }
