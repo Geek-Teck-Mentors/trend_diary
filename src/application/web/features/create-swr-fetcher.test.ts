@@ -54,18 +54,53 @@ describe('createSWRFetcher', () => {
   })
 
   describe('apiCall関数', () => {
-    it('正常なレスポンスでJSONを返す', async () => {
-      const mockResponse = {
-        ok: true,
-        json: vi.fn().mockResolvedValue({ success: true }),
-      }
-      const mockApiFunction = vi.fn().mockResolvedValue(mockResponse)
+    describe('正常なレスポンス(200番台)', () => {
+      const testCases: Array<{
+        outline: string
+        status: number
+        json: any
+        expected: any
+        expect: string
+      }> = [
+        {
+          outline: '204 OKの場合 (JSONが含まれていない)',
+          status: 204,
+          json: null,
+          expected: null,
+          expect: 'nullを返す',
+        },
+        {
+          outline: '204 OKのの場合 (JSONが含まれている)',
+          status: 204,
+          json: { dummy: 'data' },
+          expected: null,
+          expect: 'nullを返す',
+        },
+        {
+          outline: '204 以外の場合',
+          status: 200,
+          json: { success: true },
+          expected: { success: true },
+          expect: 'JSONデータを返す',
+        },
+      ]
 
-      const { apiCall } = createSWRFetcher()
-      const result = await apiCall(mockApiFunction)
+      testCases.forEach((testCase) => {
+        it(`${testCase.outline}-${testCase.expect}`, async () => {
+          const mockResponse = {
+            ok: true,
+            status: testCase.status,
+            json: vi.fn().mockResolvedValue(testCase.json),
+          }
+          const mockApiFunction = vi.fn().mockResolvedValue(mockResponse)
 
-      expect(mockApiFunction).toHaveBeenCalled()
-      expect(result).toEqual({ success: true })
+          const { apiCall } = createSWRFetcher()
+          const result = await apiCall(mockApiFunction)
+
+          expect(mockApiFunction).toHaveBeenCalled()
+          expect(result).toEqual(testCase.expected)
+        })
+      })
     })
 
     it('エラーレスポンスで例外を投げる', async () => {
