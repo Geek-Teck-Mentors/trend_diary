@@ -97,6 +97,15 @@ export class AuthV2UseCase {
     return success(result.data)
   }
 
+  async getCurrentActiveUser(): AsyncResult<ActiveUser, ClientError | ServerError> {
+    const authUserResult = await this.getCurrentUser()
+    if (isFailure(authUserResult)) {
+      return authUserResult
+    }
+
+    return this.findActiveUserByAuthenticationId(authUserResult.data.id)
+  }
+
   async refreshSession(): AsyncResult<LoginResult, ClientError | ServerError> {
     // 認証v2でセッション更新
     const authResult = await this.repository.refreshSession()
