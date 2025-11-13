@@ -129,7 +129,7 @@ export class AuthV2UseCase {
     const activeUserResult = await this.userQuery.findActiveByAuthenticationId(authenticationId)
 
     if (isFailure(activeUserResult)) {
-      return failure(new ServerError('Failed to find active user'))
+      return failure(new ServerError(activeUserResult.error))
     }
 
     if (!activeUserResult.data) {
