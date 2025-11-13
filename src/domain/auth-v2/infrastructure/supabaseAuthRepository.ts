@@ -171,12 +171,10 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       } = await this.client.auth.getUser()
 
       if (error) {
-        switch (error.constructor) {
-          case AuthSessionMissingError:
-            return success(null)
-          default:
-            return failure(new ServerError('Failed to get user information'))
+        if (error instanceof AuthSessionMissingError) {
+          return success(null)
         }
+        return failure(new ServerError('Failed to get user information'))
       }
 
       if (!user) {
