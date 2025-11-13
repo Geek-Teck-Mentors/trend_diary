@@ -70,7 +70,7 @@ describe('createSWRFetcher', () => {
           expect: 'nullを返す',
         },
         {
-          outline: '204 OKのの場合 (JSONが含まれている)',
+          outline: '204 OKの場合 (JSONが含まれている)',
           status: 204,
           json: { dummy: 'data' },
           expected: null,
