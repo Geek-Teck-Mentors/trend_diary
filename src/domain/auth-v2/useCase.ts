@@ -4,7 +4,6 @@ import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import type { AuthV2Repository } from './repository'
 import type { AuthenticationSession } from './schema/authenticationSession'
-import type { AuthenticationUser } from './schema/authenticationUser'
 
 /**
  * 認証v2ユーザーのダミーパスワード
@@ -86,19 +85,8 @@ export class AuthV2UseCase {
     return this.repository.logout()
   }
 
-  async getCurrentUser(): AsyncResult<AuthenticationUser, ClientError | ServerError> {
-    const result = await this.repository.getCurrentUser()
-    if (isFailure(result)) return result
-
-    if (!result.data) {
-      return failure(new ClientError('Unauthorized', 401))
-    }
-
-    return success(result.data)
-  }
-
   async getCurrentActiveUser(): AsyncResult<ActiveUser, ClientError | ServerError> {
-    const authUserResult = await this.getCurrentUser()
+    const authUserResult = await this.repository.getCurrentUser()
     if (isFailure(authUserResult)) {
       return authUserResult
     }

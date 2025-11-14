@@ -7,6 +7,7 @@ import {
 } from '@supabase/supabase-js'
 import { type AsyncResult, failure, isFailure, type Result, success } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
+import UnauthorizedError from '@/common/errors/unauthorizedError'
 import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
 import type { AuthenticationUser } from '../schema/authenticationUser'
 
@@ -163,7 +164,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
     }
   }
 
-  async getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError> {
+  async getCurrentUser(): AsyncResult<AuthenticationUser, ServerError> {
     try {
       const {
         data: { user },
@@ -172,13 +173,13 @@ export class SupabaseAuthRepository implements AuthV2Repository {
 
       if (error) {
         if (error instanceof AuthSessionMissingError) {
-          return success(null)
+          return failure(new UnauthorizedError('session not found'))
         }
         return failure(new ServerError('Failed to get user information'))
       }
 
       if (!user) {
-        return success(null)
+        return failure(new UnauthorizedError('session not found'))
       }
 
       const authUserResult = this.toAuthenticationUser(user)
