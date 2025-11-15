@@ -9,7 +9,6 @@ export class PermissionQueryImpl implements PermissionQuery {
 
   async getUserPermissions(activeUserId: bigint): AsyncResult<Permission[], Error> {
     try {
-      // ユーザーのロールを取得
       const userRoles = await this.rdb.userRole.findMany({
         where: {
           activeUserId,
@@ -25,7 +24,6 @@ export class PermissionQueryImpl implements PermissionQuery {
 
       const roleIds = userRoles.map((ur) => ur.roleId)
 
-      // ロールに紐づくパーミッションを取得（重複排除）
       const rolePermissions = await this.rdb.rolePermission.findMany({
         where: {
           roleId: {
@@ -105,7 +103,6 @@ export class PermissionQueryImpl implements PermissionQuery {
         },
       })
 
-      // パスパターンにマッチするエンドポイントを検索
       const matchedEndpoint = endpoints.find((endpoint) => {
         const regex = this.pathPatternToRegex(endpoint.path)
         return regex.test(path)

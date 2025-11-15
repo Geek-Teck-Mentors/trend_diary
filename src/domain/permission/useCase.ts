@@ -19,7 +19,6 @@ export class UseCase {
     path: string,
     method: string,
   ): AsyncResult<boolean, Error> {
-    // エンドポイントに必要な権限を取得
     const requiredPermissionsResult = await this.query.getRequiredPermissionsByEndpoint(
       path,
       method,
@@ -28,18 +27,15 @@ export class UseCase {
       return requiredPermissionsResult
     }
 
-    // エンドポイントが登録されていない場合はアクセス拒否
     if (requiredPermissionsResult.data.length === 0) {
       return success(false)
     }
 
-    // ユーザーの権限を取得
     const userPermissionsResult = await this.query.getUserPermissions(activeUserId)
     if (isFailure(userPermissionsResult)) {
       return userPermissionsResult
     }
 
-    // 必要な権限を全て持っているかチェック
     const hasAllPermissions = requiredPermissionsResult.data.every((required) =>
       userPermissionsResult.data.some(
         (userPerm) => userPerm.permissionId === required.permissionId,
