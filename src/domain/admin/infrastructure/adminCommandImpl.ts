@@ -19,7 +19,7 @@ export class AdminCommandImpl implements AdminCommand {
       }),
     )
     if (isFailure(existingUserResult)) {
-      return failure(new ServerError(existingUserResult.error))
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${existingUserResult.error}`))
     }
 
     const existingUser = existingUserResult.data
@@ -34,7 +34,7 @@ export class AdminCommandImpl implements AdminCommand {
       }),
     )
     if (isFailure(existingAdminResult)) {
-      return failure(new ServerError(existingAdminResult.error))
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${existingAdminResult.error}`))
     }
 
     const existingAdmin = existingAdminResult.data
