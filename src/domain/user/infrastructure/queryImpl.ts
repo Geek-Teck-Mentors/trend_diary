@@ -1,4 +1,4 @@
-import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
@@ -10,73 +10,81 @@ export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
   async findActiveById(id: bigint): AsyncResult<Nullable<ActiveUser>, Error> {
-    try {
-      const activeUser = await this.db.activeUser.findUnique({
+    const activeUserResult = await wrapAsyncCall(() =>
+      this.db.activeUser.findUnique({
         where: { activeUserId: id },
-      })
-
-      if (!activeUser) {
-        return success(null)
-      }
-
-      return success(mapToActiveUser(activeUser))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(activeUserResult)) {
+      return failure(new ServerError(activeUserResult.error))
     }
+
+    const activeUser = activeUserResult.data
+    if (!activeUser) {
+      return success(null)
+    }
+
+    return success(mapToActiveUser(activeUser))
   }
 
   async findActiveByEmail(email: string): AsyncResult<Nullable<ActiveUser>, Error> {
-    try {
-      const activeUser = await this.db.activeUser.findUnique({
+    const activeUserResult = await wrapAsyncCall(() =>
+      this.db.activeUser.findUnique({
         where: { email },
-      })
-
-      if (!activeUser) {
-        return success(null)
-      }
-
-      return success(mapToActiveUser(activeUser))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(activeUserResult)) {
+      return failure(new ServerError(activeUserResult.error))
     }
+
+    const activeUser = activeUserResult.data
+    if (!activeUser) {
+      return success(null)
+    }
+
+    return success(mapToActiveUser(activeUser))
   }
 
   async findActiveBySessionId(sessionId: string): AsyncResult<Nullable<ActiveUser>, Error> {
-    try {
-      const session = await this.db.session.findFirst({
+    const sessionResult = await wrapAsyncCall(() =>
+      this.db.session.findFirst({
         where: {
           sessionId,
           expiresAt: { gt: new Date() },
         },
         include: { activeUser: { include: { adminUser: true } } },
-      })
-
-      if (!session) {
-        return success(null)
-      }
-
-      return success(mapToActiveUser(session.activeUser))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(sessionResult)) {
+      return failure(new ServerError(sessionResult.error))
     }
+
+    const session = sessionResult.data
+    if (!session) {
+      return success(null)
+    }
+
+    return success(mapToActiveUser(session.activeUser))
   }
 
   async findActiveByAuthenticationId(
     authenticationId: string,
   ): AsyncResult<Nullable<ActiveUser>, Error> {
-    try {
-      const activeUser = await this.db.activeUser.findUnique({
+    const activeUserResult = await wrapAsyncCall(() =>
+      this.db.activeUser.findUnique({
         where: { authenticationId },
         include: { adminUser: true },
-      })
-
-      if (!activeUser) {
-        return success(null)
-      }
-
-      return success(mapToActiveUser(activeUser))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(activeUserResult)) {
+      return failure(new ServerError(activeUserResult.error))
     }
+
+    const activeUser = activeUserResult.data
+    if (!activeUser) {
+      return success(null)
+    }
+
+    return success(mapToActiveUser(activeUser))
   }
 }

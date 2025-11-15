@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 import { AdminQuery } from '../repository'
@@ -19,40 +19,43 @@ export class AdminQueryImpl implements AdminQuery {
     }>,
     Error
   > {
-    try {
-      const adminUser = await this.rdb.adminUser.findUnique({
+    const adminUserResult = await wrapAsyncCall(() =>
+      this.rdb.adminUser.findUnique({
         where: { activeUserId: activeUserId },
-      })
-      if (!adminUser) {
-        return success(null)
-      }
-
-      return success({
-        adminUserId: adminUser.adminUserId,
-        activeUserId: adminUser.activeUserId,
-        grantedAt: adminUser.grantedAt,
-        grantedByAdminUserId: adminUser.grantedByAdminUserId,
-      })
-    } catch (error) {
-      return failure(new ServerError(`Admin情報の取得に失敗しました: ${error}`))
+      }),
+    )
+    if (isFailure(adminUserResult)) {
+      return failure(new ServerError(`Admin情報の取得に失敗しました: ${adminUserResult.error}`))
     }
+
+    const adminUser = adminUserResult.data
+    if (!adminUser) {
+      return success(null)
+    }
+
+    return success({
+      adminUserId: adminUser.adminUserId,
+      activeUserId: adminUser.activeUserId,
+      grantedAt: adminUser.grantedAt,
+      grantedByAdminUserId: adminUser.grantedByAdminUserId,
+    })
   }
 
   async findAllUsers(query?: UserSearchQuery): AsyncResult<UserListResult, Error> {
-    try {
-      const { searchQuery, page = 1, limit = 20 } = query || {}
-      const offset = (page - 1) * limit
+    const { searchQuery, page = 1, limit = 20 } = query || {}
+    const offset = (page - 1) * limit
 
-      const whereClause = searchQuery
-        ? {
-            OR: [
-              { email: { contains: searchQuery, mode: 'insensitive' as const } },
-              { displayName: { contains: searchQuery, mode: 'insensitive' as const } },
-            ],
-          }
-        : {}
+    const whereClause = searchQuery
+      ? {
+          OR: [
+            { email: { contains: searchQuery, mode: 'insensitive' as const } },
+            { displayName: { contains: searchQuery, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}
 
-      const [users, total] = await Promise.all([
+    const result = await wrapAsyncCall(() =>
+      Promise.all([
         this.rdb.activeUser.findMany({
           where: whereClause,
           include: {
@@ -63,18 +66,20 @@ export class AdminQueryImpl implements AdminQuery {
           take: limit,
         }),
         this.rdb.activeUser.count({ where: whereClause }),
-      ])
-
-      const userList = users.map((user) => toUserListItem(user as UserWithAdminRow))
-
-      return success({
-        users: userList,
-        total,
-        page,
-        limit,
-      })
-    } catch (error) {
-      return failure(new ServerError(`ユーザ一覧の取得に失敗しました: ${error}`))
+      ]),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(`ユーザ一覧の取得に失敗しました: ${result.error}`))
     }
+
+    const [users, total] = result.data
+    const userList = users.map((user) => toUserListItem(user as UserWithAdminRow))
+
+    return success({
+      users: userList,
+      total,
+      page,
+      limit,
+    })
   }
 }

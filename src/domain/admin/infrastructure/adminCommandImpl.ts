@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
 import { AdminCommand } from '../repository'
 import type { AdminUser } from '../schema/adminUserSchema'
@@ -12,36 +12,49 @@ export class AdminCommandImpl implements AdminCommand {
     activeUserId: bigint,
     grantedByAdminUserId: number,
   ): AsyncResult<AdminUser, Error> {
-    try {
-      // ユーザーが存在するかチェック
-      const existingUser = await this.rdb.activeUser.findUnique({
+    // ユーザーが存在するかチェック
+    const existingUserResult = await wrapAsyncCall(() =>
+      this.rdb.activeUser.findUnique({
         where: { activeUserId },
-      })
+      }),
+    )
+    if (isFailure(existingUserResult)) {
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${existingUserResult.error}`))
+    }
 
-      if (!existingUser) {
-        return failure(new NotFoundError('ユーザーが見つかりません'))
-      }
+    const existingUser = existingUserResult.data
+    if (!existingUser) {
+      return failure(new NotFoundError('ユーザーが見つかりません'))
+    }
 
-      // 既にAdmin権限を持っているかチェック
-      const existingAdmin = await this.rdb.adminUser.findUnique({
+    // 既にAdmin権限を持っているかチェック
+    const existingAdminResult = await wrapAsyncCall(() =>
+      this.rdb.adminUser.findUnique({
         where: { activeUserId: activeUserId },
-      })
+      }),
+    )
+    if (isFailure(existingAdminResult)) {
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${existingAdminResult.error}`))
+    }
 
-      if (existingAdmin) {
-        return failure(new AlreadyExistsError('既にAdmin権限を持っています'))
-      }
+    const existingAdmin = existingAdminResult.data
+    if (existingAdmin) {
+      return failure(new AlreadyExistsError('既にAdmin権限を持っています'))
+    }
 
-      // Admin権限付与
-      const adminUser = await this.rdb.adminUser.create({
+    // Admin権限付与
+    const adminUserResult = await wrapAsyncCall(() =>
+      this.rdb.adminUser.create({
         data: {
           activeUserId: activeUserId,
           grantedByAdminUserId,
         },
-      })
-
-      return success(toDomainAdminUser(adminUser))
-    } catch (error) {
-      return failure(new ServerError(`Admin権限の付与に失敗しました: ${error}`))
+      }),
+    )
+    if (isFailure(adminUserResult)) {
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${adminUserResult.error}`))
     }
+
+    return success(toDomainAdminUser(adminUserResult.data))
   }
 }

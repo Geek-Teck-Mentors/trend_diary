@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { RdbClient } from '@/infrastructure/rdb'
 import { CreateSessionInput } from '../dto'
@@ -11,8 +11,8 @@ export default class CommandImpl implements Command {
   constructor(private readonly db: RdbClient) {}
 
   async createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, ServerError> {
-    try {
-      const activeUser = await this.db.$transaction(async (tx: Prisma.TransactionClient) => {
+    const activeUserResult = await wrapAsyncCall(() =>
+      this.db.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.create({})
         const activeUser = await tx.activeUser.create({
           data: {
@@ -22,12 +22,13 @@ export default class CommandImpl implements Command {
           },
         })
         return activeUser
-      })
-
-      return success(mapToActiveUser(activeUser))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(activeUserResult)) {
+      return failure(new ServerError(activeUserResult.error))
     }
+
+    return success(mapToActiveUser(activeUserResult.data))
   }
 
   async createActiveWithAuthenticationId(
@@ -36,8 +37,8 @@ export default class CommandImpl implements Command {
     authenticationId: string,
     displayName?: string | null,
   ): AsyncResult<ActiveUser, ServerError> {
-    try {
-      const activeUser = await this.db.$transaction(async (tx: Prisma.TransactionClient) => {
+    const activeUserResult = await wrapAsyncCall(() =>
+      this.db.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.create({})
         const activeUser = await tx.activeUser.create({
           data: {
@@ -49,17 +50,18 @@ export default class CommandImpl implements Command {
           },
         })
         return activeUser
-      })
-
-      return success(mapToActiveUser(activeUser))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(activeUserResult)) {
+      return failure(new ServerError(activeUserResult.error))
     }
+
+    return success(mapToActiveUser(activeUserResult.data))
   }
 
   async saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, ServerError> {
-    try {
-      const updatedActiveUser = await this.db.activeUser.update({
+    const updatedActiveUserResult = await wrapAsyncCall(() =>
+      this.db.activeUser.update({
         where: { activeUserId: activeUser.activeUserId },
         data: {
           email: activeUser.email,
@@ -67,19 +69,20 @@ export default class CommandImpl implements Command {
           displayName: activeUser.displayName,
           lastLogin: activeUser.lastLogin,
         },
-      })
-
-      return success(mapToActiveUser(updatedActiveUser))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(updatedActiveUserResult)) {
+      return failure(new ServerError(updatedActiveUserResult.error))
     }
+
+    return success(mapToActiveUser(updatedActiveUserResult.data))
   }
 
   async createSession(
     input: CreateSessionInput,
   ): AsyncResult<{ sessionId: string; expiresAt: Date }, ServerError> {
-    try {
-      const session = await this.db.session.create({
+    const sessionResult = await wrapAsyncCall(() =>
+      this.db.session.create({
         data: {
           sessionId: input.sessionId,
           activeUserId: input.activeUserId,
@@ -88,26 +91,29 @@ export default class CommandImpl implements Command {
           ipAddress: input.ipAddress,
           userAgent: input.userAgent,
         },
-      })
-
-      return success({
-        sessionId: session.sessionId,
-        expiresAt: session.expiresAt,
-      })
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(sessionResult)) {
+      return failure(new ServerError(sessionResult.error))
     }
+
+    const session = sessionResult.data
+    return success({
+      sessionId: session.sessionId,
+      expiresAt: session.expiresAt,
+    })
   }
 
   async deleteSession(sessionId: string): AsyncResult<void, ServerError> {
-    try {
-      await this.db.session.delete({
+    const result = await wrapAsyncCall(() =>
+      this.db.session.delete({
         where: { sessionId },
-      })
-
-      return success(undefined)
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
     }
+
+    return success(undefined)
   }
 }
