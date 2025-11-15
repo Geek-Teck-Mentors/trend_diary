@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -21,7 +22,7 @@ describe('PermissionQueryImpl', () => {
 
   describe('getUserRoles', () => {
     it('ユーザーのロール一覧を取得できる', async () => {
-      mockDb.userRole.findMany.mockResolvedValue([
+      const mockUserRoleWithRole: Prisma.UserRoleGetPayload<{ include: { role: true } }>[] = [
         {
           activeUserId: BigInt(1),
           roleId: 1,
@@ -33,7 +34,8 @@ describe('PermissionQueryImpl', () => {
             createdAt: new Date(),
           },
         },
-      ])
+      ]
+      mockDb.userRole.findMany.mockResolvedValue(mockUserRoleWithRole)
 
       const result = await query.getUserRoles(BigInt(1))
 
@@ -66,7 +68,9 @@ describe('PermissionQueryImpl', () => {
         },
       ])
 
-      mockDb.rolePermission.findMany.mockResolvedValue([
+      const mockRolePermissionWithPermission: Prisma.RolePermissionGetPayload<{
+        include: { permission: true }
+      }>[] = [
         {
           roleId: 1,
           permissionId: 1,
@@ -76,7 +80,8 @@ describe('PermissionQueryImpl', () => {
             action: 'read',
           },
         },
-      ])
+      ]
+      mockDb.rolePermission.findMany.mockResolvedValue(mockRolePermissionWithPermission)
 
       const result = await query.getUserPermissions(BigInt(1))
 

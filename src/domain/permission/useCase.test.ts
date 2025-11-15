@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -28,7 +29,9 @@ describe('Permission UseCase', () => {
         },
       ])
 
-      mockDb.rolePermission.findMany.mockResolvedValue([
+      const mockRolePermissionWithPermission: Prisma.RolePermissionGetPayload<{
+        include: { permission: true }
+      }>[] = [
         {
           roleId: 1,
           permissionId: 1,
@@ -38,7 +41,8 @@ describe('Permission UseCase', () => {
             action: 'read',
           },
         },
-      ])
+      ]
+      mockDb.rolePermission.findMany.mockResolvedValue(mockRolePermissionWithPermission)
 
       const result = await useCase.hasPermission(BigInt(1), 'article', 'read')
 
@@ -62,7 +66,7 @@ describe('Permission UseCase', () => {
 
   describe('hasRole', () => {
     it('ユーザーがロールを持っている場合trueを返す', async () => {
-      mockDb.userRole.findMany.mockResolvedValue([
+      const mockUserRoleWithRole: Prisma.UserRoleGetPayload<{ include: { role: true } }>[] = [
         {
           activeUserId: BigInt(1),
           roleId: 1,
@@ -74,7 +78,8 @@ describe('Permission UseCase', () => {
             createdAt: new Date(),
           },
         },
-      ])
+      ]
+      mockDb.userRole.findMany.mockResolvedValue(mockUserRoleWithRole)
 
       const result = await useCase.hasRole(BigInt(1), '管理者')
 
