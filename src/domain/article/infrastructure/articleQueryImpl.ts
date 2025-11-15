@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
-import { NotFoundError, ServerError } from '@/common/errors'
+import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
@@ -62,8 +62,9 @@ export default class ArticleQueryImpl implements ArticleQuery {
     if (isFailure(result)) {
       return failure(new ServerError(result.error))
     }
+
     const article = result.data
-    if (!article) return failure(new NotFoundError('article not found'))
+    if (!article) return success(null)
     return success(fromPrismaToArticle(article))
   }
 
