@@ -70,7 +70,7 @@ describe('Permission UseCase', () => {
       }
     })
 
-    it('エンドポイントが登録されていない場合trueを返す（後方互換性）', async () => {
+    it('エンドポイントが登録されていない場合falseを返す', async () => {
       mockDb.endpoint.findUnique.mockResolvedValue(null)
       mockDb.endpoint.findMany.mockResolvedValue([])
 
@@ -78,7 +78,7 @@ describe('Permission UseCase', () => {
 
       expect(isSuccess(result)).toBe(true)
       if (isSuccess(result)) {
-        expect(result.data).toBe(true)
+        expect(result.data).toBe(false)
       }
     })
 

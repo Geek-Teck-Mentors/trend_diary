@@ -28,9 +28,9 @@ export class UseCase {
       return requiredPermissionsResult
     }
 
-    // エンドポイントが登録されていない場合は権限不要（後方互換性のため）
+    // エンドポイントが登録されていない場合はアクセス拒否
     if (requiredPermissionsResult.data.length === 0) {
-      return success(true)
+      return success(false)
     }
 
     // ユーザーの権限を取得
