@@ -50,15 +50,23 @@ export class PermissionQueryImpl implements PermissionQuery {
     }
   }
 
+  /**
+   * パスパターン（例: /api/users/:id）を正規表現パターンに変換
+   * :paramName を [^/]+ に置き換える
+   */
+  private pathPatternToRegex(pattern: string): RegExp {
+    const regexPattern = pattern.replace(/:[^/]+/g, '[^/]+')
+    return new RegExp(`^${regexPattern}$`)
+  }
+
   async getRequiredPermissionsByEndpoint(
     path: string,
     method: string,
   ): AsyncResult<Permission[], Error> {
     try {
-      // エンドポイントを検索（パスマッチングは後で実装、まずは完全一致）
-      const endpoint = await this.rdb.endpoint.findUnique({
+      // まず完全一致を試す（パフォーマンス最適化）
+      const exactMatch = await this.rdb.endpoint.findUnique({
         where: {
-          // biome-ignore lint/style/useNamingConvention: Prisma auto-generated composite key name
           path_method: {
             path,
             method,
@@ -73,11 +81,40 @@ export class PermissionQueryImpl implements PermissionQuery {
         },
       })
 
-      if (!endpoint) {
+      if (exactMatch) {
+        const permissions = exactMatch.endpointPermissions.map((ep) => ({
+          permissionId: ep.permission.permissionId,
+          resource: ep.permission.resource,
+          action: ep.permission.action,
+        }))
+        return success(permissions)
+      }
+
+      // 完全一致しない場合、パターンマッチングを試す
+      const endpoints = await this.rdb.endpoint.findMany({
+        where: {
+          method,
+        },
+        include: {
+          endpointPermissions: {
+            include: {
+              permission: true,
+            },
+          },
+        },
+      })
+
+      // パスパターンにマッチするエンドポイントを検索
+      const matchedEndpoint = endpoints.find((endpoint) => {
+        const regex = this.pathPatternToRegex(endpoint.path)
+        return regex.test(path)
+      })
+
+      if (!matchedEndpoint) {
         return success([])
       }
 
-      const permissions = endpoint.endpointPermissions.map((ep) => ({
+      const permissions = matchedEndpoint.endpointPermissions.map((ep) => ({
         permissionId: ep.permission.permissionId,
         resource: ep.permission.resource,
         action: ep.permission.action,
