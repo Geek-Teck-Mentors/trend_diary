@@ -19,7 +19,11 @@ export class PermissionQueryImpl implements PermissionQuery {
       }),
     )
     if (isFailure(userRolesResult)) {
-      return failure(new ServerError(userRolesResult.error))
+      const message =
+        userRolesResult.error instanceof Error
+          ? userRolesResult.error.message
+          : String(userRolesResult.error)
+      return failure(new ServerError(`ユーザーのパーミッション取得に失敗: ${message}`))
     }
 
     const userRoles = userRolesResult.data
@@ -43,7 +47,11 @@ export class PermissionQueryImpl implements PermissionQuery {
       }),
     )
     if (isFailure(rolePermissionsResult)) {
-      return failure(new ServerError(rolePermissionsResult.error))
+      const message =
+        rolePermissionsResult.error instanceof Error
+          ? rolePermissionsResult.error.message
+          : String(rolePermissionsResult.error)
+      return failure(new ServerError(`ユーザーのパーミッション取得に失敗: ${message}`))
     }
 
     const rolePermissions = rolePermissionsResult.data
@@ -88,7 +96,11 @@ export class PermissionQueryImpl implements PermissionQuery {
       }),
     )
     if (isFailure(exactMatchResult)) {
-      return failure(new ServerError(exactMatchResult.error))
+      const message =
+        exactMatchResult.error instanceof Error
+          ? exactMatchResult.error.message
+          : String(exactMatchResult.error)
+      return failure(new ServerError(`エンドポイントの権限取得に失敗: ${message}`))
     }
 
     const exactMatch = exactMatchResult.data
@@ -117,7 +129,11 @@ export class PermissionQueryImpl implements PermissionQuery {
       }),
     )
     if (isFailure(endpointsResult)) {
-      return failure(new ServerError(endpointsResult.error))
+      const message =
+        endpointsResult.error instanceof Error
+          ? endpointsResult.error.message
+          : String(endpointsResult.error)
+      return failure(new ServerError(`エンドポイントの権限取得に失敗: ${message}`))
     }
 
     const endpoints = endpointsResult.data

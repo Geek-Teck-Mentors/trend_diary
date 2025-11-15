@@ -25,7 +25,7 @@ export class AdminQueryImpl implements AdminQuery {
       }),
     )
     if (isFailure(adminUserResult)) {
-      return failure(new ServerError(adminUserResult.error))
+      return failure(new ServerError(`Admin情報の取得に失敗しました: ${adminUserResult.error}`))
     }
 
     const adminUser = adminUserResult.data
@@ -69,7 +69,7 @@ export class AdminQueryImpl implements AdminQuery {
       ]),
     )
     if (isFailure(result)) {
-      return failure(new ServerError(result.error))
+      return failure(new ServerError(`ユーザ一覧の取得に失敗しました: ${result.error}`))
     }
 
     const [users, total] = result.data

@@ -52,7 +52,7 @@ export class AdminCommandImpl implements AdminCommand {
       }),
     )
     if (isFailure(adminUserResult)) {
-      return failure(new ServerError(adminUserResult.error))
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${adminUserResult.error}`))
     }
 
     return success(toDomainAdminUser(adminUserResult.data))
