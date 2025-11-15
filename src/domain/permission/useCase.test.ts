@@ -72,6 +72,7 @@ describe('Permission UseCase', () => {
 
     it('エンドポイントが登録されていない場合trueを返す（後方互換性）', async () => {
       mockDb.endpoint.findUnique.mockResolvedValue(null)
+      mockDb.endpoint.findMany.mockResolvedValue([])
 
       const result = await useCase.hasEndpointPermission(BigInt(1), '/api/unknown', 'GET')
 

@@ -85,6 +85,7 @@ describe('PermissionQueryImpl', () => {
         endpointId: 1,
         path: '/api/admin/users',
         method: 'GET',
+        createdAt: new Date(),
         endpointPermissions: [
           {
             endpointId: 1,
@@ -119,6 +120,7 @@ describe('PermissionQueryImpl', () => {
           endpointId: 2,
           path: '/api/admin/users/:id',
           method: 'POST',
+          createdAt: new Date(),
           endpointPermissions: [
             {
               endpointId: 2,
@@ -154,6 +156,7 @@ describe('PermissionQueryImpl', () => {
           endpointId: 3,
           path: '/api/policies/:version',
           method: 'GET',
+          createdAt: new Date(),
           endpointPermissions: [
             {
               endpointId: 3,
