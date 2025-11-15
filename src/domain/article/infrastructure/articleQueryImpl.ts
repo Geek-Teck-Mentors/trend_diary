@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
-import { ServerError } from '@/common/errors'
+import { NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
@@ -54,15 +54,17 @@ export default class ArticleQueryImpl implements ArticleQuery {
   }
 
   async findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError> {
-    try {
-      const article = await this.db.article.findUnique({
+    const result = await wrapAsyncCall(() =>
+      this.db.article.findUnique({
         where: { articleId },
-      })
-      if (!article) return success(null)
-      return success(fromPrismaToArticle(article))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
     }
+    const article = result.data
+    if (!article) return failure(new NotFoundError('article not found'))
+    return success(fromPrismaToArticle(article))
   }
 
   private static buildWhereClause(
