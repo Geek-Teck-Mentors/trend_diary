@@ -133,7 +133,6 @@ export class PermissionQueryImpl implements PermissionQuery {
     try {
       const userRole = await this.rdb.userRole.findUnique({
         where: {
-          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           activeUserId_roleId: {
             activeUserId,
             roleId,
@@ -163,7 +162,6 @@ export class PermissionQueryImpl implements PermissionQuery {
       // エンドポイントを検索（パスマッチングは後で実装、まずは完全一致）
       const endpoint = await this.rdb.endpoint.findUnique({
         where: {
-          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           path_method: {
             path,
             method,

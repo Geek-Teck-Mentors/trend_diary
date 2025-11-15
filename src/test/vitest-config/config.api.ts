@@ -6,7 +6,7 @@ import { coverageReporter, generateIncludes } from './config'
 // ci環境ではDATABASE_URLが設定されているため
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test'
 
-const { testInclude, coverageInclude } = generateIncludes('src/application/api', 'src/application/middleware')
+const { testInclude, coverageInclude } = generateIncludes('src/application/api')
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
