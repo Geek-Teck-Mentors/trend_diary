@@ -86,50 +86,26 @@ WHERE r.display_name = '一般ユーザー'
 ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 -- エンドポイントのシードデータ
--- 既存のAPIエンドポイントを登録し、必要な権限を紐付ける
+-- 権限チェックが必要なエンドポイントのみ登録
+-- 公開エンドポイント（認証不要）や認証のみ必須のエンドポイントはルート定義で制御するため登録しない
 
 -- Endpointテーブルへの投入
 INSERT INTO "public"."endpoints" (path, method) VALUES
-  -- User API
-  ('/api/user/me', 'GET'),
-  ('/api/user', 'POST'),
-  ('/api/user/login', 'POST'),
-  ('/api/user/logout', 'DELETE'),
-
-  -- Admin API
+  -- Admin API（権限チェック必須）
   ('/api/admin/users', 'GET'),
   ('/api/admin/users/:id', 'POST'),
 
-  -- Auth V2 API (公開エンドポイント)
-  ('/api/v2/auth/signup', 'POST'),
-  ('/api/v2/auth/login', 'POST'),
-  ('/api/v2/auth/logout', 'DELETE'),
-  ('/api/v2/auth/me', 'GET'),
-
-  -- Policy API
+  -- Policy API（権限チェック必須）
   ('/api/policies', 'GET'),
   ('/api/policies', 'POST'),
   ('/api/policies/:version', 'GET'),
   ('/api/policies/:version', 'PATCH'),
   ('/api/policies/:version', 'DELETE'),
   ('/api/policies/:version/clone', 'POST'),
-  ('/api/policies/:version/activate', 'PATCH'),
-
-  -- Article API
-  ('/api/articles', 'GET'),
-  ('/api/articles/:article_id/read', 'POST'),
-  ('/api/articles/:article_id/unread', 'DELETE')
+  ('/api/policies/:version/activate', 'PATCH')
 ON CONFLICT (path, method) DO NOTHING;
 
 -- EndpointPermissionの紐付け
--- GET /user/me: user.read
-INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
-SELECT e.endpoint_id, p.permission_id
-FROM "public"."endpoints" e
-CROSS JOIN "public"."permissions" p
-WHERE e.path = '/api/user/me' AND e.method = 'GET'
-  AND p.resource = 'user' AND p.action = 'read'
-ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
 -- GET /admin/users: user.list
 INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
@@ -210,31 +186,4 @@ FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
 WHERE e.path = '/api/policies/:version/activate' AND e.method = 'PATCH'
   AND p.resource = 'privacy_policy' AND p.action = 'activate'
-ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
-
--- GET /articles: article.list
-INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
-SELECT e.endpoint_id, p.permission_id
-FROM "public"."endpoints" e
-CROSS JOIN "public"."permissions" p
-WHERE e.path = '/api/articles' AND e.method = 'GET'
-  AND p.resource = 'article' AND p.action = 'list'
-ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
-
--- POST /articles/:article_id/read: article.mark_read
-INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
-SELECT e.endpoint_id, p.permission_id
-FROM "public"."endpoints" e
-CROSS JOIN "public"."permissions" p
-WHERE e.path = '/api/articles/:article_id/read' AND e.method = 'POST'
-  AND p.resource = 'article' AND p.action = 'mark_read'
-ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
-
--- DELETE /articles/:article_id/unread: article.mark_unread
-INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
-SELECT e.endpoint_id, p.permission_id
-FROM "public"."endpoints" e
-CROSS JOIN "public"."permissions" p
-WHERE e.path = '/api/articles/:article_id/unread' AND e.method = 'DELETE'
-  AND p.resource = 'article' AND p.action = 'mark_unread'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
