@@ -48,6 +48,9 @@ export default function AdminLayout() {
             </div>
             <nav className='flex space-x-8'>
               <LinkAsButton to='/admin/users'>ユーザ管理</LinkAsButton>
+              <LinkAsButton to='/admin/roles'>ロール管理</LinkAsButton>
+              <LinkAsButton to='/admin/permissions'>権限管理</LinkAsButton>
+              <LinkAsButton to='/admin/endpoints'>エンドポイント管理</LinkAsButton>
             </nav>
           </div>
         </div>
