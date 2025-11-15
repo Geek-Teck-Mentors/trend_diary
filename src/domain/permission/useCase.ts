@@ -42,9 +42,7 @@ export class UseCase {
     // 必要な権限を全て持っているかチェック
     const hasAllPermissions = requiredPermissionsResult.data.every((required) =>
       userPermissionsResult.data.some(
-        (userPerm) =>
-          userPerm.permissionId === required.permissionId ||
-          (userPerm.resource === required.resource && userPerm.action === required.action),
+        (userPerm) => userPerm.permissionId === required.permissionId,
       ),
     )
 
