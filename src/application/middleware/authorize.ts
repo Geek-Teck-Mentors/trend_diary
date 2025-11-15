@@ -12,11 +12,43 @@ import CONTEXT_KEY from './context'
  * エンドポイントベースの認可ミドルウェア
  * DBに登録されたエンドポイント情報から必要な権限を自動判定してチェックする
  *
+ * ## エンドポイントのセキュリティレベル
+ *
+ * 1. **公開エンドポイント（ミドルウェアなし）**
+ *    - 認証不要、認可不要
+ *    - 例: GET /api/articles（記事一覧）
+ *
+ * 2. **認証のみ必要（authenticatorのみ）**
+ *    - ログインが必要だが、特定の権限は不要
+ *    - 例: POST /api/articles/:id/read（記事を読んだ記録）
+ *
+ * 3. **認証 + 権限チェック必要（authenticator + authorize）**
+ *    - ログインが必要で、かつDBに登録された権限が必要
+ *    - 例: GET /api/admin/users（管理者のみアクセス可能）
+ *
+ * ## 前提条件
+ * - このミドルウェアの前にauthenticatorミドルウェアが必要
+ * - DBのendpointsテーブルにエンドポイント情報が登録されている必要がある
+ *
+ * ## 動作
+ * - エンドポイントが未登録の場合: 403 Permission denied
+ * - 必要な権限を持っていない場合: 403 Permission denied
+ * - 必要な権限を全て持っている場合: 次のハンドラーに進む
+ *
  * @returns Honoミドルウェア
  *
  * @example
- * app.get('/api/users', authenticate, authorize(), async (c) => { ... })
- * app.post('/api/articles', authenticate, authorize(), async (c) => { ... })
+ * // 権限チェックが必要なエンドポイント
+ * app.get('/api/admin/users', authenticator, authorize(), getUserList)
+ * app.post('/api/policies', authenticator, authorize(), createPolicy)
+ *
+ * @example
+ * // 認証のみ必要なエンドポイント（authorizeなし）
+ * app.post('/api/articles/:id/read', authenticator, readArticle)
+ *
+ * @example
+ * // 公開エンドポイント（ミドルウェアなし）
+ * app.get('/api/articles', getArticles)
  */
 const authorize = () => {
   return createMiddleware<Env>(async (c, next) => {
