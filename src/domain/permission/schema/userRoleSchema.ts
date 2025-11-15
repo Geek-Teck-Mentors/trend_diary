@@ -11,9 +11,9 @@ export const userRoleInputSchema = userRoleSchema.pick({
   roleId: true,
 })
 
-export const userRoleRevokeSchema = z.object({
-  activeUserId: z.bigint().positive('activeUserIdは正の整数である必要がある'),
-  roleId: z.number().int().positive('roleIdは正の整数である必要がある'),
+export const userRoleRevokeSchema = userRoleSchema.pick({
+  activeUserId: true,
+  roleId: true,
 })
 
 export type UserRole = z.infer<typeof userRoleSchema>

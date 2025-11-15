@@ -46,7 +46,8 @@ export class PermissionQueryImpl implements PermissionQuery {
 
       return success(permissions)
     } catch (error) {
-      return failure(new ServerError(`ユーザーのパーミッション取得に失敗: ${error}`))
+      const message = error instanceof Error ? error.message : String(error)
+      return failure(new ServerError(`ユーザーのパーミッション取得に失敗: ${message}`))
     }
   }
 
@@ -122,7 +123,8 @@ export class PermissionQueryImpl implements PermissionQuery {
 
       return success(permissions)
     } catch (error) {
-      return failure(new ServerError(`エンドポイントの権限取得に失敗: ${error}`))
+      const message = error instanceof Error ? error.message : String(error)
+      return failure(new ServerError(`エンドポイントの権限取得に失敗: ${message}`))
     }
   }
 }
