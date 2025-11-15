@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  userRoleInputSchema,
-  userRoleRevokeSchema,
-  userRoleSchema,
-} from './userRoleSchema'
+import { userRoleInputSchema, userRoleRevokeSchema, userRoleSchema } from './userRoleSchema'
 
 describe('userRoleSchema', () => {
   describe('正常系', () => {
