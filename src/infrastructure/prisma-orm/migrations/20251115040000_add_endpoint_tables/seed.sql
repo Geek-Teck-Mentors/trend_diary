@@ -33,7 +33,16 @@ INSERT INTO "public"."permissions" (resource, action) VALUES
 
   -- パーミッション管理
   ('permission', 'list'),
-  ('permission', 'read')
+  ('permission', 'read'),
+  ('permission', 'create'),
+  ('permission', 'delete'),
+
+  -- エンドポイント管理
+  ('endpoint', 'list'),
+  ('endpoint', 'read'),
+  ('endpoint', 'create'),
+  ('endpoint', 'delete'),
+  ('endpoint', 'update')
 ON CONFLICT (resource, action) DO NOTHING;
 
 -- Roleテーブルへの投入
@@ -65,7 +74,11 @@ WHERE r.display_name = '管理者'
     -- プライバシーポリシー
     OR (p.resource = 'privacy_policy' AND p.action IN ('list', 'read', 'create', 'update', 'delete', 'clone', 'activate'))
     -- ロール
-    OR (p.resource = 'role' AND p.action IN ('list', 'read', 'assign', 'revoke'))
+    OR (p.resource = 'role' AND p.action IN ('list', 'read', 'create', 'update', 'delete', 'assign', 'revoke'))
+    -- パーミッション
+    OR (p.resource = 'permission' AND p.action IN ('list', 'read', 'create', 'delete'))
+    -- エンドポイント
+    OR (p.resource = 'endpoint' AND p.action IN ('list', 'read', 'create', 'delete', 'update'))
   )
 ON CONFLICT (role_id, permission_id) DO NOTHING;
 
@@ -102,7 +115,27 @@ INSERT INTO "public"."endpoints" (path, method) VALUES
   ('/api/policies/:version', 'PATCH'),
   ('/api/policies/:version', 'DELETE'),
   ('/api/policies/:version/clone', 'POST'),
-  ('/api/policies/:version/activate', 'PATCH')
+  ('/api/policies/:version/activate', 'PATCH'),
+
+  -- Permission API
+  ('/api/admin/permissions', 'GET'),
+  ('/api/admin/permissions', 'POST'),
+  ('/api/admin/permissions/:id', 'DELETE'),
+
+  -- Role API
+  ('/api/admin/roles', 'GET'),
+  ('/api/admin/roles/:id', 'GET'),
+  ('/api/admin/roles', 'POST'),
+  ('/api/admin/roles/:id', 'PATCH'),
+  ('/api/admin/roles/:id', 'DELETE'),
+  ('/api/admin/roles/:id/permissions', 'PATCH'),
+
+  -- Endpoint API
+  ('/api/admin/endpoints', 'GET'),
+  ('/api/admin/endpoints/:id', 'GET'),
+  ('/api/admin/endpoints', 'POST'),
+  ('/api/admin/endpoints/:id', 'DELETE'),
+  ('/api/admin/endpoints/:id/permissions', 'PATCH')
 ON CONFLICT (path, method) DO NOTHING;
 
 -- EndpointPermissionの紐付け
@@ -186,4 +219,133 @@ FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
 WHERE e.path = '/api/policies/:version/activate' AND e.method = 'PATCH'
   AND p.resource = 'privacy_policy' AND p.action = 'activate'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- Permission API endpoints
+-- GET /api/admin/permissions: permission.list
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/permissions' AND e.method = 'GET'
+  AND p.resource = 'permission' AND p.action = 'list'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- POST /api/admin/permissions: permission.create
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/permissions' AND e.method = 'POST'
+  AND p.resource = 'permission' AND p.action = 'create'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- DELETE /api/admin/permissions/:id: permission.delete
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/permissions/:id' AND e.method = 'DELETE'
+  AND p.resource = 'permission' AND p.action = 'delete'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- Role API endpoints
+-- GET /api/admin/roles: role.list
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/roles' AND e.method = 'GET'
+  AND p.resource = 'role' AND p.action = 'list'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- GET /api/admin/roles/:id: role.read
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/roles/:id' AND e.method = 'GET'
+  AND p.resource = 'role' AND p.action = 'read'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- POST /api/admin/roles: role.create
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/roles' AND e.method = 'POST'
+  AND p.resource = 'role' AND p.action = 'create'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- PATCH /api/admin/roles/:id: role.update
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/roles/:id' AND e.method = 'PATCH'
+  AND p.resource = 'role' AND p.action = 'update'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- DELETE /api/admin/roles/:id: role.delete
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/roles/:id' AND e.method = 'DELETE'
+  AND p.resource = 'role' AND p.action = 'delete'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- PATCH /api/admin/roles/:id/permissions: role.update (権限の割り当てもupdateと見なす)
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/roles/:id/permissions' AND e.method = 'PATCH'
+  AND p.resource = 'role' AND p.action = 'update'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- Endpoint API endpoints
+-- GET /api/admin/endpoints: endpoint.list
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/endpoints' AND e.method = 'GET'
+  AND p.resource = 'endpoint' AND p.action = 'list'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- GET /api/admin/endpoints/:id: endpoint.read
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/endpoints/:id' AND e.method = 'GET'
+  AND p.resource = 'endpoint' AND p.action = 'read'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- POST /api/admin/endpoints: endpoint.create
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/endpoints' AND e.method = 'POST'
+  AND p.resource = 'endpoint' AND p.action = 'create'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- DELETE /api/admin/endpoints/:id: endpoint.delete
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/endpoints/:id' AND e.method = 'DELETE'
+  AND p.resource = 'endpoint' AND p.action = 'delete'
+ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
+
+-- PATCH /api/admin/endpoints/:id/permissions: endpoint.update
+INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
+SELECT e.endpoint_id, p.permission_id
+FROM "public"."endpoints" e
+CROSS JOIN "public"."permissions" p
+WHERE e.path = '/api/admin/endpoints/:id/permissions' AND e.method = 'PATCH'
+  AND p.resource = 'endpoint' AND p.action = 'update'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
