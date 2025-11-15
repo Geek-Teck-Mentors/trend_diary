@@ -1,6 +1,5 @@
 import { AsyncResult } from '@yuukihayashi0510/core'
 import { Nullable } from '@/common/types/utility'
-import type { Endpoint } from './schema/endpointSchema'
 import type { Permission } from './schema/permissionSchema'
 import type { Role } from './schema/roleSchema'
 import type { UserRole, UserRoleInput, UserRoleRevoke } from './schema/userRoleSchema'
