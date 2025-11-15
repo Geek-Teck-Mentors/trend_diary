@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
@@ -15,17 +15,15 @@ export default class ArticleQueryImpl implements ArticleQuery {
   async searchArticles(
     params: ArticleQueryParams,
   ): AsyncResult<OffsetPaginationResult<Article>, ServerError> {
-    try {
-      const { page = 1, limit = 20, ...searchParams } = params
+    const { page = 1, limit = 20, ...searchParams } = params
+    const where = ArticleQueryImpl.buildWhereClause(searchParams)
+    const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
+      { createdAt: 'desc' },
+      { articleId: 'desc' },
+    ]
 
-      const where = ArticleQueryImpl.buildWhereClause(searchParams)
-
-      const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
-        { createdAt: 'desc' },
-        { articleId: 'desc' },
-      ]
-
-      const [total, articles] = await this.db.$transaction([
+    const result = await wrapAsyncCall(() =>
+      this.db.$transaction([
         this.db.article.count({ where }),
         this.db.article.findMany({
           where,
@@ -33,37 +31,41 @@ export default class ArticleQueryImpl implements ArticleQuery {
           skip: (page - 1) * limit,
           take: limit,
         }),
-      ])
-
-      const mappedArticles = articles.map(fromPrismaToArticle)
-      const totalPages = Math.ceil(total / limit)
-
-      const result: OffsetPaginationResult<Article> = {
-        data: mappedArticles,
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
-      }
-
-      return success(result)
-    } catch (error) {
-      return failure(new ServerError(error))
+      ]),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
     }
+
+    const [total, articles] = result.data
+    const mappedArticles = articles.map(fromPrismaToArticle)
+    const totalPages = Math.ceil(total / limit)
+    const paginationResult: OffsetPaginationResult<Article> = {
+      data: mappedArticles,
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    }
+
+    return success(paginationResult)
   }
 
   async findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError> {
-    try {
-      const article = await this.db.article.findUnique({
+    const result = await wrapAsyncCall(() =>
+      this.db.article.findUnique({
         where: { articleId },
-      })
-      if (!article) return success(null)
-      return success(fromPrismaToArticle(article))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
     }
+
+    const article = result.data
+    if (!article) return success(null)
+    return success(fromPrismaToArticle(article))
   }
 
   private static buildWhereClause(
