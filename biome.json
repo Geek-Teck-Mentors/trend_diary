@@ -316,13 +316,6 @@
     }
   },
   "html": { "formatter": { "selfCloseVoidElements": "always" } },
-  "css": {
-    "parser": {
-      "cssModules": false,
-      "allowWrongLineComments": false,
-      "tailwindDirectives": true
-    }
-  },
   "overrides": [
     { "includes": ["**/*.tsx"], "linter": { "rules": {} } },
     {
@@ -348,16 +341,6 @@
             "noRedeclare": "off",
             "noUnsafeNegation": "off",
             "useGetterReturn": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["src/domain/permission/infrastructure/queryImpl.ts"],
-      "linter": {
-        "rules": {
-          "style": {
-            "useNamingConvention": "off"
           }
         }
       }
