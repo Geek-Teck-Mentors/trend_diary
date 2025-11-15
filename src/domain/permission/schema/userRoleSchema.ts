@@ -11,11 +11,8 @@ export const userRoleInputSchema = userRoleSchema.pick({
   roleId: true,
 })
 
-export const userRoleRevokeSchema = userRoleSchema.pick({
-  activeUserId: true,
-  roleId: true,
-})
+export const userRoleRevokeSchema = userRoleInputSchema
 
 export type UserRole = z.infer<typeof userRoleSchema>
 export type UserRoleInput = z.infer<typeof userRoleInputSchema>
-export type UserRoleRevoke = z.infer<typeof userRoleRevokeSchema>
+export type UserRoleRevoke = UserRoleInput

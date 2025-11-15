@@ -12,11 +12,8 @@ export const roleInputSchema = roleSchema.pick({
   description: true,
 })
 
-export const roleUpdateSchema = roleSchema.pick({
-  displayName: true,
-  description: true,
-})
+export const roleUpdateSchema = roleInputSchema
 
 export type Role = z.infer<typeof roleSchema>
 export type RoleInput = z.infer<typeof roleInputSchema>
-export type RoleUpdate = z.infer<typeof roleUpdateSchema>
+export type RoleUpdate = RoleInput
