@@ -24,7 +24,7 @@
     "db:migrate:sql-only": "prisma migrate dev --skip-seed --skip-generate",
     "db:reset": "prisma migrate reset",
     "db:seed": "tsx ./src/infrastructure/prisma-orm/seed.ts",
-    "db:seed:permissions": "psql $DATABASE_URL -f src/infrastructure/prisma-orm/migrations/seeds/permissions.sql",
+    "db:seed:permissions": "psql $DATABASE_URL -f src/infrastructure/prisma-orm/migrations/permissions.sql",
     "db:deploy": "prisma migrate deploy",
     "supabase:db:type-gen": "supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
