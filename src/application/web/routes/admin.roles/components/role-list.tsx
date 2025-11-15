@@ -90,7 +90,15 @@ export default function RoleList({
           {roles.map((role) => (
             <div
               key={role.roleId}
+              role='button'
+              tabIndex={0}
               onClick={() => onSelectRole(role.roleId)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onSelectRole(role.roleId)
+                }
+              }}
               className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
                 selectedRoleId === role.roleId ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
               }`}

@@ -91,7 +91,15 @@ export default function EndpointList({
           {endpoints.map((endpoint) => (
             <div
               key={endpoint.endpointId}
+              role='button'
+              tabIndex={0}
               onClick={() => onSelectEndpoint(endpoint.endpointId)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onSelectEndpoint(endpoint.endpointId)
+                }
+              }}
               className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
                 selectedEndpointId === endpoint.endpointId
                   ? 'bg-blue-50 border-l-4 border-l-blue-500'

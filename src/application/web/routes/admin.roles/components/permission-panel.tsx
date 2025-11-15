@@ -121,8 +121,16 @@ export default function PermissionPanel({
           return (
             <div key={resource} className='border border-gray-200 rounded-lg p-4'>
               <div
+                role='button'
+                tabIndex={0}
                 className='flex items-center justify-between mb-3 cursor-pointer'
                 onClick={() => handleSelectAll(permissions)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleSelectAll(permissions)
+                  }
+                }}
               >
                 <h4 className='font-medium text-gray-900 capitalize flex items-center'>
                   <Checkbox
@@ -141,7 +149,7 @@ export default function PermissionPanel({
                 {permissions.map((permission) => {
                   const isChecked = selectedPermissionIds.includes(permission.permissionId)
                   return (
-                    <label
+                    <div
                       key={permission.permissionId}
                       className='flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded'
                     >
@@ -153,7 +161,7 @@ export default function PermissionPanel({
                         {permission.action}
                         {isChecked && <Check className='w-4 h-4 inline ml-2 text-green-500' />}
                       </span>
-                    </label>
+                    </div>
                   )
                 })}
               </div>
