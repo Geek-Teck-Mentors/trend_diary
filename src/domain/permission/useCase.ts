@@ -38,6 +38,50 @@ export class UseCase {
   }
 
   /**
+   * ユーザーがエンドポイントにアクセスできるか判定
+   * @param activeUserId ユーザーID
+   * @param path エンドポイントパス
+   * @param method HTTPメソッド
+   * @returns アクセスできる場合true
+   */
+  async hasEndpointPermission(
+    activeUserId: bigint,
+    path: string,
+    method: string,
+  ): AsyncResult<boolean, Error> {
+    // エンドポイントに必要な権限を取得
+    const requiredPermissionsResult = await this.query.getRequiredPermissionsByEndpoint(
+      path,
+      method,
+    )
+    if (isFailure(requiredPermissionsResult)) {
+      return requiredPermissionsResult
+    }
+
+    // エンドポイントが登録されていない場合は権限不要（後方互換性のため）
+    if (requiredPermissionsResult.data.length === 0) {
+      return success(true)
+    }
+
+    // ユーザーの権限を取得
+    const userPermissionsResult = await this.query.getUserPermissions(activeUserId)
+    if (isFailure(userPermissionsResult)) {
+      return userPermissionsResult
+    }
+
+    // 必要な権限を全て持っているかチェック
+    const hasAllPermissions = requiredPermissionsResult.data.every((required) =>
+      userPermissionsResult.data.some(
+        (userPerm) =>
+          userPerm.permissionId === required.permissionId ||
+          (userPerm.resource === required.resource && userPerm.action === required.action),
+      ),
+    )
+
+    return success(hasAllPermissions)
+  }
+
+  /**
    * ユーザーが特定のロールを持っているか判定
    * @param activeUserId ユーザーID
    * @param displayName ロール表示名

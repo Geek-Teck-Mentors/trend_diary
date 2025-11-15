@@ -154,4 +154,43 @@ export class PermissionQueryImpl implements PermissionQuery {
       return failure(new ServerError(`ユーザーロール取得に失敗: ${error}`))
     }
   }
+
+  async getRequiredPermissionsByEndpoint(
+    path: string,
+    method: string,
+  ): AsyncResult<Permission[], Error> {
+    try {
+      // エンドポイントを検索（パスマッチングは後で実装、まずは完全一致）
+      const endpoint = await this.rdb.endpoint.findUnique({
+        where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
+          path_method: {
+            path,
+            method,
+          },
+        },
+        include: {
+          endpointPermissions: {
+            include: {
+              permission: true,
+            },
+          },
+        },
+      })
+
+      if (!endpoint) {
+        return success([])
+      }
+
+      const permissions = endpoint.endpointPermissions.map((ep) => ({
+        permissionId: ep.permission.permissionId,
+        resource: ep.permission.resource,
+        action: ep.permission.action,
+      }))
+
+      return success(permissions)
+    } catch (error) {
+      return failure(new ServerError(`エンドポイントの権限取得に失敗: ${error}`))
+    }
+  }
 }

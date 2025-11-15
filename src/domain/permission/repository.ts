@@ -1,5 +1,6 @@
 import { AsyncResult } from '@yuukihayashi0510/core'
 import { Nullable } from '@/common/types/utility'
+import type { Endpoint } from './schema/endpointSchema'
 import type { Permission } from './schema/permissionSchema'
 import type { Role } from './schema/roleSchema'
 import type { UserRole, UserRoleInput, UserRoleRevoke } from './schema/userRoleSchema'
@@ -38,6 +39,11 @@ export interface PermissionQuery {
     activeUserId: bigint,
     roleId: number,
   ): AsyncResult<Nullable<UserRole>, Error>
+
+  /**
+   * エンドポイント（パス + メソッド）から必要な権限を取得
+   */
+  getRequiredPermissionsByEndpoint(path: string, method: string): AsyncResult<Permission[], Error>
 }
 
 /**

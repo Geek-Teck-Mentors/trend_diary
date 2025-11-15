@@ -9,16 +9,16 @@ import type { Env } from '../env'
 import CONTEXT_KEY from './context'
 
 /**
- * 権限ベースの認可ミドルウェア
- * @param resource リソース名（例: 'article', 'user'）
- * @param action アクション名（例: 'read', 'write', 'delete'）
+ * エンドポイントベースの認可ミドルウェア
+ * DBに登録されたエンドポイント情報から必要な権限を自動判定してチェックする
+ *
  * @returns Honoミドルウェア
  *
  * @example
- * app.get('/api/users', authorize('user', 'list'), async (c) => { ... })
- * app.post('/api/articles', authorize('article', 'create'), async (c) => { ... })
+ * app.get('/api/users', authenticate, authorize(), async (c) => { ... })
+ * app.post('/api/articles', authenticate, authorize(), async (c) => { ... })
  */
-const authorize = (resource: string, action: string) => {
+const authorize = () => {
   return createMiddleware<Env>(async (c, next) => {
     const logger = c.get(CONTEXT_KEY.APP_LOG)
 
@@ -32,8 +32,12 @@ const authorize = (resource: string, action: string) => {
     const rdb = getRdbClient(c.env.DATABASE_URL)
     const useCase = createPermissionUseCase(rdb)
 
-    // 権限チェック
-    const result = await useCase.hasPermission(sessionUser.activeUserId, resource, action)
+    // リクエストパスとメソッドを取得
+    const path = c.req.path
+    const method = c.req.method
+
+    // エンドポイントベースで権限チェック
+    const result = await useCase.hasEndpointPermission(sessionUser.activeUserId, path, method)
 
     if (isFailure(result)) {
       if (result.error instanceof ClientError) {
@@ -54,8 +58,8 @@ const authorize = (resource: string, action: string) => {
     if (!result.data) {
       logger.warn('Permission denied', {
         activeUserId: sessionUser.activeUserId.toString(),
-        resource,
-        action,
+        path,
+        method,
       })
       throw new HTTPException(403, { message: 'Permission denied' })
     }

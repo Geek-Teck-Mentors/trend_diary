@@ -17,7 +17,8 @@ model Permission {
   resource     String @db.VarChar(100)
   action       String @db.VarChar(100)
 
-  rolePermissions RolePermission[]
+  rolePermissions     RolePermission[]
+  endpointPermissions EndpointPermission[]
 
   @@unique([resource, action])
   @@index([resource])
@@ -49,4 +50,31 @@ model UserRole {
   @@id([activeUserId, roleId])
   @@index([roleId])
   @@map("user_roles")
+}
+
+/// エンドポイント（APIパス）
+model Endpoint {
+  endpointId  Int      @id @default(autoincrement()) @map("endpoint_id") @db.Integer
+  path        String   @db.VarChar(255)
+  method      String   @db.VarChar(10)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  endpointPermissions EndpointPermission[]
+
+  @@unique([path, method])
+  @@index([path, method])
+  @@map("endpoints")
+}
+
+/// エンドポイントと権限の中間テーブル
+model EndpointPermission {
+  endpointId   Int @map("endpoint_id") @db.Integer
+  permissionId Int @map("permission_id") @db.Integer
+
+  endpoint   Endpoint   @relation(fields: [endpointId], references: [endpointId], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [permissionId], onDelete: Cascade)
+
+  @@id([endpointId, permissionId])
+  @@index([permissionId])
+  @@map("endpoint_permissions")
 }
