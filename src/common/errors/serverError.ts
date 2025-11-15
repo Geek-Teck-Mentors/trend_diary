@@ -8,10 +8,10 @@ export default class ServerError extends Error {
   }
 
   // 例外をキャッチしてサーバーエラーのハンドリングを行う関数
-  static handle(error: any): Error {
+  static handle(error: unknown): ServerError {
     if (error instanceof ServerError) return error
-    if (error instanceof Error) return new ServerError(`${error.message}`)
+    if (error instanceof Error) return new ServerError(error)
 
-    return new ServerError(`${error}`)
+    return new ServerError(String(error))
   }
 }

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { isFailure, isSuccess } from '@yuukihayashi0510/core'
+import { isFailure, isSuccess, Result } from '@yuukihayashi0510/core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
@@ -34,17 +34,23 @@ function createMockAdminUser(overrides = {}) {
   }
 }
 
-function expectSuccessResult(result: any, expectations: Record<string, any>) {
+// biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が複数あるためanyを使用
+function expectSuccessResult<T>(result: Result<T, Error>, expectations: Record<string, any>) {
   expect(isSuccess(result)).toBe(true)
   if (isSuccess(result)) {
     Object.entries(expectations).forEach(([key, value]) => {
+      // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
       const data = result.data as Record<string, any>
       expect(data[key]).toBe(value)
     })
   }
 }
 
-function expectErrorResult(result: any, errorType: any, messageContains: string) {
+function expectErrorResult<T>(
+  result: Result<T, Error>,
+  errorType: typeof ServerError | typeof NotFoundError | typeof AlreadyExistsError,
+  messageContains: string,
+) {
   expect(isFailure(result)).toBe(true)
   if (isFailure(result)) {
     expect(result.error).toBeInstanceOf(errorType)
@@ -52,13 +58,17 @@ function expectErrorResult(result: any, errorType: any, messageContains: string)
   }
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
 function setupDatabaseError(mockMethod: any, errorMessage = 'Database connection failed') {
   mockMethod.mockRejectedValue(new Error(errorMessage))
 }
 
 function expectDatabaseCalls(calls: {
+  // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
   activeUser?: any
+  // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
   adminUserFind?: any
+  // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
   adminUserCreate?: any
 }) {
   if (calls.activeUser) {
