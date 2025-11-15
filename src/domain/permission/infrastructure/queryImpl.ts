@@ -133,6 +133,7 @@ export class PermissionQueryImpl implements PermissionQuery {
     try {
       const userRole = await this.rdb.userRole.findUnique({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           activeUserId_roleId: {
             activeUserId,
             roleId,

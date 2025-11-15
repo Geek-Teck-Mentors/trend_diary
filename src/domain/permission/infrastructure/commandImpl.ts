@@ -51,6 +51,7 @@ export class PermissionCommandImpl implements PermissionCommand {
       // ユーザーロールが存在するかチェック
       const existingUserRole = await this.rdb.userRole.findUnique({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           activeUserId_roleId: {
             activeUserId: input.activeUserId,
             roleId: input.roleId,
@@ -65,6 +66,7 @@ export class PermissionCommandImpl implements PermissionCommand {
       // 物理削除
       await this.rdb.userRole.delete({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           activeUserId_roleId: {
             activeUserId: input.activeUserId,
             roleId: input.roleId,
