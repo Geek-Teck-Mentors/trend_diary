@@ -1,6 +1,7 @@
 import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import * as bcrypt from 'bcryptjs'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
+import UnauthorizedError from '@/common/errors/unauthorizedError'
 import type {
   AuthV2LoginResult,
   AuthV2Repository,
@@ -108,14 +109,14 @@ export class MockAuthV2Repository implements AuthV2Repository {
     return success(undefined)
   }
 
-  async getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError> {
+  async getCurrentUser(): AsyncResult<AuthenticationUser, ServerError> {
     if (!this.currentUserId) {
-      return success(null)
+      return failure(new UnauthorizedError('session not found'))
     }
 
     const mockUser = this.users.get(this.currentUserId)
     if (!mockUser) {
-      return success(null)
+      return failure(new UnauthorizedError('session not found'))
     }
 
     const user: AuthenticationUser = {

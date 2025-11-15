@@ -7,9 +7,9 @@ export default function useSidebar(navigate: NavigateFunction) {
   const { client, apiCall } = createSWRFetcher()
 
   const { trigger, isMutating } = useSWRMutation(
-    'user/logout',
+    'v2/auth/logout',
     async () => {
-      return apiCall(() => client.user.logout.$delete())
+      return apiCall(() => client.v2.auth.logout.$delete())
     },
     {
       onSuccess: () => {

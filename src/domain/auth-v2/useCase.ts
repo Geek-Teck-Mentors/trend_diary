@@ -1,10 +1,9 @@
 import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import { ClientError, ServerError } from '@/common/errors'
-import type { Command } from '@/domain/user/repository'
+import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import type { AuthV2Repository } from './repository'
 import type { AuthenticationSession } from './schema/authenticationSession'
-import type { AuthenticationUser } from './schema/authenticationUser'
 
 /**
  * 認証v2ユーザーのダミーパスワード
@@ -32,6 +31,7 @@ export class AuthV2UseCase {
   constructor(
     private readonly repository: AuthV2Repository,
     private readonly userCommand: Command,
+    private readonly userQuery: Query,
   ) {}
 
   async signup(
@@ -71,16 +71,9 @@ export class AuthV2UseCase {
 
     const { user, session } = authResult.data
 
-    // active_userを作成
-    const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
-      user.email,
-      AUTH_V2_DUMMY_PASSWORD,
-      user.id,
-    )
+    const activeUserResult = await this.findActiveUserByAuthenticationId(user.id)
 
-    if (isFailure(activeUserResult)) {
-      return failure(activeUserResult.error)
-    }
+    if (isFailure(activeUserResult)) return activeUserResult
 
     return success({
       session,
@@ -92,38 +85,45 @@ export class AuthV2UseCase {
     return this.repository.logout()
   }
 
-  async getCurrentUser(): AsyncResult<AuthenticationUser, ClientError | ServerError> {
-    const result = await this.repository.getCurrentUser()
-    if (isFailure(result)) return result
-
-    if (!result.data) {
-      return failure(new ClientError('Unauthorized', 401))
+  async getCurrentActiveUser(): AsyncResult<ActiveUser, ClientError | ServerError> {
+    const authUserResult = await this.repository.getCurrentUser()
+    if (isFailure(authUserResult)) {
+      return authUserResult
     }
 
-    return success(result.data)
+    return this.findActiveUserByAuthenticationId(authUserResult.data.id)
   }
 
-  async refreshSession(): AsyncResult<LoginResult, ServerError> {
+  async refreshSession(): AsyncResult<LoginResult, ClientError | ServerError> {
     // 認証v2でセッション更新
     const authResult = await this.repository.refreshSession()
     if (isFailure(authResult)) return authResult
 
     const { user, session } = authResult.data
 
-    // active_userを作成
-    const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
-      user.email,
-      AUTH_V2_DUMMY_PASSWORD,
-      user.id,
-    )
+    const activeUserResult = await this.findActiveUserByAuthenticationId(user.id)
 
-    if (isFailure(activeUserResult)) {
-      return failure(activeUserResult.error)
-    }
+    if (isFailure(activeUserResult)) return activeUserResult
 
     return success({
       session,
       activeUser: activeUserResult.data,
     })
+  }
+
+  private async findActiveUserByAuthenticationId(
+    authenticationId: string,
+  ): AsyncResult<ActiveUser, ClientError | ServerError> {
+    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(authenticationId)
+
+    if (isFailure(activeUserResult)) {
+      return failure(new ServerError(activeUserResult.error))
+    }
+
+    if (!activeUserResult.data) {
+      return failure(new ClientError('User not found', 404))
+    }
+
+    return success(activeUserResult.data)
   }
 }

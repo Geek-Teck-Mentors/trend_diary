@@ -13,17 +13,19 @@ export default async function me(c: Context) {
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const useCase = createAuthV2UseCase(client, rdb)
 
-  const result = await useCase.getCurrentUser()
-  if (isFailure(result)) throw handleError(result.error, logger)
+  const activeUserResult = await useCase.getCurrentActiveUser()
+  if (isFailure(activeUserResult)) {
+    throw handleError(activeUserResult.error, logger)
+  }
 
-  const user = result.data
+  const activeUser = activeUserResult.data
 
-  logger.info('get current user success', { userId: user.id })
+  logger.info('get current user success', { userId: activeUser.userId })
 
   return c.json({
     user: {
-      id: user.id,
-      email: user.email,
+      displayName: activeUser.displayName,
+      isAdmin: activeUser.adminUserId !== null,
     },
   })
 }

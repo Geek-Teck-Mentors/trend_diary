@@ -15,14 +15,19 @@ export const createSWRFetcher = () => {
     return response.json()
   }
 
-  const apiCall = async <T>(apiCall: () => Promise<Response>): Promise<T> => {
+  const apiCall = async <T>(apiCall: () => Promise<Response>): Promise<T | null> => {
     const response = await apiCall()
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
 
-    return response.json()
+    switch (response.status) {
+      case 204:
+        return null
+      default:
+        return response.json()
+    }
   }
 
   return {
