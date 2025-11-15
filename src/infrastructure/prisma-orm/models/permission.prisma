@@ -54,10 +54,10 @@ model UserRole {
 
 /// エンドポイント（APIパス）
 model Endpoint {
-  endpointId  Int      @id @default(autoincrement()) @map("endpoint_id") @db.Integer
-  path        String   @db.VarChar(255)
-  method      String   @db.VarChar(10)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  endpointId Int      @id @default(autoincrement()) @map("endpoint_id") @db.Integer
+  path       String   @db.VarChar(255)
+  method     String   @db.VarChar(10)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   endpointPermissions EndpointPermission[]
 
