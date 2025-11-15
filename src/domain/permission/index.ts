@@ -7,9 +7,16 @@ export * from './schema/userRoleSchema'
 // 定数エクスポート
 export * from './constants'
 
+// ファクトリエクスポート
+export { createPermissionUseCase } from './factory'
+
 // 型エクスポート
 export type { Permission, PermissionInput } from './schema/permissionSchema'
 export type { Role, RoleInput, RoleUpdate } from './schema/roleSchema'
 export type { RolePermission, RolePermissionInput } from './schema/rolePermissionSchema'
 export type { UserRole, UserRoleInput, UserRoleRevoke } from './schema/userRoleSchema'
 export type { RoleName } from './constants'
+
+// UseCase型エクスポート
+export type { UseCase } from './useCase'
+export type { PermissionQuery, PermissionCommand } from './repository'
