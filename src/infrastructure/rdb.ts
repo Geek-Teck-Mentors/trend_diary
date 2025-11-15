@@ -18,6 +18,7 @@ export default function getRdbClient(databaseUrl: string) {
   // 型定義がないためanyでキャストした後で更にキャスト
   const edgePrisma = new PrismaClient({
     datasourceUrl: databaseUrl,
+    // biome-ignore lint/suspicious/noExplicitAny: PrismaのEdgeクライアントの型定義が不十分なため
   }).$extends(withAccelerate()) as any
 
   return edgePrisma as PrismaClient
