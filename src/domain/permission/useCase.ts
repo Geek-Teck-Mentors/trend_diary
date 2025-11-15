@@ -1,4 +1,4 @@
-import { AsyncResult, isFailure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import type { PermissionCommand, PermissionQuery } from './repository'
 import type { Permission } from './schema/permissionSchema'
 import type { Role } from './schema/roleSchema'
@@ -40,16 +40,16 @@ export class UseCase {
   /**
    * ユーザーが特定のロールを持っているか判定
    * @param activeUserId ユーザーID
-   * @param roleName ロール名
+   * @param displayName ロール表示名
    * @returns ロールを持っている場合true
    */
-  async hasRole(activeUserId: bigint, roleName: string): AsyncResult<boolean, Error> {
+  async hasRole(activeUserId: bigint, displayName: string): AsyncResult<boolean, Error> {
     const rolesResult = await this.query.getUserRoles(activeUserId)
     if (isFailure(rolesResult)) {
       return rolesResult
     }
 
-    const hasRole = rolesResult.data.some((r) => r.name === roleName)
+    const hasRole = rolesResult.data.some((r) => r.displayName === displayName)
     return success(hasRole)
   }
 
@@ -86,12 +86,9 @@ export class UseCase {
       return existingResult
     }
 
-    // すでに有効なロールがある場合はエラー
-    if (existingResult.data && !existingResult.data.revokedAt) {
-      return {
-        success: false,
-        error: new Error('ユーザーはすでにこのロールを持っている'),
-      }
+    // すでにロールがある場合はエラー
+    if (existingResult.data) {
+      return failure(new Error('ユーザーはすでにこのロールを持っている'))
     }
 
     return await this.command.assignRole(input)
@@ -113,17 +110,7 @@ export class UseCase {
     }
 
     if (!existingResult.data) {
-      return {
-        success: false,
-        error: new Error('ユーザーはこのロールを持っていない'),
-      }
-    }
-
-    if (existingResult.data.revokedAt) {
-      return {
-        success: false,
-        error: new Error('このロールはすでに剥奪されている'),
-      }
+      return failure(new Error('ユーザーはこのロールを持っていない'))
     }
 
     return await this.command.revokeRole(input)
