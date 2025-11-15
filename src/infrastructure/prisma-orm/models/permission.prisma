@@ -1,0 +1,80 @@
+/// ロール（役割）
+model Role {
+  roleId      Int      @id @default(autoincrement()) @map("role_id") @db.Integer
+  displayName String   @map("display_name") @db.VarChar(255)
+  description String?  @db.VarChar(1024)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+/// パーミッション（権限）
+model Permission {
+  permissionId Int    @id @default(autoincrement()) @map("permission_id") @db.Integer
+  resource     String @db.VarChar(100)
+  action       String @db.VarChar(100)
+
+  rolePermissions     RolePermission[]
+  endpointPermissions EndpointPermission[]
+
+  @@unique([resource, action])
+  @@index([resource])
+  @@map("permissions")
+}
+
+/// ロールとパーミッションの中間テーブル
+model RolePermission {
+  roleId       Int @map("role_id") @db.Integer
+  permissionId Int @map("permission_id") @db.Integer
+
+  role       Role       @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [permissionId], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+/// ユーザーとロールの中間テーブル
+model UserRole {
+  activeUserId BigInt   @map("active_user_id") @db.BigInt
+  roleId       Int      @map("role_id") @db.Integer
+  grantedAt    DateTime @default(now()) @map("granted_at") @db.Timestamptz()
+
+  activeUser ActiveUser @relation(fields: [activeUserId], references: [activeUserId], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
+
+  @@id([activeUserId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+/// エンドポイント（APIパス）
+model Endpoint {
+  endpointId Int      @id @default(autoincrement()) @map("endpoint_id") @db.Integer
+  path       String   @db.VarChar(255)
+  method     String   @db.VarChar(10)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  endpointPermissions EndpointPermission[]
+
+  @@unique([path, method])
+  @@index([path, method])
+  @@map("endpoints")
+}
+
+/// エンドポイントと権限の中間テーブル
+model EndpointPermission {
+  endpointId   Int @map("endpoint_id") @db.Integer
+  permissionId Int @map("permission_id") @db.Integer
+
+  endpoint   Endpoint   @relation(fields: [endpointId], references: [endpointId], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [permissionId], onDelete: Cascade)
+
+  @@id([endpointId, permissionId])
+  @@index([permissionId])
+  @@map("endpoint_permissions")
+}

@@ -18,6 +18,7 @@ model ActiveUser {
   session       Session[]
   readHistories ReadHistory[]
   adminUser     AdminUser?
+  userRoles     UserRole[]
 
   @@map("active_users")
 }
