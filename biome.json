@@ -344,6 +344,16 @@
           }
         }
       }
+    },
+    {
+      "includes": ["**/infrastructure/*CommandImpl.ts", "**/infrastructure/*QueryImpl.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": "off"
+          }
+        }
+      }
     }
   ],
   "assist": {
