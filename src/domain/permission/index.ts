@@ -1,5 +1,3 @@
-// 定数エクスポート
-export * from './constants'
 // ファクトリエクスポート
 export { createPermissionUseCase } from './factory'
 // 型エクスポート

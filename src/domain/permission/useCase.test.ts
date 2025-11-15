@@ -1,8 +1,7 @@
 import { type Prisma, PrismaClient } from '@prisma/client'
-import { isFailure, isSuccess } from '@yuukihayashi0510/core'
+import { isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { PermissionCommandImpl } from './infrastructure/commandImpl'
 import { PermissionQueryImpl } from './infrastructure/queryImpl'
 import { UseCase } from './useCase'
 
@@ -13,13 +12,33 @@ describe('Permission UseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    const command = new PermissionCommandImpl(mockDb)
     const query = new PermissionQueryImpl(mockDb)
-    useCase = new UseCase(query, command)
+    useCase = new UseCase(query)
   })
 
-  describe('hasPermission', () => {
-    it('ユーザーが権限を持っている場合trueを返す', async () => {
+  describe('hasEndpointPermission', () => {
+    it('ユーザーが必要な権限を全て持っている場合trueを返す', async () => {
+      // エンドポイントに必要な権限をモック
+      const mockEndpoint = {
+        endpointId: 1,
+        path: '/api/articles',
+        method: 'GET',
+        createdAt: new Date(),
+        endpointPermissions: [
+          {
+            endpointId: 1,
+            permissionId: 1,
+            permission: {
+              permissionId: 1,
+              resource: 'article',
+              action: 'list',
+            },
+          },
+        ],
+      }
+      mockDb.endpoint.findUnique.mockResolvedValue(mockEndpoint)
+
+      // ユーザーの権限をモック
       mockDb.userRole.findMany.mockResolvedValue([
         {
           activeUserId: BigInt(1),
@@ -37,13 +56,24 @@ describe('Permission UseCase', () => {
           permission: {
             permissionId: 1,
             resource: 'article',
-            action: 'read',
+            action: 'list',
           },
         },
       ]
       mockDb.rolePermission.findMany.mockResolvedValue(mockRolePermissionWithPermission)
 
-      const result = await useCase.hasPermission(BigInt(1), 'article', 'read')
+      const result = await useCase.hasEndpointPermission(BigInt(1), '/api/articles', 'GET')
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toBe(true)
+      }
+    })
+
+    it('エンドポイントが登録されていない場合trueを返す（後方互換性）', async () => {
+      mockDb.endpoint.findUnique.mockResolvedValue(null)
+
+      const result = await useCase.hasEndpointPermission(BigInt(1), '/api/unknown', 'GET')
 
       expect(isSuccess(result)).toBe(true)
       if (isSuccess(result)) {
@@ -52,134 +82,35 @@ describe('Permission UseCase', () => {
     })
 
     it('ユーザーが権限を持っていない場合falseを返す', async () => {
-      mockDb.userRole.findMany.mockResolvedValue([])
-
-      const result = await useCase.hasPermission(BigInt(1), 'article', 'write')
-
-      expect(isSuccess(result)).toBe(true)
-      if (isSuccess(result)) {
-        expect(result.data).toBe(false)
-      }
-    })
-  })
-
-  describe('hasRole', () => {
-    it('ユーザーがロールを持っている場合trueを返す', async () => {
-      const mockUserRoleWithRole: Prisma.UserRoleGetPayload<{ include: { role: true } }>[] = [
-        {
-          activeUserId: BigInt(1),
-          roleId: 1,
-          grantedAt: new Date(),
-          role: {
-            roleId: 1,
-            displayName: '管理者',
-            description: 'テスト',
-            createdAt: new Date(),
+      // エンドポイントに必要な権限をモック
+      const mockEndpoint = {
+        endpointId: 1,
+        path: '/api/admin/users',
+        method: 'GET',
+        createdAt: new Date(),
+        endpointPermissions: [
+          {
+            endpointId: 1,
+            permissionId: 2,
+            permission: {
+              permissionId: 2,
+              resource: 'user',
+              action: 'list',
+            },
           },
-        },
-      ]
-      mockDb.userRole.findMany.mockResolvedValue(mockUserRoleWithRole)
-
-      const result = await useCase.hasRole(BigInt(1), '管理者')
-
-      expect(isSuccess(result)).toBe(true)
-      if (isSuccess(result)) {
-        expect(result.data).toBe(true)
+        ],
       }
-    })
+      mockDb.endpoint.findUnique.mockResolvedValue(mockEndpoint)
 
-    it('ユーザーがロールを持っていない場合falseを返す', async () => {
+      // ユーザーは権限を持っていない
       mockDb.userRole.findMany.mockResolvedValue([])
 
-      const result = await useCase.hasRole(BigInt(1), '管理者')
+      const result = await useCase.hasEndpointPermission(BigInt(1), '/api/admin/users', 'GET')
 
       expect(isSuccess(result)).toBe(true)
       if (isSuccess(result)) {
         expect(result.data).toBe(false)
       }
-    })
-  })
-
-  describe('assignRole', () => {
-    it('ロールを正常に付与できる', async () => {
-      mockDb.userRole.findUnique.mockResolvedValue(null)
-      mockDb.activeUser.findUnique.mockResolvedValue({
-        activeUserId: BigInt(1),
-        email: 'test@example.com',
-        password: 'hashed',
-        displayName: 'Test User',
-        authenticationId: null,
-        lastLogin: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userId: BigInt(1),
-      })
-      mockDb.role.findUnique.mockResolvedValue({
-        roleId: 1,
-        displayName: '管理者',
-        description: 'テスト',
-        createdAt: new Date(),
-      })
-      mockDb.userRole.create.mockResolvedValue({
-        activeUserId: BigInt(1),
-        roleId: 1,
-        grantedAt: new Date(),
-      })
-
-      const result = await useCase.assignRole({
-        activeUserId: BigInt(1),
-        roleId: 1,
-      })
-
-      expect(isSuccess(result)).toBe(true)
-    })
-
-    it('すでにロールを持っている場合エラーを返す', async () => {
-      mockDb.userRole.findUnique.mockResolvedValue({
-        activeUserId: BigInt(1),
-        roleId: 1,
-        grantedAt: new Date(),
-      })
-
-      const result = await useCase.assignRole({
-        activeUserId: BigInt(1),
-        roleId: 1,
-      })
-
-      expect(isFailure(result)).toBe(true)
-    })
-  })
-
-  describe('revokeRole', () => {
-    it('ロールを正常に剥奪できる', async () => {
-      mockDb.userRole.findUnique.mockResolvedValue({
-        activeUserId: BigInt(1),
-        roleId: 1,
-        grantedAt: new Date(),
-      })
-      mockDb.userRole.delete.mockResolvedValue({
-        activeUserId: BigInt(1),
-        roleId: 1,
-        grantedAt: new Date(),
-      })
-
-      const result = await useCase.revokeRole({
-        activeUserId: BigInt(1),
-        roleId: 1,
-      })
-
-      expect(isSuccess(result)).toBe(true)
-    })
-
-    it('ロールを持っていない場合エラーを返す', async () => {
-      mockDb.userRole.findUnique.mockResolvedValue(null)
-
-      const result = await useCase.revokeRole({
-        activeUserId: BigInt(1),
-        roleId: 1,
-      })
-
-      expect(isFailure(result)).toBe(true)
     })
   })
 })
