@@ -146,7 +146,7 @@ describe('PermissionQueryImpl', () => {
       }
     })
 
-    it('複数のパスパラメータを含むパターンにマッチする', async () => {
+    it('パスパラメータを含むパターンにマッチする（version）', async () => {
       mockDb.endpoint.findUnique.mockResolvedValue(null)
 
       const mockEndpoints: Prisma.EndpointGetPayload<{
@@ -214,6 +214,198 @@ describe('PermissionQueryImpl', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error).toBeInstanceOf(ServerError)
+      }
+    })
+
+    it('複数のパーミッションが必要なエンドポイントの場合、全ての権限を返す', async () => {
+      const mockEndpoint: Prisma.EndpointGetPayload<{
+        include: { endpointPermissions: { include: { permission: true } } }
+      }> = {
+        endpointId: 5,
+        path: '/api/admin/roles',
+        method: 'POST',
+        createdAt: new Date(),
+        endpointPermissions: [
+          {
+            endpointId: 5,
+            permissionId: 4,
+            permission: {
+              permissionId: 4,
+              resource: 'role',
+              action: 'create',
+            },
+          },
+          {
+            endpointId: 5,
+            permissionId: 5,
+            permission: {
+              permissionId: 5,
+              resource: 'role',
+              action: 'assign',
+            },
+          },
+        ],
+      }
+      mockDb.endpoint.findUnique.mockResolvedValue(mockEndpoint)
+
+      const result = await query.getRequiredPermissionsByEndpoint('/api/admin/roles', 'POST')
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toHaveLength(2)
+        expect(result.data[0].resource).toBe('role')
+        expect(result.data[0].action).toBe('create')
+        expect(result.data[1].resource).toBe('role')
+        expect(result.data[1].action).toBe('assign')
+      }
+    })
+
+    it('パスの途中にパラメータがあるパターンにマッチする', async () => {
+      mockDb.endpoint.findUnique.mockResolvedValue(null)
+
+      const mockEndpoints: Prisma.EndpointGetPayload<{
+        include: { endpointPermissions: { include: { permission: true } } }
+      }>[] = [
+        {
+          endpointId: 6,
+          path: '/api/users/:id/profile',
+          method: 'GET',
+          createdAt: new Date(),
+          endpointPermissions: [
+            {
+              endpointId: 6,
+              permissionId: 2,
+              permission: {
+                permissionId: 2,
+                resource: 'user',
+                action: 'read',
+              },
+            },
+          ],
+        },
+      ]
+      mockDb.endpoint.findMany.mockResolvedValue(mockEndpoints)
+
+      const result = await query.getRequiredPermissionsByEndpoint('/api/users/42/profile', 'GET')
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toHaveLength(1)
+        expect(result.data[0].resource).toBe('user')
+        expect(result.data[0].action).toBe('read')
+      }
+    })
+
+    it('エンドポイントは存在するがパーミッションが未設定の場合、空配列を返す', async () => {
+      const mockEndpoint: Prisma.EndpointGetPayload<{
+        include: { endpointPermissions: { include: { permission: true } } }
+      }> = {
+        endpointId: 7,
+        path: '/api/public/info',
+        method: 'GET',
+        createdAt: new Date(),
+        endpointPermissions: [],
+      }
+      mockDb.endpoint.findUnique.mockResolvedValue(mockEndpoint)
+
+      const result = await query.getRequiredPermissionsByEndpoint('/api/public/info', 'GET')
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toHaveLength(0)
+      }
+    })
+
+    it('複数のパスパラメータを含むパターンにマッチする', async () => {
+      mockDb.endpoint.findUnique.mockResolvedValue(null)
+
+      const mockEndpoints: Prisma.EndpointGetPayload<{
+        include: { endpointPermissions: { include: { permission: true } } }
+      }>[] = [
+        {
+          endpointId: 8,
+          path: '/api/users/:userId/articles/:articleId',
+          method: 'DELETE',
+          createdAt: new Date(),
+          endpointPermissions: [
+            {
+              endpointId: 8,
+              permissionId: 1,
+              permission: {
+                permissionId: 1,
+                resource: 'article',
+                action: 'delete',
+              },
+            },
+          ],
+        },
+      ]
+      mockDb.endpoint.findMany.mockResolvedValue(mockEndpoints)
+
+      const result = await query.getRequiredPermissionsByEndpoint(
+        '/api/users/100/articles/200',
+        'DELETE',
+      )
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toHaveLength(1)
+        expect(result.data[0].resource).toBe('article')
+        expect(result.data[0].action).toBe('delete')
+      }
+    })
+
+    it('パターンマッチングで最初にマッチしたエンドポイントを返す', async () => {
+      mockDb.endpoint.findUnique.mockResolvedValue(null)
+
+      const mockEndpoints: Prisma.EndpointGetPayload<{
+        include: { endpointPermissions: { include: { permission: true } } }
+      }>[] = [
+        {
+          endpointId: 9,
+          path: '/api/items/:id',
+          method: 'GET',
+          createdAt: new Date(),
+          endpointPermissions: [
+            {
+              endpointId: 9,
+              permissionId: 1,
+              permission: {
+                permissionId: 1,
+                resource: 'item',
+                action: 'read',
+              },
+            },
+          ],
+        },
+        {
+          endpointId: 10,
+          path: '/api/items/:itemId',
+          method: 'GET',
+          createdAt: new Date(),
+          endpointPermissions: [
+            {
+              endpointId: 10,
+              permissionId: 2,
+              permission: {
+                permissionId: 2,
+                resource: 'item',
+                action: 'list',
+              },
+            },
+          ],
+        },
+      ]
+      mockDb.endpoint.findMany.mockResolvedValue(mockEndpoints)
+
+      const result = await query.getRequiredPermissionsByEndpoint('/api/items/123', 'GET')
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toHaveLength(1)
+        // 最初にマッチしたエンドポイント（endpointId: 9）の権限が返される
+        expect(result.data[0].resource).toBe('item')
+        expect(result.data[0].action).toBe('read')
       }
     })
   })
