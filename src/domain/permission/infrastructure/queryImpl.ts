@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import type { PermissionQuery } from '../repository'
 import type { Permission } from '../schema/permissionSchema'
@@ -8,23 +8,33 @@ export class PermissionQueryImpl implements PermissionQuery {
   constructor(private rdb: PrismaClient) {}
 
   async getUserPermissions(activeUserId: bigint): AsyncResult<Permission[], Error> {
-    try {
-      const userRoles = await this.rdb.userRole.findMany({
+    const userRolesResult = await wrapAsyncCall(() =>
+      this.rdb.userRole.findMany({
         where: {
           activeUserId,
         },
         select: {
           roleId: true,
         },
-      })
+      }),
+    )
+    if (isFailure(userRolesResult)) {
+      const message =
+        userRolesResult.error instanceof Error
+          ? userRolesResult.error.message
+          : String(userRolesResult.error)
+      return failure(new ServerError(`ユーザーのパーミッション取得に失敗: ${message}`))
+    }
 
-      if (userRoles.length === 0) {
-        return success([])
-      }
+    const userRoles = userRolesResult.data
+    if (userRoles.length === 0) {
+      return success([])
+    }
 
-      const roleIds = userRoles.map((ur) => ur.roleId)
+    const roleIds = userRoles.map((ur) => ur.roleId)
 
-      const rolePermissions = await this.rdb.rolePermission.findMany({
+    const rolePermissionsResult = await wrapAsyncCall(() =>
+      this.rdb.rolePermission.findMany({
         where: {
           roleId: {
             in: roleIds,
@@ -34,19 +44,24 @@ export class PermissionQueryImpl implements PermissionQuery {
           permission: true,
         },
         distinct: ['permissionId'],
-      })
-
-      const permissions = rolePermissions.map((rp) => ({
-        permissionId: rp.permission.permissionId,
-        resource: rp.permission.resource,
-        action: rp.permission.action,
-      }))
-
-      return success(permissions)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
+      }),
+    )
+    if (isFailure(rolePermissionsResult)) {
+      const message =
+        rolePermissionsResult.error instanceof Error
+          ? rolePermissionsResult.error.message
+          : String(rolePermissionsResult.error)
       return failure(new ServerError(`ユーザーのパーミッション取得に失敗: ${message}`))
     }
+
+    const rolePermissions = rolePermissionsResult.data
+    const permissions = rolePermissions.map((rp) => ({
+      permissionId: rp.permission.permissionId,
+      resource: rp.permission.resource,
+      action: rp.permission.action,
+    }))
+
+    return success(permissions)
   }
 
   /**
@@ -62,9 +77,9 @@ export class PermissionQueryImpl implements PermissionQuery {
     path: string,
     method: string,
   ): AsyncResult<Permission[], Error> {
-    try {
-      // まず完全一致を試す（パフォーマンス最適化）
-      const exactMatch = await this.rdb.endpoint.findUnique({
+    // まず完全一致を試す（パフォーマンス最適化）
+    const exactMatchResult = await wrapAsyncCall(() =>
+      this.rdb.endpoint.findUnique({
         where: {
           path_method: {
             path,
@@ -78,19 +93,29 @@ export class PermissionQueryImpl implements PermissionQuery {
             },
           },
         },
-      })
+      }),
+    )
+    if (isFailure(exactMatchResult)) {
+      const message =
+        exactMatchResult.error instanceof Error
+          ? exactMatchResult.error.message
+          : String(exactMatchResult.error)
+      return failure(new ServerError(`エンドポイントの権限取得に失敗: ${message}`))
+    }
 
-      if (exactMatch) {
-        const permissions = exactMatch.endpointPermissions.map((ep) => ({
-          permissionId: ep.permission.permissionId,
-          resource: ep.permission.resource,
-          action: ep.permission.action,
-        }))
-        return success(permissions)
-      }
+    const exactMatch = exactMatchResult.data
+    if (exactMatch) {
+      const permissions = exactMatch.endpointPermissions.map((ep) => ({
+        permissionId: ep.permission.permissionId,
+        resource: ep.permission.resource,
+        action: ep.permission.action,
+      }))
+      return success(permissions)
+    }
 
-      // 完全一致しない場合、パターンマッチングを試す
-      const endpoints = await this.rdb.endpoint.findMany({
+    // 完全一致しない場合、パターンマッチングを試す
+    const endpointsResult = await wrapAsyncCall(() =>
+      this.rdb.endpoint.findMany({
         where: {
           method,
         },
@@ -101,27 +126,32 @@ export class PermissionQueryImpl implements PermissionQuery {
             },
           },
         },
-      })
-
-      const matchedEndpoint = endpoints.find((endpoint) => {
-        const regex = this.pathPatternToRegex(endpoint.path)
-        return regex.test(path)
-      })
-
-      if (!matchedEndpoint) {
-        return success([])
-      }
-
-      const permissions = matchedEndpoint.endpointPermissions.map((ep) => ({
-        permissionId: ep.permission.permissionId,
-        resource: ep.permission.resource,
-        action: ep.permission.action,
-      }))
-
-      return success(permissions)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
+      }),
+    )
+    if (isFailure(endpointsResult)) {
+      const message =
+        endpointsResult.error instanceof Error
+          ? endpointsResult.error.message
+          : String(endpointsResult.error)
       return failure(new ServerError(`エンドポイントの権限取得に失敗: ${message}`))
     }
+
+    const endpoints = endpointsResult.data
+    const matchedEndpoint = endpoints.find((endpoint) => {
+      const regex = this.pathPatternToRegex(endpoint.path)
+      return regex.test(path)
+    })
+
+    if (!matchedEndpoint) {
+      return success([])
+    }
+
+    const permissions = matchedEndpoint.endpointPermissions.map((ep) => ({
+      permissionId: ep.permission.permissionId,
+      resource: ep.permission.resource,
+      action: ep.permission.action,
+    }))
+
+    return success(permissions)
   }
 }

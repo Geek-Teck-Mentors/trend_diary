@@ -1,4 +1,4 @@
-import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { RdbClient } from '@/infrastructure/rdb'
 import { Command } from '../repository'
@@ -9,8 +9,8 @@ export default class CommandImpl implements Command {
   constructor(private readonly db: RdbClient) {}
 
   async save(policy: PrivacyPolicy): AsyncResult<PrivacyPolicy, Error> {
-    try {
-      const savedPolicy = await this.db.privacyPolicy.upsert({
+    const savedPolicyResult = await wrapAsyncCall(() =>
+      this.db.privacyPolicy.upsert({
         where: { version: policy.version },
         update: {
           content: policy.content,
@@ -24,23 +24,25 @@ export default class CommandImpl implements Command {
           createdAt: policy.createdAt,
           updatedAt: policy.updatedAt,
         },
-      })
-
-      return success(mapToPrivacyPolicy(savedPolicy))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(savedPolicyResult)) {
+      return failure(new ServerError(savedPolicyResult.error))
     }
+
+    return success(mapToPrivacyPolicy(savedPolicyResult.data))
   }
 
   async deleteByVersion(version: number): AsyncResult<void, Error> {
-    try {
-      await this.db.privacyPolicy.delete({
+    const result = await wrapAsyncCall(() =>
+      this.db.privacyPolicy.delete({
         where: { version },
-      })
-
-      return success(undefined)
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
     }
+
+    return success(undefined)
   }
 }
