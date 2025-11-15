@@ -91,34 +91,34 @@ ON CONFLICT (role_id, permission_id) DO NOTHING;
 -- Endpointテーブルへの投入
 INSERT INTO "public"."endpoints" (path, method) VALUES
   -- User API
-  ('/user/me', 'GET'),
-  ('/user', 'POST'),
-  ('/user/login', 'POST'),
-  ('/user/logout', 'DELETE'),
+  ('/api/user/me', 'GET'),
+  ('/api/user', 'POST'),
+  ('/api/user/login', 'POST'),
+  ('/api/user/logout', 'DELETE'),
 
   -- Admin API
-  ('/admin/users', 'GET'),
-  ('/admin/users/:id', 'POST'),
+  ('/api/admin/users', 'GET'),
+  ('/api/admin/users/:id', 'POST'),
 
   -- Auth V2 API (公開エンドポイント)
-  ('/v2/auth/signup', 'POST'),
-  ('/v2/auth/login', 'POST'),
-  ('/v2/auth/logout', 'DELETE'),
-  ('/v2/auth/me', 'GET'),
+  ('/api/v2/auth/signup', 'POST'),
+  ('/api/v2/auth/login', 'POST'),
+  ('/api/v2/auth/logout', 'DELETE'),
+  ('/api/v2/auth/me', 'GET'),
 
   -- Policy API
-  ('/policies', 'GET'),
-  ('/policies', 'POST'),
-  ('/policies/:version', 'GET'),
-  ('/policies/:version', 'PATCH'),
-  ('/policies/:version', 'DELETE'),
-  ('/policies/:version/clone', 'POST'),
-  ('/policies/:version/activate', 'PATCH'),
+  ('/api/policies', 'GET'),
+  ('/api/policies', 'POST'),
+  ('/api/policies/:version', 'GET'),
+  ('/api/policies/:version', 'PATCH'),
+  ('/api/policies/:version', 'DELETE'),
+  ('/api/policies/:version/clone', 'POST'),
+  ('/api/policies/:version/activate', 'PATCH'),
 
   -- Article API
-  ('/articles', 'GET'),
-  ('/articles/:article_id/read', 'POST'),
-  ('/articles/:article_id/unread', 'DELETE')
+  ('/api/articles', 'GET'),
+  ('/api/articles/:article_id/read', 'POST'),
+  ('/api/articles/:article_id/unread', 'DELETE')
 ON CONFLICT (path, method) DO NOTHING;
 
 -- EndpointPermissionの紐付け
@@ -127,7 +127,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/user/me' AND e.method = 'GET'
+WHERE e.path = '/api/user/me' AND e.method = 'GET'
   AND p.resource = 'user' AND p.action = 'read'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -136,7 +136,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/admin/users' AND e.method = 'GET'
+WHERE e.path = '/api/admin/users' AND e.method = 'GET'
   AND p.resource = 'user' AND p.action = 'list'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -145,7 +145,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/admin/users/:id' AND e.method = 'POST'
+WHERE e.path = '/api/admin/users/:id' AND e.method = 'POST'
   AND p.resource = 'user' AND p.action = 'grant_admin'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -154,7 +154,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/policies' AND e.method = 'GET'
+WHERE e.path = '/api/policies' AND e.method = 'GET'
   AND p.resource = 'privacy_policy' AND p.action = 'list'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -163,7 +163,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/policies' AND e.method = 'POST'
+WHERE e.path = '/api/policies' AND e.method = 'POST'
   AND p.resource = 'privacy_policy' AND p.action = 'create'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -172,7 +172,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/policies/:version' AND e.method = 'GET'
+WHERE e.path = '/api/policies/:version' AND e.method = 'GET'
   AND p.resource = 'privacy_policy' AND p.action = 'read'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -181,7 +181,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/policies/:version' AND e.method = 'PATCH'
+WHERE e.path = '/api/policies/:version' AND e.method = 'PATCH'
   AND p.resource = 'privacy_policy' AND p.action = 'update'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -190,7 +190,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/policies/:version' AND e.method = 'DELETE'
+WHERE e.path = '/api/policies/:version' AND e.method = 'DELETE'
   AND p.resource = 'privacy_policy' AND p.action = 'delete'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -199,7 +199,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/policies/:version/clone' AND e.method = 'POST'
+WHERE e.path = '/api/policies/:version/clone' AND e.method = 'POST'
   AND p.resource = 'privacy_policy' AND p.action = 'clone'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -208,7 +208,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/policies/:version/activate' AND e.method = 'PATCH'
+WHERE e.path = '/api/policies/:version/activate' AND e.method = 'PATCH'
   AND p.resource = 'privacy_policy' AND p.action = 'activate'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -217,7 +217,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/articles' AND e.method = 'GET'
+WHERE e.path = '/api/articles' AND e.method = 'GET'
   AND p.resource = 'article' AND p.action = 'list'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -226,7 +226,7 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/articles/:article_id/read' AND e.method = 'POST'
+WHERE e.path = '/api/articles/:article_id/read' AND e.method = 'POST'
   AND p.resource = 'article' AND p.action = 'mark_read'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
 
@@ -235,6 +235,6 @@ INSERT INTO "public"."endpoint_permissions" (endpoint_id, permission_id)
 SELECT e.endpoint_id, p.permission_id
 FROM "public"."endpoints" e
 CROSS JOIN "public"."permissions" p
-WHERE e.path = '/articles/:article_id/unread' AND e.method = 'DELETE'
+WHERE e.path = '/api/articles/:article_id/unread' AND e.method = 'DELETE'
   AND p.resource = 'article' AND p.action = 'mark_unread'
 ON CONFLICT (endpoint_id, permission_id) DO NOTHING;
