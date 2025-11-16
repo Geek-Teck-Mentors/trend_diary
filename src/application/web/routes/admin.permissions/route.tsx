@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
 import { Alert, AlertDescription, AlertTitle } from '@/application/web/components/shadcn/alert'
+import { getApiErrorMessage } from '@/application/web/lib/error'
 import createSWRFetcher from '../../features/create-swr-fetcher'
 import Page from './page'
 import type { PermissionsResponse } from './types'
@@ -38,11 +39,7 @@ export default function AdminPermissions() {
       await mutatePermissions()
       toast.success('権限を作成しました')
     } catch (error) {
-      const message =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message?: string }).message
-          : '権限の作成に失敗しました'
-      toast.error(message)
+      toast.error(getApiErrorMessage(error, '権限の作成に失敗しました'))
     }
   }
 
@@ -52,11 +49,7 @@ export default function AdminPermissions() {
       await mutatePermissions()
       toast.success('権限を削除しました')
     } catch (error) {
-      const message =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message?: string }).message
-          : '権限の削除に失敗しました'
-      toast.error(message)
+      toast.error(getApiErrorMessage(error, '権限の削除に失敗しました'))
     }
   }
 

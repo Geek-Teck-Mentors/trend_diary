@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
 import { Alert, AlertDescription, AlertTitle } from '@/application/web/components/shadcn/alert'
+import { getApiErrorMessage } from '@/application/web/lib/error'
 import createSWRFetcher from '../../features/create-swr-fetcher'
 import Page from './page'
 import type { EndpointDetailResponse, EndpointsResponse, PermissionsResponse } from './types'
@@ -66,11 +67,7 @@ export default function AdminEndpoints() {
       await mutateEndpoints()
       toast.success('エンドポイントを作成しました')
     } catch (error) {
-      const message =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message?: string }).message
-          : 'エンドポイントの作成に失敗しました'
-      toast.error(message)
+      toast.error(getApiErrorMessage(error, 'エンドポイントの作成に失敗しました'))
     }
   }
 
@@ -83,11 +80,7 @@ export default function AdminEndpoints() {
       }
       toast.success('エンドポイントを削除しました')
     } catch (error) {
-      const message =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message?: string }).message
-          : 'エンドポイントの削除に失敗しました'
-      toast.error(message)
+      toast.error(getApiErrorMessage(error, 'エンドポイントの削除に失敗しました'))
     }
   }
 
@@ -99,11 +92,7 @@ export default function AdminEndpoints() {
       await mutateEndpointDetail()
       toast.success('権限を更新しました')
     } catch (error) {
-      const message =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message?: string }).message
-          : '権限の更新に失敗しました'
-      toast.error(message)
+      toast.error(getApiErrorMessage(error, '権限の更新に失敗しました'))
     }
   }
 
