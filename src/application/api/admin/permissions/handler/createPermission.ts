@@ -1,7 +1,7 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
-import { ZodValidatedJsonContext } from '@/application/middleware/zodValidator'
+import { ZodValidatedContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { createPermissionUseCase } from '@/domain/permission'
 import { permissionInputSchema } from '@/domain/permission/schema/permissionSchema'
@@ -9,9 +9,7 @@ import getRdbClient from '@/infrastructure/rdb'
 
 export const jsonSchema = permissionInputSchema
 
-export default async function createPermission(
-  c: ZodValidatedJsonContext<z.infer<typeof jsonSchema>>,
-) {
+export default async function createPermission(c: ZodValidatedContext<z.infer<typeof jsonSchema>>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const parsedJson = c.req.valid('json')
 
