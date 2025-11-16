@@ -2,7 +2,14 @@ import { type Prisma, PrismaClient } from '@prisma/client'
 import { isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
+import { EndpointCommandImpl } from './infrastructure/endpointCommandImpl'
+import { EndpointPermissionCommandImpl } from './infrastructure/endpointPermissionCommandImpl'
+import { EndpointQueryImpl } from './infrastructure/endpointQueryImpl'
+import { PermissionCommandImpl } from './infrastructure/permissionCommandImpl'
 import { PermissionQueryImpl } from './infrastructure/queryImpl'
+import { RoleCommandImpl } from './infrastructure/roleCommandImpl'
+import { RolePermissionCommandImpl } from './infrastructure/rolePermissionCommandImpl'
+import { RoleQueryImpl } from './infrastructure/roleQueryImpl'
 import { UseCase } from './useCase'
 
 const mockDb = mockDeep<PrismaClient>()
@@ -12,8 +19,25 @@ describe('Permission UseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    const query = new PermissionQueryImpl(mockDb)
-    useCase = new UseCase(query)
+    const permissionQuery = new PermissionQueryImpl(mockDb)
+    const permissionCommand = new PermissionCommandImpl(mockDb)
+    const roleQuery = new RoleQueryImpl(mockDb)
+    const roleCommand = new RoleCommandImpl(mockDb)
+    const rolePermissionCommand = new RolePermissionCommandImpl(mockDb)
+    const endpointQuery = new EndpointQueryImpl(mockDb)
+    const endpointCommand = new EndpointCommandImpl(mockDb)
+    const endpointPermissionCommand = new EndpointPermissionCommandImpl(mockDb)
+
+    useCase = new UseCase(
+      permissionQuery,
+      permissionCommand,
+      roleQuery,
+      roleCommand,
+      rolePermissionCommand,
+      endpointQuery,
+      endpointCommand,
+      endpointPermissionCommand,
+    )
   })
 
   describe('hasEndpointPermission', () => {
