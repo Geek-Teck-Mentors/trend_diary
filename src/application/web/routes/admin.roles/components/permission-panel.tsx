@@ -147,12 +147,18 @@ export default function PermissionPanel({
                   return (
                     <div
                       key={permission.permissionId}
+                      role='button'
+                      tabIndex={0}
                       className='flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded'
+                      onClick={() => handleTogglePermission(permission.permissionId)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleTogglePermission(permission.permissionId)
+                        }
+                      }}
                     >
-                      <Checkbox
-                        checked={isChecked}
-                        onCheckedChange={() => handleTogglePermission(permission.permissionId)}
-                      />
+                      <Checkbox checked={isChecked} />
                       <span className='text-sm text-gray-700'>
                         {permission.action}
                         {isChecked && <Check className='w-4 h-4 inline ml-2 text-green-500' />}

@@ -2,6 +2,7 @@ import { Check, Save, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/application/web/components/shadcn/button'
 import { Checkbox } from '@/application/web/components/shadcn/checkbox'
+import { getMethodColor } from '../http-method'
 import type { Endpoint, Permission } from '../types'
 
 type Props = {
@@ -85,23 +86,6 @@ export default function PermissionPanel({
     setHasChanges(false)
   }
 
-  const getMethodColor = (method: string) => {
-    switch (method) {
-      case 'GET':
-        return 'bg-blue-100 text-blue-800'
-      case 'POST':
-        return 'bg-green-100 text-green-800'
-      case 'PUT':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'PATCH':
-        return 'bg-orange-100 text-orange-800'
-      case 'DELETE':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   return (
     <div className='flex-1 flex flex-col'>
       <div className='p-4 border-b border-gray-200'>
@@ -171,12 +155,18 @@ export default function PermissionPanel({
                   return (
                     <div
                       key={permission.permissionId}
+                      role='button'
+                      tabIndex={0}
                       className='flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded'
+                      onClick={() => handleTogglePermission(permission.permissionId)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleTogglePermission(permission.permissionId)
+                        }
+                      }}
                     >
-                      <Checkbox
-                        checked={isChecked}
-                        onCheckedChange={() => handleTogglePermission(permission.permissionId)}
-                      />
+                      <Checkbox checked={isChecked} />
                       <span className='text-sm text-gray-700'>
                         {permission.action}
                         {isChecked && <Check className='w-4 h-4 inline ml-2 text-green-500' />}
