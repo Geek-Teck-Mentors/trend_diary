@@ -169,7 +169,8 @@ describe('fromPrismaToArticle', () => {
           media: 'Qiita',
           title: 'TypeScriptの型安全性について詳しく解説します',
           author: '山田太郎（シニアエンジニア）',
-          description: 'この記事ではTypeScriptの型安全性について、実例を交えながら詳しく解説していきます。',
+          description:
+            'この記事ではTypeScriptの型安全性について、実例を交えながら詳しく解説していきます。',
           url: 'https://qiita.com/yamada-taro/items/typescript-type-safety-guide',
           expectedDescription: '日本語を含む実際的なデータでの正確なマッピング',
         },
@@ -264,7 +265,8 @@ describe('fromPrismaToArticle', () => {
       it('特殊文字を含むmediaとurlが正確にマッピングされること', () => {
         // Arrange
         const specialMedia = 'Qiita-Tech.io'
-        const specialUrl = 'https://qiita.com/users/test+tag/items/article-title_123?page=1&sort=popular#section-1'
+        const specialUrl =
+          'https://qiita.com/users/test+tag/items/article-title_123?page=1&sort=popular#section-1'
         const prismaArticle = createMockPrismaArticle({
           media: specialMedia,
           url: specialUrl,
