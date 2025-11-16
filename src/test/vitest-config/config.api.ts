@@ -12,6 +12,7 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
+    globalSetup: './src/test/setup-api.ts',
     env: {
       DATABASE_URL: dbUrl,
     },
