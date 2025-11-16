@@ -138,82 +138,37 @@ async function seedRolePermissions() {
 async function seedEndpoints() {
   const endpoints = [
     // ユーザー管理
-    { path: '/api/admin/users', method: 'GET', resource: 'user', action: 'list' },
-    { path: '/api/admin/users/:id', method: 'POST', resource: 'user', action: 'grant_admin' },
+    { path: '/api/admin/users', method: 'GET' },
+    { path: '/api/admin/users/:id', method: 'POST' },
     // 記事
-    { path: '/api/articles', method: 'GET', resource: 'article', action: 'list' },
-    { path: '/api/articles/:id/read', method: 'POST', resource: 'article', action: 'mark_read' },
-    {
-      path: '/api/articles/:id/read',
-      method: 'DELETE',
-      resource: 'article',
-      action: 'mark_unread',
-    },
+    { path: '/api/articles', method: 'GET' },
+    { path: '/api/articles/:id/read', method: 'POST' },
+    { path: '/api/articles/:id/read', method: 'DELETE' },
     // プライバシーポリシー
-    {
-      path: '/api/admin/privacy-policies',
-      method: 'GET',
-      resource: 'privacy_policy',
-      action: 'list',
-    },
-    {
-      path: '/api/admin/privacy-policies/:id',
-      method: 'GET',
-      resource: 'privacy_policy',
-      action: 'read',
-    },
-    {
-      path: '/api/admin/privacy-policies',
-      method: 'POST',
-      resource: 'privacy_policy',
-      action: 'create',
-    },
-    {
-      path: '/api/admin/privacy-policies/:id',
-      method: 'PUT',
-      resource: 'privacy_policy',
-      action: 'update',
-    },
-    {
-      path: '/api/admin/privacy-policies/:id',
-      method: 'DELETE',
-      resource: 'privacy_policy',
-      action: 'delete',
-    },
-    {
-      path: '/api/admin/privacy-policies/:id/clone',
-      method: 'POST',
-      resource: 'privacy_policy',
-      action: 'clone',
-    },
-    {
-      path: '/api/admin/privacy-policies/:id/activate',
-      method: 'POST',
-      resource: 'privacy_policy',
-      action: 'activate',
-    },
+    { path: '/api/admin/privacy-policies', method: 'GET' },
+    { path: '/api/admin/privacy-policies/:id', method: 'GET' },
+    { path: '/api/admin/privacy-policies', method: 'POST' },
+    { path: '/api/admin/privacy-policies/:id', method: 'PUT' },
+    { path: '/api/admin/privacy-policies/:id', method: 'DELETE' },
+    { path: '/api/admin/privacy-policies/:id/clone', method: 'POST' },
+    { path: '/api/admin/privacy-policies/:id/activate', method: 'POST' },
     // ロール管理
-    { path: '/api/admin/roles', method: 'GET', resource: 'role', action: 'list' },
-    { path: '/api/admin/roles/:id', method: 'GET', resource: 'role', action: 'read' },
-    { path: '/api/admin/roles', method: 'POST', resource: 'role', action: 'create' },
-    { path: '/api/admin/roles/:id', method: 'PUT', resource: 'role', action: 'update' },
-    { path: '/api/admin/roles/:id', method: 'DELETE', resource: 'role', action: 'delete' },
+    { path: '/api/admin/roles', method: 'GET' },
+    { path: '/api/admin/roles/:id', method: 'GET' },
+    { path: '/api/admin/roles', method: 'POST' },
+    { path: '/api/admin/roles/:id', method: 'PUT' },
+    { path: '/api/admin/roles/:id', method: 'DELETE' },
     // パーミッション管理
-    { path: '/api/admin/permissions', method: 'GET', resource: 'permission', action: 'list' },
-    { path: '/api/admin/permissions/:id', method: 'GET', resource: 'permission', action: 'read' },
-    { path: '/api/admin/permissions', method: 'POST', resource: 'permission', action: 'create' },
-    {
-      path: '/api/admin/permissions/:id',
-      method: 'DELETE',
-      resource: 'permission',
-      action: 'delete',
-    },
+    { path: '/api/admin/permissions', method: 'GET' },
+    { path: '/api/admin/permissions/:id', method: 'GET' },
+    { path: '/api/admin/permissions', method: 'POST' },
+    { path: '/api/admin/permissions/:id', method: 'DELETE' },
     // エンドポイント管理
-    { path: '/api/admin/endpoints', method: 'GET', resource: 'endpoint', action: 'list' },
-    { path: '/api/admin/endpoints/:id', method: 'GET', resource: 'endpoint', action: 'read' },
-    { path: '/api/admin/endpoints', method: 'POST', resource: 'endpoint', action: 'create' },
-    { path: '/api/admin/endpoints/:id', method: 'DELETE', resource: 'endpoint', action: 'delete' },
-    { path: '/api/admin/endpoints/:id', method: 'PUT', resource: 'endpoint', action: 'update' },
+    { path: '/api/admin/endpoints', method: 'GET' },
+    { path: '/api/admin/endpoints/:id', method: 'GET' },
+    { path: '/api/admin/endpoints', method: 'POST' },
+    { path: '/api/admin/endpoints/:id', method: 'DELETE' },
+    { path: '/api/admin/endpoints/:id', method: 'PUT' },
   ]
 
   await prisma.endpoint.createMany({
@@ -316,10 +271,8 @@ async function seedEndpointPermissions() {
 
     const permission = await prisma.permission.findFirst({
       where: {
-        resource_action: {
-          resource: ep.resource,
-          action: ep.action,
-        },
+        resource: ep.resource,
+        action: ep.action,
       },
     })
 
