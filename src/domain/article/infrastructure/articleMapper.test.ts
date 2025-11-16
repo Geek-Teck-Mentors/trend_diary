@@ -120,8 +120,8 @@ describe('fromPrismaToArticle', () => {
           expectedDescription: '空文字列での正確なマッピング',
         },
         {
-          name: 'media最大長(128文字)での境界値処理',
-          media: 'A'.repeat(128),
+          name: 'media最大長(10文字)での境界値処理',
+          media: 'A'.repeat(10),
           title: '通常のタイトル',
           author: '通常の著者',
           description: '通常の説明',
@@ -129,46 +129,46 @@ describe('fromPrismaToArticle', () => {
           expectedDescription: 'mediaがPrismaスキーマの最大長制限での正確なマッピング',
         },
         {
-          name: 'title最大長(1024文字)での境界値処理',
+          name: 'title最大長(100文字)での境界値処理',
           media: 'Qiita',
-          title: 'あ'.repeat(1024),
+          title: 'あ'.repeat(100),
           author: '通常の著者',
           description: '通常の説明',
           url: 'https://example.com',
           expectedDescription: 'titleがPrismaスキーマの最大長制限での正確なマッピング',
         },
         {
-          name: 'author最大長(1024文字)での境界値処理',
+          name: 'author最大長(30文字)での境界値処理',
           media: 'Qiita',
           title: '通常のタイトル',
-          author: 'A'.repeat(1024),
+          author: 'A'.repeat(30),
           description: '通常の説明',
           url: 'https://example.com',
           expectedDescription: 'authorがPrismaスキーマの最大長制限での正確なマッピング',
         },
         {
-          name: 'description最大長(2048文字)での境界値処理',
+          name: 'description最大長(1024文字)での境界値処理',
           media: 'Qiita',
           title: '通常のタイトル',
           author: '通常の著者',
-          description: 'あ'.repeat(2048),
+          description: 'あ'.repeat(1024),
           url: 'https://example.com',
           expectedDescription: 'descriptionがPrismaスキーマの最大長制限での正確なマッピング',
         },
         {
-          name: 'url最大長(2048文字)での境界値処理',
+          name: '非常に長いURL(10000文字)での処理',
           media: 'Qiita',
           title: '通常のタイトル',
           author: '通常の著者',
           description: '通常の説明',
-          url: `https://example.com/${'a'.repeat(2028)}`,
-          expectedDescription: 'urlがPrismaスキーマの最大長制限での正確なマッピング',
+          url: `https://example.com/${'a'.repeat(9980)}`,
+          expectedDescription: 'urlがText型で長い文字列でも正確にマッピング',
         },
         {
           name: '現実的な日本語記事データでの処理',
           media: 'Qiita',
-          title: 'TypeScriptの型安全性について詳しく解説します',
-          author: '山田太郎（シニアエンジニア）',
+          title: 'TypeScriptの型安全性について',
+          author: '山田太郎',
           description:
             'この記事ではTypeScriptの型安全性について、実例を交えながら詳しく解説していきます。',
           url: 'https://qiita.com/yamada-taro/items/typescript-type-safety-guide',
@@ -198,12 +198,12 @@ describe('fromPrismaToArticle', () => {
             expect(result.description).toBe(description)
             expect(result.url).toBe(url)
 
-            // 文字列長制約の確認
-            expect(result.media.length).toBeLessThanOrEqual(128)
-            expect(result.title.length).toBeLessThanOrEqual(1024)
-            expect(result.author.length).toBeLessThanOrEqual(1024)
-            expect(result.description.length).toBeLessThanOrEqual(2048)
-            expect(result.url.length).toBeLessThanOrEqual(2048)
+            // 文字列長制約の確認（Prismaスキーマに基づく）
+            expect(result.media.length).toBeLessThanOrEqual(10)
+            expect(result.title.length).toBeLessThanOrEqual(100)
+            expect(result.author.length).toBeLessThanOrEqual(30)
+            expect(result.description.length).toBeLessThanOrEqual(1024)
+            // urlはText型のため制限なし
           })
         },
       )
