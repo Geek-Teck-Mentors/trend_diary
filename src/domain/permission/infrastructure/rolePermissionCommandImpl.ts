@@ -28,6 +28,7 @@ export class RolePermissionCommandImpl implements RolePermissionCommand {
       // 既存チェック
       const existing = await this.rdb.rolePermission.findUnique({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           roleId_permissionId: {
             roleId: input.roleId,
             permissionId: input.permissionId,
@@ -59,6 +60,7 @@ export class RolePermissionCommandImpl implements RolePermissionCommand {
     try {
       const existing = await this.rdb.rolePermission.findUnique({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           roleId_permissionId: {
             roleId: input.roleId,
             permissionId: input.permissionId,
@@ -72,6 +74,7 @@ export class RolePermissionCommandImpl implements RolePermissionCommand {
 
       await this.rdb.rolePermission.delete({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           roleId_permissionId: {
             roleId: input.roleId,
             permissionId: input.permissionId,

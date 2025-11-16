@@ -33,6 +33,7 @@ export class EndpointPermissionCommandImpl implements EndpointPermissionCommand 
       // 既存チェック
       const existing = await this.rdb.endpointPermission.findUnique({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           endpointId_permissionId: {
             endpointId: input.endpointId,
             permissionId: input.permissionId,
@@ -64,6 +65,7 @@ export class EndpointPermissionCommandImpl implements EndpointPermissionCommand 
     try {
       const existing = await this.rdb.endpointPermission.findUnique({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           endpointId_permissionId: {
             endpointId: input.endpointId,
             permissionId: input.permissionId,
@@ -77,6 +79,7 @@ export class EndpointPermissionCommandImpl implements EndpointPermissionCommand 
 
       await this.rdb.endpointPermission.delete({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma generated composite key name
           endpointId_permissionId: {
             endpointId: input.endpointId,
             permissionId: input.permissionId,
