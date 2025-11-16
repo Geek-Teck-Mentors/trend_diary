@@ -138,7 +138,7 @@ describe('ArticleQueryImpl', () => {
         const params = {
           page: 1,
           limit: 20,
-          media: 'Qiita',
+          media: 'qiita' as const,
         }
 
         const mockArticles = [
