@@ -111,7 +111,7 @@ describe('DiscordNotifier', () => {
       const callArgs = mockFetch.mock.calls[0]
       const body = JSON.parse(callArgs[1].body)
       const stackTraceField = body.embeds[0].fields.find(
-        (field: any) => field.name === 'Stack Trace',
+        (field: { name: string; value: string }) => field.name === 'Stack Trace',
       )
 
       // Discordの制限（1024文字）以下になっているか確認

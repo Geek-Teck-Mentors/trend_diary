@@ -78,6 +78,7 @@ const generateFakeResponse = (
   }),
 })
 
+// biome-ignore lint/suspicious/noExplicitAny: getApiClientForClientの型が面倒なのでanyを使用
 const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
 type UseTrendsHook = ReturnType<typeof useTrends>
 
@@ -179,6 +180,7 @@ describe('useTrends', () => {
 
     it('loading中はisLoadingがtrueになる', async () => {
       let resolvePromise: () => void
+      // biome-ignore lint/suspicious/noExplicitAny:　getApiClientForClientの型が面倒なのでanyを使用
       const mockPromise = new Promise<any>((resolve) => {
         resolvePromise = () =>
           resolve({
@@ -330,6 +332,7 @@ describe('useTrends', () => {
   describe('エッジケース', () => {
     it('ローディング中に再度fetchArticlesを呼び出しても処理されない', async () => {
       let resolvePromise: () => void
+      // biome-ignore lint/suspicious/noExplicitAny: getApiClientForClientの型が面倒なのでanyを使用
       const mockPromise = new Promise<any>((resolve) => {
         resolvePromise = () =>
           resolve({

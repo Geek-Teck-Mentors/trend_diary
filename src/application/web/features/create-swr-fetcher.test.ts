@@ -28,6 +28,7 @@ describe('createSWRFetcher', () => {
         ok: true,
         json: vi.fn().mockResolvedValue({ data: 'test' }),
       }
+      // biome-ignore lint/suspicious/noExplicitAny: fetchのモックの型が不明なためanyを使用
       vi.mocked(fetch).mockResolvedValue(mockResponse as any)
 
       const { fetcher } = createSWRFetcher()
@@ -45,6 +46,7 @@ describe('createSWRFetcher', () => {
         status: 404,
         statusText: 'Not Found',
       }
+      // biome-ignore lint/suspicious/noExplicitAny: fetchのモックの型が不明なためanyを使用
       vi.mocked(fetch).mockResolvedValue(mockResponse as any)
 
       const { fetcher } = createSWRFetcher()

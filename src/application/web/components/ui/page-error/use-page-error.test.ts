@@ -108,9 +108,11 @@ describe('usePageError', () => {
       const { result } = setupHook()
 
       act(() => {
+        // biome-ignore lint/suspicious/noExplicitAny: undefinedを渡すテストのため
         result.current.newPageError(undefined as any, undefined as any)
       })
 
+      // biome-ignore lint/suspicious/noExplicitAny: undefinedを渡すテストのため
       expectPageError(result, { title: undefined as any, description: undefined as any })
     })
   })
