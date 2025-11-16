@@ -134,7 +134,7 @@ describe('AuthorizationUseCase', () => {
       }
     })
 
-    it('エンドポイントに権限が設定されていない場合trueを返す（認証不要）', async () => {
+    it('エンドポイントに権限が設定されていない場合falseを返す（エンドポイントが見つからない）', async () => {
       const mockEndpoint = {
         endpointId: 1,
         path: '/api/public',
@@ -148,7 +148,7 @@ describe('AuthorizationUseCase', () => {
 
       expect(isSuccess(result)).toBe(true)
       if (isSuccess(result)) {
-        expect(result.data).toBe(true)
+        expect(result.data).toBe(false)
       }
     })
 

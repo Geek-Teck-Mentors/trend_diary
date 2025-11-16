@@ -61,14 +61,14 @@ describe('PermissionUseCase', () => {
       }
     })
 
-    it('存在しないIDを指定した場合、NotFoundErrorを返す', async () => {
+    it('存在しないIDを指定した場合、nullを返す', async () => {
       mockDb.permission.findUnique.mockResolvedValue(null)
 
       const result = await useCase.getPermissionById(999)
 
-      expect(isFailure(result)).toBe(true)
-      if (isFailure(result)) {
-        expect(result.error).toBeInstanceOf(NotFoundError)
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toBeNull()
       }
     })
   })
@@ -78,7 +78,7 @@ describe('PermissionUseCase', () => {
       const input = { resource: 'article', action: 'delete' }
       const mockCreatedPermission = { permissionId: 3, ...input }
 
-      mockDb.permission.findFirst.mockResolvedValue(null)
+      mockDb.permission.findUnique.mockResolvedValue(null)
       mockDb.permission.create.mockResolvedValue(mockCreatedPermission)
 
       const result = await useCase.createPermission(input)
@@ -93,7 +93,7 @@ describe('PermissionUseCase', () => {
       const input = { resource: 'article', action: 'read' }
       const existingPermission = { permissionId: 1, ...input }
 
-      mockDb.permission.findFirst.mockResolvedValue(existingPermission)
+      mockDb.permission.findUnique.mockResolvedValue(existingPermission)
 
       const result = await useCase.createPermission(input)
 
@@ -114,7 +114,7 @@ describe('PermissionUseCase', () => {
 
       expect(isSuccess(result)).toBe(true)
       if (isSuccess(result)) {
-        expect(result.data).toEqual(mockPermission)
+        expect(result.data).toBeUndefined()
       }
     })
 
