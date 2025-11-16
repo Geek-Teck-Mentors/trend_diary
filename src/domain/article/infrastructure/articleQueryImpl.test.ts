@@ -19,7 +19,7 @@ describe('ArticleQueryImpl', () => {
           limit: 20,
         }
 
-        const mockArticles = [
+        const multipleMockArticles = [
           {
             articleId: 1n,
             media: 'Qiita',
@@ -40,7 +40,7 @@ describe('ArticleQueryImpl', () => {
           },
         ]
 
-        mockDb.$transaction.mockResolvedValue([2, mockArticles])
+        mockDb.$transaction.mockResolvedValue([2, multipleMockArticles])
 
         // Act
         const result = await queryImpl.searchArticles(params)
@@ -61,55 +61,7 @@ describe('ArticleQueryImpl', () => {
         expect(mockDb.$transaction).toHaveBeenCalled()
       })
 
-      const filterTestCases = [
-        {
-          name: 'タイトルでフィルタリングして記事を検索できる',
-          params: {
-            page: 1,
-            limit: 20,
-            title: 'TypeScript',
-          },
-          assertion: (result: typeof mockArticles) => {
-            expect(result[0].title).toContain('TypeScript')
-          },
-        },
-        {
-          name: '著者でフィルタリングして記事を検索できる',
-          params: {
-            page: 1,
-            limit: 20,
-            author: '山田',
-          },
-          assertion: (result: typeof mockArticles) => {
-            expect(result[0].author).toContain('山田')
-          },
-        },
-        {
-          name: 'メディアでフィルタリングして記事を検索できる',
-          params: {
-            page: 1,
-            limit: 20,
-            media: 'qiita' as const,
-          },
-          assertion: (result: typeof mockArticles) => {
-            expect(result[0].media).toBe('Qiita')
-          },
-        },
-        {
-          name: '日付範囲でフィルタリングして記事を検索できる',
-          params: {
-            page: 1,
-            limit: 20,
-            from: '2024-01-14',
-            to: '2024-01-15',
-          },
-          assertion: (_result: typeof mockArticles) => {
-            // 日付範囲のテストは記事が返されることを確認するだけ
-          },
-        },
-      ]
-
-      const mockArticles = [
+      const singleMockArticle = [
         {
           articleId: 1n,
           media: 'Qiita',
@@ -121,10 +73,58 @@ describe('ArticleQueryImpl', () => {
         },
       ]
 
+      const filterTestCases = [
+        {
+          name: 'タイトルでフィルタリングして記事を検索できる',
+          params: {
+            page: 1,
+            limit: 20,
+            title: 'TypeScript',
+          },
+          assertion: (result: typeof singleMockArticle) => {
+            expect(result[0].title).toContain('TypeScript')
+          },
+        },
+        {
+          name: '著者でフィルタリングして記事を検索できる',
+          params: {
+            page: 1,
+            limit: 20,
+            author: '山田',
+          },
+          assertion: (result: typeof singleMockArticle) => {
+            expect(result[0].author).toContain('山田')
+          },
+        },
+        {
+          name: 'メディアでフィルタリングして記事を検索できる',
+          params: {
+            page: 1,
+            limit: 20,
+            media: 'qiita' as const,
+          },
+          assertion: (result: typeof singleMockArticle) => {
+            expect(result[0].media).toBe('Qiita')
+          },
+        },
+        {
+          name: '日付範囲でフィルタリングして記事を検索できる',
+          params: {
+            page: 1,
+            limit: 20,
+            from: '2024-01-14',
+            to: '2024-01-15',
+          },
+          assertion: (_result: typeof singleMockArticle) => {
+            // 日付範囲のテストは記事が返されることを確認するだけ
+          },
+        },
+      ]
+
       filterTestCases.forEach(({ name, params, assertion }) => {
         it(name, async () => {
           // Arrange
-          mockDb.$transaction.mockResolvedValue([1, mockArticles])
+          mockDb.$transaction.mockResolvedValue([1, singleMockArticle])
 
           // Act
           const result = await queryImpl.searchArticles(params)

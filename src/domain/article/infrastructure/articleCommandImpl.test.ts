@@ -12,6 +12,28 @@ describe('ArticleCommandImpl', () => {
 
   describe('createReadHistory', () => {
     describe('基本動作', () => {
+      it('正しい引数でデータベース作成関数を呼び出す', async () => {
+        // Arrange
+        const activeUserId = 1n
+        const articleId = 100n
+        const readAt = new Date('2024-01-15T09:30:00Z')
+        mockDb.readHistory.create.mockResolvedValue({
+          readHistoryId: 1n,
+          activeUserId,
+          articleId,
+          readAt,
+          createdAt: new Date('2024-01-15T09:30:00Z'),
+        })
+
+        // Act
+        await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+
+        // Assert
+        expect(mockDb.readHistory.create).toHaveBeenCalledWith({
+          data: { activeUserId, articleId, readAt },
+        })
+      })
+
       const basicTestCases = [
         {
           name: '読み履歴を作成できる',
@@ -20,7 +42,6 @@ describe('ArticleCommandImpl', () => {
           readAt: new Date('2024-01-15T09:30:00Z'),
           readHistoryId: 1n,
           createdAt: new Date('2024-01-15T09:30:00Z'),
-          shouldCheckCall: true,
         },
         {
           name: '異なるユーザーの読み履歴を作成できる',
@@ -29,12 +50,11 @@ describe('ArticleCommandImpl', () => {
           readAt: new Date('2024-01-16T10:00:00Z'),
           readHistoryId: 2n,
           createdAt: new Date('2024-01-16T10:00:00Z'),
-          shouldCheckCall: false,
         },
       ]
 
       basicTestCases.forEach(
-        ({ name, activeUserId, articleId, readAt, readHistoryId, createdAt, shouldCheckCall }) => {
+        ({ name, activeUserId, articleId, readAt, readHistoryId, createdAt }) => {
           it(name, async () => {
             // Arrange
             const mockReadHistory = {
@@ -57,15 +77,6 @@ describe('ArticleCommandImpl', () => {
               expect(result.data.activeUserId).toBe(activeUserId)
               expect(result.data.articleId).toBe(articleId)
               expect(result.data.readAt).toEqual(readAt)
-            }
-            if (shouldCheckCall) {
-              expect(mockDb.readHistory.create).toHaveBeenCalledWith({
-                data: {
-                  activeUserId,
-                  articleId,
-                  readAt,
-                },
-              })
             }
           })
         },
@@ -154,24 +165,37 @@ describe('ArticleCommandImpl', () => {
 
   describe('deleteAllReadHistory', () => {
     describe('基本動作', () => {
+      it('正しい引数でデータベース削除関数を呼び出す', async () => {
+        // Arrange
+        const activeUserId = 1n
+        const articleId = 100n
+        mockDb.readHistory.deleteMany.mockResolvedValue({ count: 5 })
+
+        // Act
+        await commandImpl.deleteAllReadHistory(activeUserId, articleId)
+
+        // Assert
+        expect(mockDb.readHistory.deleteMany).toHaveBeenCalledWith({
+          where: { activeUserId, articleId },
+        })
+      })
+
       const basicTestCases = [
         {
           name: '特定ユーザーの特定記事の読み履歴を全て削除できる',
           activeUserId: 1n,
           articleId: 100n,
           count: 5,
-          shouldCheckCall: true,
         },
         {
           name: '異なるユーザーと記事の組み合わせで削除できる',
           activeUserId: 2n,
           articleId: 200n,
           count: 3,
-          shouldCheckCall: false,
         },
       ]
 
-      basicTestCases.forEach(({ name, activeUserId, articleId, count, shouldCheckCall }) => {
+      basicTestCases.forEach(({ name, activeUserId, articleId, count }) => {
         it(name, async () => {
           // Arrange
           mockDb.readHistory.deleteMany.mockResolvedValue({ count })
@@ -183,14 +207,6 @@ describe('ArticleCommandImpl', () => {
           expect(isSuccess(result)).toBe(true)
           if (isSuccess(result)) {
             expect(result.data).toBeUndefined()
-          }
-          if (shouldCheckCall) {
-            expect(mockDb.readHistory.deleteMany).toHaveBeenCalledWith({
-              where: {
-                activeUserId,
-                articleId,
-              },
-            })
           }
         })
       })

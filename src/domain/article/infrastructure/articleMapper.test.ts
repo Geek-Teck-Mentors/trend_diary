@@ -66,31 +66,26 @@ describe('fromPrismaToArticle', () => {
         {
           name: '最小値(0)での境界値処理',
           articleId: 0n,
-          description: 'bigintの最小値0での正確なマッピング',
         },
         {
           name: '通常の正の値での処理',
           articleId: 12345n,
-          description: '一般的な正のbigint値での正確なマッピング',
         },
         {
           name: 'JavaScript Number.MAX_SAFE_INTEGER相当値での処理',
           articleId: 9007199254740991n, // Number.MAX_SAFE_INTEGER
-          description: 'JavaScript Number型の安全な最大値での正確なマッピング',
         },
         {
           name: 'JavaScript Number.MAX_SAFE_INTEGER超過値での処理',
           articleId: 9007199254740992n, // Number.MAX_SAFE_INTEGER + 1
-          description: 'JavaScript Number型の安全範囲を超えた値での正確なマッピング',
         },
         {
           name: '非常に大きなbigint値での処理',
           articleId: 123456789012345678901234567890n,
-          description: 'PostgreSQL bigintの上限に近い非常に大きな値での正確なマッピング',
         },
       ]
 
-      bigintTestCases.forEach(({ name, articleId, description }) => {
+      bigintTestCases.forEach(({ name, articleId }) => {
         it(`${name}`, () => {
           // Arrange
           const prismaArticle = createMockPrismaArticle({ articleId })
@@ -117,7 +112,6 @@ describe('fromPrismaToArticle', () => {
           author: '',
           description: '',
           url: '',
-          expectedDescription: '空文字列での正確なマッピング',
         },
         {
           name: 'media最大長(10文字)での境界値処理',
@@ -126,7 +120,6 @@ describe('fromPrismaToArticle', () => {
           author: '通常の著者',
           description: '通常の説明',
           url: 'https://example.com',
-          expectedDescription: 'mediaがPrismaスキーマの最大長制限での正確なマッピング',
         },
         {
           name: 'title最大長(100文字)での境界値処理',
@@ -135,7 +128,6 @@ describe('fromPrismaToArticle', () => {
           author: '通常の著者',
           description: '通常の説明',
           url: 'https://example.com',
-          expectedDescription: 'titleがPrismaスキーマの最大長制限での正確なマッピング',
         },
         {
           name: 'author最大長(30文字)での境界値処理',
@@ -144,7 +136,6 @@ describe('fromPrismaToArticle', () => {
           author: 'A'.repeat(30),
           description: '通常の説明',
           url: 'https://example.com',
-          expectedDescription: 'authorがPrismaスキーマの最大長制限での正確なマッピング',
         },
         {
           name: 'description最大長(1024文字)での境界値処理',
@@ -153,7 +144,6 @@ describe('fromPrismaToArticle', () => {
           author: '通常の著者',
           description: 'あ'.repeat(1024),
           url: 'https://example.com',
-          expectedDescription: 'descriptionがPrismaスキーマの最大長制限での正確なマッピング',
         },
         {
           name: '非常に長いURL(10000文字)での処理',
@@ -162,7 +152,6 @@ describe('fromPrismaToArticle', () => {
           author: '通常の著者',
           description: '通常の説明',
           url: `https://example.com/${'a'.repeat(9980)}`,
-          expectedDescription: 'urlがText型で長い文字列でも正確にマッピング',
         },
         {
           name: '現実的な日本語記事データでの処理',
@@ -172,41 +161,38 @@ describe('fromPrismaToArticle', () => {
           description:
             'この記事ではTypeScriptの型安全性について、実例を交えながら詳しく解説していきます。',
           url: 'https://qiita.com/yamada-taro/items/typescript-type-safety-guide',
-          expectedDescription: '日本語を含む実際的なデータでの正確なマッピング',
         },
       ]
 
-      stringConstraintTestCases.forEach(
-        ({ name, media, title, author, description, url, expectedDescription }) => {
-          it(`${name}`, () => {
-            // Arrange
-            const prismaArticle = createMockPrismaArticle({
-              media,
-              title,
-              author,
-              description,
-              url,
-            })
-
-            // Act
-            const result = fromPrismaToArticle(prismaArticle)
-
-            // Assert
-            expect(result.media).toBe(media)
-            expect(result.title).toBe(title)
-            expect(result.author).toBe(author)
-            expect(result.description).toBe(description)
-            expect(result.url).toBe(url)
-
-            // 文字列長制約の確認（Prismaスキーマに基づく）
-            expect(result.media.length).toBeLessThanOrEqual(10)
-            expect(result.title.length).toBeLessThanOrEqual(100)
-            expect(result.author.length).toBeLessThanOrEqual(30)
-            expect(result.description.length).toBeLessThanOrEqual(1024)
-            // urlはText型のため制限なし
+      stringConstraintTestCases.forEach(({ name, media, title, author, description, url }) => {
+        it(`${name}`, () => {
+          // Arrange
+          const prismaArticle = createMockPrismaArticle({
+            media,
+            title,
+            author,
+            description,
+            url,
           })
-        },
-      )
+
+          // Act
+          const result = fromPrismaToArticle(prismaArticle)
+
+          // Assert
+          expect(result.media).toBe(media)
+          expect(result.title).toBe(title)
+          expect(result.author).toBe(author)
+          expect(result.description).toBe(description)
+          expect(result.url).toBe(url)
+
+          // 文字列長制約の確認（Prismaスキーマに基づく）
+          expect(result.media.length).toBeLessThanOrEqual(10)
+          expect(result.title.length).toBeLessThanOrEqual(100)
+          expect(result.author.length).toBeLessThanOrEqual(30)
+          expect(result.description.length).toBeLessThanOrEqual(1024)
+          // urlはText型のため制限なし
+        })
+      })
     })
 
     describe('Date型の特殊ケーステスト', () => {
@@ -214,31 +200,26 @@ describe('fromPrismaToArticle', () => {
         {
           name: 'Unix epoch(1970-01-01)での境界値処理',
           createdAt: new Date('1970-01-01T00:00:00.000Z'),
-          description: 'Unix epochタイムスタンプでの正確なマッピング',
         },
         {
           name: '1970年以前の日時での境界値処理',
           createdAt: new Date('1969-12-31T23:59:59.999Z'),
-          description: 'Unix epoch以前の日時での正確なマッピング',
         },
         {
           name: '遠い未来の日時での境界値処理',
           createdAt: new Date('2099-12-31T23:59:59.999Z'),
-          description: '遠い未来の日時での正確なマッピング',
         },
         {
           name: 'ミリ秒精度での境界値処理',
           createdAt: new Date('2024-01-15T09:30:15.123Z'),
-          description: 'ミリ秒精度の日時での正確なマッピング',
         },
         {
           name: 'タイムゾーンを含む日時での処理',
           createdAt: new Date('2024-01-15T18:30:15+09:00'), // JST
-          description: 'タイムゾーン付き日時での正確なマッピング',
         },
       ]
 
-      dateTestCases.forEach(({ name, createdAt, description }) => {
+      dateTestCases.forEach(({ name, createdAt }) => {
         it(`${name}`, () => {
           // Arrange
           const prismaArticle = createMockPrismaArticle({ createdAt })
