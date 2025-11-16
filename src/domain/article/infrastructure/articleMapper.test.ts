@@ -1,0 +1,349 @@
+import { Article as PrismaArticle } from '@prisma/client'
+import { describe, expect, it } from 'vitest'
+import fromPrismaToArticle from './articleMapper'
+
+describe('fromPrismaToArticle', () => {
+  // テストデータ作成ヘルパー
+  const createMockPrismaArticle = (overrides: Partial<PrismaArticle> = {}): PrismaArticle => {
+    return {
+      articleId: 1n,
+      media: 'Qiita',
+      title: 'TypeScriptの型安全性について',
+      author: '山田太郎',
+      description: 'TypeScriptの型安全性に関する解説記事です',
+      url: 'https://example.com/article/1',
+      createdAt: new Date('2024-01-15T09:30:00Z'),
+      ...overrides,
+    }
+  }
+
+  describe('基本動作', () => {
+    it('標準的なArticleデータで全フィールドが正確にマッピングされること', () => {
+      // Arrange
+      const prismaArticle = createMockPrismaArticle()
+
+      // Act
+      const result = fromPrismaToArticle(prismaArticle)
+
+      // Assert
+      expect(result).toBeDefined()
+      expect(result.articleId).toBe(prismaArticle.articleId)
+      expect(result.media).toBe(prismaArticle.media)
+      expect(result.title).toBe(prismaArticle.title)
+      expect(result.author).toBe(prismaArticle.author)
+      expect(result.description).toBe(prismaArticle.description)
+      expect(result.url).toBe(prismaArticle.url)
+      expect(result.createdAt).toEqual(prismaArticle.createdAt)
+    })
+
+    it('結果オブジェクトがPrismaオブジェクトとは独立したArticleインスタンスであること', () => {
+      // Arrange
+      const prismaArticle = createMockPrismaArticle()
+
+      // Act
+      const result = fromPrismaToArticle(prismaArticle)
+
+      // Assert - インスタンス独立性の確認
+      expect(result).not.toBe(prismaArticle)
+      expect(result).toBeDefined()
+
+      // Dateオブジェクトは同じ参照を持つ（mapperの実装仕様）
+      expect(result.createdAt).toBe(prismaArticle.createdAt)
+
+      // プリミティブ値は値で比較される
+      expect(result.articleId).toBe(prismaArticle.articleId)
+      expect(result.media).toBe(prismaArticle.media)
+      expect(result.title).toBe(prismaArticle.title)
+      expect(result.author).toBe(prismaArticle.author)
+      expect(result.description).toBe(prismaArticle.description)
+      expect(result.url).toBe(prismaArticle.url)
+    })
+  })
+
+  describe('境界値・特殊値', () => {
+    describe('bigint型の境界値テスト', () => {
+      const bigintTestCases = [
+        {
+          name: '最小値(0)での境界値処理',
+          articleId: 0n,
+          description: 'bigintの最小値0での正確なマッピング',
+        },
+        {
+          name: '通常の正の値での処理',
+          articleId: 12345n,
+          description: '一般的な正のbigint値での正確なマッピング',
+        },
+        {
+          name: 'JavaScript Number.MAX_SAFE_INTEGER相当値での処理',
+          articleId: 9007199254740991n, // Number.MAX_SAFE_INTEGER
+          description: 'JavaScript Number型の安全な最大値での正確なマッピング',
+        },
+        {
+          name: 'JavaScript Number.MAX_SAFE_INTEGER超過値での処理',
+          articleId: 9007199254740992n, // Number.MAX_SAFE_INTEGER + 1
+          description: 'JavaScript Number型の安全範囲を超えた値での正確なマッピング',
+        },
+        {
+          name: '非常に大きなbigint値での処理',
+          articleId: 123456789012345678901234567890n,
+          description: 'PostgreSQL bigintの上限に近い非常に大きな値での正確なマッピング',
+        },
+      ]
+
+      bigintTestCases.forEach(({ name, articleId, description }) => {
+        it(`${name}`, () => {
+          // Arrange
+          const prismaArticle = createMockPrismaArticle({ articleId })
+
+          // Act
+          const result = fromPrismaToArticle(prismaArticle)
+
+          // Assert
+          expect(result.articleId).toBe(articleId)
+          expect(typeof result.articleId).toBe('bigint')
+
+          // 数値の正確性確認（文字列変換で比較）
+          expect(result.articleId.toString()).toBe(articleId.toString())
+        })
+      })
+    })
+
+    describe('文字列制約の境界値テスト', () => {
+      const stringConstraintTestCases = [
+        {
+          name: '空文字列での境界値処理',
+          media: '',
+          title: '',
+          author: '',
+          description: '',
+          url: '',
+          expectedDescription: '空文字列での正確なマッピング',
+        },
+        {
+          name: 'media最大長(128文字)での境界値処理',
+          media: 'A'.repeat(128),
+          title: '通常のタイトル',
+          author: '通常の著者',
+          description: '通常の説明',
+          url: 'https://example.com',
+          expectedDescription: 'mediaがPrismaスキーマの最大長制限での正確なマッピング',
+        },
+        {
+          name: 'title最大長(1024文字)での境界値処理',
+          media: 'Qiita',
+          title: 'あ'.repeat(1024),
+          author: '通常の著者',
+          description: '通常の説明',
+          url: 'https://example.com',
+          expectedDescription: 'titleがPrismaスキーマの最大長制限での正確なマッピング',
+        },
+        {
+          name: 'author最大長(1024文字)での境界値処理',
+          media: 'Qiita',
+          title: '通常のタイトル',
+          author: 'A'.repeat(1024),
+          description: '通常の説明',
+          url: 'https://example.com',
+          expectedDescription: 'authorがPrismaスキーマの最大長制限での正確なマッピング',
+        },
+        {
+          name: 'description最大長(2048文字)での境界値処理',
+          media: 'Qiita',
+          title: '通常のタイトル',
+          author: '通常の著者',
+          description: 'あ'.repeat(2048),
+          url: 'https://example.com',
+          expectedDescription: 'descriptionがPrismaスキーマの最大長制限での正確なマッピング',
+        },
+        {
+          name: 'url最大長(2048文字)での境界値処理',
+          media: 'Qiita',
+          title: '通常のタイトル',
+          author: '通常の著者',
+          description: '通常の説明',
+          url: `https://example.com/${'a'.repeat(2028)}`,
+          expectedDescription: 'urlがPrismaスキーマの最大長制限での正確なマッピング',
+        },
+        {
+          name: '現実的な日本語記事データでの処理',
+          media: 'Qiita',
+          title: 'TypeScriptの型安全性について詳しく解説します',
+          author: '山田太郎（シニアエンジニア）',
+          description: 'この記事ではTypeScriptの型安全性について、実例を交えながら詳しく解説していきます。',
+          url: 'https://qiita.com/yamada-taro/items/typescript-type-safety-guide',
+          expectedDescription: '日本語を含む実際的なデータでの正確なマッピング',
+        },
+      ]
+
+      stringConstraintTestCases.forEach(
+        ({ name, media, title, author, description, url, expectedDescription }) => {
+          it(`${name}`, () => {
+            // Arrange
+            const prismaArticle = createMockPrismaArticle({
+              media,
+              title,
+              author,
+              description,
+              url,
+            })
+
+            // Act
+            const result = fromPrismaToArticle(prismaArticle)
+
+            // Assert
+            expect(result.media).toBe(media)
+            expect(result.title).toBe(title)
+            expect(result.author).toBe(author)
+            expect(result.description).toBe(description)
+            expect(result.url).toBe(url)
+
+            // 文字列長制約の確認
+            expect(result.media.length).toBeLessThanOrEqual(128)
+            expect(result.title.length).toBeLessThanOrEqual(1024)
+            expect(result.author.length).toBeLessThanOrEqual(1024)
+            expect(result.description.length).toBeLessThanOrEqual(2048)
+            expect(result.url.length).toBeLessThanOrEqual(2048)
+          })
+        },
+      )
+    })
+
+    describe('Date型の特殊ケーステスト', () => {
+      const dateTestCases = [
+        {
+          name: 'Unix epoch(1970-01-01)での境界値処理',
+          createdAt: new Date('1970-01-01T00:00:00.000Z'),
+          description: 'Unix epochタイムスタンプでの正確なマッピング',
+        },
+        {
+          name: '1970年以前の日時での境界値処理',
+          createdAt: new Date('1969-12-31T23:59:59.999Z'),
+          description: 'Unix epoch以前の日時での正確なマッピング',
+        },
+        {
+          name: '遠い未来の日時での境界値処理',
+          createdAt: new Date('2099-12-31T23:59:59.999Z'),
+          description: '遠い未来の日時での正確なマッピング',
+        },
+        {
+          name: 'ミリ秒精度での境界値処理',
+          createdAt: new Date('2024-01-15T09:30:15.123Z'),
+          description: 'ミリ秒精度の日時での正確なマッピング',
+        },
+        {
+          name: 'タイムゾーンを含む日時での処理',
+          createdAt: new Date('2024-01-15T18:30:15+09:00'), // JST
+          description: 'タイムゾーン付き日時での正確なマッピング',
+        },
+      ]
+
+      dateTestCases.forEach(({ name, createdAt, description }) => {
+        it(`${name}`, () => {
+          // Arrange
+          const prismaArticle = createMockPrismaArticle({ createdAt })
+
+          // Act
+          const result = fromPrismaToArticle(prismaArticle)
+
+          // Assert
+          expect(result.createdAt).toEqual(createdAt)
+          expect(result.createdAt).toBeInstanceOf(Date)
+
+          // Dateオブジェクトの参照共有（mapperの実装仕様）
+          expect(result.createdAt).toBe(createdAt)
+
+          // タイムスタンプ値の正確性確認
+          expect(result.createdAt.getTime()).toBe(createdAt.getTime())
+        })
+      })
+    })
+  })
+
+  describe('例外・制約違反', () => {
+    describe('データ一貫性とマッピング精度テスト', () => {
+      it('特殊文字を含むmediaとurlが正確にマッピングされること', () => {
+        // Arrange
+        const specialMedia = 'Qiita-Tech.io'
+        const specialUrl = 'https://qiita.com/users/test+tag/items/article-title_123?page=1&sort=popular#section-1'
+        const prismaArticle = createMockPrismaArticle({
+          media: specialMedia,
+          url: specialUrl,
+        })
+
+        // Act
+        const result = fromPrismaToArticle(prismaArticle)
+
+        // Assert
+        expect(result.media).toBe(specialMedia)
+        expect(result.url).toBe(specialUrl)
+        // 特殊文字が保持されることを確認
+        expect(result.media).toContain('-')
+        expect(result.media).toContain('.')
+        expect(result.url).toContain('+')
+        expect(result.url).toContain('?')
+        expect(result.url).toContain('&')
+        expect(result.url).toContain('#')
+        expect(result.url).toContain('_')
+      })
+
+      it('日本語・絵文字を含むtitleとdescriptionが正確にマッピングされること', () => {
+        // Arrange
+        const unicodeTitle = 'TypeScript🚀の型安全性について'
+        const unicodeDescription = 'この記事では📝TypeScriptの型安全性について解説します'
+        const prismaArticle = createMockPrismaArticle({
+          title: unicodeTitle,
+          description: unicodeDescription,
+        })
+
+        // Act
+        const result = fromPrismaToArticle(prismaArticle)
+
+        // Assert
+        expect(result.title).toBe(unicodeTitle)
+        expect(result.description).toBe(unicodeDescription)
+        expect(result.title).toContain('🚀')
+        expect(result.description).toContain('📝')
+        // Unicode文字列長の確認
+        expect(result.title.length).toBe(unicodeTitle.length)
+        expect(result.description.length).toBe(unicodeDescription.length)
+      })
+    })
+
+    describe('極限値でのマッピング安定性テスト', () => {
+      it('PostgreSQL bigint上限に近い値でのマッピング精度テスト', () => {
+        // Arrange
+        // PostgreSQL bigintの最大値は 9223372036854775807
+        const nearMaxBigInt = 9223372036854775806n
+        const prismaArticle = createMockPrismaArticle({
+          articleId: nearMaxBigInt,
+        })
+
+        // Act
+        const result = fromPrismaToArticle(prismaArticle)
+
+        // Assert
+        expect(result.articleId).toBe(nearMaxBigInt)
+        expect(typeof result.articleId).toBe('bigint')
+        // 文字列変換での精度確認
+        expect(result.articleId.toString()).toBe('9223372036854775806')
+      })
+
+      it('ミリ秒境界でのDate型マッピング精度テスト', () => {
+        // Arrange
+        const preciseDate = new Date('2024-01-15T09:30:15.999Z')
+        const prismaArticle = createMockPrismaArticle({
+          createdAt: preciseDate,
+        })
+
+        // Act
+        const result = fromPrismaToArticle(prismaArticle)
+
+        // Assert
+        expect(result.createdAt.getTime()).toBe(preciseDate.getTime())
+
+        // ミリ秒レベルでの精度確認
+        expect(result.createdAt.getMilliseconds()).toBe(999)
+      })
+    })
+  })
+})
