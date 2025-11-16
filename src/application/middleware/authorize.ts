@@ -3,7 +3,7 @@ import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
 import { ClientError, ServerError } from '@/common/errors'
-import { createPermissionUseCase } from '@/domain/permission'
+import { createAuthorizationUseCase } from '@/domain/permission'
 import getRdbClient from '@/infrastructure/rdb'
 import type { Env } from '../env'
 import CONTEXT_KEY from './context'
@@ -62,7 +62,7 @@ const authorize = () => {
     }
 
     const rdb = getRdbClient(c.env.DATABASE_URL)
-    const useCase = createPermissionUseCase(rdb)
+    const useCase = createAuthorizationUseCase(rdb)
 
     // リクエストパスとメソッドを取得
     const path = c.req.path

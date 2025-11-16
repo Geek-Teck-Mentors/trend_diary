@@ -15,6 +15,7 @@ class AdminUserTestHelper {
     // AdminUser関連テーブルをクリーンアップ（テーブルが存在する場合のみ）
     try {
       await this.rdb.$queryRaw`TRUNCATE TABLE "admin_users" CASCADE;`
+      await this.rdb.$queryRaw`TRUNCATE TABLE "user_roles" CASCADE;`
     } catch (error) {
       // テーブルが存在しない場合は無視（テスト環境の初期状態）
       if (error instanceof Error && error.message.includes('does not exist')) {
@@ -38,6 +39,20 @@ class AdminUserTestHelper {
       throw new Error(`Failed to grant admin role: ${adminResult.error.message}`)
     }
 
+    // 権限システムのロールを割り当て（「管理者」ロール）
+    // シードデータで作成された「管理者」ロールを取得して割り当て
+    const adminRole = await this.rdb.role.findFirst({
+      where: { displayName: '管理者' },
+    })
+    if (adminRole) {
+      await this.rdb.userRole.create({
+        data: {
+          activeUserId: userInfo.activeUserId,
+          roleId: adminRole.roleId,
+        },
+      })
+    }
+
     // ログインしてセッションIDを取得
     const loginInfo = await activeUserTestHelper.login(email, password)
 
@@ -55,6 +70,21 @@ class AdminUserTestHelper {
   ): Promise<{ activeUserId: bigint; sessionId: string }> {
     // 通常ユーザーを作成（Admin権限は付与しない）
     const userInfo = await activeUserTestHelper.create(email, password, displayName)
+
+    // 権限システムのロールを割り当て（「一般ユーザー」ロール）
+    // シードデータで作成された「一般ユーザー」ロールを取得して割り当て
+    const regularRole = await this.rdb.role.findFirst({
+      where: { displayName: '一般ユーザー' },
+    })
+    if (regularRole) {
+      await this.rdb.userRole.create({
+        data: {
+          activeUserId: userInfo.activeUserId,
+          roleId: regularRole.roleId,
+        },
+      })
+    }
+
     const loginInfo = await activeUserTestHelper.login(email, password)
 
     return {

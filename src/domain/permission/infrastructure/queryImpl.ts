@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
+import { Nullable } from '@/common/types/utility'
 import type { PermissionQuery } from '../repository'
 import type { Permission } from '../schema/permissionSchema'
 
@@ -153,5 +154,74 @@ export class PermissionQueryImpl implements PermissionQuery {
     }))
 
     return success(permissions)
+  }
+
+  async findAllPermissions(): AsyncResult<Permission[], Error> {
+    try {
+      const permissions = await this.rdb.permission.findMany({
+        orderBy: [{ resource: 'asc' }, { action: 'asc' }],
+      })
+
+      return success(
+        permissions.map((p) => ({
+          permissionId: p.permissionId,
+          resource: p.resource,
+          action: p.action,
+        })),
+      )
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      return failure(new ServerError(`パーミッション一覧の取得に失敗: ${message}`))
+    }
+  }
+
+  async findPermissionById(permissionId: number): AsyncResult<Nullable<Permission>, Error> {
+    try {
+      const permission = await this.rdb.permission.findUnique({
+        where: { permissionId },
+      })
+
+      if (!permission) {
+        return success(null)
+      }
+
+      return success({
+        permissionId: permission.permissionId,
+        resource: permission.resource,
+        action: permission.action,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      return failure(new ServerError(`パーミッションの取得に失敗: ${message}`))
+    }
+  }
+
+  async findPermissionByResourceAndAction(
+    resource: string,
+    action: string,
+  ): AsyncResult<Nullable<Permission>, Error> {
+    try {
+      const permission = await this.rdb.permission.findUnique({
+        where: {
+          resource_action: {
+            resource,
+            action,
+          },
+        },
+      })
+
+      if (!permission) {
+        return success(null)
+      }
+
+      return success({
+        permissionId: permission.permissionId,
+        resource: permission.resource,
+        action: permission.action,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      return failure(new ServerError(`パーミッションの検索に失敗: ${message}`))
+    }
   }
 }

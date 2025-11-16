@@ -14,15 +14,11 @@ export default function AdminLayout() {
     const f = async () => {
       const res = await client.user.me.$get({}, { init: { credentials: 'include' } })
       if (res.status === 200) {
-        const resJson = await res.json()
-        if (!resJson.user.isAdmin) {
-          toast.error('管理者ログインが必要です')
-          navigate('/login')
-        }
+        // 認証済みであればOK、権限チェックは各APIエンドポイントで行う
         return
       }
       if (res.status >= 400 && res.status < 500) {
-        toast.error('管理者ログインが必要です')
+        toast.error('ログインが必要です')
       } else {
         toast.error('不明のエラーが発生しました')
       }
@@ -48,6 +44,9 @@ export default function AdminLayout() {
             </div>
             <nav className='flex space-x-8'>
               <LinkAsButton to='/admin/users'>ユーザ管理</LinkAsButton>
+              <LinkAsButton to='/admin/roles'>ロール管理</LinkAsButton>
+              <LinkAsButton to='/admin/permissions'>権限管理</LinkAsButton>
+              <LinkAsButton to='/admin/endpoints'>エンドポイント管理</LinkAsButton>
             </nav>
           </div>
         </div>
