@@ -258,6 +258,7 @@ async function seedEndpointPermissions() {
     if (endpoint && permission) {
       await prisma.endpointPermission.upsert({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
           endpointId_permissionId: {
             endpointId: endpoint.endpointId,
             permissionId: permission.permissionId,
@@ -303,6 +304,7 @@ async function main() {
     if (adminRole) {
       await prisma.userRole.upsert({
         where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
           activeUserId_roleId: {
             activeUserId: existingUser.activeUserId,
             roleId: adminRole.roleId,

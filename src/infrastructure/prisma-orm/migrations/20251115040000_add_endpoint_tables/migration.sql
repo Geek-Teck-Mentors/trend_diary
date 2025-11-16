@@ -44,4 +44,3 @@ COMMENT ON COLUMN "public"."endpoints"."created_at" IS '作成日時：エンド
 -- Add column comments for endpoint_permissions
 COMMENT ON COLUMN "public"."endpoint_permissions"."endpoint_id" IS 'エンドポイントID：外部キー';
 COMMENT ON COLUMN "public"."endpoint_permissions"."permission_id" IS 'パーミッションID：外部キー';
--- パーミッション（権限）のシードデータ
