@@ -3,7 +3,7 @@ import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { createPermissionUseCase } from '@/domain/permission'
+import { createRoleUseCase } from '@/domain/permission'
 import getRdbClient from '@/infrastructure/rdb'
 
 export const paramSchema = z.object({
@@ -15,7 +15,7 @@ export default async function deleteRole(c: ZodValidatedParamContext<z.infer<typ
   const { id } = c.req.valid('param')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createPermissionUseCase(rdb)
+  const useCase = createRoleUseCase(rdb)
 
   const result = await useCase.deleteRole(id)
   if (isFailure(result)) {

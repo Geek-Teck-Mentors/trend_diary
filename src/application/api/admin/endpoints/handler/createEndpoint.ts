@@ -3,7 +3,7 @@ import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { createPermissionUseCase } from '@/domain/permission'
+import { createEndpointUseCase } from '@/domain/permission'
 import { endpointInputSchema } from '@/domain/permission/schema/endpointSchema'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -14,7 +14,7 @@ export default async function createEndpoint(c: ZodValidatedContext<z.infer<type
   const parsedJson = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createPermissionUseCase(rdb)
+  const useCase = createEndpointUseCase(rdb)
 
   const result = await useCase.createEndpoint(parsedJson)
   if (isFailure(result)) {

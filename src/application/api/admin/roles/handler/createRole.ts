@@ -3,7 +3,7 @@ import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { createPermissionUseCase } from '@/domain/permission'
+import { createRoleUseCase } from '@/domain/permission'
 import { roleInputSchema } from '@/domain/permission/schema/roleSchema'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -14,7 +14,7 @@ export default async function createRole(c: ZodValidatedContext<z.infer<typeof j
   const parsedJson = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createPermissionUseCase(rdb)
+  const useCase = createRoleUseCase(rdb)
 
   const result = await useCase.createRole(parsedJson)
   if (isFailure(result)) {

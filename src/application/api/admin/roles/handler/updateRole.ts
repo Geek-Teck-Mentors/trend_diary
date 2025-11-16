@@ -3,7 +3,7 @@ import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { createPermissionUseCase } from '@/domain/permission'
+import { createRoleUseCase } from '@/domain/permission'
 import { roleUpdateSchema } from '@/domain/permission/schema/roleSchema'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -21,7 +21,7 @@ export default async function updateRole(
   const parsedJson = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createPermissionUseCase(rdb)
+  const useCase = createRoleUseCase(rdb)
 
   const result = await useCase.updateRole(id, parsedJson)
   if (isFailure(result)) {

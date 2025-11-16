@@ -3,7 +3,7 @@ import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedParamJsonContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
-import { createPermissionUseCase } from '@/domain/permission'
+import { createEndpointUseCase } from '@/domain/permission'
 import getRdbClient from '@/infrastructure/rdb'
 
 export const paramSchema = z.object({
@@ -22,7 +22,7 @@ export default async function updateEndpointPermissions(
   const { permissionIds } = c.req.valid('json')
 
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createPermissionUseCase(rdb)
+  const useCase = createEndpointUseCase(rdb)
 
   const result = await useCase.updateEndpointPermissions(id, permissionIds)
   if (isFailure(result)) {
