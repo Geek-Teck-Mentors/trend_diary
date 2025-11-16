@@ -274,14 +274,7 @@ async function seedEndpointPermissions() {
   }
 }
 
-async function main() {
-  // 権限システムのシードデータ
-  await seedPermissions()
-  await seedRoles()
-  await seedRolePermissions()
-  await seedEndpoints()
-  await seedEndpointPermissions()
-
+async function seedAdminUser() {
   // 初期Adminユーザーの情報
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com'
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456'
@@ -366,12 +359,34 @@ async function main() {
   }
 }
 
-main()
-  .catch((e) => {
-    // biome-ignore lint/suspicious/noConsole: cli command console
-    console.error('Error seeding database:', e)
-    process.exit(1)
-  })
-  .finally(async () => {
+async function main() {
+  // 権限システムのシードデータ
+  await seedPermissions()
+  await seedRoles()
+  await seedRolePermissions()
+  await seedEndpoints()
+  await seedEndpointPermissions()
+  await seedAdminUser()
+}
+
+// Vitest globalSetup用のexport
+export default async function setup() {
+  try {
+    await main()
+  } finally {
     await prisma.$disconnect()
-  })
+  }
+}
+
+// CLIから直接実行される場合
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      // biome-ignore lint/suspicious/noConsole: cli command console
+      console.error('Error seeding database:', e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      await prisma.$disconnect()
+    })
+}
