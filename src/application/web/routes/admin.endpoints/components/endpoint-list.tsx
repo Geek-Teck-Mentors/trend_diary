@@ -11,6 +11,13 @@ import {
 } from '@/application/web/components/shadcn/dialog'
 import { Input } from '@/application/web/components/shadcn/input'
 import { Label } from '@/application/web/components/shadcn/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/application/web/components/shadcn/select'
 import type { Endpoint } from '../types'
 
 type Props = {
@@ -147,18 +154,18 @@ export default function EndpointList({
             </div>
             <div>
               <Label htmlFor='method'>HTTPメソッド</Label>
-              <select
-                id='method'
-                value={newMethod}
-                onChange={(e) => setNewMethod(e.target.value)}
-                className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
-              >
-                {HTTP_METHODS.map((method) => (
-                  <option key={method} value={method}>
-                    {method}
-                  </option>
-                ))}
-              </select>
+              <Select value={newMethod} onValueChange={setNewMethod}>
+                <SelectTrigger id='method'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {HTTP_METHODS.map((method) => (
+                    <SelectItem key={method} value={method}>
+                      {method}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
