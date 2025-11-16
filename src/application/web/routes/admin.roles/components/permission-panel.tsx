@@ -133,11 +133,7 @@ export default function PermissionPanel({
                 }}
               >
                 <h4 className='font-medium text-gray-900 capitalize flex items-center'>
-                  <Checkbox
-                    checked={allSelected}
-                    className='mr-2'
-                    onCheckedChange={() => handleSelectAll(permissions)}
-                  />
+                  <Checkbox checked={allSelected} className='mr-2' />
                   {resource}
                   <span className='ml-2 text-sm text-gray-500'>
                     ({selectedCount}/{resourcePermissionIds.length})

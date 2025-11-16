@@ -9,10 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/application/web/components/shadcn/dialog'
-import { Input } from '@/application/web/components/shadcn/input'
-import { Label } from '@/application/web/components/shadcn/label'
-import { Textarea } from '@/application/web/components/shadcn/textarea'
 import type { Role } from '../types'
+import RoleFormDialog from './role-form-dialog'
 
 type Props = {
   roles: Role[]
@@ -125,80 +123,28 @@ export default function RoleList({
       </div>
 
       {/* 新規作成ダイアログ */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>ロール新規作成</DialogTitle>
-            <DialogDescription>新しいロールを作成します。</DialogDescription>
-          </DialogHeader>
-          <div className='space-y-4'>
-            <div>
-              <Label htmlFor='name'>ロール名</Label>
-              <Input
-                id='name'
-                value={newRoleName}
-                onChange={(e) => setNewRoleName(e.target.value)}
-                placeholder='ロール名を入力'
-              />
-            </div>
-            <div>
-              <Label htmlFor='description'>説明</Label>
-              <Textarea
-                id='description'
-                value={newRoleDescription}
-                onChange={(e) => setNewRoleDescription(e.target.value)}
-                placeholder='ロールの説明を入力'
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant='outline' onClick={() => setIsCreateDialogOpen(false)}>
-              キャンセル
-            </Button>
-            <Button onClick={handleCreate} disabled={!newRoleName}>
-              作成
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RoleFormDialog
+        mode='create'
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        roleName={newRoleName}
+        roleDescription={newRoleDescription}
+        onRoleNameChange={setNewRoleName}
+        onRoleDescriptionChange={setNewRoleDescription}
+        onSubmit={handleCreate}
+      />
 
       {/* 編集ダイアログ */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>ロール編集</DialogTitle>
-            <DialogDescription>ロール情報を編集します。</DialogDescription>
-          </DialogHeader>
-          <div className='space-y-4'>
-            <div>
-              <Label htmlFor='edit-name'>ロール名</Label>
-              <Input
-                id='edit-name'
-                value={newRoleName}
-                onChange={(e) => setNewRoleName(e.target.value)}
-                placeholder='ロール名を入力'
-              />
-            </div>
-            <div>
-              <Label htmlFor='edit-description'>説明</Label>
-              <Textarea
-                id='edit-description'
-                value={newRoleDescription}
-                onChange={(e) => setNewRoleDescription(e.target.value)}
-                placeholder='ロールの説明を入力'
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant='outline' onClick={() => setIsEditDialogOpen(false)}>
-              キャンセル
-            </Button>
-            <Button onClick={handleEdit} disabled={!newRoleName}>
-              更新
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RoleFormDialog
+        mode='edit'
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        roleName={newRoleName}
+        roleDescription={newRoleDescription}
+        onRoleNameChange={setNewRoleName}
+        onRoleDescriptionChange={setNewRoleDescription}
+        onSubmit={handleEdit}
+      />
 
       {/* 削除確認ダイアログ */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
