@@ -1,17 +1,12 @@
-import { PrismaClient } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { mockDeep } from 'vitest-mock-extended'
+import { beforeEach, describe, expect, it } from 'vitest'
+import mockDb from '@/test/__mocks__/prisma'
 import ArticleCommandImpl from './articleCommandImpl'
-
-// モックの設定
-const mockDb = mockDeep<PrismaClient>()
 
 describe('ArticleCommandImpl', () => {
   let commandImpl: ArticleCommandImpl
 
   beforeEach(() => {
-    vi.clearAllMocks()
     commandImpl = new ArticleCommandImpl(mockDb)
   })
 
@@ -82,110 +77,61 @@ describe('ArticleCommandImpl', () => {
     })
 
     describe('境界値・特殊値', () => {
-      it('最小のbigint値で読み履歴を作成できる', async () => {
-        // Arrange
-        const activeUserId = 0n
-        const articleId = 0n
-        const readAt = new Date('2024-01-15T09:30:00Z')
-
-        const mockReadHistory = {
+      const boundaryTestCases = [
+        {
+          name: '最小のbigint値で読み履歴を作成できる',
+          activeUserId: 0n,
+          articleId: 0n,
+          readAt: new Date('2024-01-15T09:30:00Z'),
           readHistoryId: 0n,
-          activeUserId,
-          articleId,
-          readAt,
-          createdAt: new Date('2024-01-15T09:30:00Z'),
-        }
-
-        mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
-
-        // Act
-        const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.activeUserId).toBe(0n)
-          expect(result.data.articleId).toBe(0n)
-        }
-      })
-
-      it('非常に大きなbigint値で読み履歴を作成できる', async () => {
-        // Arrange
-        const activeUserId = 9223372036854775806n
-        const articleId = 9223372036854775805n
-        const readAt = new Date('2024-01-15T09:30:00Z')
-
-        const mockReadHistory = {
+        },
+        {
+          name: '非常に大きなbigint値で読み履歴を作成できる',
+          activeUserId: 9223372036854775806n,
+          articleId: 9223372036854775805n,
+          readAt: new Date('2024-01-15T09:30:00Z'),
           readHistoryId: 9223372036854775807n,
-          activeUserId,
-          articleId,
-          readAt,
-          createdAt: new Date('2024-01-15T09:30:00Z'),
-        }
-
-        mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
-
-        // Act
-        const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.activeUserId).toBe(activeUserId)
-          expect(result.data.articleId).toBe(articleId)
-        }
-      })
-
-      it('Unix epoch日時で読み履歴を作成できる', async () => {
-        // Arrange
-        const activeUserId = 1n
-        const articleId = 100n
-        const readAt = new Date('1970-01-01T00:00:00.000Z')
-
-        const mockReadHistory = {
+        },
+        {
+          name: 'Unix epoch日時で読み履歴を作成できる',
+          activeUserId: 1n,
+          articleId: 100n,
+          readAt: new Date('1970-01-01T00:00:00.000Z'),
           readHistoryId: 1n,
-          activeUserId,
-          articleId,
-          readAt,
-          createdAt: new Date('2024-01-15T09:30:00Z'),
-        }
-
-        mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
-
-        // Act
-        const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.readAt).toEqual(readAt)
-        }
-      })
-
-      it('遠い未来の日時で読み履歴を作成できる', async () => {
-        // Arrange
-        const activeUserId = 1n
-        const articleId = 100n
-        const readAt = new Date('2099-12-31T23:59:59.999Z')
-
-        const mockReadHistory = {
+        },
+        {
+          name: '遠い未来の日時で読み履歴を作成できる',
+          activeUserId: 1n,
+          articleId: 100n,
+          readAt: new Date('2099-12-31T23:59:59.999Z'),
           readHistoryId: 1n,
-          activeUserId,
-          articleId,
-          readAt,
-          createdAt: new Date('2024-01-15T09:30:00Z'),
-        }
+        },
+      ]
 
-        mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
+      boundaryTestCases.forEach(({ name, activeUserId, articleId, readAt, readHistoryId }) => {
+        it(name, async () => {
+          // Arrange
+          const mockReadHistory = {
+            readHistoryId,
+            activeUserId,
+            articleId,
+            readAt,
+            createdAt: new Date('2024-01-15T09:30:00Z'),
+          }
 
-        // Act
-        const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+          mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
 
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.readAt).toEqual(readAt)
-        }
+          // Act
+          const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+
+          // Assert
+          expect(isSuccess(result)).toBe(true)
+          if (isSuccess(result)) {
+            expect(result.data.activeUserId).toBe(activeUserId)
+            expect(result.data.articleId).toBe(articleId)
+            expect(result.data.readAt).toEqual(readAt)
+          }
+        })
       })
     })
 
@@ -254,55 +200,41 @@ describe('ArticleCommandImpl', () => {
     })
 
     describe('境界値・特殊値', () => {
-      it('最小のbigint値で削除できる', async () => {
-        // Arrange
-        const activeUserId = 0n
-        const articleId = 0n
+      const boundaryTestCases = [
+        {
+          name: '最小のbigint値で削除できる',
+          activeUserId: 0n,
+          articleId: 0n,
+          count: 1,
+        },
+        {
+          name: '非常に大きなbigint値で削除できる',
+          activeUserId: 9223372036854775806n,
+          articleId: 9223372036854775805n,
+          count: 2,
+        },
+        {
+          name: '削除対象が0件でも正常に完了する',
+          activeUserId: 999n,
+          articleId: 999n,
+          count: 0,
+        },
+      ]
 
-        mockDb.readHistory.deleteMany.mockResolvedValue({ count: 1 })
+      boundaryTestCases.forEach(({ name, activeUserId, articleId, count }) => {
+        it(name, async () => {
+          // Arrange
+          mockDb.readHistory.deleteMany.mockResolvedValue({ count })
 
-        // Act
-        const result = await commandImpl.deleteAllReadHistory(activeUserId, articleId)
+          // Act
+          const result = await commandImpl.deleteAllReadHistory(activeUserId, articleId)
 
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBeUndefined()
-        }
-      })
-
-      it('非常に大きなbigint値で削除できる', async () => {
-        // Arrange
-        const activeUserId = 9223372036854775806n
-        const articleId = 9223372036854775805n
-
-        mockDb.readHistory.deleteMany.mockResolvedValue({ count: 2 })
-
-        // Act
-        const result = await commandImpl.deleteAllReadHistory(activeUserId, articleId)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBeUndefined()
-        }
-      })
-
-      it('削除対象が0件でも正常に完了する', async () => {
-        // Arrange
-        const activeUserId = 999n
-        const articleId = 999n
-
-        mockDb.readHistory.deleteMany.mockResolvedValue({ count: 0 })
-
-        // Act
-        const result = await commandImpl.deleteAllReadHistory(activeUserId, articleId)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBeUndefined()
-        }
+          // Assert
+          expect(isSuccess(result)).toBe(true)
+          if (isSuccess(result)) {
+            expect(result.data).toBeUndefined()
+          }
+        })
       })
     })
 

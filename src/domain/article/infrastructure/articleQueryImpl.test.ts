@@ -1,17 +1,12 @@
-import { PrismaClient } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { mockDeep } from 'vitest-mock-extended'
+import { beforeEach, describe, expect, it } from 'vitest'
+import mockDb from '@/test/__mocks__/prisma'
 import ArticleQueryImpl from './articleQueryImpl'
-
-// モックの設定
-const mockDb = mockDeep<PrismaClient>()
 
 describe('ArticleQueryImpl', () => {
   let queryImpl: ArticleQueryImpl
 
   beforeEach(() => {
-    vi.clearAllMocks()
     queryImpl = new ArticleQueryImpl(mockDb)
   })
 
