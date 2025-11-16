@@ -25,8 +25,8 @@ describe('RoleUseCase', () => {
   describe('getAllRoles', () => {
     it('全てのロールを取得できる', async () => {
       const mockRoles = [
-        { roleId: 1, name: 'admin', description: 'Administrator', createdAt: new Date() },
-        { roleId: 2, name: 'user', description: 'Regular User', createdAt: new Date() },
+        { roleId: 1, displayName: 'admin', description: 'Administrator', createdAt: new Date() },
+        { roleId: 2, displayName: 'user', description: 'Regular User', createdAt: new Date() },
       ]
       mockDb.role.findMany.mockResolvedValue(mockRoles)
 
@@ -54,7 +54,7 @@ describe('RoleUseCase', () => {
     it('指定したIDのロールを取得できる', async () => {
       const mockRole = {
         roleId: 1,
-        name: 'admin',
+        displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
       }
@@ -118,7 +118,7 @@ describe('RoleUseCase', () => {
 
   describe('createRole', () => {
     it('新しいロールを作成できる', async () => {
-      const input = { name: 'moderator', description: 'Moderator role' }
+      const input = { displayName: 'moderator', description: 'Moderator role' }
       const mockCreatedRole = { roleId: 3, ...input, createdAt: new Date() }
 
       mockDb.role.findFirst.mockResolvedValue(null)
@@ -133,7 +133,7 @@ describe('RoleUseCase', () => {
     })
 
     it('既に存在するロール名で作成しようとした場合、AlreadyExistsErrorを返す', async () => {
-      const input = { name: 'admin', description: 'Administrator' }
+      const input = { displayName: 'admin', description: 'Administrator' }
       const existingRole = { roleId: 1, ...input, createdAt: new Date() }
 
       mockDb.role.findFirst.mockResolvedValue(existingRole)
@@ -149,10 +149,10 @@ describe('RoleUseCase', () => {
 
   describe('updateRole', () => {
     it('指定したIDのロールを更新できる', async () => {
-      const input = { name: 'super-admin', description: 'Super Administrator' }
+      const input = { displayName: 'super-admin', description: 'Super Administrator' }
       const existingRole = {
         roleId: 1,
-        name: 'admin',
+        displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
       }
@@ -171,7 +171,7 @@ describe('RoleUseCase', () => {
     })
 
     it('存在しないIDを指定した場合、NotFoundErrorを返す', async () => {
-      const input = { name: 'super-admin', description: 'Super Administrator' }
+      const input = { displayName: 'super-admin', description: 'Super Administrator' }
       mockDb.role.findUnique.mockResolvedValue(null)
 
       const result = await useCase.updateRole(999, input)
@@ -183,16 +183,16 @@ describe('RoleUseCase', () => {
     })
 
     it('既に存在するロール名で更新しようとした場合、AlreadyExistsErrorを返す', async () => {
-      const input = { name: 'user', description: 'Updated description' }
+      const input = { displayName: 'user', description: 'Updated description' }
       const existingRole = {
         roleId: 1,
-        name: 'admin',
+        displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
       }
       const conflictingRole = {
         roleId: 2,
-        name: 'user',
+        displayName: 'user',
         description: 'Regular User',
         createdAt: new Date(),
       }
@@ -213,7 +213,7 @@ describe('RoleUseCase', () => {
     it('指定したIDのロールを削除できる', async () => {
       const mockRole = {
         roleId: 1,
-        name: 'admin',
+        displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
       }
