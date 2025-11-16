@@ -134,6 +134,7 @@ describe('ArticleCommandImpl', () => {
           // Assert
           expect(isSuccess(result)).toBe(true)
           if (isSuccess(result)) {
+            expect(result.data.readHistoryId).toBe(readHistoryId)
             expect(result.data.activeUserId).toBe(activeUserId)
             expect(result.data.articleId).toBe(articleId)
             expect(result.data.readAt).toEqual(readAt)

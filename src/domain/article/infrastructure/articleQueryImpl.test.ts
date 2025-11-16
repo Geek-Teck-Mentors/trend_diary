@@ -115,7 +115,7 @@ describe('ArticleQueryImpl', () => {
             from: '2024-01-14',
             to: '2024-01-15',
           },
-          assertion: (_result: typeof singleMockArticle) => {
+          assertion: () => {
             // 日付範囲のテストは記事が返されることを確認するだけ
           },
         },
