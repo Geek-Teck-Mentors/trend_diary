@@ -11,7 +11,13 @@ import rolesRoute from './roles/route'
 
 const app = new Hono<Env>()
   .get('/users', authenticator, authorize(), zodValidator('query', querySchema), getUserList)
-  .post('/users/:id', authenticator, authorize(), zodValidator('param', paramSchema), grantAdminRole)
+  .post(
+    '/users/:id',
+    authenticator,
+    authorize(),
+    zodValidator('param', paramSchema),
+    grantAdminRole,
+  )
   .route('/permissions', permissionsRoute)
   .route('/roles', rolesRoute)
   .route('/endpoints', endpointsRoute)
