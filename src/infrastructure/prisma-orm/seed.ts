@@ -369,7 +369,7 @@ async function main() {
   await seedAdminUser()
 }
 
-// Vitest globalSetup用のexport
+// Vitest globalSetup & CLI実行の両方に対応
 export default async function setup() {
   try {
     await main()
@@ -378,15 +378,12 @@ export default async function setup() {
   }
 }
 
-// CLIから直接実行される場合
-if (require.main === module) {
-  main()
-    .catch((e) => {
-      // biome-ignore lint/suspicious/noConsole: cli command console
-      console.error('Error seeding database:', e)
-      process.exit(1)
-    })
-    .finally(async () => {
-      await prisma.$disconnect()
-    })
+// CLIから直接実行される場合（ES Modules形式）
+const isMainModule = import.meta.url === `file://${process.argv[1]}`
+if (isMainModule) {
+  setup().catch((e) => {
+    // biome-ignore lint/suspicious/noConsole: cli command console
+    console.error('Error seeding database:', e)
+    process.exit(1)
+  })
 }
