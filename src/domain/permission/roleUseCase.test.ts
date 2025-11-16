@@ -214,6 +214,7 @@ describe('RoleUseCase', () => {
         description: 'Administrator',
         createdAt: new Date(),
       })
+      // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
       mockDb.rolePermission.deleteMany.mockResolvedValue({ count: 2 })
       mockDb.rolePermission.createMany.mockResolvedValue({ count: 2 })
@@ -236,6 +237,7 @@ describe('RoleUseCase', () => {
         description: 'Administrator',
         createdAt: new Date(),
       })
+      // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
       mockDb.rolePermission.deleteMany.mockResolvedValue({ count: 2 })
 
@@ -257,6 +259,7 @@ describe('RoleUseCase', () => {
         description: 'Administrator',
         createdAt: new Date(),
       })
+      // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
       mockDb.rolePermission.deleteMany.mockResolvedValue({ count: 0 })
       mockDb.rolePermission.createMany.mockResolvedValue({ count: 2 })

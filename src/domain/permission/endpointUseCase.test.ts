@@ -178,6 +178,7 @@ describe('EndpointUseCase', () => {
         method: 'GET',
         createdAt: new Date(),
       })
+      // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
       mockDb.endpointPermission.deleteMany.mockResolvedValue({ count: 2 })
       mockDb.endpointPermission.createMany.mockResolvedValue({ count: 2 })
@@ -200,6 +201,7 @@ describe('EndpointUseCase', () => {
         method: 'GET',
         createdAt: new Date(),
       })
+      // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
       mockDb.endpointPermission.deleteMany.mockResolvedValue({ count: 2 })
 
@@ -221,6 +223,7 @@ describe('EndpointUseCase', () => {
         method: 'GET',
         createdAt: new Date(),
       })
+      // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
       mockDb.endpointPermission.deleteMany.mockResolvedValue({ count: 0 })
       mockDb.endpointPermission.createMany.mockResolvedValue({ count: 2 })
