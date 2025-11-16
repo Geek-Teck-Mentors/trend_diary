@@ -12,68 +12,64 @@ describe('ArticleCommandImpl', () => {
 
   describe('createReadHistory', () => {
     describe('基本動作', () => {
-      it('読み履歴を作成できる', async () => {
-        // Arrange
-        const activeUserId = 1n
-        const articleId = 100n
-        const readAt = new Date('2024-01-15T09:30:00Z')
-
-        const mockReadHistory = {
+      const basicTestCases = [
+        {
+          name: '読み履歴を作成できる',
+          activeUserId: 1n,
+          articleId: 100n,
+          readAt: new Date('2024-01-15T09:30:00Z'),
           readHistoryId: 1n,
-          activeUserId,
-          articleId,
-          readAt,
           createdAt: new Date('2024-01-15T09:30:00Z'),
-        }
-
-        mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
-
-        // Act
-        const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.readHistoryId).toBe(1n)
-          expect(result.data.activeUserId).toBe(activeUserId)
-          expect(result.data.articleId).toBe(articleId)
-          expect(result.data.readAt).toEqual(readAt)
-        }
-        expect(mockDb.readHistory.create).toHaveBeenCalledWith({
-          data: {
-            activeUserId,
-            articleId,
-            readAt,
-          },
-        })
-      })
-
-      it('異なるユーザーの読み履歴を作成できる', async () => {
-        // Arrange
-        const activeUserId = 2n
-        const articleId = 200n
-        const readAt = new Date('2024-01-16T10:00:00Z')
-
-        const mockReadHistory = {
+          shouldCheckCall: true,
+        },
+        {
+          name: '異なるユーザーの読み履歴を作成できる',
+          activeUserId: 2n,
+          articleId: 200n,
+          readAt: new Date('2024-01-16T10:00:00Z'),
           readHistoryId: 2n,
-          activeUserId,
-          articleId,
-          readAt,
           createdAt: new Date('2024-01-16T10:00:00Z'),
-        }
+          shouldCheckCall: false,
+        },
+      ]
 
-        mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
+      basicTestCases.forEach(
+        ({ name, activeUserId, articleId, readAt, readHistoryId, createdAt, shouldCheckCall }) => {
+          it(name, async () => {
+            // Arrange
+            const mockReadHistory = {
+              readHistoryId,
+              activeUserId,
+              articleId,
+              readAt,
+              createdAt,
+            }
 
-        // Act
-        const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+            mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
 
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.activeUserId).toBe(activeUserId)
-          expect(result.data.articleId).toBe(articleId)
-        }
-      })
+            // Act
+            const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+
+            // Assert
+            expect(isSuccess(result)).toBe(true)
+            if (isSuccess(result)) {
+              expect(result.data.readHistoryId).toBe(readHistoryId)
+              expect(result.data.activeUserId).toBe(activeUserId)
+              expect(result.data.articleId).toBe(articleId)
+              expect(result.data.readAt).toEqual(readAt)
+            }
+            if (shouldCheckCall) {
+              expect(mockDb.readHistory.create).toHaveBeenCalledWith({
+                data: {
+                  activeUserId,
+                  articleId,
+                  readAt,
+                },
+              })
+            }
+          })
+        },
+      )
     })
 
     describe('境界値・特殊値', () => {
@@ -158,44 +154,45 @@ describe('ArticleCommandImpl', () => {
 
   describe('deleteAllReadHistory', () => {
     describe('基本動作', () => {
-      it('特定ユーザーの特定記事の読み履歴を全て削除できる', async () => {
-        // Arrange
-        const activeUserId = 1n
-        const articleId = 100n
+      const basicTestCases = [
+        {
+          name: '特定ユーザーの特定記事の読み履歴を全て削除できる',
+          activeUserId: 1n,
+          articleId: 100n,
+          count: 5,
+          shouldCheckCall: true,
+        },
+        {
+          name: '異なるユーザーと記事の組み合わせで削除できる',
+          activeUserId: 2n,
+          articleId: 200n,
+          count: 3,
+          shouldCheckCall: false,
+        },
+      ]
 
-        mockDb.readHistory.deleteMany.mockResolvedValue({ count: 5 })
+      basicTestCases.forEach(({ name, activeUserId, articleId, count, shouldCheckCall }) => {
+        it(name, async () => {
+          // Arrange
+          mockDb.readHistory.deleteMany.mockResolvedValue({ count })
 
-        // Act
-        const result = await commandImpl.deleteAllReadHistory(activeUserId, articleId)
+          // Act
+          const result = await commandImpl.deleteAllReadHistory(activeUserId, articleId)
 
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBeUndefined()
-        }
-        expect(mockDb.readHistory.deleteMany).toHaveBeenCalledWith({
-          where: {
-            activeUserId,
-            articleId,
-          },
+          // Assert
+          expect(isSuccess(result)).toBe(true)
+          if (isSuccess(result)) {
+            expect(result.data).toBeUndefined()
+          }
+          if (shouldCheckCall) {
+            expect(mockDb.readHistory.deleteMany).toHaveBeenCalledWith({
+              where: {
+                activeUserId,
+                articleId,
+              },
+            })
+          }
         })
-      })
-
-      it('異なるユーザーと記事の組み合わせで削除できる', async () => {
-        // Arrange
-        const activeUserId = 2n
-        const articleId = 200n
-
-        mockDb.readHistory.deleteMany.mockResolvedValue({ count: 3 })
-
-        // Act
-        const result = await commandImpl.deleteAllReadHistory(activeUserId, articleId)
-
-        // Assert
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBeUndefined()
-        }
       })
     })
 
