@@ -1,6 +1,10 @@
+import { Hono } from 'hono'
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
-import app from '../route'
+import errorHandler from '@/application/middleware/errorHandler'
+import requestLogger from '@/application/middleware/requestLogger'
+import { Env } from '@/application/env'
+import articleApp from '../route'
 import { ArticleListResponse } from './getArticles'
 
 type GetArticlesTestCase = {
@@ -11,6 +15,12 @@ type GetArticlesTestCase = {
 
 describe('GET /api/articles', () => {
   let db: RdbClient
+
+  // テスト用appインスタンス作成（必要なミドルウェアを設定）
+  const app = new Hono<Env>()
+  app.use(requestLogger)
+  app.onError(errorHandler)
+  app.route('/', articleApp)
 
   const testArticles = [
     {
