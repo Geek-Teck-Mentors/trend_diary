@@ -14,7 +14,9 @@ export class QiitaFetcher implements ArticleFetcher {
   url = "https://qiita.com/popular-items/feed.atom";
 
   async fetch() {
-    const feedItemsResult = await wrapAsyncCall(() => fetchRssFeed<QiitaItem>(this.url));
+    const feedItemsResult = await wrapAsyncCall(() =>
+      fetchRssFeed<QiitaItem>(this.url)
+    );
 
     if (isFailure(feedItemsResult)) {
       logger.error("Error fetching Qiita feed:", feedItemsResult.error);

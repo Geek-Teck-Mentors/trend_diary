@@ -13,7 +13,9 @@ import type { ZennItem } from "../model/types.ts";
 export class ZennFetcher implements ArticleFetcher {
   url = "https://zenn.dev/feed";
   async fetch() {
-    const feedItemsResult = await wrapAsyncCall(() => fetchRssFeed<ZennItem>(this.url));
+    const feedItemsResult = await wrapAsyncCall(() =>
+      fetchRssFeed<ZennItem>(this.url)
+    );
 
     if (isFailure(feedItemsResult)) {
       logger.error("Error fetching Zenn feed:", feedItemsResult.error);
