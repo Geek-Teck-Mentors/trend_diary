@@ -46,7 +46,7 @@ export default function AdminEndpoints() {
   const { trigger: triggerDeleteEndpoint } = useSWRMutation(
     '/api/endpoints',
     async (_key: string, { arg }: { arg: number }) =>
-      apiCall(() => client.endpoints[':id'].$delete({ param: { id: arg } })),
+      apiCall(() => client.endpoints[':id'].$delete({ param: { id: `${arg}` } })),
   )
 
   // エンドポイント権限更新
