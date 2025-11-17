@@ -61,7 +61,7 @@ export default function AdminRoles() {
   const { trigger: triggerDeleteRole } = useSWRMutation(
     '/api/roles',
     async (_key: string, { arg }: { arg: number }) =>
-      apiCall(() => client.roles[':id'].$delete({ param: { id: `${arg}` } })),
+      apiCall(() => client.roles[':id'].$delete({ param: { id: arg } })),
   )
 
   // ロール権限更新

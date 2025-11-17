@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import type { ArticleListResponse } from '@/application/api/article/handler/getArticles'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../../infrastructure/api'
@@ -52,7 +51,7 @@ export default function useTrends() {
           },
         })
         if (res.status === 200) {
-          const resJson = (await res.json()) as ArticleListResponse
+          const resJson = await res.json()
           setArticles(
             resJson.data.map((data) => ({
               articleId: BigInt(data.articleId),
