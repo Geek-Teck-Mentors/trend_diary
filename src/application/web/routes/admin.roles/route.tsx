@@ -20,37 +20,37 @@ export default function AdminRoles() {
     error: rolesError,
     isLoading: rolesLoading,
     mutate: mutateRoles,
-  } = useSWR<RolesResponse>('/api/admin/roles', fetcher)
+  } = useSWR<RolesResponse>('/api/roles', fetcher)
 
   // 権限一覧取得
   const {
     data: permissionsData,
     error: permissionsError,
     isLoading: permissionsLoading,
-  } = useSWR<PermissionsResponse>('/api/admin/permissions', fetcher)
+  } = useSWR<PermissionsResponse>('/api/permissions', fetcher)
 
   // 選択されたロールの詳細取得
   const { data: roleDetailData, mutate: mutateRoleDetail } = useSWR<RoleDetailResponse>(
-    selectedRoleId ? `/api/admin/roles/${selectedRoleId}` : null,
+    selectedRoleId ? `/api/roles/${selectedRoleId}` : null,
     fetcher,
   )
 
   // ロール作成
   const { trigger: triggerCreateRole } = useSWRMutation(
-    '/api/admin/roles',
+    '/api/roles',
     async (_key: string, { arg }: { arg: { displayName: string; description: string | null } }) =>
-      apiCall(() => client.admin.roles.$post({ json: arg })),
+      apiCall(() => client.roles.$post({ json: arg })),
   )
 
   // ロール更新
   const { trigger: triggerUpdateRole } = useSWRMutation(
-    '/api/admin/roles',
+    '/api/roles',
     async (
       _key: string,
       { arg }: { arg: { id: number; displayName: string; description: string | null } },
     ) =>
       apiCall(() =>
-        client.admin.roles[':id'].$patch({
+        client.roles[':id'].$patch({
           param: { id: arg.id },
           json: { displayName: arg.displayName, description: arg.description },
         }),
@@ -59,17 +59,17 @@ export default function AdminRoles() {
 
   // ロール削除
   const { trigger: triggerDeleteRole } = useSWRMutation(
-    '/api/admin/roles',
+    '/api/roles',
     async (_key: string, { arg }: { arg: number }) =>
-      apiCall(() => client.admin.roles[':id'].$delete({ param: { id: arg } })),
+      apiCall(() => client.roles[':id'].$delete({ param: { id: arg } })),
   )
 
   // ロール権限更新
   const { trigger: triggerUpdateRolePermissions } = useSWRMutation(
-    '/api/admin/roles',
+    '/api/roles',
     async (_key: string, { arg }: { arg: { roleId: number; permissionIds: number[] } }) =>
       apiCall(() =>
-        client.admin.roles[':id'].permissions.$patch({
+        client.roles[':id'].permissions.$patch({
           param: { id: arg.roleId },
           json: { permissionIds: arg.permissionIds },
         }),
