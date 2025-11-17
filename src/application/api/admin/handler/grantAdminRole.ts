@@ -39,8 +39,8 @@ export default async function grantAdminRole(
     throw new HTTPException(400, { message: '自分自身にAdmin権限を付与することはできません' })
   }
 
-  // Admin権限付与
-  const result = await adminUserUseCase.grantAdminRole(activeUserId, sessionUser.adminUserId)
+  // Admin権限付与（nullチェック済みのため非nullアサーション使用）
+  const result = await adminUserUseCase.grantAdminRole(activeUserId, sessionUser.adminUserId!)
   if (isFailure(result)) {
     throw handleError(result.error, logger)
   }
