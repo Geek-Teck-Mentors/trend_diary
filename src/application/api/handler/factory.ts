@@ -140,6 +140,57 @@ type AuthenticatedHandlerConfig<
 > = BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse>
 
 /**
+ * ハンドラーの共通ロジックを実行する内部関数
+ */
+function executeHandlerLogic<TUseCase, TContext, TOutput, TResponse>(
+  config: BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse>,
+  context: TContext,
+  rdb: RdbClient,
+  c: Context<Env>,
+): Promise<Response> {
+  return (async () => {
+    // 1. UseCase実行
+    const useCase = config.createUseCase(rdb)
+    const result = await config.execute(useCase, context)
+
+    // 2. エラーハンドリング
+    if (isFailure(result)) {
+      throw handleError(result.error, context.logger)
+    }
+
+    // 3. ロギング
+    if (config.logMessage) {
+      const message =
+        typeof config.logMessage === 'function'
+          ? config.logMessage(result.data, context)
+          : config.logMessage
+
+      let payload: Record<string, unknown>
+      if (config.logPayload) {
+        payload = config.logPayload(result.data, context)
+      } else if (result.data !== undefined) {
+        payload = { data: result.data }
+      } else {
+        payload = {}
+      }
+
+      context.logger.info({ msg: message, ...payload })
+    }
+
+    // 4. レスポンス変換とレスポンス返却
+    const statusCode = config.statusCode
+
+    // 204 No Contentの場合はボディなしで返す
+    if (statusCode === 204) {
+      return c.body(null, 204)
+    }
+
+    const responseData = config.transform ? config.transform(result.data) : result.data
+    return c.json(responseData, statusCode as ContentfulStatusCode)
+  })()
+}
+
+/**
  * シンプルなAPIハンドラーを生成する高階関数（認証不要）
  *
  * @remarks
@@ -183,7 +234,6 @@ export function createSimpleApiHandler<
   TResponse = TOutput,
 >(config: SimpleHandlerConfig<TUseCase, TContext, TOutput, TResponse>) {
   return async (c: Context<Env>): Promise<Response> => {
-    // 1. コンテキスト準備
     const logger = c.get(CONTEXT_KEY.APP_LOG)
     const rdb = getRdbClient(c.env.DATABASE_URL)
 
@@ -200,44 +250,7 @@ export function createSimpleApiHandler<
       logger,
     } as TContext
 
-    // 2. UseCase実行
-    const useCase = config.createUseCase(rdb)
-    const result = await config.execute(useCase, context)
-
-    // 3. エラーハンドリング
-    if (isFailure(result)) {
-      throw handleError(result.error, logger)
-    }
-
-    // 4. ロギング
-    if (config.logMessage) {
-      const message =
-        typeof config.logMessage === 'function'
-          ? config.logMessage(result.data, context)
-          : config.logMessage
-
-      let payload: Record<string, unknown>
-      if (config.logPayload) {
-        payload = config.logPayload(result.data, context)
-      } else if (result.data !== undefined) {
-        payload = { data: result.data }
-      } else {
-        payload = {}
-      }
-
-      logger.info({ msg: message, ...payload })
-    }
-
-    // 5. レスポンス変換とレスポンス返却
-    const statusCode = config.statusCode
-
-    // 204 No Contentの場合はボディなしで返す
-    if (statusCode === 204) {
-      return c.body(null, 204)
-    }
-
-    const responseData = config.transform ? config.transform(result.data) : result.data
-    return c.json(responseData, statusCode as ContentfulStatusCode)
+    return executeHandlerLogic(config, context, rdb, c)
   }
 }
 
@@ -280,7 +293,6 @@ export function createAuthenticatedApiHandler<
   TResponse = TOutput,
 >(config: AuthenticatedHandlerConfig<TUseCase, TContext, TOutput, TResponse>) {
   return async (c: Context<Env>): Promise<Response> => {
-    // 1. コンテキスト準備
     const logger = c.get(CONTEXT_KEY.APP_LOG)
     const rdb = getRdbClient(c.env.DATABASE_URL)
 
@@ -303,43 +315,6 @@ export function createAuthenticatedApiHandler<
       logger,
     } as TContext
 
-    // 2. UseCase実行
-    const useCase = config.createUseCase(rdb)
-    const result = await config.execute(useCase, authenticatedContext)
-
-    // 3. エラーハンドリング
-    if (isFailure(result)) {
-      throw handleError(result.error, logger)
-    }
-
-    // 4. ロギング
-    if (config.logMessage) {
-      const message =
-        typeof config.logMessage === 'function'
-          ? config.logMessage(result.data, authenticatedContext)
-          : config.logMessage
-
-      let payload: Record<string, unknown>
-      if (config.logPayload) {
-        payload = config.logPayload(result.data, authenticatedContext)
-      } else if (result.data !== undefined) {
-        payload = { data: result.data }
-      } else {
-        payload = {}
-      }
-
-      logger.info({ msg: message, ...payload })
-    }
-
-    // 5. レスポンス変換とレスポンス返却
-    const statusCode = config.statusCode
-
-    // 204 No Contentの場合はボディなしで返す
-    if (statusCode === 204) {
-      return c.body(null, 204)
-    }
-
-    const responseData = config.transform ? config.transform(result.data) : result.data
-    return c.json(responseData, statusCode as ContentfulStatusCode)
+    return executeHandlerLogic(config, authenticatedContext, rdb, c)
   }
 }
