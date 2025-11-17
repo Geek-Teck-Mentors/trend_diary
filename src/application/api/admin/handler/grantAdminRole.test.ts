@@ -51,14 +51,23 @@ describe('POST /api/admin/users/:id', () => {
       expect(data.activeUserId).toBe(regularUser.activeUserId.toString())
       expect(data.adminUserId).toBeDefined()
       expect(data.grantedAt).toBeDefined()
-      expect(data.grantedByAdminUserId).toBe(adminUser.adminUserId)
+      expect(data.grantedByAdminUserId).toBe(Number(adminUser.activeUserId))
 
-      // 実際にAdmin権限が付与されたか確認
-      const adminRecord = await rdb.adminUser.findUnique({
-        where: { activeUserId: regularUser.activeUserId },
+      // 実際にAdmin権限が付与されたか確認（UserRoleテーブルをチェック）
+      const adminRole = await rdb.role.findFirst({
+        where: { displayName: '管理者' },
       })
-      expect(adminRecord).not.toBeNull()
-      expect(adminRecord?.activeUserId).toBe(regularUser.activeUserId)
+      const userRole = await rdb.userRole.findUnique({
+        where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
+          activeUserId_roleId: {
+            activeUserId: regularUser.activeUserId,
+            roleId: adminRole!.roleId,
+          },
+        },
+      })
+      expect(userRole).not.toBeNull()
+      expect(userRole?.activeUserId).toBe(regularUser.activeUserId)
     })
   })
 
@@ -127,7 +136,7 @@ describe('POST /api/admin/users/:id', () => {
         'password123',
         'Regular User',
       )
-      await adminUserTestHelper.grantAdminRole(regularUser.activeUserId, adminUser.adminUserId)
+      await adminUserTestHelper.grantAdminRole(regularUser.activeUserId, adminUser.activeUserId)
 
       // 既にAdmin権限を持つユーザーに再度Admin権限を付与しようとする
       const res = await requestPostAdminUser(
