@@ -16,4 +16,5 @@ export default createApiHandler<
   createUseCase: createPrivacyPolicyUseCase,
   execute: (useCase, { param, json }) => useCase.updatePolicy(param.version, json.content),
   logMessage: (policy) => `Policy updated: version ${policy.version}`,
+  statusCode: 200,
 })

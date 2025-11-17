@@ -33,8 +33,8 @@ type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> = {
   // outputとcontextの両方を受け取れる
   logMessage?: string | ((output: TOutput, context: TContext) => string)
 
-  // HTTPステータスコード
-  statusCode?: number
+  // HTTPステータスコード（必須）
+  statusCode: number
 
   // 認証が必要か
   requiresAuth?: boolean
@@ -113,7 +113,7 @@ export function createApiHandler<
     }
 
     // 5. レスポンス変換とレスポンス返却
-    const statusCode = config.statusCode ?? 200
+    const statusCode = config.statusCode
 
     // 204 No Contentの場合はボディなしで返す
     if (statusCode === 204) {
@@ -139,6 +139,7 @@ export const apiHandlers = {
       createUseCase,
       execute: (useCase, { param }) => execute(useCase, (param as TParam).id),
       logMessage: `${entityName} retrieved`,
+      statusCode: 200,
     }),
 
   /**
@@ -157,6 +158,7 @@ export const apiHandlers = {
           // biome-ignore lint/suspicious/noExplicitAny: データ構造が動的なため
           Array.isArray(data) ? data.length : ((data as any)?.data?.length ?? 0)
         })`,
+      statusCode: 200,
     }),
 
   /**
@@ -186,6 +188,7 @@ export const apiHandlers = {
       createUseCase,
       execute: (useCase, { param, json }) => execute(useCase, (param as TParam).id, json as TJson),
       logMessage: `${entityName} updated`,
+      statusCode: 200,
     }),
 
   /**

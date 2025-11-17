@@ -43,4 +43,5 @@ export default createApiHandler<
   }),
   logMessage: (data) =>
     `Privacy policies retrieved successfully (count: ${data.data.length}, total: ${data.total})`,
+  statusCode: 200,
 })
