@@ -33,6 +33,7 @@ export const meta: MetaFunction = () => [
   { name: 'twitter:site', content: '@TrendDiary' },
   { name: 'author', content: 'TrendDiary' },
   { name: 'robots', content: 'index, follow' },
+  { tagName: 'link', rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {
