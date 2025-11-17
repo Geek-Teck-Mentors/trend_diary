@@ -142,7 +142,12 @@ type AuthenticatedHandlerConfig<
 /**
  * ハンドラーの共通ロジックを実行する内部関数
  */
-function executeHandlerLogic<TUseCase, TContext, TOutput, TResponse>(
+function executeHandlerLogic<
+  TUseCase,
+  TContext extends RequestContext | AuthenticatedRequestContext,
+  TOutput,
+  TResponse,
+>(
   config: BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse>,
   context: TContext,
   rdb: RdbClient,
