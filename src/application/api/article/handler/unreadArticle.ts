@@ -1,28 +1,17 @@
-import { isFailure } from '@yuukihayashi0510/core'
-import CONTEXT_KEY from '@/application/middleware/context'
-import { ZodValidatedParamContext } from '@/application/middleware/zodValidator'
-import { handleError } from '@/common/errors'
+import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
-import getRdbClient from '@/infrastructure/rdb'
 import { ArticleIdParam } from './readArticle'
 
-export default async function unreadArticle(c: ZodValidatedParamContext<ArticleIdParam>) {
-  const logger = c.get(CONTEXT_KEY.APP_LOG)
-  const user = c.get(CONTEXT_KEY.SESSION_USER)
-
-  const param = c.req.valid('param')
-  const { article_id: articleId } = param
-
-  const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createArticleUseCase(rdb)
-
-  const result = await useCase.deleteAllReadHistory(user.activeUserId, articleId)
-  if (isFailure(result)) throw handleError(result.error, logger)
-
-  logger.info('Read history deleted successfully', {
-    activeUserId: user.activeUserId,
-    articleId,
-  })
-
-  return c.json({ message: '記事を未読にしました' }, 200)
-}
+export default createApiHandler({
+  createUseCase: createArticleUseCase,
+  execute: (useCase, context: RequestContext<ArticleIdParam>) =>
+    useCase.deleteAllReadHistory(context.user!.activeUserId, context.param.article_id),
+  transform: () => ({ message: '記事を未読にしました' }),
+  logMessage: 'Read history deleted successfully',
+  logPayload: (_result, context) => ({
+    activeUserId: context.user!.activeUserId,
+    articleId: context.param.article_id,
+  }),
+  statusCode: 200,
+  requiresAuth: true,
+})

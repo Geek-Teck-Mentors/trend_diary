@@ -1,21 +1,11 @@
-import { isFailure } from '@yuukihayashi0510/core'
-import CONTEXT_KEY from '@/application/middleware/context'
-import { ZodValidatedContext } from '@/application/middleware/zodValidator'
-import { handleError } from '@/common/errors'
+import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import { ActiveUserInput, createUserUseCase } from '@/domain/user'
-import getRdbClient from '@/infrastructure/rdb'
 
-export default async function signup(c: ZodValidatedContext<ActiveUserInput>) {
-  const logger = c.get(CONTEXT_KEY.APP_LOG)
-  const valid = c.req.valid('json')
-
-  const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createUserUseCase(rdb)
-
-  const result = await useCase.signup(valid.email, valid.password)
-  if (isFailure(result)) throw handleError(result.error, logger)
-
-  const activeUser = result.data
-  logger.info('sign up success', { activeUserId: activeUser.activeUserId.toString() })
-  return c.json({}, 201)
-}
+export default createApiHandler({
+  createUseCase: createUserUseCase,
+  execute: (useCase, context: RequestContext<unknown, ActiveUserInput>) =>
+    useCase.signup(context.json.email, context.json.password),
+  logMessage: 'sign up success',
+  logPayload: (activeUser) => ({ activeUserId: activeUser.activeUserId.toString() }),
+  statusCode: 201,
+})

@@ -1,12 +1,8 @@
-import { isFailure } from '@yuukihayashi0510/core'
 import { z } from 'zod'
-import CONTEXT_KEY from '@/application/middleware/context'
-import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
-import { handleError } from '@/common/errors'
+import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import { OffsetPaginationResult, offsetPaginationSchema } from '@/common/pagination'
 import { Article, ArticleQueryParams, createArticleUseCase } from '@/domain/article'
 import { ArticleOutput } from '@/domain/article/schema/articleSchema'
-import getRdbClient from '@/infrastructure/rdb'
 
 const mediaEnum = z.enum(['qiita', 'zenn'])
 const readStatusEnum = z.enum(['0', '1'])
@@ -51,31 +47,23 @@ export type ArticleResponse = Omit<ArticleOutput, 'articleId'> & {
 
 export type ArticleListResponse = OffsetPaginationResult<ArticleResponse>
 
-export default async function getArticles(c: ZodValidatedQueryContext<ApiArticleQueryParams>) {
-  const transformedParams = c.req.valid('query')
-  const logger = c.get(CONTEXT_KEY.APP_LOG)
-
-  const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createArticleUseCase(rdb)
-
-  const result = await useCase.searchArticles(convertApiArticleQueryParams(transformedParams))
-  if (isFailure(result)) {
-    throw handleError(result.error, logger)
-  }
-
-  const paginationResult = result.data
-  logger.info('articles retrieved successfully', { count: paginationResult.data.length })
-  const response: ArticleListResponse = {
-    data: paginationResult.data.map(convertToResponse),
-    page: paginationResult.page,
-    limit: paginationResult.limit,
-    total: paginationResult.total,
-    totalPages: paginationResult.totalPages,
-    hasNext: paginationResult.hasNext,
-    hasPrev: paginationResult.hasPrev,
-  }
-  return c.json(response)
-}
+export default createApiHandler({
+  createUseCase: createArticleUseCase,
+  execute: (useCase, context: RequestContext<unknown, unknown, ApiArticleQueryParams>) =>
+    useCase.searchArticles(convertApiArticleQueryParams(context.query)),
+  transform: (data) => ({
+    data: data.data.map(convertToResponse),
+    page: data.page,
+    limit: data.limit,
+    total: data.total,
+    totalPages: data.totalPages,
+    hasNext: data.hasNext,
+    hasPrev: data.hasPrev,
+  }),
+  logMessage: 'articles retrieved successfully',
+  logPayload: (data) => ({ count: data.data.length }),
+  statusCode: 200,
+})
 
 function convertApiArticleQueryParams(params: ApiArticleQueryParams): ArticleQueryParams {
   let readStatus: boolean | undefined

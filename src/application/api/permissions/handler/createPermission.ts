@@ -1,31 +1,16 @@
-import { isFailure } from '@yuukihayashi0510/core'
 import { z } from 'zod'
-import CONTEXT_KEY from '@/application/middleware/context'
-import { ZodValidatedContext } from '@/application/middleware/zodValidator'
-import { handleError } from '@/common/errors'
+import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import { createPermissionUseCase } from '@/domain/permission'
 import { permissionInputSchema } from '@/domain/permission/schema/permissionSchema'
-import getRdbClient from '@/infrastructure/rdb'
 
 export const jsonSchema = permissionInputSchema
 
-export default async function createPermission(c: ZodValidatedContext<z.infer<typeof jsonSchema>>) {
-  const logger = c.get(CONTEXT_KEY.APP_LOG)
-  const parsedJson = c.req.valid('json')
-
-  const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createPermissionUseCase(rdb)
-
-  const result = await useCase.createPermission(parsedJson)
-  if (isFailure(result)) {
-    logger.error('Failed to create permission', { error: result.error })
-    throw handleError(result.error, logger)
-  }
-
-  return c.json(
-    {
-      permission: result.data,
-    },
-    201,
-  )
-}
+export default createApiHandler({
+  createUseCase: createPermissionUseCase,
+  execute: (useCase, context: RequestContext<unknown, z.infer<typeof jsonSchema>>) =>
+    useCase.createPermission(context.json),
+  transform: (permission) => ({ permission }),
+  logMessage: 'Permission created successfully',
+  logPayload: (permission) => ({ permissionName: permission.name }),
+  statusCode: 201,
+})
