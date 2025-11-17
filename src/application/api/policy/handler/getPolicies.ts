@@ -26,7 +26,9 @@ export default createApiHandler<
   ReturnType<typeof createPrivacyPolicyUseCase>,
   unknown,
   unknown,
-  OffsetPaginationParams
+  OffsetPaginationParams,
+  OffsetPaginationResult<PrivacyPolicy>,
+  PolicyListResponse
 >({
   createUseCase: createPrivacyPolicyUseCase,
   execute: (useCase, { query }) => useCase.getAllPolicies(query.page, query.limit),

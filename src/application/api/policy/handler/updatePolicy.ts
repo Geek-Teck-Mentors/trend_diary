@@ -1,4 +1,5 @@
 import { createApiHandler } from '@/application/api/handler/factory'
+import type { PrivacyPolicy } from '@/domain/policy'
 import {
   createPrivacyPolicyUseCase,
   type PrivacyPolicyUpdate,
@@ -8,7 +9,9 @@ import {
 export default createApiHandler<
   ReturnType<typeof createPrivacyPolicyUseCase>,
   VersionParam,
-  PrivacyPolicyUpdate
+  PrivacyPolicyUpdate,
+  unknown,
+  PrivacyPolicy
 >({
   createUseCase: createPrivacyPolicyUseCase,
   execute: (useCase, { param, json }) => useCase.updatePolicy(param.version, json.content),
