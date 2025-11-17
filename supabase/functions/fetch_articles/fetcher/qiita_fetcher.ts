@@ -17,14 +17,13 @@ export class QiitaFetcher implements ArticleFetcher {
       return failure(new MediaFetchError(message));
     }
 
-    const feedItems = feedItemsResult.data;
-    const params: FeedItem[] = feedItems.map((item) => ({
-      title: item.title,
-      author: item.author,
-      description: item.content,
-      url: item.link,
-    }));
-
-    return success(params);
+    return success(
+      feedItemsResult.data.map((item) => ({
+        title: item.title,
+        author: item.author,
+        description: item.content,
+        url: item.link,
+      })),
+    );
   }
 }
