@@ -37,6 +37,10 @@ type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse
   // outputとcontextの両方を受け取れる
   logMessage?: string | ((output: TOutput, context: TContext) => string)
 
+  // ログペイロード（オプション）
+  // 大量のデータを返すハンドラーでは、このオプションを使用してサマリー情報のみをログに出力することを推奨
+  logPayload?: (output: TOutput, context: TContext) => Record<string, unknown>
+
   // HTTPステータスコード（必須）
   statusCode: number
 
@@ -60,17 +64,24 @@ type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse
  *   createUseCase: createPrivacyPolicyUseCase,
  *   execute: (useCase, context: RequestContext<unknown, PrivacyPolicyInput>) =>
  *     useCase.createPolicy(context.json.content),
- *   logMessage: (policy) => `Policy created: version ${policy.version}`,
+ *   logMessage: 'Policy created',
+ *   logPayload: (policy) => ({ version: policy.version }),
  *   statusCode: 201,
  * })
  *
- * // contextを使用したログ（void型の場合に有用）
+ * // 大量のデータを返すハンドラーの例（logPayloadでサマリー情報のみをログに出力）
  * export default createApiHandler({
  *   createUseCase: createPrivacyPolicyUseCase,
- *   execute: (useCase, context: RequestContext<VersionParam>) =>
- *     useCase.deletePolicy(context.param.version),
- *   logMessage: (_, { param }) => `Policy deleted: version ${param.version}`,
- *   statusCode: 204,
+ *   execute: (useCase, context: RequestContext<unknown, unknown, OffsetPaginationParams>) =>
+ *     useCase.getAllPolicies(context.query.page, context.query.limit),
+ *   logMessage: 'Privacy policies retrieved successfully',
+ *   logPayload: (data, { query }) => ({
+ *     count: data.data.length,
+ *     page: query.page,
+ *     limit: query.limit,
+ *     total: data.total,
+ *   }),
+ *   statusCode: 200,
  * })
  * ```
  */
@@ -85,7 +96,7 @@ export function createApiHandler<
     const logger = c.get(CONTEXT_KEY.APP_LOG)
     const rdb = getRdbClient(c.env.DATABASE_URL)
 
-    // validメソッドの型安全な呼び出し
+    // バリデーションミドルウェアで検証済みのデータを取得するための型ハック
     const validParam = c.req.valid ? c.req.valid('param' as never) : undefined
     const validJson = c.req.valid ? c.req.valid('json' as never) : undefined
     const validQuery = c.req.valid ? c.req.valid('query' as never) : undefined
@@ -113,7 +124,14 @@ export function createApiHandler<
         typeof config.logMessage === 'function'
           ? config.logMessage(result.data, context)
           : config.logMessage
-      logger.info({ msg: message, data: result.data })
+
+      const payload = config.logPayload
+        ? config.logPayload(result.data, context)
+        : result.data !== undefined
+          ? { data: result.data }
+          : {}
+
+      logger.info({ msg: message, ...payload })
     }
 
     // 5. レスポンス変換とレスポンス返却

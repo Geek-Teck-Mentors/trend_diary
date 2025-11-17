@@ -5,6 +5,7 @@ export default createApiHandler({
   createUseCase: createPrivacyPolicyUseCase,
   execute: (useCase, context: RequestContext<VersionParam>) =>
     useCase.deletePolicy(context.param.version),
-  logMessage: (_, { param }) => `Policy deleted: version ${param.version}`,
+  logMessage: 'Policy deleted',
+  logPayload: (_, { param }) => ({ version: param.version }),
   statusCode: 204,
 })

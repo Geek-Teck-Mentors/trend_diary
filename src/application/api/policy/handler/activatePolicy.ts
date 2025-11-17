@@ -10,6 +10,7 @@ export default createApiHandler({
   createUseCase: createPrivacyPolicyUseCase,
   execute: (useCase, context: RequestContext<VersionParam, PrivacyPolicyActivate>) =>
     useCase.activatePolicy(context.param.version, context.json.effectiveAt),
-  logMessage: (policy) => `Policy activated: version ${policy.version}`,
+  logMessage: 'Policy activated',
+  logPayload: (policy) => ({ version: policy.version, effectiveAt: policy.effectiveAt }),
   statusCode: 200,
 })

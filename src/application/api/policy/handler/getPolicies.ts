@@ -35,7 +35,12 @@ export default createApiHandler({
     hasNext: data.hasNext,
     hasPrev: data.hasPrev,
   }),
-  logMessage: (data) =>
-    `Privacy policies retrieved successfully (count: ${data.data.length}, total: ${data.total})`,
+  logMessage: 'Privacy policies retrieved successfully',
+  logPayload: (data, { query }) => ({
+    count: data.data.length,
+    page: query.page,
+    limit: query.limit,
+    total: data.total,
+  }),
   statusCode: 200,
 })
