@@ -1,10 +1,10 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import { Context } from 'hono'
+import type { Env } from '@/application/env'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { handleError } from '@/common/errors'
 import { createRoleUseCase } from '@/domain/permission'
 import getRdbClient from '@/infrastructure/rdb'
-import type { Env } from '../../../../env'
 
 export default async function getRoles(c: Context<Env>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)

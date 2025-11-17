@@ -17,20 +17,20 @@ export default function AdminPermissions() {
     error: permissionsError,
     isLoading: permissionsLoading,
     mutate: mutatePermissions,
-  } = useSWR<PermissionsResponse>('/api/admin/permissions', fetcher)
+  } = useSWR<PermissionsResponse>('/api/permissions', fetcher)
 
   // 権限作成
   const { trigger: triggerCreatePermission } = useSWRMutation(
-    '/api/admin/permissions',
+    '/api/permissions',
     async (_key: string, { arg }: { arg: { resource: string; action: string } }) =>
-      apiCall(() => client.admin.permissions.$post({ json: arg })),
+      apiCall(() => client.permissions.$post({ json: arg })),
   )
 
   // 権限削除
   const { trigger: triggerDeletePermission } = useSWRMutation(
-    '/api/admin/permissions',
+    '/api/permissions',
     async (_key: string, { arg }: { arg: number }) =>
-      apiCall(() => client.admin.permissions[':id'].$delete({ param: { id: arg } })),
+      apiCall(() => client.permissions[':id'].$delete({ param: { id: arg } })),
   )
 
   const handleCreatePermission = async (resource: string, action: string) => {

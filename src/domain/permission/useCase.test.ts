@@ -69,7 +69,7 @@ describe('Permission UseCase', () => {
         },
         {
           name: '複数の権限が必要で、一部の権限しか持っていない場合falseを返す',
-          endpointPath: '/api/admin/roles',
+          endpointPath: '/api/roles',
           method: 'POST',
           requiredPermissionIds: [4, 5],
           userPermissionIds: [4],
@@ -77,7 +77,7 @@ describe('Permission UseCase', () => {
         },
         {
           name: '複数の権限が必要で、全ての権限を持っている場合trueを返す',
-          endpointPath: '/api/admin/roles',
+          endpointPath: '/api/roles',
           method: 'POST',
           requiredPermissionIds: [4, 5],
           userPermissionIds: [4, 5],

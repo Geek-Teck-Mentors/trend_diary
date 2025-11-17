@@ -105,11 +105,11 @@ describe('PermissionQueryImpl', () => {
         },
         {
           name: '複数のパーミッションが必要なエンドポイント',
-          endpointPath: '/api/admin/roles',
+          endpointPath: '/api/roles',
           method: 'POST',
           mockEndpoint: {
             endpointId: 5,
-            path: '/api/admin/roles',
+            path: '/api/roles',
             method: 'POST',
             createdAt: new Date(),
             endpointPermissions: [

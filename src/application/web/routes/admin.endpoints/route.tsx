@@ -20,41 +20,41 @@ export default function AdminEndpoints() {
     error: endpointsError,
     isLoading: endpointsLoading,
     mutate: mutateEndpoints,
-  } = useSWR<EndpointsResponse>('/api/admin/endpoints', fetcher)
+  } = useSWR<EndpointsResponse>('/api/endpoints', fetcher)
 
   // 権限一覧取得
   const {
     data: permissionsData,
     error: permissionsError,
     isLoading: permissionsLoading,
-  } = useSWR<PermissionsResponse>('/api/admin/permissions', fetcher)
+  } = useSWR<PermissionsResponse>('/api/permissions', fetcher)
 
   // 選択されたエンドポイントの詳細取得
   const { data: endpointDetailData, mutate: mutateEndpointDetail } = useSWR<EndpointDetailResponse>(
-    selectedEndpointId ? `/api/admin/endpoints/${selectedEndpointId}` : null,
+    selectedEndpointId ? `/api/endpoints/${selectedEndpointId}` : null,
     fetcher,
   )
 
   // エンドポイント作成
   const { trigger: triggerCreateEndpoint } = useSWRMutation(
-    '/api/admin/endpoints',
+    '/api/endpoints',
     async (_key: string, { arg }: { arg: { path: string; method: string } }) =>
-      apiCall(() => client.admin.endpoints.$post({ json: arg })),
+      apiCall(() => client.endpoints.$post({ json: arg })),
   )
 
   // エンドポイント削除
   const { trigger: triggerDeleteEndpoint } = useSWRMutation(
-    '/api/admin/endpoints',
+    '/api/endpoints',
     async (_key: string, { arg }: { arg: number }) =>
-      apiCall(() => client.admin.endpoints[':id'].$delete({ param: { id: arg } })),
+      apiCall(() => client.endpoints[':id'].$delete({ param: { id: arg } })),
   )
 
   // エンドポイント権限更新
   const { trigger: triggerUpdateEndpointPermissions } = useSWRMutation(
-    '/api/admin/endpoints',
+    '/api/endpoints',
     async (_key: string, { arg }: { arg: { endpointId: number; permissionIds: number[] } }) =>
       apiCall(() =>
-        client.admin.endpoints[':id'].permissions.$patch({
+        client.endpoints[':id'].permissions.$patch({
           param: { id: arg.endpointId },
           json: { permissionIds: arg.permissionIds },
         }),
