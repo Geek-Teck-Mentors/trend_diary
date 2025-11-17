@@ -1,9 +1,14 @@
+import {
+  failure,
+  isFailure,
+  success,
+  wrapAsyncCall,
+} from "@yuukihayashi0510/core";
 import { logger } from "../../../logger/logger.ts";
 import { MediaFetchError } from "../error.ts";
-import { ArticleFetcher } from "../model/interface.ts";
-import { failure, success, wrapAsyncCall, isFailure } from "@yuukihayashi0510/core";
-import { QiitaItem } from "../model/types.ts";
 import { fetchRssFeed } from "./fetch.ts";
+import { ArticleFetcher } from "../model/interface.ts";
+import type { QiitaItem } from "../model/types.ts";
 
 export class QiitaFetcher implements ArticleFetcher {
   url = "https://qiita.com/popular-items/feed.atom";
