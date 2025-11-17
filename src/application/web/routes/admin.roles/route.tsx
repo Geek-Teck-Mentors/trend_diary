@@ -51,7 +51,7 @@ export default function AdminRoles() {
     ) =>
       apiCall(() =>
         client.roles[':id'].$patch({
-          param: { id: arg.id.toString() },
+          param: { id: arg.id },
           json: { displayName: arg.displayName, description: arg.description },
         }),
       ),
@@ -61,7 +61,7 @@ export default function AdminRoles() {
   const { trigger: triggerDeleteRole } = useSWRMutation(
     '/api/roles',
     async (_key: string, { arg }: { arg: number }) =>
-      apiCall(() => client.roles[':id'].$delete({ param: { id: arg.toString() } })),
+      apiCall(() => client.roles[':id'].$delete({ param: { id: arg } })),
   )
 
   // ロール権限更新
@@ -70,7 +70,7 @@ export default function AdminRoles() {
     async (_key: string, { arg }: { arg: { roleId: number; permissionIds: number[] } }) =>
       apiCall(() =>
         client.roles[':id'].permissions.$patch({
-          param: { id: arg.roleId.toString() },
+          param: { id: arg.roleId },
           json: { permissionIds: arg.permissionIds },
         }),
       ),

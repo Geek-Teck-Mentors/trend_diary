@@ -46,7 +46,7 @@ export default function AdminEndpoints() {
   const { trigger: triggerDeleteEndpoint } = useSWRMutation(
     '/api/endpoints',
     async (_key: string, { arg }: { arg: number }) =>
-      apiCall(() => client.endpoints[':id'].$delete({ param: { id: arg.toString() } })),
+      apiCall(() => client.endpoints[':id'].$delete({ param: { id: arg } })),
   )
 
   // エンドポイント権限更新
@@ -55,7 +55,7 @@ export default function AdminEndpoints() {
     async (_key: string, { arg }: { arg: { endpointId: number; permissionIds: number[] } }) =>
       apiCall(() =>
         client.endpoints[':id'].permissions.$patch({
-          param: { id: arg.endpointId.toString() },
+          param: { id: arg.endpointId },
           json: { permissionIds: arg.permissionIds },
         }),
       ),
