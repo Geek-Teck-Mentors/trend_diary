@@ -18,9 +18,9 @@ export type RequestContext<TParam = unknown, TJson = unknown, TQuery = unknown> 
 }
 
 // RequestContextから型パラメータを抽出するヘルパー型
-type ExtractParam<T> = T extends RequestContext<infer P, any, any> ? P : unknown
-type ExtractJson<T> = T extends RequestContext<any, infer J, any> ? J : unknown
-type ExtractQuery<T> = T extends RequestContext<any, any, infer Q> ? Q : unknown
+type ExtractParam<T> = T extends RequestContext<infer P, unknown, unknown> ? P : unknown
+type ExtractJson<T> = T extends RequestContext<unknown, infer J, unknown> ? J : unknown
+type ExtractQuery<T> = T extends RequestContext<unknown, unknown, infer Q> ? Q : unknown
 
 // ハンドラー設定の型
 type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse = TOutput> = {
@@ -125,11 +125,14 @@ export function createApiHandler<
           ? config.logMessage(result.data, context)
           : config.logMessage
 
-      const payload = config.logPayload
-        ? config.logPayload(result.data, context)
-        : result.data !== undefined
-          ? { data: result.data }
-          : {}
+      let payload: Record<string, unknown>
+      if (config.logPayload) {
+        payload = config.logPayload(result.data, context)
+      } else if (result.data !== undefined) {
+        payload = { data: result.data }
+      } else {
+        payload = {}
+      }
 
       logger.info({ msg: message, ...payload })
     }
