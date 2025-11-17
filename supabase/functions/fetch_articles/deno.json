@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@yuukihayashi0510/core": "jsr:@yuukihayashi0510/core@^0.1.0"
+    "@yuukihayashi0510/core": "jsr:@yuukihayashi0510/core@^0.2.0"
   },
   "nodeModulesDir": "auto",
   "test": {
