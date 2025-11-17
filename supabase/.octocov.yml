@@ -3,17 +3,17 @@ coverage:
   paths:
     - functions/*/coverage/lcov.info
   exclude:
-    - '**/*.test.ts'
-    - '**/repository.ts'
-    - '**/fetcher/qiita_fetcher.ts'
-    - '**/fetcher/zenn_fetcher.ts'
+    - "**/*.test.ts"
+    - "**/repository.ts"
+    - "**/fetcher/qiita_fetcher.ts"
+    - "**/fetcher/zenn_fetcher.ts"
 
 codeToTestRatio:
   code:
-    - 'functions/**/*.ts'
-    - '!**/*.test.ts'
+    - "functions/**/*.ts"
+    - "!**/*.test.ts"
   test:
-    - 'functions/**/*.test.ts'
+    - "functions/**/*.test.ts"
 
 comment:
   if: is_pull_request
