@@ -1,4 +1,4 @@
-import { AsyncResult, isFailure, success } from '@yuukihayashi0510/core'
+import { AsyncResult } from '@yuukihayashi0510/core'
 import { AdminCommand, AdminQuery } from './repository'
 import type { AdminUser } from './schema/adminUserSchema'
 import { UserListResult } from './schema/userListSchema'
@@ -15,14 +15,6 @@ export class UseCase {
     grantedByAdminUserId: number,
   ): AsyncResult<AdminUser, Error> {
     return await this.command.grantAdminRole(activeUserId, grantedByAdminUserId)
-  }
-
-  async isAdmin(activeUserId: bigint): AsyncResult<boolean, Error> {
-    const result = await this.query.findAdminByActiveUserId(activeUserId)
-    if (isFailure(result)) {
-      return result
-    }
-    return success(result.data !== null)
   }
 
   async getUserList(query?: UserSearchQuery): AsyncResult<UserListResult, Error> {

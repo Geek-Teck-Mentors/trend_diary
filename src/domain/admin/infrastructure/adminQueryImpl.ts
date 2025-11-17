@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { Nullable } from '@/common/types/utility'
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
@@ -9,37 +8,6 @@ import { toUserListItem, type UserWithAdminRow } from './mapper'
 
 export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
-
-  async findAdminByActiveUserId(activeUserId: bigint): AsyncResult<
-    Nullable<{
-      adminUserId: number
-      activeUserId: bigint
-      grantedAt: Date
-      grantedByAdminUserId: number
-    }>,
-    Error
-  > {
-    const adminUserResult = await wrapAsyncCall(() =>
-      this.rdb.adminUser.findUnique({
-        where: { activeUserId: activeUserId },
-      }),
-    )
-    if (isFailure(adminUserResult)) {
-      return failure(new ServerError(`Admin情報の取得に失敗しました: ${adminUserResult.error}`))
-    }
-
-    const adminUser = adminUserResult.data
-    if (!adminUser) {
-      return success(null)
-    }
-
-    return success({
-      adminUserId: adminUser.adminUserId,
-      activeUserId: adminUser.activeUserId,
-      grantedAt: adminUser.grantedAt,
-      grantedByAdminUserId: adminUser.grantedByAdminUserId,
-    })
-  }
 
   async findAllUsers(query?: UserSearchQuery): AsyncResult<UserListResult, Error> {
     const { searchQuery, page = 1, limit = 20 } = query || {}

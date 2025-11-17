@@ -112,7 +112,6 @@ function setupDatabaseError(mockMethod: any, errorMessage = 'Database connection
 
 describe('AdminQueryImpl', () => {
   let query: AdminQueryImpl
-  const activeUserId = 123456789n
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -121,112 +120,6 @@ describe('AdminQueryImpl', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
-  })
-
-  describe('findAdminByActiveUserId', () => {
-    describe('基本動作', () => {
-      it('ActiveUserIdでAdmin情報を検索できる', async () => {
-        const mockAdminUser = createMockAdminUser({ activeUserId: activeUserId })
-        mockDb.adminUser.findUnique.mockResolvedValue(mockAdminUser)
-
-        const result = await query.findAdminByActiveUserId(activeUserId)
-
-        expectSuccessResult(result, {
-          adminUserId: 1,
-          activeUserId,
-          grantedAt: new Date('2024-01-15T09:30:15.123Z'),
-          grantedByAdminUserId: 2,
-        })
-        expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith({
-          where: { activeUserId: activeUserId },
-        })
-      })
-
-      it('異なるActiveUserIdで複数のAdmin情報を検索できる', async () => {
-        const activeUserId2 = 987654321n
-        mockDb.adminUser.findUnique.mockResolvedValueOnce(
-          createMockAdminUser({ activeUserId: activeUserId }),
-        )
-        mockDb.adminUser.findUnique.mockResolvedValueOnce(
-          createMockAdminUser({
-            adminUserId: 3,
-            activeUserId: activeUserId2,
-            grantedByAdminUserId: 1,
-          }),
-        )
-
-        const [result1, result2] = await Promise.all([
-          query.findAdminByActiveUserId(activeUserId),
-          query.findAdminByActiveUserId(activeUserId2),
-        ])
-
-        expectSuccessResult(result1, { adminUserId: 1, activeUserId })
-        expectSuccessResult(result2, { adminUserId: 3, activeUserId: activeUserId2 })
-      })
-    })
-
-    describe('境界値・特殊値', () => {
-      it('存在しないActiveUserIdの場合nullを返す', async () => {
-        const nonExistentActiveUserId = 999999999n
-        mockDb.adminUser.findUnique.mockResolvedValue(null)
-
-        const result = await query.findAdminByActiveUserId(nonExistentActiveUserId)
-
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBeNull()
-        }
-        expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith({
-          where: { activeUserId: nonExistentActiveUserId },
-        })
-      })
-
-      it('bigintの最大値に近いActiveUserIdでも正常に処理できる', async () => {
-        const largeActiveUserId = 9223372036854775806n
-        mockDb.adminUser.findUnique.mockResolvedValue(
-          createMockAdminUser({ activeUserId: largeActiveUserId }),
-        )
-
-        const result = await query.findAdminByActiveUserId(largeActiveUserId)
-
-        expectSuccessResult(result, { activeUserId: largeActiveUserId })
-        expect(isSuccess(result) && result.data?.activeUserId.toString()).toBe(
-          '9223372036854775806',
-        )
-      })
-
-      it('最小値のActiveUserIdでも正常に処理できる', async () => {
-        const minActiveUserId = 1n
-        mockDb.adminUser.findUnique.mockResolvedValue(
-          createMockAdminUser({ activeUserId: minActiveUserId }),
-        )
-
-        const result = await query.findAdminByActiveUserId(minActiveUserId)
-
-        expectSuccessResult(result, { activeUserId: minActiveUserId })
-      })
-    })
-
-    describe('例外・制約違反', () => {
-      it('データベースエラー時は適切にエラーを返す', async () => {
-        setupDatabaseError(mockDb.adminUser.findUnique)
-
-        const result = await query.findAdminByActiveUserId(activeUserId)
-
-        expectErrorResult(result, ServerError, 'Admin情報の取得に失敗しました')
-      })
-
-      it('Prismaクエリエラーを適切にハンドリングする', async () => {
-        mockDb.adminUser.findUnique.mockRejectedValue({
-          code: 'P2025',
-          message: 'Record not found',
-        })
-
-        const result = await query.findAdminByActiveUserId(activeUserId)
-
-        expectErrorResult(result, ServerError, 'Admin情報の取得に失敗しました')
-      })
-    })
   })
 
   describe('findAllUsers', () => {

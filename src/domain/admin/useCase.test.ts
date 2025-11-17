@@ -95,37 +95,6 @@ describe('AdminUser UseCase', () => {
     })
   })
 
-  describe('isAdmin', () => {
-    describe('正常系', () => {
-      it('Admin権限を持つユーザーの場合trueを返す', async () => {
-        mockDb.adminUser.findUnique.mockResolvedValue({
-          adminUserId: 1,
-          activeUserId: BigInt(100),
-          grantedAt: new Date(),
-          grantedByAdminUserId: 1,
-        })
-
-        const result = await useCase.isAdmin(BigInt(100))
-
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBe(true)
-        }
-      })
-
-      it('Admin権限を持たないユーザーの場合falseを返す', async () => {
-        mockDb.adminUser.findUnique.mockResolvedValue(null)
-
-        const result = await useCase.isAdmin(BigInt(200))
-
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBe(false)
-        }
-      })
-    })
-  })
-
   describe('getUserList', () => {
     describe('正常系', () => {
       it('ユーザー一覧を取得できる', async () => {
