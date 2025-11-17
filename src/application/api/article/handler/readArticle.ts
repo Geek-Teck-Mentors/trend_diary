@@ -1,5 +1,8 @@
 import { z } from 'zod'
-import { createSimpleApiHandler, type RequestContext } from '@/application/api/handler/factory'
+import {
+  type AuthenticatedRequestContext,
+  createSimpleApiHandler,
+} from '@/application/api/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
 
 // API用スキーマ
@@ -20,25 +23,22 @@ export type ArticleIdParam = z.output<typeof articleIdParamSchema>
 
 export default createSimpleApiHandler({
   createUseCase: createArticleUseCase,
-  execute: async (useCase, context: RequestContext<ArticleIdParam, CreateReadHistoryApiInput>) => {
-    // requiresAuth: true により、factory.ts内で認証チェック済み
-    // context.userは必ず存在するが、型システム上undefinedの可能性があるため型アサーション
-    const user = context.user as NonNullable<typeof context.user>
+  requiresAuth: true,
+  execute: async (
+    useCase,
+    context: AuthenticatedRequestContext<ArticleIdParam, CreateReadHistoryApiInput>,
+  ) => {
     return useCase.createReadHistory(
-      user.activeUserId,
+      context.user.activeUserId,
       context.param.article_id,
       new Date(context.json.read_at),
     )
   },
   transform: () => ({ message: '記事を既読にしました' }),
   logMessage: 'Read history created successfully',
-  logPayload: (_result, context) => {
-    const user = context.user as NonNullable<typeof context.user>
-    return {
-      activeUserId: user.activeUserId,
-      articleId: context.param.article_id,
-    }
-  },
+  logPayload: (_result, context) => ({
+    activeUserId: context.user.activeUserId,
+    articleId: context.param.article_id,
+  }),
   statusCode: 201,
-  requiresAuth: true,
 })
