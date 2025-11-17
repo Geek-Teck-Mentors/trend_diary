@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
 import { Alert, AlertDescription, AlertTitle } from '@/application/web/components/shadcn/alert'
 import { useDebounce } from '@/application/web/hooks/use-debounce'
+import { getApiErrorMessage } from '@/application/web/lib/error'
 import createSWRFetcher from '../../features/create-swr-fetcher'
 import Page from './page'
 import type { UserListResponse } from './types'
@@ -42,11 +43,7 @@ export default function AdminUsers() {
       // 成功したら一覧を再取得
       await mutate()
     } catch (error) {
-      const message =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message?: string }).message
-          : 'Admin権限の付与に失敗しました'
-      toast.error(message)
+      toast.error(getApiErrorMessage(error, 'Admin権限の付与に失敗しました'))
     }
   }
 

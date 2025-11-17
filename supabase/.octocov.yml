@@ -1,0 +1,23 @@
+# octocov configuration for Supabase Functions
+coverage:
+  paths:
+    - functions/*/coverage/lcov.info
+  exclude:
+    - "**/*.test.ts"
+    - "**/repository.ts"
+    - "**/fetcher/qiita_fetcher.ts"
+    - "**/fetcher/zenn_fetcher.ts"
+
+codeToTestRatio:
+  code:
+    - "functions/**/*.ts"
+    - "!**/*.test.ts"
+  test:
+    - "functions/**/*.test.ts"
+
+comment:
+  if: is_pull_request
+  hideFooter: true
+
+diff:
+  path: functions

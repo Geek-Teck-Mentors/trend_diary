@@ -1,4 +1,4 @@
-import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
+import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
@@ -14,82 +14,90 @@ export default class QueryImpl implements Query {
     page: number,
     limit: number,
   ): AsyncResult<OffsetPaginationResult<PrivacyPolicy>, Error> {
-    try {
-      const [policies, total] = await Promise.all([
+    const result = await wrapAsyncCall(() =>
+      Promise.all([
         this.db.privacyPolicy.findMany({
           skip: (page - 1) * limit,
           take: limit,
           orderBy: { version: 'desc' },
         }),
         this.db.privacyPolicy.count(),
-      ])
-
-      const totalPages = Math.ceil(total / limit)
-      const hasNext = page < totalPages
-      const hasPrev = page > 1
-
-      const result: OffsetPaginationResult<PrivacyPolicy> = {
-        data: policies.map(mapToPrivacyPolicy),
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNext,
-        hasPrev,
-      }
-
-      return success(result)
-    } catch (error) {
-      return failure(new ServerError(error))
+      ]),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
     }
+
+    const [policies, total] = result.data
+    const totalPages = Math.ceil(total / limit)
+    const hasNext = page < totalPages
+    const hasPrev = page > 1
+
+    const paginationResult: OffsetPaginationResult<PrivacyPolicy> = {
+      data: policies.map(mapToPrivacyPolicy),
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext,
+      hasPrev,
+    }
+
+    return success(paginationResult)
   }
 
   async findByVersion(version: number): AsyncResult<Nullable<PrivacyPolicy>, Error> {
-    try {
-      const policy = await this.db.privacyPolicy.findUnique({
+    const policyResult = await wrapAsyncCall(() =>
+      this.db.privacyPolicy.findUnique({
         where: { version },
-      })
-
-      if (!policy) {
-        return success(null)
-      }
-
-      return success(mapToPrivacyPolicy(policy))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(policyResult)) {
+      return failure(new ServerError(policyResult.error))
     }
+
+    const policy = policyResult.data
+    if (!policy) {
+      return success(null)
+    }
+
+    return success(mapToPrivacyPolicy(policy))
   }
 
   async getLatestDraft(): AsyncResult<Nullable<PrivacyPolicy>, Error> {
-    try {
-      const policy = await this.db.privacyPolicy.findFirst({
+    const policyResult = await wrapAsyncCall(() =>
+      this.db.privacyPolicy.findFirst({
         where: { effectiveAt: null },
         orderBy: { version: 'desc' },
-      })
-
-      if (!policy) {
-        return success(null)
-      }
-
-      return success(mapToPrivacyPolicy(policy))
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(policyResult)) {
+      return failure(new ServerError(policyResult.error))
     }
+
+    const policy = policyResult.data
+    if (!policy) {
+      return success(null)
+    }
+
+    return success(mapToPrivacyPolicy(policy))
   }
 
   async getNextVersion(): AsyncResult<number, Error> {
-    try {
-      const latestPolicy = await this.db.privacyPolicy.findFirst({
+    const latestPolicyResult = await wrapAsyncCall(() =>
+      this.db.privacyPolicy.findFirst({
         orderBy: { version: 'desc' },
-      })
-
-      if (!latestPolicy) {
-        return success(1)
-      }
-
-      return success(latestPolicy.version + 1)
-    } catch (error) {
-      return failure(new ServerError(error))
+      }),
+    )
+    if (isFailure(latestPolicyResult)) {
+      return failure(new ServerError(latestPolicyResult.error))
     }
+
+    const latestPolicy = latestPolicyResult.data
+    if (!latestPolicy) {
+      return success(1)
+    }
+
+    return success(latestPolicy.version + 1)
   }
 }

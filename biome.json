@@ -286,7 +286,8 @@
         "useAwait": "off",
         "useDefaultSwitchClauseLast": "error",
         "useGetterReturn": "error",
-        "useGuardForIn": "error"
+        "useGuardForIn": "error",
+        "noExplicitAny": "error"
       }
     }
   },

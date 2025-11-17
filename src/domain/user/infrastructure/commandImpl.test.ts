@@ -40,8 +40,11 @@ describe('CommandImpl', () => {
 
         mockDb.$transaction.mockImplementation(async (callback) => {
           return await callback({
+            // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
             user: { create: vi.fn().mockResolvedValue(mockUser) } as any,
+            // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
             activeUser: { create: vi.fn().mockResolvedValue(mockActiveUser) } as any,
+            // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
           } as any)
         })
 
@@ -223,6 +226,7 @@ describe('CommandImpl', () => {
       it('Sessionを削除できる', async () => {
         // Arrange
         const sessionId = 'session123'
+        // biome-ignore lint/suspicious/noExplicitAny: 戻り値が不要なためanyを使用
         mockDb.session.delete.mockResolvedValue({} as any)
 
         // Act

@@ -41,6 +41,9 @@ const adminGroup = {
   routes: [
     { path: PATH_INDEX, file: './routes/admin._index.tsx' },
     { path: '/users', file: './routes/admin.users/route.tsx' },
+    { path: '/roles', file: './routes/admin.roles/route.tsx' },
+    { path: '/permissions', file: './routes/admin.permissions/route.tsx' },
+    { path: '/endpoints', file: './routes/admin.endpoints/route.tsx' },
   ],
 } as const satisfies GroupRoute
 
