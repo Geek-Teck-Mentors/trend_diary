@@ -111,12 +111,20 @@ export class MockAuthV2Repository implements AuthV2Repository {
 
   async getCurrentUser(): AsyncResult<AuthenticationUser, ServerError> {
     if (!this.currentUserId) {
-      return failure(new UnauthorizedError('session not found'))
+      return failure(
+        new UnauthorizedError('session not found', {
+          sessionExists: false,
+        }),
+      )
     }
 
     const mockUser = this.users.get(this.currentUserId)
     if (!mockUser) {
-      return failure(new UnauthorizedError('session not found'))
+      return failure(
+        new UnauthorizedError('session not found', {
+          sessionExists: true,
+        }),
+      )
     }
 
     const user: AuthenticationUser = {

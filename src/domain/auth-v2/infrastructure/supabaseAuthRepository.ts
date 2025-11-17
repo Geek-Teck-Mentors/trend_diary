@@ -173,13 +173,21 @@ export class SupabaseAuthRepository implements AuthV2Repository {
 
       if (error) {
         if (error instanceof AuthSessionMissingError) {
-          return failure(new UnauthorizedError('session not found'))
+          return failure(
+            new UnauthorizedError('session not found', {
+              sessionExists: false,
+            }),
+          )
         }
         return failure(new ServerError('Failed to get user information'))
       }
 
       if (!user) {
-        return failure(new UnauthorizedError('session not found'))
+        return failure(
+          new UnauthorizedError('session not found', {
+            sessionExists: true,
+          }),
+        )
       }
 
       const authUserResult = this.toAuthenticationUser(user)
