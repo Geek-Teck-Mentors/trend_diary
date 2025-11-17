@@ -1,24 +1,11 @@
-import { isFailure } from '@yuukihayashi0510/core'
-import { Context } from 'hono'
-import type { Env } from '@/application/env'
-import CONTEXT_KEY from '@/application/middleware/context'
-import { handleError } from '@/common/errors'
+import { createSimpleApiHandler } from '@/application/api/handler/factory'
 import { createEndpointUseCase } from '@/domain/permission'
-import getRdbClient from '@/infrastructure/rdb'
 
-export default async function getEndpoints(c: Context<Env>) {
-  const logger = c.get(CONTEXT_KEY.APP_LOG)
-
-  const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createEndpointUseCase(rdb)
-
-  const result = await useCase.getAllEndpoints()
-  if (isFailure(result)) {
-    logger.error('Failed to get endpoints', { error: result.error })
-    throw handleError(result.error, logger)
-  }
-
-  return c.json({
-    endpoints: result.data,
-  })
-}
+export default createSimpleApiHandler({
+  createUseCase: createEndpointUseCase,
+  execute: (useCase) => useCase.getAllEndpoints(),
+  transform: (endpoints) => ({ endpoints }),
+  logMessage: 'Endpoints retrieved successfully',
+  logPayload: (endpoints) => ({ count: endpoints.length }),
+  statusCode: 200,
+})
