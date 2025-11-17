@@ -1,3 +1,59 @@
+/**
+ * API Handler Factory
+ *
+ * @overview
+ * このファクトリー関数は、API層のハンドラーを統一されたパターンで生成するための高階関数。
+ * DDDアーキテクチャに基づき、UseCase→Result→Response変換の流れを標準化する。
+ *
+ * @usage_guidelines
+ * **使用可能なケース:**
+ * - 静的パスのエンドポイント（例: /api/users、/api/articles）
+ * - GETメソッドでqueryパラメータのみを扱うエンドポイント
+ * - POSTメソッドでjsonボディのみを扱うエンドポイント
+ * - 認証が必要なエンドポイント（requiresAuth: trueで対応可能）
+ * - レスポンス型の変換が不要、またはtransform関数で完結するエンドポイント
+ *
+ * **使用できないケース（Hono clientの型推論の制限）:**
+ * - 動的パス（例: /api/roles/:id）と$patchメソッドの組み合わせ
+ *   → 型推論失敗: 'json' does not exist in type '{ param: { id: string; } }'
+ * - 動的パス（例: /api/roles/:id）と$deleteメソッドの組み合わせ
+ *   → フロントエンドでnumber→string変換が必要になり型エラーが発生
+ * - レスポンス型が複雑で、フロントエンドで型アサーションが必要になるケース
+ *   → factory patternではなく従来の実装を推奨
+ *
+ * **制限事項の回避策:**
+ * 上記の使用できないケースでは、従来のハンドラー実装パターンを使用すること。
+ * 従来パターン例:
+ * ```typescript
+ * export default async function updateRole(
+ *   c: ZodValidatedParamJsonContext<z.infer<typeof paramSchema>, z.infer<typeof jsonSchema>>,
+ * ) {
+ *   const logger = c.get(CONTEXT_KEY.APP_LOG)
+ *   const { id } = c.req.valid('param')
+ *   const parsedJson = c.req.valid('json')
+ *   // ... UseCase実行とエラーハンドリング
+ *   return c.json({ role: result.data })
+ * }
+ * ```
+ *
+ * @examples
+ * 成功事例:
+ * - signup.ts（POST /api/user/signup）
+ * - getUserList.ts（GET /api/admin/user）
+ * - createRole.ts（POST /api/roles）
+ * - getRoles.ts（GET /api/roles）
+ * - policy系ハンドラー全般
+ *
+ * 従来実装を維持した事例:
+ * - getArticles.ts（レスポンス型推論の問題）
+ * - updateRole.ts（動的パス + $patch）
+ * - updateRolePermissions.ts（動的パス + $patch）
+ * - updateEndpointPermissions.ts（動的パス + $patch）
+ * - deleteRole.ts（動的パス + $delete）
+ * - deleteEndpoint.ts（動的パス + $delete）
+ * - deletePermission.ts（動的パス + $delete）
+ */
+
 import type { Result } from '@yuukihayashi0510/core'
 import { isFailure } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
