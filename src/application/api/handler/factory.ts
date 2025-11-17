@@ -1,4 +1,3 @@
-import type { PrismaClient } from '@prisma/client'
 import type { Result } from '@yuukihayashi0510/core'
 import { isFailure } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
@@ -7,7 +6,7 @@ import type { Env, SessionUser } from '@/application/env'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { handleError } from '@/common/errors'
 import type { LoggerType } from '@/common/logger'
-import getRdbClient from '@/infrastructure/rdb'
+import getRdbClient, { type RdbClient } from '@/infrastructure/rdb'
 
 // コンテキストの型定義
 type RequestContext<TParam = unknown, TJson = unknown, TQuery = unknown> = {
@@ -21,7 +20,7 @@ type RequestContext<TParam = unknown, TJson = unknown, TQuery = unknown> = {
 // ハンドラー設定の型
 type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> = {
   // UseCaseファクトリー
-  createUseCase: (rdb: PrismaClient) => TUseCase
+  createUseCase: (rdb: RdbClient) => TUseCase
 
   // メインロジック
   execute: (useCase: TUseCase, context: TContext) => Promise<Result<TOutput, Error>>
@@ -131,7 +130,7 @@ export const apiHandlers = {
    * 単純なGETハンドラー（ID指定）
    */
   getById: <TUseCase, TParam extends { id: number }, TOutput>(
-    createUseCase: (rdb: PrismaClient) => TUseCase,
+    createUseCase: (rdb: RdbClient) => TUseCase,
     execute: (useCase: TUseCase, id: number) => Promise<Result<TOutput, Error>>,
     entityName: string,
   ) =>
@@ -146,7 +145,7 @@ export const apiHandlers = {
    * リスト取得ハンドラー
    */
   getList: <TUseCase, TOutput>(
-    createUseCase: (rdb: PrismaClient) => TUseCase,
+    createUseCase: (rdb: RdbClient) => TUseCase,
     execute: (useCase: TUseCase) => Promise<Result<TOutput, Error>>,
     entityName: string,
   ) =>
@@ -165,7 +164,7 @@ export const apiHandlers = {
    * 作成ハンドラー
    */
   create: <TUseCase, TJson, TOutput>(
-    createUseCase: (rdb: PrismaClient) => TUseCase,
+    createUseCase: (rdb: RdbClient) => TUseCase,
     execute: (useCase: TUseCase, input: TJson) => Promise<Result<TOutput, Error>>,
     entityName: string,
   ) =>
@@ -180,7 +179,7 @@ export const apiHandlers = {
    * 更新ハンドラー
    */
   update: <TUseCase, TParam extends { id: number }, TJson, TOutput>(
-    createUseCase: (rdb: PrismaClient) => TUseCase,
+    createUseCase: (rdb: RdbClient) => TUseCase,
     execute: (useCase: TUseCase, id: number, input: TJson) => Promise<Result<TOutput, Error>>,
     entityName: string,
   ) =>
@@ -195,7 +194,7 @@ export const apiHandlers = {
    * 削除ハンドラー
    */
   delete: <TUseCase, TParam extends { id: number }>(
-    createUseCase: (rdb: PrismaClient) => TUseCase,
+    createUseCase: (rdb: RdbClient) => TUseCase,
     execute: (useCase: TUseCase, id: number) => Promise<Result<void, Error>>,
     entityName: string,
   ) =>
