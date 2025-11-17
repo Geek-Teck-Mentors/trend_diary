@@ -116,7 +116,9 @@ type BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse> = {
   logMessage?: string | ((output: TOutput, context: TContext) => string)
 
   // ログペイロード（オプション）
-  // 大量のデータを返すハンドラーでは、このオプションを使用してサマリー情報のみをログに出力することを推奨
+  // IMPORTANT: 未指定の場合は空のペイロード{}がログに出力される
+  // セキュリティとパフォーマンスのため、必要な情報のみを明示的に指定すること
+  // 大量のデータを返すハンドラーでは、サマリー情報のみをログに出力することを推奨
   logPayload?: (output: TOutput, context: TContext) => Record<string, unknown>
 
   // HTTPステータスコード（必須）
@@ -170,14 +172,7 @@ function executeHandlerLogic<
           ? config.logMessage(result.data, context)
           : config.logMessage
 
-      let payload: Record<string, unknown>
-      if (config.logPayload) {
-        payload = config.logPayload(result.data, context)
-      } else if (result.data !== undefined) {
-        payload = { data: result.data }
-      } else {
-        payload = {}
-      }
+      const payload = config.logPayload ? config.logPayload(result.data, context) : {}
 
       context.logger.info({ msg: message, ...payload })
     }
