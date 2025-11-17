@@ -1,8 +1,8 @@
-import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
+import { createSimpleApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
 import { ArticleIdParam } from './readArticle'
 
-export default createApiHandler({
+export default createSimpleApiHandler({
   createUseCase: createArticleUseCase,
   execute: async (useCase, context: RequestContext<ArticleIdParam>) => {
     // requiresAuth: true により、factory.ts内で認証チェック済み

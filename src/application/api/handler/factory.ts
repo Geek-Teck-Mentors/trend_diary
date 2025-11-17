@@ -106,7 +106,7 @@ type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse
 }
 
 /**
- * APIハンドラーを生成する高階関数
+ * シンプルなAPIハンドラーを生成する高階関数
  *
  * @remarks
  * この関数を使用する際は、リクエストパラメータやボディを期待するルートには
@@ -117,7 +117,7 @@ type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse
  * @example
  * ```typescript
  * // 基本的な使用例
- * export default createApiHandler({
+ * export default createSimpleApiHandler({
  *   createUseCase: createPrivacyPolicyUseCase,
  *   execute: (useCase, context: RequestContext<unknown, PrivacyPolicyInput>) =>
  *     useCase.createPolicy(context.json.content),
@@ -127,7 +127,7 @@ type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse
  * })
  *
  * // 大量のデータを返すハンドラーの例（logPayloadでサマリー情報のみをログに出力）
- * export default createApiHandler({
+ * export default createSimpleApiHandler({
  *   createUseCase: createPrivacyPolicyUseCase,
  *   execute: (useCase, context: RequestContext<unknown, unknown, OffsetPaginationParams>) =>
  *     useCase.getAllPolicies(context.query.page, context.query.limit),
@@ -142,7 +142,7 @@ type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse
  * })
  * ```
  */
-export function createApiHandler<
+export function createSimpleApiHandler<
   TUseCase,
   TContext extends RequestContext,
   TOutput,

@@ -1,7 +1,7 @@
-import { createApiHandler } from '@/application/api/handler/factory'
+import { createSimpleApiHandler } from '@/application/api/handler/factory'
 import { createPermissionUseCase } from '@/domain/permission'
 
-export default createApiHandler({
+export default createSimpleApiHandler({
   createUseCase: createPermissionUseCase,
   execute: (useCase) => useCase.getAllPermissions(),
   transform: (permissions) => ({ permissions }),

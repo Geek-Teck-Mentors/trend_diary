@@ -1,7 +1,7 @@
-import { createApiHandler } from '@/application/api/handler/factory'
+import { createSimpleApiHandler } from '@/application/api/handler/factory'
 import { createEndpointUseCase } from '@/domain/permission'
 
-export default createApiHandler({
+export default createSimpleApiHandler({
   createUseCase: createEndpointUseCase,
   execute: (useCase) => useCase.getAllEndpoints(),
   transform: (endpoints) => ({ endpoints }),

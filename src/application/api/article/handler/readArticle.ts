@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
+import { createSimpleApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
 
 // API用スキーマ
@@ -18,7 +18,7 @@ export const articleIdParamSchema = z.object({
 export type CreateReadHistoryApiInput = z.input<typeof createReadHistoryApiSchema>
 export type ArticleIdParam = z.output<typeof articleIdParamSchema>
 
-export default createApiHandler({
+export default createSimpleApiHandler({
   createUseCase: createArticleUseCase,
   execute: async (useCase, context: RequestContext<ArticleIdParam, CreateReadHistoryApiInput>) => {
     // requiresAuth: true により、factory.ts内で認証チェック済み

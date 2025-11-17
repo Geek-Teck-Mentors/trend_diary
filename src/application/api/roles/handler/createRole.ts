@@ -1,11 +1,11 @@
 import { z } from 'zod'
-import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
+import { createSimpleApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import { createRoleUseCase } from '@/domain/permission'
 import { roleInputSchema } from '@/domain/permission/schema/roleSchema'
 
 export const jsonSchema = roleInputSchema
 
-export default createApiHandler({
+export default createSimpleApiHandler({
   createUseCase: createRoleUseCase,
   execute: (useCase, context: RequestContext<unknown, z.infer<typeof jsonSchema>>) =>
     useCase.createRole(context.json),

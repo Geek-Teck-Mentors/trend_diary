@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
+import { createSimpleApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import { createAdminUserUseCase } from '@/domain/admin'
 import { UserListResult } from '@/domain/admin/schema/userListSchema'
 import { User } from '@/domain/admin/schema/userSchema'
@@ -20,7 +20,7 @@ export const querySchema = z.object({
   limit: z.coerce.number().int().positive().default(20),
 })
 
-export default createApiHandler({
+export default createSimpleApiHandler({
   createUseCase: createAdminUserUseCase,
   execute: (useCase, context: RequestContext<unknown, unknown, z.infer<typeof querySchema>>) =>
     useCase.getUserList({
