@@ -113,7 +113,7 @@ export function createApiHandler<
     }
 
     // 5. レスポンス変換とレスポンス返却
-    const statusCode = (config.statusCode ?? 200) as ContentfulStatusCode
+    const statusCode = config.statusCode ?? 200
 
     // 204 No Contentの場合はボディなしで返す
     if (statusCode === 204) {
@@ -121,7 +121,7 @@ export function createApiHandler<
     }
 
     const responseData = config.transform ? config.transform(result.data) : result.data
-    return c.json(responseData, statusCode)
+    return c.json(responseData, statusCode as ContentfulStatusCode)
   }
 }
 
