@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
@@ -11,7 +12,10 @@ describe('PATCH /api/roles/:id/permissions', () => {
 
   async function setupTestData(): Promise<void> {
     // 管理者ユーザー作成・ログイン
-    const adminUser = await adminUserTestHelper.createAdminUser('admin@example.com', 'password123')
+    const adminUser = await adminUserTestHelper.createAdminUser(
+      faker.internet.email(),
+      'password123',
+    )
     sessionId = adminUser.sessionId
 
     // テストロールと権限作成

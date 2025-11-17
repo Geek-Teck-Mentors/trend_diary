@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
@@ -11,7 +12,10 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
 
   async function setupTestData(): Promise<void> {
     // 管理者ユーザー作成・ログイン
-    const adminUser = await adminUserTestHelper.createAdminUser('admin@example.com', 'password123')
+    const adminUser = await adminUserTestHelper.createAdminUser(
+      faker.internet.email(),
+      'password123',
+    )
     sessionId = adminUser.sessionId
 
     // テストエンドポイントと権限作成
@@ -56,10 +60,11 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
 
   describe('正常系', () => {
     it('エンドポイントの権限を更新できること', async () => {
-      const response = await requestUpdateEndpointPermissions(testEndpointId.toString(), sessionId, [
-        testPermissionId1,
-        testPermissionId2,
-      ])
+      const response = await requestUpdateEndpointPermissions(
+        testEndpointId.toString(),
+        sessionId,
+        [testPermissionId1, testPermissionId2],
+      )
 
       expect(response.status).toBe(200)
       const json = (await response.json()) as { message: string }
