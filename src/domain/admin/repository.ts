@@ -8,5 +8,5 @@ export interface AdminQuery {
 }
 
 export interface AdminCommand {
-  grantAdminRole(activeUserId: bigint, grantedByAdminUserId: number): AsyncResult<AdminUser, Error>
+  grantAdminRole(activeUserId: bigint, grantedByActiveUserId: bigint): AsyncResult<AdminUser, Error>
 }

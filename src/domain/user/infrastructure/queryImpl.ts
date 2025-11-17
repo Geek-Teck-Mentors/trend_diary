@@ -52,7 +52,7 @@ export default class QueryImpl implements Query {
           sessionId,
           expiresAt: { gt: new Date() },
         },
-        include: { activeUser: { include: { adminUser: true } } },
+        include: { activeUser: true },
       }),
     )
     if (isFailure(sessionResult)) {
@@ -73,7 +73,6 @@ export default class QueryImpl implements Query {
     const activeUserResult = await wrapAsyncCall(() =>
       this.db.activeUser.findUnique({
         where: { authenticationId },
-        include: { adminUser: true },
       }),
     )
     if (isFailure(activeUserResult)) {

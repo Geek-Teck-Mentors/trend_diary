@@ -12,9 +12,9 @@ export class UseCase {
 
   async grantAdminRole(
     activeUserId: bigint,
-    grantedByAdminUserId: number,
+    grantedByActiveUserId: bigint,
   ): AsyncResult<AdminUser, Error> {
-    return await this.command.grantAdminRole(activeUserId, grantedByAdminUserId)
+    return await this.command.grantAdminRole(activeUserId, grantedByActiveUserId)
   }
 
   async getUserList(query?: UserSearchQuery): AsyncResult<UserListResult, Error> {

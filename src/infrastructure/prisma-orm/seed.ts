@@ -283,38 +283,43 @@ async function seedAdminUser() {
   // パスワードハッシュ化
   const hashedPassword = await bcrypt.hash(adminPassword, 10)
 
+  // 管理者ロールを取得
+  const adminRole = await prisma.role.findFirst({
+    where: { displayName: '管理者' },
+  })
+  if (!adminRole) {
+    throw new Error('管理者ロールが見つかりません')
+  }
+
   // 既存のAdminユーザーをチェック
   const existingUser = await prisma.activeUser.findUnique({
     where: { email: adminEmail },
-    include: { adminUser: true },
+    include: {
+      userRoles: {
+        where: { roleId: adminRole.roleId },
+      },
+    },
   })
 
-  if (existingUser?.adminUser) {
-    // 既存ユーザーに「管理者」ロールを割り当て
-    const adminRole = await prisma.role.findFirst({
-      where: { displayName: '管理者' },
+  if (existingUser && existingUser.userRoles.length > 0) {
+    // 既にAdmin権限を持っている
+    return
+  }
+
+  if (existingUser) {
+    // ユーザーは存在するが管理者ロールを持っていない
+    await prisma.userRole.create({
+      data: {
+        activeUserId: existingUser.activeUserId,
+        roleId: adminRole.roleId,
+        grantedByActiveUserId: existingUser.activeUserId, // 初期シードなので自分自身
+      },
     })
-    if (adminRole) {
-      await prisma.userRole.upsert({
-        where: {
-          // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
-          activeUserId_roleId: {
-            activeUserId: existingUser.activeUserId,
-            roleId: adminRole.roleId,
-          },
-        },
-        create: {
-          activeUserId: existingUser.activeUserId,
-          roleId: adminRole.roleId,
-        },
-        update: {},
-      })
-    }
     return
   }
 
   // トランザクションで初期Adminユーザーを作成
-  const result = await prisma.$transaction(async (tx) => {
+  const _result = await prisma.$transaction(async (tx) => {
     // 1. Userレコード作成
     const user = await tx.user.create({
       data: {},
@@ -330,33 +335,20 @@ async function seedAdminUser() {
       },
     })
 
-    // 3. AdminUserレコード作成（grantedByAdminUserIdは自分自身を参照）
-    const adminUser = await tx.adminUser.create({
+    // 3. 管理者ロールを割り当て
+    await tx.userRole.create({
       data: {
         activeUserId: activeUser.activeUserId,
-        grantedByAdminUserId: 1, // 初期Adminは自分自身が付与者
+        roleId: adminRole.roleId,
+        grantedByActiveUserId: activeUser.activeUserId, // 初期Adminは自分自身が付与者
       },
     })
 
     return {
       user,
       activeUser,
-      adminUser,
     }
   })
-
-  // 初期Adminユーザーに「管理者」ロールを割り当て
-  const adminRole = await prisma.role.findFirst({
-    where: { displayName: '管理者' },
-  })
-  if (adminRole) {
-    await prisma.userRole.create({
-      data: {
-        activeUserId: result.activeUser.activeUserId,
-        roleId: adminRole.roleId,
-      },
-    })
-  }
 }
 
 async function main() {

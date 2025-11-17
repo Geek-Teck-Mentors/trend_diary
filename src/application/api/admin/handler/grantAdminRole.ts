@@ -29,18 +29,13 @@ export default async function grantAdminRole(
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const adminUserUseCase = createAdminUserUseCase(rdb)
 
-  // Admin権限チェック（authorizeミドルウェアを通過しているが型安全性のため確認）
-  if (sessionUser.adminUserId === null) {
-    throw new HTTPException(403, { message: 'Admin権限が必要です' })
-  }
-
   // 自分に権限を付与しようとしていないかチェック
   if (activeUserId === sessionUser.activeUserId) {
     throw new HTTPException(400, { message: '自分自身にAdmin権限を付与することはできません' })
   }
 
-  // Admin権限付与（nullチェック済みのため非nullアサーション使用）
-  const result = await adminUserUseCase.grantAdminRole(activeUserId, sessionUser.adminUserId!)
+  // Admin権限付与
+  const result = await adminUserUseCase.grantAdminRole(activeUserId, sessionUser.activeUserId)
   if (isFailure(result)) {
     throw handleError(result.error, logger)
   }

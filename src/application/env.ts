@@ -7,7 +7,6 @@ export type SessionUser = {
   displayName?: Nullable<string>
   email: string
   hasAdminAccess: boolean
-  adminUserId: Nullable<number>
 }
 
 export type Env = {

@@ -1,10 +1,7 @@
-import { ActiveUser as RdbActiveUser, AdminUser as RdbAdminUser } from '@prisma/client'
-import { Nullable } from '@/common/types/utility'
+import { ActiveUser as RdbActiveUser } from '@prisma/client'
 import type { ActiveUser } from '../schema/activeUserSchema'
 
-export function mapToActiveUser(
-  activeUser: RdbActiveUser & { adminUser?: Nullable<RdbAdminUser> },
-): ActiveUser {
+export function mapToActiveUser(activeUser: RdbActiveUser): ActiveUser {
   return {
     activeUserId: activeUser.activeUserId,
     userId: activeUser.userId,
@@ -15,6 +12,5 @@ export function mapToActiveUser(
     lastLogin: activeUser.lastLogin ?? undefined,
     createdAt: activeUser.createdAt,
     updatedAt: activeUser.updatedAt,
-    adminUserId: activeUser.adminUser?.adminUserId ?? null,
   }
 }

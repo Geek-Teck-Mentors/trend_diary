@@ -48,13 +48,20 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
     throw new HTTPException(404, { message: 'login required' })
   }
 
+  // 管理者権限チェック（ロールベース）
+  const adminRoleCount = await rdb.userRole.count({
+    where: {
+      activeUserId: result.data.activeUserId,
+      role: { displayName: { in: ['管理者', 'スーパー管理者'] } },
+    },
+  })
+
   // セッションユーザー情報を設定
   const sessionUser: SessionUser = {
     activeUserId: result.data.activeUserId,
     displayName: result.data.displayName,
     email: result.data.email,
-    hasAdminAccess: result.data.adminUserId !== null,
-    adminUserId: result.data.adminUserId,
+    hasAdminAccess: adminRoleCount > 0,
   }
 
   c.set(CONTEXT_KEY.SESSION_USER, sessionUser)

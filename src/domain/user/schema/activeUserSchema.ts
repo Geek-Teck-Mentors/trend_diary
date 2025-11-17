@@ -11,7 +11,6 @@ export const activeUserSchema = z.object({
   lastLogin: z.date().optional(),
   createdAt,
   updatedAt,
-  adminUserId: z.number().positive().nullable().default(null),
 })
 
 export const activeUserInputSchema = activeUserSchema.pick({

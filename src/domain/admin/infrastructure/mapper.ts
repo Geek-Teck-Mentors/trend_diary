@@ -1,42 +1,35 @@
-import type { AdminUser } from '../schema/adminUserSchema'
-
-export type AdminUserRow = {
-  adminUserId: number
-  activeUserId: bigint
-  grantedAt: Date
-  grantedByAdminUserId: number
-}
-
-export type UserWithAdminRow = {
+export type UserWithRolesRow = {
   activeUserId: bigint
   email: string
   displayName: string | null
   authenticationId: string | null
   createdAt: Date
-  adminUser: {
-    adminUserId: number
+  userRoles: {
+    roleId: number
     grantedAt: Date
-    grantedByAdminUserId: number
-  } | null
+    grantedByActiveUserId: bigint | null
+    role: {
+      roleId: number
+      displayName: string
+    }
+  }[]
 }
 
-export function toDomainAdminUser(row: AdminUserRow): AdminUser {
-  return {
-    adminUserId: row.adminUserId,
-    activeUserId: row.activeUserId,
-    grantedAt: row.grantedAt,
-    grantedByAdminUserId: row.grantedByAdminUserId,
-  }
-}
+export function toUserListItem(row: UserWithRolesRow) {
+  // 管理者ロールまたはスーパー管理者ロールを探す
+  const adminRole = row.userRoles.find(
+    (ur) => ur.role.displayName === '管理者' || ur.role.displayName === 'スーパー管理者',
+  )
 
-export function toUserListItem(row: UserWithAdminRow) {
   return {
     activeUserId: row.activeUserId,
     email: row.email,
     displayName: row.displayName,
-    hasAdminAccess: row.adminUser !== null,
-    grantedAt: row.adminUser?.grantedAt || null,
-    grantedByAdminUserId: row.adminUser?.grantedByAdminUserId || null,
+    hasAdminAccess: adminRole !== undefined,
+    grantedAt: adminRole?.grantedAt || null,
+    grantedByAdminUserId: adminRole?.grantedByActiveUserId
+      ? Number(adminRole.grantedByActiveUserId)
+      : null,
     createdAt: row.createdAt,
   }
 }

@@ -4,7 +4,7 @@ import { ServerError } from '@/common/errors'
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
-import { toUserListItem, type UserWithAdminRow } from './mapper'
+import { toUserListItem } from './mapper'
 
 export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
@@ -27,7 +27,11 @@ export class AdminQueryImpl implements AdminQuery {
         this.rdb.activeUser.findMany({
           where: whereClause,
           include: {
-            adminUser: true,
+            userRoles: {
+              include: {
+                role: true,
+              },
+            },
           },
           orderBy: { createdAt: 'desc' },
           skip: offset,
@@ -41,7 +45,7 @@ export class AdminQueryImpl implements AdminQuery {
     }
 
     const [users, total] = result.data
-    const userList = users.map((user) => toUserListItem(user as UserWithAdminRow))
+    const userList = users.map((user) => toUserListItem(user))
 
     return success({
       users: userList,
