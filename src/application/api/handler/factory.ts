@@ -30,7 +30,8 @@ type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> = {
   transform?: (output: TOutput) => TResponse
 
   // ログメッセージ（オプション）
-  logMessage?: string | ((output: TOutput) => string)
+  // outputとcontextの両方を受け取れる
+  logMessage?: string | ((output: TOutput, context: TContext) => string)
 
   // HTTPステータスコード
   statusCode?: number
@@ -42,13 +43,28 @@ type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> = {
 /**
  * APIハンドラーを生成する高階関数
  *
+ * @remarks
+ * この関数を使用する際は、リクエストパラメータやボディを期待するルートには
+ * 必ずバリデーションミドルウェア（zodValidator等）を適用してください。
+ * バリデーションミドルウェアが適用されていない場合、param/json/queryがundefinedとなり、
+ * execute関数内でランタイムエラーが発生する可能性があります。
+ *
  * @example
  * ```typescript
+ * // 基本的な使用例
  * export default createApiHandler({
  *   createUseCase: createPrivacyPolicyUseCase,
  *   execute: (useCase, { json }) => useCase.createPolicy(json.content),
  *   logMessage: (policy) => `Policy created: version ${policy.version}`,
  *   statusCode: 201,
+ * })
+ *
+ * // contextを使用したログ（void型の場合に有用）
+ * export default createApiHandler({
+ *   createUseCase: createPrivacyPolicyUseCase,
+ *   execute: (useCase, { param }) => useCase.deletePolicy(param.version),
+ *   logMessage: (_, { param }) => `Policy deleted: version ${param.version}`,
+ *   statusCode: 204,
  * })
  * ```
  */
@@ -90,8 +106,10 @@ export function createApiHandler<
     // 4. ロギング
     if (config.logMessage) {
       const message =
-        typeof config.logMessage === 'function' ? config.logMessage(result.data) : config.logMessage
-      logger.info(message, { data: result.data })
+        typeof config.logMessage === 'function'
+          ? config.logMessage(result.data, context)
+          : config.logMessage
+      logger.info({ msg: message, data: result.data })
     }
 
     // 5. レスポンス変換とレスポンス返却
@@ -137,7 +155,7 @@ export const apiHandlers = {
       logMessage: (data: unknown) =>
         `${entityName} list retrieved (count: ${
           // biome-ignore lint/suspicious/noExplicitAny: データ構造が動的なため
-          (data as any).length || (data as any).data?.length || 0
+          Array.isArray(data) ? data.length : ((data as any)?.data?.length ?? 0)
         })`,
     }),
 
