@@ -28,7 +28,7 @@ export default createApiHandler({
       page: context.query.page,
       limit: context.query.limit,
     }),
-  transform: (data, context) => ({
+  transform: (data) => ({
     users: data.users.map((user) => ({
       activeUserId: user.activeUserId.toString(),
       email: user.email,
@@ -39,8 +39,8 @@ export default createApiHandler({
       createdAt: user.createdAt.toISOString(),
     })),
     total: data.total,
-    page: context.query.page,
-    limit: context.query.limit,
+    page: data.page,
+    limit: data.limit,
   }),
   logMessage: 'User list retrieved successfully',
   logPayload: (data) => ({ count: data.users.length, total: data.total }),

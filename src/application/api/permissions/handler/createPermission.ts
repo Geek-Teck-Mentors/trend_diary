@@ -11,6 +11,9 @@ export default createApiHandler({
     useCase.createPermission(context.json),
   transform: (permission) => ({ permission }),
   logMessage: 'Permission created successfully',
-  logPayload: (permission) => ({ permissionName: permission.name }),
+  logPayload: (permission) => ({
+    resource: permission.resource,
+    action: permission.action,
+  }),
   statusCode: 201,
 })

@@ -11,6 +11,6 @@ export default createApiHandler({
     useCase.createRole(context.json),
   transform: (role) => ({ role }),
   logMessage: 'Role created successfully',
-  logPayload: (role) => ({ roleName: role.name }),
+  logPayload: (role) => ({ roleName: role.displayName }),
   statusCode: 201,
 })

@@ -17,6 +17,6 @@ export default createApiHandler({
   ) => useCase.updateRole(context.param.id, context.json),
   transform: (role) => ({ role }),
   logMessage: 'Role updated successfully',
-  logPayload: (role) => ({ roleId: role.id, roleName: role.name }),
+  logPayload: (role) => ({ roleId: role.roleId, roleName: role.displayName }),
   statusCode: 200,
 })
