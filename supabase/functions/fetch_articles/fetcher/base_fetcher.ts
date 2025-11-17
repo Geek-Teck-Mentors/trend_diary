@@ -26,8 +26,7 @@ export abstract class BaseRssFetcher<T> implements ArticleFetcher {
         `Error fetching ${this.mediaName} feed:`,
         feedItemsResult.error,
       );
-      const message =
-        `Failed to fetch ${this.mediaName} feed: ${feedItemsResult.error}`;
+      const message = `Failed to fetch ${this.mediaName} feed`;
       return failure(new MediaFetchError(message));
     }
 
