@@ -30,7 +30,7 @@ export default function AdminPermissions() {
   const { trigger: triggerDeletePermission } = useSWRMutation(
     '/api/permissions',
     async (_key: string, { arg }: { arg: number }) =>
-      apiCall(() => client.permissions[':id'].$delete({ param: { id: arg } })),
+      apiCall(() => client.permissions[':id'].$delete({ param: { id: arg.toString() } })),
   )
 
   const handleCreatePermission = async (resource: string, action: string) => {
