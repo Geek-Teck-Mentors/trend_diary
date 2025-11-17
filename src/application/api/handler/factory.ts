@@ -1,6 +1,7 @@
 import type { Result } from '@yuukihayashi0510/core'
 import { isFailure } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
+import { HTTPException } from 'hono/http-exception'
 import type { ContentfulStatusCode, StatusCode } from 'hono/utils/http-status'
 import type { Env, SessionUser } from '@/application/env'
 import CONTEXT_KEY from '@/application/middleware/context'
@@ -108,6 +109,11 @@ export function createApiHandler<
       user: config.requiresAuth ? c.get(CONTEXT_KEY.SESSION_USER) : undefined,
       logger,
     } as TContext
+
+    // 認証チェック
+    if (config.requiresAuth && !context.user) {
+      throw new HTTPException(401, { message: 'Unauthorized' })
+    }
 
     // 2. UseCase実行
     const useCase = config.createUseCase(rdb)

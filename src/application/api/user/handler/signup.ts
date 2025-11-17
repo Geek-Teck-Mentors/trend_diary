@@ -5,6 +5,7 @@ export default createApiHandler({
   createUseCase: createUserUseCase,
   execute: (useCase, context: RequestContext<unknown, ActiveUserInput>) =>
     useCase.signup(context.json.email, context.json.password),
+  transform: () => ({}),
   logMessage: 'sign up success',
   logPayload: (activeUser) => ({ activeUserId: activeUser.activeUserId.toString() }),
   statusCode: 201,
