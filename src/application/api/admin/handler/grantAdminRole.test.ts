@@ -1,8 +1,11 @@
 import app from '@/application/server'
+import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
 import { GrantAdminRoleResponse } from './grantAdminRole'
+
+const rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
 async function requestPostAdminUser(id: string, sessionId?: string) {
   const url = `/api/admin/users/${id}`
@@ -51,8 +54,11 @@ describe('POST /api/admin/users/:id', () => {
       expect(data.grantedByAdminUserId).toBe(adminUser.adminUserId)
 
       // 実際にAdmin権限が付与されたか確認
-      const isAdmin = await adminUserTestHelper.isAdmin(regularUser.activeUserId)
-      expect(isAdmin).toBe(true)
+      const adminRecord = await rdb.adminUser.findUnique({
+        where: { activeUserId: regularUser.activeUserId },
+      })
+      expect(adminRecord).not.toBeNull()
+      expect(adminRecord?.activeUserId).toBe(regularUser.activeUserId)
     })
   })
 

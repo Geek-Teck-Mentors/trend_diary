@@ -106,14 +106,6 @@ class AdminUserTestHelper {
     }
   }
 
-  async isAdmin(activeUserId: bigint): Promise<boolean> {
-    const result = await this.useCase.isAdmin(activeUserId)
-    if (isFailure(result)) {
-      throw new Error(`Failed to check admin status: ${result.error.message}`)
-    }
-    return result.data
-  }
-
   async getUserList(query?: { searchQuery?: string; page?: number; limit?: number }): Promise<{
     users: Array<{
       activeUserId: bigint
