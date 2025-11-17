@@ -1,13 +1,12 @@
 import {
   type AuthenticatedRequestContext,
-  createSimpleApiHandler,
+  createAuthenticatedApiHandler,
 } from '@/application/api/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
 import { ArticleIdParam } from './readArticle'
 
-export default createSimpleApiHandler({
+export default createAuthenticatedApiHandler({
   createUseCase: createArticleUseCase,
-  requiresAuth: true,
   execute: async (useCase, context: AuthenticatedRequestContext<ArticleIdParam>) => {
     return useCase.deleteAllReadHistory(context.user.activeUserId, context.param.article_id)
   },

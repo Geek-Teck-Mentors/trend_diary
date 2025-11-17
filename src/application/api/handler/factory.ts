@@ -105,6 +105,9 @@ type BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse> = {
   // UseCaseファクトリー
   createUseCase: (rdb: RdbClient) => TUseCase
 
+  // メインロジック
+  execute: (useCase: TUseCase, context: TContext) => Promise<Result<TOutput, Error>>
+
   // レスポンス変換（オプション）
   transform?: (output: TOutput) => TResponse
 
@@ -120,35 +123,24 @@ type BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse> = {
   statusCode: StatusCode
 }
 
+// 認証不要なハンドラーの設定
+type SimpleHandlerConfig<
+  TUseCase,
+  TContext extends RequestContext,
+  TOutput,
+  TResponse = TOutput,
+> = BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse>
+
 // 認証が必要なハンドラーの設定
 type AuthenticatedHandlerConfig<
   TUseCase,
   TContext extends AuthenticatedRequestContext,
   TOutput,
   TResponse = TOutput,
-> = BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse> & {
-  requiresAuth: true
-  execute: (useCase: TUseCase, context: TContext) => Promise<Result<TOutput, Error>>
-}
-
-// 認証が不要なハンドラーの設定
-type UnauthenticatedHandlerConfig<
-  TUseCase,
-  TContext extends RequestContext,
-  TOutput,
-  TResponse = TOutput,
-> = BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse> & {
-  requiresAuth?: false
-  execute: (useCase: TUseCase, context: TContext) => Promise<Result<TOutput, Error>>
-}
-
-// ハンドラー設定の型（Discriminated Union）
-type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> =
-  | AuthenticatedHandlerConfig<TUseCase, TContext & AuthenticatedRequestContext, TOutput, TResponse>
-  | UnauthenticatedHandlerConfig<TUseCase, TContext & RequestContext, TOutput, TResponse>
+> = BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse>
 
 /**
- * シンプルなAPIハンドラーを生成する高階関数
+ * シンプルなAPIハンドラーを生成する高階関数（認証不要）
  *
  * @remarks
  * この関数を使用する際は、リクエストパラメータやボディを期待するルートには
@@ -158,29 +150,13 @@ type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> =
  *
  * @example
  * ```typescript
- * // 基本的な使用例（認証不要）
+ * // 基本的な使用例
  * export default createSimpleApiHandler({
  *   createUseCase: createPrivacyPolicyUseCase,
  *   execute: (useCase, context: RequestContext<unknown, PrivacyPolicyInput>) =>
  *     useCase.createPolicy(context.json.content),
  *   logMessage: 'Policy created',
  *   logPayload: (policy) => ({ version: policy.version }),
- *   statusCode: 201,
- * })
- *
- * // 認証が必要な場合（context.userは型安全にアクセス可能）
- * export default createSimpleApiHandler({
- *   createUseCase: createArticleUseCase,
- *   requiresAuth: true,
- *   execute: async (useCase, context: AuthenticatedRequestContext<ArticleIdParam, ReadHistoryInput>) => {
- *     // context.userは必ず存在し、型アサーション不要
- *     return useCase.createReadHistory(
- *       context.user.activeUserId,
- *       context.param.article_id,
- *       new Date(context.json.read_at),
- *     )
- *   },
- *   transform: () => ({ message: '記事を既読にしました' }),
  *   statusCode: 201,
  * })
  *
@@ -202,10 +178,10 @@ type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> =
  */
 export function createSimpleApiHandler<
   TUseCase,
-  TContext extends RequestContext | AuthenticatedRequestContext,
+  TContext extends RequestContext,
   TOutput,
   TResponse = TOutput,
->(config: HandlerConfig<TUseCase, TContext, TOutput, TResponse>) {
+>(config: SimpleHandlerConfig<TUseCase, TContext, TOutput, TResponse>) {
   return async (c: Context<Env>): Promise<Response> => {
     // 1. コンテキスト準備
     const logger = c.get(CONTEXT_KEY.APP_LOG)
@@ -216,62 +192,6 @@ export function createSimpleApiHandler<
     const validJson = c.req.valid ? c.req.valid('json' as never) : undefined
     const validQuery = c.req.valid ? c.req.valid('query' as never) : undefined
 
-    // 認証が必要な場合の処理
-    if (config.requiresAuth) {
-      const user = c.get(CONTEXT_KEY.SESSION_USER)
-      if (!user) {
-        throw new HTTPException(401, { message: 'Unauthorized' })
-      }
-
-      const authenticatedContext = {
-        param: validParam as ExtractParam<TContext>,
-        json: validJson as ExtractJson<TContext>,
-        query: validQuery as ExtractQuery<TContext>,
-        user,
-        logger,
-      } as TContext
-
-      // 2. UseCase実行
-      const useCase = config.createUseCase(rdb)
-      const result = await config.execute(useCase, authenticatedContext)
-
-      // 3. エラーハンドリング
-      if (isFailure(result)) {
-        throw handleError(result.error, logger)
-      }
-
-      // 4. ロギング
-      if (config.logMessage) {
-        const message =
-          typeof config.logMessage === 'function'
-            ? config.logMessage(result.data, authenticatedContext)
-            : config.logMessage
-
-        let payload: Record<string, unknown>
-        if (config.logPayload) {
-          payload = config.logPayload(result.data, authenticatedContext)
-        } else if (result.data !== undefined) {
-          payload = { data: result.data }
-        } else {
-          payload = {}
-        }
-
-        logger.info({ msg: message, ...payload })
-      }
-
-      // 5. レスポンス変換とレスポンス返却
-      const statusCode = config.statusCode
-
-      // 204 No Contentの場合はボディなしで返す
-      if (statusCode === 204) {
-        return c.body(null, 204)
-      }
-
-      const responseData = config.transform ? config.transform(result.data) : result.data
-      return c.json(responseData, statusCode as ContentfulStatusCode)
-    }
-
-    // 認証が不要な場合の処理
     const context = {
       param: validParam as ExtractParam<TContext>,
       json: validJson as ExtractJson<TContext>,
@@ -299,6 +219,109 @@ export function createSimpleApiHandler<
       let payload: Record<string, unknown>
       if (config.logPayload) {
         payload = config.logPayload(result.data, context)
+      } else if (result.data !== undefined) {
+        payload = { data: result.data }
+      } else {
+        payload = {}
+      }
+
+      logger.info({ msg: message, ...payload })
+    }
+
+    // 5. レスポンス変換とレスポンス返却
+    const statusCode = config.statusCode
+
+    // 204 No Contentの場合はボディなしで返す
+    if (statusCode === 204) {
+      return c.body(null, 204)
+    }
+
+    const responseData = config.transform ? config.transform(result.data) : result.data
+    return c.json(responseData, statusCode as ContentfulStatusCode)
+  }
+}
+
+/**
+ * 認証が必要なAPIハンドラーを生成する高階関数
+ *
+ * @remarks
+ * この関数を使用する際は、リクエストパラメータやボディを期待するルートには
+ * 必ずバリデーションミドルウェア（zodValidator等）を適用してください。
+ * バリデーションミドルウェアが適用されていない場合、param/json/queryがundefinedとなり、
+ * execute関数内でランタイムエラーが発生する可能性があります。
+ *
+ * @example
+ * ```typescript
+ * // 認証が必要な場合（context.userは型安全にアクセス可能）
+ * export default createAuthenticatedApiHandler({
+ *   createUseCase: createArticleUseCase,
+ *   execute: async (useCase, context: AuthenticatedRequestContext<ArticleIdParam, ReadHistoryInput>) => {
+ *     // context.userは必ず存在し、型アサーション不要
+ *     return useCase.createReadHistory(
+ *       context.user.activeUserId,
+ *       context.param.article_id,
+ *       new Date(context.json.read_at),
+ *     )
+ *   },
+ *   transform: () => ({ message: '記事を既読にしました' }),
+ *   logMessage: 'Read history created successfully',
+ *   logPayload: (_result, context) => ({
+ *     activeUserId: context.user.activeUserId,
+ *     articleId: context.param.article_id,
+ *   }),
+ *   statusCode: 201,
+ * })
+ * ```
+ */
+export function createAuthenticatedApiHandler<
+  TUseCase,
+  TContext extends AuthenticatedRequestContext,
+  TOutput,
+  TResponse = TOutput,
+>(config: AuthenticatedHandlerConfig<TUseCase, TContext, TOutput, TResponse>) {
+  return async (c: Context<Env>): Promise<Response> => {
+    // 1. コンテキスト準備
+    const logger = c.get(CONTEXT_KEY.APP_LOG)
+    const rdb = getRdbClient(c.env.DATABASE_URL)
+
+    // 認証チェック
+    const user = c.get(CONTEXT_KEY.SESSION_USER)
+    if (!user) {
+      throw new HTTPException(401, { message: 'Unauthorized' })
+    }
+
+    // バリデーションミドルウェアで検証済みのデータを取得するための型ハック
+    const validParam = c.req.valid ? c.req.valid('param' as never) : undefined
+    const validJson = c.req.valid ? c.req.valid('json' as never) : undefined
+    const validQuery = c.req.valid ? c.req.valid('query' as never) : undefined
+
+    const authenticatedContext = {
+      param: validParam as ExtractParam<TContext>,
+      json: validJson as ExtractJson<TContext>,
+      query: validQuery as ExtractQuery<TContext>,
+      user,
+      logger,
+    } as TContext
+
+    // 2. UseCase実行
+    const useCase = config.createUseCase(rdb)
+    const result = await config.execute(useCase, authenticatedContext)
+
+    // 3. エラーハンドリング
+    if (isFailure(result)) {
+      throw handleError(result.error, logger)
+    }
+
+    // 4. ロギング
+    if (config.logMessage) {
+      const message =
+        typeof config.logMessage === 'function'
+          ? config.logMessage(result.data, authenticatedContext)
+          : config.logMessage
+
+      let payload: Record<string, unknown>
+      if (config.logPayload) {
+        payload = config.logPayload(result.data, authenticatedContext)
       } else if (result.data !== undefined) {
         payload = { data: result.data }
       } else {

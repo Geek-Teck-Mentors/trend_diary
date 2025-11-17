@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import {
   type AuthenticatedRequestContext,
-  createSimpleApiHandler,
+  createAuthenticatedApiHandler,
 } from '@/application/api/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
 
@@ -21,9 +21,8 @@ export const articleIdParamSchema = z.object({
 export type CreateReadHistoryApiInput = z.input<typeof createReadHistoryApiSchema>
 export type ArticleIdParam = z.output<typeof articleIdParamSchema>
 
-export default createSimpleApiHandler({
+export default createAuthenticatedApiHandler({
   createUseCase: createArticleUseCase,
-  requiresAuth: true,
   execute: async (
     useCase,
     context: AuthenticatedRequestContext<ArticleIdParam, CreateReadHistoryApiInput>,
