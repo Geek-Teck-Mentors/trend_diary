@@ -1,32 +1,16 @@
-import { logger } from "../../../logger/logger.ts";
-import { MediaFetchError } from "../error.ts";
-import { ArticleFetcher } from "../model/interface.ts";
-import { failure, success } from "@yuukihayashi0510/core";
-import { FeedItem, QiitaItem } from "../model/types.ts";
-import { fetchRssFeed } from "./fetch.ts";
+import { BaseRssFetcher } from "./base_fetcher.ts";
+import type { FeedItem, QiitaItem } from "../model/types.ts";
 
-export class QiitaFetcher implements ArticleFetcher {
+export class QiitaFetcher extends BaseRssFetcher<QiitaItem> {
   url = "https://qiita.com/popular-items/feed.atom";
+  protected mediaName = "Qiita";
 
-  async fetch() {
-    try {
-      const feedItems = await fetchRssFeed<QiitaItem>(this.url);
-      let params: FeedItem[] = [];
-
-      params = feedItems.map((item) => ({
-        title: item.title,
-        author: item.author,
-        description: item.content,
-        url: item.link,
-      }));
-
-      return success(params);
-    } catch (error: unknown) {
-      logger.error("Error fetching Qiita feed:", error);
-      const message = `Failed to fetch Qiita feed: ${error}`;
-      return failure(
-        new MediaFetchError(message),
-      );
-    }
+  protected mapToFeedItem(item: QiitaItem): FeedItem {
+    return {
+      title: item.title,
+      author: item.author,
+      description: item.content,
+      url: item.link,
+    };
   }
 }
