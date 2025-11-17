@@ -138,8 +138,8 @@ describe('AdminUser UseCase', () => {
         if (isSuccess(result)) {
           expect(result.data.users).toHaveLength(2)
           expect(result.data.total).toBe(2)
-          expect(result.data.users[0].isAdmin).toBe(true)
-          expect(result.data.users[1].isAdmin).toBe(false)
+          expect(result.data.users[0].hasAdminAccess).toBe(true)
+          expect(result.data.users[1].hasAdminAccess).toBe(false)
         }
       })
 

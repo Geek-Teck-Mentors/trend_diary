@@ -16,7 +16,7 @@ export default function AdminLayout() {
       if (res.status === 200) {
         const data = await res.json()
         // Admin権限チェック
-        if (!data.user.isAdmin) {
+        if (!data.user.hasAdminAccess) {
           toast.error('管理者権限が必要です')
           navigate('/')
           return

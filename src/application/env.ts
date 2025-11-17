@@ -6,7 +6,7 @@ export type SessionUser = {
   activeUserId: bigint
   displayName?: Nullable<string>
   email: string
-  isAdmin: boolean
+  hasAdminAccess: boolean
   adminUserId: Nullable<number>
 }
 

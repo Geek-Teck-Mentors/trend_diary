@@ -33,7 +33,7 @@ export default createSimpleApiHandler({
       activeUserId: user.activeUserId.toString(),
       email: user.email,
       displayName: user.displayName,
-      isAdmin: user.isAdmin,
+      hasAdminAccess: user.hasAdminAccess,
       grantedAt: user.grantedAt?.toISOString() || null,
       grantedByAdminUserId: user.grantedByAdminUserId,
       createdAt: user.createdAt.toISOString(),

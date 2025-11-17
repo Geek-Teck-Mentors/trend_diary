@@ -34,7 +34,7 @@ export function toUserListItem(row: UserWithAdminRow) {
     activeUserId: row.activeUserId,
     email: row.email,
     displayName: row.displayName,
-    isAdmin: row.adminUser !== null,
+    hasAdminAccess: row.adminUser !== null,
     grantedAt: row.adminUser?.grantedAt || null,
     grantedByAdminUserId: row.adminUser?.grantedByAdminUserId || null,
     createdAt: row.createdAt,

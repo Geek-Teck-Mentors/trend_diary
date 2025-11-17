@@ -111,7 +111,7 @@ class AdminUserTestHelper {
       activeUserId: bigint
       email: string
       displayName: string | null
-      isAdmin: boolean
+      hasAdminAccess: boolean
       grantedAt: Date | null
       grantedByAdminUserId: number | null
       createdAt: Date

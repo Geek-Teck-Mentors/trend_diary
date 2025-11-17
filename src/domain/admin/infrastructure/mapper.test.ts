@@ -304,7 +304,7 @@ describe('Admin Mapper', () => {
         expect(result.activeUserId).toBe(userWithAdminRow.activeUserId)
         expect(result.email).toBe(userWithAdminRow.email)
         expect(result.displayName).toBe(userWithAdminRow.displayName)
-        expect(result.isAdmin).toBe(true)
+        expect(result.hasAdminAccess).toBe(true)
         expect(result.grantedAt).toEqual(userWithAdminRow.adminUser?.grantedAt)
         expect(result.grantedByAdminUserId).toBe(userWithAdminRow.adminUser?.grantedByAdminUserId)
         expect(result.createdAt).toEqual(userWithAdminRow.createdAt)
@@ -323,7 +323,7 @@ describe('Admin Mapper', () => {
         expect(result.activeUserId).toBe(userWithAdminRow.activeUserId)
         expect(result.email).toBe(userWithAdminRow.email)
         expect(result.displayName).toBe(userWithAdminRow.displayName)
-        expect(result.isAdmin).toBe(false)
+        expect(result.hasAdminAccess).toBe(false)
         expect(result.grantedAt).toBeNull()
         expect(result.grantedByAdminUserId).toBeNull()
         expect(result.createdAt).toEqual(userWithAdminRow.createdAt)
@@ -341,7 +341,7 @@ describe('Admin Mapper', () => {
 
         // Assert
         expect(result.displayName).toBeNull()
-        expect(result.isAdmin).toBe(false)
+        expect(result.hasAdminAccess).toBe(false)
         expect(result.grantedAt).toBeNull()
         expect(result.grantedByAdminUserId).toBeNull()
       })
@@ -496,7 +496,7 @@ describe('Admin Mapper', () => {
 
     describe('例外・制約違反', () => {
       describe('Admin権限フラグの正確性テスト', () => {
-        it('adminUserがnullの場合isAdminがfalseになること', () => {
+        it('adminUserがnullの場合hasAdminAccessがfalseになること', () => {
           // Arrange
           const userWithAdminRow = createMockUserWithAdminRow({
             adminUser: null,
@@ -506,12 +506,12 @@ describe('Admin Mapper', () => {
           const result = toUserListItem(userWithAdminRow)
 
           // Assert
-          expect(result.isAdmin).toBe(false)
+          expect(result.hasAdminAccess).toBe(false)
           expect(result.grantedAt).toBeNull()
           expect(result.grantedByAdminUserId).toBeNull()
         })
 
-        it('adminUserが存在する場合isAdminがtrueになること', () => {
+        it('adminUserが存在する場合hasAdminAccessがtrueになること', () => {
           // Arrange
           const userWithAdminRow = createMockUserWithAdminRow({
             adminUser: {
@@ -525,7 +525,7 @@ describe('Admin Mapper', () => {
           const result = toUserListItem(userWithAdminRow)
 
           // Assert
-          expect(result.isAdmin).toBe(true)
+          expect(result.hasAdminAccess).toBe(true)
           expect(result.grantedAt).not.toBeNull()
           expect(result.grantedByAdminUserId).not.toBeNull()
         })
