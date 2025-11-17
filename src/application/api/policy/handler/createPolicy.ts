@@ -1,20 +1,13 @@
-import { isFailure } from '@yuukihayashi0510/core'
-import CONTEXT_KEY from '@/application/middleware/context'
-import { ZodValidatedContext } from '@/application/middleware/zodValidator'
-import { handleError } from '@/common/errors'
-import { createPrivacyPolicyUseCase, PrivacyPolicyInput } from '@/domain/policy'
-import getRdbClient from '@/infrastructure/rdb'
+import { createApiHandler } from '@/application/api/handler/factory'
+import { createPrivacyPolicyUseCase, type PrivacyPolicyInput } from '@/domain/policy'
 
-export default async function createPolicy(c: ZodValidatedContext<PrivacyPolicyInput>) {
-  const logger = c.get(CONTEXT_KEY.APP_LOG)
-  const valid = c.req.valid('json')
-
-  const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createPrivacyPolicyUseCase(rdb)
-
-  const result = await useCase.createPolicy(valid.content)
-  if (isFailure(result)) throw handleError(result.error, logger)
-  logger.info('Policy created', { policy: result.data.version })
-
-  return c.json(result.data, 201)
-}
+export default createApiHandler<
+  ReturnType<typeof createPrivacyPolicyUseCase>,
+  unknown,
+  PrivacyPolicyInput
+>({
+  createUseCase: createPrivacyPolicyUseCase,
+  execute: (useCase, { json }) => useCase.createPolicy(json.content),
+  logMessage: (policy) => `Policy created: version ${policy.version}`,
+  statusCode: 201,
+})
