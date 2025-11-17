@@ -56,6 +56,29 @@ class PermissionTestHelper {
     return result.data.endpointId
   }
 
+  async assignPermissionsToRole(roleId: number, permissionIds: number[]): Promise<void> {
+    const result = await this.roleUseCase.updateRolePermissions(roleId, permissionIds)
+    if (isFailure(result)) {
+      throw new Error(`Failed to assign permissions to role: ${result.error.message}`)
+    }
+  }
+
+  async assignPermissionsToEndpoint(endpointId: number, permissionIds: number[]): Promise<void> {
+    const result = await this.endpointUseCase.updateEndpointPermissions(endpointId, permissionIds)
+    if (isFailure(result)) {
+      throw new Error(`Failed to assign permissions to endpoint: ${result.error.message}`)
+    }
+  }
+
+  async assignRoleToUser(activeUserId: bigint, roleId: number): Promise<void> {
+    await this.rdb.userRole.create({
+      data: {
+        activeUserId,
+        roleId,
+      },
+    })
+  }
+
   async disconnect(): Promise<void> {
     await this.rdb.$disconnect()
   }

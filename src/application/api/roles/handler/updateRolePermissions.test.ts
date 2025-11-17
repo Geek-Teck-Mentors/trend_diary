@@ -1,22 +1,36 @@
 import { faker } from '@faker-js/faker'
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import permissionTestHelper from '@/test/helper/permissionTestHelper'
 
 describe('PATCH /api/roles/:id/permissions', () => {
   let sessionId: string
+  let activeUserId: bigint
   let testRoleId: number
   let testPermissionId1: number
   let testPermissionId2: number
 
   async function setupTestData(): Promise<void> {
-    // 管理者ユーザー作成・ログイン
-    const adminUser = await adminUserTestHelper.createAdminUser(
-      faker.internet.email(),
-      'password123',
+    // ユーザー作成・ログイン
+    const email = faker.internet.email()
+    await activeUserTestHelper.create(email, 'password123')
+    const loginData = await activeUserTestHelper.login(email, 'password123')
+    activeUserId = loginData.activeUserId
+    sessionId = loginData.sessionId
+
+    // エンドポイントと権限を作成
+    const endpointId = await permissionTestHelper.createEndpoint(
+      '/api/roles/:id/permissions',
+      'PATCH',
     )
-    sessionId = adminUser.sessionId
+    const permissionId = await permissionTestHelper.createPermission('roles', 'update_permissions')
+    await permissionTestHelper.assignPermissionsToEndpoint(endpointId, [permissionId])
+
+    // ロールを作成してユーザーに割り当て
+    const adminRoleId = await permissionTestHelper.createRole('管理者', '管理者ロール')
+    await permissionTestHelper.assignPermissionsToRole(adminRoleId, [permissionId])
+    await permissionTestHelper.assignRoleToUser(activeUserId, adminRoleId)
 
     // テストロールと権限作成
     testRoleId = await permissionTestHelper.createRole('テストロール', 'テスト用のロール')
@@ -48,13 +62,13 @@ describe('PATCH /api/roles/:id/permissions', () => {
   }
 
   beforeEach(async () => {
-    await adminUserTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     await permissionTestHelper.cleanUp()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await adminUserTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     await permissionTestHelper.cleanUp()
   })
 

@@ -1,22 +1,39 @@
 import { faker } from '@faker-js/faker'
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import permissionTestHelper from '@/test/helper/permissionTestHelper'
 
 describe('PATCH /api/endpoints/:id/permissions', () => {
   let sessionId: string
+  let activeUserId: bigint
   let testEndpointId: number
   let testPermissionId1: number
   let testPermissionId2: number
 
   async function setupTestData(): Promise<void> {
-    // 管理者ユーザー作成・ログイン
-    const adminUser = await adminUserTestHelper.createAdminUser(
-      faker.internet.email(),
-      'password123',
+    // ユーザー作成・ログイン
+    const email = faker.internet.email()
+    await activeUserTestHelper.create(email, 'password123')
+    const loginData = await activeUserTestHelper.login(email, 'password123')
+    activeUserId = loginData.activeUserId
+    sessionId = loginData.sessionId
+
+    // エンドポイントと権限を作成
+    const authEndpointId = await permissionTestHelper.createEndpoint(
+      '/api/endpoints/:id/permissions',
+      'PATCH',
     )
-    sessionId = adminUser.sessionId
+    const permissionId = await permissionTestHelper.createPermission(
+      'endpoints',
+      'update_permissions',
+    )
+    await permissionTestHelper.assignPermissionsToEndpoint(authEndpointId, [permissionId])
+
+    // ロールを作成してユーザーに割り当て
+    const adminRoleId = await permissionTestHelper.createRole('管理者', '管理者ロール')
+    await permissionTestHelper.assignPermissionsToRole(adminRoleId, [permissionId])
+    await permissionTestHelper.assignRoleToUser(activeUserId, adminRoleId)
 
     // テストエンドポイントと権限作成
     testEndpointId = await permissionTestHelper.createEndpoint('/test', 'GET')
@@ -48,13 +65,13 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
   }
 
   beforeEach(async () => {
-    await adminUserTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     await permissionTestHelper.cleanUp()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await adminUserTestHelper.cleanUp()
+    await activeUserTestHelper.cleanUp()
     await permissionTestHelper.cleanUp()
   })
 
