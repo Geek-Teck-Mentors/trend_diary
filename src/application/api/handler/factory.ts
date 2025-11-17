@@ -9,7 +9,7 @@ import type { LoggerType } from '@/common/logger'
 import getRdbClient, { type RdbClient } from '@/infrastructure/rdb'
 
 // コンテキストの型定義
-type RequestContext<TParam = unknown, TJson = unknown, TQuery = unknown> = {
+export type RequestContext<TParam = unknown, TJson = unknown, TQuery = unknown> = {
   param: TParam
   json: TJson
   query: TQuery
@@ -17,8 +17,13 @@ type RequestContext<TParam = unknown, TJson = unknown, TQuery = unknown> = {
   logger: LoggerType
 }
 
+// RequestContextから型パラメータを抽出するヘルパー型
+type ExtractParam<T> = T extends RequestContext<infer P, any, any> ? P : unknown
+type ExtractJson<T> = T extends RequestContext<any, infer J, any> ? J : unknown
+type ExtractQuery<T> = T extends RequestContext<any, any, infer Q> ? Q : unknown
+
 // ハンドラー設定の型
-type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> = {
+type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse = TOutput> = {
   // UseCaseファクトリー
   createUseCase: (rdb: RdbClient) => TUseCase
 
@@ -53,7 +58,8 @@ type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> = {
  * // 基本的な使用例
  * export default createApiHandler({
  *   createUseCase: createPrivacyPolicyUseCase,
- *   execute: (useCase, { json }) => useCase.createPolicy(json.content),
+ *   execute: (useCase, context: RequestContext<unknown, PrivacyPolicyInput>) =>
+ *     useCase.createPolicy(context.json.content),
  *   logMessage: (policy) => `Policy created: version ${policy.version}`,
  *   statusCode: 201,
  * })
@@ -61,7 +67,8 @@ type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> = {
  * // contextを使用したログ（void型の場合に有用）
  * export default createApiHandler({
  *   createUseCase: createPrivacyPolicyUseCase,
- *   execute: (useCase, { param }) => useCase.deletePolicy(param.version),
+ *   execute: (useCase, context: RequestContext<VersionParam>) =>
+ *     useCase.deletePolicy(context.param.version),
  *   logMessage: (_, { param }) => `Policy deleted: version ${param.version}`,
  *   statusCode: 204,
  * })
@@ -69,12 +76,10 @@ type HandlerConfig<TUseCase, TContext, TOutput, TResponse = TOutput> = {
  */
 export function createApiHandler<
   TUseCase,
-  TParam = unknown,
-  TJson = unknown,
-  TQuery = unknown,
-  TOutput = unknown,
+  TContext extends RequestContext,
+  TOutput,
   TResponse = TOutput,
->(config: HandlerConfig<TUseCase, RequestContext<TParam, TJson, TQuery>, TOutput, TResponse>) {
+>(config: HandlerConfig<TUseCase, TContext, TOutput, TResponse>) {
   return async (c: Context<Env>): Promise<Response> => {
     // 1. コンテキスト準備
     const logger = c.get(CONTEXT_KEY.APP_LOG)
@@ -85,13 +90,13 @@ export function createApiHandler<
     const validJson = c.req.valid ? c.req.valid('json' as never) : undefined
     const validQuery = c.req.valid ? c.req.valid('query' as never) : undefined
 
-    const context: RequestContext<TParam, TJson, TQuery> = {
-      param: validParam as TParam,
-      json: validJson as TJson,
-      query: validQuery as TQuery,
+    const context = {
+      param: validParam as ExtractParam<TContext>,
+      json: validJson as ExtractJson<TContext>,
+      query: validQuery as ExtractQuery<TContext>,
       user: config.requiresAuth ? c.get(CONTEXT_KEY.SESSION_USER) : undefined,
       logger,
-    }
+    } as TContext
 
     // 2. UseCase実行
     const useCase = config.createUseCase(rdb)

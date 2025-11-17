@@ -1,4 +1,4 @@
-import { createApiHandler } from '@/application/api/handler/factory'
+import { createApiHandler, type RequestContext } from '@/application/api/handler/factory'
 import type { OffsetPaginationParams, OffsetPaginationResult } from '@/common/pagination'
 import { createPrivacyPolicyUseCase, type PrivacyPolicy } from '@/domain/policy'
 
@@ -22,16 +22,10 @@ function convertToResponse(policy: PrivacyPolicy): PolicyResponse {
   }
 }
 
-export default createApiHandler<
-  ReturnType<typeof createPrivacyPolicyUseCase>,
-  unknown,
-  unknown,
-  OffsetPaginationParams,
-  OffsetPaginationResult<PrivacyPolicy>,
-  PolicyListResponse
->({
+export default createApiHandler({
   createUseCase: createPrivacyPolicyUseCase,
-  execute: (useCase, { query }) => useCase.getAllPolicies(query.page, query.limit),
+  execute: (useCase, context: RequestContext<unknown, unknown, OffsetPaginationParams>) =>
+    useCase.getAllPolicies(context.query.page, context.query.limit),
   transform: (data) => ({
     data: data.data.map(convertToResponse),
     page: data.page,
