@@ -4,7 +4,7 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { handleError } from '@/common/errors'
 import { createPermissionUseCase } from '@/domain/permission'
 import getRdbClient from '@/infrastructure/rdb'
-import type { Env } from '../../../../env'
+import type { Env } from '@/application/env'
 
 export default async function getPermissions(c: Context<Env>) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
