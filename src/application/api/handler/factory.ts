@@ -1,6 +1,6 @@
 import type { Result } from '@yuukihayashi0510/core'
 import { isFailure } from '@yuukihayashi0510/core'
-import type { Context } from 'hono'
+import type { Context, StatusCode } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import type { Env, SessionUser } from '@/application/env'
 import CONTEXT_KEY from '@/application/middleware/context'
@@ -42,7 +42,7 @@ type HandlerConfig<TUseCase, TContext extends RequestContext, TOutput, TResponse
   logPayload?: (output: TOutput, context: TContext) => Record<string, unknown>
 
   // HTTPステータスコード（必須）
-  statusCode: number
+  statusCode: StatusCode
 
   // 認証が必要か
   requiresAuth?: boolean
