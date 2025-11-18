@@ -8,7 +8,9 @@ export interface Query {
   findActiveById(id: bigint): AsyncResult<Nullable<CurrentUser>, Error>
   findActiveByEmail(email: string): AsyncResult<Nullable<CurrentUser>, Error>
   findActiveByEmailForAuth(email: string): AsyncResult<Nullable<ActiveUser>, Error>
-  findActiveBySessionId(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error>
+  findActiveBySessionId(
+    sessionId: string,
+  ): AsyncResult<Nullable<CurrentUser & { hasAdminAccess: boolean }>, Error>
   findActiveByAuthenticationId(authenticationId: string): AsyncResult<Nullable<CurrentUser>, Error>
 }
 
