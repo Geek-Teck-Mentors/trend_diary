@@ -21,7 +21,6 @@ function createMockActiveUser(email: string, authenticationId: string): ActiveUs
     lastLogin: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    adminUserId: null,
   }
 }
 

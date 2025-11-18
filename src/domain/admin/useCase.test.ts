@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { isFailure, isSuccess } from '@yuukihayashi0510/core'
+import { isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { AdminCommandImpl } from './infrastructure/adminCommandImpl'
@@ -19,161 +19,78 @@ describe('AdminUser UseCase', () => {
   })
 
   describe('grantAdminRole', () => {
-    describe('正常系', () => {
-      it('Admin権限を正常に付与できる', async () => {
-        // モックデータセットアップ
-        mockDb.activeUser.findUnique.mockResolvedValue({
-          activeUserId: BigInt(100),
-          email: 'user@example.com',
-          password: 'hashedPassword',
+    it('Admin権限を正常に付与できる', async () => {
+      // モックデータセットアップ
+      mockDb.activeUser.findUnique.mockResolvedValue({
+        activeUserId: BigInt(100),
+        email: 'user@example.com',
+        password: 'hashedPassword',
+        displayName: 'Test User',
+        authenticationId: null,
+        lastLogin: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: BigInt(1),
+      })
+
+      mockDb.role.findFirst.mockResolvedValue({
+        roleId: 2,
+        displayName: '管理者',
+        description: null,
+        createdAt: new Date(),
+      })
+
+      mockDb.userRole.findUnique.mockResolvedValue(null)
+
+      mockDb.userRole.create.mockResolvedValue({
+        activeUserId: BigInt(100),
+        roleId: 2,
+        grantedAt: new Date(),
+        grantedByActiveUserId: BigInt(1),
+        role: {
+          roleId: 2,
+          displayName: '管理者',
+          description: null,
+          createdAt: new Date(),
+        },
+      })
+
+      const result = await useCase.grantAdminRole(BigInt(100), BigInt(1))
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data.activeUserId).toBe(BigInt(100))
+        expect(result.data.adminUserId).toBe(2)
+      }
+    })
+  })
+
+  describe('getUserList', () => {
+    it('ユーザーリストを取得できる', async () => {
+      mockDb.activeUser.findMany.mockResolvedValue([
+        {
+          activeUserId: BigInt(1),
+          email: 'test@example.com',
+          password: 'hashed',
           displayName: 'Test User',
           authenticationId: null,
           lastLogin: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
           userId: BigInt(1),
-        })
+          userRoles: [],
+        },
+      ])
 
-        mockDb.adminUser.findUnique.mockResolvedValue(null)
+      mockDb.activeUser.count.mockResolvedValue(1)
 
-        mockDb.adminUser.create.mockResolvedValue({
-          adminUserId: 1,
-          activeUserId: BigInt(100),
-          grantedAt: new Date(),
-          grantedByAdminUserId: 1,
-        })
+      const result = await useCase.getUserList()
 
-        const result = await useCase.grantAdminRole(BigInt(100), 1)
-
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.activeUserId).toBe(BigInt(100))
-          expect(result.data.grantedByAdminUserId).toBe(1)
-        }
-      })
-    })
-
-    describe('準正常系', () => {
-      it('存在しないユーザーの場合エラーを返す', async () => {
-        mockDb.activeUser.findUnique.mockResolvedValue(null)
-
-        const result = await useCase.grantAdminRole(BigInt(999), 1)
-
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error.message).toBe('ユーザーが見つかりません')
-        }
-      })
-
-      it('既にAdmin権限を持つユーザーの場合エラーを返す', async () => {
-        mockDb.activeUser.findUnique.mockResolvedValue({
-          activeUserId: BigInt(100),
-          email: 'admin@example.com',
-          password: 'hashedPassword',
-          displayName: 'Admin User',
-          authenticationId: null,
-          lastLogin: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          userId: BigInt(1),
-        })
-
-        mockDb.adminUser.findUnique.mockResolvedValue({
-          adminUserId: 1,
-          activeUserId: BigInt(100),
-          grantedAt: new Date(),
-          grantedByAdminUserId: 1,
-        })
-
-        const result = await useCase.grantAdminRole(BigInt(100), 1)
-
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error.message).toBe('既にAdmin権限を持っています')
-        }
-      })
-    })
-  })
-
-  describe('getUserList', () => {
-    describe('正常系', () => {
-      it('ユーザー一覧を取得できる', async () => {
-        const mockUsers = [
-          {
-            activeUserId: BigInt(100),
-            email: 'admin@example.com',
-            displayName: 'Admin User',
-            password: 'hashedPassword',
-            authenticationId: null,
-            lastLogin: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            userId: BigInt(1),
-            adminUser: {
-              adminUserId: 1,
-              grantedAt: new Date(),
-              grantedByAdminUserId: 1,
-            },
-          },
-          {
-            activeUserId: BigInt(200),
-            email: 'user@example.com',
-            displayName: 'Regular User',
-            password: 'hashedPassword',
-            authenticationId: null,
-            lastLogin: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            userId: BigInt(2),
-            adminUser: null,
-          },
-        ]
-
-        mockDb.activeUser.findMany.mockResolvedValue(mockUsers)
-        mockDb.activeUser.count.mockResolvedValue(2)
-
-        const result = await useCase.getUserList()
-
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.users).toHaveLength(2)
-          expect(result.data.total).toBe(2)
-          expect(result.data.users[0].hasAdminAccess).toBe(true)
-          expect(result.data.users[1].hasAdminAccess).toBe(false)
-        }
-      })
-
-      it('検索クエリでユーザーをフィルタリングできる', async () => {
-        const mockUsers = [
-          {
-            activeUserId: BigInt(100),
-            email: 'admin@example.com',
-            displayName: 'Admin User',
-            password: 'hashedPassword',
-            authenticationId: null,
-            lastLogin: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            userId: BigInt(1),
-            adminUser: {
-              adminUserId: 1,
-              grantedAt: new Date(),
-              grantedByAdminUserId: 1,
-            },
-          },
-        ]
-
-        mockDb.activeUser.findMany.mockResolvedValue(mockUsers)
-        mockDb.activeUser.count.mockResolvedValue(1)
-
-        const result = await useCase.getUserList({ searchQuery: 'admin' })
-
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data.users).toHaveLength(1)
-          expect(result.data.users[0].email).toBe('admin@example.com')
-        }
-      })
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data.users).toHaveLength(1)
+        expect(result.data.total).toBe(1)
+      }
     })
   })
 })

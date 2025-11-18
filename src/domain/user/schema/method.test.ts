@@ -13,7 +13,6 @@ function makeActiveUser(overrides: Partial<ActiveUser> = {}): ActiveUser {
     // lastLogin は省略可能
     createdAt: new Date('2020-01-01T00:00:00Z'),
     updatedAt: new Date('2020-01-02T00:00:00Z'),
-    adminUserId: null,
   }
   return { ...base, ...overrides }
 }

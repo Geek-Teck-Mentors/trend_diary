@@ -26,6 +26,7 @@ describe('PermissionQueryImpl', () => {
           activeUserId: BigInt(1),
           roleId: 1,
           grantedAt: new Date(),
+          grantedByActiveUserId: null,
         },
       ])
 

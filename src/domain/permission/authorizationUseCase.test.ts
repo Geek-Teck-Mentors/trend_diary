@@ -170,8 +170,8 @@ describe('AuthorizationUseCase', () => {
 
       // ユーザーは2つのロールを持つ
       mockDb.userRole.findMany.mockResolvedValue([
-        { activeUserId: BigInt(1), roleId: 1, grantedAt: new Date() },
-        { activeUserId: BigInt(1), roleId: 2, grantedAt: new Date() },
+        { activeUserId: BigInt(1), roleId: 1, grantedAt: new Date(), grantedByActiveUserId: null },
+        { activeUserId: BigInt(1), roleId: 2, grantedAt: new Date(), grantedByActiveUserId: null },
       ])
 
       // ロール2が必要な権限を持つ
