@@ -140,6 +140,8 @@ describe('AdminQueryImpl', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // hasAdminPermissionsで使用する$queryRawのデフォルトmock（管理者権限なし）
+    mockDb.$queryRaw.mockResolvedValue([{ count: 0n }])
     query = new AdminQueryImpl(mockDb)
   })
 
