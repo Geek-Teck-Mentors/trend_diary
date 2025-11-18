@@ -74,7 +74,9 @@ export default class QueryImpl implements Query {
     })
   }
 
-  async findActiveBySessionId(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error> {
+  async findActiveBySessionId(
+    sessionId: string,
+  ): AsyncResult<Nullable<CurrentUser & { hasAdminAccess: boolean }>, Error> {
     const sessionResult = await wrapAsyncCall(() =>
       this.db.session.findFirst({
         where: {
