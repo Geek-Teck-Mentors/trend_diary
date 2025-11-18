@@ -15,7 +15,9 @@ describe('Admin Mapper', () => {
         displayName: 'テストユーザー',
         authenticationId: null,
         createdAt: now,
-        userRoles: [],
+        hasAdminAccess: false,
+        adminGrantedAt: null,
+        adminGrantedByUserId: null,
         ...overrides,
       }
     }
@@ -25,25 +27,9 @@ describe('Admin Mapper', () => {
         // Arrange
         const grantedAt = new Date('2024-01-10T10:00:00.000Z')
         const userWithRolesRow = createMockUserWithRolesRow({
-          userRoles: [
-            {
-              roleId: 1,
-              grantedAt,
-              grantedByActiveUserId: 2n,
-              role: {
-                roleId: 1,
-                displayName: '管理者',
-                rolePermissions: [
-                  {
-                    permission: {
-                      resource: 'user',
-                      action: 'list',
-                    },
-                  },
-                ],
-              },
-            },
-          ],
+          hasAdminAccess: true,
+          adminGrantedAt: grantedAt,
+          adminGrantedByUserId: 2n,
         })
 
         // Act
@@ -62,25 +48,9 @@ describe('Admin Mapper', () => {
       it('privacy_policy権限を持つユーザーもAdmin判定されること', () => {
         // Arrange
         const userWithRolesRow = createMockUserWithRolesRow({
-          userRoles: [
-            {
-              roleId: 2,
-              grantedAt: new Date(),
-              grantedByActiveUserId: null,
-              role: {
-                roleId: 2,
-                displayName: 'ポリシー管理者',
-                rolePermissions: [
-                  {
-                    permission: {
-                      resource: 'privacy_policy',
-                      action: 'create',
-                    },
-                  },
-                ],
-              },
-            },
-          ],
+          hasAdminAccess: true,
+          adminGrantedAt: new Date(),
+          adminGrantedByUserId: null,
         })
 
         // Act
@@ -93,25 +63,9 @@ describe('Admin Mapper', () => {
       it('Admin権限を持たないユーザーデータで正確にマッピングされること', () => {
         // Arrange
         const userWithRolesRow = createMockUserWithRolesRow({
-          userRoles: [
-            {
-              roleId: 3,
-              grantedAt: new Date(),
-              grantedByActiveUserId: null,
-              role: {
-                roleId: 3,
-                displayName: '一般ユーザー',
-                rolePermissions: [
-                  {
-                    permission: {
-                      resource: 'article',
-                      action: 'list',
-                    },
-                  },
-                ],
-              },
-            },
-          ],
+          hasAdminAccess: false,
+          adminGrantedAt: null,
+          adminGrantedByUserId: null,
         })
 
         // Act
@@ -131,7 +85,7 @@ describe('Admin Mapper', () => {
         // Arrange
         const userWithRolesRow = createMockUserWithRolesRow({
           displayName: null,
-          userRoles: [],
+          hasAdminAccess: false,
         })
 
         // Act
@@ -145,25 +99,9 @@ describe('Admin Mapper', () => {
       it('grantedByActiveUserIdがnullの場合も正常に処理されること', () => {
         // Arrange
         const userWithRolesRow = createMockUserWithRolesRow({
-          userRoles: [
-            {
-              roleId: 1,
-              grantedAt: new Date(),
-              grantedByActiveUserId: null,
-              role: {
-                roleId: 1,
-                displayName: '管理者',
-                rolePermissions: [
-                  {
-                    permission: {
-                      resource: 'user',
-                      action: 'grant_admin',
-                    },
-                  },
-                ],
-              },
-            },
-          ],
+          hasAdminAccess: true,
+          adminGrantedAt: new Date(),
+          adminGrantedByUserId: null,
         })
 
         // Act

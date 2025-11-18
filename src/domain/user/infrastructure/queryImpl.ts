@@ -10,7 +10,7 @@ import { hasAdminPermissions } from './permissionChecker'
 export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
-  async findActiveById(id: bigint): AsyncResult<Nullable<ActiveUserWithoutPassword>, Error> {
+  async findActiveById(id: bigint): AsyncResult<Nullable<CurrentUser>, Error> {
     const activeUserResult = await wrapAsyncCall(() =>
       this.db.activeUser.findUnique({
         where: { activeUserId: id },
@@ -28,7 +28,7 @@ export default class QueryImpl implements Query {
     return success(mapToActiveUser(activeUser))
   }
 
-  async findActiveByEmail(email: string): AsyncResult<Nullable<ActiveUserWithoutPassword>, Error> {
+  async findActiveByEmail(email: string): AsyncResult<Nullable<CurrentUser>, Error> {
     const activeUserResult = await wrapAsyncCall(() =>
       this.db.activeUser.findUnique({
         where: { email },
@@ -104,7 +104,7 @@ export default class QueryImpl implements Query {
 
   async findActiveByAuthenticationId(
     authenticationId: string,
-  ): AsyncResult<Nullable<ActiveUserWithoutPassword>, Error> {
+  ): AsyncResult<Nullable<CurrentUser>, Error> {
     const activeUserResult = await wrapAsyncCall(() =>
       this.db.activeUser.findUnique({
         where: { authenticationId },

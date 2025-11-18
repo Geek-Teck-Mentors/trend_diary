@@ -52,7 +52,7 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
     activeUserId: result.data.activeUserId,
     displayName: result.data.displayName,
     email: result.data.email,
-    hasAdminAccess: result.data.hasAdminAccess,
+    hasAdminAccess: result.data.hasAdminAccess ?? false,
   }
 
   c.set(CONTEXT_KEY.SESSION_USER, sessionUser)
