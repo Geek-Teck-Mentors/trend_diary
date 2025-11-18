@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { findAdminRole } from '@/domain/user/infrastructure/permissionChecker'
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
 import { toUserListItem, UserWithRolesRow } from './mapper'
+import { findAdminRole } from './permissionChecker'
 
 export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
