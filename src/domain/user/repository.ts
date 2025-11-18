@@ -7,6 +7,7 @@ import type { ActiveUser, ActiveUserWithoutPassword, CurrentUser } from './schem
 export interface Query {
   findActiveById(id: bigint): AsyncResult<Nullable<ActiveUserWithoutPassword>, Error>
   findActiveByEmail(email: string): AsyncResult<Nullable<ActiveUserWithoutPassword>, Error>
+  findActiveByEmailForAuth(email: string): AsyncResult<Nullable<ActiveUser>, Error>
   findActiveBySessionId(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error>
   findActiveByAuthenticationId(
     authenticationId: string,
@@ -14,14 +15,17 @@ export interface Query {
 }
 
 export interface Command {
-  createActive(email: string, hashedPassword: string): AsyncResult<ActiveUser, ServerError>
+  createActive(
+    email: string,
+    hashedPassword: string,
+  ): AsyncResult<ActiveUserWithoutPassword, ServerError>
   createActiveWithAuthenticationId(
     email: string,
     hashedPassword: string,
     authenticationId: string,
     displayName?: string | null,
-  ): AsyncResult<ActiveUser, ServerError>
-  saveActive(activeUser: ActiveUser): AsyncResult<ActiveUser, ServerError>
+  ): AsyncResult<ActiveUserWithoutPassword, ServerError>
+  saveActive(activeUser: ActiveUser): AsyncResult<ActiveUserWithoutPassword, ServerError>
   createSession(
     input: CreateSessionInput,
   ): AsyncResult<{ sessionId: string; expiresAt: Date }, ServerError>

@@ -36,7 +36,6 @@ describe('mapToActiveUser', () => {
       expect(result.activeUserId).toBe(rdbActiveUser.activeUserId)
       expect(result.userId).toBe(rdbActiveUser.userId)
       expect(result.email).toBe(rdbActiveUser.email)
-      expect(result.password).toBe(rdbActiveUser.password)
       expect(result.displayName).toBe(rdbActiveUser.displayName)
       expect(result.lastLogin).toEqual(rdbActiveUser.lastLogin)
       expect(result.createdAt).toEqual(rdbActiveUser.createdAt)
@@ -58,7 +57,6 @@ describe('mapToActiveUser', () => {
       expect(result.activeUserId).toBe(rdbActiveUser.activeUserId)
       expect(result.userId).toBe(rdbActiveUser.userId)
       expect(result.email).toBe(rdbActiveUser.email)
-      expect(result.password).toBe(rdbActiveUser.password)
       expect(result.displayName).toBeNull()
       expect(result.lastLogin).toBeUndefined() // null -> undefined変換
       expect(result.createdAt).toEqual(rdbActiveUser.createdAt)
@@ -87,7 +85,6 @@ describe('mapToActiveUser', () => {
       expect(result.activeUserId).toBe(rdbActiveUser.activeUserId)
       expect(result.userId).toBe(rdbActiveUser.userId)
       expect(result.email).toBe(rdbActiveUser.email)
-      expect(result.password).toBe(rdbActiveUser.password)
       expect(result.displayName).toBe(rdbActiveUser.displayName)
     })
   })
@@ -209,12 +206,10 @@ describe('mapToActiveUser', () => {
 
           // Assert
           expect(result.email).toBe(email)
-          expect(result.password).toBe(password)
           expect(result.displayName).toBe(displayName)
 
           // 文字列長制約の確認（1024文字以内）
           expect(result.email.length).toBeLessThanOrEqual(1024)
-          expect(result.password.length).toBeLessThanOrEqual(1024)
           if (result.displayName) {
             expect(result.displayName.length).toBeLessThanOrEqual(1024)
           }
@@ -406,15 +401,10 @@ describe('mapToActiveUser', () => {
 
         // Assert
         expect(result.email).toBe(specialEmail)
-        expect(result.password).toBe(specialPassword)
         // 特殊文字が保持されることを確認
         expect(result.email).toContain('+')
         expect(result.email).toContain('.')
         expect(result.email).toContain('-')
-        expect(result.password).toContain('$')
-        expect(result.password).toContain('/')
-        expect(result.password).toContain('+')
-        expect(result.password).toContain('=')
       })
 
       it('日本語・絵文字を含むdisplayNameが正確にマッピングされること', () => {
