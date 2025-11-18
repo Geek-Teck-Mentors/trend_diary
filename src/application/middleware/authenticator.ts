@@ -6,7 +6,7 @@ import { ContentfulStatusCode } from 'hono/utils/http-status'
 import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants'
 import { ClientError, ServerError } from '@/common/errors'
-import { hasAdminPermissions } from '@/domain/admin/infrastructure/permissionChecker'
+import { createAdminQuery } from '@/domain/admin'
 import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env, SessionUser } from '../env'
@@ -50,7 +50,8 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   // 管理者権限をチェック
-  const hasAdminAccess = await hasAdminPermissions(rdb, result.data.activeUserId)
+  const adminQuery = createAdminQuery(rdb)
+  const hasAdminAccess = await adminQuery.hasAdminPermissions(result.data.activeUserId)
 
   const sessionUser: SessionUser = {
     activeUserId: result.data.activeUserId,

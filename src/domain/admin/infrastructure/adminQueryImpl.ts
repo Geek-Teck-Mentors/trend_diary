@@ -5,10 +5,25 @@ import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
 import { toUserListItem, UserWithRolesRow } from './mapper'
-import { findAdminRole } from './permissionChecker'
+import { ADMIN_ROLE_NAMES, findAdminRole } from './permissionChecker'
 
 export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
+
+  async hasAdminPermissions(activeUserId: bigint): Promise<boolean> {
+    const userRoles = await this.rdb.userRole.findMany({
+      where: { activeUserId },
+      include: {
+        role: {
+          select: { displayName: true },
+        },
+      },
+    })
+
+    return userRoles.some((ur) =>
+      ADMIN_ROLE_NAMES.includes(ur.role.displayName as (typeof ADMIN_ROLE_NAMES)[number]),
+    )
+  }
 
   async findAllUsers(query?: UserSearchQuery): AsyncResult<UserListResult, Error> {
     const { searchQuery, page = 1, limit = 20 } = query || {}

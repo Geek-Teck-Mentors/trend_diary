@@ -5,6 +5,7 @@ import { UserSearchQuery } from './schema/userSearchSchema'
 
 export interface AdminQuery {
   findAllUsers(query?: UserSearchQuery): AsyncResult<UserListResult, Error>
+  hasAdminPermissions(activeUserId: bigint): Promise<boolean>
 }
 
 export interface AdminCommand {
