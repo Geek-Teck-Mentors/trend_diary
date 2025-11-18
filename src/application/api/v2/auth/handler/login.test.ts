@@ -34,6 +34,7 @@ function createMockActiveUser(email: string, authenticationId: string): ActiveUs
 const mockQuery: Query = {
   findActiveById: vi.fn(),
   findActiveByEmail: vi.fn(),
+  findActiveByEmailForAuth: vi.fn(),
   findActiveBySessionId: vi.fn(),
   findActiveByAuthenticationId: vi.fn((authenticationId: string) => {
     const activeUser = mockActiveUsers.get(authenticationId)
