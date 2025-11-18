@@ -4,8 +4,10 @@ import QueryImpl from './infrastructure/queryImpl'
 import {
   ActiveUser,
   ActiveUserInput,
+  ActiveUserWithoutPassword,
   activeUserInputSchema,
   activeUserSchema,
+  activeUserWithoutPasswordSchema,
   CurrentUser,
   currentUserSchema,
 } from './schema/activeUserSchema'
@@ -16,7 +18,12 @@ export function createUserUseCase(db: RdbClient): UseCase {
 }
 
 // 型
-export type { ActiveUser, ActiveUserInput, CurrentUser }
+export type { ActiveUser, ActiveUserInput, ActiveUserWithoutPassword, CurrentUser }
 
 // スキーマ
-export { activeUserSchema, activeUserInputSchema, currentUserSchema }
+export {
+  activeUserSchema,
+  activeUserInputSchema,
+  activeUserWithoutPasswordSchema,
+  currentUserSchema,
+}

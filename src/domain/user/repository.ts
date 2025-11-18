@@ -2,13 +2,15 @@ import { AsyncResult } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 import { CreateSessionInput } from './dto'
-import type { ActiveUser, CurrentUser } from './schema/activeUserSchema'
+import type { ActiveUser, ActiveUserWithoutPassword, CurrentUser } from './schema/activeUserSchema'
 
 export interface Query {
-  findActiveById(id: bigint): AsyncResult<Nullable<ActiveUser>, Error>
-  findActiveByEmail(email: string): AsyncResult<Nullable<ActiveUser>, Error>
+  findActiveById(id: bigint): AsyncResult<Nullable<ActiveUserWithoutPassword>, Error>
+  findActiveByEmail(email: string): AsyncResult<Nullable<ActiveUserWithoutPassword>, Error>
   findActiveBySessionId(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error>
-  findActiveByAuthenticationId(authenticationId: string): AsyncResult<Nullable<ActiveUser>, Error>
+  findActiveByAuthenticationId(
+    authenticationId: string,
+  ): AsyncResult<Nullable<ActiveUserWithoutPassword>, Error>
 }
 
 export interface Command {
