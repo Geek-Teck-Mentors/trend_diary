@@ -3,7 +3,7 @@ import { ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { Query } from '../repository'
-import type { ActiveUser, ActiveUserWithoutPassword, CurrentUser } from '../schema/activeUserSchema'
+import type { ActiveUser, CurrentUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 import { hasAdminPermissions } from './permissionChecker'
 

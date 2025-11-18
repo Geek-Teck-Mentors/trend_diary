@@ -5,11 +5,11 @@ import { SESSION_DURATION } from '@/common/constants'
 import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
 import { isNull, Nullable } from '@/common/types/utility'
 import { Command, Query } from './repository'
-import type { ActiveUser, ActiveUserWithoutPassword, CurrentUser } from './schema/activeUserSchema'
+import type { ActiveUser, CurrentUser } from './schema/activeUserSchema'
 import { recordLogin } from './schema/method'
 
 type LoginResult = {
-  activeUser: ActiveUserWithoutPassword
+  activeUser: CurrentUser
   sessionId: string
   expiresAt: Date
 }
@@ -20,10 +20,7 @@ export class UseCase {
     private command: Command,
   ) {}
 
-  async signup(
-    email: string,
-    plainPassword: string,
-  ): Promise<Result<ActiveUserWithoutPassword, Error>> {
+  async signup(email: string, plainPassword: string): Promise<Result<CurrentUser, Error>> {
     const existingResult = await this.query.findActiveByEmail(email)
     if (isFailure(existingResult)) return existingResult
     if (!isNull(existingResult.data)) {

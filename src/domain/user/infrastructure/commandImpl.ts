@@ -4,16 +4,13 @@ import { ServerError } from '@/common/errors'
 import { RdbClient } from '@/infrastructure/rdb'
 import { CreateSessionInput } from '../dto'
 import { Command } from '../repository'
-import type { ActiveUser, ActiveUserWithoutPassword } from '../schema/activeUserSchema'
+import type { ActiveUser, CurrentUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
 
 export default class CommandImpl implements Command {
   constructor(private readonly db: RdbClient) {}
 
-  async createActive(
-    email: string,
-    hashedPassword: string,
-  ): AsyncResult<ActiveUserWithoutPassword, ServerError> {
+  async createActive(email: string, hashedPassword: string): AsyncResult<CurrentUser, ServerError> {
     const activeUserResult = await wrapAsyncCall(() =>
       this.db.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.create({})
@@ -39,7 +36,7 @@ export default class CommandImpl implements Command {
     hashedPassword: string,
     authenticationId: string,
     displayName?: string | null,
-  ): AsyncResult<ActiveUserWithoutPassword, ServerError> {
+  ): AsyncResult<CurrentUser, ServerError> {
     const activeUserResult = await wrapAsyncCall(() =>
       this.db.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.create({})
@@ -62,7 +59,7 @@ export default class CommandImpl implements Command {
     return success(mapToActiveUser(activeUserResult.data))
   }
 
-  async saveActive(activeUser: ActiveUser): AsyncResult<ActiveUserWithoutPassword, ServerError> {
+  async saveActive(activeUser: ActiveUser): AsyncResult<CurrentUser, ServerError> {
     const updatedActiveUserResult = await wrapAsyncCall(() =>
       this.db.activeUser.update({
         where: { activeUserId: activeUser.activeUserId },
