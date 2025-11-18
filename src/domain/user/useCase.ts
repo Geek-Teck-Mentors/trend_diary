@@ -126,9 +126,7 @@ export class UseCase {
     return success(undefined)
   }
 
-  async getCurrentUser(
-    sessionId: string,
-  ): AsyncResult<Nullable<CurrentUser & { hasAdminAccess: boolean }>, Error> {
+  async getCurrentUser(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error> {
     const result = await this.query.findActiveBySessionId(sessionId)
     if (isFailure(result)) return failure(ServerError.handle(result.error))
 

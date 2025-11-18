@@ -74,9 +74,7 @@ export default class QueryImpl implements Query {
     })
   }
 
-  async findActiveBySessionId(
-    sessionId: string,
-  ): AsyncResult<Nullable<CurrentUser & { hasAdminAccess: boolean }>, Error> {
+  async findActiveBySessionId(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error> {
     const sessionResult = await wrapAsyncCall(() =>
       this.db.session.findFirst({
         where: {
@@ -95,13 +93,7 @@ export default class QueryImpl implements Query {
       return success(null)
     }
 
-    const hasAdminAccess = await hasAdminPermissions(this.db, session.activeUser.activeUserId)
-
-    const activeUserWithoutPassword = mapToActiveUser(session.activeUser)
-    return success({
-      ...activeUserWithoutPassword,
-      hasAdminAccess,
-    })
+    return success(mapToActiveUser(session.activeUser))
   }
 
   async findActiveByAuthenticationId(
