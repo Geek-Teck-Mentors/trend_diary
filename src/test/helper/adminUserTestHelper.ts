@@ -102,7 +102,7 @@ class AdminUserTestHelper {
       displayName: string | null
       hasAdminAccess: boolean
       grantedAt: Date | null
-      grantedByAdminUserId: number | null
+      grantedByAdminUserId: bigint | null
       createdAt: Date
     }>
     total: number
