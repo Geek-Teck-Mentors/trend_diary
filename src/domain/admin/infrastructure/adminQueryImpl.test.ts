@@ -9,12 +9,23 @@ import { AdminQueryImpl } from './adminQueryImpl'
 const mockDb = mockDeep<PrismaClient>()
 
 // ヘルパー関数
-function createMockAdminUser(overrides = {}) {
+function createMockUserRole(overrides = {}) {
   return {
-    adminUserId: 1,
-    activeUserId: 123456789n,
+    roleId: 1,
     grantedAt: new Date('2024-01-15T09:30:15.123Z'),
-    grantedByAdminUserId: 2,
+    grantedByActiveUserId: 2n,
+    role: {
+      roleId: 1,
+      displayName: '管理者',
+      rolePermissions: [
+        {
+          permission: {
+            resource: 'user',
+            action: 'list',
+          },
+        },
+      ],
+    },
     ...overrides,
   }
 }
@@ -31,7 +42,7 @@ function createMockUsers() {
       lastLogin: new Date('2024-01-15T09:30:15.123Z'),
       createdAt: new Date('2024-01-10T00:00:00.000Z'),
       updatedAt: new Date('2024-01-15T09:30:15.123Z'),
-      adminUser: createMockAdminUser({ activeUserId: 1n }),
+      userRoles: [createMockUserRole()],
     },
     {
       activeUserId: 2n,
@@ -43,7 +54,7 @@ function createMockUsers() {
       lastLogin: null,
       createdAt: new Date('2024-01-11T00:00:00.000Z'),
       updatedAt: new Date('2024-01-11T00:00:00.000Z'),
-      adminUser: null,
+      userRoles: [],
     },
   ]
 }
@@ -59,7 +70,7 @@ function createMockUser(overrides = {}) {
     lastLogin: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    adminUser: null,
+    userRoles: [],
     ...overrides,
   }
 }
@@ -68,7 +79,21 @@ function createMockUser(overrides = {}) {
 function expectFindManyCall(expectedQuery: any) {
   expect(mockDb.activeUser.findMany).toHaveBeenCalledWith({
     where: expectedQuery.where || {},
-    include: { adminUser: true },
+    include: {
+      userRoles: {
+        include: {
+          role: {
+            include: {
+              rolePermissions: {
+                include: {
+                  permission: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     orderBy: { createdAt: 'desc' },
     skip: expectedQuery.skip || 0,
     take: expectedQuery.take || 20,

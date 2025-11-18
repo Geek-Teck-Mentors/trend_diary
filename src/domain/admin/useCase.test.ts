@@ -47,12 +47,6 @@ describe('AdminUser UseCase', () => {
         roleId: 2,
         grantedAt: new Date(),
         grantedByActiveUserId: BigInt(1),
-        role: {
-          roleId: 2,
-          displayName: '管理者',
-          description: null,
-          createdAt: new Date(),
-        },
       })
 
       const result = await useCase.grantAdminRole(BigInt(100), BigInt(1))
@@ -67,6 +61,7 @@ describe('AdminUser UseCase', () => {
 
   describe('getUserList', () => {
     it('ユーザーリストを取得できる', async () => {
+      // biome-ignore lint/suspicious/noExplicitAny: includeを含むモックデータのため型が複雑
       mockDb.activeUser.findMany.mockResolvedValue([
         {
           activeUserId: BigInt(1),
@@ -80,7 +75,7 @@ describe('AdminUser UseCase', () => {
           userId: BigInt(1),
           userRoles: [],
         },
-      ])
+      ] as any)
 
       mockDb.activeUser.count.mockResolvedValue(1)
 

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { AdminCommandImpl } from './adminCommandImpl'
@@ -47,18 +48,12 @@ describe('AdminCommandImpl', () => {
         roleId: 2,
         grantedAt: new Date(),
         grantedByActiveUserId,
-        role: {
-          roleId: 2,
-          displayName: '管理者',
-          description: null,
-          createdAt: new Date(),
-        },
       })
 
       const result = await adminCommandImpl.grantAdminRole(activeUserId, grantedByActiveUserId)
 
-      expect(result.success).toBe(true)
-      if (result.success) {
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
         expect(result.data.activeUserId).toBe(activeUserId)
         expect(result.data.adminUserId).toBe(2)
         expect(result.data.grantedByAdminUserId).toBe(Number(grantedByActiveUserId))
@@ -70,8 +65,8 @@ describe('AdminCommandImpl', () => {
 
       const result = await adminCommandImpl.grantAdminRole(100n, 1n)
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
         expect(result.error.message).toContain('ユーザーが見つかりません')
       }
     })
@@ -108,8 +103,8 @@ describe('AdminCommandImpl', () => {
 
       const result = await adminCommandImpl.grantAdminRole(activeUserId, 1n)
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
         expect(result.error.message).toContain('既にAdmin権限を持っています')
       }
     })
