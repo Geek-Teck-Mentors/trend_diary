@@ -22,10 +22,17 @@ export type UserWithRolesRow = {
 }
 
 export function toUserListItem(row: UserWithRolesRow) {
-  // 管理系権限（user, privacy_policyリソース）を持つロールを探す
+  // 管理系権限を持つロールを探す
+  // user.list, user.grant_admin, privacy_policy.create などの管理者特有の権限をチェック
   const adminRole = row.userRoles.find((ur) =>
     ur.role.rolePermissions.some(
-      (rp) => rp.permission.resource === 'user' || rp.permission.resource === 'privacy_policy',
+      (rp) =>
+        (rp.permission.resource === 'user' &&
+          (rp.permission.action === 'list' || rp.permission.action === 'grant_admin')) ||
+        (rp.permission.resource === 'privacy_policy' &&
+          (rp.permission.action === 'create' ||
+            rp.permission.action === 'update' ||
+            rp.permission.action === 'delete')),
     ),
   )
 

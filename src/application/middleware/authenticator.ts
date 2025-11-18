@@ -49,14 +49,18 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   // 管理者権限チェック（権限ベース）
-  // ユーザーが管理系リソース（user, privacy_policyなど）への権限を持っているかチェック
+  // ユーザーが管理者特有の権限を持っているかチェック
+  // user.list, user.grant_admin, privacy_policy.create/update/delete など
   const adminPermissionCount = await rdb.$queryRaw<[{ count: bigint }]>`
     SELECT COUNT(DISTINCT p.permission_id) as count
     FROM user_roles ur
     JOIN role_permissions rp ON ur.role_id = rp.role_id
     JOIN permissions p ON rp.permission_id = p.permission_id
     WHERE ur.active_user_id = ${result.data.activeUserId}
-      AND p.resource IN ('user', 'privacy_policy')
+      AND (
+        (p.resource = 'user' AND p.action IN ('list', 'grant_admin'))
+        OR (p.resource = 'privacy_policy' AND p.action IN ('create', 'update', 'delete'))
+      )
   `
 
   // セッションユーザー情報を設定
