@@ -41,7 +41,7 @@ export interface AuthV2Repository {
   /**
    * 現在のユーザーを取得する
    */
-  getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError>
+  getCurrentUser(): AsyncResult<AuthenticationUser, ServerError>
 
   /**
    * セッションを更新する

@@ -12,7 +12,7 @@ export default function AdminLayout() {
     const client = getApiClientForClient()
 
     const f = async () => {
-      const res = await client.user.me.$get({}, { init: { credentials: 'include' } })
+      const res = await client.v2.auth.me.$get({}, { init: { credentials: 'include' } })
       if (res.status === 200) {
         // 認証済みであればOK、権限チェックは各APIエンドポイントで行う
         return

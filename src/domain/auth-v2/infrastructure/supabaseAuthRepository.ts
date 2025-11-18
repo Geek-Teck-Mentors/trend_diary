@@ -1,5 +1,6 @@
 import {
   AuthInvalidCredentialsError,
+  AuthSessionMissingError,
   type Session,
   type SupabaseClient,
   type User,
@@ -13,6 +14,7 @@ import {
   wrapAsyncCall,
 } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
+import UnauthorizedError from '@/common/errors/unauthorizedError'
 import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
 import type { AuthenticationUser } from '../schema/authenticationUser'
 
@@ -165,23 +167,29 @@ export class SupabaseAuthRepository implements AuthV2Repository {
     return success(undefined)
   }
 
-  async getCurrentUser(): AsyncResult<AuthenticationUser | null, ServerError> {
+  async getCurrentUser(): AsyncResult<AuthenticationUser, ServerError> {
     const result = await wrapAsyncCall(() => this.client.auth.getUser())
     if (isFailure(result)) {
+      if (result.error instanceof AuthSessionMissingError) {
+        return failure(
+          new UnauthorizedError('session not found', {
+            sessionExists: false,
+          }),
+        )
+      }
       return failure(new ServerError(result.error))
     }
 
     const {
       data: { user },
-      error,
     } = result.data
-    if (error) {
-      // Supabaseの内部エラーメッセージを露出しない
-      return failure(new ServerError('Failed to get user information'))
-    }
 
     if (!user) {
-      return success(null)
+      return failure(
+        new UnauthorizedError('session not found', {
+          sessionExists: true,
+        }),
+      )
     }
 
     const authUserResult = this.toAuthenticationUser(user)
