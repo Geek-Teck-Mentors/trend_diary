@@ -13,8 +13,6 @@ describe('AdminUser UseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    // hasAdminPermissionsで使用する$queryRawのデフォルトmock（管理者権限なし）
-    mockDb.$queryRaw.mockResolvedValue([{ count: 0n }])
     const command = new AdminCommandImpl(mockDb)
     const query = new AdminQueryImpl(mockDb)
     useCase = new UseCase(command, query)
