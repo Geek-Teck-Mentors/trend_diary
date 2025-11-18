@@ -93,6 +93,10 @@ class ActiveUserTestHelper {
     await this.deleteAllActiveUsers()
   }
 
+  getRdb() {
+    return this.rdb
+  }
+
   async disconnect(): Promise<void> {
     await this.rdb.$disconnect()
   }

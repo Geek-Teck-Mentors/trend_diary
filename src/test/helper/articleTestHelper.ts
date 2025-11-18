@@ -93,6 +93,10 @@ class ArticleTestHelper {
     await this.rdb.$queryRaw`TRUNCATE TABLE "articles" CASCADE;`
   }
 
+  getRdb() {
+    return this.rdb
+  }
+
   async disconnect(): Promise<void> {
     await this.rdb.$disconnect()
   }

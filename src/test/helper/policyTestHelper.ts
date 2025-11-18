@@ -100,6 +100,10 @@ class PolicyTestHelper {
     return loginData.sessionId
   }
 
+  getRdb() {
+    return this.rdb
+  }
+
   async disconnect(): Promise<void> {
     await this.rdb.$disconnect()
   }
