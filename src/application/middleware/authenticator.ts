@@ -48,27 +48,12 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
     throw new HTTPException(404, { message: 'login required' })
   }
 
-  // 管理者権限チェック（権限ベース）
-  // ユーザーが管理者特有の権限を持っているかチェック
-  // user.list, user.grant_admin, privacy_policy.create/update/delete など
-  const adminPermissionCount = await rdb.$queryRaw<[{ count: bigint }]>`
-    SELECT COUNT(DISTINCT p.permission_id) as count
-    FROM user_roles ur
-    JOIN role_permissions rp ON ur.role_id = rp.role_id
-    JOIN permissions p ON rp.permission_id = p.permission_id
-    WHERE ur.active_user_id = ${result.data.activeUserId}
-      AND (
-        (p.resource = 'user' AND p.action IN ('list', 'grant_admin'))
-        OR (p.resource = 'privacy_policy' AND p.action IN ('create', 'update', 'delete'))
-      )
-  `
-
-  // セッションユーザー情報を設定
+  // セッションユーザー情報を設定（hasAdminAccessはドメイン層で計算済み）
   const sessionUser: SessionUser = {
     activeUserId: result.data.activeUserId,
     displayName: result.data.displayName,
     email: result.data.email,
-    hasAdminAccess: Number(adminPermissionCount[0]?.count || 0n) > 0,
+    hasAdminAccess: result.data.hasAdminAccess,
   }
 
   c.set(CONTEXT_KEY.SESSION_USER, sessionUser)

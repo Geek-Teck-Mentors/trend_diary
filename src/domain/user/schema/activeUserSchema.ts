@@ -13,6 +13,13 @@ export const activeUserSchema = z.object({
   updatedAt,
 })
 
+// getCurrentUser用のスキーマ（hasAdminAccessを含む）
+export const currentUserSchema = activeUserSchema
+  .omit({ password: true }) // パスワードは返さない
+  .extend({
+    hasAdminAccess: z.boolean(),
+  })
+
 export const activeUserInputSchema = activeUserSchema.pick({
   email: true,
   password: true,
@@ -25,4 +32,5 @@ export const activeUserUpdateSchema = activeUserSchema.pick({
 })
 
 export type ActiveUser = z.infer<typeof activeUserSchema>
+export type CurrentUser = z.infer<typeof currentUserSchema>
 export type ActiveUserInput = z.infer<typeof activeUserInputSchema>
