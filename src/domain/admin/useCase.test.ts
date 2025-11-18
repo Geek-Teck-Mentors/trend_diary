@@ -61,7 +61,6 @@ describe('AdminUser UseCase', () => {
 
   describe('getUserList', () => {
     it('ユーザーリストを取得できる', async () => {
-      // biome-ignore lint/suspicious/noExplicitAny: includeを含むモックデータのため型が複雑
       mockDb.activeUser.findMany.mockResolvedValue([
         {
           activeUserId: BigInt(1),
@@ -75,6 +74,7 @@ describe('AdminUser UseCase', () => {
           userId: BigInt(1),
           userRoles: [],
         },
+        // biome-ignore lint/suspicious/noExplicitAny: includeを含むモックデータのため型が複雑
       ] as any)
 
       mockDb.activeUser.count.mockResolvedValue(1)

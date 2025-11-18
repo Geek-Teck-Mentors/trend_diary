@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
-import { DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { AdminCommandImpl } from './adminCommandImpl'
 
 let mockDb: DeepMockProxy<PrismaClient>
