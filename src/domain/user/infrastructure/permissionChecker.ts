@@ -1,0 +1,22 @@
+import { RdbClient } from '@/infrastructure/rdb'
+
+/**
+ * ユーザーが管理者権限を持っているかどうかを判定する
+ * 管理者権限の定義:
+ * - user.list または user.grant_admin
+ * - privacy_policy.create, update, または delete
+ */
+export async function hasAdminPermissions(db: RdbClient, activeUserId: bigint): Promise<boolean> {
+  const adminPermissionCount = await db.$queryRaw<[{ count: bigint }]>`
+    SELECT COUNT(DISTINCT p.permission_id) as count
+    FROM user_roles ur
+    JOIN role_permissions rp ON ur.role_id = rp.role_id
+    JOIN permissions p ON rp.permission_id = p.permission_id
+    WHERE ur.active_user_id = ${activeUserId}
+      AND (
+        (p.resource = 'user' AND p.action IN ('list', 'grant_admin'))
+        OR (p.resource = 'privacy_policy' AND p.action IN ('create', 'update', 'delete'))
+      )
+  `
+  return Number(adminPermissionCount[0]?.count || 0n) > 0
+}

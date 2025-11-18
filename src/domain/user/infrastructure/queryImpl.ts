@@ -5,6 +5,7 @@ import { RdbClient } from '@/infrastructure/rdb'
 import { Query } from '../repository'
 import type { ActiveUser, ActiveUserWithoutPassword, CurrentUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
+import { hasAdminPermissions } from './permissionChecker'
 
 export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
@@ -92,20 +93,7 @@ export default class QueryImpl implements Query {
       return success(null)
     }
 
-    // 管理者権限チェック（権限ベース）
-    // ユーザーが管理者特有の権限を持っているかチェック
-    const adminPermissionCount = await this.db.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(DISTINCT p.permission_id) as count
-      FROM user_roles ur
-      JOIN role_permissions rp ON ur.role_id = rp.role_id
-      JOIN permissions p ON rp.permission_id = p.permission_id
-      WHERE ur.active_user_id = ${session.activeUser.activeUserId}
-        AND (
-          (p.resource = 'user' AND p.action IN ('list', 'grant_admin'))
-          OR (p.resource = 'privacy_policy' AND p.action IN ('create', 'update', 'delete'))
-        )
-    `
-    const hasAdminAccess = Number(adminPermissionCount[0]?.count || 0n) > 0
+    const hasAdminAccess = await hasAdminPermissions(this.db, session.activeUser.activeUserId)
 
     const activeUserWithoutPassword = mapToActiveUser(session.activeUser)
     return success({
