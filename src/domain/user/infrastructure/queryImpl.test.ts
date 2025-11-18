@@ -180,6 +180,7 @@ describe('QueryImpl', () => {
         }
 
         mockDb.session.findFirst.mockResolvedValue(mockSession)
+        mockDb.$queryRaw.mockResolvedValue([{ count: 0n }])
 
         // Act
         const result = await useCase.findActiveBySessionId(sessionId)
@@ -189,8 +190,10 @@ describe('QueryImpl', () => {
         if (isSuccess(result)) {
           expect(result.data?.activeUserId).toBe(1n)
           expect(result.data?.email).toBe('test@example.com')
+          expect(result.data?.hasAdminAccess).toBe(false)
         }
         expect(mockDb.session.findFirst).toHaveBeenCalled()
+        expect(mockDb.$queryRaw).toHaveBeenCalled()
       })
     })
 
