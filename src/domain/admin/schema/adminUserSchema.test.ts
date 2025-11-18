@@ -5,7 +5,7 @@ describe('adminUserSchema', () => {
     adminUserId: 1,
     activeUserId: 123456789n,
     grantedAt: new Date(),
-    grantedByAdminUserId: 2,
+    grantedByAdminUserId: 2n,
   }
 
   it('有効なAdmin Userデータを受け入れること', () => {
@@ -172,11 +172,18 @@ describe('adminUserSchema', () => {
   })
 
   describe('grantedByAdminUserId のバリデーション', () => {
-    it('有効な正の整数のgrantedByAdminUserIdを受け入れること', () => {
+    it('有効な正のbigint型のgrantedByAdminUserIdを受け入れること', () => {
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          grantedByAdminUserId: 999999,
+          grantedByAdminUserId: 999999n,
+        })
+      }).not.toThrow()
+
+      expect(() => {
+        adminUserSchema.parse({
+          ...validAdminUser,
+          grantedByAdminUserId: 9007199254740991n,
         })
       }).not.toThrow()
     })
@@ -185,28 +192,26 @@ describe('adminUserSchema', () => {
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          grantedByAdminUserId: 0,
+          grantedByAdminUserId: 0n,
         })
       }).toThrow()
 
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          grantedByAdminUserId: -1,
+          grantedByAdminUserId: -1n,
         })
       }).toThrow()
     })
 
-    it('小数点のgrantedByAdminUserIdを拒否すること', () => {
+    it('bigint型でないgrantedByAdminUserIdを拒否すること', () => {
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,
-          grantedByAdminUserId: 1.5,
+          grantedByAdminUserId: 123,
         })
       }).toThrow()
-    })
 
-    it('数値型でないgrantedByAdminUserIdを拒否すること', () => {
       expect(() => {
         adminUserSchema.parse({
           ...validAdminUser,

@@ -11,7 +11,11 @@ export const activeUserSchema = z.object({
   lastLogin: z.date().optional(),
   createdAt,
   updatedAt,
-  adminUserId: z.number().positive().nullable().default(null),
+})
+
+// passwordを含まないCurrentUserスキーマ（mapper用）
+export const currentUserSchema = activeUserSchema.omit({ password: true }).extend({
+  hasAdminAccess: z.boolean().optional(),
 })
 
 export const activeUserInputSchema = activeUserSchema.pick({
@@ -26,4 +30,5 @@ export const activeUserUpdateSchema = activeUserSchema.pick({
 })
 
 export type ActiveUser = z.infer<typeof activeUserSchema>
+export type CurrentUser = z.infer<typeof currentUserSchema>
 export type ActiveUserInput = z.infer<typeof activeUserInputSchema>

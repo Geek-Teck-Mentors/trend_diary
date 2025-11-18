@@ -4,7 +4,7 @@ export interface AdminUser {
   activeUserId: string
   email: string
   displayName: string | null
-  isAdmin: boolean
+  hasAdminAccess: boolean
   grantedAt: string | null
   grantedByAdminUserId: number | null
   createdAt: string

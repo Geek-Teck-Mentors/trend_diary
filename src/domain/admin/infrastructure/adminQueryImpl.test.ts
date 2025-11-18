@@ -9,16 +9,6 @@ import { AdminQueryImpl } from './adminQueryImpl'
 const mockDb = mockDeep<PrismaClient>()
 
 // ヘルパー関数
-function createMockAdminUser(overrides = {}) {
-  return {
-    adminUserId: 1,
-    activeUserId: 123456789n,
-    grantedAt: new Date('2024-01-15T09:30:15.123Z'),
-    grantedByAdminUserId: 2,
-    ...overrides,
-  }
-}
-
 function createMockUsers() {
   return [
     {
@@ -31,7 +21,7 @@ function createMockUsers() {
       lastLogin: new Date('2024-01-15T09:30:15.123Z'),
       createdAt: new Date('2024-01-10T00:00:00.000Z'),
       updatedAt: new Date('2024-01-15T09:30:15.123Z'),
-      adminUser: createMockAdminUser({ activeUserId: 1n }),
+      userRoles: [],
     },
     {
       activeUserId: 2n,
@@ -43,7 +33,7 @@ function createMockUsers() {
       lastLogin: null,
       createdAt: new Date('2024-01-11T00:00:00.000Z'),
       updatedAt: new Date('2024-01-11T00:00:00.000Z'),
-      adminUser: null,
+      userRoles: [],
     },
   ]
 }
@@ -59,7 +49,7 @@ function createMockUser(overrides = {}) {
     lastLogin: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    adminUser: null,
+    userRoles: [],
     ...overrides,
   }
 }
@@ -68,7 +58,21 @@ function createMockUser(overrides = {}) {
 function expectFindManyCall(expectedQuery: any) {
   expect(mockDb.activeUser.findMany).toHaveBeenCalledWith({
     where: expectedQuery.where || {},
-    include: { adminUser: true },
+    include: {
+      userRoles: {
+        include: {
+          role: {
+            include: {
+              rolePermissions: {
+                include: {
+                  permission: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     orderBy: { createdAt: 'desc' },
     skip: expectedQuery.skip || 0,
     take: expectedQuery.take || 20,
@@ -112,7 +116,6 @@ function setupDatabaseError(mockMethod: any, errorMessage = 'Database connection
 
 describe('AdminQueryImpl', () => {
   let query: AdminQueryImpl
-  const activeUserId = 123456789n
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -121,112 +124,6 @@ describe('AdminQueryImpl', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
-  })
-
-  describe('findAdminByActiveUserId', () => {
-    describe('基本動作', () => {
-      it('ActiveUserIdでAdmin情報を検索できる', async () => {
-        const mockAdminUser = createMockAdminUser({ activeUserId: activeUserId })
-        mockDb.adminUser.findUnique.mockResolvedValue(mockAdminUser)
-
-        const result = await query.findAdminByActiveUserId(activeUserId)
-
-        expectSuccessResult(result, {
-          adminUserId: 1,
-          activeUserId,
-          grantedAt: new Date('2024-01-15T09:30:15.123Z'),
-          grantedByAdminUserId: 2,
-        })
-        expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith({
-          where: { activeUserId: activeUserId },
-        })
-      })
-
-      it('異なるActiveUserIdで複数のAdmin情報を検索できる', async () => {
-        const activeUserId2 = 987654321n
-        mockDb.adminUser.findUnique.mockResolvedValueOnce(
-          createMockAdminUser({ activeUserId: activeUserId }),
-        )
-        mockDb.adminUser.findUnique.mockResolvedValueOnce(
-          createMockAdminUser({
-            adminUserId: 3,
-            activeUserId: activeUserId2,
-            grantedByAdminUserId: 1,
-          }),
-        )
-
-        const [result1, result2] = await Promise.all([
-          query.findAdminByActiveUserId(activeUserId),
-          query.findAdminByActiveUserId(activeUserId2),
-        ])
-
-        expectSuccessResult(result1, { adminUserId: 1, activeUserId })
-        expectSuccessResult(result2, { adminUserId: 3, activeUserId: activeUserId2 })
-      })
-    })
-
-    describe('境界値・特殊値', () => {
-      it('存在しないActiveUserIdの場合nullを返す', async () => {
-        const nonExistentActiveUserId = 999999999n
-        mockDb.adminUser.findUnique.mockResolvedValue(null)
-
-        const result = await query.findAdminByActiveUserId(nonExistentActiveUserId)
-
-        expect(isSuccess(result)).toBe(true)
-        if (isSuccess(result)) {
-          expect(result.data).toBeNull()
-        }
-        expect(mockDb.adminUser.findUnique).toHaveBeenCalledWith({
-          where: { activeUserId: nonExistentActiveUserId },
-        })
-      })
-
-      it('bigintの最大値に近いActiveUserIdでも正常に処理できる', async () => {
-        const largeActiveUserId = 9223372036854775806n
-        mockDb.adminUser.findUnique.mockResolvedValue(
-          createMockAdminUser({ activeUserId: largeActiveUserId }),
-        )
-
-        const result = await query.findAdminByActiveUserId(largeActiveUserId)
-
-        expectSuccessResult(result, { activeUserId: largeActiveUserId })
-        expect(isSuccess(result) && result.data?.activeUserId.toString()).toBe(
-          '9223372036854775806',
-        )
-      })
-
-      it('最小値のActiveUserIdでも正常に処理できる', async () => {
-        const minActiveUserId = 1n
-        mockDb.adminUser.findUnique.mockResolvedValue(
-          createMockAdminUser({ activeUserId: minActiveUserId }),
-        )
-
-        const result = await query.findAdminByActiveUserId(minActiveUserId)
-
-        expectSuccessResult(result, { activeUserId: minActiveUserId })
-      })
-    })
-
-    describe('例外・制約違反', () => {
-      it('データベースエラー時は適切にエラーを返す', async () => {
-        setupDatabaseError(mockDb.adminUser.findUnique)
-
-        const result = await query.findAdminByActiveUserId(activeUserId)
-
-        expectErrorResult(result, ServerError, 'Admin情報の取得に失敗しました')
-      })
-
-      it('Prismaクエリエラーを適切にハンドリングする', async () => {
-        mockDb.adminUser.findUnique.mockRejectedValue({
-          code: 'P2025',
-          message: 'Record not found',
-        })
-
-        const result = await query.findAdminByActiveUserId(activeUserId)
-
-        expectErrorResult(result, ServerError, 'Admin情報の取得に失敗しました')
-      })
-    })
   })
 
   describe('findAllUsers', () => {
@@ -239,13 +136,7 @@ describe('AdminQueryImpl', () => {
         const result = await query.findAllUsers()
 
         expectSuccessResult(result, { users: { length: 2 }, total: 2, page: 1, limit: 20 })
-        expect(mockDb.activeUser.findMany).toHaveBeenCalledWith({
-          where: {},
-          include: { adminUser: true },
-          orderBy: { createdAt: 'desc' },
-          skip: 0,
-          take: 20,
-        })
+        expectFindManyCall({ where: {}, skip: 0, take: 20 })
       })
 
       it('検索クエリでユーザーをフィルタリングできる', async () => {
@@ -384,6 +275,121 @@ describe('AdminQueryImpl', () => {
         const result = await query.findAllUsers()
 
         expectErrorResult(result, ServerError, 'ユーザ一覧の取得に失敗しました')
+      })
+    })
+  })
+
+  describe('hasAdminPermissions', () => {
+    describe('基本動作', () => {
+      type UserRoleWithRole = {
+        activeUserId: bigint
+        roleId: number
+        grantedAt: Date
+        grantedByActiveUserId: bigint
+        role: {
+          displayName: string
+        }
+      }
+
+      it.each<{
+        description: string
+        activeUserId: bigint
+        mockUserRoles: UserRoleWithRole[]
+        expected: boolean
+      }>([
+        {
+          description: '管理者ロールを持つユーザーの場合trueを返す',
+          activeUserId: 1n,
+          mockUserRoles: [
+            {
+              activeUserId: 1n,
+              roleId: 1,
+              grantedAt: new Date(),
+              grantedByActiveUserId: 2n,
+              role: {
+                displayName: '管理者',
+              },
+            },
+          ],
+          expected: true,
+        },
+        {
+          description: 'スーパー管理者ロールを持つユーザーの場合trueを返す',
+          activeUserId: 2n,
+          mockUserRoles: [
+            {
+              activeUserId: 2n,
+              roleId: 2,
+              grantedAt: new Date(),
+              grantedByActiveUserId: 3n,
+              role: {
+                displayName: 'スーパー管理者',
+              },
+            },
+          ],
+          expected: true,
+        },
+        {
+          description: '一般ユーザーの場合falseを返す',
+          activeUserId: 3n,
+          mockUserRoles: [
+            {
+              activeUserId: 3n,
+              roleId: 3,
+              grantedAt: new Date(),
+              grantedByActiveUserId: 1n,
+              role: {
+                displayName: '一般ユーザー',
+              },
+            },
+          ],
+          expected: false,
+        },
+        {
+          description: 'ロールを持たないユーザーの場合falseを返す',
+          activeUserId: 4n,
+          mockUserRoles: [],
+          expected: false,
+        },
+        {
+          description: '複数ロールを持ち、1つが管理者ロールの場合trueを返す',
+          activeUserId: 5n,
+          mockUserRoles: [
+            {
+              activeUserId: 5n,
+              roleId: 3,
+              grantedAt: new Date(),
+              grantedByActiveUserId: 1n,
+              role: {
+                displayName: '一般ユーザー',
+              },
+            },
+            {
+              activeUserId: 5n,
+              roleId: 1,
+              grantedAt: new Date(),
+              grantedByActiveUserId: 2n,
+              role: {
+                displayName: '管理者',
+              },
+            },
+          ],
+          expected: true,
+        },
+      ])('$description', async ({ activeUserId, mockUserRoles, expected }) => {
+        mockDb.userRole.findMany.mockResolvedValue(mockUserRoles)
+
+        const result = await query.hasAdminPermissions(activeUserId)
+
+        expect(result).toBe(expected)
+        expect(mockDb.userRole.findMany).toHaveBeenCalledWith({
+          where: { activeUserId },
+          include: {
+            role: {
+              select: { displayName: true },
+            },
+          },
+        })
       })
     })
   })

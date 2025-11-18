@@ -43,12 +43,12 @@ describe('GET /api/admin/users', () => {
       expect(data.total).toBe(2)
 
       // Adminユーザーの情報を確認
-      const admin = data.users.find((user) => user.isAdmin)
+      const admin = data.users.find((user) => user.hasAdminAccess)
       expect(admin).toBeDefined()
       expect(admin!.email).toBe('admin@example.com')
 
       // 通常ユーザーの情報を確認
-      const regular = data.users.find((user) => !user.isAdmin)
+      const regular = data.users.find((user) => !user.hasAdminAccess)
       expect(regular).toBeDefined()
       expect(regular!.email).toBe('user@example.com')
     })

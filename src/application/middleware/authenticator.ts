@@ -6,6 +6,7 @@ import { ContentfulStatusCode } from 'hono/utils/http-status'
 import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants'
 import { ClientError, ServerError } from '@/common/errors'
+import { createAdminQuery } from '@/domain/admin'
 import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { Env, SessionUser } from '../env'
@@ -48,13 +49,15 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
     throw new HTTPException(404, { message: 'login required' })
   }
 
-  // セッションユーザー情報を設定
+  // 管理者権限をチェック
+  const adminQuery = createAdminQuery(rdb)
+  const hasAdminAccess = await adminQuery.hasAdminPermissions(result.data.activeUserId)
+
   const sessionUser: SessionUser = {
     activeUserId: result.data.activeUserId,
     displayName: result.data.displayName,
     email: result.data.email,
-    isAdmin: result.data.adminUserId !== null,
-    adminUserId: result.data.adminUserId,
+    hasAdminAccess,
   }
 
   c.set(CONTEXT_KEY.SESSION_USER, sessionUser)

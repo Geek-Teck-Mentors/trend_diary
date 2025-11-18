@@ -140,7 +140,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockQuery.findActiveByEmail.mockResolvedValue(success(mockActiveUser))
+        mockQuery.findActiveByEmailForAuth.mockResolvedValue(success(mockActiveUser))
 
         mockCommand.createSession.mockResolvedValue(
           success({
@@ -182,7 +182,7 @@ describe('User UseCase', () => {
         const password = 'password123'
 
         // Arrange
-        mockQuery.findActiveByEmail.mockResolvedValue(success(null))
+        mockQuery.findActiveByEmailForAuth.mockResolvedValue(success(null))
 
         // Act
         const result = await useCase.login(email, password, '192.168.1.1', 'Mozilla/5.0')
@@ -213,7 +213,7 @@ describe('User UseCase', () => {
           updatedAt: new Date(),
           adminUserId: null,
         }
-        mockQuery.findActiveByEmail.mockResolvedValue(success(mockActiveUser))
+        mockQuery.findActiveByEmailForAuth.mockResolvedValue(success(mockActiveUser))
 
         // Act
         const result = await useCase.login(email, wrongPassword, '192.168.1.1', 'Mozilla/5.0')

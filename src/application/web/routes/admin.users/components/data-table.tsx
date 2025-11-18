@@ -89,10 +89,10 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
         ),
       },
       {
-        accessorKey: 'isAdmin',
+        accessorKey: 'hasAdminAccess',
         header: '権限',
         cell: ({ row }) =>
-          row.original.isAdmin ? (
+          row.original.hasAdminAccess ? (
             <Badge variant='destructive'>Admin</Badge>
           ) : (
             <Badge variant='outline'>一般ユーザー</Badge>
@@ -123,7 +123,7 @@ export default function DataTable({ users, grantAdminRole }: DataTableProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end'>
                 <DropdownMenuLabel>操作</DropdownMenuLabel>
-                {!user.isAdmin && (
+                {!user.hasAdminAccess && (
                   <DropdownMenuItem onClick={() => grantAdminRole(user.activeUserId)}>
                     Admin権限を付与
                   </DropdownMenuItem>

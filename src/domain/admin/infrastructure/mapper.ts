@@ -1,42 +1,22 @@
-import type { AdminUser } from '../schema/adminUserSchema'
-
-export type AdminUserRow = {
-  adminUserId: number
-  activeUserId: bigint
-  grantedAt: Date
-  grantedByAdminUserId: number
-}
-
-export type UserWithAdminRow = {
+export type UserWithRolesRow = {
   activeUserId: bigint
   email: string
   displayName: string | null
   authenticationId: string | null
   createdAt: Date
-  adminUser: {
-    adminUserId: number
-    grantedAt: Date
-    grantedByAdminUserId: number
-  } | null
+  hasAdminAccess: boolean
+  adminGrantedAt: Date | null
+  adminGrantedByUserId: bigint | null
 }
 
-export function toDomainAdminUser(row: AdminUserRow): AdminUser {
-  return {
-    adminUserId: row.adminUserId,
-    activeUserId: row.activeUserId,
-    grantedAt: row.grantedAt,
-    grantedByAdminUserId: row.grantedByAdminUserId,
-  }
-}
-
-export function toUserListItem(row: UserWithAdminRow) {
+export function toUserListItem(row: UserWithRolesRow) {
   return {
     activeUserId: row.activeUserId,
     email: row.email,
     displayName: row.displayName,
-    isAdmin: row.adminUser !== null,
-    grantedAt: row.adminUser?.grantedAt || null,
-    grantedByAdminUserId: row.adminUser?.grantedByAdminUserId || null,
+    hasAdminAccess: row.hasAdminAccess,
+    grantedAt: row.adminGrantedAt,
+    grantedByAdminUserId: row.adminGrantedByUserId,
     createdAt: row.createdAt,
   }
 }

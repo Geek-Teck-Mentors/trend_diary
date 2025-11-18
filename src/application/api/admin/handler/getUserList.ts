@@ -4,9 +4,11 @@ import { createAdminUserUseCase } from '@/domain/admin'
 import { UserListResult } from '@/domain/admin/schema/userListSchema'
 import { User } from '@/domain/admin/schema/userSchema'
 
-interface ApiUser extends Omit<User, 'activeUserId' | 'grantedAt' | 'createdAt'> {
+interface ApiUser
+  extends Omit<User, 'activeUserId' | 'grantedAt' | 'grantedByAdminUserId' | 'createdAt'> {
   activeUserId: string
   grantedAt: string | null
+  grantedByAdminUserId: string | null
   createdAt: string
 }
 
@@ -33,9 +35,9 @@ export default createSimpleApiHandler({
       activeUserId: user.activeUserId.toString(),
       email: user.email,
       displayName: user.displayName,
-      isAdmin: user.isAdmin,
+      hasAdminAccess: user.hasAdminAccess,
       grantedAt: user.grantedAt?.toISOString() || null,
-      grantedByAdminUserId: user.grantedByAdminUserId,
+      grantedByAdminUserId: user.grantedByAdminUserId?.toString() || null,
       createdAt: user.createdAt.toISOString(),
     })),
     total: data.total,

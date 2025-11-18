@@ -12,9 +12,8 @@ class AdminUserTestHelper {
   private useCase = createAdminUserUseCase(this.rdb)
 
   async cleanUp(): Promise<void> {
-    // AdminUser関連テーブルをクリーンアップ（テーブルが存在する場合のみ）
+    // UserRole関連テーブルをクリーンアップ（テーブルが存在する場合のみ）
     try {
-      await this.rdb.$queryRaw`TRUNCATE TABLE "admin_users" CASCADE;`
       await this.rdb.$queryRaw`TRUNCATE TABLE "user_roles" CASCADE;`
     } catch (error) {
       // テーブルが存在しない場合は無視（テスト環境の初期状態）
@@ -33,24 +32,14 @@ class AdminUserTestHelper {
     // 通常ユーザーを作成
     const userInfo = await activeUserTestHelper.create(email, password, displayName)
 
-    // Admin権限を付与
-    const adminResult = await this.useCase.grantAdminRole(userInfo.activeUserId, 1)
+    // Admin権限を付与（UserRoleに管理者ロールを追加）
+    // grantedByActiveUserIdは自分自身（テストデータのため）
+    const adminResult = await this.useCase.grantAdminRole(
+      userInfo.activeUserId,
+      userInfo.activeUserId,
+    )
     if (isFailure(adminResult)) {
       throw new Error(`Failed to grant admin role: ${adminResult.error.message}`)
-    }
-
-    // 権限システムのロールを割り当て（「管理者」ロール）
-    // シードデータで作成された「管理者」ロールを取得して割り当て
-    const adminRole = await this.rdb.role.findFirst({
-      where: { displayName: '管理者' },
-    })
-    if (adminRole) {
-      await this.rdb.userRole.create({
-        data: {
-          activeUserId: userInfo.activeUserId,
-          roleId: adminRole.roleId,
-        },
-      })
     }
 
     // ログインしてセッションIDを取得
@@ -95,9 +84,9 @@ class AdminUserTestHelper {
 
   async grantAdminRole(
     activeUserId: bigint,
-    grantedByAdminUserId: number,
+    grantedByActiveUserId: bigint,
   ): Promise<{ adminUserId: number }> {
-    const result = await this.useCase.grantAdminRole(activeUserId, grantedByAdminUserId)
+    const result = await this.useCase.grantAdminRole(activeUserId, grantedByActiveUserId)
     if (isFailure(result)) {
       throw new Error(`Failed to grant admin role: ${result.error.message}`)
     }
@@ -106,22 +95,14 @@ class AdminUserTestHelper {
     }
   }
 
-  async isAdmin(activeUserId: bigint): Promise<boolean> {
-    const result = await this.useCase.isAdmin(activeUserId)
-    if (isFailure(result)) {
-      throw new Error(`Failed to check admin status: ${result.error.message}`)
-    }
-    return result.data
-  }
-
   async getUserList(query?: { searchQuery?: string; page?: number; limit?: number }): Promise<{
     users: Array<{
       activeUserId: bigint
       email: string
       displayName: string | null
-      isAdmin: boolean
+      hasAdminAccess: boolean
       grantedAt: Date | null
-      grantedByAdminUserId: number | null
+      grantedByAdminUserId: bigint | null
       createdAt: Date
     }>
     total: number

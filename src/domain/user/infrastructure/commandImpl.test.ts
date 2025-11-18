@@ -55,7 +55,6 @@ describe('CommandImpl', () => {
         expect(isSuccess(result)).toBe(true)
         if (isSuccess(result)) {
           expect(result.data.email).toBe(email)
-          expect(result.data.password).toBe(hashedPassword)
         }
         expect(mockDb.$transaction).toHaveBeenCalled()
       })

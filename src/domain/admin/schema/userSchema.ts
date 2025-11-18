@@ -5,9 +5,9 @@ export const userSchema = z.object({
   activeUserId: z.bigint().positive('activeUserIdは正の整数である必要があります'),
   email: z.string().email('有効なメールアドレスである必要があります'),
   displayName: z.string().nullable(),
-  isAdmin: z.boolean(),
+  hasAdminAccess: z.boolean(),
   grantedAt: z.date().nullable(),
-  grantedByAdminUserId: z.number().int().positive().nullable(),
+  grantedByAdminUserId: z.bigint().positive().nullable(),
   createdAt,
 })
 

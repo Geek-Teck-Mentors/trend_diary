@@ -5,11 +5,11 @@ import { SESSION_DURATION } from '@/common/constants'
 import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
 import { isNull, Nullable } from '@/common/types/utility'
 import { Command, Query } from './repository'
-import type { ActiveUser } from './schema/activeUserSchema'
+import type { ActiveUser, CurrentUser } from './schema/activeUserSchema'
 import { recordLogin } from './schema/method'
 
 type LoginResult = {
-  activeUser: ActiveUser
+  activeUser: CurrentUser
   sessionId: string
   expiresAt: Date
 }
@@ -20,7 +20,7 @@ export class UseCase {
     private command: Command,
   ) {}
 
-  async signup(email: string, plainPassword: string): Promise<Result<ActiveUser, Error>> {
+  async signup(email: string, plainPassword: string): Promise<Result<CurrentUser, Error>> {
     const existingResult = await this.query.findActiveByEmail(email)
     if (isFailure(existingResult)) return existingResult
     if (!isNull(existingResult.data)) {
@@ -70,7 +70,7 @@ export class UseCase {
     email: string,
     plainPassword: string,
   ): Promise<Result<ActiveUser, Error>> {
-    const activeUserResult = await this.query.findActiveByEmail(email)
+    const activeUserResult = await this.query.findActiveByEmailForAuth(email)
     if (isFailure(activeUserResult)) return failure(ServerError.handle(activeUserResult.error))
     if (isNull(activeUserResult.data)) {
       return failure(new NotFoundError('User not found'))
@@ -126,7 +126,7 @@ export class UseCase {
     return success(undefined)
   }
 
-  async getCurrentUser(sessionId: string): AsyncResult<Nullable<ActiveUser>, Error> {
+  async getCurrentUser(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error> {
     const result = await this.query.findActiveBySessionId(sessionId)
     if (isFailure(result)) return failure(ServerError.handle(result.error))
 

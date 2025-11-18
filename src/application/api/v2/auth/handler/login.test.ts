@@ -24,7 +24,6 @@ function createMockActiveUser(email: string, authenticationId: string): ActiveUs
     lastLogin: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    adminUserId: null,
   }
   // モックユーザーをMapに保存
   mockActiveUsers.set(authenticationId, activeUser)
@@ -35,6 +34,7 @@ function createMockActiveUser(email: string, authenticationId: string): ActiveUs
 const mockQuery: Query = {
   findActiveById: vi.fn(),
   findActiveByEmail: vi.fn(),
+  findActiveByEmailForAuth: vi.fn(),
   findActiveBySessionId: vi.fn(),
   findActiveByAuthenticationId: vi.fn((authenticationId: string) => {
     const activeUser = mockActiveUsers.get(authenticationId)

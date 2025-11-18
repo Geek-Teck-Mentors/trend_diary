@@ -3,14 +3,14 @@ import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukih
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
 import { AdminCommand } from '../repository'
 import type { AdminUser } from '../schema/adminUserSchema'
-import { toDomainAdminUser } from './mapper'
+import { ADMIN_ROLE_NAMES } from './permissionChecker'
 
 export class AdminCommandImpl implements AdminCommand {
   constructor(private rdb: PrismaClient) {}
 
   async grantAdminRole(
     activeUserId: bigint,
-    grantedByAdminUserId: number,
+    grantedByActiveUserId: bigint,
   ): AsyncResult<AdminUser, Error> {
     // ユーザーが存在するかチェック
     const existingUserResult = await wrapAsyncCall(() =>
@@ -27,34 +27,71 @@ export class AdminCommandImpl implements AdminCommand {
       return failure(new NotFoundError('ユーザーが見つかりません'))
     }
 
-    // 既にAdmin権限を持っているかチェック
-    const existingAdminResult = await wrapAsyncCall(() =>
-      this.rdb.adminUser.findUnique({
-        where: { activeUserId: activeUserId },
+    // 管理者ロールを取得
+    const adminRoleResult = await wrapAsyncCall(() =>
+      this.rdb.role.findFirst({
+        where: { displayName: ADMIN_ROLE_NAMES[0] },
       }),
     )
-    if (isFailure(existingAdminResult)) {
-      return failure(new ServerError(`Admin権限の付与に失敗しました: ${existingAdminResult.error}`))
+    if (isFailure(adminRoleResult)) {
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${adminRoleResult.error}`))
     }
 
-    const existingAdmin = existingAdminResult.data
-    if (existingAdmin) {
-      return failure(new AlreadyExistsError('既にAdmin権限を持っています'))
+    const adminRole = adminRoleResult.data
+    if (!adminRole) {
+      return failure(new ServerError('管理者ロールが見つかりません'))
     }
 
-    // Admin権限付与
-    const adminUserResult = await wrapAsyncCall(() =>
-      this.rdb.adminUser.create({
-        data: {
-          activeUserId: activeUserId,
-          grantedByAdminUserId,
+    // 既にAdmin権限を持っているかチェック
+    const existingRoleResult = await wrapAsyncCall(() =>
+      this.rdb.userRole.findUnique({
+        where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
+          activeUserId_roleId: {
+            activeUserId: activeUserId,
+            roleId: adminRole.roleId,
+          },
         },
       }),
     )
-    if (isFailure(adminUserResult)) {
-      return failure(new ServerError(`Admin権限の付与に失敗しました: ${adminUserResult.error}`))
+    if (isFailure(existingRoleResult)) {
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${existingRoleResult.error}`))
     }
 
-    return success(toDomainAdminUser(adminUserResult.data))
+    const existingRole = existingRoleResult.data
+    if (existingRole) {
+      return failure(new AlreadyExistsError('既にAdmin権限を持っています'))
+    }
+
+    // Admin権限付与（UserRoleに追加）
+    const userRoleResult = await wrapAsyncCall(() =>
+      this.rdb.userRole.create({
+        data: {
+          activeUserId: activeUserId,
+          roleId: adminRole.roleId,
+          grantedByActiveUserId,
+        },
+        include: {
+          role: true,
+        },
+      }),
+    )
+    if (isFailure(userRoleResult)) {
+      return failure(new ServerError(`Admin権限の付与に失敗しました: ${userRoleResult.error}`))
+    }
+
+    // AdminUser形式に変換して返す（後方互換性のため）
+    // Prismaスキーマ上はgrantedByActiveUserIdがnullableだが、実際はuserRole.createで必ず設定される
+    // スキーマ上のnullabilityに対応するための防御的なnullチェック
+    if (!userRoleResult.data.grantedByActiveUserId) {
+      return failure(new ServerError('grantedByActiveUserIdが設定されていません'))
+    }
+
+    return success({
+      adminUserId: userRoleResult.data.roleId,
+      activeUserId: userRoleResult.data.activeUserId,
+      grantedAt: userRoleResult.data.grantedAt,
+      grantedByAdminUserId: userRoleResult.data.grantedByActiveUserId,
+    })
   }
 }

@@ -14,7 +14,14 @@ export default function AdminLayout() {
     const f = async () => {
       const res = await client.v2.auth.me.$get({}, { init: { credentials: 'include' } })
       if (res.status === 200) {
-        // 認証済みであればOK、権限チェックは各APIエンドポイントで行う
+        const data = await res.json()
+        // Admin権限チェック
+        if (!data.user.isAdmin) {
+          toast.error('管理者権限が必要です')
+          navigate('/')
+          return
+        }
+        // Admin権限があればOK
         return
       }
       if (res.status >= 400 && res.status < 500) {
@@ -31,7 +38,7 @@ export default function AdminLayout() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [navigate])
   return (
     <div className='min-h-screen bg-gray-50'>
       <div className='bg-white shadow'>

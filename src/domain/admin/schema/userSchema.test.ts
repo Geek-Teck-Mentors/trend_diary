@@ -5,7 +5,7 @@ describe('userSchema', () => {
     activeUserId: 123456789n,
     email: 'test@example.com',
     displayName: 'Test User',
-    isAdmin: false,
+    hasAdminAccess: false,
     grantedAt: null,
     grantedByAdminUserId: null,
     createdAt: new Date(),
@@ -86,28 +86,28 @@ describe('userSchema', () => {
     })
   })
 
-  describe('isAdmin のバリデーション', () => {
-    it('boolean型のisAdminを受け入れること', () => {
+  describe('hasAdminAccess のバリデーション', () => {
+    it('boolean型のhasAdminAccessを受け入れること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          isAdmin: true,
+          hasAdminAccess: true,
         })
       }).not.toThrow()
 
       expect(() => {
         userSchema.parse({
           ...validUser,
-          isAdmin: false,
+          hasAdminAccess: false,
         })
       }).not.toThrow()
     })
 
-    it('boolean型でないisAdminを拒否すること', () => {
+    it('boolean型でないhasAdminAccessを拒否すること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          isAdmin: 'true',
+          hasAdminAccess: 'true',
         })
       }).toThrow()
     })
@@ -134,11 +134,11 @@ describe('userSchema', () => {
   })
 
   describe('grantedByAdminUserId のバリデーション', () => {
-    it('正の整数のgrantedByAdminUserIdを受け入れること', () => {
+    it('正のbigint型のgrantedByAdminUserIdを受け入れること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          grantedByAdminUserId: 1,
+          grantedByAdminUserId: 1n,
         })
       }).not.toThrow()
     })
@@ -156,7 +156,16 @@ describe('userSchema', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          grantedByAdminUserId: 0,
+          grantedByAdminUserId: 0n,
+        })
+      }).toThrow()
+    })
+
+    it('bigint型でないgrantedByAdminUserIdを拒否すること', () => {
+      expect(() => {
+        userSchema.parse({
+          ...validUser,
+          grantedByAdminUserId: 123,
         })
       }).toThrow()
     })

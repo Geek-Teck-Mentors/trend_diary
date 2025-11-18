@@ -1,7 +1,7 @@
 import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import { ClientError, ServerError } from '@/common/errors'
 import type { Command, Query } from '@/domain/user/repository'
-import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
+import type { CurrentUser } from '@/domain/user/schema/activeUserSchema'
 import type { AuthV2Repository } from './repository'
 import type { AuthenticationSession } from './schema/authenticationSession'
 
@@ -16,7 +16,7 @@ const AUTH_V2_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
  */
 export type SignupResult = {
   session: AuthenticationSession | null
-  activeUser: ActiveUser
+  activeUser: CurrentUser
 }
 
 /**
@@ -24,7 +24,7 @@ export type SignupResult = {
  */
 export type LoginResult = {
   session: AuthenticationSession
-  activeUser: ActiveUser
+  activeUser: CurrentUser
 }
 
 export class AuthV2UseCase {
@@ -85,7 +85,7 @@ export class AuthV2UseCase {
     return this.repository.logout()
   }
 
-  async getCurrentActiveUser(): AsyncResult<ActiveUser, ClientError | ServerError> {
+  async getCurrentActiveUser(): AsyncResult<CurrentUser, ClientError | ServerError> {
     const authUserResult = await this.repository.getCurrentUser()
     if (isFailure(authUserResult)) {
       return authUserResult
@@ -113,7 +113,7 @@ export class AuthV2UseCase {
 
   private async findActiveUserByAuthenticationId(
     authenticationId: string,
-  ): AsyncResult<ActiveUser, ClientError | ServerError> {
+  ): AsyncResult<CurrentUser, ClientError | ServerError> {
     const activeUserResult = await this.userQuery.findActiveByAuthenticationId(authenticationId)
 
     if (isFailure(activeUserResult)) {

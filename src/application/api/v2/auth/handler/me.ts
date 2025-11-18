@@ -2,6 +2,7 @@ import { isFailure } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { handleError } from '@/common/errors'
+import { createAdminQuery } from '@/domain/admin'
 import { createAuthV2UseCase } from '@/domain/auth-v2'
 import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
@@ -20,12 +21,16 @@ export default async function me(c: Context) {
 
   const activeUser = activeUserResult.data
 
+  // 管理者権限をチェック
+  const adminQuery = createAdminQuery(rdb)
+  const isAdmin = await adminQuery.hasAdminPermissions(activeUser.activeUserId)
+
   logger.info('get current user success', { userId: activeUser.userId })
 
   return c.json({
     user: {
       displayName: activeUser.displayName,
-      isAdmin: activeUser.adminUserId !== null,
+      isAdmin,
     },
   })
 }

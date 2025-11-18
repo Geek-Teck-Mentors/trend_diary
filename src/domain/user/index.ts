@@ -6,6 +6,8 @@ import {
   ActiveUserInput,
   activeUserInputSchema,
   activeUserSchema,
+  CurrentUser,
+  currentUserSchema,
 } from './schema/activeUserSchema'
 import { UseCase } from './useCase'
 
@@ -14,7 +16,7 @@ export function createUserUseCase(db: RdbClient): UseCase {
 }
 
 // 型
-export type { ActiveUser, ActiveUserInput }
+export type { ActiveUser, ActiveUserInput, CurrentUser }
 
 // スキーマ
-export { activeUserSchema, activeUserInputSchema }
+export { activeUserSchema, activeUserInputSchema, currentUserSchema }

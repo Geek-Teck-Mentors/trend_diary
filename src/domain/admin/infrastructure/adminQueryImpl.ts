@@ -1,44 +1,28 @@
 import { PrismaClient } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { Nullable } from '@/common/types/utility'
 import { AdminQuery } from '../repository'
 import { UserListResult } from '../schema/userListSchema'
 import { UserSearchQuery } from '../schema/userSearchSchema'
-import { toUserListItem, type UserWithAdminRow } from './mapper'
+import { toUserListItem, UserWithRolesRow } from './mapper'
+import { ADMIN_ROLE_NAMES, findAdminRole } from './permissionChecker'
 
 export class AdminQueryImpl implements AdminQuery {
   constructor(private rdb: PrismaClient) {}
 
-  async findAdminByActiveUserId(activeUserId: bigint): AsyncResult<
-    Nullable<{
-      adminUserId: number
-      activeUserId: bigint
-      grantedAt: Date
-      grantedByAdminUserId: number
-    }>,
-    Error
-  > {
-    const adminUserResult = await wrapAsyncCall(() =>
-      this.rdb.adminUser.findUnique({
-        where: { activeUserId: activeUserId },
-      }),
-    )
-    if (isFailure(adminUserResult)) {
-      return failure(new ServerError(`Admin情報の取得に失敗しました: ${adminUserResult.error}`))
-    }
-
-    const adminUser = adminUserResult.data
-    if (!adminUser) {
-      return success(null)
-    }
-
-    return success({
-      adminUserId: adminUser.adminUserId,
-      activeUserId: adminUser.activeUserId,
-      grantedAt: adminUser.grantedAt,
-      grantedByAdminUserId: adminUser.grantedByAdminUserId,
+  async hasAdminPermissions(activeUserId: bigint): Promise<boolean> {
+    const userRoles = await this.rdb.userRole.findMany({
+      where: { activeUserId },
+      include: {
+        role: {
+          select: { displayName: true },
+        },
+      },
     })
+
+    return userRoles.some((ur) =>
+      ADMIN_ROLE_NAMES.includes(ur.role.displayName as (typeof ADMIN_ROLE_NAMES)[number]),
+    )
   }
 
   async findAllUsers(query?: UserSearchQuery): AsyncResult<UserListResult, Error> {
@@ -59,7 +43,19 @@ export class AdminQueryImpl implements AdminQuery {
         this.rdb.activeUser.findMany({
           where: whereClause,
           include: {
-            adminUser: true,
+            userRoles: {
+              include: {
+                role: {
+                  include: {
+                    rolePermissions: {
+                      include: {
+                        permission: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           orderBy: { createdAt: 'desc' },
           skip: offset,
@@ -73,7 +69,29 @@ export class AdminQueryImpl implements AdminQuery {
     }
 
     const [users, total] = result.data
-    const userList = users.map((user) => toUserListItem(user as UserWithAdminRow))
+
+    // 各ユーザーの管理者権限情報を計算
+    const usersWithAdminInfo = users.map((user) => {
+      // 管理者権限を持つロールを見つける
+      const adminRole = findAdminRole(user.userRoles)
+
+      const userWithAdminInfo: UserWithRolesRow = {
+        activeUserId: user.activeUserId,
+        email: user.email,
+        displayName: user.displayName,
+        authenticationId: user.authenticationId,
+        createdAt: user.createdAt,
+        hasAdminAccess: !!adminRole,
+        adminGrantedAt: adminRole?.grantedAt || null,
+        // Prismaスキーマ上はnullableだが、実際はuserRole.createで必ず設定される
+        // スキーマ上のnullabilityに対応するための防御的なnullチェック
+        adminGrantedByUserId: adminRole?.grantedByActiveUserId || null,
+      }
+
+      return userWithAdminInfo
+    })
+
+    const userList = usersWithAdminInfo.map((user) => toUserListItem(user))
 
     return success({
       users: userList,

@@ -24,7 +24,6 @@ function createMockActiveUser(email: string, authenticationId: string): ActiveUs
     lastLogin: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    adminUserId: null,
   }
   // モックユーザーをMapに保存
   mockActiveUsers.set(authenticationId, activeUser)
@@ -35,6 +34,7 @@ function createMockActiveUser(email: string, authenticationId: string): ActiveUs
 const mockQuery: Query = {
   findActiveById: vi.fn(),
   findActiveByEmail: vi.fn(),
+  findActiveByEmailForAuth: vi.fn(),
   findActiveBySessionId: vi.fn(),
   findActiveByAuthenticationId: vi.fn((authenticationId: string) => {
     const activeUser = mockActiveUsers.get(authenticationId)
@@ -66,6 +66,14 @@ vi.mock('@/domain/user/infrastructure/queryImpl', () => ({
 // CommandImplをモック
 vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
   default: vi.fn(() => mockCommand),
+}))
+
+// AdminQueryImplをモック
+vi.mock('@/domain/admin/infrastructure/adminQueryImpl', () => ({
+  AdminQueryImpl: vi.fn(() => ({
+    findAllUsers: vi.fn(),
+    hasAdminPermissions: vi.fn(() => Promise.resolve(false)),
+  })),
 }))
 
 // getRdbClientをモックして何も返さない（使われないため）

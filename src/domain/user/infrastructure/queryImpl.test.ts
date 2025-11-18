@@ -189,6 +189,7 @@ describe('QueryImpl', () => {
         if (isSuccess(result)) {
           expect(result.data?.activeUserId).toBe(1n)
           expect(result.data?.email).toBe('test@example.com')
+          expect(result.data).not.toHaveProperty('password')
         }
         expect(mockDb.session.findFirst).toHaveBeenCalled()
       })

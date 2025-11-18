@@ -1,8 +1,12 @@
 import app from '@/application/server'
+import { ADMIN_ROLE_NAMES } from '@/domain/admin/infrastructure/permissionChecker'
+import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import adminUserTestHelper from '@/test/helper/adminUserTestHelper'
 import { GrantAdminRoleResponse } from './grantAdminRole'
+
+const rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
 async function requestPostAdminUser(id: string, sessionId?: string) {
   const url = `/api/admin/users/${id}`
@@ -48,11 +52,23 @@ describe('POST /api/admin/users/:id', () => {
       expect(data.activeUserId).toBe(regularUser.activeUserId.toString())
       expect(data.adminUserId).toBeDefined()
       expect(data.grantedAt).toBeDefined()
-      expect(data.grantedByAdminUserId).toBe(adminUser.adminUserId)
+      expect(data.grantedByAdminUserId).toBe(adminUser.activeUserId.toString())
 
-      // 実際にAdmin権限が付与されたか確認
-      const isAdmin = await adminUserTestHelper.isAdmin(regularUser.activeUserId)
-      expect(isAdmin).toBe(true)
+      // 実際にAdmin権限が付与されたか確認（UserRoleテーブルをチェック）
+      const adminRole = await rdb.role.findFirst({
+        where: { displayName: ADMIN_ROLE_NAMES[0] },
+      })
+      const userRole = await rdb.userRole.findUnique({
+        where: {
+          // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
+          activeUserId_roleId: {
+            activeUserId: regularUser.activeUserId,
+            roleId: adminRole!.roleId,
+          },
+        },
+      })
+      expect(userRole).not.toBeNull()
+      expect(userRole?.activeUserId).toBe(regularUser.activeUserId)
     })
   })
 
@@ -121,7 +137,7 @@ describe('POST /api/admin/users/:id', () => {
         'password123',
         'Regular User',
       )
-      await adminUserTestHelper.grantAdminRole(regularUser.activeUserId, adminUser.adminUserId)
+      await adminUserTestHelper.grantAdminRole(regularUser.activeUserId, adminUser.activeUserId)
 
       // 既にAdmin権限を持つユーザーに再度Admin権限を付与しようとする
       const res = await requestPostAdminUser(

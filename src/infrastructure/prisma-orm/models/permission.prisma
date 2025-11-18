@@ -40,9 +40,10 @@ model RolePermission {
 
 /// ユーザーとロールの中間テーブル
 model UserRole {
-  activeUserId BigInt   @map("active_user_id") @db.BigInt
-  roleId       Int      @map("role_id") @db.Integer
-  grantedAt    DateTime @default(now()) @map("granted_at") @db.Timestamptz()
+  activeUserId          BigInt   @map("active_user_id") @db.BigInt
+  roleId                Int      @map("role_id") @db.Integer
+  grantedAt             DateTime @default(now()) @map("granted_at") @db.Timestamptz()
+  grantedByActiveUserId BigInt?  @map("granted_by_active_user_id") @db.BigInt
 
   activeUser ActiveUser @relation(fields: [activeUserId], references: [activeUserId], onDelete: Cascade)
   role       Role       @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
