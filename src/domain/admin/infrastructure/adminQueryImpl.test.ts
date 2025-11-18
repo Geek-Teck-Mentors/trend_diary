@@ -278,4 +278,118 @@ describe('AdminQueryImpl', () => {
       })
     })
   })
+
+  describe('hasAdminPermissions', () => {
+    describe('基本動作', () => {
+      it('管理者ロールを持つユーザーの場合trueを返す', async () => {
+        const activeUserId = 1n
+        const mockUserRoles = [
+          {
+            activeUserId: 1n,
+            roleId: 1,
+            grantedAt: new Date(),
+            grantedByActiveUserId: 2n,
+            role: {
+              displayName: '管理者',
+            },
+          },
+        ]
+
+        mockDb.userRole.findMany.mockResolvedValue(mockUserRoles)
+
+        const result = await query.hasAdminPermissions(activeUserId)
+
+        expect(result).toBe(true)
+        expect(mockDb.userRole.findMany).toHaveBeenCalledWith({
+          where: { activeUserId },
+          include: {
+            role: {
+              select: { displayName: true },
+            },
+          },
+        })
+      })
+
+      it('スーパー管理者ロールを持つユーザーの場合trueを返す', async () => {
+        const activeUserId = 2n
+        const mockUserRoles = [
+          {
+            activeUserId: 2n,
+            roleId: 2,
+            grantedAt: new Date(),
+            grantedByActiveUserId: 3n,
+            role: {
+              displayName: 'スーパー管理者',
+            },
+          },
+        ]
+
+        mockDb.userRole.findMany.mockResolvedValue(mockUserRoles)
+
+        const result = await query.hasAdminPermissions(activeUserId)
+
+        expect(result).toBe(true)
+      })
+
+      it('一般ユーザーの場合falseを返す', async () => {
+        const activeUserId = 3n
+        const mockUserRoles = [
+          {
+            activeUserId: 3n,
+            roleId: 3,
+            grantedAt: new Date(),
+            grantedByActiveUserId: 1n,
+            role: {
+              displayName: '一般ユーザー',
+            },
+          },
+        ]
+
+        mockDb.userRole.findMany.mockResolvedValue(mockUserRoles)
+
+        const result = await query.hasAdminPermissions(activeUserId)
+
+        expect(result).toBe(false)
+      })
+
+      it('ロールを持たないユーザーの場合falseを返す', async () => {
+        const activeUserId = 4n
+        mockDb.userRole.findMany.mockResolvedValue([])
+
+        const result = await query.hasAdminPermissions(activeUserId)
+
+        expect(result).toBe(false)
+      })
+
+      it('複数ロールを持ち、1つが管理者ロールの場合trueを返す', async () => {
+        const activeUserId = 5n
+        const mockUserRoles = [
+          {
+            activeUserId: 5n,
+            roleId: 3,
+            grantedAt: new Date(),
+            grantedByActiveUserId: 1n,
+            role: {
+              displayName: '一般ユーザー',
+            },
+          },
+          {
+            activeUserId: 5n,
+            roleId: 1,
+            grantedAt: new Date(),
+            grantedByActiveUserId: 2n,
+            role: {
+              displayName: '管理者',
+            },
+          },
+        ]
+
+        mockDb.userRole.findMany.mockResolvedValue(mockUserRoles)
+
+        const result = await query.hasAdminPermissions(activeUserId)
+
+        expect(result).toBe(true)
+      })
+    })
+  })
 })
