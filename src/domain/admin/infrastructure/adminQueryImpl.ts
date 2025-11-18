@@ -68,6 +68,8 @@ export class AdminQueryImpl implements AdminQuery {
         createdAt: user.createdAt,
         hasAdminAccess: !!adminRole,
         adminGrantedAt: adminRole?.grantedAt || null,
+        // Prismaスキーマ上はnullableだが、実際はuserRole.createで必ず設定される
+        // スキーマ上のnullabilityに対応するための防御的なnullチェック
         adminGrantedByUserId: adminRole?.grantedByActiveUserId || null,
       }
 
