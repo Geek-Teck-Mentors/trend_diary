@@ -48,7 +48,6 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
     throw new HTTPException(404, { message: 'login required' })
   }
 
-  // セッションユーザー情報を設定（hasAdminAccessはドメイン層で計算済み）
   const sessionUser: SessionUser = {
     activeUserId: result.data.activeUserId,
     displayName: result.data.displayName,
