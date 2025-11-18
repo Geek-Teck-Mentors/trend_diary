@@ -1,6 +1,5 @@
-import { RdbClient } from '@/infrastructure/rdb'
+import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
-import articleTestHelper from '@/test/helper/articleTestHelper'
 import app from '../../../server'
 import { ArticleListResponse } from './getArticles'
 
@@ -46,7 +45,7 @@ describe('GET /api/articles', () => {
   }
 
   beforeAll(() => {
-    db = articleTestHelper.getRdb()
+    db = getRdbClient(TEST_ENV.DATABASE_URL)
   })
 
   afterAll(async () => {

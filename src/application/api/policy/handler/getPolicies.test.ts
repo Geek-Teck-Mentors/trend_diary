@@ -1,4 +1,4 @@
-import { RdbClient } from '@/infrastructure/rdb'
+import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import policyTestHelper from '@/test/helper/policyTestHelper'
@@ -21,7 +21,7 @@ describe('GET /api/policies', () => {
   beforeAll(async () => {
     await policyTestHelper.cleanUp()
     await activeUserTestHelper.cleanUp()
-    db = policyTestHelper.getRdb()
+    db = getRdbClient(TEST_ENV.DATABASE_URL)
     sessionId = await policyTestHelper.setupUserSession()
   })
 
