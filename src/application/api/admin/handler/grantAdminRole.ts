@@ -15,7 +15,7 @@ export interface GrantAdminRoleResponse {
   adminUserId: number
   activeUserId: string
   grantedAt: string
-  grantedByAdminUserId: number
+  grantedByAdminUserId: string
 }
 
 export default async function grantAdminRole(
@@ -44,6 +44,6 @@ export default async function grantAdminRole(
     adminUserId: result.data.adminUserId,
     activeUserId: result.data.activeUserId.toString(),
     grantedAt: result.data.grantedAt.toISOString(),
-    grantedByAdminUserId: result.data.grantedByAdminUserId,
+    grantedByAdminUserId: result.data.grantedByAdminUserId.toString(),
   })
 }

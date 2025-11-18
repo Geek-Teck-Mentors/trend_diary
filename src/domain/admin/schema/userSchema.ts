@@ -7,7 +7,7 @@ export const userSchema = z.object({
   displayName: z.string().nullable(),
   hasAdminAccess: z.boolean(),
   grantedAt: z.date().nullable(),
-  grantedByAdminUserId: z.number().int().positive().nullable(),
+  grantedByAdminUserId: z.bigint().positive().nullable(),
   createdAt,
 })
 

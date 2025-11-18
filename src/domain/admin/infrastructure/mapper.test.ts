@@ -41,7 +41,7 @@ describe('Admin Mapper', () => {
         expect(result.displayName).toBe(userWithRolesRow.displayName)
         expect(result.hasAdminAccess).toBe(true)
         expect(result.grantedAt).toEqual(grantedAt)
-        expect(result.grantedByAdminUserId).toBe(2)
+        expect(result.grantedByAdminUserId).toBe(2n)
         expect(result.createdAt).toEqual(userWithRolesRow.createdAt)
       })
 

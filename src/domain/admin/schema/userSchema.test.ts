@@ -134,11 +134,11 @@ describe('userSchema', () => {
   })
 
   describe('grantedByAdminUserId のバリデーション', () => {
-    it('正の整数のgrantedByAdminUserIdを受け入れること', () => {
+    it('正のbigint型のgrantedByAdminUserIdを受け入れること', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          grantedByAdminUserId: 1,
+          grantedByAdminUserId: 1n,
         })
       }).not.toThrow()
     })
@@ -156,7 +156,16 @@ describe('userSchema', () => {
       expect(() => {
         userSchema.parse({
           ...validUser,
-          grantedByAdminUserId: 0,
+          grantedByAdminUserId: 0n,
+        })
+      }).toThrow()
+    })
+
+    it('bigint型でないgrantedByAdminUserIdを拒否すること', () => {
+      expect(() => {
+        userSchema.parse({
+          ...validUser,
+          grantedByAdminUserId: 123,
         })
       }).toThrow()
     })

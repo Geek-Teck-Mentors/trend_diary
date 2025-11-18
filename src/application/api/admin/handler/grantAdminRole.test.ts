@@ -1,4 +1,5 @@
 import app from '@/application/server'
+import { ADMIN_ROLE_NAMES } from '@/domain/admin/infrastructure/permissionChecker'
 import getRdbClient from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
@@ -51,11 +52,11 @@ describe('POST /api/admin/users/:id', () => {
       expect(data.activeUserId).toBe(regularUser.activeUserId.toString())
       expect(data.adminUserId).toBeDefined()
       expect(data.grantedAt).toBeDefined()
-      expect(data.grantedByAdminUserId).toBe(Number(adminUser.activeUserId))
+      expect(data.grantedByAdminUserId).toBe(adminUser.activeUserId.toString())
 
       // 実際にAdmin権限が付与されたか確認（UserRoleテーブルをチェック）
       const adminRole = await rdb.role.findFirst({
-        where: { displayName: '管理者' },
+        where: { displayName: ADMIN_ROLE_NAMES[0] },
       })
       const userRole = await rdb.userRole.findUnique({
         where: {

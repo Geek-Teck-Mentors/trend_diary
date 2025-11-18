@@ -56,7 +56,7 @@ describe('AdminCommandImpl', () => {
       if (isSuccess(result)) {
         expect(result.data.activeUserId).toBe(activeUserId)
         expect(result.data.adminUserId).toBe(2)
-        expect(result.data.grantedByAdminUserId).toBe(Number(grantedByActiveUserId))
+        expect(result.data.grantedByAdminUserId).toBe(grantedByActiveUserId)
       }
     })
 

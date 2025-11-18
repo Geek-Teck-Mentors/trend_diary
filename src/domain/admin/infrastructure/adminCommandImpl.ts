@@ -3,6 +3,7 @@ import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukih
 import { AlreadyExistsError, NotFoundError, ServerError } from '@/common/errors'
 import { AdminCommand } from '../repository'
 import type { AdminUser } from '../schema/adminUserSchema'
+import { ADMIN_ROLE_NAMES } from './permissionChecker'
 
 export class AdminCommandImpl implements AdminCommand {
   constructor(private rdb: PrismaClient) {}
@@ -29,7 +30,7 @@ export class AdminCommandImpl implements AdminCommand {
     // 管理者ロールを取得
     const adminRoleResult = await wrapAsyncCall(() =>
       this.rdb.role.findFirst({
-        where: { displayName: '管理者' },
+        where: { displayName: ADMIN_ROLE_NAMES[0] },
       }),
     )
     if (isFailure(adminRoleResult)) {
@@ -80,7 +81,8 @@ export class AdminCommandImpl implements AdminCommand {
     }
 
     // AdminUser形式に変換して返す（後方互換性のため）
-    // grantedByActiveUserIdは必ず値があるはず（この関数で設定している）
+    // Prismaスキーマ上はgrantedByActiveUserIdがnullableだが、実際はuserRole.createで必ず設定される
+    // スキーマ上のnullabilityに対応するための防御的なnullチェック
     if (!userRoleResult.data.grantedByActiveUserId) {
       return failure(new ServerError('grantedByActiveUserIdが設定されていません'))
     }
@@ -89,7 +91,7 @@ export class AdminCommandImpl implements AdminCommand {
       adminUserId: userRoleResult.data.roleId,
       activeUserId: userRoleResult.data.activeUserId,
       grantedAt: userRoleResult.data.grantedAt,
-      grantedByAdminUserId: Number(userRoleResult.data.grantedByActiveUserId),
+      grantedByAdminUserId: userRoleResult.data.grantedByActiveUserId,
     })
   }
 }
