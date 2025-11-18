@@ -80,7 +80,9 @@ export default class QueryImpl implements Query {
     const hasAdminAccess = Number(adminPermissionCount[0]?.count || 0n) > 0
 
     // CurrentUserを返す（passwordは除く）
-    const { password: _password, ...activeUserWithoutPassword } = mapToActiveUser(session.activeUser)
+    const { password: _password, ...activeUserWithoutPassword } = mapToActiveUser(
+      session.activeUser,
+    )
     return success({
       ...activeUserWithoutPassword,
       hasAdminAccess,

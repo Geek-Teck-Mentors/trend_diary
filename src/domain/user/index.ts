@@ -4,9 +4,9 @@ import QueryImpl from './infrastructure/queryImpl'
 import {
   ActiveUser,
   ActiveUserInput,
-  CurrentUser,
   activeUserInputSchema,
   activeUserSchema,
+  CurrentUser,
   currentUserSchema,
 } from './schema/activeUserSchema'
 import { UseCase } from './useCase'
