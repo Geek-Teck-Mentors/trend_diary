@@ -46,7 +46,7 @@ describe('userListResultSchema', () => {
               displayName: 'User Two',
               hasAdminAccess: true,
               grantedAt: new Date(),
-              grantedByAdminUserId: 1,
+              grantedByAdminUserId: 1n,
               createdAt: new Date(),
             },
           ],
