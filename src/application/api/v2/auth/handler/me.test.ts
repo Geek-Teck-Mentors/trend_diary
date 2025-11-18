@@ -68,6 +68,14 @@ vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
   default: vi.fn(() => mockCommand),
 }))
 
+// AdminQueryImplをモック
+vi.mock('@/domain/admin/infrastructure/adminQueryImpl', () => ({
+  AdminQueryImpl: vi.fn(() => ({
+    findAllUsers: vi.fn(),
+    hasAdminPermissions: vi.fn(() => Promise.resolve(false)),
+  })),
+}))
+
 // getRdbClientをモックして何も返さない（使われないため）
 vi.mock('@/infrastructure/rdb', () => ({
   default: () => ({}),
