@@ -157,13 +157,7 @@ describe('AdminQueryImpl', () => {
         const result = await query.findAllUsers()
 
         expectSuccessResult(result, { users: { length: 2 }, total: 2, page: 1, limit: 20 })
-        expect(mockDb.activeUser.findMany).toHaveBeenCalledWith({
-          where: {},
-          include: { adminUser: true },
-          orderBy: { createdAt: 'desc' },
-          skip: 0,
-          take: 20,
-        })
+        expectFindManyCall({ where: {}, skip: 0, take: 20 })
       })
 
       it('検索クエリでユーザーをフィルタリングできる', async () => {
