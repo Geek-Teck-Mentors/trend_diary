@@ -9,27 +9,6 @@ import { AdminQueryImpl } from './adminQueryImpl'
 const mockDb = mockDeep<PrismaClient>()
 
 // ヘルパー関数
-function createMockUserRole(overrides = {}) {
-  return {
-    roleId: 1,
-    grantedAt: new Date('2024-01-15T09:30:15.123Z'),
-    grantedByActiveUserId: 2n,
-    role: {
-      roleId: 1,
-      displayName: '管理者',
-      rolePermissions: [
-        {
-          permission: {
-            resource: 'user',
-            action: 'list',
-          },
-        },
-      ],
-    },
-    ...overrides,
-  }
-}
-
 function createMockUsers() {
   return [
     {
@@ -42,7 +21,7 @@ function createMockUsers() {
       lastLogin: new Date('2024-01-15T09:30:15.123Z'),
       createdAt: new Date('2024-01-10T00:00:00.000Z'),
       updatedAt: new Date('2024-01-15T09:30:15.123Z'),
-      userRoles: [createMockUserRole()],
+      userRoles: [],
     },
     {
       activeUserId: 2n,
