@@ -33,6 +33,14 @@ describe('Admin Mapper', () => {
               role: {
                 roleId: 1,
                 displayName: '管理者',
+                rolePermissions: [
+                  {
+                    permission: {
+                      resource: 'user',
+                      action: 'list',
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -51,7 +59,7 @@ describe('Admin Mapper', () => {
         expect(result.createdAt).toEqual(userWithRolesRow.createdAt)
       })
 
-      it('スーパー管理者権限を持つユーザーもAdmin判定されること', () => {
+      it('privacy_policy権限を持つユーザーもAdmin判定されること', () => {
         // Arrange
         const userWithRolesRow = createMockUserWithRolesRow({
           userRoles: [
@@ -61,7 +69,15 @@ describe('Admin Mapper', () => {
               grantedByActiveUserId: null,
               role: {
                 roleId: 2,
-                displayName: 'スーパー管理者',
+                displayName: 'ポリシー管理者',
+                rolePermissions: [
+                  {
+                    permission: {
+                      resource: 'privacy_policy',
+                      action: 'create',
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -77,7 +93,25 @@ describe('Admin Mapper', () => {
       it('Admin権限を持たないユーザーデータで正確にマッピングされること', () => {
         // Arrange
         const userWithRolesRow = createMockUserWithRolesRow({
-          userRoles: [],
+          userRoles: [
+            {
+              roleId: 3,
+              grantedAt: new Date(),
+              grantedByActiveUserId: null,
+              role: {
+                roleId: 3,
+                displayName: '一般ユーザー',
+                rolePermissions: [
+                  {
+                    permission: {
+                      resource: 'article',
+                      action: 'list',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
         })
 
         // Act
@@ -119,6 +153,14 @@ describe('Admin Mapper', () => {
               role: {
                 roleId: 1,
                 displayName: '管理者',
+                rolePermissions: [
+                  {
+                    permission: {
+                      resource: 'user',
+                      action: 'grant_admin',
+                    },
+                  },
+                ],
               },
             },
           ],

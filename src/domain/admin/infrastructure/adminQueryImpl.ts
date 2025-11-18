@@ -29,7 +29,15 @@ export class AdminQueryImpl implements AdminQuery {
           include: {
             userRoles: {
               include: {
-                role: true,
+                role: {
+                  include: {
+                    rolePermissions: {
+                      include: {
+                        permission: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
