@@ -191,6 +191,49 @@ describe('QueryImpl', () => {
           expect(result.data?.activeUserId).toBe(1n)
           expect(result.data?.email).toBe('test@example.com')
           expect(result.data?.hasAdminAccess).toBe(false)
+          expect(result.data).not.toHaveProperty('password')
+        }
+        expect(mockDb.session.findFirst).toHaveBeenCalled()
+        expect(mockDb.$queryRaw).toHaveBeenCalled()
+      })
+
+      it('管理者権限を持つユーザーの場合hasAdminAccessがtrueになる', async () => {
+        // Arrange
+        const sessionId = 'admin-session'
+
+        const mockSession = {
+          sessionId: 'admin-session',
+          activeUserId: 2n,
+          sessionToken: 'admin-token',
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          ipAddress: '192.168.1.2',
+          userAgent: 'Mozilla/5.0',
+          createdAt: new Date(),
+          activeUser: {
+            activeUserId: 2n,
+            userId: 3n,
+            email: 'admin@example.com',
+            password: 'hashedPassword456',
+            displayName: '管理者ユーザー',
+            lastLogin: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        }
+
+        mockDb.session.findFirst.mockResolvedValue(mockSession)
+        mockDb.$queryRaw.mockResolvedValue([{ count: 2n }])
+
+        // Act
+        const result = await useCase.findActiveBySessionId(sessionId)
+
+        // Assert
+        expect(isSuccess(result)).toBe(true)
+        if (isSuccess(result)) {
+          expect(result.data?.activeUserId).toBe(2n)
+          expect(result.data?.email).toBe('admin@example.com')
+          expect(result.data?.hasAdminAccess).toBe(true)
+          expect(result.data).not.toHaveProperty('password')
         }
         expect(mockDb.session.findFirst).toHaveBeenCalled()
         expect(mockDb.$queryRaw).toHaveBeenCalled()
