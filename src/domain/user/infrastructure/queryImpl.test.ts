@@ -12,6 +12,8 @@ describe('QueryImpl', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // hasAdminPermissionsで使用する$queryRawのデフォルトmock（管理者権限なし）
+    mockDb.$queryRaw.mockResolvedValue([{ count: 0n }])
     useCase = new QueryImpl(mockDb)
   })
 
