@@ -1,17 +1,20 @@
-import { success } from '@yuukihayashi0510/core'
+import { isSuccess, success } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
 import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2Repository'
-import type { Command } from '@/domain/user/repository'
+import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
 import TEST_ENV from '@/test/env'
 import app from '../../../../server'
 
 const mockRepository = new MockAuthV2Repository()
 
+// ログイン時に作成されたユーザーを保存するMap（authenticationId -> ActiveUser）
+const mockActiveUsers = new Map<string, ActiveUser>()
+
 // モックのActiveUser生成関数
 let activeUserIdCounter = 1n
 function createMockActiveUser(email: string, authenticationId: string): ActiveUser {
-  return {
+  const activeUser: ActiveUser = {
     activeUserId: activeUserIdCounter++,
     userId: activeUserIdCounter,
     email,
@@ -22,6 +25,20 @@ function createMockActiveUser(email: string, authenticationId: string): ActiveUs
     createdAt: new Date(),
     updatedAt: new Date(),
   }
+  // モックユーザーをMapに保存
+  mockActiveUsers.set(authenticationId, activeUser)
+  return activeUser
+}
+
+// モックのQuery
+const mockQuery: Query = {
+  findActiveById: vi.fn(),
+  findActiveByEmail: vi.fn(),
+  findActiveBySessionId: vi.fn(),
+  findActiveByAuthenticationId: vi.fn((authenticationId: string) => {
+    const activeUser = mockActiveUsers.get(authenticationId)
+    return Promise.resolve(success(activeUser || null))
+  }),
 }
 
 // モックのCommand
@@ -38,6 +55,11 @@ const mockCommand: Command = {
 // SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
 vi.mock('@/domain/auth-v2/infrastructure/supabaseAuthRepository', () => ({
   SupabaseAuthRepository: vi.fn(() => mockRepository),
+}))
+
+// QueryImplをモック
+vi.mock('@/domain/user/infrastructure/queryImpl', () => ({
+  default: vi.fn(() => mockQuery),
 }))
 
 // CommandImplをモック
@@ -61,6 +83,8 @@ describe('GET /api/v2/auth/me', () => {
 
   beforeEach(async () => {
     mockRepository.clearAll()
+    mockActiveUsers.clear()
+    activeUserIdCounter = 1n
   })
 
   async function requestMe() {
@@ -80,16 +104,20 @@ describe('GET /api/v2/auth/me', () => {
 
   it('正常系: 現在のユーザー情報を取得できる', async () => {
     // ユーザーを作成してログイン状態にする
-    await mockRepository.signup(TEST_EMAIL, TEST_PASSWORD)
+    const signupResult = await mockRepository.signup(TEST_EMAIL, TEST_PASSWORD)
+    if (isSuccess(signupResult)) {
+      // signup時のauthenticationIdでActiveUserを作成
+      createMockActiveUser(TEST_EMAIL, signupResult.data.user.id)
+    }
 
     // ユーザー情報取得
     const meRes = await requestMe()
     expect(meRes.status).toBe(200)
 
-    const body = (await meRes.json()) as { user: { id: string; email: string } }
+    const body = (await meRes.json()) as { user: { displayName: string | null; isAdmin: boolean } }
     expect(body).toHaveProperty('user')
-    expect(body.user).toHaveProperty('id')
-    expect(body.user).toHaveProperty('email', TEST_EMAIL)
+    expect(body.user).toHaveProperty('displayName')
+    expect(body.user).toHaveProperty('isAdmin', false)
   })
 
   it('準正常系: ログインしていない場合は401を返す', async () => {
