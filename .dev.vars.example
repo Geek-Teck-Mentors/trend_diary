@@ -1,8 +1,10 @@
+# SupabaseのDB URLを設定
 # edge環境ではprisma://から始まるURLにする必要がある
 DATABASE_URL=postgresql://postgres:password@localhost:5432/postgres
 
+# SupabaseのDB URLを設定
 # Direct connection to the database. Used for migrations
-DIRECT_URL=postgres://postgres:password@localhost:5432/postgres 
+DIRECT_URL=postgres://postgres:password@localhost:5432/postgres
 
 # Discord webhook URL for alert
 DISCORD_WEBHOOK_URL=
