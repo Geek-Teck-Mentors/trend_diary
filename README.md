@@ -19,18 +19,19 @@ Nodeモジュールのインストール
 npm ci
 ```
 
+Supabaseを起動
+
+```sh
+supabase start
+```
+
 環境変数ファイルをコピー(Cloudflareでは.{env}.vars)
+Supabaseの`anon key`を`SUPABASE_ANON_KEY`に設定
 ```sh
 cp .dev.vars.example .dev.vars
 ```
 
-DockerのDBを起動
-
-```sh
-docker compose up -d
-```
-
-Docker上のDBにマイグレーションを適用
+SupabaseのDBにマイグレーションを適用
 
 ```sh
 npm run db:migrate
