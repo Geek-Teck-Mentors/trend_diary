@@ -121,21 +121,26 @@ jobs:
     needs: setup
     runs-on: ${{ needs.setup.outputs.test_runner }}
     if: ${{ needs.setup.outputs.run_api_test == 'true' }}
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-
-      - name: PostgreSQLのセットアップ
-        run: docker compose build && docker compose up -d
-
-      - name: PostgreSQLが起動するまで待機
-        uses: ./.github/actions/backoff
-        with:
-          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
-          fail_command: docker compose down
 
       - name: DB Migration
         env:
