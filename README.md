@@ -26,7 +26,7 @@ supabase start
 ```
 
 環境変数ファイルをコピー(Cloudflareでは.{env}.vars)
-Supabaseの`anon key`を`SUPABASE_ANON_KEY`に設定
+`supabase start`時に表示される`anon key`を`SUPABASE_ANON_KEY`に設定
 ```sh
 cp .dev.vars.example .dev.vars
 ```
