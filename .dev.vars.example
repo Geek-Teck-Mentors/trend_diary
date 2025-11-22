@@ -2,7 +2,6 @@
 # edge環境ではprisma://から始まるURLにする必要がある
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 
-# SupabaseのDB URLを設定
 # Direct connection to the database. Used for migrations
 DIRECT_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 
