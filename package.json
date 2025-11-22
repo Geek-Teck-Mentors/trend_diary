@@ -6,9 +6,9 @@
   },
   "scripts": {
     "postinstall": "prisma generate",
-    "prestart": "docker compose up -d",
+    "prestart": "supabase start",
     "start": "react-router dev",
-    "poststart": "docker compose down",
+    "poststart": "supabase stop",
     "build": "react-router build",
     "test:frontend": "vitest run -c src/test/vitest-config/config.frontend.ts",
     "test:domain": "vitest run -c src/test/vitest-config/config.domain.ts",
