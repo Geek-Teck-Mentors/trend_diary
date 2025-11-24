@@ -24,5 +24,6 @@ runs:
       id: get-keys
       shell: bash
       run: |
-        echo "db-url=$(supabase status --output json | jq -r '.DB_URL')" >> $GITHUB_OUTPUT
-        echo "anon-key=$(supabase status --output json | jq -r '.ANON_KEY')" >> $GITHUB_OUTPUT
+        SUPABASE_JSON=$(supabase status --output json)
+        echo "db-url=$(echo $SUPABASE_JSON | jq -r '.DB_URL')" >> $GITHUB_OUTPUT
+        echo "anon-key=$(echo $SUPABASE_JSON | jq -r '.ANON_KEY')" >> $GITHUB_OUTPUT
