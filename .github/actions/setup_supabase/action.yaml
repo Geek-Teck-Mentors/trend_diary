@@ -6,6 +6,7 @@ runs:
   steps:
     - name: Supabase CLIのセットアップ
       uses: supabase/setup-cli@v1
+
     - name: Supabaseの起動
       shell: bash
       # INFO: DBと認証のみ起動

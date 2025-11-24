@@ -31,7 +31,7 @@ concurrency:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
-  DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
+  DATABASE_URL: postgresql://postgres:password@localhost:54322/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
 
 jobs:
   setup:
