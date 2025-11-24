@@ -1,6 +1,14 @@
 name: Setup Supabase Composite Action
 description: 'SupabaseをセットアップするComposite Action'
 
+outputs:
+  db_url:
+    description: 'Supabaseのデータベース接続URL'
+    value: ${{ steps.get-keys.outputs.db-url }}
+  anon_key:
+    description: 'Supabaseのanon key'
+    value: ${{ steps.get-keys.outputs.anon-key }}
+
 runs:
   using: 'composite'
   steps:
@@ -12,3 +20,9 @@ runs:
       # INFO: DBと認証のみ起動
       run: supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit
 
+    - name: Supabaseのキー取得
+      id: get-keys
+      shell: bash
+      run: |
+        echo "db-url=$(supabase status --output json | jq -r '.DB_URL')" >> $GITHUB_OUTPUT
+        echo "anon-key=$(supabase status --output json | jq -r '.ANON_KEY')" >> $GITHUB_OUTPUT
