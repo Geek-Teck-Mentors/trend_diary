@@ -6,7 +6,7 @@
   },
   "scripts": {
     "postinstall": "prisma generate",
-    "prestart": "supabase start",
+    "prestart": "supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit",
     "start": "react-router dev",
     "poststart": "supabase stop",
     "dev": "react-router dev",
