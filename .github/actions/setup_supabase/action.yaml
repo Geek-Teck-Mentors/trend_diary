@@ -1,0 +1,11 @@
+name: Setup Supabase Composite Action
+description: 'SupabaseをセットアップするComposite Action'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Supabaseのセットアップ
+      uses: supabase/setup-cli@v1
+      # INFO: DBと認証のみ起動
+      run: supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit
+

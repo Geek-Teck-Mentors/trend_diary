@@ -17,6 +17,9 @@ runs:
       with:
         node-version-file: ${{ inputs.node-version-file }}
 
+    - name: Supabaseのセットアップ
+      uses: ./.github/actions/setup_supabase
+
     - name: Playwrightブラウザのキャッシュ
       uses: actions/cache@v4
       id: playwright-cache
