@@ -50,19 +50,41 @@ async function seedPermissions() {
 }
 
 async function seedRoles() {
-  await prisma.role.createMany({
-    data: [
-      { displayName: 'スーパー管理者', description: 'すべての権限を持つ最高管理者' },
-      { displayName: '管理者', description: 'ユーザー管理・ポリシー管理が可能' },
-      { displayName: '一般ユーザー', description: '基本的な機能が利用可能' },
-    ],
-    skipDuplicates: true,
+  const presetRoles = [
+    { displayName: 'スーパー管理者', description: 'すべての権限を持つ最高管理者' },
+    { displayName: '管理者', description: 'ユーザー管理・ポリシー管理が可能' },
+    { displayName: '一般ユーザー', description: '基本的な機能が利用可能' },
+  ]
+
+  // 既存のプリセットロールを一度に取得
+  const existingRoles = await prisma.role.findMany({
+    where: {
+      displayName: { in: presetRoles.map((r) => r.displayName) },
+      preset: true,
+    },
+    select: { displayName: true },
   })
+
+  const existingRoleNames = new Set(existingRoles.map((r) => r.displayName))
+
+  // 不足しているロールをフィルタリング
+  const rolesToCreate = presetRoles
+    .filter((role) => !existingRoleNames.has(role.displayName))
+    .map((role) => ({ ...role, preset: true }))
+
+  // まとめて作成
+  if (rolesToCreate.length > 0) {
+    await prisma.role.createMany({
+      data: rolesToCreate,
+    })
+  }
 }
 
 async function seedRolePermissions() {
   // スーパー管理者：すべての権限
-  const superAdmin = await prisma.role.findFirst({ where: { displayName: 'スーパー管理者' } })
+  const superAdmin = await prisma.role.findFirst({
+    where: { preset: true, displayName: 'スーパー管理者' },
+  })
   const allPermissions = await prisma.permission.findMany()
   if (superAdmin) {
     await prisma.rolePermission.createMany({
@@ -75,7 +97,7 @@ async function seedRolePermissions() {
   }
 
   // 管理者：特定の権限
-  const admin = await prisma.role.findFirst({ where: { displayName: '管理者' } })
+  const admin = await prisma.role.findFirst({ where: { preset: true, displayName: '管理者' } })
   const adminPermissions = await prisma.permission.findMany({
     where: {
       OR: [
@@ -105,7 +127,9 @@ async function seedRolePermissions() {
   }
 
   // 一般ユーザー：基本的な権限
-  const regularUser = await prisma.role.findFirst({ where: { displayName: '一般ユーザー' } })
+  const regularUser = await prisma.role.findFirst({
+    where: { preset: true, displayName: '一般ユーザー' },
+  })
   const regularPermissions = await prisma.permission.findMany({
     where: {
       OR: [
@@ -285,7 +309,7 @@ async function seedAdminUser() {
 
   // 管理者ロールを取得
   const adminRole = await prisma.role.findFirst({
-    where: { displayName: '管理者' },
+    where: { preset: true, displayName: '管理者' },
   })
   if (!adminRole) {
     throw new Error('管理者ロールが見つかりません')

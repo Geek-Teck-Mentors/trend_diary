@@ -1,6 +1,7 @@
 /// ロール（役割）
 model Role {
   roleId      Int      @id @default(autoincrement()) @map("role_id") @db.Integer
+  preset      Boolean  @default(false) @db.Boolean
   displayName String   @map("display_name") @db.VarChar(255)
   description String?  @db.VarChar(1024)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()

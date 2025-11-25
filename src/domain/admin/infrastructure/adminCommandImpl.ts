@@ -30,7 +30,7 @@ export class AdminCommandImpl implements AdminCommand {
     // 管理者ロールを取得
     const adminRoleResult = await wrapAsyncCall(() =>
       this.rdb.role.findFirst({
-        where: { displayName: ADMIN_ROLE_NAMES[0] },
+        where: { preset: true, displayName: ADMIN_ROLE_NAMES[0] },
       }),
     )
     if (isFailure(adminRoleResult)) {
