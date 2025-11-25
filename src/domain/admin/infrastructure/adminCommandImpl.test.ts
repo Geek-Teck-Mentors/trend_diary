@@ -37,6 +37,7 @@ describe('AdminCommandImpl', () => {
         displayName: '管理者',
         description: null,
         createdAt: new Date(),
+        preset: false,
       })
 
       // まだAdmin権限を持っていない
@@ -91,6 +92,7 @@ describe('AdminCommandImpl', () => {
         displayName: '管理者',
         description: null,
         createdAt: new Date(),
+        preset: false,
       })
 
       // 既にAdmin権限を持っている

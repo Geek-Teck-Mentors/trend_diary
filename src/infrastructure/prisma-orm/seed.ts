@@ -56,15 +56,27 @@ async function seedRoles() {
     { displayName: '一般ユーザー', description: '基本的な機能が利用可能' },
   ]
 
-  for (const role of presetRoles) {
-    const exists = await prisma.role.findFirst({
-      where: { preset: true, displayName: role.displayName },
+  // 既存のプリセットロールを一度に取得
+  const existingRoles = await prisma.role.findMany({
+    where: {
+      displayName: { in: presetRoles.map((r) => r.displayName) },
+      preset: true,
+    },
+    select: { displayName: true },
+  })
+
+  const existingRoleNames = new Set(existingRoles.map((r) => r.displayName))
+
+  // 不足しているロールをフィルタリング
+  const rolesToCreate = presetRoles
+    .filter((role) => !existingRoleNames.has(role.displayName))
+    .map((role) => ({ ...role, preset: true }))
+
+  // まとめて作成
+  if (rolesToCreate.length > 0) {
+    await prisma.role.createMany({
+      data: rolesToCreate,
     })
-    if (!exists) {
-      await prisma.role.create({
-        data: { ...role, preset: true },
-      })
-    }
   }
 }
 

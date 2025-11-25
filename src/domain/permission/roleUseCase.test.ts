@@ -25,8 +25,8 @@ describe('RoleUseCase', () => {
   describe('getAllRoles', () => {
     it('全てのロールを取得できる', async () => {
       const mockRoles = [
-        { roleId: 1, displayName: 'admin', description: 'Administrator', createdAt: new Date() },
-        { roleId: 2, displayName: 'user', description: 'Regular User', createdAt: new Date() },
+        { roleId: 1, displayName: 'admin', description: 'Administrator', createdAt: new Date(), preset: false },
+        { roleId: 2, displayName: 'user', description: 'Regular User', createdAt: new Date(), preset: false },
       ]
       mockDb.role.findMany.mockResolvedValue(mockRoles)
 
@@ -57,6 +57,7 @@ describe('RoleUseCase', () => {
         displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
+        preset: false,
       }
       mockDb.role.findUnique.mockResolvedValue(mockRole)
 
@@ -123,7 +124,7 @@ describe('RoleUseCase', () => {
   describe('createRole', () => {
     it('新しいロールを作成できる', async () => {
       const input = { displayName: 'moderator', description: 'Moderator role' }
-      const mockCreatedRole = { roleId: 3, ...input, createdAt: new Date() }
+      const mockCreatedRole = { roleId: 3, ...input, createdAt: new Date(), preset: false }
 
       mockDb.role.create.mockResolvedValue(mockCreatedRole)
 
@@ -144,6 +145,7 @@ describe('RoleUseCase', () => {
         displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
+        preset: false,
       }
       const updatedRole = { ...existingRole, ...input }
 
@@ -179,6 +181,7 @@ describe('RoleUseCase', () => {
         displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
+        preset: false,
       }
       mockDb.role.findUnique.mockResolvedValue(mockRole)
       mockDb.role.delete.mockResolvedValue(mockRole)
@@ -213,6 +216,7 @@ describe('RoleUseCase', () => {
         displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
+        preset: false,
       })
       // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
@@ -236,6 +240,7 @@ describe('RoleUseCase', () => {
         displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
+        preset: false,
       })
       // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
@@ -258,6 +263,7 @@ describe('RoleUseCase', () => {
         displayName: 'admin',
         description: 'Administrator',
         createdAt: new Date(),
+        preset: false,
       })
       // biome-ignore lint/suspicious/noExplicitAny: mockImplementation requires any for generic callback
       mockDb.$transaction.mockImplementation((callback: any) => callback(mockDb))
