@@ -18,8 +18,7 @@ class PermissionTestHelper {
 
   async cleanUp(): Promise<void> {
     try {
-      // user_rolesを全削除（ユーザーとロールの紐付けをクリア）
-      await this.rdb.userRole.deleteMany({})
+      // user_rolesはactiveUserTestHelper.cleanUp()のCASCADEで自動削除される
 
       // preset=falseのロールとその関連データを削除（テストで作成したロールのみ）
       // 外部キー制約のため、先にrole_permissionsを削除
