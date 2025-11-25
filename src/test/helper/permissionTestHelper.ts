@@ -18,8 +18,6 @@ class PermissionTestHelper {
 
   async cleanUp(): Promise<void> {
     try {
-      // user_rolesはactiveUserTestHelper.cleanUp()のCASCADEで自動削除される
-
       // preset=falseのロールとその関連データを削除（テストで作成したロールのみ）
       // 外部キー制約のため、先にrole_permissionsを削除
       await this.rdb.rolePermission.deleteMany({
@@ -35,12 +33,6 @@ class PermissionTestHelper {
         },
       })
 
-      // エンドポイント関連は全て削除（seedで管理していない）
-      // 外部キー制約のため、先にendpoint_permissionsを削除
-      await this.rdb.endpointPermission.deleteMany({})
-      await this.rdb.endpoint.deleteMany({})
-
-      // 権限は削除しない（テストで作成した権限を蓄積して再利用）
     } catch (error) {
       if (error instanceof Error && error.message.includes('does not exist')) {
         return
