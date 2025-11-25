@@ -25,8 +25,20 @@ describe('RoleUseCase', () => {
   describe('getAllRoles', () => {
     it('全てのロールを取得できる', async () => {
       const mockRoles = [
-        { roleId: 1, displayName: 'admin', description: 'Administrator', createdAt: new Date(), preset: false },
-        { roleId: 2, displayName: 'user', description: 'Regular User', createdAt: new Date(), preset: false },
+        {
+          roleId: 1,
+          displayName: 'admin',
+          description: 'Administrator',
+          createdAt: new Date(),
+          preset: false,
+        },
+        {
+          roleId: 2,
+          displayName: 'user',
+          description: 'Regular User',
+          createdAt: new Date(),
+          preset: false,
+        },
       ]
       mockDb.role.findMany.mockResolvedValue(mockRoles)
 

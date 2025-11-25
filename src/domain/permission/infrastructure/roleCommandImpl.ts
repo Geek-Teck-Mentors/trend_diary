@@ -18,6 +18,7 @@ export class RoleCommandImpl implements RoleCommand {
 
       return success({
         roleId: role.roleId,
+        preset: role.preset,
         displayName: role.displayName,
         description: role.description,
         createdAt: role.createdAt,
@@ -48,6 +49,7 @@ export class RoleCommandImpl implements RoleCommand {
 
       return success({
         roleId: role.roleId,
+        preset: role.preset,
         displayName: role.displayName,
         description: role.description,
         createdAt: role.createdAt,
