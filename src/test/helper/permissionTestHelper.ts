@@ -131,36 +131,6 @@ class PermissionTestHelper {
     })
   }
 
-  async ensureAdminHasPermission(permissionId: number): Promise<void> {
-    const adminRole = await this.rdb.role.findFirst({
-      where: { preset: true, displayName: '管理者' },
-    })
-    if (!adminRole) {
-      throw new Error('管理者ロールが見つかりません')
-    }
-
-    // 既に権限が割り当てられているかチェック
-    const existing = await this.rdb.rolePermission.findUnique({
-      where: {
-        // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
-        roleId_permissionId: {
-          roleId: adminRole.roleId,
-          permissionId,
-        },
-      },
-    })
-
-    // 存在しない場合のみ追加
-    if (!existing) {
-      await this.rdb.rolePermission.create({
-        data: {
-          roleId: adminRole.roleId,
-          permissionId,
-        },
-      })
-    }
-  }
-
   async disconnect(): Promise<void> {
     await this.rdb.$disconnect()
   }
