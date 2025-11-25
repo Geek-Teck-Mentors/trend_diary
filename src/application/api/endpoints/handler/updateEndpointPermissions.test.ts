@@ -19,7 +19,7 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
     activeUserId = loginData.activeUserId
     sessionId = loginData.sessionId
 
-    // エンドポイントと権限を作成（seedで定義されたものを使用）
+    // エンドポイントと権限を作成
     const authEndpointId = await permissionTestHelper.createEndpoint(
       '/api/endpoints/:id/permissions',
       'PATCH',
@@ -27,7 +27,10 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
     const permissionId = await permissionTestHelper.createPermission('endpoint', 'update')
     await permissionTestHelper.assignPermissionsToEndpoint(authEndpointId, [permissionId])
 
-    // seedで作成された管理者ロールを取得してユーザーに割り当て（管理者は既にendpoint.update権限を持っている）
+    // 管理者ロールに権限を追加（既に存在する場合はスキップ）
+    await permissionTestHelper.ensureAdminHasPermission(permissionId)
+
+    // seedで作成された管理者ロールを取得してユーザーに割り当て
     const adminRoleId = await permissionTestHelper.getPresetRole('管理者')
     await permissionTestHelper.assignRoleToUser(activeUserId, adminRoleId)
 
