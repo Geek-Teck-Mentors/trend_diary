@@ -20,22 +20,21 @@ describe('PATCH /api/roles/:id/permissions', () => {
     sessionId = loginData.sessionId
 
     // エンドポイントと権限を作成
-    const endpointId = await permissionTestHelper.createEndpoint(
+    const endpointId = await permissionTestHelper.findOrCreateEndpoint(
       '/api/roles/:id/permissions',
       'PATCH',
     )
-    const permissionId = await permissionTestHelper.createPermission('roles', 'update_permissions')
+    const permissionId = await permissionTestHelper.findOrCreatePermission('role', 'update')
     await permissionTestHelper.assignPermissionsToEndpoint(endpointId, [permissionId])
 
-    // ロールを作成してユーザーに割り当て
-    const adminRoleId = await permissionTestHelper.createRole('管理者', '管理者ロール')
-    await permissionTestHelper.assignPermissionsToRole(adminRoleId, [permissionId])
+    // seedで作成された管理者ロールを取得してユーザーに割り当て（管理者は既にrole.update権限を持っている）
+    const adminRoleId = await permissionTestHelper.getPresetRole('管理者')
     await permissionTestHelper.assignRoleToUser(activeUserId, adminRoleId)
 
     // テストロールと権限作成
     testRoleId = await permissionTestHelper.createRole('テストロール', 'テスト用のロール')
-    testPermissionId1 = await permissionTestHelper.createPermission('test_resource', 'read')
-    testPermissionId2 = await permissionTestHelper.createPermission('test_resource', 'write')
+    testPermissionId1 = await permissionTestHelper.findOrCreatePermission('test_resource', 'read')
+    testPermissionId2 = await permissionTestHelper.findOrCreatePermission('test_resource', 'write')
   }
 
   async function requestUpdateRolePermissions(
