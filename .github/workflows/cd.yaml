@@ -57,6 +57,8 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -66,3 +68,6 @@ jobs:
 
       - name: Prismaのマイグレーション
         run: npm run db:deploy
+
+      - name: Prismaのシード
+        run: npm run db:seed
