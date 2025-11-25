@@ -19,16 +19,27 @@ class PermissionTestHelper {
   async cleanUp(): Promise<void> {
     try {
       // user_rolesを全削除（ユーザーとロールの紐付けをクリア）
-      await this.rdb.$queryRaw`TRUNCATE TABLE "user_roles" CASCADE;`
+      await this.rdb.userRole.deleteMany({})
 
       // preset=falseのロールとその関連データを削除（テストで作成したロールのみ）
-      await this.rdb
-        .$queryRaw`DELETE FROM "role_permissions" WHERE "role_id" IN (SELECT "role_id" FROM "roles" WHERE "preset" = false);`
-      await this.rdb.$queryRaw`DELETE FROM "roles" WHERE "preset" = false;`
+      // 外部キー制約のため、先にrole_permissionsを削除
+      await this.rdb.rolePermission.deleteMany({
+        where: {
+          role: {
+            preset: false,
+          },
+        },
+      })
+      await this.rdb.role.deleteMany({
+        where: {
+          preset: false,
+        },
+      })
 
       // エンドポイント関連は全て削除（seedで管理していない）
-      await this.rdb.$queryRaw`TRUNCATE TABLE "endpoint_permissions" CASCADE;`
-      await this.rdb.$queryRaw`TRUNCATE TABLE "endpoints" CASCADE;`
+      // 外部キー制約のため、先にendpoint_permissionsを削除
+      await this.rdb.endpointPermission.deleteMany({})
+      await this.rdb.endpoint.deleteMany({})
 
       // 権限は削除しない（テストで作成した権限を蓄積して再利用）
     } catch (error) {
