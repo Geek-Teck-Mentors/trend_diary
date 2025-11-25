@@ -20,7 +20,7 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
     sessionId = loginData.sessionId
 
     // エンドポイントと権限を作成
-    const authEndpointId = await permissionTestHelper.createEndpoint(
+    const authEndpointId = await permissionTestHelper.findOrCreateEndpoint(
       '/api/endpoints/:id/permissions',
       'PATCH',
     )
@@ -32,7 +32,7 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
     await permissionTestHelper.assignRoleToUser(activeUserId, adminRoleId)
 
     // テストエンドポイントと権限作成
-    testEndpointId = await permissionTestHelper.createEndpoint('/test', 'GET')
+    testEndpointId = await permissionTestHelper.findOrCreateEndpoint('/test', 'GET')
     testPermissionId1 = await permissionTestHelper.createPermission('test_resource', 'read')
     testPermissionId2 = await permissionTestHelper.createPermission('test_resource', 'write')
   }

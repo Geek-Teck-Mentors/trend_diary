@@ -20,7 +20,7 @@ describe('PATCH /api/roles/:id/permissions', () => {
     sessionId = loginData.sessionId
 
     // エンドポイントと権限を作成
-    const endpointId = await permissionTestHelper.createEndpoint(
+    const endpointId = await permissionTestHelper.findOrCreateEndpoint(
       '/api/roles/:id/permissions',
       'PATCH',
     )

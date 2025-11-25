@@ -87,7 +87,7 @@ class PermissionTestHelper {
     return result.data.permissionId
   }
 
-  async createEndpoint(path: string, method: string): Promise<number> {
+  async findOrCreateEndpoint(path: string, method: string): Promise<number> {
     // 既存のエンドポイントを検索
     const existing = await this.rdb.endpoint.findUnique({
       where: {
