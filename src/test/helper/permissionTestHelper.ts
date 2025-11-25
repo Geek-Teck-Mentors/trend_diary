@@ -32,7 +32,6 @@ class PermissionTestHelper {
           preset: false,
         },
       })
-
     } catch (error) {
       if (error instanceof Error && error.message.includes('does not exist')) {
         return
@@ -63,7 +62,6 @@ class PermissionTestHelper {
     // 既存の権限を検索
     const existing = await this.rdb.permission.findUnique({
       where: {
-        // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
         resource_action: { resource, action },
       },
     })
@@ -83,7 +81,6 @@ class PermissionTestHelper {
     // 既存のエンドポイントを検索
     const existing = await this.rdb.endpoint.findUnique({
       where: {
-        // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
         path_method: { path, method },
       },
     })
