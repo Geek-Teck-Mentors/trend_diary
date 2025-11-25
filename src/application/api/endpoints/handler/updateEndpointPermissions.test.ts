@@ -24,7 +24,7 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
       '/api/endpoints/:id/permissions',
       'PATCH',
     )
-    const permissionId = await permissionTestHelper.createPermission('endpoint', 'update')
+    const permissionId = await permissionTestHelper.findOrCreatePermission('endpoint', 'update')
     await permissionTestHelper.assignPermissionsToEndpoint(authEndpointId, [permissionId])
 
     // seedで作成された管理者ロールを取得してユーザーに割り当て（管理者は既にendpoint.update権限を持っている）
@@ -33,8 +33,8 @@ describe('PATCH /api/endpoints/:id/permissions', () => {
 
     // テストエンドポイントと権限作成
     testEndpointId = await permissionTestHelper.findOrCreateEndpoint('/test', 'GET')
-    testPermissionId1 = await permissionTestHelper.createPermission('test_resource', 'read')
-    testPermissionId2 = await permissionTestHelper.createPermission('test_resource', 'write')
+    testPermissionId1 = await permissionTestHelper.findOrCreatePermission('test_resource', 'read')
+    testPermissionId2 = await permissionTestHelper.findOrCreatePermission('test_resource', 'write')
   }
 
   async function requestUpdateEndpointPermissions(

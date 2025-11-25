@@ -19,7 +19,7 @@ describe('PATCH /api/roles/:id', () => {
 
     // エンドポイントと権限を作成
     const endpointId = await permissionTestHelper.findOrCreateEndpoint('/api/roles/:id', 'PATCH')
-    const permissionId = await permissionTestHelper.createPermission('role', 'update')
+    const permissionId = await permissionTestHelper.findOrCreatePermission('role', 'update')
     await permissionTestHelper.assignPermissionsToEndpoint(endpointId, [permissionId])
 
     // seedで作成された管理者ロールを取得してユーザーに割り当て（管理者は既にrole.update権限を持っている）

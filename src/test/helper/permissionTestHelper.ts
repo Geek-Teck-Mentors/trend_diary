@@ -58,7 +58,7 @@ class PermissionTestHelper {
     return role.roleId
   }
 
-  async createPermission(resource: string, action: string): Promise<number> {
+  async findOrCreatePermission(resource: string, action: string): Promise<number> {
     // 既存の権限を検索
     const existing = await this.rdb.permission.findUnique({
       where: {
