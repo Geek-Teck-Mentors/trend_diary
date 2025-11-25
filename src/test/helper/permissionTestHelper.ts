@@ -58,6 +58,18 @@ class PermissionTestHelper {
   }
 
   async createPermission(resource: string, action: string): Promise<number> {
+    // 既存の権限を検索
+    const existing = await this.rdb.permission.findUnique({
+      where: {
+        // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
+        resource_action: { resource, action },
+      },
+    })
+    if (existing) {
+      return existing.permissionId
+    }
+
+    // 存在しない場合は作成
     const result = await this.permissionUseCase.createPermission({ resource, action })
     if (isFailure(result)) {
       throw new Error(`Failed to create permission: ${result.error.message}`)
@@ -66,6 +78,18 @@ class PermissionTestHelper {
   }
 
   async createEndpoint(path: string, method: string): Promise<number> {
+    // 既存のエンドポイントを検索
+    const existing = await this.rdb.endpoint.findUnique({
+      where: {
+        // biome-ignore lint/style/useNamingConvention: Prisma composite unique key name
+        path_method: { path, method },
+      },
+    })
+    if (existing) {
+      return existing.endpointId
+    }
+
+    // 存在しない場合は作成
     const result = await this.endpointUseCase.createEndpoint({ path, method })
     if (isFailure(result)) {
       throw new Error(`Failed to create endpoint: ${result.error.message}`)
