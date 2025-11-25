@@ -38,7 +38,7 @@ describe('AdminUser UseCase', () => {
         displayName: '管理者',
         description: null,
         createdAt: new Date(),
-        preset: false,
+        preset: true,
       })
 
       mockDb.userRole.findUnique.mockResolvedValue(null)
