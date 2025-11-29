@@ -10,7 +10,7 @@ runs:
     - name: Supabaseの起動
       shell: bash
       # INFO: DBと認証のみ起動
-      run: supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit
+      run: supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,logflare,vector,supavisor,mailpit
 
     - name: Supabaseのキーを環境変数に設定
       id: get-keys
@@ -21,3 +21,4 @@ runs:
         echo "DATABASE_URL=$(echo $SUPABASE_JSON | jq -r '.DB_URL')" >> $GITHUB_ENV
         echo "DB_URL=$(echo $SUPABASE_JSON | jq -r '.DB_URL')" >> $GITHUB_ENV
         echo "DIRECT_URL=$(echo $SUPABASE_JSON | jq -r '.DB_URL')" >> $GITHUB_ENV
+        echo "SUPABASE_URL=$(echo $SUPABASE_JSON | jq -r '.API_URL')" >> $GITHUB_ENV
