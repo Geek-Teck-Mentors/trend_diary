@@ -131,12 +131,6 @@ jobs:
         name: Supabaseのセットアップ
         uses: ./.github/actions/setup_supabase
 
-      - name: 環境変数の設定
-        run: |
-          echo "SUPABASE_ANON_KEY=${{ steps.setup-supabase.outputs.anon_key }}" >> $GITHUB_ENV
-          echo "DATABASE_URL=${{ steps.setup-supabase.outputs.db_url }}" >> $GITHUB_ENV
-          echo "DIRECT_URL=${{ steps.setup-supabase.outputs.db_url }}" >> $GITHUB_ENV
-
       - name: DB Migration
         run: npm run db:migrate
 
