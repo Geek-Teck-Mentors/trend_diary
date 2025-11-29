@@ -10,6 +10,7 @@ import {
 import { AnchorLink, ExternalPath } from '@/application/web/components/ui/link'
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
+import useReadArticle from '../hooks/use-read-article'
 import MediaIcon from './media-icon'
 
 type Props = {
@@ -19,8 +20,17 @@ type Props = {
 }
 
 export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
+  const { markAsRead } = useReadArticle()
+
   const handleOpenChange = (open: boolean) => {
     if (!open) onClose()
+  }
+
+  const handleReadArticle = () => {
+    // 記事を読むリンクをクリックした時に既読登録
+    markAsRead(article.articleId).catch(() => {
+      // エラーはフック内でtoastで表示されるため、ここでは何もしない
+    })
   }
 
   const media = article.media === 'qiita' ? 'qiita' : 'zenn'
@@ -74,6 +84,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
         <div className='border-t p-4'>
           <AnchorLink
             to={article.url as ExternalPath}
+            onClick={handleReadArticle}
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
             data-slot='drawer-content-link'
           >
