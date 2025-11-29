@@ -35,8 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - id: setup-supabase
-        name: Supabaseのセットアップ
+      - name: Supabaseのセットアップ
         uses: ./.github/actions/setup_supabase
 
       - name: E2E環境のセットアップ

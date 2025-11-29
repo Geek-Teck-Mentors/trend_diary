@@ -127,8 +127,7 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-      - id: setup-supabase
-        name: Supabaseのセットアップ
+      - name: Supabaseのセットアップ
         uses: ./.github/actions/setup_supabase
 
       - name: DB Migration
