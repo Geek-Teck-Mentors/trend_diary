@@ -9,6 +9,7 @@ export const articleSchema = z.object({
   description: z.string().max(255),
   url: z.string().url(),
   createdAt,
+  hasRead: z.boolean().optional(),
 })
 
 export type Article = z.infer<typeof articleSchema>
