@@ -34,7 +34,7 @@ describe('GET /api/articles', () => {
   ]
 
   async function cleanUp(): Promise<void> {
-    await db.$queryRaw`TRUNCATE TABLE "articles";`
+    await db.$queryRaw`TRUNCATE TABLE "articles" CASCADE;`
   }
 
   async function setupTestData(): Promise<void> {
