@@ -1,10 +1,20 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import getApiClientForClient from '../../../infrastructure/api'
 
 type UseReadArticleReturn = {
   markAsRead: (articleId: bigint) => Promise<void>
   markAsUnread: (articleId: bigint) => Promise<void>
   isLoading: boolean
+}
+
+type ReadArticleParams = {
+  param: { article_id: string }
+  json: { read_at: string }
+}
+
+type UnreadArticleParams = {
+  param: { article_id: string }
 }
 
 export default function useReadArticle(): UseReadArticleReturn {
@@ -13,13 +23,12 @@ export default function useReadArticle(): UseReadArticleReturn {
   const markAsRead = useCallback(async (articleId: bigint) => {
     setIsLoading(true)
     try {
-      const res = await fetch(`/api/articles/${articleId}/read`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ read_at: new Date().toISOString() }),
-      })
+      const client = getApiClientForClient()
+      const params: ReadArticleParams = {
+        param: { article_id: articleId.toString() },
+        json: { read_at: new Date().toISOString() },
+      }
+      const res = await client.articles[':article_id'].read.$post(params)
 
       if (res.status === 201) {
         const resJson = (await res.json()) as { message: string }
@@ -46,9 +55,11 @@ export default function useReadArticle(): UseReadArticleReturn {
   const markAsUnread = useCallback(async (articleId: bigint) => {
     setIsLoading(true)
     try {
-      const res = await fetch(`/api/articles/${articleId}/unread`, {
-        method: 'DELETE',
-      })
+      const client = getApiClientForClient()
+      const params: UnreadArticleParams = {
+        param: { article_id: articleId.toString() },
+      }
+      const res = await client.articles[':article_id'].unread.$delete(params)
 
       if (res.status === 200) {
         const resJson = (await res.json()) as { message: string }
