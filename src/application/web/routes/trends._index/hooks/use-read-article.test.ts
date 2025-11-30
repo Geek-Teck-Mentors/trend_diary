@@ -109,9 +109,21 @@ describe('useReadArticle', () => {
     })
 
     it.each([
-      { status: 400, expectedError: '既読登録に失敗しました', description: 'クライアントエラー(4xx)' },
-      { status: 404, expectedError: '既読登録に失敗しました', description: 'クライアントエラー(4xx)' },
-      { status: 500, expectedError: 'サーバーエラーが発生しました', description: 'サーバーエラー(5xx)' },
+      {
+        status: 400,
+        expectedError: '既読登録に失敗しました',
+        description: 'クライアントエラー(4xx)',
+      },
+      {
+        status: 404,
+        expectedError: '既読登録に失敗しました',
+        description: 'クライアントエラー(4xx)',
+      },
+      {
+        status: 500,
+        expectedError: 'サーバーエラーが発生しました',
+        description: 'サーバーエラー(5xx)',
+      },
     ])('$description の場合、エラー結果を返す', async ({ status, expectedError }) => {
       const { result } = setupHook()
       const articleId = BigInt(1)
@@ -193,9 +205,21 @@ describe('useReadArticle', () => {
     })
 
     it.each([
-      { status: 400, expectedError: '未読登録に失敗しました', description: 'クライアントエラー(4xx)' },
-      { status: 404, expectedError: '未読登録に失敗しました', description: 'クライアントエラー(4xx)' },
-      { status: 500, expectedError: 'サーバーエラーが発生しました', description: 'サーバーエラー(5xx)' },
+      {
+        status: 400,
+        expectedError: '未読登録に失敗しました',
+        description: 'クライアントエラー(4xx)',
+      },
+      {
+        status: 404,
+        expectedError: '未読登録に失敗しました',
+        description: 'クライアントエラー(4xx)',
+      },
+      {
+        status: 500,
+        expectedError: 'サーバーエラーが発生しました',
+        description: 'サーバーエラー(5xx)',
+      },
     ])('$description の場合、エラー結果を返す', async ({ status, expectedError }) => {
       const { result } = setupHook()
       const articleId = BigInt(1)
