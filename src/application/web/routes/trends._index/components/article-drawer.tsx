@@ -7,6 +7,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/application/web/components/shadcn/drawer'
+import { AnchorLink, ExternalPath } from '@/application/web/components/ui/link'
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import useReadArticle from '../hooks/use-read-article'
@@ -27,9 +28,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
 
   const handleReadArticle = () => {
     // 記事を読むリンクをクリックした時に既読登録
-    markAsRead(article.articleId).catch(() => {
-      // エラーはフック内でtoastで表示されるため、ここでは何もしない
-    })
+    markAsRead(article.articleId)
   }
 
   const media = article.media === 'qiita' ? 'qiita' : 'zenn'
@@ -81,18 +80,15 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
         </div>
 
         <div className='border-t p-4'>
-          {/* biome-ignore lint: plugin */}
-          <a
-            href={article.url}
+          <AnchorLink
+            to={article.url as ExternalPath}
             onClick={handleReadArticle}
-            target='_blank'
-            rel='noopener noreferrer nofollow'
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
             data-slot='drawer-content-link'
           >
             <ExternalLink className='size-4' />
             記事を読む
-          </a>
+          </AnchorLink>
         </div>
       </DrawerContent>
     </Drawer>,

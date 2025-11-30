@@ -5,6 +5,7 @@ import { Button } from '../shadcn/button'
 
 interface BaseProps {
   className?: string
+  onClick?: () => void
 }
 
 export type ExternalPath = `https://${string}`
@@ -13,10 +14,21 @@ interface ExternalLinkProps extends BaseProps {
   to: ExternalPath
 }
 
-function ExternalLink({ to, children, className }: PropsWithChildren<ExternalLinkProps>) {
+function ExternalLink({
+  to,
+  children,
+  className,
+  onClick,
+}: PropsWithChildren<ExternalLinkProps>) {
   return (
     // biome-ignore lint: plugin
-    <a href={to} className={className} target='_blank' rel='noopener noreferrer nofollow'>
+    <a
+      href={to}
+      className={className}
+      onClick={onClick}
+      target='_blank'
+      rel='noopener noreferrer nofollow'
+    >
       {children}
     </a>
   )
@@ -26,9 +38,14 @@ interface InternalLinkProps extends BaseProps {
   to: InternalPath
 }
 
-function InternalLink({ to, children, className }: PropsWithChildren<InternalLinkProps>) {
+function InternalLink({
+  to,
+  children,
+  className,
+  onClick,
+}: PropsWithChildren<InternalLinkProps>) {
   return (
-    <Link to={to} className={className}>
+    <Link to={to} className={className} onClick={onClick}>
       {children}
     </Link>
   )
@@ -41,6 +58,7 @@ function isExternalPath(to: string): to is ExternalPath {
 type AnchorLinkProps = PropsWithChildren<{
   to: InternalPath | ExternalPath
   className?: string
+  onClick?: () => void
 }>
 
 /**
@@ -48,16 +66,17 @@ type AnchorLinkProps = PropsWithChildren<{
  * @description aタグを薄くラップしたコンポーネント。内部リンクの際はReact RouterのLink
  * @param to InternalPath | `https://${string}`, InternalPathはルーティング定義から型推論される
  * @param className
+ * @param onClick
  * @param children
  * @link Linkのperf参考: https://zenn.dev/atusi/articles/3e37d4d54736fa#link
  */
-export function AnchorLink({ to, className, children }: AnchorLinkProps) {
+export function AnchorLink({ to, className, onClick, children }: AnchorLinkProps) {
   return isExternalPath(to) ? (
-    <ExternalLink to={to} className={className}>
+    <ExternalLink to={to} className={className} onClick={onClick}>
       {children}
     </ExternalLink>
   ) : (
-    <InternalLink to={to} className={className}>
+    <InternalLink to={to} className={className} onClick={onClick}>
       {children}
     </InternalLink>
   )
