@@ -1,11 +1,14 @@
 import { isFailure } from '@yuukihayashi0510/core'
+import { getCookie } from 'hono/cookie'
 import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
+import { SESSION_NAME } from '@/common/constants'
 import { handleError } from '@/common/errors'
 import { OffsetPaginationResult, offsetPaginationSchema } from '@/common/pagination'
 import { Article, ArticleQueryParams, createArticleUseCase } from '@/domain/article'
 import { ArticleOutput } from '@/domain/article/schema/articleSchema'
+import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 
 const mediaEnum = z.enum(['qiita', 'zenn'])
@@ -58,7 +61,20 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const useCase = createArticleUseCase(rdb)
 
-  const result = await useCase.searchArticles(convertApiArticleQueryParams(transformedParams))
+  // オプショナルに認証済みユーザーのIDを取得
+  let activeUserId: bigint | undefined
+  const sessionId = getCookie(c, SESSION_NAME)
+  if (sessionId && z.string().uuid().safeParse(sessionId).success) {
+    const userUseCase = createUserUseCase(rdb)
+    const userResult = await userUseCase.getCurrentUser(sessionId)
+    if (!isFailure(userResult) && userResult.data) {
+      activeUserId = userResult.data.activeUserId
+    }
+  }
+
+  const result = await useCase.searchArticles(
+    convertApiArticleQueryParams(transformedParams, activeUserId),
+  )
   if (isFailure(result)) {
     throw handleError(result.error, logger)
   }
@@ -77,7 +93,10 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   return c.json(response)
 }
 
-function convertApiArticleQueryParams(params: ApiArticleQueryParams): ArticleQueryParams {
+function convertApiArticleQueryParams(
+  params: ApiArticleQueryParams,
+  activeUserId?: bigint,
+): ArticleQueryParams {
   let readStatus: boolean | undefined
   if (params.read_status === '1') {
     readStatus = true
@@ -96,6 +115,7 @@ function convertApiArticleQueryParams(params: ApiArticleQueryParams): ArticleQue
     from: params.from,
     to: params.to,
     readStatus,
+    activeUserId,
   }
 }
 
@@ -108,5 +128,6 @@ function convertToResponse(article: Article): ArticleResponse {
     description: article.description,
     url: article.url,
     createdAt: article.createdAt,
+    hasRead: article.hasRead,
   }
 }

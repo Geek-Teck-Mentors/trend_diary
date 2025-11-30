@@ -15,7 +15,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
   async searchArticles(
     params: ArticleQueryParams,
   ): AsyncResult<OffsetPaginationResult<Article>, ServerError> {
-    const { page = 1, limit = 20, ...searchParams } = params
+    const { page = 1, limit = 20, activeUserId, ...searchParams } = params
     const where = ArticleQueryImpl.buildWhereClause(searchParams)
     const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
       { createdAt: 'desc' },
@@ -38,7 +38,30 @@ export default class ArticleQueryImpl implements ArticleQuery {
     }
 
     const [total, articles] = result.data
-    const mappedArticles = articles.map(fromPrismaToArticle)
+    let mappedArticles = articles.map(fromPrismaToArticle)
+
+    // activeUserIdが指定されている場合、既読ステータスを取得
+    if (activeUserId) {
+      const articleIds = articles.map((a) => a.articleId)
+      const readHistoriesResult = await wrapAsyncCall(() =>
+        this.db.readHistory.findMany({
+          where: {
+            articleId: { in: articleIds },
+            activeUserId,
+          },
+        }),
+      )
+      if (isFailure(readHistoriesResult)) {
+        return failure(new ServerError(readHistoriesResult.error))
+      }
+
+      const readArticleIds = new Set(readHistoriesResult.data.map((rh) => rh.articleId))
+      mappedArticles = mappedArticles.map((article) => ({
+        ...article,
+        hasRead: readArticleIds.has(article.articleId),
+      }))
+    }
+
     const totalPages = Math.ceil(total / limit)
     const paginationResult: OffsetPaginationResult<Article> = {
       data: mappedArticles,
