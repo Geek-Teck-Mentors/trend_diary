@@ -7,7 +7,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/application/web/components/shadcn/drawer'
-import { AnchorLink, ExternalPath } from '@/application/web/components/ui/link'
 import { toJaDateString } from '@/common/locale'
 import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import useReadArticle from '../hooks/use-read-article'
@@ -82,15 +81,18 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
         </div>
 
         <div className='border-t p-4'>
-          <AnchorLink
-            to={article.url as ExternalPath}
+          {/* biome-ignore lint: plugin */}
+          <a
+            href={article.url}
             onClick={handleReadArticle}
+            target='_blank'
+            rel='noopener noreferrer nofollow'
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
             data-slot='drawer-content-link'
           >
             <ExternalLink className='size-4' />
             記事を読む
-          </AnchorLink>
+          </a>
         </div>
       </DrawerContent>
     </Drawer>,

@@ -14,13 +14,14 @@ export default function useReadArticle(): UseReadArticleReturn {
   const markAsRead = useCallback(async (articleId: bigint) => {
     setIsLoading(true)
     try {
+      // @ts-expect-error Honoクライアントの型推論の問題を回避
       const res = await getApiClientForClient().articles[':article_id'].read.$post({
         param: { article_id: articleId.toString() },
         json: { read_at: new Date().toISOString() },
       })
 
       if (res.status === 201) {
-        const resJson = await res.json()
+        const resJson = (await res.json()) as { message: string }
         toast.success(resJson.message)
       } else if (res.status >= 400 && res.status < 500) {
         throw new Error('既読登録に失敗しました')
@@ -44,12 +45,13 @@ export default function useReadArticle(): UseReadArticleReturn {
   const markAsUnread = useCallback(async (articleId: bigint) => {
     setIsLoading(true)
     try {
+      // @ts-expect-error Honoクライアントの型推論の問題を回避
       const res = await getApiClientForClient().articles[':article_id'].unread.$delete({
         param: { article_id: articleId.toString() },
       })
 
       if (res.status === 200) {
-        const resJson = await res.json()
+        const resJson = (await res.json()) as { message: string }
         toast.success(resJson.message)
       } else if (res.status >= 400 && res.status < 500) {
         throw new Error('未読登録に失敗しました')
