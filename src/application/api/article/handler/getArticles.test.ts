@@ -1,5 +1,7 @@
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
+import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
+import articleTestHelper from '@/test/helper/articleTestHelper'
 import app from '../../../server'
 import { ArticleListResponse } from './getArticles'
 
@@ -39,9 +41,10 @@ describe('GET /api/articles', () => {
     await Promise.all(testArticles.map((article) => db.article.create({ data: article })))
   }
 
-  async function requestGetArticles(query: string = '') {
+  async function requestGetArticles(query: string = '', sessionId?: string) {
     const url = query ? `/api/articles?${query}` : '/api/articles'
-    return app.request(url, { method: 'GET' }, TEST_ENV)
+    const headers = sessionId ? { Cookie: `sid=${sessionId}` } : {}
+    return app.request(url, { method: 'GET', headers }, TEST_ENV)
   }
 
   beforeAll(() => {
@@ -149,6 +152,56 @@ describe('GET /api/articles', () => {
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
       expect(data.data).toHaveLength(0)
+    })
+
+    describe('既読ステータス', () => {
+      let testActiveUserId: bigint
+      let sessionId: string
+      let articleIds: bigint[]
+
+      beforeEach(async () => {
+        // ユーザーを作成してログイン
+        await activeUserTestHelper.create('readtest@example.com', 'password123')
+        const loginData = await activeUserTestHelper.login('readtest@example.com', 'password123')
+        testActiveUserId = loginData.activeUserId
+        sessionId = loginData.sessionId
+
+        // 記事IDを取得
+        const articles = await db.article.findMany()
+        articleIds = articles.map((a) => a.articleId)
+
+        // 1つ目の記事に既読履歴を作成
+        if (articleIds.length > 0) {
+          await articleTestHelper.createReadHistory(testActiveUserId, articleIds[0])
+        }
+      })
+
+      afterEach(async () => {
+        await activeUserTestHelper.cleanUp()
+        await articleTestHelper.cleanUpReadHistories()
+      })
+
+      it('認証済みユーザーの場合、既読ステータスが含まれる', async () => {
+        const res = await requestGetArticles('', sessionId)
+
+        expect(res.status).toBe(200)
+        const data: ArticleListResponse = await res.json()
+        expect(data.data).toHaveLength(2)
+        // TypeScriptの応用（2つ目の記事）は既読
+        expect(data.data[0].hasRead).toBe(true)
+        // Reactの基礎（1つ目の記事）は未読
+        expect(data.data[1].hasRead).toBe(false)
+      })
+
+      it('認証なしの場合、hasReadはundefinedになる', async () => {
+        const res = await requestGetArticles()
+
+        expect(res.status).toBe(200)
+        const data: ArticleListResponse = await res.json()
+        expect(data.data).toHaveLength(2)
+        expect(data.data[0].hasRead).toBeUndefined()
+        expect(data.data[1].hasRead).toBeUndefined()
+      })
     })
   })
 
