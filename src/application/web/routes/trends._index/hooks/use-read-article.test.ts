@@ -1,6 +1,6 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { isFailure, isSuccess } from '@yuukihayashi0510/core'
+import { type AsyncResult, isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
 
 // モックの定義
@@ -58,7 +58,7 @@ describe('useReadArticle', () => {
         json: async () => ({ message: '記事を既読にしました' }),
       })
 
-      let apiResult
+      let apiResult: AsyncResult<string, Error>
       await act(async () => {
         apiResult = await result.current.markAsRead(articleId)
       })
@@ -132,7 +132,7 @@ describe('useReadArticle', () => {
         status,
       })
 
-      let apiResult
+      let apiResult: AsyncResult<string, Error>
       await act(async () => {
         apiResult = await result.current.markAsRead(articleId)
       })
@@ -157,7 +157,7 @@ describe('useReadArticle', () => {
         json: async () => ({ message: '記事を未読にしました' }),
       })
 
-      let apiResult
+      let apiResult: AsyncResult<string, Error>
       await act(async () => {
         apiResult = await result.current.markAsUnread(articleId)
       })
@@ -228,7 +228,7 @@ describe('useReadArticle', () => {
         status,
       })
 
-      let apiResult
+      let apiResult: AsyncResult<string, Error>
       await act(async () => {
         apiResult = await result.current.markAsUnread(articleId)
       })

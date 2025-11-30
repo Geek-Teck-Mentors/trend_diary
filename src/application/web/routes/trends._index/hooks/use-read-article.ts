@@ -18,10 +18,10 @@ export default function useReadArticle(): UseReadArticleReturn {
       const res = await client.articles[':article_id'].read.$post({
         param: { article_id: articleId.toString() },
         json: { read_at: new Date().toISOString() },
-      })
+      } as never)
 
       if (res.status === 201) {
-        const resJson = await res.json()
+        const resJson = (await res.json()) as { message: string }
         return success(resJson.message)
       }
       if (res.status >= 400 && res.status < 500) {
@@ -49,10 +49,10 @@ export default function useReadArticle(): UseReadArticleReturn {
       const client = getApiClientForClient()
       const res = await client.articles[':article_id'].unread.$delete({
         param: { article_id: articleId.toString() },
-      })
+      } as never)
 
       if (res.status === 200) {
-        const resJson = await res.json()
+        const resJson = (await res.json()) as { message: string }
         return success(resJson.message)
       }
       if (res.status >= 400 && res.status < 500) {
