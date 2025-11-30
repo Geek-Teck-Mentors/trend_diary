@@ -43,8 +43,10 @@ describe('GET /api/articles', () => {
 
   async function requestGetArticles(query: string = '', sessionId?: string) {
     const url = query ? `/api/articles?${query}` : '/api/articles'
-    const headers = sessionId ? { Cookie: `sid=${sessionId}` } : {}
-    return app.request(url, { method: 'GET', headers }, TEST_ENV)
+    const options = sessionId
+      ? { method: 'GET' as const, headers: { Cookie: `sid=${sessionId}` } }
+      : { method: 'GET' as const }
+    return app.request(url, options, TEST_ENV)
   }
 
   beforeAll(() => {

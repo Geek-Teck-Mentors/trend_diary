@@ -1,4 +1,4 @@
-import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
+import { AsyncResult, isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { useCallback, useState } from 'react'
 import getApiClientForClient from '../../../infrastructure/api'
 
@@ -18,10 +18,11 @@ export default function useReadArticle(): UseReadArticleReturn {
       clientErrorMessage: string,
     ): AsyncResult<string, Error> => {
       setIsLoading(true)
-      try {
+
+      const executeApiCall = async (): Promise<string> => {
         const result = await wrapAsyncCall(apiCall)
         if (isFailure(result)) {
-          return failure(result.error)
+          throw result.error
         }
 
         const res = result.data
@@ -29,21 +30,21 @@ export default function useReadArticle(): UseReadArticleReturn {
         if (res.status === successStatus) {
           const resJsonResult = await wrapAsyncCall(() => res.json())
           if (isFailure(resJsonResult)) {
-            return failure(resJsonResult.error)
+            throw resJsonResult.error
           }
           const resJson = resJsonResult.data as { message: string }
-          return success(resJson.message)
+          return resJson.message
         }
         if (res.status >= 400 && res.status < 500) {
-          return failure(new Error(clientErrorMessage))
+          throw new Error(clientErrorMessage)
         }
         if (res.status >= 500) {
-          return failure(new Error('サーバーエラーが発生しました'))
+          throw new Error('サーバーエラーが発生しました')
         }
-        return failure(new Error('不明なエラーが発生しました'))
-      } finally {
-        setIsLoading(false)
+        throw new Error('不明なエラーが発生しました')
       }
+
+      return wrapAsyncCall(executeApiCall, () => setIsLoading(false))
     },
     [],
   )
