@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import getApiClientForClient from '../../../infrastructure/api'
 
 type UseReadArticleReturn = {
   markAsRead: (articleId: bigint) => Promise<void>
@@ -14,10 +13,12 @@ export default function useReadArticle(): UseReadArticleReturn {
   const markAsRead = useCallback(async (articleId: bigint) => {
     setIsLoading(true)
     try {
-      // @ts-expect-error Honoクライアントの型推論の問題を回避
-      const res = await getApiClientForClient().articles[':article_id'].read.$post({
-        param: { article_id: articleId.toString() },
-        json: { read_at: new Date().toISOString() },
+      const res = await fetch(`/api/articles/${articleId}/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ read_at: new Date().toISOString() }),
       })
 
       if (res.status === 201) {
@@ -45,9 +46,8 @@ export default function useReadArticle(): UseReadArticleReturn {
   const markAsUnread = useCallback(async (articleId: bigint) => {
     setIsLoading(true)
     try {
-      // @ts-expect-error Honoクライアントの型推論の問題を回避
-      const res = await getApiClientForClient().articles[':article_id'].unread.$delete({
-        param: { article_id: articleId.toString() },
+      const res = await fetch(`/api/articles/${articleId}/unread`, {
+        method: 'DELETE',
       })
 
       if (res.status === 200) {
