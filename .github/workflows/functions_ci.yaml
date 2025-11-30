@@ -81,8 +81,8 @@ jobs:
       - name: DBのマイグレーション
         run: npm run db:migrate
         env:
-          DIRECT_URL: ${{ env.DB_URL }}
-          DATABASE_URL: ${{ env.DB_URL }}
+          DIRECT_URL: ${{ env.DATABASE_URL }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Deno testの実行
         env:

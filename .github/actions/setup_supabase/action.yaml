@@ -19,6 +19,4 @@ runs:
         SUPABASE_JSON=$(supabase status --output json)
         echo "SUPABASE_ANON_KEY=$(echo $SUPABASE_JSON | jq -r '.ANON_KEY')" >> $GITHUB_ENV
         echo "DATABASE_URL=$(echo $SUPABASE_JSON | jq -r '.DB_URL')" >> $GITHUB_ENV
-        echo "DB_URL=$(echo $SUPABASE_JSON | jq -r '.DB_URL')" >> $GITHUB_ENV
-        echo "DIRECT_URL=$(echo $SUPABASE_JSON | jq -r '.DB_URL')" >> $GITHUB_ENV
         echo "SUPABASE_URL=$(echo $SUPABASE_JSON | jq -r '.API_URL')" >> $GITHUB_ENV

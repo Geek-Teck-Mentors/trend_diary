@@ -131,6 +131,8 @@ jobs:
         uses: ./.github/actions/setup_supabase
 
       - name: DB Migration
+        env:
+          DIRECT_URL: ${{ env.DATABASE_URL }}
         run: npm run db:migrate
 
       - name: APIのテスト
