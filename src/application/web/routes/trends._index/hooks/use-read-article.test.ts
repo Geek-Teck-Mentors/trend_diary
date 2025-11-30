@@ -1,5 +1,6 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
 
 // モックの定義
@@ -23,17 +24,8 @@ vi.mock('../../../infrastructure/api', () => ({
   }),
 }))
 
-// toastのモック
-vi.mock('sonner', () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}))
-
 // テスト対象のインポートは必ずモック定義の後に行う
 const { default: useReadArticle } = await import('./use-read-article')
-const { toast } = await import('sonner')
 
 type UseReadArticleHook = ReturnType<typeof useReadArticle>
 
@@ -57,7 +49,7 @@ describe('useReadArticle', () => {
   })
 
   describe('markAsRead', () => {
-    it('既読登録に成功した場合、成功メッセージを表示する', async () => {
+    it('既読登録に成功した場合、成功結果とメッセージを返す', async () => {
       const { result } = setupHook()
       const articleId = BigInt(1)
 
@@ -66,8 +58,9 @@ describe('useReadArticle', () => {
         json: async () => ({ message: '記事を既読にしました' }),
       })
 
+      let apiResult
       await act(async () => {
-        await result.current.markAsRead(articleId)
+        apiResult = await result.current.markAsRead(articleId)
       })
 
       await waitFor(() => {
@@ -77,7 +70,10 @@ describe('useReadArticle', () => {
             read_at: expect.any(String),
           }),
         })
-        expect(toast.success).toHaveBeenCalledWith('記事を既読にしました')
+        expect(isSuccess(apiResult)).toBe(true)
+        if (isSuccess(apiResult)) {
+          expect(apiResult.data).toBe('記事を既読にしました')
+        }
         expect(result.current.isLoading).toBe(false)
       })
     })
@@ -112,53 +108,35 @@ describe('useReadArticle', () => {
       })
     })
 
-    it('既読登録に失敗した場合(4xx)、エラーメッセージを表示する', async () => {
+    it.each([
+      { status: 400, expectedError: '既読登録に失敗しました', description: 'クライアントエラー(4xx)' },
+      { status: 404, expectedError: '既読登録に失敗しました', description: 'クライアントエラー(4xx)' },
+      { status: 500, expectedError: 'サーバーエラーが発生しました', description: 'サーバーエラー(5xx)' },
+    ])('$description の場合、エラー結果を返す', async ({ status, expectedError }) => {
       const { result } = setupHook()
       const articleId = BigInt(1)
 
       mockMarkAsReadPost.mockResolvedValue({
-        status: 400,
+        status,
       })
 
+      let apiResult
       await act(async () => {
-        try {
-          await result.current.markAsRead(articleId)
-        } catch {
-          // エラーは期待通り
-        }
+        apiResult = await result.current.markAsRead(articleId)
       })
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('既読登録に失敗しました')
-        expect(result.current.isLoading).toBe(false)
-      })
-    })
-
-    it('サーバーエラーの場合(5xx)、エラーメッセージを表示する', async () => {
-      const { result } = setupHook()
-      const articleId = BigInt(1)
-
-      mockMarkAsReadPost.mockResolvedValue({
-        status: 500,
-      })
-
-      await act(async () => {
-        try {
-          await result.current.markAsRead(articleId)
-        } catch {
-          // エラーは期待通り
+        expect(isFailure(apiResult)).toBe(true)
+        if (isFailure(apiResult)) {
+          expect(apiResult.error.message).toBe(expectedError)
         }
-      })
-
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('サーバーエラーが発生しました')
         expect(result.current.isLoading).toBe(false)
       })
     })
   })
 
   describe('markAsUnread', () => {
-    it('未読登録に成功した場合、成功メッセージを表示する', async () => {
+    it('未読登録に成功した場合、成功結果とメッセージを返す', async () => {
       const { result } = setupHook()
       const articleId = BigInt(1)
 
@@ -167,15 +145,19 @@ describe('useReadArticle', () => {
         json: async () => ({ message: '記事を未読にしました' }),
       })
 
+      let apiResult
       await act(async () => {
-        await result.current.markAsUnread(articleId)
+        apiResult = await result.current.markAsUnread(articleId)
       })
 
       await waitFor(() => {
         expect(mockMarkAsUnreadDelete).toHaveBeenCalledWith({
           param: { article_id: '1' },
         })
-        expect(toast.success).toHaveBeenCalledWith('記事を未読にしました')
+        expect(isSuccess(apiResult)).toBe(true)
+        if (isSuccess(apiResult)) {
+          expect(apiResult.data).toBe('記事を未読にしました')
+        }
         expect(result.current.isLoading).toBe(false)
       })
     })
@@ -210,46 +192,28 @@ describe('useReadArticle', () => {
       })
     })
 
-    it('未読登録に失敗した場合(4xx)、エラーメッセージを表示する', async () => {
+    it.each([
+      { status: 400, expectedError: '未読登録に失敗しました', description: 'クライアントエラー(4xx)' },
+      { status: 404, expectedError: '未読登録に失敗しました', description: 'クライアントエラー(4xx)' },
+      { status: 500, expectedError: 'サーバーエラーが発生しました', description: 'サーバーエラー(5xx)' },
+    ])('$description の場合、エラー結果を返す', async ({ status, expectedError }) => {
       const { result } = setupHook()
       const articleId = BigInt(1)
 
       mockMarkAsUnreadDelete.mockResolvedValue({
-        status: 404,
+        status,
       })
 
+      let apiResult
       await act(async () => {
-        try {
-          await result.current.markAsUnread(articleId)
-        } catch {
-          // エラーは期待通り
-        }
+        apiResult = await result.current.markAsUnread(articleId)
       })
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('未読登録に失敗しました')
-        expect(result.current.isLoading).toBe(false)
-      })
-    })
-
-    it('サーバーエラーの場合(5xx)、エラーメッセージを表示する', async () => {
-      const { result } = setupHook()
-      const articleId = BigInt(1)
-
-      mockMarkAsUnreadDelete.mockResolvedValue({
-        status: 500,
-      })
-
-      await act(async () => {
-        try {
-          await result.current.markAsUnread(articleId)
-        } catch {
-          // エラーは期待通り
+        expect(isFailure(apiResult)).toBe(true)
+        if (isFailure(apiResult)) {
+          expect(apiResult.error.message).toBe(expectedError)
         }
-      })
-
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('サーバーエラーが発生しました')
         expect(result.current.isLoading).toBe(false)
       })
     })

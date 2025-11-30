@@ -1,17 +1,17 @@
 import { useCallback, useState } from 'react'
-import { toast } from 'sonner'
+import { AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import getApiClientForClient from '../../../infrastructure/api'
 
 type UseReadArticleReturn = {
-  markAsRead: (articleId: bigint) => Promise<void>
-  markAsUnread: (articleId: bigint) => Promise<void>
+  markAsRead: (articleId: bigint) => AsyncResult<string, Error>
+  markAsUnread: (articleId: bigint) => AsyncResult<string, Error>
   isLoading: boolean
 }
 
 export default function useReadArticle(): UseReadArticleReturn {
   const [isLoading, setIsLoading] = useState(false)
 
-  const markAsRead = useCallback(async (articleId: bigint) => {
+  const markAsRead = useCallback(async (articleId: bigint): AsyncResult<string, Error> => {
     setIsLoading(true)
     try {
       const client = getApiClientForClient()
@@ -22,27 +22,28 @@ export default function useReadArticle(): UseReadArticleReturn {
 
       if (res.status === 201) {
         const resJson = await res.json()
-        toast.success(resJson.message)
-      } else if (res.status >= 400 && res.status < 500) {
-        throw new Error('既読登録に失敗しました')
-      } else if (res.status >= 500) {
-        throw new Error('サーバーエラーが発生しました')
+        return success(resJson.message)
       }
+      if (res.status >= 400 && res.status < 500) {
+        return failure(new Error('既読登録に失敗しました'))
+      }
+      if (res.status >= 500) {
+        return failure(new Error('サーバーエラーが発生しました'))
+      }
+      return failure(new Error('不明なエラーが発生しました'))
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error('不明なエラーが発生しました')
-        // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
-        console.error(error)
+        return failure(error)
       }
-      throw error
+      // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
+      console.error(error)
+      return failure(new Error('不明なエラーが発生しました'))
     } finally {
       setIsLoading(false)
     }
   }, [])
 
-  const markAsUnread = useCallback(async (articleId: bigint) => {
+  const markAsUnread = useCallback(async (articleId: bigint): AsyncResult<string, Error> => {
     setIsLoading(true)
     try {
       const client = getApiClientForClient()
@@ -52,21 +53,22 @@ export default function useReadArticle(): UseReadArticleReturn {
 
       if (res.status === 200) {
         const resJson = await res.json()
-        toast.success(resJson.message)
-      } else if (res.status >= 400 && res.status < 500) {
-        throw new Error('未読登録に失敗しました')
-      } else if (res.status >= 500) {
-        throw new Error('サーバーエラーが発生しました')
+        return success(resJson.message)
       }
+      if (res.status >= 400 && res.status < 500) {
+        return failure(new Error('未読登録に失敗しました'))
+      }
+      if (res.status >= 500) {
+        return failure(new Error('サーバーエラーが発生しました'))
+      }
+      return failure(new Error('不明なエラーが発生しました'))
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error('不明なエラーが発生しました')
-        // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
-        console.error(error)
+        return failure(error)
       }
-      throw error
+      // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
+      console.error(error)
+      return failure(new Error('不明なエラーが発生しました'))
     } finally {
       setIsLoading(false)
     }

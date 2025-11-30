@@ -1,5 +1,7 @@
 import { Calendar, ExternalLink, User, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
+import { isFailure } from '@yuukihayashi0510/core'
+import { toast } from 'sonner'
 import {
   Drawer,
   DrawerClose,
@@ -26,9 +28,14 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
     if (!open) onClose()
   }
 
-  const handleReadArticle = () => {
+  const handleReadArticle = async () => {
     // 記事を読むリンクをクリックした時に既読登録
-    markAsRead(article.articleId)
+    const result = await markAsRead(article.articleId)
+    if (isFailure(result)) {
+      toast.error(result.error.message)
+    } else {
+      toast.success(result.data)
+    }
   }
 
   const media = article.media === 'qiita' ? 'qiita' : 'zenn'
