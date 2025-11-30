@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -16,11 +17,19 @@ export default function ArticleCard({ article, onCardClick }: Props) {
   return (
     <Card
       data-slot='card'
-      className='h-32 w-full sm:w-64 cursor-pointer rounded-3xl border border-white/40 bg-white/30 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:shadow-xl'
+      className='relative h-32 w-full sm:w-64 cursor-pointer rounded-3xl border border-white/40 bg-white/30 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:shadow-xl'
       onClick={() => onCardClick(article)}
       role='button'
       tabIndex={0}
     >
+      {article.hasRead && (
+        <div
+          className='absolute top-2 right-2 flex items-center justify-center rounded-full bg-green-500 p-1'
+          data-slot='read-badge'
+        >
+          <Check className='size-4 text-white' />
+        </div>
+      )}
       <CardContent className='flex h-full flex-col p-0'>
         <CardTitle className='line-clamp-2 flex-1 overflow-hidden text-sm leading-relaxed font-bold text-gray-700'>
           <MediaIcon media={article.media === 'qiita' ? 'qiita' : 'zenn'} />
