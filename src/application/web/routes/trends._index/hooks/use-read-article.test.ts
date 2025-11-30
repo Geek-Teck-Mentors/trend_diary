@@ -58,7 +58,7 @@ describe('useReadArticle', () => {
         json: async () => ({ message: '記事を既読にしました' }),
       })
 
-      let apiResult: Result<string, Error>
+      let apiResult!: Result<string, Error>
       await act(async () => {
         apiResult = await result.current.markAsRead(articleId)
       })
@@ -132,7 +132,7 @@ describe('useReadArticle', () => {
         status,
       })
 
-      let apiResult: Result<string, Error>
+      let apiResult!: Result<string, Error>
       await act(async () => {
         apiResult = await result.current.markAsRead(articleId)
       })
@@ -157,7 +157,7 @@ describe('useReadArticle', () => {
         json: async () => ({ message: '記事を未読にしました' }),
       })
 
-      let apiResult: Result<string, Error>
+      let apiResult!: Result<string, Error>
       await act(async () => {
         apiResult = await result.current.markAsUnread(articleId)
       })
@@ -228,7 +228,7 @@ describe('useReadArticle', () => {
         status,
       })
 
-      let apiResult: Result<string, Error>
+      let apiResult!: Result<string, Error>
       await act(async () => {
         apiResult = await result.current.markAsUnread(articleId)
       })

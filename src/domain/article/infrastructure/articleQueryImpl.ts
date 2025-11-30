@@ -38,7 +38,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
     }
 
     const [total, articles] = result.data
-    let mappedArticles = articles.map(fromPrismaToArticle)
+    let mappedArticles: Article[]
 
     // activeUserIdが指定されている場合、既読ステータスを取得
     if (activeUserId) {
@@ -56,10 +56,12 @@ export default class ArticleQueryImpl implements ArticleQuery {
       }
 
       const readArticleIds = new Set(readHistoriesResult.data.map((rh) => rh.articleId))
-      mappedArticles = mappedArticles.map((article) => ({
-        ...article,
+      mappedArticles = articles.map((article) => ({
+        ...fromPrismaToArticle(article),
         hasRead: readArticleIds.has(article.articleId),
       }))
+    } else {
+      mappedArticles = articles.map(fromPrismaToArticle)
     }
 
     const totalPages = Math.ceil(total / limit)
@@ -129,6 +131,11 @@ export default class ArticleQueryImpl implements ArticleQuery {
       }
 
       where.createdAt = dateRange
+    }
+
+    if (params.readStatus !== undefined && params.activeUserId) {
+      const filter = { activeUserId: params.activeUserId }
+      where.readHistories = params.readStatus ? { some: filter } : { none: filter }
     }
 
     return where

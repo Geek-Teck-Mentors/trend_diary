@@ -30,7 +30,7 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
 
   const handleReadArticle = async () => {
     // 記事を読むリンクをクリックした時に既読登録
-    const result = await markAsRead(article.articleId)
+    const result = await markAsRead(BigInt(article.articleId))
     if (isFailure(result)) {
       toast.error(result.error.message)
     } else {
