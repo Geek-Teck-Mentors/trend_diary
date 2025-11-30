@@ -84,24 +84,21 @@ export type AuthenticatedRequestContext<TParam = unknown, TJson = unknown, TQuer
 }
 
 // RequestContextから型パラメータを抽出するヘルパー型
-type ExtractParam<T> =
-  T extends RequestContext<infer P, unknown, unknown>
+type ExtractParam<T> = T extends RequestContext<infer P, unknown, unknown>
+  ? P
+  : T extends AuthenticatedRequestContext<infer P, unknown, unknown>
     ? P
-    : T extends AuthenticatedRequestContext<infer P, unknown, unknown>
-      ? P
-      : unknown
-type ExtractJson<T> =
-  T extends RequestContext<unknown, infer J, unknown>
+    : unknown
+type ExtractJson<T> = T extends RequestContext<unknown, infer J, unknown>
+  ? J
+  : T extends AuthenticatedRequestContext<unknown, infer J, unknown>
     ? J
-    : T extends AuthenticatedRequestContext<unknown, infer J, unknown>
-      ? J
-      : unknown
-type ExtractQuery<T> =
-  T extends RequestContext<unknown, unknown, infer Q>
+    : unknown
+type ExtractQuery<T> = T extends RequestContext<unknown, unknown, infer Q>
+  ? Q
+  : T extends AuthenticatedRequestContext<unknown, unknown, infer Q>
     ? Q
-    : T extends AuthenticatedRequestContext<unknown, unknown, infer Q>
-      ? Q
-      : unknown
+    : unknown
 
 // 共通のハンドラー設定プロパティ
 type BaseHandlerConfig<TUseCase, TContext, TOutput, TResponse> = {

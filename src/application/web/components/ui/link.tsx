@@ -14,12 +14,7 @@ interface ExternalLinkProps extends BaseProps {
   to: ExternalPath
 }
 
-function ExternalLink({
-  to,
-  children,
-  className,
-  onClick,
-}: PropsWithChildren<ExternalLinkProps>) {
+function ExternalLink({ to, children, className, onClick }: PropsWithChildren<ExternalLinkProps>) {
   return (
     // biome-ignore lint: plugin
     <a
@@ -38,12 +33,7 @@ interface InternalLinkProps extends BaseProps {
   to: InternalPath
 }
 
-function InternalLink({
-  to,
-  children,
-  className,
-  onClick,
-}: PropsWithChildren<InternalLinkProps>) {
+function InternalLink({ to, children, className, onClick }: PropsWithChildren<InternalLinkProps>) {
   return (
     <Link to={to} className={className} onClick={onClick}>
       {children}
