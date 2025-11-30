@@ -1,6 +1,6 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { type Result, isFailure, isSuccess } from '@yuukihayashi0510/core'
+import { isFailure, isSuccess, type Result } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
 
 // モックの定義
