@@ -8,15 +8,6 @@ type UseReadArticleReturn = {
   isLoading: boolean
 }
 
-type ReadArticleParams = {
-  param: { article_id: string }
-  json: { read_at: string }
-}
-
-type UnreadArticleParams = {
-  param: { article_id: string }
-}
-
 export default function useReadArticle(): UseReadArticleReturn {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -24,14 +15,13 @@ export default function useReadArticle(): UseReadArticleReturn {
     setIsLoading(true)
     try {
       const client = getApiClientForClient()
-      const params: ReadArticleParams = {
+      const res = await client.articles[':article_id'].read.$post({
         param: { article_id: articleId.toString() },
         json: { read_at: new Date().toISOString() },
-      }
-      const res = await client.articles[':article_id'].read.$post(params)
+      })
 
       if (res.status === 201) {
-        const resJson = (await res.json()) as { message: string }
+        const resJson = await res.json()
         toast.success(resJson.message)
       } else if (res.status >= 400 && res.status < 500) {
         throw new Error('既読登録に失敗しました')
@@ -56,13 +46,12 @@ export default function useReadArticle(): UseReadArticleReturn {
     setIsLoading(true)
     try {
       const client = getApiClientForClient()
-      const params: UnreadArticleParams = {
+      const res = await client.articles[':article_id'].unread.$delete({
         param: { article_id: articleId.toString() },
-      }
-      const res = await client.articles[':article_id'].unread.$delete(params)
+      })
 
       if (res.status === 200) {
-        const resJson = (await res.json()) as { message: string }
+        const resJson = await res.json()
         toast.success(resJson.message)
       } else if (res.status >= 400 && res.status < 500) {
         throw new Error('未読登録に失敗しました')
