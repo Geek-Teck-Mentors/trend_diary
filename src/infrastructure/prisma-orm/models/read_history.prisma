@@ -7,6 +7,7 @@ model ReadHistory {
   articleId    BigInt @map("article_id") @db.BigInt
   activeUserId BigInt @map("active_user_id") @db.BigInt
 
+  article    Article?   @relation(fields: [articleId], references: [articleId])
   activeUser ActiveUser @relation(fields: [activeUserId], references: [activeUserId], onDelete: Cascade)
 
   @@map("read_histories")
