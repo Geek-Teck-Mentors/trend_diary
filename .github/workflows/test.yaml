@@ -31,7 +31,6 @@ concurrency:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
-  DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
 
 jobs:
   setup:
@@ -128,14 +127,8 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-      - name: PostgreSQLのセットアップ
-        run: docker compose build && docker compose up -d
-
-      - name: PostgreSQLが起動するまで待機
-        uses: ./.github/actions/backoff
-        with:
-          command: 'docker exec $(docker ps -q -f name=postgres) pg_isready -U postgres'
-          fail_command: docker compose down
+      - name: Supabaseのセットアップ
+        uses: ./.github/actions/setup_supabase
 
       - name: DB Migration
         env:

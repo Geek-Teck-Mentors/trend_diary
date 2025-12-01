@@ -25,7 +25,6 @@ concurrency:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
-  DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres # Supabase側で変更できず、Supabaseの設定と整合性を保つため
 
 jobs:
   test:
@@ -36,11 +35,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Supabaseのセットアップ
+        uses: ./.github/actions/setup_supabase
+
       - name: E2E環境のセットアップ
         uses: ./.github/actions/setup_e2e
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-          database-url: ${{ env.DATABASE_URL }}
 
       - name: E2Eテストの実行
         run: npm run e2e -- --pass-with-no-tests
@@ -62,11 +63,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - id: setup-supabase
+        name: Supabaseのセットアップ
+        uses: ./.github/actions/setup_supabase
+
       - name: E2E環境のセットアップ
         uses: ./.github/actions/setup_e2e
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
-          database-url: ${{ env.DATABASE_URL }}
 
       - name: E2Eテストの差分実行
         shell: bash

@@ -6,10 +6,11 @@
   },
   "scripts": {
     "postinstall": "prisma generate",
-    "prestart": "docker compose up -d",
+    "prestart": "npm run supabase:start",
     "start": "react-router dev",
-    "poststart": "docker compose down",
+    "poststart": "supabase stop",
     "build": "react-router build",
+    "supabase:start": "supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit",
     "test:frontend": "vitest run -c src/test/vitest-config/config.frontend.ts",
     "test:domain": "vitest run -c src/test/vitest-config/config.domain.ts",
     "test:api": "vitest run -c src/test/vitest-config/config.api.ts",

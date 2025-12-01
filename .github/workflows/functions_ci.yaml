@@ -70,37 +70,26 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
       - name: Node.jsの構築(DBのマイグレーション用)
         uses: ./.github/actions/setup_node
         with:
           node-version-file: .node-version
 
-      - name: supabase start
-        run: supabase start -x storage-api,imgproxy,edge-runtime,realtime,vector,studio,postgres-meta,mailpit,logflare,supavisor
-
-      # SUPABASE_URL, SUPABASE_ANON_KEY, DB_URLはSupabase CLIを起動した後に取得できるため、supabase startの後に設定
-      - name: Setup ENV
-        run: |
-          echo "SUPABASE_URL=$(supabase status --output json | jq -r '.API_URL')" >> $GITHUB_ENV
-          echo "SUPABASE_ANON_KEY=$(supabase status --output json | jq -r '.ANON_KEY')" >> $GITHUB_ENV
-          echo "DB_URL=$(supabase status --output json | jq -r '.DB_URL')" >> $GITHUB_ENV
+      - name: Supabaseのセットアップ
+        uses: ./.github/actions/setup_supabase
 
       - name: DBのマイグレーション
         run: npm run db:migrate
         env:
-          DIRECT_URL: ${{ env.DB_URL }}
-          DATABASE_URL: ${{ env.DB_URL }}
+          DIRECT_URL: ${{ env.DATABASE_URL }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Deno testの実行
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
           NO_COLOR: true
+
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
           for function_name in $(ls supabase/functions); do
