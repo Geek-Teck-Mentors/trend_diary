@@ -189,10 +189,10 @@ describe('GET /api/articles', () => {
         expect(res.status).toBe(200)
         const data: ArticleListResponse = await res.json()
         expect(data.data).toHaveLength(2)
-        // TypeScriptの応用（2つ目の記事）は既読
-        expect(data.data[0].hasRead).toBe(true)
-        // Reactの基礎（1つ目の記事）は未読
-        expect(data.data[1].hasRead).toBe(false)
+        // TypeScriptの応用（createdAt降順で1番目）は未読
+        expect(data.data[0].hasRead).toBe(false)
+        // Reactの基礎（createdAt降順で2番目）は既読
+        expect(data.data[1].hasRead).toBe(true)
       })
 
       it('認証なしの場合、hasReadはundefinedになる', async () => {

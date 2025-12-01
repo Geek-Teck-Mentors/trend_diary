@@ -20,6 +20,12 @@ class ArticleTestHelper {
   }
 
   async deleteArticle(articleId: bigint): Promise<void> {
+    // 外部キー制約のため、先にread_historiesを削除
+    await this.rdb.readHistory.deleteMany({
+      where: {
+        articleId,
+      },
+    })
     await this.rdb.article.deleteMany({
       where: {
         articleId,
