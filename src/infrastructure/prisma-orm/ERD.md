@@ -42,6 +42,7 @@ erDiagram
 
   "roles" {
     Int role_id "🗝️"
+    Boolean preset 
     String display_name 
     String description "❓"
     DateTime created_at 

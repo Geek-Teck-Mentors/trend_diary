@@ -18,12 +18,20 @@ class PermissionTestHelper {
 
   async cleanUp(): Promise<void> {
     try {
-      await this.rdb.$queryRaw`TRUNCATE TABLE "role_permissions" CASCADE;`
-      await this.rdb.$queryRaw`TRUNCATE TABLE "endpoint_permissions" CASCADE;`
-      await this.rdb.$queryRaw`TRUNCATE TABLE "user_roles" CASCADE;`
-      await this.rdb.$queryRaw`TRUNCATE TABLE "roles" CASCADE;`
-      await this.rdb.$queryRaw`TRUNCATE TABLE "permissions" CASCADE;`
-      await this.rdb.$queryRaw`TRUNCATE TABLE "endpoints" CASCADE;`
+      // preset=falseのロールとその関連データを削除（テストで作成したロールのみ）
+      // 外部キー制約のため、先にrole_permissionsを削除
+      await this.rdb.rolePermission.deleteMany({
+        where: {
+          role: {
+            preset: false,
+          },
+        },
+      })
+      await this.rdb.role.deleteMany({
+        where: {
+          preset: false,
+        },
+      })
     } catch (error) {
       if (error instanceof Error && error.message.includes('does not exist')) {
         return
@@ -40,7 +48,28 @@ class PermissionTestHelper {
     return result.data.roleId
   }
 
-  async createPermission(resource: string, action: string): Promise<number> {
+  async getPresetRole(displayName: string): Promise<number> {
+    const role = await this.rdb.role.findFirst({
+      where: { preset: true, displayName },
+    })
+    if (!role) {
+      throw new Error(`Preset role not found: ${displayName}`)
+    }
+    return role.roleId
+  }
+
+  async findOrCreatePermission(resource: string, action: string): Promise<number> {
+    // 既存の権限を検索
+    const existing = await this.rdb.permission.findUnique({
+      where: {
+        resource_action: { resource, action },
+      },
+    })
+    if (existing) {
+      return existing.permissionId
+    }
+
+    // 存在しない場合は作成
     const result = await this.permissionUseCase.createPermission({ resource, action })
     if (isFailure(result)) {
       throw new Error(`Failed to create permission: ${result.error.message}`)
@@ -48,7 +77,18 @@ class PermissionTestHelper {
     return result.data.permissionId
   }
 
-  async createEndpoint(path: string, method: string): Promise<number> {
+  async findOrCreateEndpoint(path: string, method: string): Promise<number> {
+    // 既存のエンドポイントを検索
+    const existing = await this.rdb.endpoint.findUnique({
+      where: {
+        path_method: { path, method },
+      },
+    })
+    if (existing) {
+      return existing.endpointId
+    }
+
+    // 存在しない場合は作成
     const result = await this.endpointUseCase.createEndpoint({ path, method })
     if (isFailure(result)) {
       throw new Error(`Failed to create endpoint: ${result.error.message}`)

@@ -6,6 +6,7 @@ describe('roleSchema', () => {
     it('有効なロールデータをパースできる', () => {
       const validData = {
         roleId: 1,
+        preset: false,
         displayName: '管理者',
         description: 'システム管理者',
         createdAt: new Date(),
@@ -18,6 +19,7 @@ describe('roleSchema', () => {
     it('descriptionがnullでもパースできる', () => {
       const validData = {
         roleId: 1,
+        preset: false,
         displayName: '管理者',
         description: null,
         createdAt: new Date(),
@@ -32,6 +34,7 @@ describe('roleSchema', () => {
     it('roleIdが負の数の場合エラー', () => {
       const invalidData = {
         roleId: -1,
+        preset: false,
         displayName: '管理者',
         description: 'テスト',
         createdAt: new Date(),
@@ -44,6 +47,7 @@ describe('roleSchema', () => {
     it('displayNameが空文字の場合エラー', () => {
       const invalidData = {
         roleId: 1,
+        preset: false,
         displayName: '',
         description: 'テスト',
         createdAt: new Date(),

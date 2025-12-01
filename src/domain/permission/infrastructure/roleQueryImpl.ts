@@ -18,6 +18,7 @@ export class RoleQueryImpl implements RoleQuery {
       return success(
         roles.map((r) => ({
           roleId: r.roleId,
+          preset: r.preset,
           displayName: r.displayName,
           description: r.description,
           createdAt: r.createdAt,
@@ -41,6 +42,7 @@ export class RoleQueryImpl implements RoleQuery {
 
       return success({
         roleId: role.roleId,
+        preset: role.preset,
         displayName: role.displayName,
         description: role.description,
         createdAt: role.createdAt,
