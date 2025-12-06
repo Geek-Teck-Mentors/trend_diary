@@ -1,4 +1,4 @@
-import { articleSchema } from './articleSchema'
+import { articleSchema, articleWithReadStatusSchema } from './articleSchema'
 
 describe('記事スキーマ', () => {
   const validArticle = {
@@ -217,5 +217,56 @@ describe('記事スキーマ', () => {
         })
       }).toThrow()
     })
+  })
+})
+
+describe('既読情報付き記事スキーマ', () => {
+  const validArticleWithReadStatus = {
+    articleId: BigInt(123456789),
+    media: 'news',
+    title: 'Test Article',
+    author: 'John Doe',
+    description: 'This is a test article description.',
+    url: 'http://example.com',
+    createdAt: new Date(),
+    isRead: false,
+  }
+
+  it('有効な既読情報付き記事データを受け入れること', () => {
+    expect(() => {
+      articleWithReadStatusSchema.parse(validArticleWithReadStatus)
+    }).not.toThrow()
+  })
+
+  it('isReadがtrueの場合も受け入れること', () => {
+    expect(() => {
+      articleWithReadStatusSchema.parse({
+        ...validArticleWithReadStatus,
+        isRead: true,
+      })
+    }).not.toThrow()
+  })
+
+  it('isReadがboolean型でない場合は拒否すること', () => {
+    expect(() => {
+      articleWithReadStatusSchema.parse({
+        ...validArticleWithReadStatus,
+        isRead: 'true',
+      })
+    }).toThrow()
+
+    expect(() => {
+      articleWithReadStatusSchema.parse({
+        ...validArticleWithReadStatus,
+        isRead: 1,
+      })
+    }).toThrow()
+  })
+
+  it('isReadがない場合は拒否すること', () => {
+    const { isRead, ...articleWithoutIsRead } = validArticleWithReadStatus
+    expect(() => {
+      articleWithReadStatusSchema.parse(articleWithoutIsRead)
+    }).toThrow()
   })
 })
