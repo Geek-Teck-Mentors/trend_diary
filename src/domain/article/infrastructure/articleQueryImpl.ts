@@ -6,7 +6,7 @@ import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
 import { ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article } from '@/domain/article/schema/articleSchema'
+import type { Article, ArticleWithReadStatus } from '@/domain/article/schema/articleSchema'
 import { RdbClient } from '@/infrastructure/rdb'
 
 export default class ArticleQueryImpl implements ArticleQuery {
@@ -42,6 +42,71 @@ export default class ArticleQueryImpl implements ArticleQuery {
     const totalPages = Math.ceil(total / limit)
     const paginationResult: OffsetPaginationResult<Article> = {
       data: mappedArticles,
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    }
+
+    return success(paginationResult)
+  }
+
+  async searchArticlesWithReadStatus(
+    params: ArticleQueryParams,
+    activeUserId: bigint,
+  ): AsyncResult<OffsetPaginationResult<ArticleWithReadStatus>, ServerError> {
+    const { page = 1, limit = 20, ...searchParams } = params
+    const where = ArticleQueryImpl.buildWhereClause(searchParams)
+    const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
+      { createdAt: 'desc' },
+      { articleId: 'desc' },
+    ]
+
+    // 記事取得
+    const articlesResult = await wrapAsyncCall(() =>
+      this.db.$transaction([
+        this.db.article.count({ where }),
+        this.db.article.findMany({
+          where,
+          orderBy,
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]),
+    )
+    if (isFailure(articlesResult)) {
+      return failure(new ServerError(articlesResult.error))
+    }
+
+    const [total, articles] = articlesResult.data
+    const articleIds = articles.map((a) => a.articleId)
+
+    // 既読履歴取得
+    const readHistoriesResult = await wrapAsyncCall(() =>
+      this.db.readHistory.findMany({
+        where: {
+          activeUserId,
+          articleId: { in: articleIds },
+        },
+      }),
+    )
+    if (isFailure(readHistoriesResult)) {
+      return failure(new ServerError(readHistoriesResult.error))
+    }
+
+    const readArticleIds = new Set(readHistoriesResult.data.map((rh) => rh.articleId))
+
+    // 記事に既読情報を付与
+    const articlesWithReadStatus: ArticleWithReadStatus[] = articles.map((article) => ({
+      ...fromPrismaToArticle(article),
+      isRead: readArticleIds.has(article.articleId),
+    }))
+
+    const totalPages = Math.ceil(total / limit)
+    const paginationResult: OffsetPaginationResult<ArticleWithReadStatus> = {
+      data: articlesWithReadStatus,
       page,
       limit,
       total,
