@@ -6,7 +6,7 @@ import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
 import { ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article, ArticleWithReadStatus } from '@/domain/article/schema/articleSchema'
+import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
 import { RdbClient } from '@/infrastructure/rdb'
 
 export default class ArticleQueryImpl implements ArticleQuery {
@@ -14,49 +14,8 @@ export default class ArticleQueryImpl implements ArticleQuery {
 
   async searchArticles(
     params: ArticleQueryParams,
-  ): AsyncResult<OffsetPaginationResult<Article>, ServerError> {
-    const { page = 1, limit = 20, ...searchParams } = params
-    const where = ArticleQueryImpl.buildWhereClause(searchParams)
-    const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
-      { createdAt: 'desc' },
-      { articleId: 'desc' },
-    ]
-
-    const result = await wrapAsyncCall(() =>
-      this.db.$transaction([
-        this.db.article.count({ where }),
-        this.db.article.findMany({
-          where,
-          orderBy,
-          skip: (page - 1) * limit,
-          take: limit,
-        }),
-      ]),
-    )
-    if (isFailure(result)) {
-      return failure(new ServerError(result.error))
-    }
-
-    const [total, articles] = result.data
-    const mappedArticles = articles.map(fromPrismaToArticle)
-    const totalPages = Math.ceil(total / limit)
-    const paginationResult: OffsetPaginationResult<Article> = {
-      data: mappedArticles,
-      page,
-      limit,
-      total,
-      totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1,
-    }
-
-    return success(paginationResult)
-  }
-
-  async searchArticlesWithReadStatus(
-    params: ArticleQueryParams,
-    activeUserId: bigint,
-  ): AsyncResult<OffsetPaginationResult<ArticleWithReadStatus>, ServerError> {
+    activeUserId?: bigint,
+  ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
     const { page = 1, limit = 20, ...searchParams } = params
     const where = ArticleQueryImpl.buildWhereClause(searchParams)
     const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
@@ -81,32 +40,34 @@ export default class ArticleQueryImpl implements ArticleQuery {
     }
 
     const [total, articles] = articlesResult.data
-    const articleIds = articles.map((a) => a.articleId)
 
-    // 既読履歴取得
-    const readHistoriesResult = await wrapAsyncCall(() =>
-      this.db.readHistory.findMany({
-        where: {
-          activeUserId,
-          articleId: { in: articleIds },
-        },
-      }),
-    )
-    if (isFailure(readHistoriesResult)) {
-      return failure(new ServerError(readHistoriesResult.error))
+    // activeUserIdがある場合は既読情報を取得
+    let readArticleIds: Set<bigint> | null = null
+    if (activeUserId !== undefined) {
+      const articleIds = articles.map((a) => a.articleId)
+      const readHistoriesResult = await wrapAsyncCall(() =>
+        this.db.readHistory.findMany({
+          where: {
+            activeUserId,
+            articleId: { in: articleIds },
+          },
+        }),
+      )
+      if (isFailure(readHistoriesResult)) {
+        return failure(new ServerError(readHistoriesResult.error))
+      }
+      readArticleIds = new Set(readHistoriesResult.data.map((rh) => rh.articleId))
     }
 
-    const readArticleIds = new Set(readHistoriesResult.data.map((rh) => rh.articleId))
-
-    // 記事に既読情報を付与
-    const articlesWithReadStatus: ArticleWithReadStatus[] = articles.map((article) => ({
+    // 記事をマッピング（activeUserIdがある場合はisReadを付与）
+    const mappedArticles: ArticleWithOptionalReadStatus[] = articles.map((article) => ({
       ...fromPrismaToArticle(article),
-      isRead: readArticleIds.has(article.articleId),
+      isRead: readArticleIds !== null ? readArticleIds.has(article.articleId) : undefined,
     }))
 
     const totalPages = Math.ceil(total / limit)
-    const paginationResult: OffsetPaginationResult<ArticleWithReadStatus> = {
-      data: articlesWithReadStatus,
+    const paginationResult: OffsetPaginationResult<ArticleWithOptionalReadStatus> = {
+      data: mappedArticles,
       page,
       limit,
       total,
