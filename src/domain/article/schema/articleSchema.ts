@@ -25,4 +25,6 @@ export type ArticleOutput = z.output<typeof articleSchema>
 export type ArticleWithReadStatus = z.infer<typeof articleWithReadStatusSchema>
 export type ArticleWithReadStatusOutput = z.output<typeof articleWithReadStatusSchema>
 export type ArticleWithOptionalReadStatus = z.infer<typeof articleWithOptionalReadStatusSchema>
-export type ArticleWithOptionalReadStatusOutput = z.output<typeof articleWithOptionalReadStatusSchema>
+export type ArticleWithOptionalReadStatusOutput = z.output<
+  typeof articleWithOptionalReadStatusSchema
+>

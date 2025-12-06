@@ -264,7 +264,7 @@ describe('既読情報付き記事スキーマ', () => {
   })
 
   it('isReadがない場合は拒否すること', () => {
-    const { isRead, ...articleWithoutIsRead } = validArticleWithReadStatus
+    const { isRead: _isRead, ...articleWithoutIsRead } = validArticleWithReadStatus
     expect(() => {
       articleWithReadStatusSchema.parse(articleWithoutIsRead)
     }).toThrow()

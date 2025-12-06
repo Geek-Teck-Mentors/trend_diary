@@ -5,7 +5,7 @@ import { NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article } from '@/domain/article/schema/articleSchema'
+import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 import { UseCase } from './useCase'
 
@@ -19,8 +19,18 @@ const mockArticle: Article = {
   createdAt: new Date(),
 }
 
-const mockPaginationResult: OffsetPaginationResult<Article> = {
+const mockPaginationResult: OffsetPaginationResult<ArticleWithOptionalReadStatus> = {
   data: [mockArticle],
+  page: 1,
+  limit: 20,
+  total: 1,
+  totalPages: 1,
+  hasNext: false,
+  hasPrev: false,
+}
+
+const mockPaginationResultWithReadStatus: OffsetPaginationResult<ArticleWithOptionalReadStatus> = {
+  data: [{ ...mockArticle, isRead: true }],
   page: 1,
   limit: 20,
   total: 1,
@@ -97,11 +107,14 @@ describe('ArticleUseCase', () => {
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
-          title: 'test title',
-          limit: 20,
-          page: 1,
-        })
+        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+          {
+            title: 'test title',
+            limit: 20,
+            page: 1,
+          },
+          undefined,
+        )
       })
 
       it('authorパラメータのみで検索', async () => {
@@ -116,11 +129,14 @@ describe('ArticleUseCase', () => {
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
-          author: 'test author',
-          limit: 20,
-          page: 1,
-        })
+        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+          {
+            author: 'test author',
+            limit: 20,
+            page: 1,
+          },
+          undefined,
+        )
       })
 
       it('mediaパラメータのみで検索', async () => {
@@ -135,11 +151,14 @@ describe('ArticleUseCase', () => {
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
-          media: 'zenn',
-          limit: 20,
-          page: 1,
-        })
+        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+          {
+            media: 'zenn',
+            limit: 20,
+            page: 1,
+          },
+          undefined,
+        )
       })
 
       it('fromパラメータのみで検索', async () => {
@@ -154,11 +173,14 @@ describe('ArticleUseCase', () => {
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
-          from: '2024-01-01',
-          limit: 20,
-          page: 1,
-        })
+        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+          {
+            from: '2024-01-01',
+            limit: 20,
+            page: 1,
+          },
+          undefined,
+        )
       })
 
       it('toパラメータのみで検索', async () => {
@@ -173,11 +195,14 @@ describe('ArticleUseCase', () => {
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
-          to: '2024-01-31',
-          limit: 20,
-          page: 1,
-        })
+        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+          {
+            to: '2024-01-31',
+            limit: 20,
+            page: 1,
+          },
+          undefined,
+        )
       })
 
       it('from/toパラメータの組み合わせで検索', async () => {
@@ -193,12 +218,15 @@ describe('ArticleUseCase', () => {
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
-          from: '2024-01-01',
-          to: '2024-01-31',
-          limit: 20,
-          page: 1,
-        })
+        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+          {
+            from: '2024-01-01',
+            to: '2024-01-31',
+            limit: 20,
+            page: 1,
+          },
+          undefined,
+        )
       })
 
       it('readStatusパラメータのみで検索', async () => {
@@ -213,11 +241,37 @@ describe('ArticleUseCase', () => {
         const result = await useCase.searchArticles(params as ArticleQueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith({
-          readStatus: true,
+        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+          {
+            readStatus: true,
+            limit: 20,
+            page: 1,
+          },
+          undefined,
+        )
+      })
+
+      it('activeUserIdを渡すと既読情報付きで記事検索成功', async () => {
+        const params: ArticleQueryParams = {
           limit: 20,
           page: 1,
-        })
+        }
+        const activeUserId = 100n
+
+        mockArticleQuery.searchArticles.mockResolvedValue(
+          success(mockPaginationResultWithReadStatus),
+        )
+
+        const result = await useCase.searchArticles(params, activeUserId)
+
+        expect(result).toEqual(success(mockPaginationResultWithReadStatus))
+        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+          {
+            limit: 20,
+            page: 1,
+          },
+          activeUserId,
+        )
       })
     })
 
