@@ -13,6 +13,12 @@ export async function loader({ context }: LoaderFunctionArgs) {
   }
 }
 
+export type TrendsOutletContext = {
+  displayName: string
+  userFeatureEnabled: boolean
+  isLoggedIn: boolean
+}
+
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
   const [displayName, setDisplayName] = useState('')
@@ -41,12 +47,20 @@ export default function Layout() {
     }
   }, [])
 
+  const isLoggedIn = displayName !== ''
+
+  const outletContext: TrendsOutletContext = {
+    displayName,
+    userFeatureEnabled,
+    isLoggedIn,
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar displayName={displayName} userFeatureEnabled={userFeatureEnabled} />
       <div className='w-full'>
         <AppHeader displayName={displayName} userFeatureEnabled={userFeatureEnabled} />
-        <Outlet />
+        <Outlet context={outletContext} />
       </div>
     </SidebarProvider>
   )
