@@ -246,7 +246,7 @@ describe('GET /api/articles', () => {
 
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
-      expect(data.data).toHaveLength(4) // 既存2 + 新規2
+      expect(data.data).toHaveLength(2) // 既読記事1 + 未読記事1
       for (const article of data.data) {
         expect(article.isRead).toBeUndefined()
       }
