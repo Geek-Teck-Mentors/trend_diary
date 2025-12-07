@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, userEvent, waitFor } from 'storybook/test'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
+import type { Article } from '../hooks/use-trends'
 import ArticleCard from './article-card'
 
 const defaultArticle: Article = {
@@ -26,6 +26,8 @@ const meta: Meta<typeof ArticleCard> = {
   },
   args: {
     onCardClick: fn(),
+    onToggleRead: fn(),
+    isLoggedIn: false,
   },
 }
 export default meta
@@ -126,6 +128,86 @@ export const HoverInteraction: Story = {
       })
 
       await expect(card).toBeVisible()
+    })
+  },
+}
+
+// 既読状態のストーリー（ログイン時）
+const readArticle = generateArticle({ media: 'qiita', isRead: true })
+export const ReadArticleLoggedIn: Story = {
+  args: {
+    article: readArticle,
+    isLoggedIn: true,
+  },
+  play: async ({ canvas, step }) => {
+    await step('既読カードは透明度が下がっていることを確認', async () => {
+      const card = canvas.getByTestId('article-card')
+      await expect(card).toHaveClass('opacity-60')
+    })
+
+    await step('チェックアイコンが表示されることを確認', async () => {
+      const checkIcon = canvas.getByTestId('read-indicator')
+      await expect(checkIcon).toBeInTheDocument()
+    })
+
+    await step('既読切り替えボタンが表示されることを確認', async () => {
+      const toggleButton = canvas.getByText('未読にする')
+      await expect(toggleButton).toBeInTheDocument()
+    })
+  },
+}
+
+// 未読状態のストーリー（ログイン時）
+const unreadArticle = generateArticle({ media: 'qiita', isRead: false })
+export const UnreadArticleLoggedIn: Story = {
+  args: {
+    article: unreadArticle,
+    isLoggedIn: true,
+  },
+  play: async ({ canvas, step }) => {
+    await step('未読カードは透明度が正常であることを確認', async () => {
+      const card = canvas.getByTestId('article-card')
+      await expect(card).not.toHaveClass('opacity-60')
+    })
+
+    await step('チェックアイコンが表示されないことを確認', async () => {
+      const checkIcon = canvas.queryByTestId('read-indicator')
+      await expect(checkIcon).not.toBeInTheDocument()
+    })
+
+    await step('既読切り替えボタンが表示されることを確認', async () => {
+      const toggleButton = canvas.getByText('既読にする')
+      await expect(toggleButton).toBeInTheDocument()
+    })
+  },
+}
+
+// 未ログイン時はボタン非表示
+export const NotLoggedIn: Story = {
+  args: {
+    article: unreadArticle,
+    isLoggedIn: false,
+  },
+  play: async ({ canvas, step }) => {
+    await step('既読切り替えボタンが表示されないことを確認', async () => {
+      const toggleButton = canvas.queryByText(/既読にする|未読にする/)
+      await expect(toggleButton).not.toBeInTheDocument()
+    })
+  },
+}
+
+// 既読切り替え操作のテスト
+export const ToggleReadInteraction: Story = {
+  args: {
+    article: unreadArticle,
+    isLoggedIn: true,
+  },
+  play: async ({ canvas, args, step }) => {
+    await step('既読ボタンクリックでonToggleReadが呼ばれることを確認', async () => {
+      const toggleButton = canvas.getByText('既読にする')
+      await userEvent.click(toggleButton)
+
+      await expect(args.onToggleRead).toHaveBeenCalledWith(unreadArticle.articleId, true)
     })
   },
 }
