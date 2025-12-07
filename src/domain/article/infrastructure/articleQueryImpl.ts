@@ -62,7 +62,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
     // 記事をマッピング（activeUserIdがある場合はisReadを付与）
     const mappedArticles: ArticleWithOptionalReadStatus[] = articles.map((article) => ({
       ...fromPrismaToArticle(article),
-      isRead: readArticleIds !== null ? readArticleIds.has(article.articleId) : undefined,
+      isRead: readArticleIds?.has(article.articleId),
     }))
 
     const totalPages = Math.ceil(total / limit)

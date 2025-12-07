@@ -193,9 +193,6 @@ describe('GET /api/articles', () => {
 
   describe('既読情報', () => {
     let sessionId: string
-    let testActiveUserId: bigint
-    let readArticleId: bigint
-    let _unreadArticleId: bigint
 
     async function requestGetArticlesWithAuth(query: string = '', sid?: string) {
       const url = query ? `/api/articles?${query}` : '/api/articles'
@@ -210,7 +207,7 @@ describe('GET /api/articles', () => {
       // アカウント作成・ログイン
       await activeUserTestHelper.create('readtest@example.com', 'password123')
       const loginData = await activeUserTestHelper.login('readtest@example.com', 'password123')
-      testActiveUserId = loginData.activeUserId
+      const testActiveUserId = loginData.activeUserId
       sessionId = loginData.sessionId
 
       // テスト記事作成
@@ -218,13 +215,12 @@ describe('GET /api/articles', () => {
         title: '既読記事',
         author: 'テスト著者1',
       })
-      readArticleId = article1.articleId
+      const readArticleId = article1.articleId
 
-      const article2 = await articleTestHelper.createArticle({
+      await articleTestHelper.createArticle({
         title: '未読記事',
         author: 'テスト著者2',
       })
-      _unreadArticleId = article2.articleId
 
       // article1を既読にする
       await articleTestHelper.createReadHistory(testActiveUserId, readArticleId)

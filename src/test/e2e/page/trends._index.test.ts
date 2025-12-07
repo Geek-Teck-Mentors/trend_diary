@@ -77,25 +77,24 @@ test.describe('記事一覧ページ', () => {
     })
 
     test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
-      const ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
+      const _ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
 
       // 記事カードをクリック
       const articleCard = page.locator('[data-slot="card"]').first()
       await articleCard.click()
 
       const drawer = await waitDrawerOpen(page)
-      const drawerLink = drawer.getByRole('link', { name: '記事を読む' })
-      await expect(drawerLink).toBeVisible()
+      const drawerButton = drawer.getByRole('button', { name: '記事を読む' })
+      await expect(drawerButton).toBeVisible()
 
-      // ドロワーの記事を読むリンクのURLを上書き
-      await drawerLink.evaluate((element, url) => {
-        ;(element as HTMLAnchorElement).href = url
-      }, ARTICLE_URL)
-      await drawerLink.click()
+      // window.openで開かれるURLを検証
+      const [newPage] = await Promise.all([
+        page.context().waitForEvent('page'),
+        drawerButton.click(),
+      ])
 
-      // 新しいタブでそのリンクのページに遷移する
-      const newPage = await page.context().waitForEvent('page')
-      await expect(newPage).toHaveURL(ARTICLE_URL)
+      // 新しいタブで記事URLが開かれることを確認
+      await expect(newPage).toHaveURL(/zenn\.dev|qiita\.com/)
     })
   })
 
