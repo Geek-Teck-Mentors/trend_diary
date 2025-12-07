@@ -1,4 +1,4 @@
-import { Calendar, ExternalLink, User, X } from 'lucide-react'
+import { Calendar, Check, ExternalLink, User, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import {
   Drawer,
@@ -7,30 +7,60 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/application/web/components/shadcn/drawer'
-import { AnchorLink, ExternalPath } from '@/application/web/components/ui/link'
 import { toJaDateString } from '@/common/locale'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
+import type { Article } from '../hooks/use-trends'
 import MediaIcon from './media-icon'
 
 type Props = {
   article: Article
   isOpen: boolean
   onClose: () => void
+  onMarkAsRead?: (articleId: string) => void
+  onToggleRead?: (articleId: bigint, isRead: boolean) => void
+  isLoggedIn?: boolean
 }
 
-export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
+export default function ArticleDrawer({
+  article,
+  isOpen,
+  onClose,
+  onMarkAsRead,
+  onToggleRead,
+  isLoggedIn = false,
+}: Props) {
   const handleOpenChange = (open: boolean) => {
     if (!open) onClose()
   }
 
+  const isRead = article.isRead ?? false
   const media = article.media === 'qiita' ? 'qiita' : 'zenn'
+
+  const handleReadArticle = () => {
+    if (isLoggedIn) {
+      onMarkAsRead?.(article.articleId.toString())
+    }
+    window.open(article.url, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleToggleRead = () => {
+    onToggleRead?.(article.articleId, !isRead)
+  }
 
   return createPortal(
     <Drawer open={isOpen} onOpenChange={handleOpenChange} direction='right'>
       <DrawerContent className='h-full w-3/4 md:w-1/2'>
         <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
-          <div className='flex-1' data-slot='drawer-header-icon'>
+          <div className='flex flex-1 items-center gap-2' data-slot='drawer-header-icon'>
             <MediaIcon media={media} />
+            {isRead && (
+              <span
+                data-testid='drawer-read-indicator'
+                className='inline-flex items-center text-green-600'
+              >
+                <Check className='h-4 w-4' />
+                <span className='ml-1 text-sm'>既読</span>
+              </span>
+            )}
           </div>
           <DrawerClose className='ring-offset-background focus:ring-ring cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'>
             <X className='size-4' data-slot='x-icon' />
@@ -71,15 +101,25 @@ export default function ArticleDrawer({ article, isOpen, onClose }: Props) {
           </div>
         </div>
 
-        <div className='border-t p-4'>
-          <AnchorLink
-            to={article.url as ExternalPath}
+        <div className='border-t p-4 space-y-3'>
+          <button
+            type='button'
+            onClick={handleReadArticle}
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
             data-slot='drawer-content-link'
           >
             <ExternalLink className='size-4' />
             記事を読む
-          </AnchorLink>
+          </button>
+          {isLoggedIn && (
+            <button
+              type='button'
+              onClick={handleToggleRead}
+              className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100'
+            >
+              {isRead ? '未読に戻す' : '既読にする'}
+            </button>
+          )}
         </div>
       </DrawerContent>
     </Drawer>,
