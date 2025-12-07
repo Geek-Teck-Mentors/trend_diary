@@ -2,9 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
+import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
+
+// isRead を含む記事型
+export type Article = ArticleOutput & {
+  isRead?: boolean
+}
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
@@ -41,15 +46,18 @@ export default function useTrends() {
       try {
         const queryDate = formatDate(date)
 
-        const res = await getApiClientForClient().articles.$get({
-          query: {
-            to: queryDate,
-            from: queryDate,
-            page,
-            limit,
-            ...(media && { media }),
+        const res = await getApiClientForClient().articles.$get(
+          {
+            query: {
+              to: queryDate,
+              from: queryDate,
+              page,
+              limit,
+              ...(media && { media }),
+            },
           },
-        })
+          { init: { credentials: 'include' } },
+        )
         if (res.status === 200) {
           const resJson = await res.json()
           setArticles(
@@ -61,6 +69,7 @@ export default function useTrends() {
               description: data.description,
               url: data.url,
               createdAt: new Date(data.createdAt),
+              isRead: data.isRead,
             })),
           )
           setPage(resJson.page)
@@ -133,6 +142,12 @@ export default function useTrends() {
     [searchParams, setSearchParams],
   )
 
+  const updateArticleReadStatus = useCallback((articleId: bigint, isRead: boolean) => {
+    setArticles((prev) =>
+      prev.map((article) => (article.articleId === articleId ? { ...article, isRead } : article)),
+    )
+  }, [])
+
   return {
     date,
     articles,
@@ -144,5 +159,6 @@ export default function useTrends() {
     setSearchParams,
     handleMediaChange,
     selectedMedia,
+    updateArticleReadStatus,
   }
 }
