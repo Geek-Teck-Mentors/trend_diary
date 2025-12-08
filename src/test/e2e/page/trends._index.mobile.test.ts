@@ -127,7 +127,17 @@ test.describe('記事一覧ページ(モバイル)', () => {
     })
 
     test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
-      const _ARTICLE_URL = 'https://zenn.dev/kouphasi/articles/61a39a76d23dd1'
+      // window.openをモックして、開かれたURLを記録
+      let openedUrl = ''
+      await page.evaluate(() => {
+        window.open = (url: string | URL | undefined) => {
+          if (url) {
+            // biome-ignore lint/suspicious/noExplicitAny: E2Eテストでのwindow拡張のため
+            ;(window as any).__lastOpenedUrl = url.toString()
+          }
+          return null
+        }
+      })
 
       // 記事カードをクリック
       const articleCard = page.locator('[data-slot="card"]').first()
@@ -137,14 +147,15 @@ test.describe('記事一覧ページ(モバイル)', () => {
       const drawerButton = drawer.getByRole('button', { name: '記事を読む' })
       await expect(drawerButton).toBeVisible()
 
-      // window.openで開かれるURLを検証
-      const [newPage] = await Promise.all([
-        page.context().waitForEvent('page'),
-        drawerButton.click(),
-      ])
+      // ボタンをクリック
+      await drawerButton.click()
 
-      // 新しいタブで記事URLが開かれることを確認
-      await expect(newPage).toHaveURL(/zenn\.dev|qiita\.com/)
+      // window.openで開かれたURLを取得
+      // biome-ignore lint/suspicious/noExplicitAny: E2Eテストでのwindow拡張のため
+      openedUrl = await page.evaluate(() => (window as any).__lastOpenedUrl)
+
+      // 記事URLが開かれることを確認
+      expect(openedUrl).toMatch(/zenn\.dev|qiita\.com/)
     })
   })
 
