@@ -5,6 +5,7 @@ import {
   CardDescription,
   CardTitle,
 } from '@/application/web/components/shadcn/card'
+import { cn } from '@/application/web/components/shadcn/lib/utils'
 import type { Article } from '../hooks/use-trends'
 import MediaIcon from './media-icon'
 
@@ -32,7 +33,10 @@ export default function ArticleCard({
     <Card
       data-slot='card'
       data-testid='article-card'
-      className={`h-32 w-full sm:w-64 cursor-pointer rounded-3xl border border-white/40 bg-white/30 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:shadow-xl ${isRead ? 'opacity-60' : ''}`}
+      className={cn(
+        'h-32 w-full sm:w-64 cursor-pointer rounded-3xl border border-white/40 bg-white/30 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:shadow-xl',
+        isRead && 'opacity-60',
+      )}
       onClick={() => onCardClick(article)}
       role='button'
       tabIndex={0}
