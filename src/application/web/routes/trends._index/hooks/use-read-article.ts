@@ -1,3 +1,4 @@
+import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import getApiClientForClient from '../../../infrastructure/api'
@@ -15,7 +16,7 @@ export default function useReadArticle() {
     isLoadingRef.current = true
     setIsLoading(true)
 
-    try {
+    const result = await wrapAsyncCall(async () => {
       const client = getApiClientForClient()
       // biome-ignore lint/suspicious/noExplicitAny: Hono client の型定義が param と json の同時指定に対応していない
       const res = await (client.articles[':article_id'].read.$post as any)(
@@ -29,16 +30,19 @@ export default function useReadArticle() {
       if (res.status !== 201) {
         throw new Error('Failed to mark as read')
       }
-      return true
-    } catch (error) {
+    })
+
+    isLoadingRef.current = false
+    setIsLoading(false)
+
+    if (isFailure(result)) {
       // biome-ignore lint/suspicious/noConsole: デバッグのためにエラーログを出力
-      console.error('Failed to mark as read:', error)
+      console.error('Failed to mark as read:', result.error)
       toast.error(MarkAsReadErrorMessage)
       return false
-    } finally {
-      isLoadingRef.current = false
-      setIsLoading(false)
     }
+
+    return true
   }, [])
 
   const markAsUnread = useCallback(async (articleId: string): Promise<boolean> => {
@@ -47,7 +51,7 @@ export default function useReadArticle() {
     isLoadingRef.current = true
     setIsLoading(true)
 
-    try {
+    const result = await wrapAsyncCall(async () => {
       const client = getApiClientForClient()
       const res = await client.articles[':article_id'].unread.$delete(
         {
@@ -59,16 +63,19 @@ export default function useReadArticle() {
       if (res.status !== 200) {
         throw new Error('Failed to mark as unread')
       }
-      return true
-    } catch (error) {
+    })
+
+    isLoadingRef.current = false
+    setIsLoading(false)
+
+    if (isFailure(result)) {
       // biome-ignore lint/suspicious/noConsole: デバッグのためにエラーログを出力
-      console.error('Failed to mark as unread:', error)
+      console.error('Failed to mark as unread:', result.error)
       toast.error(MarkAsUnreadErrorMessage)
       return false
-    } finally {
-      isLoadingRef.current = false
-      setIsLoading(false)
     }
+
+    return true
   }, [])
 
   return {
