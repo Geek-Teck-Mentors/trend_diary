@@ -1,7 +1,8 @@
+import { isSuccess } from '@yuukihayashi0510/core'
 import { createMiddleware } from 'hono/factory'
-import { Env } from '../env'
+import { Env } from '../../env'
+import CONTEXT_KEY from '../context'
 import { validateSession } from './authHelper'
-import CONTEXT_KEY from './context'
 
 /**
  * オプショナル認証ミドルウェア
@@ -11,9 +12,9 @@ import CONTEXT_KEY from './context'
 const optionalAuthenticator = createMiddleware<Env>(async (c, next) => {
   const validationResult = await validateSession(c)
 
-  if (validationResult.success) {
-    c.set(CONTEXT_KEY.SESSION_USER, validationResult.sessionUser)
-    c.set(CONTEXT_KEY.SESSION_ID, validationResult.sessionId)
+  if (isSuccess(validationResult)) {
+    c.set(CONTEXT_KEY.SESSION_USER, validationResult.data.sessionUser)
+    c.set(CONTEXT_KEY.SESSION_ID, validationResult.data.sessionId)
   }
 
   return next()

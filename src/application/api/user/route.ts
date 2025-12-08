@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { createMiddleware } from 'hono/factory'
 import { Env } from '@/application/env'
-import authenticator from '@/application/middleware/authenticator'
+import { authenticator } from '@/application/middleware/authenticator'
 import zodValidator from '@/application/middleware/zodValidator'
 import { activeUserInputSchema } from '@/domain/user'
 import login from './handler/login'
