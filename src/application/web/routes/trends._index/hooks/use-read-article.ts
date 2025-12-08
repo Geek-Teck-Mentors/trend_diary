@@ -36,8 +36,6 @@ export default function useReadArticle() {
     setIsLoading(false)
 
     if (isFailure(result)) {
-      // biome-ignore lint/suspicious/noConsole: デバッグのためにエラーログを出力
-      console.error('Failed to mark as read:', result.error)
       toast.error(MarkAsReadErrorMessage)
       return false
     }
@@ -69,8 +67,6 @@ export default function useReadArticle() {
     setIsLoading(false)
 
     if (isFailure(result)) {
-      // biome-ignore lint/suspicious/noConsole: デバッグのためにエラーログを出力
-      console.error('Failed to mark as unread:', result.error)
       toast.error(MarkAsUnreadErrorMessage)
       return false
     }
