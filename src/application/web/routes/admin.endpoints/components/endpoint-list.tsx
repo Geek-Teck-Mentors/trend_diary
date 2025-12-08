@@ -11,6 +11,7 @@ import {
 } from '@/application/web/components/shadcn/dialog'
 import { Input } from '@/application/web/components/shadcn/input'
 import { Label } from '@/application/web/components/shadcn/label'
+import { cn } from '@/application/web/components/shadcn/lib/utils'
 import {
   Select,
   SelectContent,
@@ -91,17 +92,20 @@ export default function EndpointList({
                   onSelectEndpoint(endpoint.endpointId)
                 }
               }}
-              className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                selectedEndpointId === endpoint.endpointId
-                  ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                  : ''
-              }`}
+              className={cn(
+                'p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors',
+                selectedEndpointId === endpoint.endpointId &&
+                  'bg-blue-50 border-l-4 border-l-blue-500',
+              )}
             >
               <div className='flex justify-between items-start'>
                 <div className='flex-1'>
                   <div className='flex items-center gap-2'>
                     <span
-                      className={`px-2 py-0.5 rounded text-xs font-medium ${getMethodColor(endpoint.method)}`}
+                      className={cn(
+                        'px-2 py-0.5 rounded text-xs font-medium',
+                        getMethodColor(endpoint.method),
+                      )}
                     >
                       {endpoint.method}
                     </span>

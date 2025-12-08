@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/application/web/components/shadcn/dialog'
+import { cn } from '@/application/web/components/shadcn/lib/utils'
 import type { Role } from '../types'
 import RoleFormDialog from './role-form-dialog'
 
@@ -97,9 +98,10 @@ export default function RoleList({
                   onSelectRole(role.roleId)
                 }
               }}
-              className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                selectedRoleId === role.roleId ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-              }`}
+              className={cn(
+                'p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors',
+                selectedRoleId === role.roleId && 'bg-blue-50 border-l-4 border-l-blue-500',
+              )}
             >
               <div className='flex justify-between items-start'>
                 <div className='flex-1'>
