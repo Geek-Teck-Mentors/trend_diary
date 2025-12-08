@@ -2,6 +2,9 @@ import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import getApiClientForClient from '../../../infrastructure/api'
 
+const MarkAsReadErrorMessage = '既読に失敗しました'
+const MarkAsUnreadErrorMessage = '未読に失敗しました'
+
 export default function useReadArticle() {
   const [isLoading, setIsLoading] = useState(false)
   const isLoadingRef = useRef(false)
@@ -26,10 +29,10 @@ export default function useReadArticle() {
       if (res.status === 201) {
         return true
       }
-      toast.error('既読に失敗しました')
+      toast.error(MarkAsReadErrorMessage)
       return false
     } catch {
-      toast.error('既読に失敗しました')
+      toast.error(MarkAsReadErrorMessage)
       return false
     } finally {
       isLoadingRef.current = false
@@ -55,10 +58,10 @@ export default function useReadArticle() {
       if (res.status === 200) {
         return true
       }
-      toast.error('未読に失敗しました')
+      toast.error(MarkAsUnreadErrorMessage)
       return false
     } catch {
-      toast.error('未読に失敗しました')
+      toast.error(MarkAsUnreadErrorMessage)
       return false
     } finally {
       isLoadingRef.current = false

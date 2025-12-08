@@ -15,7 +15,7 @@ type Props = {
   article: Article
   isOpen: boolean
   onClose: () => void
-  onMarkAsRead?: (articleId: string) => void
+  onMarkAsRead?: (articleId: string) => void | Promise<void>
   onToggleRead?: (articleId: bigint, isRead: boolean) => void
   isLoggedIn?: boolean
 }
@@ -35,9 +35,9 @@ export default function ArticleDrawer({
   const isRead = article.isRead ?? false
   const media = article.media === 'qiita' ? 'qiita' : 'zenn'
 
-  const handleReadArticle = () => {
+  const handleReadArticle = async () => {
     if (isLoggedIn) {
-      onMarkAsRead?.(article.articleId.toString())
+      await onMarkAsRead?.(article.articleId.toString())
     }
     window.open(article.url, '_blank', 'noopener,noreferrer')
   }
