@@ -26,11 +26,10 @@ export default function useReadArticle() {
         { init: { credentials: 'include' } },
       )
 
-      if (res.status === 201) {
-        return true
+      if (res.status !== 201) {
+        throw new Error('Failed to mark as read')
       }
-      toast.error(MarkAsReadErrorMessage)
-      return false
+      return true
     } catch {
       toast.error(MarkAsReadErrorMessage)
       return false
@@ -55,11 +54,10 @@ export default function useReadArticle() {
         { init: { credentials: 'include' } },
       )
 
-      if (res.status === 200) {
-        return true
+      if (res.status !== 200) {
+        throw new Error('Failed to mark as unread')
       }
-      toast.error(MarkAsUnreadErrorMessage)
-      return false
+      return true
     } catch {
       toast.error(MarkAsUnreadErrorMessage)
       return false

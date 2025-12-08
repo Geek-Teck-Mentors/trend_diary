@@ -35,11 +35,13 @@ export default function ArticleDrawer({
   const isRead = article.isRead ?? false
   const media = article.media === 'qiita' ? 'qiita' : 'zenn'
 
-  const handleReadArticle = async () => {
-    if (isLoggedIn) {
-      await onMarkAsRead?.(article.articleId.toString())
-    }
+  const handleReadArticle = () => {
+    // ポップアップブロッカー対策として、先にウィンドウを開く
     window.open(article.url, '_blank', 'noopener,noreferrer')
+    if (isLoggedIn) {
+      // onMarkAsReadはawaitせず、バックグラウンドで実行
+      onMarkAsRead?.(article.articleId.toString())
+    }
   }
 
   const handleToggleRead = () => {
