@@ -41,10 +41,7 @@ export default function Trends() {
   }
 
   const handleMarkAsRead = async (articleId: string) => {
-    const success = await markAsRead(articleId)
-    if (success) {
-      updateArticleReadStatus(BigInt(articleId), true)
-    }
+    await handleToggleRead(BigInt(articleId), true)
   }
 
   return (

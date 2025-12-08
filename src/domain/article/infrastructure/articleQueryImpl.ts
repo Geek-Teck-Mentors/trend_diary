@@ -41,9 +41,9 @@ export default class ArticleQueryImpl implements ArticleQuery {
 
     const [total, articles] = articlesResult.data
 
-    // activeUserIdがある場合は既読情報を取得
+    // activeUserIdがある場合は既読情報を取得（記事が0件の場合は不要）
     let readArticleIds: Set<bigint> | null = null
-    if (activeUserId !== undefined) {
+    if (activeUserId !== undefined && articles.length > 0) {
       const articleIds = articles.map((a) => a.articleId)
       const readHistoriesResult = await wrapAsyncCall(() =>
         this.db.readHistory.findMany({
