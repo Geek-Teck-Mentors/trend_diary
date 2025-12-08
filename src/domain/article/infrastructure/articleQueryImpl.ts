@@ -16,6 +16,12 @@ export default class ArticleQueryImpl implements ArticleQuery {
     params: ArticleQueryParams,
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
+    // activeUserIdがある場合は生SQLでLEFT JOINして1クエリで取得
+    if (activeUserId !== undefined) {
+      return this.searchArticlesWithReadStatus(params, activeUserId)
+    }
+
+    // activeUserIdがない場合は従来通り
     const { page = 1, limit = 20, ...searchParams } = params
     const where = ArticleQueryImpl.buildWhereClause(searchParams)
     const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
@@ -23,8 +29,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
       { articleId: 'desc' },
     ]
 
-    // 記事取得
-    const articlesResult = await wrapAsyncCall(() =>
+    const result = await wrapAsyncCall(() =>
       this.db.$transaction([
         this.db.article.count({ where }),
         this.db.article.findMany({
@@ -35,38 +40,19 @@ export default class ArticleQueryImpl implements ArticleQuery {
         }),
       ]),
     )
-    if (isFailure(articlesResult)) {
-      return failure(new ServerError(articlesResult.error))
+
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
     }
 
-    const [total, articles] = articlesResult.data
-
-    // activeUserIdがある場合は既読情報を取得（記事が0件の場合は不要）
-    let readArticleIds: Set<bigint> | null = null
-    if (activeUserId !== undefined && articles.length > 0) {
-      const articleIds = articles.map((a) => a.articleId)
-      const readHistoriesResult = await wrapAsyncCall(() =>
-        this.db.readHistory.findMany({
-          where: {
-            activeUserId,
-            articleId: { in: articleIds },
-          },
-        }),
-      )
-      if (isFailure(readHistoriesResult)) {
-        return failure(new ServerError(readHistoriesResult.error))
-      }
-      readArticleIds = new Set(readHistoriesResult.data.map((rh) => rh.articleId))
-    }
-
-    // 記事をマッピング（activeUserIdがある場合はisReadを付与）
+    const [total, articles] = result.data
     const mappedArticles: ArticleWithOptionalReadStatus[] = articles.map((article) => ({
       ...fromPrismaToArticle(article),
-      isRead: readArticleIds?.has(article.articleId),
+      isRead: undefined,
     }))
 
     const totalPages = Math.ceil(total / limit)
-    const paginationResult: OffsetPaginationResult<ArticleWithOptionalReadStatus> = {
+    return success({
       data: mappedArticles,
       page,
       limit,
@@ -74,9 +60,101 @@ export default class ArticleQueryImpl implements ArticleQuery {
       totalPages,
       hasNext: page < totalPages,
       hasPrev: page > 1,
+    })
+  }
+
+  private async searchArticlesWithReadStatus(
+    params: ArticleQueryParams,
+    activeUserId: bigint,
+  ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
+    const { page = 1, limit = 20, ...searchParams } = params
+
+    // WHERE句とパラメータを構築
+    const { whereClause, whereParams } = ArticleQueryImpl.buildWhereClauseForRawSql(searchParams)
+
+    const offset = (page - 1) * limit
+
+    // COUNT用とデータ取得用のクエリを1トランザクションで実行
+    const countSql = Prisma.sql([`SELECT COUNT(*)::int as count FROM articles a ${whereClause}`])
+
+    const dataSql = Prisma.sql([
+      `
+      SELECT
+        a.article_id,
+        a.media,
+        a.title,
+        a.author,
+        a.description,
+        a.url,
+        a.created_at,
+        CASE WHEN rh.read_history_id IS NOT NULL THEN true ELSE false END as is_read
+      FROM articles a
+      LEFT JOIN read_histories rh
+        ON a.article_id = rh.article_id
+        AND rh.active_user_id = ${activeUserId}
+      ${whereClause}
+      ORDER BY a.created_at DESC, a.article_id DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `,
+    ])
+
+    // whereParamsを両方のクエリに適用
+    for (const param of whereParams) {
+      countSql.values.push(param)
+      dataSql.values.push(param)
     }
 
-    return success(paginationResult)
+    type CountResult = { count: number }
+    type RawDataRow = {
+      // biome-ignore lint/style/useNamingConvention: データベースのカラム名
+      article_id: bigint
+      media: string
+      title: string
+      author: string
+      description: string
+      url: string
+      // biome-ignore lint/style/useNamingConvention: データベースのカラム名
+      created_at: Date
+      // biome-ignore lint/style/useNamingConvention: データベースのカラム名
+      is_read: boolean
+    }
+
+    const result = await wrapAsyncCall(() =>
+      this.db.$transaction([
+        this.db.$queryRaw<CountResult[]>(countSql),
+        this.db.$queryRaw<RawDataRow[]>(dataSql),
+      ]),
+    )
+
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
+    }
+
+    const [countResult, dataResult] = result.data
+    const total = countResult[0]?.count ?? 0
+
+    // 結果をマッピング
+    const mappedArticles: ArticleWithOptionalReadStatus[] = dataResult.map((row) => ({
+      articleId: row.article_id,
+      media: row.media,
+      title: row.title,
+      author: row.author,
+      description: row.description,
+      url: row.url,
+      createdAt: row.created_at,
+      isRead: row.is_read,
+    }))
+
+    const totalPages = Math.ceil(total / limit)
+    return success({
+      data: mappedArticles,
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    })
   }
 
   async findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError> {
@@ -135,5 +213,51 @@ export default class ArticleQueryImpl implements ArticleQuery {
     }
 
     return where
+  }
+
+  private static buildWhereClauseForRawSql(params: Omit<ArticleQueryParams, 'page' | 'limit'>): {
+    whereClause: string
+    whereParams: unknown[]
+  } {
+    const whereClauses: string[] = []
+    const whereParams: unknown[] = []
+
+    let paramIndex = 1
+
+    if (params.title) {
+      whereClauses.push(`a.title ILIKE $${paramIndex}`)
+      whereParams.push(`%${params.title}%`)
+      paramIndex++
+    }
+
+    if (params.author) {
+      whereClauses.push(`a.author ILIKE $${paramIndex}`)
+      whereParams.push(`%${params.author}%`)
+      paramIndex++
+    }
+
+    if (params.media) {
+      whereClauses.push(`a.media = $${paramIndex}`)
+      whereParams.push(params.media)
+      paramIndex++
+    }
+
+    if (params.from) {
+      whereClauses.push(`a.created_at >= $${paramIndex}`)
+      whereParams.push(new Date(`${params.from}T00:00:00+09:00`))
+      paramIndex++
+    }
+
+    if (params.to) {
+      const toDate = new Date(`${params.to}T00:00:00+09:00`)
+      toDate.setDate(toDate.getDate() + 1)
+      whereClauses.push(`a.created_at < $${paramIndex}`)
+      whereParams.push(toDate)
+      paramIndex++
+    }
+
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''
+
+    return { whereClause, whereParams }
   }
 }
