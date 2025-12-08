@@ -10,7 +10,7 @@ import TrendsPage from './page'
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
 
 export default function Trends() {
-  const { isLoggedIn, readArticleFeatureEnabled } = useOutletContext<TrendsOutletContext>()
+  const { isLoggedIn, userFeatureEnabled } = useOutletContext<TrendsOutletContext>()
   const {
     articles,
     isLoading,
@@ -31,7 +31,7 @@ export default function Trends() {
   } = useArticleDrawer()
   const { markAsRead, markAsUnread } = useReadArticle()
 
-  const isReadArticleEnabled = readArticleFeatureEnabled && isLoggedIn
+  const isReadArticleEnabled = userFeatureEnabled && isLoggedIn
 
   const handleToggleRead = async (articleId: bigint, isRead: boolean) => {
     const success = isRead
