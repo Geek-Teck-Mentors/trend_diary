@@ -3,26 +3,28 @@ import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
 import { SidebarProvider } from '../components/shadcn/sidebar'
 import AppHeader from '../components/ui/app-header'
 import AppSidebar from '../components/ui/sidebar'
-import { isUserFeatureEnabled } from '../features/feature-flag'
+import { isReadArticleFeatureEnabled, isUserFeatureEnabled } from '../features/feature-flag'
 import getApiClientForClient from '../infrastructure/api'
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const env = context.cloudflare?.env
   return {
     userFeatureEnabled: isUserFeatureEnabled(env),
+    readArticleFeatureEnabled: isReadArticleFeatureEnabled(env),
   }
 }
 
 export type TrendsOutletContext = {
   displayName: string
   userFeatureEnabled: boolean
+  readArticleFeatureEnabled: boolean
   isLoggedIn: boolean
 }
 
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
   const [displayName, setDisplayName] = useState('')
-  const { userFeatureEnabled } = useLoaderData<typeof loader>()
+  const { userFeatureEnabled, readArticleFeatureEnabled } = useLoaderData<typeof loader>()
 
   useEffect(() => {
     if (!userFeatureEnabled) return
@@ -52,6 +54,7 @@ export default function Layout() {
   const outletContext: TrendsOutletContext = {
     displayName,
     userFeatureEnabled,
+    readArticleFeatureEnabled,
     isLoggedIn,
   }
 

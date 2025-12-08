@@ -14,6 +14,7 @@ export type Env = {
     DATABASE_URL: string
     DISCORD_WEBHOOK_URL: string
     FEATURE_USER_ENABLED: string
+    FEATURE_READ_ARTICLE_ENABLED: string
     SUPABASE_URL: string
     SUPABASE_ANON_KEY: string
   }
