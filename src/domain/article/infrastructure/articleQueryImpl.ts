@@ -68,17 +68,12 @@ export default class ArticleQueryImpl implements ArticleQuery {
     activeUserId: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
     const { page = 1, limit = 20, ...searchParams } = params
-
-    // WHERE句とパラメータを構築
-    const { whereClause, whereParams } = ArticleQueryImpl.buildWhereClauseForRawSql(searchParams)
-
     const offset = (page - 1) * limit
 
-    // COUNT用とデータ取得用のクエリを1トランザクションで実行
-    const countSql = Prisma.sql([`SELECT COUNT(*)::int as count FROM articles a ${whereClause}`])
+    const whereClause = ArticleQueryImpl.buildWhereClauseForRawSql(searchParams)
 
-    const dataSql = Prisma.sql([
-      `
+    const countSql = Prisma.sql`SELECT COUNT(*)::int as count FROM articles a ${whereClause}`
+    const dataSql = Prisma.sql`
       SELECT
         a.article_id,
         a.media,
@@ -95,14 +90,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
       ${whereClause}
       ORDER BY a.created_at DESC, a.article_id DESC
       LIMIT ${limit} OFFSET ${offset}
-    `,
-    ])
-
-    // whereParamsを両方のクエリに適用
-    for (const param of whereParams) {
-      countSql.values.push(param)
-      dataSql.values.push(param)
-    }
+    `
 
     type CountResult = { count: number }
     type RawDataRow = {
@@ -215,44 +203,37 @@ export default class ArticleQueryImpl implements ArticleQuery {
     return where
   }
 
-  private static buildWhereClauseForRawSql(params: Omit<ArticleQueryParams, 'page' | 'limit'>): {
-    whereClause: string
-    whereParams: unknown[]
-  } {
-    const whereClauses: string[] = []
-    const whereParams: unknown[] = []
-    let paramIndex = 1
-
-    const addClause = (clause: string, value: unknown) => {
-      whereClauses.push(`${clause}$${paramIndex}`)
-      whereParams.push(value)
-      paramIndex++
-    }
+  private static buildWhereClauseForRawSql(
+    params: Omit<ArticleQueryParams, 'page' | 'limit'>,
+  ): Prisma.Sql {
+    const conditions: Prisma.Sql[] = []
 
     if (params.title) {
-      addClause('a.title ILIKE ', `%${params.title}%`)
+      conditions.push(Prisma.sql`a.title ILIKE ${`%${params.title}%`}`)
     }
 
     if (params.author) {
-      addClause('a.author ILIKE ', `%${params.author}%`)
+      conditions.push(Prisma.sql`a.author ILIKE ${`%${params.author}%`}`)
     }
 
     if (params.media) {
-      addClause('a.media = ', params.media)
+      conditions.push(Prisma.sql`a.media = ${params.media}`)
     }
 
     if (params.from) {
-      addClause('a.created_at >= ', new Date(`${params.from}T00:00:00+09:00`))
+      conditions.push(Prisma.sql`a.created_at >= ${new Date(`${params.from}T00:00:00+09:00`)}`)
     }
 
     if (params.to) {
       const toDate = new Date(`${params.to}T00:00:00+09:00`)
       toDate.setDate(toDate.getDate() + 1)
-      addClause('a.created_at < ', toDate)
+      conditions.push(Prisma.sql`a.created_at < ${toDate}`)
     }
 
-    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''
+    if (conditions.length === 0) {
+      return Prisma.empty
+    }
 
-    return { whereClause, whereParams }
+    return Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
   }
 }
