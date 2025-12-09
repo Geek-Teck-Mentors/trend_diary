@@ -113,7 +113,15 @@ describe('RoleQueryImpl', () => {
 
   describe('findPermissionsByRoleId', () => {
     it('指定したロールIDのパーミッション一覧を取得できる', async () => {
-      const mockRolePermissions = [
+      const mockRolePermissions: Array<{
+        roleId: number
+        permissionId: number
+        permission: {
+          permissionId: number
+          resource: string
+          action: string
+        }
+      }> = [
         {
           roleId: 1,
           permissionId: 1,
@@ -134,8 +142,7 @@ describe('RoleQueryImpl', () => {
         },
       ]
 
-      // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
-      mockDb.rolePermission.findMany.mockResolvedValue(mockRolePermissions as any)
+      mockDb.rolePermission.findMany.mockResolvedValue(mockRolePermissions)
 
       const result = await query.findPermissionsByRoleId(1)
 

@@ -112,7 +112,15 @@ describe('EndpointQueryImpl', () => {
 
   describe('findPermissionsByEndpointId', () => {
     it('指定したエンドポイントIDのパーミッション一覧を取得できる', async () => {
-      const mockEndpointPermissions = [
+      const mockEndpointPermissions: Array<{
+        endpointId: number
+        permissionId: number
+        permission: {
+          permissionId: number
+          resource: string
+          action: string
+        }
+      }> = [
         {
           endpointId: 1,
           permissionId: 1,
@@ -133,8 +141,7 @@ describe('EndpointQueryImpl', () => {
         },
       ]
 
-      // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
-      mockDb.endpointPermission.findMany.mockResolvedValue(mockEndpointPermissions as any)
+      mockDb.endpointPermission.findMany.mockResolvedValue(mockEndpointPermissions)
 
       const result = await query.findPermissionsByEndpointId(1)
 

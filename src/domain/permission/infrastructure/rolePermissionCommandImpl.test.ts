@@ -180,16 +180,7 @@ describe('RolePermissionCommandImpl', () => {
       }
 
       mockDb.role.findUnique.mockResolvedValue(mockRole)
-      mockDb.$transaction.mockImplementation(async (callback) => {
-        const tx = {
-          rolePermission: {
-            deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
-            createMany: vi.fn().mockResolvedValue({ count: 3 }),
-          },
-        }
-        // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
-        return callback(tx as any)
-      })
+      mockDb.$transaction.mockResolvedValue(undefined)
 
       const result = await command.updateRolePermissions(1, [1, 2, 3])
 
@@ -218,15 +209,7 @@ describe('RolePermissionCommandImpl', () => {
       }
 
       mockDb.role.findUnique.mockResolvedValue(mockRole)
-      mockDb.$transaction.mockImplementation(async (callback) => {
-        const tx = {
-          rolePermission: {
-            deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
-          },
-        }
-        // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
-        return callback(tx as any)
-      })
+      mockDb.$transaction.mockResolvedValue(undefined)
 
       const result = await command.updateRolePermissions(1, [])
 

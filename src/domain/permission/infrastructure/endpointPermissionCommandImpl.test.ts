@@ -179,16 +179,7 @@ describe('EndpointPermissionCommandImpl', () => {
       }
 
       mockDb.endpoint.findUnique.mockResolvedValue(mockEndpoint)
-      mockDb.$transaction.mockImplementation(async (callback) => {
-        const tx = {
-          endpointPermission: {
-            deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
-            createMany: vi.fn().mockResolvedValue({ count: 3 }),
-          },
-        }
-        // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
-        return callback(tx as any)
-      })
+      mockDb.$transaction.mockResolvedValue(undefined)
 
       const result = await command.updateEndpointPermissions(1, [1, 2, 3])
 
@@ -216,15 +207,7 @@ describe('EndpointPermissionCommandImpl', () => {
       }
 
       mockDb.endpoint.findUnique.mockResolvedValue(mockEndpoint)
-      mockDb.$transaction.mockImplementation(async (callback) => {
-        const tx = {
-          endpointPermission: {
-            deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
-          },
-        }
-        // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
-        return callback(tx as any)
-      })
+      mockDb.$transaction.mockResolvedValue(undefined)
 
       const result = await command.updateEndpointPermissions(1, [])
 
