@@ -18,7 +18,7 @@
     "e2e:report": "playwright show-report",
     "e2e:gen": "playwright codegen",
     "typecheck": "tsgo --noEmit",
-    "lint": "biome ci . && npm run tsc",
+    "lint": "biome ci . && npm run typecheck",
     "check": "biome check .",
     "check:fix": "biome check --write . --unsafe",
     "db:migrate": "prisma migrate dev",
