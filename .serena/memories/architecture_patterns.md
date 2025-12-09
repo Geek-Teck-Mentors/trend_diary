@@ -1,209 +1,278 @@
-# Architecture Patterns
+# アーキテクチャパターンとガイドライン
+
+## アーキテクチャ概要
+
+このプロジェクトは**ドメイン駆動設計（DDD）**と**クリーンアーキテクチャ**の原則に基づいて設計されている。
+
+### レイヤー構造
+
+```
+┌─────────────────────────────────────┐
+│   Presentation Layer                │
+│   (API / Web)                       │
+│   src/application/                  │
+└────────────┬────────────────────────┘
+             │
+┌────────────▼────────────────────────┐
+│   Domain Layer                      │
+│   (Business Logic)                  │
+│   src/domain/                       │
+└────────────┬────────────────────────┘
+             │
+┌────────────▼────────────────────────┐
+│   Infrastructure Layer              │
+│   (Database / External Services)    │
+│   src/infrastructure/               │
+└─────────────────────────────────────┘
+```
+
+---
 
 ## エラーハンドリングパターン
 
 ### 関数型エラーハンドリング
-プロジェクトでは`Result<T, E>`型を使用した関数型エラーハンドリングパターンを採用している。
 
-#### 基本型定義
+**定義場所**: `src/common/types/utility.ts`
+
+プロジェクト全体で`Result<T, E>`型を使用した関数型エラーハンドリングパターンを採用。
+
 ```typescript
-// src/common/types/utility.ts
-export type Result<T extends any, E extends Error> = { data: T } | { error: E }
-export type AsyncResult<T, E extends Error> = Promise<Result<T, E>>
+type Result<T, E> = 
+  | { success: true; value: T }
+  | { success: false; error: E }
+
+type AsyncResult<T, E> = Promise<Result<T, E>>
 ```
 
-#### ヘルパー関数
+### ヘルパー関数
+
 ```typescript
-// 成功結果作成
+// 成功結果を作成
 resultSuccess<T>(value: T): Result<T, never>
 
-// エラー結果作成  
-resultError<T, E extends Error>(error: E): Result<never, E>
+// エラー結果を作成
+resultError<E>(error: E): Result<never, E>
 
-// 成功判定
-isSuccess<T, E>(result: Result<T, E>): result is { data: T }
+// 成功かどうかを判定
+isSuccess<T, E>(result: Result<T, E>): boolean
 
-// エラー判定
-isError<T, E>(result: Result<T, E>): result is { error: E }
+// エラーかどうかを判定
+isError<T, E>(result: Result<T, E>): boolean
 ```
 
-#### 使用例
+### カスタムエラー型
+
+**定義場所**: `src/common/errors/`
+
+- `ClientError`: クライアントエラー（400系）
+- `ServerError`: サーバーエラー（500系）
+- `NotFoundError`: リソースが見つからない
+- `AlreadyExistsError`: リソースが既に存在
+
+### 使用方法
+
+**ドメイン層**:
 ```typescript
-// ドメイン層での使用
-async function findUser(id: string): AsyncResult<User, NotFoundError> {
-  const user = await userRepository.findById(id)
-  if (!user) {
-    return resultError(new NotFoundError('User not found'))
+// UseCaseはResult型を返す
+async execute(): AsyncResult<Article, NotFoundError> {
+  const article = await repository.findById(id)
+  if (!article) {
+    return resultError(new NotFoundError())
   }
-  return resultSuccess(user)
-}
-
-// 呼び出し側
-const result = await findUser('123')
-if (isSuccess(result)) {
-  console.log(result.data.name)  // 型安全にアクセス
-} else {
-  console.error(result.error.message)
-}
-```
-
-## カスタムエラー型
-
-### エラー階層
-```typescript
-// src/common/errors/
-├── ClientError      # 400系エラー（クライアント起因）
-├── ServerError      # 500系エラー（サーバー起因）
-├── NotFoundError    # リソースが見つからない
-└── AlreadyExistsError  # リソースが既に存在
-```
-
-### API層でのエラー変換
-```typescript
-// src/common/errors/handle.ts
-export function handleError(error: Error): HTTPException {
-  if (error instanceof ClientError) {
-    return new HTTPException(400, { message: error.message })
-  }
-  if (error instanceof NotFoundError) {
-    return new HTTPException(404, { message: error.message })
-  }
-  // ... その他のエラー型
-  return new HTTPException(500, { message: 'Internal Server Error' })
+  return resultSuccess(article)
 }
 ```
+
+**API層**:
+```typescript
+// handleError関数でHTTPExceptionに変換
+const result = await useCase.execute()
+if (isError(result)) {
+  throw handleError(result.error)
+}
+return c.json(result.value)
+```
+
+---
+
+## ドメイン駆動設計（DDD）パターン
+
+### 集約（Aggregate）
+
+各ドメイン集約は以下の構造を持つ:
+
+```
+src/domain/{aggregate}/
+├── schema/          # Zodバリデーションスキーマ
+├── infrastructure/  # リポジトリ実装（インフラ層への依存）
+├── repository.ts    # リポジトリインターフェース
+├── useCase.ts       # ドメインビジネスロジック
+└── index.ts         # 集約エクスポート、factory関数
+```
+
+### リポジトリパターン
+
+**インターフェース**: `src/domain/{aggregate}/repository.ts`
+**実装**: `src/domain/{aggregate}/infrastructure/`
+
+リポジトリはドメイン層でインターフェースを定義し、インフラ層で実装する。
+
+### ユースケース
+
+**場所**: `src/domain/{aggregate}/useCase.ts`
+
+- ビジネスロジックを含む
+- リポジトリを依存性注入で受け取る
+- `Result<T, E>`型を返す
+
+---
 
 ## バリデーションパターン
 
-### API層バリデーション（必須）
-全てのAPIエンドポイントで`zodValidator`の使用が必須
+### ドメイン層
+
+**場所**: `src/domain/{aggregate}/schema/`
+
+Zodスキーマでドメインモデルのバリデーションを定義。
+
+### API層
+
+**必須**: `@hono/zod-validator`を使用
+
+全てのAPIエンドポイントで以下の順序でバリデーション:
+1. `authenticator`（認証）
+2. `zodValidator('param')`（パスパラメータ）
+3. `zodValidator('json')`（リクエストボディ）
+4. ハンドラー関数
 
 ```typescript
-import { zodValidator } from '@/application/middleware/zodValidator'
-
-// 必須パターン
-app.post('/users/:id',
-  authenticator,                           // 1. 認証
-  zodValidator('param', paramSchema),      // 2. パスパラメータ
-  zodValidator('json', bodySchema),        // 3. リクエストボディ  
-  async (c: ZodValidatedContext) => {      // 4. ハンドラー
-    const { id } = c.req.valid('param')    // 型安全アクセス
+app.post(
+  '/articles',
+  authenticator,
+  zodValidator('json', createArticleSchema),
+  async (c) => {
+    // 型安全なリクエストデータアクセス
     const body = c.req.valid('json')
     // ...
   }
 )
 ```
 
-### ドメイン層バリデーション
+---
+
+## 依存性注入パターン
+
+### Factory関数
+
+**場所**: `src/domain/{aggregate}/index.ts`
+
+各集約でfactory関数を提供し、依存性を注入:
+
 ```typescript
-// src/domain/{aggregate}/schema/
-import { z } from 'zod'
-
-export const userSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string().email(),
-  name: z.string().min(1).max(50),
-})
-
-export type User = z.infer<typeof userSchema>
-```
-
-## ドメイン駆動設計パターン
-
-### 集約構造
-```
-src/domain/{aggregate}/
-├── model/           # エンティティ・値オブジェクト
-├── schema/          # Zodバリデーションスキーマ  
-├── infrastructure/  # リポジトリ実装
-├── repository.ts    # リポジトリインターフェース
-├── useCase.ts       # アプリケーションサービス
-└── index.ts         # ファクトリー・エクスポート
-```
-
-### リポジトリパターン
-```typescript
-// repository.ts (インターフェース)
-export interface UserRepository {
-  findById(id: string): AsyncResult<User, NotFoundError>
-  save(user: User): AsyncResult<User, ServerError>
-}
-
-// infrastructure/userImpl.ts (実装)
-export class UserRepositoryImpl implements UserRepository {
-  async findById(id: string): AsyncResult<User, NotFoundError> {
-    // Prisma実装
-  }
+export function createArticleUseCase(db: PrismaClient) {
+  const repository = new ArticleRepository(db)
+  return new ArticleUseCase(repository)
 }
 ```
 
-### ユースケースパターン
-```typescript
-// useCase.ts
-export class UserUseCase {
-  constructor(private userRepository: UserRepository) {}
+---
 
-  async getUser(id: string): AsyncResult<User, NotFoundError> {
-    return this.userRepository.findById(id)
-  }
+## データベースアクセスパターン
 
-  async createUser(data: CreateUserData): AsyncResult<User, AlreadyExistsError> {
-    // ビジネスロジック
-  }
-}
-```
+### Prismaクライアント
 
-## テストパターン
+**接続**: `src/infrastructure/rdb.ts`
 
-### ドメインテスト（ユニット）
-```typescript
-// モックを使用したユニットテスト
-import { mockDeep } from 'vitest-mock-extended'
-import { prisma } from '@/test/__mocks__/prisma'
+- Cloudflare Workers対応
+- Prisma Accelerateを使用
+- 接続プーリング管理
 
-describe('UserUseCase', () => {
-  const mockRepository = mockDeep<UserRepository>()
-  const useCase = new UserUseCase(mockRepository)
+### マイグレーション
 
-  it('should return user when found', async () => {
-    // テスト実装
-  })
-})
-```
+**場所**: `src/infrastructure/prisma-orm/migrations/`
 
-### API統合テスト
-```typescript
-// 実データベースを使用した統合テスト
-describe('POST /api/users', () => {
-  beforeEach(async () => {
-    await resetDatabase()
-  })
+- スキーマファイルは`models/`で分割管理
+- 全モデルは統一されたID/タイムスタンプパターンを使用
 
-  it('should create user successfully', async () => {
-    // 実DB使用テスト
-  })
-})
-```
+---
 
-## 設計原則
+## ログパターン
 
-### 禁止事項
-- **utilsの作成禁止**: utilsディレクトリやファイルの作成は禁止
-- **直接的DB操作**: ドメイン層でのPrismaクライアント直接使用禁止
+**ロガー**: Pino（構造化ログ）
 
-### 推奨パターン
-- **関数型エラーハンドリング**: 例外ではなくResult型を使用
-- **型安全性**: TypeScriptの型システムを最大活用
-- **テスト駆動開発**: テストケース名を先に記載
-- **単一責任の原則**: 各クラス・関数は単一の責任を持つ
+**場所**: `src/common/logger.ts`
 
-### 依存関係のルール
-```
-API層 → ドメイン層 → インフラ層
-  ↓
-Web層（フロントエンド）
-```
+重要な処理で適切にログを記録:
+- エラー時
+- 重要な状態変更時
+- 外部サービス連携時
 
-- 上位層は下位層に依存可能
-- 下位層は上位層に依存してはならない
-- ドメイン層はインフラ層の詳細を知らない（DIP：依存関係逆転の原則）
+---
+
+## 禁止パターン
+
+### utilsディレクトリの作成禁止
+
+汎用的な`utils`ディレクトリ・ファイルの作成は禁止。
+
+理由:
+- 責任の所在が不明確になる
+- アーキテクチャ層の境界が曖昧になる
+
+代替案:
+- 共通ロジックは`src/common/`配下の明確な目的を持ったディレクトリに配置
+- ドメイン固有のロジックは各集約内に配置
+
+---
+
+## ハイブリッドデプロイパターン
+
+### Cloudflare Workers
+
+**対象**: メインアプリケーション（API + Web）
+**エントリーポイント**: `src/worker.ts`
+**特徴**: エッジでの高速レスポンス
+
+### Supabase Functions
+
+**対象**: バックグラウンドジョブ
+**場所**: `supabase/functions/*/index.ts`
+**特徴**: 長時間処理、定期実行ジョブ
+
+---
+
+## テスト駆動開発（TDD）パターン
+
+### 推奨フロー
+
+1. ドメイン層でテストを先に書く（Red）
+2. ユースケースを実装（Green）
+3. リファクタリング（Refactor）
+4. API層の統合テストを書く
+5. 必要に応じてE2Eテストを追加
+
+### テスト層の選択
+
+- **ドメイン層変更**: `test:domain`（高速）
+- **API層変更**: `test:api`（統合）
+- **UI変更**: `test:frontend`, `test-storybook`
+- **クリティカルパス**: `e2e`
+
+---
+
+## セキュリティパターン
+
+### 認証・認可
+
+**認証**: Supabase Auth
+**セッション管理**: `@supabase/ssr`
+
+### バリデーション
+
+全てのAPIエンドポイントで入力バリデーション必須。
+
+### サニタイゼーション
+
+**場所**: `src/common/sanitization/`
+
+ユーザー入力を適切にサニタイズ。

@@ -1,121 +1,143 @@
-# Suggested Commands
+# 推奨コマンド一覧
 
-## セットアップ・環境構築
+## 開発サーバー
 
-### 初回セットアップ
+### アプリケーション起動
 ```bash
-# 依存関係のインストール
-npm i
-
-# 環境変数のコピー
-cp .dev.vars.example .dev.vars
-
-# Docker環境でDBを起動
-docker compose up -d
-
-# DBマイグレーション実行
-npm run db:migrate
-```
-
-### 開発サーバー起動
-```bash
-# メイン開発サーバー（Docker DB自動起動・停止付き）
 npm start
-
-# Storybook起動
-npm run storybook
 ```
-
-## テスト実行
-
-### 各層のテスト実行
-```bash
-# ドメイン層テスト（モックPrisma使用）
-npm run test:domain
-
-# API層テスト（実DB使用）
-npm run test:api
-
-# フロントエンドテスト
-npm run test:frontend
-
-# Storybookテスト
-npm run test-storybook
-
-# E2Eテスト
-npm run e2e
-npm run e2e:report  # HTMLレポート表示
-npm run e2e:gen     # コード生成ツール
-```
-
-### 個別テスト実行
-```bash
-# 特定のテストファイルを実行
-npm run test:domain -- path/to/test.ts
-npm run test:api -- path/to/test.ts
-npm run test:frontend -- path/to/test.ts
-```
-
-## コード品質・ビルド
-
-### Lint & Format
-```bash
-# 基本チェック（推奨）
-npm run lint  # Biome CI + TypeScript型チェック
-
-# 個別実行
-npm run tsc            # TypeScript型チェックのみ
-npm run check          # Biome総合チェック
-npm run check:fix      # Biome自動修正付きチェック
-```
+- React Routerで開発サーバーを起動
+- 内部でSupabaseも自動起動（prestart/poststart）
 
 ### ビルド
 ```bash
-npm run build  # 本番用ビルド
+npm run build
+```
+- 本番用ビルド生成
+
+## テスト
+
+### 全テストタイプ
+```bash
+# ドメイン層のテスト（モックPrismaクライアント使用）
+npm run test:domain
+
+# API層のテスト（実際のデータベース使用）
+npm run test:api
+
+# フロントエンドのテスト（コンポーネント・フック）
+npm run test:frontend
+
+# Storybookのテスト（UIコンポーネントのビジュアルテスト）
+npm run test-storybook
+
+# E2Eテスト（Playwright）
+npm run e2e
+
+# E2Eテストレポート表示
+npm run e2e:report
+
+# E2Eテストコード生成
+npm run e2e:gen
 ```
 
-## データベース操作
+## データベース
 
+### マイグレーション
 ```bash
-# マイグレーション
-npm run db:migrate              # 開発用マイグレーション
-npm run db:migrate:sql-only     # SQLのみマイグレーション
+# 開発用マイグレーション実行
+npm run db:migrate
 
-# リセット・シード
-npm run db:reset    # DBリセット
-npm run db:seed     # シードデータ投入
+# SQLのみのマイグレーション（シードなし）
+npm run db:migrate:sql-only
 
-# Supabase型生成
+# 本番用マイグレーション適用
+npm run db:deploy
+```
+
+### リセット・シード
+```bash
+# データベースリセット
+npm run db:reset
+
+# シードデータ投入
+npm run db:seed
+```
+
+### Supabase型生成
+```bash
 npm run supabase:db:type-gen
 ```
 
-## システムコマンド（macOS）
+## コード品質
 
-### よく使用するコマンド
+### Lint・フォーマット
 ```bash
-# ファイル・ディレクトリ操作
-ls -la              # ファイル一覧（詳細）
-find . -name "*.ts" # TypeScriptファイル検索
-grep -r "pattern" src/  # パターン検索
+# Biome CI + TypeScript型チェック（推奨）
+npm run lint
 
-# Git操作
-git status
-git add .
-git commit -m "message"
-git push origin branch-name
+# TypeScript型チェックのみ
+npm run typecheck
 
-# プロセス管理
-ps aux | grep node  # Nodeプロセス確認
-kill -9 PID         # プロセス強制終了
+# Biomeチェック
+npm run check
 
-# ネットワーク
-lsof -i :5173      # ポート5173使用確認
+# Biome自動修正（--unsafe含む）
+npm run check:fix
 ```
 
-### Docker操作
+## Supabase
+
+### Supabase起動・停止
 ```bash
-docker compose up -d    # バックグラウンド起動
-docker compose down     # 停止・削除
-docker compose logs     # ログ表示
-docker ps              # コンテナ一覧
+# Supabase起動（一部サービス除外）
+npm run supabase:start
+
+# Supabase停止（npm startのpoststart内で自動実行）
+supabase stop
+
+# Supabaseステータス確認
+supabase status
 ```
+
+## Storybook
+
+```bash
+# Storybookサーバー起動
+npm run storybook
+```
+
+## インストール
+
+```bash
+# パッケージインストール（postinstall内でprisma generate実行）
+npm ci
+```
+
+## よく使うワークフロー
+
+### 新機能開発時
+1. `npm start` - 開発サーバー起動
+2. コード編集
+3. `npm run lint` - Lint + 型チェック
+4. 該当層のテスト実行（例: `npm run test:domain`）
+5. コミット
+
+### リファクタリング時
+1. コード編集
+2. `npm run lint` - Lint + 型チェック
+3. `npm run check:fix` - 自動修正
+4. 全てのテスト実行
+5. コミット
+
+### データベーススキーマ変更時
+1. Prismaスキーマ編集（`src/infrastructure/prisma-orm/`）
+2. `npm run db:migrate` - マイグレーション生成・適用
+3. `npm run supabase:db:type-gen` - 型生成
+4. コミット
+
+### PR作成前
+1. `npm run build` - ビルド確認
+2. `npm run lint` - 最終Lint
+3. 全テスト実行
+4. PR作成

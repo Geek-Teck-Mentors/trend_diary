@@ -1,122 +1,173 @@
-# Test Strategy
+# テスト戦略
 
-## テスト戦略概要
+## 多層テスト構造
 
-このプロジェクトは多層テスト戦略を採用している。各層で異なるVitest設定を使用し、適切なレベルでのテストを実現している。
+このプロジェクトでは、アーキテクチャ層ごとに異なる設定のVitestを使用した多層テスト戦略を採用している。
 
-## 各層のテスト設定
+### 1. ドメイン層テスト (`test:domain`)
 
-### 1. ドメイン層テスト
-- **設定ファイル**: `vitest/config.domain.ts`
-- **実行コマンド**: `npm run test:domain`
-- **特徴**: モックPrismaクライアントを使用したユニットテスト
-- **対象**: ドメインロジック、ユースケース、エンティティ
-- **モック設定**: `src/test/__mocks__/prisma.ts`
+**設定ファイル**: `src/test/vitest-config/config.domain.ts`
 
-### 2. API層テスト
-- **設定ファイル**: `vitest/config.api.ts`
-- **実行コマンド**: `npm run test:api`
-- **特徴**: 実際のデータベースを使用した統合テスト
-- **対象**: API エンドポイント、ミドルウェア、リポジトリ実装
+**特徴**:
+- モックPrismaクライアントを使用（`src/test/__mocks__/prisma.ts`）
+- データベースに接続せず高速に実行
+- ビジネスロジックの単体テスト
+- `vitest-mock-extended`によるモック拡張
 
-### 3. フロントエンドテスト
-- **設定ファイル**: `vitest/config.frontend.ts`
-- **実行コマンド**: `npm run test:frontend`
-- **対象**: React コンポーネント、フック、フロントエンド機能
-- **ライブラリ**: `@testing-library/react`, `@testing-library/user-event`
+**対象**:
+- `src/domain/*/useCase.ts`
+- `src/domain/*/useCase.test.ts`
 
-### 4. Storybookテスト
-- **設定ファイル**: `vitest/config.storybook.ts`
-- **実行コマンド**: `npm run test-storybook`
-- **対象**: UIコンポーネントのビジュアルテスト、インタラクションテスト
-
-### 5. E2Eテスト
-- **フレームワーク**: Playwright
-- **実行コマンド**: `npm run e2e`
-- **対象**: エンドツーエンドシナリオ
-- **設定**: `playwright.config.ts`
-- **baseURL**: `http://localhost:5173`
-
-## テスト実行パターン
-
-### 個別テスト実行
+**実行コマンド**:
 ```bash
-# 特定のファイルをテスト
-npm run test:domain -- src/domain/user/useCase.test.ts
-npm run test:api -- src/application/api/user/login.test.ts
-npm run test:frontend -- src/application/web/components/Button.test.ts
-
-# パターンマッチでテスト
-npm run test:domain -- --run user
+npm run test:domain
 ```
 
-### デバッグ・開発時
-```bash
-# ウォッチモード（設定によってはデフォルト）
-npm run test:domain -- --watch
+**用途**:
+- ドメインロジックの検証
+- エラーハンドリングの確認
+- ビジネスルールの検証
 
-# カバレッジ付き実行
-npm run test:api -- --coverage
+---
+
+### 2. API層テスト (`test:api`)
+
+**設定ファイル**: `src/test/vitest-config/config.api.ts`
+
+**特徴**:
+- **実際のデータベース**を使用した統合テスト
+- Honoアプリケーションのエンドポイントテスト
+- リクエスト/レスポンスの検証
+
+**対象**:
+- `src/application/api/`配下のAPIエンドポイント
+
+**実行コマンド**:
+```bash
+npm run test:api
 ```
 
-### CI/CD環境
+**用途**:
+- APIエンドポイントの統合テスト
+- リクエストバリデーションの確認
+- データベースとの連携確認
+- 認証・認可の動作確認
+
+---
+
+### 3. フロントエンド層テスト (`test:frontend`)
+
+**設定ファイル**: `src/test/vitest-config/config.frontend.ts`
+
+**特徴**:
+- React Testing Libraryを使用
+- コンポーネントとReact Hooksのテスト
+- jsdom環境で実行
+
+**対象**:
+- `src/application/web/`配下のReactコンポーネント
+- カスタムReact Hooks
+
+**実行コマンド**:
 ```bash
-# 全テスト実行（推奨順序）
-npm run test:domain   # ドメインテスト（高速）
-npm run test:frontend # フロントエンドテスト
-npm run test:api      # API統合テスト
-npm run test-storybook # Storybookテスト
-npm run e2e           # E2Eテスト（最後）
+npm run test:frontend
 ```
 
-## テストファイル命名規則
+**用途**:
+- UIコンポーネントの動作確認
+- ユーザーインタラクションのテスト
+- カスタムフックのロジック検証
 
-### ファイル配置
-- 実装ファイルと同じディレクトリに配置
-- 例: `src/domain/user/useCase.ts` → `src/domain/user/useCase.test.ts`
+---
 
-### テストケース記載ルール
-- 仕様をテストコードに記載する
-- コードを書く前にテストケース名を記載（TDD推奨）
-- describeブロックで機能をグループ化
-- itブロックで具体的なテストケースを記載
+### 4. Storybookテスト (`test-storybook`)
 
-## モック・テストヘルパー
+**設定ファイル**: `src/test/vitest-config/config.storybook.ts`
 
-### Prismaモック
-- **場所**: `src/test/__mocks__/prisma.ts`
-- **使用場所**: ドメインテストのみ
-- **ライブラリ**: `vitest-mock-extended`
+**特徴**:
+- UIコンポーネントのビジュアルテスト
+- Storybook統合
+- `@storybook/addon-vitest`を使用
 
-### テストヘルパー
-- **場所**: `src/test/helper/`
-- **種類**: 
-  - `articleTestHelper.ts`: 記事関連テストヘルパー
-  - `adminUserTestHelper.ts`: 管理者ユーザーテストヘルパー
-  - `activeUserTestHelper.ts`: アクティブユーザーテストヘルパー
-  - `policyTestHelper.ts`: ポリシー関連テストヘルパー
+**対象**:
+- `.storybook/`配下のStorybookストーリー
 
-### セットアップファイル
-- **場所**: `src/test/setup.ts`
-- **環境設定**: `src/test/env.ts`
-
-## E2Eテスト詳細
-
-### ページオブジェクト
-- **場所**: `src/test/e2e/page/`
-- **例**: `trends._index.test.ts`
-
-### シナリオテスト
-- **場所**: `src/test/e2e/scenario/`
-
-### Playwright設定
+**実行コマンド**:
 ```bash
-# テスト実行
-npm run e2e
-
-# レポート表示
-npm run e2e:report
-
-# コード生成ツール
-npm run e2e:gen
+npm run test-storybook
 ```
+
+**用途**:
+- UIコンポーネントのビジュアルリグレッションテスト
+- 各種状態でのコンポーネント表示確認
+- アクセシビリティテスト
+
+---
+
+### 5. E2Eテスト (`e2e`)
+
+**設定ファイル**: `playwright.config.ts`
+
+**特徴**:
+- Playwrightを使用
+- エンドツーエンドシナリオのテスト
+- ブラウザ自動化
+
+**対象**:
+- `src/test/e2e/`配下のE2Eテストシナリオ
+
+**実行コマンド**:
+```bash
+npm run e2e           # E2E実行
+npm run e2e:report    # レポート表示
+npm run e2e:gen       # テストコード生成
+```
+
+**用途**:
+- ユーザーシナリオのエンドツーエンド検証
+- クリティカルパスの動作確認
+- ブラウザ間の互換性確認
+
+---
+
+## テスト実行のベストプラクティス
+
+### 開発時
+- 変更した層のテストを実行
+- 例: ドメイン層変更時は `npm run test:domain`
+
+### リファクタリング時
+- 影響範囲に応じて複数層のテストを実行
+- 全テスト実行を推奨
+
+### PR作成前
+- 全てのテスト層を実行
+- E2Eテストも含めて実行
+
+### CI/CD
+- 全テスト層が自動実行される
+- テスト失敗時はマージブロック
+
+## テストカバレッジ
+
+カバレッジ計測:
+```bash
+# カバレッジ付きでテスト実行
+vitest run --coverage
+```
+
+カバレッジツール: `@vitest/coverage-v8`
+
+## テストヘルパー
+
+**場所**: `src/test/helper/`
+
+- データベースセットアップヘルパー
+- フィクスチャ生成ヘルパー（`@faker-js/faker`使用）
+- テスト用モックデータ
+
+## テスト環境変数
+
+**場所**: `src/test/env.ts`
+
+テスト専用の環境変数を定義。
