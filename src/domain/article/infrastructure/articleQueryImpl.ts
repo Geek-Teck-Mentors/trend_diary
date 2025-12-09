@@ -221,39 +221,34 @@ export default class ArticleQueryImpl implements ArticleQuery {
   } {
     const whereClauses: string[] = []
     const whereParams: unknown[] = []
-
     let paramIndex = 1
 
-    if (params.title) {
-      whereClauses.push(`a.title ILIKE $${paramIndex}`)
-      whereParams.push(`%${params.title}%`)
+    const addClause = (clause: string, value: unknown) => {
+      whereClauses.push(`${clause}$${paramIndex}`)
+      whereParams.push(value)
       paramIndex++
+    }
+
+    if (params.title) {
+      addClause('a.title ILIKE ', `%${params.title}%`)
     }
 
     if (params.author) {
-      whereClauses.push(`a.author ILIKE $${paramIndex}`)
-      whereParams.push(`%${params.author}%`)
-      paramIndex++
+      addClause('a.author ILIKE ', `%${params.author}%`)
     }
 
     if (params.media) {
-      whereClauses.push(`a.media = $${paramIndex}`)
-      whereParams.push(params.media)
-      paramIndex++
+      addClause('a.media = ', params.media)
     }
 
     if (params.from) {
-      whereClauses.push(`a.created_at >= $${paramIndex}`)
-      whereParams.push(new Date(`${params.from}T00:00:00+09:00`))
-      paramIndex++
+      addClause('a.created_at >= ', new Date(`${params.from}T00:00:00+09:00`))
     }
 
     if (params.to) {
       const toDate = new Date(`${params.to}T00:00:00+09:00`)
       toDate.setDate(toDate.getDate() + 1)
-      whereClauses.push(`a.created_at < $${paramIndex}`)
-      whereParams.push(toDate)
-      paramIndex++
+      addClause('a.created_at < ', toDate)
     }
 
     const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''
