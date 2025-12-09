@@ -74,6 +74,7 @@ describe('PermissionQueryImpl', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('ユーザーのパーミッション取得に失敗')
       }
     })
   })
@@ -287,6 +288,7 @@ describe('PermissionQueryImpl', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('エンドポイントの権限取得に失敗')
       }
     })
 
@@ -341,6 +343,61 @@ describe('PermissionQueryImpl', () => {
         // 最初にマッチしたエンドポイント（endpointId: 9）の権限が返される
         expect(result.data[0].resource).toBe('item')
         expect(result.data[0].action).toBe('read')
+      }
+    })
+
+    it('パターンマッチング時のDB接続エラーの場合ServerErrorを返す', async () => {
+      mockDb.endpoint.findUnique.mockResolvedValue(null)
+      mockDb.endpoint.findMany.mockRejectedValue(new Error('DB Error'))
+
+      const result = await query.getRequiredPermissionsByEndpoint('/api/items/123', 'GET')
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('エンドポイントの権限取得に失敗')
+      }
+    })
+  })
+
+  describe('findAllPermissions', () => {
+    it('DB接続エラーの場合ServerErrorを返す', async () => {
+      mockDb.permission.findMany.mockRejectedValue(new Error('DB Error'))
+
+      const result = await query.findAllPermissions()
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('パーミッション一覧の取得に失敗')
+      }
+    })
+  })
+
+  describe('findPermissionById', () => {
+    it('DB接続エラーの場合ServerErrorを返す', async () => {
+      mockDb.permission.findUnique.mockRejectedValue(new Error('DB Error'))
+
+      const result = await query.findPermissionById(1)
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('パーミッションの取得に失敗')
+      }
+    })
+  })
+
+  describe('findPermissionByResourceAndAction', () => {
+    it('DB接続エラーの場合ServerErrorを返す', async () => {
+      mockDb.permission.findUnique.mockRejectedValue(new Error('DB Error'))
+
+      const result = await query.findPermissionByResourceAndAction('article', 'read')
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('パーミッションの検索に失敗')
       }
     })
   })
