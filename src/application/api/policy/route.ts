@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
-import authenticator from '@/application/middleware/authenticator'
+import { authenticator } from '@/application/middleware/authenticator'
 import zodValidator from '@/application/middleware/zodValidator'
 import { offsetPaginationSchema } from '@/common/pagination'
 import {

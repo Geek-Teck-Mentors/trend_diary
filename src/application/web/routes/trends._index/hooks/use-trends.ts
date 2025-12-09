@@ -2,9 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
+import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
+
+// isRead を含む記事型（フロントエンドではarticleIdをstringに統一）
+export type Article = Omit<ArticleOutput, 'articleId'> & {
+  articleId: string
+  isRead?: boolean
+}
 
 const formatDate = (rawDate: Date) => {
   const year = rawDate.getFullYear()
@@ -41,26 +47,30 @@ export default function useTrends() {
       try {
         const queryDate = formatDate(date)
 
-        const res = await getApiClientForClient().articles.$get({
-          query: {
-            to: queryDate,
-            from: queryDate,
-            page,
-            limit,
-            ...(media && { media }),
+        const res = await getApiClientForClient().articles.$get(
+          {
+            query: {
+              to: queryDate,
+              from: queryDate,
+              page,
+              limit,
+              ...(media && { media }),
+            },
           },
-        })
+          { init: { credentials: 'include' } },
+        )
         if (res.status === 200) {
           const resJson = await res.json()
           setArticles(
             resJson.data.map((data) => ({
-              articleId: BigInt(data.articleId),
+              articleId: data.articleId,
               media: data.media,
               title: data.title,
               author: data.author,
               description: data.description,
               url: data.url,
               createdAt: new Date(data.createdAt),
+              isRead: data.isRead,
             })),
           )
           setPage(resJson.page)
@@ -133,6 +143,12 @@ export default function useTrends() {
     [searchParams, setSearchParams],
   )
 
+  const updateArticleReadStatus = useCallback((articleId: string, isRead: boolean) => {
+    setArticles((prev) =>
+      prev.map((article) => (article.articleId === articleId ? { ...article, isRead } : article)),
+    )
+  }, [])
+
   return {
     date,
     articles,
@@ -144,5 +160,6 @@ export default function useTrends() {
     setSearchParams,
     handleMediaChange,
     selectedMedia,
+    updateArticleReadStatus,
   }
 }

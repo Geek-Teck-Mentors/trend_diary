@@ -250,6 +250,222 @@ describe('ArticleQueryImpl', () => {
     })
   })
 
+  describe('searchArticles with activeUserId', () => {
+    const activeUserId = 1n
+
+    describe('基本動作', () => {
+      const mockArticles = [
+        {
+          articleId: 1n,
+          media: 'Qiita',
+          title: 'TypeScriptの型安全性について',
+          author: '山田太郎',
+          description: 'TypeScriptの型安全性に関する解説記事です',
+          url: 'https://example.com/article/1',
+          createdAt: new Date('2024-01-15T09:30:00Z'),
+        },
+        {
+          articleId: 2n,
+          media: 'Zenn',
+          title: 'Reactのフック活用法',
+          author: '佐藤花子',
+          description: 'Reactのフックについて詳しく解説します',
+          url: 'https://example.com/article/2',
+          createdAt: new Date('2024-01-14T10:00:00Z'),
+        },
+      ]
+
+      const readStatusTestCases = [
+        {
+          name: 'activeUserIdを渡すと既読情報付きで記事を検索できる',
+          activeUserId: 1n,
+          mockArticles,
+          mockReadHistories: [
+            {
+              readHistoryId: 1n,
+              activeUserId: 1n,
+              articleId: 1n,
+              readAt: new Date('2024-01-16T09:00:00Z'),
+              createdAt: new Date('2024-01-16T09:00:00Z'),
+            },
+          ],
+          expectedLength: 2,
+          expectedIsRead: [true, false],
+        },
+        {
+          name: 'activeUserIdを渡さないとisReadがundefinedになる',
+          activeUserId: undefined,
+          mockArticles: [mockArticles[0]],
+          mockReadHistories: undefined,
+          expectedLength: 1,
+          expectedIsRead: [undefined],
+        },
+        {
+          name: '既読履歴がない場合は全てisRead: falseになる',
+          activeUserId: 1n,
+          mockArticles: [mockArticles[0]],
+          mockReadHistories: [],
+          expectedLength: 1,
+          expectedIsRead: [false],
+        },
+      ]
+
+      readStatusTestCases.forEach(
+        ({
+          name,
+          activeUserId: testActiveUserId,
+          mockArticles: testMockArticles,
+          mockReadHistories,
+          expectedLength,
+          expectedIsRead,
+        }) => {
+          it(name, async () => {
+            // Arrange
+            const params = {
+              page: 1,
+              limit: 20,
+            }
+
+            if (testActiveUserId !== undefined) {
+              // activeUserIdがある場合は$queryRawを使う
+              const mockCountResult = [{ count: testMockArticles.length }]
+              const mockDataResult = testMockArticles.map((article, index) => ({
+                article_id: article.articleId,
+                media: article.media,
+                title: article.title,
+                author: article.author,
+                description: article.description,
+                url: article.url,
+                created_at: article.createdAt,
+                is_read:
+                  mockReadHistories !== undefined
+                    ? mockReadHistories.some((rh) => rh.articleId === article.articleId)
+                    : false,
+              }))
+
+              mockDb.$transaction.mockResolvedValue([mockCountResult, mockDataResult])
+            } else {
+              // activeUserIdがない場合は従来通り
+              mockDb.$transaction.mockResolvedValue([testMockArticles.length, testMockArticles])
+            }
+
+            // Act
+            const result = await queryImpl.searchArticles(params, testActiveUserId)
+
+            // Assert
+            expect(isSuccess(result)).toBe(true)
+            if (isSuccess(result)) {
+              expect(result.data.data).toHaveLength(expectedLength)
+              expectedIsRead.forEach((expected, index) => {
+                expect(result.data.data[index].isRead).toBe(expected)
+              })
+            }
+          })
+        },
+      )
+    })
+
+    describe('フィルタリング', () => {
+      const singleMockArticle = [
+        {
+          articleId: 1n,
+          media: 'Qiita',
+          title: 'TypeScriptの型安全性について',
+          author: '山田太郎',
+          description: 'TypeScriptの型安全性に関する解説記事です',
+          url: 'https://example.com/article/1',
+          createdAt: new Date('2024-01-15T09:30:00Z'),
+        },
+      ]
+
+      const filterTestCases = [
+        {
+          name: 'タイトルでフィルタリングして記事を検索できる',
+          params: {
+            page: 1,
+            limit: 20,
+            title: 'TypeScript',
+          },
+        },
+        {
+          name: '著者でフィルタリングして記事を検索できる',
+          params: {
+            page: 1,
+            limit: 20,
+            author: '山田',
+          },
+        },
+        {
+          name: 'メディアでフィルタリングして記事を検索できる',
+          params: {
+            page: 1,
+            limit: 20,
+            media: 'qiita' as const,
+          },
+        },
+        {
+          name: '日付範囲でフィルタリングして記事を検索できる',
+          params: {
+            page: 1,
+            limit: 20,
+            from: '2024-01-14',
+            to: '2024-01-15',
+          },
+        },
+      ]
+
+      filterTestCases.forEach(({ name, params }) => {
+        it(name, async () => {
+          // Arrange
+          const mockCountResult = [{ count: 1 }]
+          const mockDataResult = singleMockArticle.map((article) => ({
+            article_id: article.articleId,
+            media: article.media,
+            title: article.title,
+            author: article.author,
+            description: article.description,
+            url: article.url,
+            created_at: article.createdAt,
+            is_read: false,
+          }))
+
+          mockDb.$transaction.mockResolvedValue([mockCountResult, mockDataResult])
+
+          // Act
+          const result = await queryImpl.searchArticles(params, activeUserId)
+
+          // Assert
+          expect(isSuccess(result)).toBe(true)
+          if (isSuccess(result)) {
+            expect(result.data.data).toHaveLength(1)
+            expect(result.data.total).toBe(1)
+          }
+        })
+      })
+    })
+
+    describe('例外・制約違反', () => {
+      it('既読履歴取得時のデータベースエラー時は適切にエラーを返す', async () => {
+        // Arrange
+        const params = {
+          page: 1,
+          limit: 20,
+        }
+        const dbError = new Error('Database connection failed')
+        mockDb.$transaction.mockRejectedValue(dbError)
+
+        // Act
+        const result = await queryImpl.searchArticles(params, activeUserId)
+
+        // Assert
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
+          expect(result.error.message).toBe('Database connection failed')
+        }
+      })
+    })
+  })
+
   describe('findArticleById', () => {
     describe('基本動作', () => {
       it('記事をIDで検索できる', async () => {

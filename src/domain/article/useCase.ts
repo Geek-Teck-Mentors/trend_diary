@@ -5,7 +5,7 @@ import extractTrimmed from '@/common/sanitization'
 import { isNull } from '@/common/types/utility'
 import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
 import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article } from '@/domain/article/schema/articleSchema'
+import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
 import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
 
 export class UseCase {
@@ -14,9 +14,15 @@ export class UseCase {
     private readonly articleCommand: ArticleCommand,
   ) {}
 
+  /**
+   * 記事を検索する
+   * @param params 検索パラメータ
+   * @param activeUserId オプション。指定された場合、各記事にisReadフィールドを付与
+   */
   async searchArticles(
     params: ArticleQueryParams,
-  ): AsyncResult<OffsetPaginationResult<Article>, ServerError> {
+    activeUserId?: bigint,
+  ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
     const optimizedParams: Partial<ArticleQueryParams> = {
       title: extractTrimmed(params.title),
       author: extractTrimmed(params.author),
@@ -28,7 +34,7 @@ export class UseCase {
       readStatus: params.readStatus,
     }
 
-    return this.articleQuery.searchArticles(optimizedParams as ArticleQueryParams)
+    return this.articleQuery.searchArticles(optimizedParams as ArticleQueryParams, activeUserId)
   }
 
   async createReadHistory(

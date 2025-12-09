@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, waitFor, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { toJaDateString } from '@/common/locale'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
+import type { Article } from '../hooks/use-trends'
 import ArticleDrawer from './article-drawer'
 
 const defaultArticle: Article = {
-  articleId: BigInt(1),
+  articleId: '1',
   media: 'qiita',
   title: 'デフォルトタイトル',
   author: 'デフォルト著者',
@@ -33,6 +33,9 @@ const meta: Meta<typeof ArticleDrawer> = {
   args: {
     isOpen: true,
     onClose: () => null,
+    onMarkAsRead: fn(),
+    onToggleRead: fn(),
+    isLoggedIn: false,
   },
 }
 export default meta
@@ -69,7 +72,7 @@ export const Default: Story = {
 
     await step('「記事を読む」ボタンが存在することを確認', async () => {
       await expect(
-        within(document.body).getByRole('link', { name: '記事を読む' }),
+        within(document.body).getByRole('button', { name: '記事を読む' }),
       ).toBeInTheDocument()
     })
 
@@ -93,8 +96,8 @@ export const QiitaArticle: Story = {
     })
 
     await step('記事URLが正しく設定されていることを確認', async () => {
-      const readButton = within(document.body).getByRole('link', { name: '記事を読む' })
-      await expect(readButton).toHaveAttribute('href', qiitaArticle.url)
+      const readButton = within(document.body).getByRole('button', { name: '記事を読む' })
+      await expect(readButton).toBeInTheDocument()
     })
   },
 }
@@ -109,6 +112,106 @@ export const ZennArticle: Story = {
     await step('Zennメディアアイコンが表示されることを確認', async () => {
       const mediaIcon = within(document.body).getByAltText('zenn icon')
       await expect(mediaIcon).toBeInTheDocument()
+    })
+  },
+}
+
+// 既読記事（ログイン時）
+const readArticle = generateArticle({ isRead: true })
+export const ReadArticleLoggedIn: Story = {
+  args: {
+    article: readArticle,
+    isLoggedIn: true,
+  },
+  play: async ({ step }) => {
+    await step('既読アイコンが表示されることを確認', async () => {
+      await waitFor(() => {
+        const readIndicator = within(document.body).getByTestId('drawer-read-indicator')
+        expect(readIndicator).toBeInTheDocument()
+      })
+    })
+
+    await step('「未読に戻す」ボタンが表示されることを確認', async () => {
+      const toggleButton = within(document.body).getByText('未読に戻す')
+      await expect(toggleButton).toBeInTheDocument()
+    })
+  },
+}
+
+// 未読記事（ログイン時）
+const unreadArticle = generateArticle({ isRead: false })
+export const UnreadArticleLoggedIn: Story = {
+  args: {
+    article: unreadArticle,
+    isLoggedIn: true,
+  },
+  play: async ({ step }) => {
+    await step('既読アイコンが表示されないことを確認', async () => {
+      await waitFor(() => {
+        within(document.body).getByRole('dialog', { hidden: true })
+      })
+      const readIndicator = within(document.body).queryByTestId('drawer-read-indicator')
+      await expect(readIndicator).not.toBeInTheDocument()
+    })
+
+    await step('「既読にする」ボタンが表示されることを確認', async () => {
+      const toggleButton = within(document.body).getByText('既読にする')
+      await expect(toggleButton).toBeInTheDocument()
+    })
+  },
+}
+
+// 未ログイン時は既読ボタン非表示
+export const NotLoggedIn: Story = {
+  args: {
+    article: unreadArticle,
+    isLoggedIn: false,
+  },
+  play: async ({ step }) => {
+    await step('既読切り替えボタンが表示されないことを確認', async () => {
+      await waitFor(() => {
+        within(document.body).getByRole('dialog', { hidden: true })
+      })
+      const toggleButton = within(document.body).queryByText(/既読にする|未読に戻す/)
+      await expect(toggleButton).not.toBeInTheDocument()
+    })
+  },
+}
+
+// 「記事を読む」クリック時にonMarkAsReadが呼ばれる
+export const MarkAsReadOnClick: Story = {
+  args: {
+    article: unreadArticle,
+    isLoggedIn: true,
+  },
+  play: async ({ args, step }) => {
+    await step('「記事を読む」クリックでonMarkAsReadが呼ばれることを確認', async () => {
+      await waitFor(() => {
+        within(document.body).getByRole('dialog', { hidden: true })
+      })
+      const readButton = within(document.body).getByText('記事を読む')
+      await userEvent.click(readButton)
+
+      await expect(args.onMarkAsRead).toHaveBeenCalledWith(unreadArticle.articleId.toString())
+    })
+  },
+}
+
+// 既読切り替えボタンのテスト
+export const ToggleReadInteraction: Story = {
+  args: {
+    article: unreadArticle,
+    isLoggedIn: true,
+  },
+  play: async ({ args, step }) => {
+    await step('既読ボタンクリックでonToggleReadが呼ばれることを確認', async () => {
+      await waitFor(() => {
+        within(document.body).getByRole('dialog', { hidden: true })
+      })
+      const toggleButton = within(document.body).getByText('既読にする')
+      await userEvent.click(toggleButton)
+
+      await expect(args.onToggleRead).toHaveBeenCalledWith(unreadArticle.articleId, true)
     })
   },
 }

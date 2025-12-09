@@ -4,7 +4,8 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import { coverageReporter, generateIncludes } from './config'
 
 // ci環境ではDATABASE_URLが設定されているため
-const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/test'
+// ローカルではSupabaseが54322ポートで起動する
+const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 
 const { testInclude, coverageInclude } = generateIncludes('src/application/api')
 

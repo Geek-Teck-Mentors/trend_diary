@@ -8,13 +8,19 @@ process.env.NODE_ENV = 'test'
 class ArticleTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
 
-  async createArticle(options?: { media?: 'qiita' | 'zenn' }) {
+  async createArticle(options?: { media?: 'qiita' | 'zenn'; title?: string; author?: string }) {
+    const media = options?.media ?? faker.helpers.arrayElement(['qiita', 'zenn'])
+    const url =
+      media === 'qiita'
+        ? `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
+        : `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
+
     const data = {
-      media: options?.media ?? faker.helpers.arrayElement(['qiita', 'zenn']),
-      title: faker.lorem.sentence().substring(0, 100),
-      author: faker.person.fullName().substring(0, 30),
+      media,
+      title: options?.title ?? faker.lorem.sentence().substring(0, 100),
+      author: options?.author ?? faker.person.fullName().substring(0, 30),
       description: faker.lorem.paragraph().substring(0, 255),
-      url: faker.internet.url(),
+      url,
     }
     return await this.rdb.article.create({ data })
   }

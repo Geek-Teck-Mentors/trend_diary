@@ -4,7 +4,8 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { OffsetPaginationResult, offsetPaginationSchema } from '@/common/pagination'
-import { Article, ArticleQueryParams, createArticleUseCase } from '@/domain/article'
+import { ArticleQueryParams, createArticleUseCase } from '@/domain/article'
+import type { ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
 import { ArticleOutput } from '@/domain/article/schema/articleSchema'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -47,6 +48,11 @@ export type ApiArticleQueryParams = z.infer<typeof apiArticleQuerySchema>
 
 export type ArticleResponse = Omit<ArticleOutput, 'articleId'> & {
   articleId: string
+  isRead?: boolean
+}
+
+export type ArticleWithReadStatusResponse = ArticleResponse & {
+  isRead: boolean
 }
 
 export type ArticleListResponse = OffsetPaginationResult<ArticleResponse>
@@ -55,10 +61,17 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   const transformedParams = c.req.valid('query')
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
+  // SESSION_USER があれば activeUserId を取得
+  const sessionUser = c.get(CONTEXT_KEY.SESSION_USER)
+  const activeUserId = sessionUser?.activeUserId
+
   const rdb = getRdbClient(c.env.DATABASE_URL)
   const useCase = createArticleUseCase(rdb)
 
-  const result = await useCase.searchArticles(convertApiArticleQueryParams(transformedParams))
+  const result = await useCase.searchArticles(
+    convertApiArticleQueryParams(transformedParams),
+    activeUserId,
+  )
   if (isFailure(result)) {
     throw handleError(result.error, logger)
   }
@@ -99,7 +112,7 @@ function convertApiArticleQueryParams(params: ApiArticleQueryParams): ArticleQue
   }
 }
 
-function convertToResponse(article: Article): ArticleResponse {
+function convertToResponse(article: ArticleWithOptionalReadStatus): ArticleResponse {
   return {
     articleId: article.articleId.toString(),
     media: article.media,
@@ -108,5 +121,6 @@ function convertToResponse(article: Article): ArticleResponse {
     description: article.description,
     url: article.url,
     createdAt: article.createdAt,
+    isRead: article.isRead,
   }
 }

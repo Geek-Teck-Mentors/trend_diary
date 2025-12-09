@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
-import authenticator from '@/application/middleware/authenticator'
+import { authenticator, optionalAuthenticator } from '@/application/middleware/authenticator'
 import zodValidator from '@/application/middleware/zodValidator'
 import getArticles, { apiArticleQuerySchema } from './handler/getArticles'
 import readArticle, {
@@ -10,7 +10,7 @@ import readArticle, {
 import unreadArticle from './handler/unreadArticle'
 
 const app = new Hono<Env>()
-  .get('/', zodValidator('query', apiArticleQuerySchema), getArticles)
+  .get('/', optionalAuthenticator, zodValidator('query', apiArticleQuerySchema), getArticles)
   .post(
     '/:article_id/read',
     authenticator,

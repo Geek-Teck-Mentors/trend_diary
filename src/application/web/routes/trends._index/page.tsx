@@ -9,10 +9,10 @@ import {
   PaginationPrevious,
 } from '@/application/web/components/shadcn/pagination'
 import { toJaDateString } from '@/common/locale'
-import type { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import LoadingSpinner from '../../components/ui/loading-spinner'
 import ArticleCard from './components/article-card'
 import MediaFilter, { MediaType } from './components/media-filter'
+import type { Article } from './hooks/use-trends'
 
 type Props = {
   date: Date
@@ -25,6 +25,8 @@ type Props = {
   totalPages: number
   selectedMedia: MediaType
   onMediaChange: (media: MediaType) => void
+  onToggleRead: (articleId: string, isRead: boolean) => void
+  isLoggedIn: boolean
 }
 
 export default function TrendsPage({
@@ -38,6 +40,8 @@ export default function TrendsPage({
   totalPages,
   selectedMedia,
   onMediaChange,
+  onToggleRead,
+  isLoggedIn,
 }: Props) {
   const [searchParams] = useSearchParams()
 
@@ -102,6 +106,8 @@ export default function TrendsPage({
                 key={article.articleId}
                 article={article}
                 onCardClick={handleCardClick}
+                onToggleRead={onToggleRead}
+                isLoggedIn={isLoggedIn}
               />
             ))}
           </div>

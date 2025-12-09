@@ -2,6 +2,7 @@ import { Check, Save, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/application/web/components/shadcn/button'
 import { Checkbox } from '@/application/web/components/shadcn/checkbox'
+import { cn } from '@/application/web/components/shadcn/lib/utils'
 import { getMethodColor } from '../http-method'
 import type { Endpoint, Permission } from '../types'
 
@@ -93,7 +94,10 @@ export default function PermissionPanel({
           <div>
             <div className='flex items-center gap-2'>
               <span
-                className={`px-2 py-0.5 rounded text-xs font-medium ${getMethodColor(selectedEndpoint.method)}`}
+                className={cn(
+                  'px-2 py-0.5 rounded text-xs font-medium',
+                  getMethodColor(selectedEndpoint.method),
+                )}
               >
                 {selectedEndpoint.method}
               </span>
