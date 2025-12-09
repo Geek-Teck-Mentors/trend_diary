@@ -23,7 +23,10 @@ describe('RolePermissionCommandImpl', () => {
     it('正常にパーミッションを付与できる', async () => {
       const mockRole = {
         roleId: 1,
-        roleName: 'admin',
+        displayName: 'admin',
+        description: null,
+        createdAt: new Date(),
+        preset: false,
       }
       const mockPermission = {
         permissionId: 1,
@@ -64,7 +67,10 @@ describe('RolePermissionCommandImpl', () => {
     it('パーミッションが見つからない場合NotFoundErrorを返す', async () => {
       const mockRole = {
         roleId: 1,
-        roleName: 'admin',
+        displayName: 'admin',
+        description: null,
+        createdAt: new Date(),
+        preset: false,
       }
 
       mockDb.role.findUnique.mockResolvedValue(mockRole)
@@ -82,7 +88,10 @@ describe('RolePermissionCommandImpl', () => {
     it('既に付与されている場合AlreadyExistsErrorを返す', async () => {
       const mockRole = {
         roleId: 1,
-        roleName: 'admin',
+        displayName: 'admin',
+        description: null,
+        createdAt: new Date(),
+        preset: false,
       }
       const mockPermission = {
         permissionId: 1,
@@ -164,7 +173,10 @@ describe('RolePermissionCommandImpl', () => {
     it('正常にトランザクションで一括更新できる', async () => {
       const mockRole = {
         roleId: 1,
-        roleName: 'admin',
+        displayName: 'admin',
+        description: null,
+        createdAt: new Date(),
+        preset: false,
       }
 
       mockDb.role.findUnique.mockResolvedValue(mockRole)
@@ -175,6 +187,7 @@ describe('RolePermissionCommandImpl', () => {
             createMany: vi.fn().mockResolvedValue({ count: 3 }),
           },
         }
+        // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
         return callback(tx as any)
       })
 
@@ -198,7 +211,10 @@ describe('RolePermissionCommandImpl', () => {
     it('空のpermissionIds配列でも正常動作する', async () => {
       const mockRole = {
         roleId: 1,
-        roleName: 'admin',
+        displayName: 'admin',
+        description: null,
+        createdAt: new Date(),
+        preset: false,
       }
 
       mockDb.role.findUnique.mockResolvedValue(mockRole)
@@ -208,6 +224,7 @@ describe('RolePermissionCommandImpl', () => {
             deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
           },
         }
+        // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
         return callback(tx as any)
       })
 
@@ -219,7 +236,10 @@ describe('RolePermissionCommandImpl', () => {
     it('トランザクション失敗時にServerErrorを返す', async () => {
       const mockRole = {
         roleId: 1,
-        roleName: 'admin',
+        displayName: 'admin',
+        description: null,
+        createdAt: new Date(),
+        preset: false,
       }
 
       mockDb.role.findUnique.mockResolvedValue(mockRole)

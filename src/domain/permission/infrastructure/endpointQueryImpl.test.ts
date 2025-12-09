@@ -133,6 +133,7 @@ describe('EndpointQueryImpl', () => {
         },
       ]
 
+      // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
       mockDb.endpointPermission.findMany.mockResolvedValue(mockEndpointPermissions as any)
 
       const result = await query.findPermissionsByEndpointId(1)

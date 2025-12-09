@@ -134,6 +134,7 @@ describe('RoleQueryImpl', () => {
         },
       ]
 
+      // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
       mockDb.rolePermission.findMany.mockResolvedValue(mockRolePermissions as any)
 
       const result = await query.findPermissionsByRoleId(1)

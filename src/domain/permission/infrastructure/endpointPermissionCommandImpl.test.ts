@@ -186,6 +186,7 @@ describe('EndpointPermissionCommandImpl', () => {
             createMany: vi.fn().mockResolvedValue({ count: 3 }),
           },
         }
+        // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
         return callback(tx as any)
       })
 
@@ -221,6 +222,7 @@ describe('EndpointPermissionCommandImpl', () => {
             deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
           },
         }
+        // biome-ignore lint/suspicious/noExplicitAny: テストでのモック用途のため型アサーションが必要
         return callback(tx as any)
       })
 
