@@ -6,8 +6,9 @@ import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
 
-// isRead を含む記事型
-export type Article = ArticleOutput & {
+// isRead を含む記事型（フロントエンドではarticleIdをstringに統一）
+export type Article = Omit<ArticleOutput, 'articleId'> & {
+  articleId: string
   isRead?: boolean
 }
 
@@ -62,7 +63,7 @@ export default function useTrends() {
           const resJson = await res.json()
           setArticles(
             resJson.data.map((data) => ({
-              articleId: BigInt(data.articleId),
+              articleId: data.articleId,
               media: data.media,
               title: data.title,
               author: data.author,
@@ -142,7 +143,7 @@ export default function useTrends() {
     [searchParams, setSearchParams],
   )
 
-  const updateArticleReadStatus = useCallback((articleId: bigint, isRead: boolean) => {
+  const updateArticleReadStatus = useCallback((articleId: string, isRead: boolean) => {
     setArticles((prev) =>
       prev.map((article) => (article.articleId === articleId ? { ...article, isRead } : article)),
     )

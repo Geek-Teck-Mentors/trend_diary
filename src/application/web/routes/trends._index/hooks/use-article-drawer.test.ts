@@ -1,7 +1,7 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
-import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
 import useArticleDrawer from './use-article-drawer'
+import type { Article } from './use-trends'
 
 type UseArticleDrawerHook = ReturnType<typeof useArticleDrawer>
 
@@ -11,7 +11,7 @@ function setupHook(): RenderHookResult<UseArticleDrawerHook, unknown> {
 
 function openArticleDrawer(
   result: RenderHookResult<UseArticleDrawerHook, unknown>['result'],
-  article: ArticleOutput,
+  article: Article,
 ): void {
   act(() => {
     result.current.open(article)
@@ -26,8 +26,8 @@ function closeArticleDrawer(
   })
 }
 
-const createFakeArticle = (id: number = 1, title: string = 'テスト記事'): ArticleOutput => ({
-  articleId: BigInt(id),
+const createFakeArticle = (id: string = '1', title: string = 'テスト記事'): Article => ({
+  articleId: id,
   media: 'qiita',
   title,
   author: 'テスト著者',
@@ -76,8 +76,8 @@ describe('useArticleDrawer', () => {
   describe('エッジケース', () => {
     it('複数回open関数を呼び出してもDrawerが開いた状態になる', () => {
       const { result } = setupHook()
-      const fakeArticle1 = createFakeArticle(1, '記事1')
-      const fakeArticle2 = createFakeArticle(2, '記事2')
+      const fakeArticle1 = createFakeArticle('1', '記事1')
+      const fakeArticle2 = createFakeArticle('2', '記事2')
 
       openArticleDrawer(result, fakeArticle1)
 
@@ -114,8 +114,8 @@ describe('useArticleDrawer', () => {
 
     it('ある記事のDrawerを開いた状態で別の記事を開くとその記事に内容が置き換わる', () => {
       const { result } = setupHook()
-      const fakeArticle1 = createFakeArticle(1, '技術記事')
-      const fakeArticle2 = createFakeArticle(2, 'ビジネス記事')
+      const fakeArticle1 = createFakeArticle('1', '技術記事')
+      const fakeArticle2 = createFakeArticle('2', 'ビジネス記事')
 
       openArticleDrawer(result, fakeArticle1)
 

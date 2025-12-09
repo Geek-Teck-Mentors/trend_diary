@@ -25,7 +25,7 @@ type Props = {
   totalPages: number
   selectedMedia: MediaType
   onMediaChange: (media: MediaType) => void
-  onToggleRead: (articleId: bigint, isRead: boolean) => void
+  onToggleRead: (articleId: string, isRead: boolean) => void
   isLoggedIn: boolean
 }
 

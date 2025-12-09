@@ -4,7 +4,7 @@ import type { Article } from '../hooks/use-trends'
 import ArticleCard from './article-card'
 
 const defaultArticle: Article = {
-  articleId: BigInt(1),
+  articleId: '1',
   media: 'qiita',
   title: 'デフォルトタイトル',
   author: 'デフォルト筆者',

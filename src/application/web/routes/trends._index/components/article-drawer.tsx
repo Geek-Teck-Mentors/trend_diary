@@ -16,7 +16,7 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   onMarkAsRead?: (articleId: string) => void | Promise<void>
-  onToggleRead?: (articleId: bigint, isRead: boolean) => void
+  onToggleRead?: (articleId: string, isRead: boolean) => void
   isLoggedIn?: boolean
 }
 
@@ -40,7 +40,7 @@ export default function ArticleDrawer({
     window.open(article.url, '_blank', 'noopener,noreferrer')
     if (isLoggedIn) {
       // onMarkAsReadはawaitせず、バックグラウンドで実行
-      onMarkAsRead?.(article.articleId.toString())
+      onMarkAsRead?.(article.articleId)
     }
   }
 
@@ -108,7 +108,7 @@ export default function ArticleDrawer({
             type='button'
             onClick={handleReadArticle}
             className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
-            data-slot='drawer-content-link'
+            data-slot='drawer-content-button'
           >
             <ExternalLink className='size-4' />
             記事を読む

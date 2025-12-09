@@ -5,9 +5,8 @@ import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
-import { ArticleOutput as Article } from '@/domain/article/schema/articleSchema'
 import getApiClientForClient from '../../../infrastructure/api'
-import useTrends from './use-trends'
+import useTrends, { type Article } from './use-trends'
 
 // window.matchMediaのモック
 Object.defineProperty(window, 'matchMedia', {
@@ -35,7 +34,7 @@ vi.mock('../../../infrastructure/api', () => ({
 }))
 
 const defaultFakeArticle: Article = {
-  articleId: BigInt(1),
+  articleId: '1',
   media: 'qiita',
   title: 'デフォルトタイトル',
   author: 'デフォルト筆者',
@@ -102,8 +101,8 @@ describe('useTrends', () => {
   describe('基本動作', () => {
     it('初期化時に今日の日付で記事一覧が取得できる', async () => {
       const fakeArticles = [
-        generateFakeArticle({ articleId: BigInt(1), title: '記事1' }),
-        generateFakeArticle({ articleId: BigInt(2), title: '記事2' }),
+        generateFakeArticle({ articleId: '1', title: '記事1' }),
+        generateFakeArticle({ articleId: '2', title: '記事2' }),
       ]
 
       const fakeResponse = generateFakeResponse({
@@ -145,7 +144,7 @@ describe('useTrends', () => {
       })
 
       const nextPageFakeResponse = generateFakeResponse({
-        articles: [generateFakeArticle({ articleId: BigInt(3), title: '記事3' })],
+        articles: [generateFakeArticle({ articleId: '3', title: '記事3' })],
         page: 2,
         limit: 20,
         total: 50,
@@ -291,7 +290,7 @@ describe('useTrends', () => {
 
     it('URLパラメータにpage=2がある場合、初期表示で2ページ目を取得する', async () => {
       const fakeResponse = generateFakeResponse({
-        articles: [generateFakeArticle({ articleId: BigInt(3), title: '2ページ目の記事' })],
+        articles: [generateFakeArticle({ articleId: '3', title: '2ページ目の記事' })],
         page: 2,
         totalPages: 3,
       })
@@ -433,8 +432,8 @@ describe('useTrends', () => {
   describe('既読状態管理', () => {
     it('isRead付きの記事を取得できる', async () => {
       const fakeArticles = [
-        generateFakeArticle({ articleId: BigInt(1), title: '既読記事' }),
-        generateFakeArticle({ articleId: BigInt(2), title: '未読記事' }),
+        generateFakeArticle({ articleId: '1', title: '既読記事' }),
+        generateFakeArticle({ articleId: '2', title: '未読記事' }),
       ]
 
       const fakeResponse = {
@@ -466,7 +465,7 @@ describe('useTrends', () => {
     })
 
     it('updateArticleReadStatusで記事の既読状態を更新できる', async () => {
-      const fakeArticles = [generateFakeArticle({ articleId: BigInt(1), title: '記事1' })]
+      const fakeArticles = [generateFakeArticle({ articleId: '1', title: '記事1' })]
 
       const fakeResponse = {
         status: 200,
@@ -491,7 +490,7 @@ describe('useTrends', () => {
       })
 
       act(() => {
-        result.current.updateArticleReadStatus(BigInt(1), true)
+        result.current.updateArticleReadStatus('1', true)
       })
 
       expect(result.current.articles[0].isRead).toBe(true)

@@ -1,5 +1,5 @@
 import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import getApiClientForClient from '../../../infrastructure/api'
 
@@ -8,12 +8,8 @@ const MarkAsUnreadErrorMessage = '未読に失敗しました'
 
 export default function useReadArticle() {
   const [isLoading, setIsLoading] = useState(false)
-  const isLoadingRef = useRef(false)
 
   const markAsRead = useCallback(async (articleId: string): Promise<boolean> => {
-    if (isLoadingRef.current) return false
-
-    isLoadingRef.current = true
     setIsLoading(true)
 
     const result = await wrapAsyncCall(async () => {
@@ -32,7 +28,6 @@ export default function useReadArticle() {
       }
     })
 
-    isLoadingRef.current = false
     setIsLoading(false)
 
     if (isFailure(result)) {
@@ -44,9 +39,6 @@ export default function useReadArticle() {
   }, [])
 
   const markAsUnread = useCallback(async (articleId: string): Promise<boolean> => {
-    if (isLoadingRef.current) return false
-
-    isLoadingRef.current = true
     setIsLoading(true)
 
     const result = await wrapAsyncCall(async () => {
@@ -63,7 +55,6 @@ export default function useReadArticle() {
       }
     })
 
-    isLoadingRef.current = false
     setIsLoading(false)
 
     if (isFailure(result)) {

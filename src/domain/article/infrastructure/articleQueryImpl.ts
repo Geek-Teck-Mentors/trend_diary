@@ -121,15 +121,17 @@ export default class ArticleQueryImpl implements ArticleQuery {
     const [countResult, dataResult] = result.data
     const total = countResult[0]?.count ?? 0
 
-    // 結果をマッピング
+    // 結果をマッピング（fromPrismaToArticleを再利用）
     const mappedArticles: ArticleWithOptionalReadStatus[] = dataResult.map((row) => ({
-      articleId: row.article_id,
-      media: row.media,
-      title: row.title,
-      author: row.author,
-      description: row.description,
-      url: row.url,
-      createdAt: row.created_at,
+      ...fromPrismaToArticle({
+        articleId: row.article_id,
+        media: row.media,
+        title: row.title,
+        author: row.author,
+        description: row.description,
+        url: row.url,
+        createdAt: row.created_at,
+      }),
       isRead: row.is_read,
     }))
 

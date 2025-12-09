@@ -5,7 +5,7 @@ import type { Article } from '../hooks/use-trends'
 import ArticleDrawer from './article-drawer'
 
 const defaultArticle: Article = {
-  articleId: BigInt(1),
+  articleId: '1',
   media: 'qiita',
   title: 'デフォルトタイトル',
   author: 'デフォルト著者',

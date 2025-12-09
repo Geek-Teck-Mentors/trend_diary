@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
 import getApiClientForClient from '../../../infrastructure/api'
@@ -77,46 +77,6 @@ describe('useReadArticle', () => {
 
       expect(success).toBe(false)
       expect(toast.error).toHaveBeenCalledWith('既読に失敗しました')
-    })
-
-    it('ローディング中は重複呼び出しを防ぐ', async () => {
-      let resolvePromise: () => void
-      mockApiClient.articles[':article_id'].read.$post.mockReturnValue(
-        new Promise((resolve) => {
-          resolvePromise = () =>
-            resolve({
-              status: 201,
-              json: vi.fn().mockResolvedValue({ message: '記事を既読にしました' }),
-            })
-        }),
-      )
-
-      const { result } = renderHook(() => useReadArticle())
-
-      // 最初の呼び出し
-      act(() => {
-        result.current.markAsRead('123')
-      })
-
-      expect(result.current.isLoading).toBe(true)
-
-      // 2回目の呼び出し（ローディング中）
-      await act(async () => {
-        const secondResult = await result.current.markAsRead('123')
-        expect(secondResult).toBe(false) // ローディング中は失敗
-      })
-
-      // 呼び出しは1回だけ
-      expect(mockApiClient.articles[':article_id'].read.$post).toHaveBeenCalledTimes(1)
-
-      // promiseを解決
-      await act(async () => {
-        resolvePromise!()
-      })
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
     })
   })
 

@@ -12,7 +12,7 @@ import MediaIcon from './media-icon'
 type Props = {
   article: Article
   onCardClick: (article: Article) => void
-  onToggleRead?: (articleId: bigint, isRead: boolean) => void
+  onToggleRead?: (articleId: string, isRead: boolean) => void
   isLoggedIn?: boolean
 }
 
