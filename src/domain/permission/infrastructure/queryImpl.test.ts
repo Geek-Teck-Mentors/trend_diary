@@ -74,6 +74,7 @@ describe('PermissionQueryImpl', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('ユーザーのパーミッション取得に失敗')
       }
     })
   })
@@ -287,6 +288,7 @@ describe('PermissionQueryImpl', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('エンドポイントの権限取得に失敗')
       }
     })
 
@@ -353,6 +355,7 @@ describe('PermissionQueryImpl', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error).toBeInstanceOf(ServerError)
+        expect(result.error.message).toContain('エンドポイントの権限取得に失敗')
       }
     })
   })
