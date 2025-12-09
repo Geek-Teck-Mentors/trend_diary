@@ -34,11 +34,20 @@ export default function Trends() {
   const isReadArticleEnabled = userFeatureEnabled && isLoggedIn
 
   const handleToggleRead = async (articleId: bigint, isRead: boolean) => {
+    const originalArticle = articles.find((a) => a.articleId === articleId)
+    if (!originalArticle) return
+
+    // 1. UIを即座に更新（オプティミスティックUI）
+    updateArticleReadStatus(articleId, isRead)
+
+    // 2. APIを呼び出し
     const success = isRead
       ? await markAsRead(articleId.toString())
       : await markAsUnread(articleId.toString())
-    if (success) {
-      updateArticleReadStatus(articleId, isRead)
+
+    // 3. 失敗した場合にUIを元に戻す
+    if (!success) {
+      updateArticleReadStatus(articleId, originalArticle.isRead ?? false)
     }
   }
 
