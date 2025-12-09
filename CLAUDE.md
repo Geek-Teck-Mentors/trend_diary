@@ -44,13 +44,6 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
 - `npm run test:frontend` - フロントエンドコンポーネントのテストを実行
 - `npm run test-storybook` - Storybookのテストを実行
 - `npm run e2e` - PlaywrightでE2Eテストを実行
-- `npm run e2e:report` - PlaywrightのHTMLレポートを表示
-- `npm run e2e:gen` - Playwrightのコード生成ツールを起動
-- 個別テストファイルは 各種適切なコマンドで`-- <path/to/file>`で実行可能
-
-### Storybook
-
-- `npm run storybook` - Storybookを開発モードで起動
 
 ### データベース
 
@@ -63,17 +56,8 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
 ### コード品質
 
 - `npm run lint` - Biome CI実行 + TypeScript型チェック（基本的にこれを使用する）
-- `npm run tsc` - TypeScript型チェックのみ実行
-- `npm run check` - Biomeで総合チェック
-- `npm run check:fix` - Biomeで総合チェック・修正
 
 ## 開発環境設定
-
-### ローカル開発サーバー
-
-- **開発サーバー**: `http://localhost:5173` (Vite + React Router)
-- **Storybook**: `http://localhost:6006` (UIコンポーネント開発)
-- **E2Eテスト**: `http://localhost:5173` (Playwright baseURL)
 
 ### 環境変数
 
@@ -140,15 +124,6 @@ src/domain/{aggregate}/
 ### データベーススキーマ
 
 Prismaモデルは`src/infrastructure/prisma-orm/models/`内のファイルに分割:
-
-- `user.prisma` - ユーザー管理
-- `active_user.prisma` - アクティブユーザー管理
-- `ban_user.prisma` - BANユーザー管理
-- `leaved_user.prisma` - 退会ユーザー管理
-- `session.prisma` - セッション管理
-- `article.prisma` - 記事集約システム
-- `read_history.prisma` - 記事読み履歴
-- `privacy_policy.prisma` - プライバシーポリシー管理
 - 全モデルは統一されたID/タイムスタンプパターンでベーススキーマを拡張
 
 ### 重要な規約
