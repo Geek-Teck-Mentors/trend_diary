@@ -14,9 +14,7 @@ export const activeUserSchema = z.object({
 })
 
 // passwordを含まないCurrentUserスキーマ（mapper用）
-export const currentUserSchema = activeUserSchema.omit({ password: true }).extend({
-  hasAdminAccess: z.boolean().optional(),
-})
+export const currentUserSchema = activeUserSchema.omit({ password: true })
 
 export const activeUserInputSchema = activeUserSchema.pick({
   email: true,
