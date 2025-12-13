@@ -1,103 +1,90 @@
-# Code Style Conventions
+# コードスタイルと規約
 
-## TypeScript設定
+## 言語とフォーマット
+- **言語**: TypeScript
+- **エンコーディング**: UTF-8
+- **フォーマッター**: Biome
+- **リンター**: Biome
 
-### 基本設定
-- **Target**: ESNext
-- **Module**: ESNext, Bundler resolution
-- **Strict mode**: 有効
-- **noImplicitAny**: 有効
-- **JSX**: react-jsx
+## コミットメッセージ規約
+Conventional Commitsを使用:
+- `feat:` - 新機能追加
+- `fix:` - バグ修正
+- `refactor:` - リファクタリング（機能変更なし）
+- `test:` - テスト追加・修正
+- `docs:` - ドキュメント更新
+- `style:` - コードスタイル修正（フォーマット等）
+- `perf:` - パフォーマンス改善
+- `chore:` - ビルドプロセス・補助ツール等の変更
 
-### パスマッピング
-```typescript
-// src/からの絶対インポートを使用
-import { UserRepository } from '@/domain/user/repository'
+## インポート規約
+- **絶対インポート推奨**: `src/`ルートからの絶対インポートを使用
+- **TypeScript path mapping**: `@/*` エイリアスを使用
+
+## ファイル・ディレクトリ構造
+### ドメイン層の構造
+```
+src/domain/{aggregate}/
+├── schema/          # Zodバリデーションスキーマ
+├── infrastructure/  # リポジトリ実装
+├── repository.ts    # リポジトリインターフェース
+├── useCase.ts       # ドメインビジネスロジック
+└── index.ts         # 集約エクスポート, factory
 ```
 
-## Biome設定（Linter + Formatter）
+### Prismaスキーマ
+- スキーマファイルは`src/infrastructure/prisma-orm/models/`内で分割管理
+- 全モデルは統一されたID/タイムスタンプパターンでベーススキーマを拡張
 
-### フォーマット設定
-- **インデント**: スペース2個
-- **行幅**: 100文字
-- **行末**: LF
-- **セミコロン**: 必要な場合のみ（asNeeded）
-- **クォート**: シングルクォート
-- **JSXクォート**: シングルクォート
-- **トレイリングカンマ**: 常に付ける
-- **アロー関数**: 常に括弧を付ける
-
-### 命名規則
-- **関数**: camelCase, PascalCase
-- **変数**: camelCase, PascalCase, CONSTANT_CASE
+## 命名規約
+- **ファイル名**: camelCase or kebab-case
+- **コンポーネント**: PascalCase
+- **関数・変数**: camelCase
 - **型・インターフェース**: PascalCase
-- **オブジェクトプロパティ**: camelCase, snake_case, PascalCase, CONSTANT_CASE
+- **定数**: UPPER_SNAKE_CASE
 
-### 主要なLintルール
-- **アクセシビリティ**: 厳格なa11yルール適用
-- **等価比較**: `===` / `!==` を強制（`==` / `!=` 禁止）
-- **未使用変数/インポート**: エラー
-- **console.log**: 警告
-- **alert/debugger**: 警告/エラー
-- **var**: 禁止（let/const使用）
-- **arrow function**: 推奨
+## エラーハンドリング規約
+### 関数型エラーハンドリング
+- サービス層は`Result<T, E>`型を返す（`src/common/types/utility.ts`で定義）
+- 非同期処理では`AsyncResult<T, E>`型を使用
+- エラーハンドリングヘルパー関数:
+  - `resultSuccess<T>(value: T)`: 成功結果を作成
+  - `resultError<T, E>(error: E)`: エラー結果を作成
+  - `isSuccess<T, E>(result)`: 成功かどうかを判定
+  - `isError<T, E>(result)`: エラーかどうかを判定
 
-## アーキテクチャ規約
+### カスタムエラー型
+- `src/common/errors/`に定義:
+  - `ClientError`: クライアントエラー（400系）
+  - `ServerError`: サーバーエラー（500系）
+  - `NotFoundError`: リソースが見つからない
+  - `AlreadyExistsError`: リソースが既に存在
 
-### エラーハンドリング
-```typescript
-// Result型を使用した関数型エラーハンドリング
-export type Result<T, E extends Error> = { data: T } | { error: E }
+### API層のエラーハンドリング
+- `handleError`関数でHTTPExceptionに変換
 
-// 使用例
-const result: Result<User, NotFoundError> = await findUser(id)
-if (isSuccess(result)) {
-  // result.data でアクセス
-} else {
-  // result.error でエラーハンドリング
-}
-```
+## バリデーション規約
+### API層のバリデーション
+- **必須ルール**: 全APIエンドポイントで`zodValidator`の使用が必須
+- **バリデーション対象**:
+  - `query`: クエリパラメータ
+  - `param`: パスパラメータ
+  - `json`: リクエストボディ
+- **バリデーション順序**: authenticator → zodValidator(param) → zodValidator(json) → handler
+- **型安全性**: `ZodValidatedContext`系の型を使用
 
-### インポート規約
-- **絶対パス**: `@/*` を使用してsrcルートからインポート
-- **相対パス**: 同一ディレクトリ内のファイルのみ
-- **インポート整理**: Biomeの自動整理機能を使用
+### ドメイン層のバリデーション
+- Zodスキーマをドメイン層に定義
+- データ検証にZodスキーマを使用
 
-### API層バリデーション規約
-```typescript
-// 全APIエンドポイントでzodValidatorを必須使用
-app.post('/users',
-  authenticator,                    // 認証
-  zodValidator('param', paramSchema), // パスパラメータ
-  zodValidator('json', bodySchema),   // リクエストボディ
-  async (c) => {
-    // ZodValidatedContext型で型安全にアクセス
-    const { id } = c.req.valid('param')
-    const body = c.req.valid('json')
-  }
-)
-```
+## 禁止事項
+- **utilsの作成禁止**: 汎用的なutilsディレクトリ・ファイルの作成を禁止
 
-### テストファイル配置
-- テストファイルは実装ファイルと同じ階層に配置
-- `test`フォルダは作成しない
-- 例: `src/domain/user/useCase.ts` → `src/domain/user/useCase.test.ts`
+## コメント・ドキュメント
+- コードは自己説明的であることを優先
+- 必要な場合のみコメントを追加
+- 複雑なロジックには説明コメントを追加
 
-## Git規約
-
-### Conventional Commits
-```bash
-feat: 新機能追加
-fix: バグ修正
-refactor: リファクタリング（機能変更なし）
-test: テスト追加・修正
-docs: ドキュメント更新
-style: コードスタイル修正（フォーマット等）
-perf: パフォーマンス改善
-chore: ビルドプロセス・補助ツール等の変更
-```
-
-## 開発ルール
-- **仕様記載**: テストコードに仕様を記載する
-- **TDD推奨**: コードを書く前にテストケース名を記載
-- **utils禁止**: utilsディレクトリ・ファイルの作成を禁止
+## ログ規約
+- Pinoロガーで構造化ログを使用
+- 重要な処理のログを適切に記録

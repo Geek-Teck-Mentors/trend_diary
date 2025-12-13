@@ -4,7 +4,6 @@ import { getCookie } from 'hono/cookie'
 import { z } from 'zod'
 import { SESSION_NAME } from '@/common/constants'
 import { ClientError, ServerError } from '@/common/errors'
-import { createAdminQuery } from '@/domain/admin'
 import { createUserUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import type { Env, SessionUser } from '../../env'
@@ -73,14 +72,11 @@ export async function validateSession(
   }
 
   // 管理者権限をチェック
-  const adminQuery = createAdminQuery(rdb)
-  const hasAdminAccess = await adminQuery.hasAdminPermissions(result.data.activeUserId)
 
   const sessionUser: SessionUser = {
     activeUserId: result.data.activeUserId,
     displayName: result.data.displayName,
     email: result.data.email,
-    hasAdminAccess,
   }
 
   return success({ sessionUser, sessionId })

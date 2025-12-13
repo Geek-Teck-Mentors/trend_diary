@@ -17,8 +17,8 @@
     "e2e": "playwright test",
     "e2e:report": "playwright show-report",
     "e2e:gen": "playwright codegen",
-    "tsc": "tsc --noEmit",
-    "lint": "biome ci . && npm run tsc",
+    "typecheck": "tsgo --noEmit",
+    "lint": "biome ci . && npm run typecheck",
     "check": "biome check .",
     "check:fix": "biome check --write . --unsafe",
     "db:migrate": "prisma migrate dev",
@@ -31,8 +31,7 @@
     "test-storybook": "vitest run -c src/test/vitest-config/config.storybook.ts"
   },
   "prisma": {
-    "schema": "./src/infrastructure/prisma-orm",
-    "seed": "npx tsx ./src/infrastructure/prisma-orm/seed.ts"
+    "schema": "./src/infrastructure/prisma-orm"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.5.0",
@@ -95,6 +94,7 @@
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@types/uuid": "^10.0.0",
+    "@typescript/native-preview": "^7.0.0-dev.20251209.1",
     "@vitest/browser": "3.2.4",
     "@vitest/coverage-v8": "^3.2.4",
     "dotenv": "^17.2.1",
