@@ -72,7 +72,6 @@ vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
 vi.mock('@/domain/admin/infrastructure/adminQueryImpl', () => ({
   AdminQueryImpl: vi.fn(() => ({
     findAllUsers: vi.fn(),
-    hasAdminPermissions: vi.fn(() => Promise.resolve(false)),
   })),
 }))
 
@@ -123,10 +122,9 @@ describe('GET /api/v2/auth/me', () => {
     const meRes = await requestMe()
     expect(meRes.status).toBe(200)
 
-    const body = (await meRes.json()) as { user: { displayName: string | null; isAdmin: boolean } }
+    const body = (await meRes.json()) as { user: { displayName: string | null } }
     expect(body).toHaveProperty('user')
     expect(body.user).toHaveProperty('displayName')
-    expect(body.user).toHaveProperty('isAdmin', false)
   })
 
   it('準正常系: ログインしていない場合は401を返す', async () => {
