@@ -22,7 +22,7 @@ export interface ArticleQuery {
 }
 
 export interface ArticleCommand {
-  createReadHistory(
+  findOrCreateReadHistory(
     activeUserId: bigint,
     articleId: bigint,
     readAt: Date,

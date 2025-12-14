@@ -45,7 +45,7 @@ export class UseCase {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isFailure(articleValidation)) return articleValidation
 
-    return this.articleCommand.createReadHistory(activeUserId, articleId, readAt)
+    return this.articleCommand.findOrCreateReadHistory(activeUserId, articleId, readAt)
   }
 
   async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {

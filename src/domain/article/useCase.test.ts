@@ -307,7 +307,7 @@ describe('ArticleUseCase', () => {
         readAt: readAt,
         createdAt: new Date(),
       }
-      mockArticleCommand.createReadHistory.mockResolvedValue(success(mockReadHistory))
+      mockArticleCommand.findOrCreateReadHistory.mockResolvedValue(success(mockReadHistory))
 
       const result = await useCase.createReadHistory(userId, articleId, readAt)
 
@@ -319,7 +319,11 @@ describe('ArticleUseCase', () => {
       }
 
       expect(mockArticleQuery.findArticleById).toHaveBeenCalledWith(articleId)
-      expect(mockArticleCommand.createReadHistory).toHaveBeenCalledWith(userId, articleId, readAt)
+      expect(mockArticleCommand.findOrCreateReadHistory).toHaveBeenCalledWith(
+        userId,
+        articleId,
+        readAt,
+      )
     })
 
     it('データベースエラー時にServerErrorを返すこと', async () => {
@@ -331,7 +335,7 @@ describe('ArticleUseCase', () => {
       mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
 
       const dbError = new ServerError('Database error')
-      mockArticleCommand.createReadHistory.mockResolvedValue(failure(dbError))
+      mockArticleCommand.findOrCreateReadHistory.mockResolvedValue(failure(dbError))
 
       const result = await useCase.createReadHistory(userId, articleId, readAt)
 
@@ -358,7 +362,7 @@ describe('ArticleUseCase', () => {
       }
 
       expect(mockArticleQuery.findArticleById).toHaveBeenCalledWith(articleId)
-      expect(mockArticleCommand.createReadHistory).not.toHaveBeenCalled()
+      expect(mockArticleCommand.findOrCreateReadHistory).not.toHaveBeenCalled()
     })
   })
 

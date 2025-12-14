@@ -10,39 +10,70 @@ describe('ArticleCommandImpl', () => {
     commandImpl = new ArticleCommandImpl(mockDb)
   })
 
-  describe('createReadHistory', () => {
+  describe('findOrCreateReadHistory', () => {
     describe('基本動作', () => {
-      it('正しい引数でデータベース作成関数を呼び出す', async () => {
+      it('既存の読み履歴が存在する場合は既存データを返す', async () => {
         // Arrange
         const activeUserId = 1n
         const articleId = 100n
         const readAt = new Date('2024-01-15T09:30:00Z')
-        mockDb.readHistory.create.mockResolvedValue({
+        const existingReadHistory = {
+          readHistoryId: 1n,
+          activeUserId,
+          articleId,
+          readAt: new Date('2024-01-14T09:30:00Z'),
+          createdAt: new Date('2024-01-14T09:30:00Z'),
+        }
+        mockDb.readHistory.findFirst.mockResolvedValue(existingReadHistory)
+
+        // Act
+        const result = await commandImpl.findOrCreateReadHistory(activeUserId, articleId, readAt)
+
+        // Assert
+        expect(mockDb.readHistory.findFirst).toHaveBeenCalledWith({
+          where: { activeUserId, articleId },
+        })
+        expect(mockDb.readHistory.create).not.toHaveBeenCalled()
+        expect(isSuccess(result)).toBe(true)
+        if (isSuccess(result)) {
+          expect(result.data.readHistoryId).toBe(existingReadHistory.readHistoryId)
+          expect(result.data.readAt).toEqual(existingReadHistory.readAt)
+        }
+      })
+
+      it('既存の読み履歴が存在しない場合は新規作成する', async () => {
+        // Arrange
+        const activeUserId = 1n
+        const articleId = 100n
+        const readAt = new Date('2024-01-15T09:30:00Z')
+        const newReadHistory = {
           readHistoryId: 1n,
           activeUserId,
           articleId,
           readAt,
           createdAt: new Date('2024-01-15T09:30:00Z'),
-        })
+        }
+        mockDb.readHistory.findFirst.mockResolvedValue(null)
+        mockDb.readHistory.create.mockResolvedValue(newReadHistory)
 
         // Act
-        await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+        const result = await commandImpl.findOrCreateReadHistory(activeUserId, articleId, readAt)
 
         // Assert
+        expect(mockDb.readHistory.findFirst).toHaveBeenCalledWith({
+          where: { activeUserId, articleId },
+        })
         expect(mockDb.readHistory.create).toHaveBeenCalledWith({
           data: { activeUserId, articleId, readAt },
         })
+        expect(isSuccess(result)).toBe(true)
+        if (isSuccess(result)) {
+          expect(result.data.readHistoryId).toBe(newReadHistory.readHistoryId)
+          expect(result.data.readAt).toEqual(readAt)
+        }
       })
 
       const basicTestCases = [
-        {
-          name: '読み履歴を作成できる',
-          activeUserId: 1n,
-          articleId: 100n,
-          readAt: new Date('2024-01-15T09:30:00Z'),
-          readHistoryId: 1n,
-          createdAt: new Date('2024-01-15T09:30:00Z'),
-        },
         {
           name: '異なるユーザーの読み履歴を作成できる',
           activeUserId: 2n,
@@ -64,11 +95,15 @@ describe('ArticleCommandImpl', () => {
               readAt,
               createdAt,
             }
-
+            mockDb.readHistory.findFirst.mockResolvedValue(null)
             mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
 
             // Act
-            const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+            const result = await commandImpl.findOrCreateReadHistory(
+              activeUserId,
+              articleId,
+              readAt,
+            )
 
             // Assert
             expect(isSuccess(result)).toBe(true)
@@ -125,11 +160,11 @@ describe('ArticleCommandImpl', () => {
             readAt,
             createdAt: new Date('2024-01-15T09:30:00Z'),
           }
-
+          mockDb.readHistory.findFirst.mockResolvedValue(null)
           mockDb.readHistory.create.mockResolvedValue(mockReadHistory)
 
           // Act
-          const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+          const result = await commandImpl.findOrCreateReadHistory(activeUserId, articleId, readAt)
 
           // Assert
           expect(isSuccess(result)).toBe(true)
@@ -144,16 +179,35 @@ describe('ArticleCommandImpl', () => {
     })
 
     describe('例外・制約違反', () => {
-      it('データベースエラー時は適切にエラーを返す', async () => {
+      it('findFirst時のデータベースエラーは適切にエラーを返す', async () => {
         // Arrange
         const activeUserId = 1n
         const articleId = 100n
         const readAt = new Date('2024-01-15T09:30:00Z')
         const dbError = new Error('Database connection failed')
+        mockDb.readHistory.findFirst.mockRejectedValue(dbError)
+
+        // Act
+        const result = await commandImpl.findOrCreateReadHistory(activeUserId, articleId, readAt)
+
+        // Assert
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
+          expect(result.error.message).toBe('Database connection failed')
+        }
+      })
+
+      it('create時のデータベースエラーは適切にエラーを返す', async () => {
+        // Arrange
+        const activeUserId = 1n
+        const articleId = 100n
+        const readAt = new Date('2024-01-15T09:30:00Z')
+        const dbError = new Error('Database connection failed')
+        mockDb.readHistory.findFirst.mockResolvedValue(null)
         mockDb.readHistory.create.mockRejectedValue(dbError)
 
         // Act
-        const result = await commandImpl.createReadHistory(activeUserId, articleId, readAt)
+        const result = await commandImpl.findOrCreateReadHistory(activeUserId, articleId, readAt)
 
         // Assert
         expect(isFailure(result)).toBe(true)
