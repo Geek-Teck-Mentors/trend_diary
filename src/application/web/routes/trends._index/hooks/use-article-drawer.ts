@@ -16,10 +16,20 @@ export default function useArticleDrawer() {
     setSelectedArticle(null)
   }
 
+  const syncSelectedArticle = (articles: Article[]) => {
+    if (!selectedArticle) return
+
+    const updatedArticle = articles.find((a) => a.articleId === selectedArticle.articleId)
+    if (updatedArticle) {
+      setSelectedArticle(updatedArticle)
+    }
+  }
+
   return {
     isOpen,
     selectedArticle,
     open,
     close,
+    syncSelectedArticle,
   }
 }

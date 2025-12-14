@@ -26,7 +26,11 @@ function closeArticleDrawer(
   })
 }
 
-const createFakeArticle = (id: string = '1', title: string = 'テスト記事'): Article => ({
+const createFakeArticle = (
+  id: string = '1',
+  title: string = 'テスト記事',
+  isRead?: boolean,
+): Article => ({
   articleId: id,
   media: 'qiita',
   title,
@@ -34,6 +38,7 @@ const createFakeArticle = (id: string = '1', title: string = 'テスト記事'):
   description: 'テスト記事の説明文です',
   url: 'https://example.com/article',
   createdAt: new Date('2024-01-01T00:00:00Z'),
+  isRead,
 })
 
 describe('useArticleDrawer', () => {
@@ -128,6 +133,58 @@ describe('useArticleDrawer', () => {
       closeArticleDrawer(result)
 
       expect(result.current.selectedArticle).toBeNull()
+    })
+  })
+
+  describe('syncSelectedArticle', () => {
+    describe('drawerが閉じている場合', () => {
+      it('何もしない', () => {
+        const { result } = setupHook()
+        const articles = [createFakeArticle('1'), createFakeArticle('2')]
+
+        act(() => {
+          result.current.syncSelectedArticle(articles)
+        })
+
+        expect(result.current.selectedArticle).toBeNull()
+      })
+    })
+
+    describe('drawerが開いている場合', () => {
+      it('articles配列内にselectedArticleと同じIDの記事があれば更新する', () => {
+        const { result } = setupHook()
+        const originalArticle = createFakeArticle('1', '元の記事', false)
+        const updatedArticle = createFakeArticle('1', '更新された記事', true)
+        const articles = [updatedArticle, createFakeArticle('2')]
+
+        openArticleDrawer(result, originalArticle)
+
+        expect(result.current.selectedArticle?.title).toBe('元の記事')
+        expect(result.current.selectedArticle?.isRead).toBe(false)
+
+        act(() => {
+          result.current.syncSelectedArticle(articles)
+        })
+
+        expect(result.current.selectedArticle?.title).toBe('更新された記事')
+        expect(result.current.selectedArticle?.isRead).toBe(true)
+      })
+
+      it('articles配列内にselectedArticleと同じIDの記事がなければ更新しない', () => {
+        const { result } = setupHook()
+        const originalArticle = createFakeArticle('1', '元の記事')
+        const articles = [createFakeArticle('2'), createFakeArticle('3')]
+
+        openArticleDrawer(result, originalArticle)
+
+        expect(result.current.selectedArticle).toEqual(originalArticle)
+
+        act(() => {
+          result.current.syncSelectedArticle(articles)
+        })
+
+        expect(result.current.selectedArticle).toEqual(originalArticle)
+      })
     })
   })
 })
