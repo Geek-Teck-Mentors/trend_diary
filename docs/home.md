@@ -5,10 +5,8 @@
 - [開発ルール](development_rule.md)
 - [ドキュメントルール](docs_rule.md)
 - [ADR](adr/0_top.md)
-- [スクラムルール](scrum_rule.md)
 - [ハウツーガイド](how_to_guides/0_top.md)
 - [システム構成](system_config/config.md)
-- [画面遷移図](screen-flow.md)
 
 ## ディレクトリ構成
 

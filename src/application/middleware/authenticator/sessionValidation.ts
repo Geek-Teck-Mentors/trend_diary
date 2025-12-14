@@ -2,7 +2,6 @@ import { failure, isFailure, type Result, success } from '@yuukihayashi0510/core
 import type { Context } from 'hono'
 import { ClientError, ServerError } from '@/common/errors'
 import UnauthorizedError from '@/common/errors/unauthorizedError'
-import { createAdminQuery } from '@/domain/admin'
 import { createAuthV2UseCase } from '@/domain/auth-v2'
 import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
@@ -61,14 +60,11 @@ export async function validateSession(
   }
 
   // 管理者権限をチェック
-  const adminQuery = createAdminQuery(rdb)
-  const hasAdminAccess = await adminQuery.hasAdminPermissions(result.data.activeUserId)
 
   const sessionUser: SessionUser = {
     activeUserId: result.data.activeUserId,
     displayName: result.data.displayName,
     email: result.data.email,
-    hasAdminAccess,
   }
 
   return success({ sessionUser })

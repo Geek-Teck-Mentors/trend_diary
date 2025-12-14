@@ -68,6 +68,3 @@ jobs:
 
       - name: Prismaのマイグレーション
         run: npm run db:deploy
-
-      - name: Prismaのシード
-        run: npm run db:seed

@@ -13,7 +13,6 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
-    globalSetup: './src/infrastructure/prisma-orm/seed.ts',
     env: {
       DATABASE_URL: dbUrl,
     },
