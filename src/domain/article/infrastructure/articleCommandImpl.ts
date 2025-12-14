@@ -62,14 +62,7 @@ export default class ArticleCommandImpl implements ArticleCommand {
       return success(null)
     }
 
-    const readHistory: ReadHistory = {
-      readHistoryId: readHistoryData.readHistoryId,
-      activeUserId: readHistoryData.activeUserId,
-      articleId: readHistoryData.articleId,
-      readAt: readHistoryData.readAt,
-      createdAt: readHistoryData.createdAt,
-    }
-    return success(readHistory)
+    return success(readHistoryData)
   }
 
   private async createReadHistory(
@@ -91,13 +84,6 @@ export default class ArticleCommandImpl implements ArticleCommand {
     }
 
     const createdReadHistory = result.data
-    const readHistory: ReadHistory = {
-      readHistoryId: createdReadHistory.readHistoryId,
-      activeUserId: createdReadHistory.activeUserId,
-      articleId: createdReadHistory.articleId,
-      readAt: createdReadHistory.readAt,
-      createdAt: createdReadHistory.createdAt,
-    }
-    return success(readHistory)
+    return success(createdReadHistory)
   }
 }
