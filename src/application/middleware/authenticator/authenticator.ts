@@ -15,7 +15,6 @@ const authenticator = createMiddleware<Env>(async (c, next) => {
   }
 
   c.set(CONTEXT_KEY.SESSION_USER, validationResult.data.sessionUser)
-  c.set(CONTEXT_KEY.SESSION_ID, validationResult.data.sessionId)
   return next()
 })
 
