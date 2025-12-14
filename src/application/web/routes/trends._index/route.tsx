@@ -37,7 +37,7 @@ export default function Trends() {
 
   useEffect(() => {
     syncSelectedArticle(articles)
-  }, [articles, syncSelectedArticle])
+  }, [articles])
 
   const handleToggleRead = async (articleId: string, isRead: boolean) => {
     const originalArticle = articles.find((a) => a.articleId === articleId)
