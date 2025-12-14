@@ -6,6 +6,7 @@ export type SessionUser = {
   activeUserId: bigint
   displayName?: Nullable<string>
   email: string
+  hasAdminAccess: boolean
 }
 
 export type Env = {
@@ -19,6 +20,7 @@ export type Env = {
   Variables: {
     [CONTEXT_KEY.APP_LOG]: typeof logger
     [CONTEXT_KEY.SESSION_USER]: SessionUser
+    [CONTEXT_KEY.SESSION_ID]: string
   }
 }
 
