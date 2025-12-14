@@ -9,6 +9,6 @@ model ReadHistory {
 
   activeUser ActiveUser @relation(fields: [activeUserId], references: [activeUserId], onDelete: Cascade)
 
-  @@unique ([activeUserId, articleId])
+  @@unique([activeUserId, articleId])
   @@map("read_histories")
 }
