@@ -1,28 +1,26 @@
 import { failure, isFailure, type Result, success } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
-import { getCookie } from 'hono/cookie'
-import { z } from 'zod'
-import { SESSION_NAME } from '@/common/constants'
 import { ClientError, ServerError } from '@/common/errors'
-import { createUserUseCase } from '@/domain/user'
+import UnauthorizedError from '@/common/errors/unauthorizedError'
+import { createAuthV2UseCase } from '@/domain/auth-v2'
 import getRdbClient from '@/infrastructure/rdb'
+import { createSupabaseAuthClient } from '@/infrastructure/supabase'
 import type { Env, SessionUser } from '../../env'
 import CONTEXT_KEY from '../context'
 
 type AuthValidationSuccess = {
   sessionUser: SessionUser
-  sessionId: string
 }
 
 type AuthValidationError = Error & {
-  reason: 'no_session' | 'invalid_format' | 'validation_failed' | 'user_not_found'
+  reason: 'no_session' | 'validation_failed' | 'user_not_found'
 }
 
 /**
  * 認証エラーを作成
  */
 function createAuthValidationError(
-  reason: 'no_session' | 'invalid_format' | 'validation_failed' | 'user_not_found',
+  reason: 'no_session' | 'validation_failed' | 'user_not_found',
   message: string,
 ): AuthValidationError {
   const error = new Error(message) as AuthValidationError
@@ -31,7 +29,7 @@ function createAuthValidationError(
 }
 
 /**
- * セッション検証の共通ロジック
+ * セッション検証の共通ロジック（auth v2）
  * @param c Honoコンテキスト
  * @returns セッション検証結果
  */
@@ -40,25 +38,15 @@ export async function validateSession(
 ): Promise<Result<AuthValidationSuccess, AuthValidationError>> {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
-  // セッションIDを取得
-  const sessionId = getCookie(c, SESSION_NAME)
-  if (!sessionId) {
-    return failure(createAuthValidationError('no_session', 'No session cookie found'))
-  }
-
-  // SQLインジェクション対策
-  const valid = z.string().uuid().safeParse(sessionId)
-  if (!valid.success) {
-    logger.warn('invalid sid format', { sessionId })
-    return failure(createAuthValidationError('invalid_format', 'Invalid session ID format'))
-  }
-
+  const supabaseClient = createSupabaseAuthClient(c)
   const rdb = getRdbClient(c.env.DATABASE_URL)
-  const useCase = createUserUseCase(rdb)
+  const useCase = createAuthV2UseCase(supabaseClient, rdb)
 
-  // ユーザー情報を取得
-  const result = await useCase.getCurrentUser(sessionId)
+  const result = await useCase.getCurrentActiveUser()
   if (isFailure(result)) {
+    if (result.error instanceof UnauthorizedError) {
+      return failure(createAuthValidationError('no_session', 'No session found'))
+    }
     if (result.error instanceof ClientError || result.error instanceof ServerError) {
       logger.warn('Session validation failed', { error: result.error })
     } else {
@@ -79,5 +67,5 @@ export async function validateSession(
     email: result.data.email,
   }
 
-  return success({ sessionUser, sessionId })
+  return success({ sessionUser })
 }
