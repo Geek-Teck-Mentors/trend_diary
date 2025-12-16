@@ -18,7 +18,7 @@ type Props = {
   date: Date
   articles: Article[]
   setSearchParams: ReturnType<typeof useSearchParams>[1]
-  openDrawer: (article: Article) => void
+  openDrawer: (articleId: string) => void
   isLoading: boolean
   page: number
   limit: number
@@ -50,7 +50,7 @@ export default function TrendsPage({
 
   const handleCardClick = useCallback(
     (article: Article) => {
-      openDrawer(article)
+      openDrawer(article.articleId)
     },
     [openDrawer],
   )

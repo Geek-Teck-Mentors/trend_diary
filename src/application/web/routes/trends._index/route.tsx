@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import type { MetaFunction } from 'react-router'
 import { useOutletContext } from 'react-router'
 import type { TrendsOutletContext } from '../trends'
@@ -26,18 +25,13 @@ export default function Trends() {
   } = useTrends()
   const {
     isOpen: isDrawerOpen,
-    selectedArticle,
+    selectedArticleId,
     open: openDrawer,
     close: closeDrawer,
-    syncSelectedArticle,
   } = useArticleDrawer()
   const { markAsRead, markAsUnread } = useReadArticle()
 
   const isReadArticleEnabled = userFeatureEnabled && isLoggedIn
-
-  useEffect(() => {
-    syncSelectedArticle(articles)
-  }, [articles, syncSelectedArticle])
 
   const handleToggleRead = async (articleId: string, isRead: boolean) => {
     const originalArticle = articles.find((a) => a.articleId === articleId)
@@ -58,6 +52,8 @@ export default function Trends() {
   const handleMarkAsRead = async (articleId: string) => {
     await handleToggleRead(articleId, true)
   }
+
+  const selectedArticle = articles.find((a) => a.articleId === selectedArticleId) || null
 
   return (
     <>
