@@ -1,7 +1,6 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import useArticleDrawer from './use-article-drawer'
-import type { Article } from './use-trends'
 
 type UseArticleDrawerHook = ReturnType<typeof useArticleDrawer>
 
@@ -11,10 +10,10 @@ function setupHook(): RenderHookResult<UseArticleDrawerHook, unknown> {
 
 function openArticleDrawer(
   result: RenderHookResult<UseArticleDrawerHook, unknown>['result'],
-  article: Article,
+  articleId: string,
 ): void {
   act(() => {
-    result.current.open(article)
+    result.current.open(articleId)
   })
 }
 
@@ -26,86 +25,71 @@ function closeArticleDrawer(
   })
 }
 
-const createFakeArticle = (
-  id: string = '1',
-  title: string = 'テスト記事',
-  isRead?: boolean,
-): Article => ({
-  articleId: id,
-  media: 'qiita',
-  title,
-  author: 'テスト著者',
-  description: 'テスト記事の説明文です',
-  url: 'https://example.com/article',
-  createdAt: new Date('2024-01-01T00:00:00Z'),
-  isRead,
-})
-
 describe('useArticleDrawer', () => {
   describe('基本動作', () => {
-    it('初期状態ではisOpenがfalse、selectedArticleがnullである', () => {
+    it('初期状態ではisOpenがfalse、selectedArticleIdがnullである', () => {
       const { result } = setupHook()
 
       expect(result.current.isOpen).toBe(false)
-      expect(result.current.selectedArticle).toBeNull()
+      expect(result.current.selectedArticleId).toBeNull()
       expect(typeof result.current.open).toBe('function')
       expect(typeof result.current.close).toBe('function')
     })
 
-    it('open関数で記事を選択してドロワーを開くことができる', () => {
+    it('open関数で記事IDを選択してドロワーを開くことができる', () => {
       const { result } = setupHook()
-      const fakeArticle = createFakeArticle()
+      const articleId = 'article-1'
 
-      openArticleDrawer(result, fakeArticle)
+      openArticleDrawer(result, articleId)
 
       expect(result.current.isOpen).toBe(true)
-      expect(result.current.selectedArticle).toEqual(fakeArticle)
+      expect(result.current.selectedArticleId).toBe(articleId)
     })
 
-    it('close関数でドロワーを閉じて記事選択をクリアできる', () => {
+    it('close関数でドロワーを閉じて記事ID選択をクリアできる', () => {
       const { result } = setupHook()
-      const fakeArticle = createFakeArticle()
+      const articleId = 'article-1'
 
-      openArticleDrawer(result, fakeArticle)
+      openArticleDrawer(result, articleId)
 
       expect(result.current.isOpen).toBe(true)
-      expect(result.current.selectedArticle).toEqual(fakeArticle)
+      expect(result.current.selectedArticleId).toBe(articleId)
 
       closeArticleDrawer(result)
 
       expect(result.current.isOpen).toBe(false)
-      expect(result.current.selectedArticle).toBeNull()
+      expect(result.current.selectedArticleId).toBeNull()
     })
   })
 
   describe('エッジケース', () => {
     it('複数回open関数を呼び出してもDrawerが開いた状態になる', () => {
       const { result } = setupHook()
-      const fakeArticle1 = createFakeArticle('1', '記事1')
-      const fakeArticle2 = createFakeArticle('2', '記事2')
+      const articleId1 = 'article-1'
+      const articleId2 = 'article-2'
 
-      openArticleDrawer(result, fakeArticle1)
-
-      expect(result.current.isOpen).toBe(true)
-      expect(result.current.selectedArticle).toEqual(fakeArticle1)
-
-      openArticleDrawer(result, fakeArticle2)
+      openArticleDrawer(result, articleId1)
 
       expect(result.current.isOpen).toBe(true)
-      expect(result.current.selectedArticle).toEqual(fakeArticle2)
+      expect(result.current.selectedArticleId).toBe(articleId1)
+
+      openArticleDrawer(result, articleId2)
+
+      expect(result.current.isOpen).toBe(true)
+      expect(result.current.selectedArticleId).toBe(articleId2)
     })
 
     it('複数回close関数を呼び出してもDrawerが閉じる', () => {
       const { result } = setupHook()
-      const fakeArticle = createFakeArticle()
+      const articleId = 'article-1'
 
-      openArticleDrawer(result, fakeArticle)
+      openArticleDrawer(result, articleId)
 
       closeArticleDrawer(result)
       closeArticleDrawer(result)
 
       expect(result.current.isOpen).toBe(false)
-      expect(result.current.selectedArticle).toBeNull()
+      expect(result.current.selectedArticleId).toBeNull()
     })
 
     it('close状態でclose関数を呼び出してもDrawerが閉じたままである', () => {
@@ -114,77 +98,25 @@ describe('useArticleDrawer', () => {
       closeArticleDrawer(result)
 
       expect(result.current.isOpen).toBe(false)
-      expect(result.current.selectedArticle).toBeNull()
+      expect(result.current.selectedArticleId).toBeNull()
     })
 
-    it('ある記事のDrawerを開いた状態で別の記事を開くとその記事に内容が置き換わる', () => {
+    it('ある記事のDrawerを開いた状態で別の記事を開くとその記事IDに置き換わる', () => {
       const { result } = setupHook()
-      const fakeArticle1 = createFakeArticle('1', '技術記事')
-      const fakeArticle2 = createFakeArticle('2', 'ビジネス記事')
+      const articleId1 = 'article-1'
+      const articleId2 = 'article-2'
 
-      openArticleDrawer(result, fakeArticle1)
+      openArticleDrawer(result, articleId1)
 
-      expect(result.current.selectedArticle?.title).toBe('技術記事')
+      expect(result.current.selectedArticleId).toBe(articleId1)
 
-      openArticleDrawer(result, fakeArticle2)
+      openArticleDrawer(result, articleId2)
 
-      expect(result.current.selectedArticle?.title).toBe('ビジネス記事')
+      expect(result.current.selectedArticleId).toBe(articleId2)
 
       closeArticleDrawer(result)
 
-      expect(result.current.selectedArticle).toBeNull()
-    })
-  })
-
-  describe('syncSelectedArticle', () => {
-    describe('drawerが閉じている場合', () => {
-      it('何もしない', () => {
-        const { result } = setupHook()
-        const articles = [createFakeArticle('1'), createFakeArticle('2')]
-
-        act(() => {
-          result.current.syncSelectedArticle(articles)
-        })
-
-        expect(result.current.selectedArticle).toBeNull()
-      })
-    })
-
-    describe('drawerが開いている場合', () => {
-      it('articles配列内にselectedArticleと同じIDの記事があれば更新する', () => {
-        const { result } = setupHook()
-        const originalArticle = createFakeArticle('1', '元の記事', false)
-        const updatedArticle = createFakeArticle('1', '更新された記事', true)
-        const articles = [updatedArticle, createFakeArticle('2')]
-
-        openArticleDrawer(result, originalArticle)
-
-        expect(result.current.selectedArticle?.title).toBe('元の記事')
-        expect(result.current.selectedArticle?.isRead).toBe(false)
-
-        act(() => {
-          result.current.syncSelectedArticle(articles)
-        })
-
-        expect(result.current.selectedArticle?.title).toBe('更新された記事')
-        expect(result.current.selectedArticle?.isRead).toBe(true)
-      })
-
-      it('articles配列内にselectedArticleと同じIDの記事がなければ更新しない', () => {
-        const { result } = setupHook()
-        const originalArticle = createFakeArticle('1', '元の記事')
-        const articles = [createFakeArticle('2'), createFakeArticle('3')]
-
-        openArticleDrawer(result, originalArticle)
-
-        expect(result.current.selectedArticle).toEqual(originalArticle)
-
-        act(() => {
-          result.current.syncSelectedArticle(articles)
-        })
-
-        expect(result.current.selectedArticle).toEqual(originalArticle)
-      })
+      expect(result.current.selectedArticleId).toBeNull()
     })
   })
 })
