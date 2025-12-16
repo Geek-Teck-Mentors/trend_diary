@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { toast } from 'sonner'
+import { SWRConfig } from 'swr'
 import type { MockedFunction } from 'vitest'
 import getApiClientForClient from '../../../infrastructure/api'
 import useTrends, { type Article } from './use-trends'
@@ -84,7 +85,11 @@ type UseTrendsHook = ReturnType<typeof useTrends>
 function setupHook(initialEntries?: string[]): RenderHookResult<UseTrendsHook, unknown> {
   return renderHook(() => useTrends(), {
     wrapper: ({ children }: { children: ReactNode }) =>
-      createElement(MemoryRouter, { initialEntries }, children),
+      createElement(
+        SWRConfig,
+        { value: { provider: () => new Map(), dedupingInterval: 0 } },
+        createElement(MemoryRouter, { initialEntries }, children),
+      ),
   })
 }
 
@@ -137,52 +142,6 @@ describe('useTrends', () => {
       expect(result.current.totalPages).toBe(1)
     })
 
-    it('pageを2に設定すると、2ページ目が取得できる', async () => {
-      const initialFakeResponse = generateFakeResponse({
-        page: 1,
-        totalPages: 3,
-      })
-
-      const nextPageFakeResponse = generateFakeResponse({
-        articles: [generateFakeArticle({ articleId: '3', title: '記事3' })],
-        page: 2,
-        limit: 20,
-        total: 50,
-        totalPages: 3,
-      })
-
-      mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
-
-      const { result } = setupHook()
-
-      await waitFor(() => {
-        expect(result.current.page).toBe(1)
-      })
-
-      mockApiClient.articles.$get.mockResolvedValueOnce(nextPageFakeResponse)
-
-      await act(async () => {
-        await result.current.fetchArticles({
-          date: new Date('2024-01-01'),
-          page: 2,
-        })
-      })
-
-      expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
-        {
-          query: {
-            to: '2024-01-01',
-            from: '2024-01-01',
-            page: 2,
-            limit: 20,
-          },
-        },
-        { init: { credentials: 'include' } },
-      )
-      expect(result.current.articles).toHaveLength(1)
-      expect(result.current.articles[0].title).toBe('記事3')
-    })
-
     it('loading中はisLoadingがtrueになる', async () => {
       let resolvePromise: () => void
       // biome-ignore lint/suspicious/noExplicitAny:　getApiClientForClientの型が面倒なのでanyを使用
@@ -218,41 +177,6 @@ describe('useTrends', () => {
       })
     })
 
-    it('limitを設定すると1度に取得できる記事の数を制限できる', async () => {
-      const initialFakeResponse = generateFakeResponse()
-
-      const limitFakeResponse = generateFakeResponse()
-
-      mockApiClient.articles.$get.mockResolvedValueOnce(initialFakeResponse)
-
-      const { result } = setupHook()
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
-
-      mockApiClient.articles.$get.mockResolvedValueOnce(limitFakeResponse)
-
-      await act(async () => {
-        await result.current.fetchArticles({
-          date: new Date('2024-01-01'),
-          limit: 10,
-        })
-      })
-
-      expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
-        {
-          query: {
-            to: '2024-01-01',
-            from: '2024-01-01',
-            page: 1,
-            limit: 10,
-          },
-        },
-        { init: { credentials: 'include' } },
-      )
-    })
-
     it('記事一覧を取得したタイミングで、ページ情報が更新される', async () => {
       const fakeResponse = generateFakeResponse({
         articles: [generateFakeArticle()],
@@ -264,7 +188,7 @@ describe('useTrends', () => {
 
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
-      const { result } = setupHook()
+      const { result } = setupHook(['/?page=2'])
 
       await waitFor(() => {
         expect(result.current.page).toBe(2)
@@ -341,50 +265,78 @@ describe('useTrends', () => {
         { init: { credentials: 'include' } },
       )
     })
-  })
 
-  describe('エッジケース', () => {
-    it('ローディング中に再度fetchArticlesを呼び出しても処理されない', async () => {
-      let resolvePromise: () => void
-      // biome-ignore lint/suspicious/noExplicitAny: getApiClientForClientの型が面倒なのでanyを使用
-      const mockPromise = new Promise<any>((resolve) => {
-        resolvePromise = () =>
-          resolve({
-            status: 200,
-            json: () =>
-              Promise.resolve({
-                data: [],
-                page: 1,
-                limit: 20,
-                total: 0,
-                totalPages: 1,
-                hasNext: false,
-                hasPrev: false,
-              }),
-          })
+    it('setSearchParamsでURLパラメータを変更すると、新しいパラメータでAPIが呼ばれる', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 1,
+        totalPages: 3,
       })
 
-      mockApiClient.articles.$get.mockReturnValue(mockPromise)
+      const nextPageResponse = generateFakeResponse({
+        articles: [generateFakeArticle({ articleId: '3', title: '記事3' })],
+        page: 2,
+        limit: 20,
+        total: 50,
+        totalPages: 3,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
 
       const { result } = setupHook()
 
-      expect(result.current.isLoading).toBe(true)
-
-      await act(async () => {
-        await result.current.fetchArticles({
-          date: new Date('2024-01-01'),
-        })
+      await waitFor(() => {
+        expect(result.current.page).toBe(1)
       })
 
-      expect(mockApiClient.articles.$get).toHaveBeenCalledTimes(1)
+      mockApiClient.articles.$get.mockResolvedValueOnce(nextPageResponse)
 
       await act(async () => {
-        resolvePromise!()
+        result.current.setSearchParams(new URLSearchParams({ page: '2' }))
       })
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 2,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+      expect(result.current.articles).toHaveLength(1)
+      expect(result.current.articles[0].title).toBe('記事3')
+    })
+
+    it('URLパラメータでlimitを指定すると、指定されたlimitでAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        limit: 10,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?limit=10'])
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
       })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 1,
+            limit: 10,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
     })
   })
 
