@@ -12,7 +12,7 @@ import { defineConfig, devices } from '@playwright/test'
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './src/test/e2e',
+  testDir: '.',
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   // INFO: CIに合わせる
   forbidOnly: true,
@@ -26,7 +26,7 @@ export default defineConfig({
   // INFO: CIではスペックの問題で並列実行ができないので、オフにする
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [['html', { outputFolder: 'playwright-report' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
