@@ -1,4 +1,4 @@
 import type { Config } from '@react-router/dev/config'
 export default {
-  appDirectory: 'src/application/web',
+  appDirectory: './web',
 } satisfies Config
