@@ -11,9 +11,9 @@
     "poststart": "supabase stop",
     "build": "react-router build",
     "supabase:start": "supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit",
-    "test:frontend": "vitest run -c src/test/vitest-config/config.frontend.ts",
-    "test:domain": "vitest run -c src/test/vitest-config/config.domain.ts",
-    "test:api": "vitest run -c src/test/vitest-config/config.api.ts",
+    "test:frontend": "vitest run --project frontend",
+    "test:domain": "vitest run --project domain",
+    "test:api": "vitest run --project api",
     "e2e": "playwright test --config=src/test/e2e/playwright.config.ts",
     "e2e:report": "playwright show-report src/test/e2e/playwright-report",
     "e2e:gen": "playwright codegen --config=src/test/e2e/playwright.config.ts",
@@ -28,7 +28,7 @@
     "db:deploy": "prisma migrate deploy",
     "supabase:db:type-gen": "supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
-    "test-storybook": "vitest run -c src/test/vitest-config/config.storybook.ts"
+    "test-storybook": "vitest run --project storybook"
   },
   "prisma": {
     "schema": "./src/infrastructure/prisma-orm"
