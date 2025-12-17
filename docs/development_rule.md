@@ -47,6 +47,7 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
 
 **その他**:
 - utilsの作成は禁止
+  - 理由: DDDの原則を遵守し、貧血性ドメインを防ぐため。ロジックは適切な場所（ドメイン層、アプリケーション層）に配置すべきで、utils（便利関数集）は責務が不明確になりがち
 - Pinoロガーで構造化ログを使用
 
 ### 開発コマンド
