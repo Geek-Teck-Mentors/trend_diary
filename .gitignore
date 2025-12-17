@@ -38,10 +38,10 @@ lerna-debug.log*
 coverage/
 
 # Playwright
-/test-results/
+/src/test/e2e/test-results/
 /src/test/e2e/playwright-report/
-/blob-report/
-/playwright/.cache/
+/src/test/e2e/blob-report/
+/src/test/e2e/playwright/.cache/
 
 *storybook.log
 storybook-static
