@@ -7,9 +7,9 @@
   "scripts": {
     "postinstall": "prisma generate",
     "prestart": "npm run supabase:start",
-    "start": "react-router dev",
+    "start": "react-router dev --config src/application/react-router.config.ts",
     "poststart": "supabase stop",
-    "build": "react-router build",
+    "build": "react-router build --config src/application/react-router.config.ts",
     "supabase:start": "supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit",
     "test:frontend": "vitest run -c src/test/vitest-config/config.frontend.ts",
     "test:domain": "vitest run -c src/test/vitest-config/config.domain.ts",
