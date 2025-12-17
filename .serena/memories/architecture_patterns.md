@@ -213,15 +213,7 @@ export function createArticleUseCase(db: PrismaClient) {
 
 ### utilsディレクトリの作成禁止
 
-汎用的な`utils`ディレクトリ・ファイルの作成は禁止。
-
-理由:
-- 責任の所在が不明確になる
-- アーキテクチャ層の境界が曖昧になる
-
-代替案:
-- 共通ロジックは`src/common/`配下の明確な目的を持ったディレクトリに配置
-- ドメイン固有のロジックは各集約内に配置
+詳細は[開発ルール](../../docs/development_rule.md)を参照
 
 ---
 
