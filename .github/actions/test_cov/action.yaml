@@ -18,5 +18,7 @@ runs:
       uses: davelosert/vitest-coverage-report-action@v2
       with:
         name: ${{ inputs.target }}
-        vite-config-path: src/test/vitest-config/config.${{ inputs.target }}.ts
+        json-summary-path: ./coverage/${{ inputs.target }}/coverage-summary.json
+        json-final-path: ./coverage/${{ inputs.target }}/coverage-final.json
+        vite-config-path: ./vitest.workspace.ts
         comment-on: ${{ github.event_name == 'pull_request' && 'pr' || 'commit' }}
