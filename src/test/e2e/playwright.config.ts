@@ -12,7 +12,7 @@ import { defineConfig, devices } from '@playwright/test'
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './src/test/e2e',
+  testDir: '.',
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   // INFO: CIに合わせる
   forbidOnly: true,
