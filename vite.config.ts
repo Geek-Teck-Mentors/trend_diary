@@ -19,7 +19,9 @@ export default defineConfig({
   plugins: [
     tsconfigPaths(),
     tailwindcss(),
-    reactRouter(),
+    reactRouter({
+      configFile: 'src/application/react-router.config.ts',
+    }),
     serverAdapter({
       adapter,
       entry: 'src/application/server.ts',
