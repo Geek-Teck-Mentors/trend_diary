@@ -24,6 +24,8 @@ export default defineWorkspace([
       globals: true,
       include: generateIncludes('src/domain', 'src/common').testInclude,
       coverage: {
+        enabled: true,
+        provider: 'v8',
         reportsDirectory: './coverage/domain',
         reporter: coverageReporter,
         thresholds: {
@@ -56,6 +58,8 @@ export default defineWorkspace([
       },
       include: generateIncludes('src/application/api').testInclude,
       coverage: {
+        enabled: true,
+        provider: 'v8',
         reportsDirectory: './coverage/api',
         reporter: coverageReporter,
         thresholds: {
@@ -81,6 +85,8 @@ export default defineWorkspace([
       exclude: ['src/application/web/components/shadcn/**/*', 'src/application/web/**/*.tsx'],
       passWithNoTests: true,
       coverage: {
+        enabled: true,
+        provider: 'v8',
         reportsDirectory: './coverage/frontend',
         reporter: coverageReporter,
         include: ['src/application/web/**/*.ts', 'src/application/web/components/**/*.ts'],
@@ -111,6 +117,8 @@ export default defineWorkspace([
       },
       setupFiles: ['.storybook/vitest.setup.ts'],
       coverage: {
+        enabled: true,
+        provider: 'v8',
         reportsDirectory: './coverage/storybook',
         include: [
           'src/application/web/components/**/*.tsx',
