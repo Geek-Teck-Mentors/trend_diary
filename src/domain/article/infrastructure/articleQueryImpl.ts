@@ -72,7 +72,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
 
     const whereClause = ArticleQueryImpl.buildWhereClauseForRawSql(searchParams)
 
-    const countSql = Prisma.sql`SELECT COUNT(*)::int as count FROM articles a ${whereClause}`
+    const countSql = Prisma.sql`SELECT COUNT(DISTINCT a.article_id)::int as count FROM articles a ${whereClause}`
     const dataSql = Prisma.sql`
       SELECT
         DISTINCT a.article_id,
