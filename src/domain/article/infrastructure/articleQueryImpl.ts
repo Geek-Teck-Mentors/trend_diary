@@ -75,7 +75,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
     const countSql = Prisma.sql`SELECT COUNT(*)::int as count FROM articles a ${whereClause}`
     const dataSql = Prisma.sql`
       SELECT
-        a.article_id,
+        DISTINCT a.article_id,
         a.media,
         a.title,
         a.author,
