@@ -17,7 +17,6 @@ export default defineConfig({
     exclude,
     passWithNoTests: true,
     coverage: {
-      enabled: true,
       provider: 'v8',
       reportsDirectory: './coverage/frontend',
       reporter: ['text', 'json-summary', 'json'],

@@ -31,7 +31,6 @@ export default defineConfig({
     },
     include: testInclude,
     coverage: {
-      enabled: true,
       provider: 'v8',
       reportsDirectory: './coverage/api',
       reporter: ['text', 'json-summary', 'json'],

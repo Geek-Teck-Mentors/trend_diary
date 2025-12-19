@@ -23,7 +23,6 @@ export default defineConfig(({ mode }) => {
       },
       setupFiles: ['.storybook/vitest.setup.ts'],
       coverage: {
-        enabled: true,
         provider: 'v8',
         reportsDirectory: './coverage/storybook',
         include: [

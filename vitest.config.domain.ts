@@ -17,7 +17,6 @@ export default defineConfig({
     globals: true,
     include: testInclude,
     coverage: {
-      enabled: true,
       provider: 'v8',
       reportsDirectory: './coverage/domain',
       reporter: ['text', 'json-summary', 'json'],
