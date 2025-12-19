@@ -13,6 +13,30 @@ runs:
       shell: bash
       run: npm run test:${{ inputs.target }} -- --coverage
 
+    - name: カバレッジファイルの確認と調整
+      shell: bash
+      run: |
+        echo "=== カバレッジディレクトリの確認 ==="
+        ls -la coverage/ || echo "coverage/ ディレクトリが存在しない"
+
+        # プロジェクト固有のディレクトリが存在するか確認
+        if [ -d ./coverage/${{ inputs.target }} ]; then
+          echo "✓ カバレッジは既に ./coverage/${{ inputs.target }}/ に生成されている"
+          ls -la ./coverage/${{ inputs.target }}/
+        elif [ -f ./coverage/coverage-summary.json ]; then
+          echo "⚠ カバレッジがデフォルトの ./coverage/ に生成されている。移動します..."
+          mkdir -p ./coverage/${{ inputs.target }}
+          # JSONファイルのみを移動（他のプロジェクトと競合しないように）
+          cp ./coverage/coverage-summary.json ./coverage/${{ inputs.target }}/ || true
+          cp ./coverage/coverage-final.json ./coverage/${{ inputs.target }}/ || true
+          echo "✓ カバレッジファイルを移動しました"
+          ls -la ./coverage/${{ inputs.target }}/
+        else
+          echo "✗ カバレッジファイルが見つかりません"
+          echo "coverage/ の内容:"
+          find coverage/ -type f || true
+        fi
+
     - name: カバレッジの可視化
       if: github.event_name == 'pull_request'
       uses: davelosert/vitest-coverage-report-action@v2
