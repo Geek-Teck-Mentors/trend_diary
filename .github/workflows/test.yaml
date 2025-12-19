@@ -47,7 +47,7 @@ jobs:
         id: check-test-config
         uses: ./.github/actions/diff
         with:
-          subdir: '.github/workflows/test.yaml vitest.workspace.ts'
+          subdir: '.github/workflows/test.yaml vitest.workspace.ts vitest.config.domain.ts vitest.config.api.ts vitest.config.frontend.ts vitest.config.storybook.ts'
 
       - name: フロントエンドの差分チェック
         id: check-frontend
