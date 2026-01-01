@@ -57,7 +57,12 @@ export class AuthV2UseCase {
       if (isFailure(deleteResult)) {
         // 補償トランザクション失敗時はExternalServiceErrorを返す
         return failure(
-          new ExternalServiceError(activeUserResult.error, deleteResult.error, { userId: user.id }),
+          new ExternalServiceError(
+            'Failed to delete Supabase Auth user during compensation',
+            activeUserResult.error,
+            deleteResult.error,
+            { userId: user.id },
+          ),
         )
       }
       return failure(activeUserResult.error)

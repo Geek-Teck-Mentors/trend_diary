@@ -10,11 +10,12 @@ export default class ExternalServiceError extends ServerError {
   public readonly context: Record<string, unknown>
 
   constructor(
+    message: string,
     originalError: ServerError,
     serviceError: ServerError,
     context: Record<string, unknown> = {},
   ) {
-    super('External service error')
+    super(message)
     this.name = 'ExternalServiceError'
     this.originalError = originalError
     this.serviceError = serviceError
