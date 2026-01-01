@@ -64,7 +64,7 @@
 │   ├── __mocks__ # モック
 │   ├── e2e # E2Eテスト
 │   ├── helper # テストヘルパー
-│   └── vitest-config # Vitest設定
+│   └── vitest # Vitest設定
 │       ├── config.domain.ts
 │       ├── config.api.ts
 │       ├── config.frontend.ts
@@ -80,4 +80,4 @@
 - E2Eテスト: `src/test/e2e`に配置
 - テストヘルパー: `src/test/helper`に配置
 - テストモック: `src/test/__mocks__`に配置（ドメイン層テストで使用）
-- Vitest設定: `src/test/vitest-config`に配置
+- Vitest設定: `src/test/vitest`に配置
