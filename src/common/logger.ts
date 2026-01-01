@@ -1,6 +1,6 @@
 import pino from 'pino'
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+export type LogLevel = pino.Level
 export type LogMessage = string | Record<string, unknown>
 export type LogContext = Record<string, unknown>
 
@@ -12,8 +12,15 @@ class Logger {
   constructor(context: LogContext = {}) {
     this.context = context
 
+    let level: pino.LevelWithSilentOrString = 'info'
+    if (process.env.NODE_ENV === 'test') {
+      level = 'silent'
+    }
+    if (process.env.NODE_ENV === 'development') {
+      level = 'debug'
+    }
     this.logger = pino({
-      level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+      level,
       formatters: {
         level: (label) => ({ level: label }),
       },
