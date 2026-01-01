@@ -34,12 +34,12 @@ const mockCommand: Command = {
 }
 
 // SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
-vi.mock('@/domain/user/infrastructure/supabaseAuthRepository', () => ({
+vi.mock('@/domain/user/infrastructure/supabase-auth-repository', () => ({
   SupabaseAuthRepository: vi.fn(() => mockRepository),
 }))
 
 // CommandImplをモック
-vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
+vi.mock('@/domain/user/infrastructure/command-impl', () => ({
   default: vi.fn(() => mockCommand),
 }))
 
