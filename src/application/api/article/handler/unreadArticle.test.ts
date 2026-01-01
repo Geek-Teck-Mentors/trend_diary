@@ -1,19 +1,44 @@
+import { vi } from 'vitest'
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
+import authV2TestHelper, {
+  mockCommand,
+  mockQuery,
+  mockRepository,
+} from '@/test/helper/authV2TestHelper'
+
+// SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
+vi.mock('@/domain/auth-v2/infrastructure/supabaseAuthRepository', () => ({
+  SupabaseAuthRepository: vi.fn(() => mockRepository),
+}))
+
+// QueryImplをモック
+vi.mock('@/domain/user/infrastructure/queryImpl', () => ({
+  default: vi.fn(() => mockQuery),
+}))
+
+// CommandImplをモック
+vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
+  default: vi.fn(() => mockCommand),
+}))
+
+// createSupabaseAuthClientはモックして何も返さない（使われないため）
+vi.mock('@/infrastructure/supabase', () => ({
+  createSupabaseAuthClient: () => ({}),
+}))
 
 describe('DELETE /api/articles/:article_id/unread', () => {
   let testActiveUserId: bigint
   let testArticleId: bigint
-  let sessionId: string
+  let AccessToken: string
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
-    await activeUserTestHelper.create('test@example.com', 'password123')
-    const loginData = await activeUserTestHelper.login('test@example.com', 'password123')
+    await authV2TestHelper.create('test@example.com', 'Test@password123')
+    const loginData = await authV2TestHelper.login('test@example.com', 'Test@password123')
     testActiveUserId = loginData.activeUserId
-    sessionId = loginData.sessionId
+    AccessToken = loginData.accessToken
 
     // テスト記事作成
     const article = await articleTestHelper.createArticle()
@@ -27,9 +52,9 @@ describe('DELETE /api/articles/:article_id/unread', () => {
     )
   }
 
-  async function requestUnreadArticle(articleId: string, sessionId: string) {
+  async function requestUnreadArticle(articleId: string, token: string) {
     const headers: Record<string, string> = {
-      Cookie: `sid=${sessionId}`,
+      Cookie: `access_token=${token}`,
     }
 
     return app.request(
@@ -43,13 +68,13 @@ describe('DELETE /api/articles/:article_id/unread', () => {
   }
 
   beforeEach(async () => {
-    await activeUserTestHelper.cleanUp()
+    await authV2TestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await activeUserTestHelper.cleanUp()
+    await authV2TestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
   })
 
@@ -62,7 +87,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       )
       expect(beforeCount).toBe(1)
 
-      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
+      const response = await requestUnreadArticle(testArticleId.toString(), AccessToken)
 
       expect(response.status).toBe(200)
       const json = (await response.json()) as { message: string }
@@ -77,7 +102,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       // 既読履歴を削除
       await articleTestHelper.deleteReadHistory(testActiveUserId, testArticleId)
 
-      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
+      const response = await requestUnreadArticle(testArticleId.toString(), AccessToken)
 
       expect(response.status).toBe(200)
       const json = (await response.json()) as { message: string }
@@ -91,7 +116,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
   describe('準正常系', () => {
     it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
-      const response = await requestUnreadArticle('invalid-id', sessionId)
+      const response = await requestUnreadArticle('invalid-id', AccessToken)
 
       expect(response.status).toBe(422)
     })
@@ -100,7 +125,7 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       // 既読履歴を事前に削除
       await articleTestHelper.deleteArticle(testArticleId)
 
-      const response = await requestUnreadArticle(testArticleId.toString(), sessionId)
+      const response = await requestUnreadArticle(testArticleId.toString(), AccessToken)
       expect(response.status).toBe(404)
     })
   })

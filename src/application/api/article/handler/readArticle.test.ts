@@ -1,30 +1,55 @@
 import { faker } from '@faker-js/faker'
+import { vi } from 'vitest'
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
+import authV2TestHelper, {
+  mockCommand,
+  mockQuery,
+  mockRepository,
+} from '@/test/helper/authV2TestHelper'
+
+// SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
+vi.mock('@/domain/auth-v2/infrastructure/supabaseAuthRepository', () => ({
+  SupabaseAuthRepository: vi.fn(() => mockRepository),
+}))
+
+// QueryImplをモック
+vi.mock('@/domain/user/infrastructure/queryImpl', () => ({
+  default: vi.fn(() => mockQuery),
+}))
+
+// CommandImplをモック
+vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
+  default: vi.fn(() => mockCommand),
+}))
+
+// createSupabaseAuthClientはモックして何も返さない（使われないため）
+vi.mock('@/infrastructure/supabase', () => ({
+  createSupabaseAuthClient: () => ({}),
+}))
 
 describe('POST /api/articles/:article_id/read', () => {
   let testActiveUserId: bigint
   let testArticleId: bigint
-  let sessionId: string
+  let AccessToken: string
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
-    await activeUserTestHelper.create('test@example.com', 'password123')
-    const loginData = await activeUserTestHelper.login('test@example.com', 'password123')
+    await authV2TestHelper.create('test@example.com', 'Test@password123')
+    const loginData = await authV2TestHelper.login('test@example.com', 'Test@password123')
     testActiveUserId = loginData.activeUserId
-    sessionId = loginData.sessionId
+    AccessToken = loginData.accessToken
 
     // テスト記事作成
     const article = await articleTestHelper.createArticle()
     testArticleId = article.articleId
   }
 
-  async function requestReadArticle(articleId: string, sessionId: string, readAt?: string) {
+  async function requestReadArticle(articleId: string, token: string, readAt?: string) {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      Cookie: `sid=${sessionId}`,
+      Cookie: `access_token=${token}`,
     }
 
     return app.request(
@@ -41,20 +66,20 @@ describe('POST /api/articles/:article_id/read', () => {
   }
 
   beforeEach(async () => {
-    await activeUserTestHelper.cleanUp()
+    await authV2TestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await activeUserTestHelper.cleanUp()
+    await authV2TestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
   })
 
   describe('正常系', () => {
     it('既読履歴を作成できること', async () => {
       const fixedReadAt = '2024-01-01T10:00:00.000Z'
-      const response = await requestReadArticle(testArticleId.toString(), sessionId, fixedReadAt)
+      const response = await requestReadArticle(testArticleId.toString(), AccessToken, fixedReadAt)
 
       expect(response.status).toBe(201)
       const json = (await response.json()) as { message: string }
@@ -69,19 +94,23 @@ describe('POST /api/articles/:article_id/read', () => {
 
   describe('準正常系', () => {
     it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
-      const response = await requestReadArticle('invalid-id', sessionId)
+      const response = await requestReadArticle('invalid-id', AccessToken)
 
       expect(response.status).toBe(422)
     })
     it('無効なreadAtでバリデーションエラーが発生すること', async () => {
-      const response = await requestReadArticle(testArticleId.toString(), sessionId, 'invalid-date')
+      const response = await requestReadArticle(
+        testArticleId.toString(),
+        AccessToken,
+        'invalid-date',
+      )
 
       expect(response.status).toBe(422)
     })
     it('存在しない記事は既読履歴が作成できない', async () => {
       const nonExistentArticleId = '999999'
 
-      const response = await requestReadArticle(nonExistentArticleId, sessionId)
+      const response = await requestReadArticle(nonExistentArticleId, AccessToken)
 
       expect(response.status).toBe(404)
     })
