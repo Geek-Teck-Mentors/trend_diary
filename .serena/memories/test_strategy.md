@@ -6,7 +6,7 @@
 
 ### 1. ドメイン層テスト (`test:domain`)
 
-**設定ファイル**: `src/test/vitest/config.domain.ts`
+**設定ファイル**: `src/test/vitest/config/domain.ts`
 
 **特徴**:
 - モックPrismaクライアントを使用（`src/test/__mocks__/prisma.ts`）
