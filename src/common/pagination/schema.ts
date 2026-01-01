@@ -12,14 +12,22 @@ function transform(value: string | number | undefined, defaultValue: number) {
 const limit = z
   .union([z.string(), z.number()])
   .optional()
-  .transform((val) => transform(val, DEFAULT_LIMIT))
+  .transform((val) => {
+    const parsed = transform(val, DEFAULT_LIMIT)
+    if (parsed < 1) return 1
+    if (parsed > 100) return 100
+    return parsed
+  })
   .default(DEFAULT_LIMIT)
 
 export const offsetPaginationSchema = z.object({
   page: z
     .union([z.string(), z.number()])
     .optional()
-    .transform((val) => transform(val, DEFAULT_PAGE))
+    .transform((val) => {
+      const parsed = transform(val, DEFAULT_PAGE)
+      return parsed < 1 ? 1 : parsed
+    })
     .default(DEFAULT_PAGE),
   limit,
 })

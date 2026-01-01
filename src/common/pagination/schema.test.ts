@@ -19,6 +19,21 @@ describe('offsetPaginationSchema', () => {
       input: { page: 'abc', limit: 'NaN' },
       expected: { page: DEFAULT_PAGE, limit: DEFAULT_LIMIT },
     },
+    {
+      name: 'pageが1未満なら1にクランプ',
+      input: { page: 0 },
+      expected: { page: 1, limit: DEFAULT_LIMIT },
+    },
+    {
+      name: 'limitが1未満なら1にクランプ',
+      input: { limit: -10 },
+      expected: { page: DEFAULT_PAGE, limit: 1 },
+    },
+    {
+      name: 'limitが100より大きい場合は100にクランプ',
+      input: { limit: 500 },
+      expected: { page: DEFAULT_PAGE, limit: 100 },
+    },
   ] as const
 
   for (const { name, input, expected } of cases) {
