@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { coverageReporter, generateIncludes } from '../generate'
 
-const { testInclude, coverageInclude } = generateIncludes('src/domain', 'src/common')
+const { testInclude, coverageInclude } = generateIncludes('src/domain')
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
