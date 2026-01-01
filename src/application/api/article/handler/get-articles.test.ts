@@ -4,7 +4,7 @@ import articleTestHelper from '@/test/helper/articleTestHelper'
 import authV2TestHelper, { mockRepository } from '@/test/helper/authV2TestHelper'
 import app from '../../../server'
 
-import { ArticleListResponse, ArticleWithReadStatusResponse } from './getArticles'
+import { ArticleListResponse, ArticleWithReadStatusResponse } from './get-articles'
 
 type GetArticlesTestCase = {
   name: string

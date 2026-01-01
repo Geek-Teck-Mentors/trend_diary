@@ -3,6 +3,71 @@ import app from '@/application/server'
 import TEST_ENV from '@/test/env'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 import authV2TestHelper from '@/test/helper/authV2TestHelper'
+import { articleIdParamSchema, createReadHistoryApiSchema } from './read-article'
+
+describe('API ReadHistoryスキーマ', () => {
+  describe('createReadHistoryApiSchema', () => {
+    it('有効なISO8601文字列を受け入れること', () => {
+      const validRequest = {
+        read_at: '2024-01-01T10:00:00.000Z',
+      }
+
+      expect(() => {
+        createReadHistoryApiSchema.parse(validRequest)
+      }).not.toThrow()
+    })
+
+    it('無効な日時文字列を拒否すること', () => {
+      expect(() => {
+        createReadHistoryApiSchema.parse({
+          read_at: 'invalid-date',
+        })
+      }).toThrow()
+
+      expect(() => {
+        createReadHistoryApiSchema.parse({
+          read_at: '2024-01-01',
+        })
+      }).toThrow()
+    })
+
+    it('readAtフィールドが必須であること', () => {
+      expect(() => {
+        createReadHistoryApiSchema.parse({})
+      }).toThrow()
+    })
+  })
+
+  describe('articleIdParamSchema', () => {
+    it('有効な数値文字列をbigintに変換すること', () => {
+      const result = articleIdParamSchema.parse({
+        article_id: '123456789',
+      })
+
+      expect(result.article_id).toBe(123456789n)
+    })
+
+    it('無効な文字列を拒否すること', () => {
+      expect(() => {
+        articleIdParamSchema.parse({
+          article_id: 'not-a-number',
+        })
+      }).toThrow()
+
+      expect(() => {
+        articleIdParamSchema.parse({
+          article_id: '',
+        })
+      }).toThrow()
+    })
+
+    it('article_idフィールドが必須であること', () => {
+      expect(() => {
+        articleIdParamSchema.parse({})
+      }).toThrow()
+    })
+  })
+})
 
 describe('POST /api/articles/:article_id/read', () => {
   let testActiveUserId: bigint
