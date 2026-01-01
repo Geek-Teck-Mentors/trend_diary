@@ -34,7 +34,7 @@ describe('handleError', () => {
     expect(result.status).toBe(422)
     expect(result.message).toBe('invalid query')
     expect(logger.warn).toHaveBeenCalledTimes(1)
-    expect(logger.warn).toHaveBeenCalledWith('client error in search', error)
+    expect(logger.warn).toHaveBeenCalledWith('client error', error)
     expect(logger.error).not.toHaveBeenCalled()
   })
 
