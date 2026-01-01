@@ -33,29 +33,36 @@ export default class Logger {
     return new Logger(this.level, { ...this.context, ...context })
   }
 
-  private log(level: LogLevel, message: LogMessage, ...args: unknown[]): void {
+  private log(level: LogLevel, message: LogMessage): void {
     if (typeof message === 'string') {
-      this.logger[level](this.context, message, ...args)
+      this.logger[level](this.context, message)
     } else {
       this.logger[level]({ ...this.context, ...message })
     }
   }
 
-  debug(message: LogMessage, ...args: unknown[]): void {
-    this.log('debug', message, ...args)
+  debug(message: LogMessage): void {
+    this.log('debug', message)
   }
 
-  info(message: LogMessage, ...args: unknown[]): void {
-    this.log('info', message, ...args)
+  info(message: LogMessage): void {
+    this.log('info', message)
   }
 
-  warn(message: LogMessage, ...args: unknown[]): void {
-    this.log('warn', message, ...args)
+  warn(message: LogMessage): void {
+    this.log('warn', message)
   }
 
-  error(message: LogMessage, error: Error | unknown, ...args: unknown[]): void {
+  error(message: LogMessage, error: Error | unknown): void {
+    const normalizedError = error instanceof Error ? error : new Error(String(error))
+
     // * pinoのstdSerializersで処理されるよう、errプロパティ名を使用
-    this.log('error', { message, err: error }, ...args)
+    if (typeof message === 'string') {
+      this.logger.error({ ...this.context, err: normalizedError }, message)
+      return
+    }
+
+    this.logger.error({ ...this.context, ...message, err: normalizedError })
   }
 }
 
