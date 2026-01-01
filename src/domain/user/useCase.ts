@@ -1,135 +1,129 @@
-import { AsyncResult, failure, isFailure, Result, success } from '@yuukihayashi0510/core'
-import bcrypt from 'bcryptjs'
-import { v4 as uuidv4 } from 'uuid'
-import { SESSION_DURATION } from '@/common/constants'
-import { AlreadyExistsError, ClientError, NotFoundError, ServerError } from '@/common/errors'
-import { isNull, Nullable } from '@/common/types/utility'
-import { Command, Query } from './repository'
-import type { ActiveUser, CurrentUser } from './schema/activeUserSchema'
-import { recordLogin } from './schema/method'
+import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
+import { ClientError, ServerError } from '@/common/errors'
+import type { Command, Query } from '@/domain/user/repository'
+import type { CurrentUser } from '@/domain/user/schema/activeUserSchema'
+import type { AuthV2Repository } from './repository'
+import type { AuthenticationSession } from './schema/authenticationSession'
 
-type LoginResult = {
+/**
+ * 認証v2ユーザーのダミーパスワード
+ * Supabase Authを使用するため、active_userテーブルのpasswordフィールドには実際のパスワードを保存しない
+ */
+const AUTH_V2_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
+
+/**
+ * サインアップ結果
+ */
+export type SignupResult = {
+  session: AuthenticationSession | null
   activeUser: CurrentUser
-  sessionId: string
-  expiresAt: Date
 }
 
-export class UseCase {
+/**
+ * ログイン結果
+ */
+export type LoginResult = {
+  session: AuthenticationSession
+  activeUser: CurrentUser
+}
+
+export class AuthV2UseCase {
   constructor(
-    private query: Query,
-    private command: Command,
+    private readonly repository: AuthV2Repository,
+    private readonly userCommand: Command,
+    private readonly userQuery: Query,
   ) {}
 
-  async signup(email: string, plainPassword: string): Promise<Result<CurrentUser, Error>> {
-    const existingResult = await this.query.findActiveByEmail(email)
-    if (isFailure(existingResult)) return existingResult
-    if (!isNull(existingResult.data)) {
-      return failure(new AlreadyExistsError('Email already exists'))
-    }
+  async signup(
+    email: string,
+    password: string,
+  ): AsyncResult<SignupResult, ClientError | ServerError> {
+    // 認証v2でユーザー作成
+    const authResult = await this.repository.signup(email, password)
+    if (isFailure(authResult)) return authResult
 
-    const hashedPassword = await bcrypt.hash(plainPassword, 10)
+    const { user, session } = authResult.data
 
-    const activeUserResult = await this.command.createActive(email, hashedPassword)
+    // active_userを作成（パスワードはダミーハッシュ、認証v2を使うため不要）
+    const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
+      user.email,
+      AUTH_V2_DUMMY_PASSWORD,
+      user.id,
+    )
+
     if (isFailure(activeUserResult)) {
-      return failure(ServerError.handle(activeUserResult.error))
+      return failure(activeUserResult.error)
     }
 
-    return success(activeUserResult.data)
+    return success({
+      session,
+      activeUser: activeUserResult.data,
+    })
   }
 
   async login(
     email: string,
-    plainPassword: string,
-    ipAddress?: string,
-    userAgent?: string,
-  ): Promise<Result<LoginResult, Error>> {
-    const authResult = await this.authenticateUser(email, plainPassword)
-    if (isFailure(authResult)) return failure(authResult.error)
+    password: string,
+  ): AsyncResult<LoginResult, ClientError | ServerError> {
+    // 認証v2でログイン
+    const authResult = await this.repository.login(email, password)
+    if (isFailure(authResult)) return authResult
 
-    const sessionResult = await this.createLoginSession(
-      authResult.data.activeUserId,
-      ipAddress,
-      userAgent,
-    )
-    if (isFailure(sessionResult)) return failure(sessionResult.error)
+    const { user, session } = authResult.data
 
-    const { sessionId, expiresAt } = sessionResult.data
+    const activeUserResult = await this.findActiveUserByAuthenticationId(user.id)
 
-    const updatedUser = recordLogin(authResult.data)
-    const updateResult = await this.command.saveActive(updatedUser)
-    if (isFailure(updateResult)) return failure(updateResult.error)
+    if (isFailure(activeUserResult)) return activeUserResult
 
     return success({
-      activeUser: updateResult.data,
-      sessionId,
-      expiresAt,
+      session,
+      activeUser: activeUserResult.data,
     })
   }
 
-  private async authenticateUser(
-    email: string,
-    plainPassword: string,
-  ): Promise<Result<ActiveUser, Error>> {
-    const activeUserResult = await this.query.findActiveByEmailForAuth(email)
-    if (isFailure(activeUserResult)) return failure(ServerError.handle(activeUserResult.error))
-    if (isNull(activeUserResult.data)) {
-      return failure(new NotFoundError('User not found'))
-    }
-
-    const activeUser = activeUserResult.data
-
-    // パスワードチェック
-    const validationResult = await this.validateCredentials(plainPassword, activeUser.password)
-    if (isFailure(validationResult)) return failure(validationResult.error)
-
-    return success(activeUser)
+  async logout(): AsyncResult<void, ServerError> {
+    return this.repository.logout()
   }
 
-  private async validateCredentials(
-    plainPassword: string,
-    hashedPassword: string,
-  ): Promise<Result<void, Error>> {
-    const isValidPassword = await bcrypt.compare(plainPassword, hashedPassword)
-    if (!isValidPassword) {
-      return failure(new ClientError('Invalid credentials'))
+  async getCurrentActiveUser(): AsyncResult<CurrentUser, ClientError | ServerError> {
+    const authUserResult = await this.repository.getCurrentUser()
+    if (isFailure(authUserResult)) {
+      return authUserResult
     }
-    return success(undefined)
+
+    return this.findActiveUserByAuthenticationId(authUserResult.data.id)
   }
 
-  private async createLoginSession(
-    activeUserId: bigint,
-    ipAddress?: string,
-    userAgent?: string,
-  ): Promise<Result<{ sessionId: string; expiresAt: Date }, Error>> {
-    const sessionId = uuidv4()
-    const expiresAt = new Date(Date.now() + SESSION_DURATION)
+  async refreshSession(): AsyncResult<LoginResult, ClientError | ServerError> {
+    // 認証v2でセッション更新
+    const authResult = await this.repository.refreshSession()
+    if (isFailure(authResult)) return authResult
 
-    const sessionResult = await this.command.createSession({
-      sessionId,
-      activeUserId,
-      sessionToken: uuidv4(),
-      expiresAt,
-      ipAddress,
-      userAgent,
+    const { user, session } = authResult.data
+
+    const activeUserResult = await this.findActiveUserByAuthenticationId(user.id)
+
+    if (isFailure(activeUserResult)) return activeUserResult
+
+    return success({
+      session,
+      activeUser: activeUserResult.data,
     })
+  }
 
-    if (isFailure(sessionResult)) {
-      return failure(ServerError.handle(sessionResult.error))
+  private async findActiveUserByAuthenticationId(
+    authenticationId: string,
+  ): AsyncResult<CurrentUser, ClientError | ServerError> {
+    const activeUserResult = await this.userQuery.findActiveByAuthenticationId(authenticationId)
+
+    if (isFailure(activeUserResult)) {
+      return failure(new ServerError(activeUserResult.error))
     }
 
-    return success({ sessionId, expiresAt })
-  }
+    if (!activeUserResult.data) {
+      return failure(new ClientError('User not found', 404))
+    }
 
-  async logout(sessionId: string): Promise<Result<void, Error>> {
-    const result = await this.command.deleteSession(sessionId)
-    if (isFailure(result)) return failure(ServerError.handle(result.error))
-    return success(undefined)
-  }
-
-  async getCurrentUser(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error> {
-    const result = await this.query.findActiveBySessionId(sessionId)
-    if (isFailure(result)) return failure(ServerError.handle(result.error))
-
-    return success(result.data)
+    return success(activeUserResult.data)
   }
 }
