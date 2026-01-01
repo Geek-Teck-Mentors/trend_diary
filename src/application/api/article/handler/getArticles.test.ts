@@ -1,8 +1,9 @@
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
-import activeUserTestHelper from '@/test/helper/activeUserTestHelper'
 import articleTestHelper from '@/test/helper/articleTestHelper'
+import authV2TestHelper, { mockRepository } from '@/test/helper/authV2TestHelper'
 import app from '../../../server'
+
 import { ArticleListResponse, ArticleWithReadStatusResponse } from './getArticles'
 
 type GetArticlesTestCase = {
@@ -192,23 +193,23 @@ describe('GET /api/articles', () => {
   })
 
   describe('既読情報', () => {
-    let sessionId: string
+    let accessToken: string
 
-    async function requestGetArticlesWithAuth(query: string = '', sid?: string) {
+    async function requestGetArticlesWithAuth(query: string = '', token?: string) {
       const url = query ? `/api/articles?${query}` : '/api/articles'
       const headers: Record<string, string> = {}
-      if (sid) {
-        headers.Cookie = `sid=${sid}`
+      if (token) {
+        headers.Cookie = `access_token=${token}`
       }
       return app.request(url, { method: 'GET', headers }, TEST_ENV)
     }
 
     async function setupAuthTestData(): Promise<void> {
       // アカウント作成・ログイン
-      await activeUserTestHelper.create('readtest@example.com', 'password123')
-      const loginData = await activeUserTestHelper.login('readtest@example.com', 'password123')
+      await authV2TestHelper.create('readtest@example.com', 'Test@password123')
+      const loginData = await authV2TestHelper.login('readtest@example.com', 'Test@password123')
       const testActiveUserId = loginData.activeUserId
-      sessionId = loginData.sessionId
+      accessToken = loginData.accessToken
 
       // テスト記事作成
       const article1 = await articleTestHelper.createArticle({
@@ -227,17 +228,20 @@ describe('GET /api/articles', () => {
     }
 
     beforeEach(async () => {
-      await activeUserTestHelper.cleanUp()
+      await authV2TestHelper.cleanUp()
       await articleTestHelper.cleanUpArticles()
       await setupAuthTestData()
     })
 
     afterAll(async () => {
-      await activeUserTestHelper.cleanUp()
+      await authV2TestHelper.cleanUp()
       await articleTestHelper.cleanUpArticles()
     })
 
     it('未ログインの場合はisReadがundefined', async () => {
+      // モックの認証状態をログアウトにする
+      await mockRepository.logout()
+
       const res = await requestGetArticlesWithAuth()
 
       expect(res.status).toBe(200)
@@ -249,7 +253,7 @@ describe('GET /api/articles', () => {
     })
 
     it('ログイン時は既読記事にisRead: trueが返される', async () => {
-      const res = await requestGetArticlesWithAuth('title=既読記事', sessionId)
+      const res = await requestGetArticlesWithAuth('title=既読記事', accessToken)
 
       expect(res.status).toBe(200)
       const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
@@ -258,7 +262,7 @@ describe('GET /api/articles', () => {
     })
 
     it('ログイン時は未読記事にisRead: falseが返される', async () => {
-      const res = await requestGetArticlesWithAuth('title=未読記事', sessionId)
+      const res = await requestGetArticlesWithAuth('title=未読記事', accessToken)
 
       expect(res.status).toBe(200)
       const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }

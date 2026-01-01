@@ -6,14 +6,14 @@ describe('validateAuthenticateForm', () => {
     it('有効なemail/passwordで成功する', () => {
       const formData = new FormData()
       formData.append('email', 'test@example.com')
-      formData.append('password', 'password123')
+      formData.append('password', 'Test@123')
 
       const result = validateAuthenticateForm(formData)
 
       expect(result.isValid).toBe(true)
       if (result.isValid) {
         expect(result.data.email).toBe('test@example.com')
-        expect(result.data.password).toBe('password123')
+        expect(result.data.password).toBe('Test@123')
       }
     })
   })
@@ -58,7 +58,7 @@ describe('validateAuthenticateForm', () => {
     const passwordBoundaryCases = [
       {
         name: '最小長パスワード(8文字)で成功する',
-        password: '12345678',
+        password: 'Test@123',
         expectedValid: true,
       },
       {
@@ -68,7 +68,7 @@ describe('validateAuthenticateForm', () => {
       },
       {
         name: '最大長パスワード(50文字)で成功する',
-        password: 'a'.repeat(50),
+        password: `Test@123${'a'.repeat(42)}`,
         expectedValid: true,
       },
       {
