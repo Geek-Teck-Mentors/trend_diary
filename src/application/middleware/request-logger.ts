@@ -4,6 +4,8 @@ import Logger from '@/common/logger'
 import { Env } from '../env'
 import CONTEXT_KEY from './context'
 
+const DEFAULT_LOG_LEVEL = 'info'
+
 const requestLogger = createMiddleware<Env>(async (c, next) => {
   const requestId = uuidv4()
   const startTime = performance.now()
@@ -12,7 +14,7 @@ const requestLogger = createMiddleware<Env>(async (c, next) => {
   const { path } = c.req
   const userAgent = c.req.header('user-agent')
 
-  const logger = new Logger(c.env.LOG_LEVEL ?? 'info')
+ const logger = new Logger(c.env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL);
   const requestLogger = logger.with({
     request_id: requestId,
     method,
