@@ -1,6 +1,6 @@
 import { AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import { NotFoundError, ServerError } from '@/common/errors'
-import { OffsetPaginationResult } from '@/common/pagination'
+import { DEFAULT_LIMIT, DEFAULT_PAGE, OffsetPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
 import { isNull } from '@/common/types/utility'
 import { Command, Query } from '@/domain/article/repository'
@@ -26,8 +26,8 @@ export class UseCase {
     const optimizedParams: QueryParams = {
       title: extractTrimmed(params.title),
       author: extractTrimmed(params.author),
-      limit: params.limit ?? 20,
-      page: params.page ?? 1,
+      limit: params.limit ?? DEFAULT_LIMIT,
+      page: params.page ?? DEFAULT_PAGE,
       from: params.from,
       to: params.to,
       media: params.media,

@@ -8,6 +8,7 @@ const TEST_ENV = {
   // Supabase環境変数（テストではモックを使うため実際には使用されない）
   SUPABASE_URL: '',
   SUPABASE_ANON_KEY: '',
+  LOG_LEVEL: 'silent', // テストではログを出力しない
 } satisfies Env['Bindings']
 
 export default TEST_ENV

@@ -1,29 +1,18 @@
 import pino from 'pino'
 
-export type LogLevel = pino.Level
+export type LogLevel = pino.LevelWithSilent
 export type LogMessage = string | Record<string, unknown>
 export type LogContext = Record<string, unknown>
 
-class Logger {
+export default class Logger {
   private readonly logger: pino.Logger
 
+  private readonly level: pino.LevelWithSilent
   private readonly context: LogContext
 
-  constructor(context: LogContext = {}) {
+  constructor(level: LogLevel, context: LogContext = {}) {
+    this.level = level
     this.context = context
-
-    let level: pino.LevelWithSilentOrString
-    switch (process.env.NODE_ENV) {
-      case 'test':
-        level = 'silent'
-        break
-      case 'development':
-        level = 'debug'
-        break
-      default:
-        level = 'info'
-        break
-    }
 
     this.logger = pino({
       level,
@@ -41,12 +30,12 @@ class Logger {
   }
 
   with(context: LogContext): Logger {
-    return new Logger({ ...this.context, ...context })
+    return new Logger(this.level, { ...this.context, ...context })
   }
 
   private log(level: LogLevel, message: LogMessage, ...args: unknown[]): void {
     if (typeof message === 'string') {
-      this.logger[level](this.context, message, ...args)
+      this.logger[level](this.context, message)
     } else {
       this.logger[level]({ ...this.context, ...message })
     }
@@ -65,10 +54,16 @@ class Logger {
   }
 
   error(message: LogMessage, error: Error | unknown, ...args: unknown[]): void {
+    const normalizedError = error instanceof Error ? error : new Error(String(error))
+
     // * pinoのstdSerializersで処理されるよう、errプロパティ名を使用
-    this.log('error', { message, err: error }, ...args)
+    if (typeof message === 'string') {
+      this.logger.error({ ...this.context, err: normalizedError }, message)
+      return
+    }
+
+    this.logger.error({ ...this.context, ...message, err: normalizedError })
   }
 }
 
-export const logger = new Logger()
 export type LoggerType = Logger

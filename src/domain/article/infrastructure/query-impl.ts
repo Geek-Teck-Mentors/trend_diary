@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { OffsetPaginationResult } from '@/common/pagination'
+import { DEFAULT_LIMIT, DEFAULT_PAGE, OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/mapper'
 import { Query } from '@/domain/article/repository'
@@ -22,7 +22,7 @@ export default class QueryImpl implements Query {
     }
 
     // activeUserIdがない場合は従来通り
-    const { page = 1, limit = 20, ...searchParams } = params
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, ...searchParams } = params
     const where = QueryImpl.buildWhereClause(searchParams)
     const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
       { createdAt: 'desc' },
@@ -67,7 +67,7 @@ export default class QueryImpl implements Query {
     params: QueryParams,
     activeUserId: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
-    const { page = 1, limit = 20, ...searchParams } = params
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, ...searchParams } = params
     const offset = (page - 1) * limit
 
     const whereClause = QueryImpl.buildWhereClauseForRawSql(searchParams)

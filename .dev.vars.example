@@ -14,3 +14,6 @@ FEATURE_USER_ENABLED=false
 # Supabase設定
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_ANON_KEY=
+
+# ログレベル(debug,info,warn,error,silent)。未記載の場合の初期値はinfo
+LOG_LEVEL=
