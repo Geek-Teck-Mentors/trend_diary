@@ -47,21 +47,14 @@ describe('GET /api/articles', () => {
     return app.request(url, { method: 'GET' }, TEST_ENV)
   }
 
-  beforeAll(() => {
+  beforeAll(async () => {
     db = getRdbClient(TEST_ENV.DATABASE_URL)
-  })
-
-  afterAll(async () => {
-    await db.$disconnect()
-  })
-
-  beforeEach(async () => {
-    await cleanUp()
     await setupTestData()
   })
 
-  afterEach(async () => {
+  afterAll(async () => {
     await cleanUp()
+    await db.$disconnect()
   })
 
   describe('正常系', () => {
