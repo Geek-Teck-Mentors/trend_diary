@@ -16,7 +16,7 @@ import {
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import UnauthorizedError from '@/common/errors/unauthorizedError'
 import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
-import type { AuthenticationUser } from '../schema/authenticationUser'
+import type { AuthenticationUser } from '../schema/authSchema'
 
 /**
  * Supabaseのユーザー登録エラーが「既に存在する」ことを示すかチェック
@@ -224,5 +224,19 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       user: userResult.data,
       session: this.toSessionObject(session, userResult.data),
     })
+  }
+
+  async deleteUser(userId: string): AsyncResult<void, ServerError> {
+    const result = await wrapAsyncCall(() => this.client.auth.admin.deleteUser(userId))
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
+    }
+
+    const { error } = result.data
+    if (error) {
+      return failure(new ServerError('User deletion failed'))
+    }
+
+    return success(undefined)
   }
 }

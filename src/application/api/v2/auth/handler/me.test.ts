@@ -35,7 +35,6 @@ const mockQuery: Query = {
   findActiveById: vi.fn(),
   findActiveByEmail: vi.fn(),
   findActiveByEmailForAuth: vi.fn(),
-  findActiveBySessionId: vi.fn(),
   findActiveByAuthenticationId: vi.fn((authenticationId: string) => {
     const activeUser = mockActiveUsers.get(authenticationId)
     return Promise.resolve(success(activeUser || null))
@@ -49,12 +48,10 @@ const mockCommand: Command = {
     return Promise.resolve(success(createMockActiveUser(email, authenticationId)))
   }),
   saveActive: vi.fn(),
-  createSession: vi.fn(),
-  deleteSession: vi.fn(),
 }
 
 // SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
-vi.mock('@/domain/auth-v2/infrastructure/supabaseAuthRepository', () => ({
+vi.mock('@/domain/user/infrastructure/supabaseAuthRepository', () => ({
   SupabaseAuthRepository: vi.fn(() => mockRepository),
 }))
 
