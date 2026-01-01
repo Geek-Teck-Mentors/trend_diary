@@ -166,6 +166,19 @@ export class MockAuthV2Repository implements AuthV2Repository {
     })
   }
 
+  async deleteUser(userId: string): AsyncResult<void, ServerError> {
+    if (!this.users.has(userId)) {
+      return failure(new ServerError('User not found'))
+    }
+
+    this.users.delete(userId)
+    if (this.currentUserId === userId) {
+      this.currentUserId = null
+    }
+
+    return success(undefined)
+  }
+
   // テスト用ヘルパーメソッド
   clearAll() {
     this.users.clear()

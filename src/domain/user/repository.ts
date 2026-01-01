@@ -67,4 +67,9 @@ export interface AuthV2Repository {
    * セッションを更新する
    */
   refreshSession(): AsyncResult<AuthV2LoginResult, ServerError>
+
+  /**
+   * ユーザーを削除する（補償トランザクション用）
+   */
+  deleteUser(userId: string): AsyncResult<void, ServerError>
 }

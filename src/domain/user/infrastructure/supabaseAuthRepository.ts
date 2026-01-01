@@ -225,4 +225,18 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       session: this.toSessionObject(session, userResult.data),
     })
   }
+
+  async deleteUser(userId: string): AsyncResult<void, ServerError> {
+    const result = await wrapAsyncCall(() => this.client.auth.admin.deleteUser(userId))
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
+    }
+
+    const { error } = result.data
+    if (error) {
+      return failure(new ServerError('User deletion failed'))
+    }
+
+    return success(undefined)
+  }
 }

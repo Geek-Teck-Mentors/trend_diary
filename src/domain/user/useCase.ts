@@ -1,5 +1,5 @@
 import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
-import { ClientError, ServerError } from '@/common/errors'
+import { ClientError, ExternalServiceError, ServerError } from '@/common/errors'
 import type { Command, Query } from '@/domain/user/repository'
 import type { CurrentUser } from '@/domain/user/schema/activeUserSchema'
 import type { AuthV2Repository } from './repository'
@@ -52,6 +52,14 @@ export class AuthV2UseCase {
     )
 
     if (isFailure(activeUserResult)) {
+      // 補償トランザクション: Supabase Authで作成したユーザーを削除
+      const deleteResult = await this.repository.deleteUser(user.id)
+      if (isFailure(deleteResult)) {
+        // 補償トランザクション失敗時はExternalServiceErrorを返す
+        return failure(
+          new ExternalServiceError(activeUserResult.error, deleteResult.error, { userId: user.id }),
+        )
+      }
       return failure(activeUserResult.error)
     }
 
