@@ -1,7 +1,7 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import { z } from 'zod'
 import CONTEXT_KEY from '@/application/middleware/context'
-import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
+import { ZodValidatedQueryContext } from '@/application/middleware/zod-validator'
 import { handleError } from '@/common/errors'
 import { OffsetPaginationResult, offsetPaginationSchema } from '@/common/pagination'
 import { createArticleUseCase, QueryParams } from '@/domain/article'

@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { Env } from '@/application/env'
 import { authenticator, optionalAuthenticator } from '@/application/middleware/authenticator'
-import zodValidator from '@/application/middleware/zodValidator'
+import zodValidator from '@/application/middleware/zod-validator'
 import getArticles, { apiArticleQuerySchema } from './handler/get-articles'
 import readArticle, {
   articleIdParamSchema,

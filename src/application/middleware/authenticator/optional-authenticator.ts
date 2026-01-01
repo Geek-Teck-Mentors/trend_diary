@@ -2,7 +2,7 @@ import { isSuccess } from '@yuukihayashi0510/core'
 import { createMiddleware } from 'hono/factory'
 import { Env } from '../../env'
 import CONTEXT_KEY from '../context'
-import { validateSession } from './sessionValidation'
+import { validateSession } from './validate'
 
 /**
  * オプショナル認証ミドルウェア

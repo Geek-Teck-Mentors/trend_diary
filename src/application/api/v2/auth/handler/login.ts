@@ -1,6 +1,6 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
-import { ZodValidatedContext } from '@/application/middleware/zodValidator'
+import { ZodValidatedContext } from '@/application/middleware/zod-validator'
 import { handleError } from '@/common/errors'
 import { type AuthInput, createAuthV2UseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
