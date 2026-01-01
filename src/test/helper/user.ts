@@ -1,9 +1,9 @@
 import { isSuccess, success } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
-import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2Repository'
 import type { Command, Query } from '@/domain/user/repository'
 import type { ActiveUser } from '@/domain/user/schema/active-user-schema'
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
+import { MockAuthV2Repository } from '@/test/__mocks__/mockAuthV2Repository'
 import TEST_ENV from '@/test/env'
 
 // モックリポジトリのシングルトンインスタンス
