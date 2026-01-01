@@ -3,7 +3,7 @@ import app from '@/application/server'
 import TEST_ENV from '@/test/env'
 import articleTestHelper from '@/test/helper/articleTestHelper'
 import authV2TestHelper from '@/test/helper/authV2TestHelper'
-import { articleIdParamSchema, createReadHistoryApiSchema } from './readArticle'
+import { articleIdParamSchema, createReadHistoryApiSchema } from './read-article'
 
 describe('API ReadHistoryスキーマ', () => {
   describe('createReadHistoryApiSchema', () => {

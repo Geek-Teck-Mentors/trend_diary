@@ -3,7 +3,7 @@ import {
   createAuthenticatedApiHandler,
 } from '@/application/api/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
-import { ArticleIdParam } from './readArticle'
+import { ArticleIdParam } from './read-article'
 
 export default createAuthenticatedApiHandler({
   createUseCase: createArticleUseCase,
