@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { RdbClient } from '@/infrastructure/rdb'
-import { CreateSessionInput } from '../dto'
 import { Command } from '../repository'
 import type { ActiveUser, CurrentUser } from '../schema/activeUserSchema'
 import { mapToActiveUser } from './mapper'
@@ -76,44 +75,5 @@ export default class CommandImpl implements Command {
     }
 
     return success(mapToActiveUser(updatedActiveUserResult.data))
-  }
-
-  async createSession(
-    input: CreateSessionInput,
-  ): AsyncResult<{ sessionId: string; expiresAt: Date }, ServerError> {
-    const sessionResult = await wrapAsyncCall(() =>
-      this.db.session.create({
-        data: {
-          sessionId: input.sessionId,
-          activeUserId: input.activeUserId,
-          sessionToken: input.sessionToken,
-          expiresAt: input.expiresAt,
-          ipAddress: input.ipAddress,
-          userAgent: input.userAgent,
-        },
-      }),
-    )
-    if (isFailure(sessionResult)) {
-      return failure(new ServerError(sessionResult.error))
-    }
-
-    const session = sessionResult.data
-    return success({
-      sessionId: session.sessionId,
-      expiresAt: session.expiresAt,
-    })
-  }
-
-  async deleteSession(sessionId: string): AsyncResult<void, ServerError> {
-    const result = await wrapAsyncCall(() =>
-      this.db.session.delete({
-        where: { sessionId },
-      }),
-    )
-    if (isFailure(result)) {
-      return failure(new ServerError(result.error))
-    }
-
-    return success(undefined)
   }
 }

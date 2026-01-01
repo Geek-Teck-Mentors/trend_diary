@@ -1,3 +1,4 @@
+import { createAuthV2UseCase } from './factory'
 import {
   ActiveUser,
   ActiveUserInput,
@@ -6,9 +7,13 @@ import {
   CurrentUser,
   currentUserSchema,
 } from './schema/activeUserSchema'
+import { AuthenticationSession, AuthInput, authInputSchema } from './schema/authSchema'
 
 // 型
-export type { ActiveUser, ActiveUserInput, CurrentUser }
+export type { ActiveUser, ActiveUserInput, CurrentUser, AuthenticationSession, AuthInput }
 
 // スキーマ
-export { activeUserSchema, activeUserInputSchema, currentUserSchema }
+export { activeUserSchema, activeUserInputSchema, currentUserSchema, authInputSchema }
+
+// ファクトリ
+export { createAuthV2UseCase }

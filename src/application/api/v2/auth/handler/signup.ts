@@ -1,8 +1,8 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedContext } from '@/application/middleware/zodValidator'
-import { handleError } from '@/common/errors'
-import { type AuthInput, createAuthV2UseCase } from '@/domain/auth-v2'
+import { ExternalServiceError, handleError } from '@/common/errors'
+import { type AuthInput, createAuthV2UseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
 
@@ -15,7 +15,19 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
   const useCase = createAuthV2UseCase(client, rdb)
 
   const result = await useCase.signup(valid.email, valid.password)
-  if (isFailure(result)) throw handleError(result.error, logger)
+  if (isFailure(result)) {
+    // 補償トランザクション失敗時のログ出力
+    if (result.error instanceof ExternalServiceError) {
+      logger.error(result.error.message, {
+        context: result.error.context,
+        errors: {
+          original: result.error.originalError.message,
+          compensation: result.error.serviceError.message,
+        },
+      })
+    }
+    throw handleError(result.error, logger)
+  }
 
   const { activeUser } = result.data
   logger.info('signup success', { activeUserId: activeUser.activeUserId })

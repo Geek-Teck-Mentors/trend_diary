@@ -1,4 +1,4 @@
-import { AuthInput, authInputSchema } from '@/domain/auth-v2'
+import { AuthInput, authInputSchema } from '@/domain/user'
 import { newValidationError, newValidationSuccess, ValidationResult } from '../validation'
 
 export type AuthenticateErrors = {
