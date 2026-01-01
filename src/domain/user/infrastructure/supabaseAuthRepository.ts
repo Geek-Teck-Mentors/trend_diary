@@ -234,7 +234,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
 
     const { error } = result.data
     if (error) {
-      return failure(new ServerError('User deletion failed'))
+      return failure(new ServerError(`User deletion failed: ${error.message}`))
     }
 
     return success(undefined)
