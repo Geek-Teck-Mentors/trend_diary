@@ -55,14 +55,10 @@ export class AuthV2UseCase {
       // 補償トランザクション: Supabase Authで作成したユーザーを削除
       const deleteResult = await this.repository.deleteUser(user.id)
       if (isFailure(deleteResult)) {
-    if (isFailure(activeUserResult)) {
-      // 補償トランザクション: Supabase Authで作成したユーザーを削除
-      const deleteResult = await this.repository.deleteUser(user.id)
-      if (isFailure(deleteResult)) {
         // 補償トランザクション失敗時はExternalServiceErrorを返す
         return failure(
           new ExternalServiceError(
-            'Compensation transaction failed: Supabase Auth user deletion failed',
+            'Failed to delete Supabase Auth user during compensation',
             activeUserResult.error,
             deleteResult.error,
             { userId: user.id },
