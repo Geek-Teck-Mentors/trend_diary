@@ -34,7 +34,7 @@ export class UseCase {
       readStatus: params.readStatus,
     }
 
-    return this.query.searchArticles(optimizedParams as QueryParams, activeUserId)
+    return this.query.searchArticles(optimizedParams, activeUserId)
   }
 
   async createReadHistory(
