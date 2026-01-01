@@ -6,7 +6,7 @@ import ServerError from './server-error'
 
 export default function handleError(error: unknown, logger: LoggerType): HTTPException {
   if (error instanceof ClientError) {
-    logger.warn('client error in search', error)
+    logger.warn('client error', error)
     return new HTTPException(error.statusCode as ContentfulStatusCode, {
       message: error.message,
     })

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
+import { DEFAULT_LIMIT, DEFAULT_PAGE } from '@/common/pagination'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
@@ -44,6 +45,12 @@ export type FetchArticles = (params: {
 
 export default function useTrends() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [articles, setArticles] = useState<Article[]>([])
+  const [page, setPage] = useState(DEFAULT_PAGE)
+  const [limit, setLimit] = useState(DEFAULT_LIMIT)
+  const [totalPages, setTotalPages] = useState(DEFAULT_PAGE)
+  const [isLoading, setIsLoading] = useState(false)
+  const isLoadingRef = useRef(false)
   const isMobile = useIsMobile()
 
   const date = useMemo(() => new Date(), [])

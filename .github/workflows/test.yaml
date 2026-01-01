@@ -40,6 +40,7 @@ jobs:
       run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-frontend.outputs.diff-count != 0 }}
       run_domain_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-domain.outputs.diff-count != 0 }}
       run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-api.outputs.diff-count != 0 }}
+      run_common_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-common.outputs.diff-count != 0 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -53,20 +54,26 @@ jobs:
         id: check-frontend
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/web src/application/web/components src/test/vitest/config.frontend.ts'
+          subdir: 'src/application/web'
           exclude_pattern: 'src/application/web/components/shadcn'
 
       - name: ドメインの差分チェック
         id: check-domain
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/domain src/test/vitest/config.domain.ts'
+          subdir: 'src/domain'
 
       - name: APIの差分チェック
         id: check-api
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/api src/test/vitest/config.api.ts'
+          subdir: 'src/application/api'
+
+      - name: 共通モジュールの差分チェック
+        id: check-common
+        uses: ./.github/actions/diff
+        with:
+          subdir: 'src/common'
 
       - name: 差分結果の表示
         run: |
@@ -139,3 +146,19 @@ jobs:
         uses: ./.github/actions/test_cov
         with:
           target: api
+
+  common:
+    needs: setup
+    runs-on: ${{ needs.setup.outputs.test_runner }}
+    if: ${{ needs.setup.outputs.run_common_test == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+      
+      - name: 共通モジュールのテスト
+        uses: ./.github/actions/test_cov
+        with:
+          target: common
