@@ -1,7 +1,7 @@
 import { HTTPException } from 'hono/http-exception'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
 import { LoggerType } from '@/common/logger'
-import ClientError from './client-error'
+import ClientError from './client-error/client-error'
 import ServerError from './server-error'
 
 export default function handleError(error: unknown, logger: LoggerType): HTTPException {
