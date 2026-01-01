@@ -12,13 +12,19 @@ class Logger {
   constructor(context: LogContext = {}) {
     this.context = context
 
-    let level: pino.LevelWithSilentOrString = 'info'
-    if (process.env.NODE_ENV === 'test') {
-      level = 'silent'
+    let level: pino.LevelWithSilentOrString
+    switch (process.env.NODE_ENV) {
+      case 'test':
+        level = 'silent'
+        break
+      case 'development':
+        level = 'debug'
+        break
+      default:
+        level = 'info'
+        break
     }
-    if (process.env.NODE_ENV === 'development') {
-      level = 'debug'
-    }
+
     this.logger = pino({
       level,
       formatters: {
