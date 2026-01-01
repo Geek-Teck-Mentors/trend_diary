@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
-import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
+import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
 

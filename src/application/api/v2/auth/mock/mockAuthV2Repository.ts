@@ -1,13 +1,13 @@
 import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import * as bcrypt from 'bcryptjs'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
-import UnauthorizedError from '@/common/errors/unauthorizedError'
+import UnauthorizedError from '@/common/errors/client-error/unauthorized-error'
 import type {
   AuthV2LoginResult,
   AuthV2Repository,
   AuthV2SignupResult,
 } from '@/domain/user/repository'
-import type { AuthenticationUser } from '@/domain/user/schema/authSchema'
+import type { AuthenticationUser } from '@/domain/user/schema/auth-schema'
 
 const BCRYPT_SALT_ROUNDS = 10
 
