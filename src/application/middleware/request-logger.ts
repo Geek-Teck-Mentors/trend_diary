@@ -1,9 +1,10 @@
 import { createMiddleware } from 'hono/factory'
 import { v4 as uuidv4 } from 'uuid'
-import { logger } from '@/common/logger'
+import Logger from '@/common/logger'
+import { Env } from '../env'
 import CONTEXT_KEY from './context'
 
-const requestLogger = createMiddleware(async (c, next) => {
+const requestLogger = createMiddleware<Env>(async (c, next) => {
   const requestId = uuidv4()
   const startTime = performance.now()
 
@@ -11,6 +12,7 @@ const requestLogger = createMiddleware(async (c, next) => {
   const { path } = c.req
   const userAgent = c.req.header('user-agent')
 
+  const logger = new Logger(c.env.LOG_LEVEL ?? 'info')
   const requestLogger = logger.with({
     request_id: requestId,
     method,
