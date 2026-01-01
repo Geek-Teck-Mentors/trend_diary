@@ -32,6 +32,20 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    services: &postgres-service
+      postgres:
+        image: postgres:15.8
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 54322:54322
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -58,6 +72,7 @@ jobs:
     if: github.event_name == 'pull_request'
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    services: *postgres-service
     steps:
       - uses: actions/checkout@v4
         with:
