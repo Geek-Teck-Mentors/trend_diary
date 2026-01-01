@@ -1,7 +1,7 @@
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { ArticleCommand } from '@/domain/article/repository'
-import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
+import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
 import { RdbClient } from '@/infrastructure/rdb'
 
 export default class ArticleCommandImpl implements ArticleCommand {

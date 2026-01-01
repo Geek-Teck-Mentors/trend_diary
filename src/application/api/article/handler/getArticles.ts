@@ -5,8 +5,8 @@ import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { OffsetPaginationResult, offsetPaginationSchema } from '@/common/pagination'
 import { ArticleQueryParams, createArticleUseCase } from '@/domain/article'
-import type { ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
-import { ArticleOutput } from '@/domain/article/schema/articleSchema'
+import type { ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import { ArticleOutput } from '@/domain/article/schema/article-schema'
 import getRdbClient from '@/infrastructure/rdb'
 
 const mediaEnum = z.enum(['qiita', 'zenn'])

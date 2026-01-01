@@ -4,10 +4,10 @@ import { mockDeep } from 'vitest-mock-extended'
 import { NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
-import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
-import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
-import { UseCase } from './useCase'
+import { ArticleQueryParams } from '@/domain/article/schema/article-query-schema'
+import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
+import { UseCase } from './use-case'
 
 const mockArticle: Article = {
   articleId: BigInt(1),

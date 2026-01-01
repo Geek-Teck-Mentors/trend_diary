@@ -3,10 +3,10 @@ import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukih
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
-import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
+import fromPrismaToArticle from '@/domain/article/infrastructure/article-mapper'
 import { ArticleQuery } from '@/domain/article/repository'
-import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
+import { ArticleQueryParams } from '@/domain/article/schema/article-query-schema'
+import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
 import { RdbClient } from '@/infrastructure/rdb'
 
 export default class ArticleQueryImpl implements ArticleQuery {

@@ -3,9 +3,9 @@ import { AsyncResult } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
-import { ArticleQueryParams } from './schema/articleQuerySchema'
-import type { ArticleWithOptionalReadStatus } from './schema/articleSchema'
-import type { ReadHistory } from './schema/readHistorySchema'
+import { ArticleQueryParams } from './schema/article-query-schema'
+import type { ArticleWithOptionalReadStatus } from './schema/article-schema'
+import type { ReadHistory } from './schema/read-history-schema'
 
 export interface ArticleQuery {
   /**

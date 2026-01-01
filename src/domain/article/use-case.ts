@@ -4,9 +4,9 @@ import { OffsetPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
 import { isNull } from '@/common/types/utility'
 import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
-import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
-import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
+import { ArticleQueryParams } from '@/domain/article/schema/article-query-schema'
+import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
 
 export class UseCase {
   constructor(

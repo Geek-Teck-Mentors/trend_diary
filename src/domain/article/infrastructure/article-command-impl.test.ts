@@ -1,7 +1,7 @@
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it } from 'vitest'
 import mockDb from '@/test/__mocks__/prisma'
-import ArticleCommandImpl from './articleCommandImpl'
+import ArticleCommandImpl from './article-command-impl'
 
 describe('ArticleCommandImpl', () => {
   let commandImpl: ArticleCommandImpl
