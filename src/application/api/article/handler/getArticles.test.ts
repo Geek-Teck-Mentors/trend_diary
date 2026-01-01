@@ -1,33 +1,8 @@
-import { vi } from 'vitest'
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import articleTestHelper from '@/test/helper/articleTestHelper'
-import authV2TestHelper, {
-  mockCommand,
-  mockQuery,
-  mockRepository,
-} from '@/test/helper/authV2TestHelper'
+import authV2TestHelper, { mockRepository } from '@/test/helper/authV2TestHelper'
 import app from '../../../server'
-
-// SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
-vi.mock('@/domain/auth-v2/infrastructure/supabaseAuthRepository', () => ({
-  SupabaseAuthRepository: vi.fn(() => mockRepository),
-}))
-
-// QueryImplをモック
-vi.mock('@/domain/user/infrastructure/queryImpl', () => ({
-  default: vi.fn(() => mockQuery),
-}))
-
-// CommandImplをモック
-vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
-  default: vi.fn(() => mockCommand),
-}))
-
-// createSupabaseAuthClientはモックして何も返さない（使われないため）
-vi.mock('@/infrastructure/supabase', () => ({
-  createSupabaseAuthClient: () => ({}),
-}))
 
 import { ArticleListResponse, ArticleWithReadStatusResponse } from './getArticles'
 
