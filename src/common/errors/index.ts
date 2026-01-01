@@ -1,9 +1,9 @@
-import AlreadyExistsError from './alreadyExistsError'
-import ClientError from './clientError'
-import ExternalServiceError from './externalServiceError'
+import AlreadyExistsError from './already-exists-error'
+import ClientError from './client-error'
+import ExternalServiceError from './external-service-error'
 import handleError from './handle'
-import NotFoundError from './notFoundError'
-import ServerError from './serverError'
+import NotFoundError from './not-found-error'
+import ServerError from './server-error'
 
 export {
   ClientError,

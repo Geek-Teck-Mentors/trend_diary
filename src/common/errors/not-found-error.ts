@@ -1,4 +1,4 @@
-import ClientError from './clientError'
+import ClientError from './client-error'
 
 export default class NotFoundError extends ClientError {
   constructor(message: string) {

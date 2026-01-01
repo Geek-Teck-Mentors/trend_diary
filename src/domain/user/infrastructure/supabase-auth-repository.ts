@@ -14,7 +14,7 @@ import {
   wrapAsyncCall,
 } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
-import UnauthorizedError from '@/common/errors/unauthorizedError'
+import UnauthorizedError from '@/common/errors/unauthorized-error'
 import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
 import type { AuthenticationUser } from '../schema/auth-schema'
 
