@@ -15,7 +15,7 @@ env:
   NODE_VERSION_FILE: .node-version
 
 jobs:
-  biome:
+  code-quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

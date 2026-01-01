@@ -6,7 +6,7 @@
 
 ### 1. ドメイン層テスト (`test:domain`)
 
-**設定ファイル**: `src/test/vitest-config/config.domain.ts`
+**設定ファイル**: `src/test/vitest/config/domain.ts`
 
 **特徴**:
 - モックPrismaクライアントを使用（`src/test/__mocks__/prisma.ts`）
@@ -32,7 +32,7 @@ npm run test:domain
 
 ### 2. API層テスト (`test:api`)
 
-**設定ファイル**: `src/test/vitest-config/config.api.ts`
+**設定ファイル**: `src/test/vitest/config/api.ts`
 
 **特徴**:
 - **実際のデータベース**を使用した統合テスト
@@ -57,7 +57,7 @@ npm run test:api
 
 ### 3. フロントエンド層テスト (`test:frontend`)
 
-**設定ファイル**: `src/test/vitest-config/config.frontend.ts`
+**設定ファイル**: `src/test/vitest/config/frontend.ts`
 
 **特徴**:
 - React Testing Libraryを使用
@@ -82,7 +82,7 @@ npm run test:frontend
 
 ### 4. Storybookテスト (`test-storybook`)
 
-**設定ファイル**: `src/test/vitest-config/config.storybook.ts`
+**設定ファイル**: `src/test/vitest/config/storybook.ts`
 
 **特徴**:
 - UIコンポーネントのビジュアルテスト

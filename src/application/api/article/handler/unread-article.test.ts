@@ -1,7 +1,7 @@
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import articleTestHelper from '@/test/helper/articleTestHelper'
-import authV2TestHelper from '@/test/helper/authV2TestHelper'
+import articleTestHelper from '@/test/helper/article'
+import userTestHelper from '@/test/helper/user'
 
 describe('DELETE /api/articles/:article_id/unread', () => {
   let testActiveUserId: bigint
@@ -10,8 +10,8 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
-    await authV2TestHelper.create('test@example.com', 'Test@password123')
-    const loginData = await authV2TestHelper.login('test@example.com', 'Test@password123')
+    await userTestHelper.create('test@example.com', 'Test@password123')
+    const loginData = await userTestHelper.login('test@example.com', 'Test@password123')
     testActiveUserId = loginData.activeUserId
     accessToken = loginData.accessToken
 
@@ -43,13 +43,13 @@ describe('DELETE /api/articles/:article_id/unread', () => {
   }
 
   beforeEach(async () => {
-    await authV2TestHelper.cleanUp()
+    await userTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await authV2TestHelper.cleanUp()
+    await userTestHelper.cleanUp()
     await articleTestHelper.cleanUpArticles()
   })
 
