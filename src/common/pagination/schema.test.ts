@@ -22,8 +22,8 @@ describe('offsetPaginationSchema', () => {
   ] as const
 
   for (const { name, input, expected } of cases) {
-    const result = offsetPaginationSchema.parse(input)
     it(name, () => {
+      const result = offsetPaginationSchema.parse(input)
       expect(result).toEqual(expected)
     })
   }
