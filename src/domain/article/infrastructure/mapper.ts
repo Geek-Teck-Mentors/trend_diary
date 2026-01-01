@@ -1,5 +1,5 @@
 import { Article as PrismaArticle } from '@prisma/client'
-import type { Article } from '@/domain/article/schema/articleSchema'
+import type { Article } from '@/domain/article/schema/article-schema'
 
 export default function fromPrismaToArticle(prismaArticle: PrismaArticle): Article {
   return {

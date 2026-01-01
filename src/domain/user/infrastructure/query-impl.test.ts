@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import QueryImpl from './queryImpl'
+import QueryImpl from './query-impl'
 
 // モックの設定
 const mockDb = mockDeep<PrismaClient>()

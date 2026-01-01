@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { ActiveUser } from './activeUserSchema'
+import type { ActiveUser } from './active-user-schema'
 import { recordLogin } from './method'
 
 function makeActiveUser(overrides: Partial<ActiveUser> = {}): ActiveUser {

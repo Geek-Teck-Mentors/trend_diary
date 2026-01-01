@@ -3,15 +3,15 @@ import { NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
 import { isNull } from '@/common/types/utility'
-import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
-import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
-import type { ReadHistory } from '@/domain/article/schema/readHistorySchema'
+import { Command, Query } from '@/domain/article/repository'
+import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import { QueryParams } from '@/domain/article/schema/query-schema'
+import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
 
 export class UseCase {
   constructor(
-    private readonly articleQuery: ArticleQuery,
-    private readonly articleCommand: ArticleCommand,
+    private readonly query: Query,
+    private readonly command: Command,
   ) {}
 
   /**
@@ -20,10 +20,10 @@ export class UseCase {
    * @param activeUserId オプション。指定された場合、各記事にisReadフィールドを付与
    */
   async searchArticles(
-    params: ArticleQueryParams,
+    params: QueryParams,
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
-    const optimizedParams: Partial<ArticleQueryParams> = {
+    const optimizedParams: QueryParams = {
       title: extractTrimmed(params.title),
       author: extractTrimmed(params.author),
       limit: params.limit ?? 20,
@@ -34,7 +34,7 @@ export class UseCase {
       readStatus: params.readStatus,
     }
 
-    return this.articleQuery.searchArticles(optimizedParams as ArticleQueryParams, activeUserId)
+    return this.query.searchArticles(optimizedParams, activeUserId)
   }
 
   async createReadHistory(
@@ -45,18 +45,18 @@ export class UseCase {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isFailure(articleValidation)) return articleValidation
 
-    return this.articleCommand.createReadHistory(activeUserId, articleId, readAt)
+    return this.command.createReadHistory(activeUserId, articleId, readAt)
   }
 
   async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isFailure(articleValidation)) return articleValidation
 
-    return this.articleCommand.deleteAllReadHistory(activeUserId, articleValidation.data.articleId)
+    return this.command.deleteAllReadHistory(activeUserId, articleValidation.data.articleId)
   }
 
   private async validateArticleExists(articleId: bigint): AsyncResult<Article, Error> {
-    const res = await this.articleQuery.findArticleById(articleId)
+    const res = await this.query.findArticleById(articleId)
     if (isFailure(res)) return res
 
     if (isNull(res.data)) {

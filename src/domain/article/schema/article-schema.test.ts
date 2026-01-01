@@ -1,4 +1,4 @@
-import { articleSchema, articleWithReadStatusSchema } from './articleSchema'
+import { articleSchema, articleWithReadStatusSchema } from './article-schema'
 
 describe('記事スキーマ', () => {
   const validArticle = {

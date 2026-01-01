@@ -3,17 +3,17 @@ import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukih
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
-import fromPrismaToArticle from '@/domain/article/infrastructure/articleMapper'
-import { ArticleQuery } from '@/domain/article/repository'
-import { ArticleQueryParams } from '@/domain/article/schema/articleQuerySchema'
-import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
+import fromPrismaToArticle from '@/domain/article/infrastructure/mapper'
+import { Query } from '@/domain/article/repository'
+import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import { QueryParams } from '@/domain/article/schema/query-schema'
 import { RdbClient } from '@/infrastructure/rdb'
 
-export default class ArticleQueryImpl implements ArticleQuery {
+export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
   async searchArticles(
-    params: ArticleQueryParams,
+    params: QueryParams,
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
     // activeUserIdがある場合は生SQLでLEFT JOINして1クエリで取得
@@ -23,7 +23,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
 
     // activeUserIdがない場合は従来通り
     const { page = 1, limit = 20, ...searchParams } = params
-    const where = ArticleQueryImpl.buildWhereClause(searchParams)
+    const where = QueryImpl.buildWhereClause(searchParams)
     const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
       { createdAt: 'desc' },
       { articleId: 'desc' },
@@ -64,13 +64,13 @@ export default class ArticleQueryImpl implements ArticleQuery {
   }
 
   private async searchArticlesWithReadStatus(
-    params: ArticleQueryParams,
+    params: QueryParams,
     activeUserId: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
     const { page = 1, limit = 20, ...searchParams } = params
     const offset = (page - 1) * limit
 
-    const whereClause = ArticleQueryImpl.buildWhereClauseForRawSql(searchParams)
+    const whereClause = QueryImpl.buildWhereClauseForRawSql(searchParams)
 
     const countSql = Prisma.sql`SELECT COUNT(*)::int as count FROM articles a ${whereClause}`
     const dataSql = Prisma.sql`
@@ -163,7 +163,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
   }
 
   private static buildWhereClause(
-    params: Omit<ArticleQueryParams, 'page' | 'limit'>,
+    params: Omit<QueryParams, 'page' | 'limit'>,
   ): Prisma.ArticleWhereInput {
     const where: Prisma.ArticleWhereInput = {}
 
@@ -206,7 +206,7 @@ export default class ArticleQueryImpl implements ArticleQuery {
   }
 
   private static buildWhereClauseForRawSql(
-    params: Omit<ArticleQueryParams, 'page' | 'limit'>,
+    params: Omit<QueryParams, 'page' | 'limit'>,
   ): Prisma.Sql {
     const conditions: Prisma.Sql[] = []
 

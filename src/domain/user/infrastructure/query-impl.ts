@@ -3,7 +3,7 @@ import { ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
 import { Query } from '../repository'
-import type { ActiveUser, CurrentUser } from '../schema/activeUserSchema'
+import type { ActiveUser, CurrentUser } from '../schema/active-user-schema'
 import { mapToActiveUser } from './mapper'
 
 export default class QueryImpl implements Query {

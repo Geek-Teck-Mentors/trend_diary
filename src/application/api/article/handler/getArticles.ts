@@ -4,9 +4,9 @@ import CONTEXT_KEY from '@/application/middleware/context'
 import { ZodValidatedQueryContext } from '@/application/middleware/zodValidator'
 import { handleError } from '@/common/errors'
 import { OffsetPaginationResult, offsetPaginationSchema } from '@/common/pagination'
-import { ArticleQueryParams, createArticleUseCase } from '@/domain/article'
-import type { ArticleWithOptionalReadStatus } from '@/domain/article/schema/articleSchema'
-import { ArticleOutput } from '@/domain/article/schema/articleSchema'
+import { createArticleUseCase, QueryParams } from '@/domain/article'
+import type { ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import { ArticleOutput } from '@/domain/article/schema/article-schema'
 import getRdbClient from '@/infrastructure/rdb'
 
 const mediaEnum = z.enum(['qiita', 'zenn'])
@@ -44,7 +44,7 @@ export const apiArticleQuerySchema = baseArticleSearchSchema
     message: DATE_RANGE_ERROR_MESSAGE,
   })
 
-export type ApiArticleQueryParams = z.infer<typeof apiArticleQuerySchema>
+export type ApiQueryParams = z.infer<typeof apiArticleQuerySchema>
 
 export type ArticleResponse = Omit<ArticleOutput, 'articleId'> & {
   articleId: string
@@ -57,7 +57,7 @@ export type ArticleWithReadStatusResponse = ArticleResponse & {
 
 export type ArticleListResponse = OffsetPaginationResult<ArticleResponse>
 
-export default async function getArticles(c: ZodValidatedQueryContext<ApiArticleQueryParams>) {
+export default async function getArticles(c: ZodValidatedQueryContext<ApiQueryParams>) {
   const transformedParams = c.req.valid('query')
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
@@ -69,7 +69,7 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   const useCase = createArticleUseCase(rdb)
 
   const result = await useCase.searchArticles(
-    convertApiArticleQueryParams(transformedParams),
+    convertApiQueryParams(transformedParams),
     activeUserId,
   )
   if (isFailure(result)) {
@@ -90,7 +90,7 @@ export default async function getArticles(c: ZodValidatedQueryContext<ApiArticle
   return c.json(response)
 }
 
-function convertApiArticleQueryParams(params: ApiArticleQueryParams): ArticleQueryParams {
+function convertApiQueryParams(params: ApiQueryParams): QueryParams {
   let readStatus: boolean | undefined
   if (params.read_status === '1') {
     readStatus = true
