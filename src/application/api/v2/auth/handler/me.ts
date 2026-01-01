@@ -2,7 +2,7 @@ import { isFailure } from '@yuukihayashi0510/core'
 import type { Context } from 'hono'
 import CONTEXT_KEY from '@/application/middleware/context'
 import { handleError } from '@/common/errors'
-import { createAuthV2UseCase } from '@/domain/auth-v2'
+import { createAuthV2UseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
 
