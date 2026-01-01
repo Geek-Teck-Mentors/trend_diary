@@ -1,4 +1,4 @@
-import { articleQuerySchema } from './article-query-schema'
+import { articleQuerySchema } from './query-schema'
 
 describe('記事検索スキーマ', () => {
   it('有効な記事検索パラメータを受け入れること', () => {

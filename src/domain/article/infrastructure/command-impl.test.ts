@@ -1,13 +1,13 @@
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it } from 'vitest'
 import mockDb from '@/test/__mocks__/prisma'
-import ArticleCommandImpl from './article-command-impl'
+import CommandImpl from './command-impl'
 
-describe('ArticleCommandImpl', () => {
-  let commandImpl: ArticleCommandImpl
+describe('CommandImpl', () => {
+  let commandImpl: CommandImpl
 
   beforeEach(() => {
-    commandImpl = new ArticleCommandImpl(mockDb)
+    commandImpl = new CommandImpl(mockDb)
   })
 
   describe('createReadHistory', () => {

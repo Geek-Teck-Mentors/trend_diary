@@ -1,6 +1,6 @@
 import { Article as PrismaArticle } from '@prisma/client'
 import { describe, expect, it } from 'vitest'
-import fromPrismaToArticle from './article-mapper'
+import fromPrismaToArticle from './mapper'
 
 describe('fromPrismaToArticle', () => {
   // テストデータ作成ヘルパー

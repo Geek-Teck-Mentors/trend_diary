@@ -3,9 +3,9 @@ import { failure, isFailure, isSuccess, success } from '@yuukihayashi0510/core'
 import { mockDeep } from 'vitest-mock-extended'
 import { NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
-import { ArticleCommand, ArticleQuery } from '@/domain/article/repository'
-import { ArticleQueryParams } from '@/domain/article/schema/article-query-schema'
+import { Command, Query } from '@/domain/article/repository'
 import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import { QueryParams } from '@/domain/article/schema/query-schema'
 import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
 import { UseCase } from './use-case'
 
@@ -39,12 +39,11 @@ const mockPaginationResultWithReadStatus: OffsetPaginationResult<ArticleWithOpti
   hasPrev: false,
 }
 
-const mockArticleQuery = mockDeep<ArticleQuery>()
-const mockArticleCommand = mockDeep<ArticleCommand>()
+const queryMock = mockDeep<Query>()
+const commandMock = mockDeep<Command>()
 
 describe('ArticleUseCase', () => {
-  const useCase = new UseCase(mockArticleQuery, mockArticleCommand)
-
+  const useCase = new UseCase(queryMock, commandMock)
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -52,7 +51,7 @@ describe('ArticleUseCase', () => {
   describe('searchArticles', () => {
     describe('正常系', () => {
       it('有効なパラメータで記事検索成功', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           title: 'test title',
           author: 'test author',
           media: 'qiita',
@@ -63,18 +62,18 @@ describe('ArticleUseCase', () => {
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledTimes(1)
-        const calledArgs = mockArticleQuery.searchArticles.mock.calls[0][0]
+        expect(queryMock.searchArticles).toHaveBeenCalledTimes(1)
+        const calledArgs = queryMock.searchArticles.mock.calls[0][0]
         expect(calledArgs).toEqual(params)
       })
 
       it('全てのパラメータが含まれるfrom/to検索', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           title: 'test title',
           author: 'test author',
           media: 'qiita',
@@ -85,29 +84,29 @@ describe('ArticleUseCase', () => {
           page: 2,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledTimes(1)
-        const calledArgs = mockArticleQuery.searchArticles.mock.calls[0][0]
+        expect(queryMock.searchArticles).toHaveBeenCalledTimes(1)
+        const calledArgs = queryMock.searchArticles.mock.calls[0][0]
         expect(calledArgs).toEqual(params)
       })
 
       it('titleパラメータのみで検索', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           title: 'test title',
           limit: 20,
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+        expect(queryMock.searchArticles).toHaveBeenCalledWith(
           {
             title: 'test title',
             limit: 20,
@@ -118,18 +117,18 @@ describe('ArticleUseCase', () => {
       })
 
       it('authorパラメータのみで検索', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           author: 'test author',
           limit: 20,
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+        expect(queryMock.searchArticles).toHaveBeenCalledWith(
           {
             author: 'test author',
             limit: 20,
@@ -140,18 +139,18 @@ describe('ArticleUseCase', () => {
       })
 
       it('mediaパラメータのみで検索', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           media: 'zenn',
           limit: 20,
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+        expect(queryMock.searchArticles).toHaveBeenCalledWith(
           {
             media: 'zenn',
             limit: 20,
@@ -162,18 +161,18 @@ describe('ArticleUseCase', () => {
       })
 
       it('fromパラメータのみで検索', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           from: '2024-01-01',
           limit: 20,
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+        expect(queryMock.searchArticles).toHaveBeenCalledWith(
           {
             from: '2024-01-01',
             limit: 20,
@@ -184,18 +183,18 @@ describe('ArticleUseCase', () => {
       })
 
       it('toパラメータのみで検索', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           to: '2024-01-31',
           limit: 20,
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+        expect(queryMock.searchArticles).toHaveBeenCalledWith(
           {
             to: '2024-01-31',
             limit: 20,
@@ -206,19 +205,19 @@ describe('ArticleUseCase', () => {
       })
 
       it('from/toパラメータの組み合わせで検索', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           from: '2024-01-01',
           to: '2024-01-31',
           limit: 20,
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+        expect(queryMock.searchArticles).toHaveBeenCalledWith(
           {
             from: '2024-01-01',
             to: '2024-01-31',
@@ -230,18 +229,18 @@ describe('ArticleUseCase', () => {
       })
 
       it('readStatusパラメータのみで検索', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           readStatus: true,
           limit: 20,
           page: 1,
         }
 
-        mockArticleQuery.searchArticles.mockResolvedValue(success(mockPaginationResult))
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as ArticleQueryParams)
+        const result = await useCase.searchArticles(params as QueryParams)
 
         expect(result).toEqual(success(mockPaginationResult))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+        expect(queryMock.searchArticles).toHaveBeenCalledWith(
           {
             readStatus: true,
             limit: 20,
@@ -252,20 +251,18 @@ describe('ArticleUseCase', () => {
       })
 
       it('activeUserIdを渡すと既読情報付きで記事検索成功', async () => {
-        const params: ArticleQueryParams = {
+        const params: QueryParams = {
           limit: 20,
           page: 1,
         }
         const activeUserId = 100n
 
-        mockArticleQuery.searchArticles.mockResolvedValue(
-          success(mockPaginationResultWithReadStatus),
-        )
+        queryMock.searchArticles.mockResolvedValue(success(mockPaginationResultWithReadStatus))
 
         const result = await useCase.searchArticles(params, activeUserId)
 
         expect(result).toEqual(success(mockPaginationResultWithReadStatus))
-        expect(mockArticleQuery.searchArticles).toHaveBeenCalledWith(
+        expect(queryMock.searchArticles).toHaveBeenCalledWith(
           {
             limit: 20,
             page: 1,
@@ -276,14 +273,14 @@ describe('ArticleUseCase', () => {
     })
 
     it('異常系: リポジトリ層でのDBエラー', async () => {
-      const params: ArticleQueryParams = {
+      const params: QueryParams = {
         title: 'test title',
         limit: 20,
         page: 1,
       }
 
       const dbError = new ServerError('Database error')
-      mockArticleQuery.searchArticles.mockResolvedValue(failure(dbError))
+      queryMock.searchArticles.mockResolvedValue(failure(dbError))
 
       const result = await useCase.searchArticles(params)
 
@@ -298,7 +295,7 @@ describe('ArticleUseCase', () => {
       const readAt = new Date('2024-01-01T10:00:00Z')
 
       // 記事存在確認のモック
-      mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
+      queryMock.findArticleById.mockResolvedValue(success(mockArticle))
 
       const mockReadHistory: ReadHistory = {
         readHistoryId: 1n,
@@ -307,7 +304,7 @@ describe('ArticleUseCase', () => {
         readAt: readAt,
         createdAt: new Date(),
       }
-      mockArticleCommand.createReadHistory.mockResolvedValue(success(mockReadHistory))
+      commandMock.createReadHistory.mockResolvedValue(success(mockReadHistory))
 
       const result = await useCase.createReadHistory(userId, articleId, readAt)
 
@@ -318,8 +315,8 @@ describe('ArticleUseCase', () => {
         expect(result.data.readAt).toBe(readAt)
       }
 
-      expect(mockArticleQuery.findArticleById).toHaveBeenCalledWith(articleId)
-      expect(mockArticleCommand.createReadHistory).toHaveBeenCalledWith(userId, articleId, readAt)
+      expect(queryMock.findArticleById).toHaveBeenCalledWith(articleId)
+      expect(commandMock.createReadHistory).toHaveBeenCalledWith(userId, articleId, readAt)
     })
 
     it('データベースエラー時にServerErrorを返すこと', async () => {
@@ -328,10 +325,10 @@ describe('ArticleUseCase', () => {
       const readAt = new Date('2024-01-01T10:00:00Z')
 
       // 記事存在確認のモック
-      mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
+      queryMock.findArticleById.mockResolvedValue(success(mockArticle))
 
       const dbError = new ServerError('Database error')
-      mockArticleCommand.createReadHistory.mockResolvedValue(failure(dbError))
+      commandMock.createReadHistory.mockResolvedValue(failure(dbError))
 
       const result = await useCase.createReadHistory(userId, articleId, readAt)
 
@@ -347,7 +344,7 @@ describe('ArticleUseCase', () => {
       const readAt = new Date('2024-01-01T10:00:00Z')
 
       // 記事が存在しない場合のモック
-      mockArticleQuery.findArticleById.mockResolvedValue(success(null))
+      queryMock.findArticleById.mockResolvedValue(success(null))
 
       const result = await useCase.createReadHistory(userId, articleId, readAt)
 
@@ -357,8 +354,8 @@ describe('ArticleUseCase', () => {
         expect(result.error.message).toBe('Article with ID 999 not found')
       }
 
-      expect(mockArticleQuery.findArticleById).toHaveBeenCalledWith(articleId)
-      expect(mockArticleCommand.createReadHistory).not.toHaveBeenCalled()
+      expect(queryMock.findArticleById).toHaveBeenCalledWith(articleId)
+      expect(commandMock.createReadHistory).not.toHaveBeenCalled()
     })
   })
 
@@ -367,25 +364,22 @@ describe('ArticleUseCase', () => {
       const userId = 100n
       const articleId = 200n
 
-      mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
-      mockArticleCommand.deleteAllReadHistory.mockResolvedValue(success(undefined))
+      queryMock.findArticleById.mockResolvedValue(success(mockArticle))
+      commandMock.deleteAllReadHistory.mockResolvedValue(success(undefined))
 
       const result = await useCase.deleteAllReadHistory(userId, articleId)
 
       expect(isSuccess(result)).toBe(true)
-      expect(mockArticleCommand.deleteAllReadHistory).toHaveBeenCalledWith(
-        userId,
-        mockArticle.articleId,
-      )
+      expect(commandMock.deleteAllReadHistory).toHaveBeenCalledWith(userId, mockArticle.articleId)
     })
 
     it('データベースエラー時にServerErrorを返すこと', async () => {
       const userId = 100n
       const articleId = 200n
 
-      mockArticleQuery.findArticleById.mockResolvedValue(success(mockArticle))
+      queryMock.findArticleById.mockResolvedValue(success(mockArticle))
       const dbError = new ServerError('Database error')
-      mockArticleCommand.deleteAllReadHistory.mockResolvedValue(failure(dbError))
+      commandMock.deleteAllReadHistory.mockResolvedValue(failure(dbError))
 
       const result = await useCase.deleteAllReadHistory(userId, articleId)
 

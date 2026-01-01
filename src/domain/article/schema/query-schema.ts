@@ -37,4 +37,4 @@ export const articleQuerySchema = baseArticleSearchSchema
     message: DATE_RANGE_ERROR_MESSAGE,
   })
 
-export type ArticleQueryParams = z.infer<typeof articleQuerySchema>
+export type QueryParams = z.infer<typeof articleQuerySchema>
