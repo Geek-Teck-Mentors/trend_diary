@@ -19,9 +19,11 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
     // 補償トランザクション失敗時のログ出力
     if (result.error instanceof ExternalServiceError) {
       logger.error('Compensation transaction failed: Supabase Auth user deletion failed', {
-        userId: result.error.context.userId,
-        originalError: result.error.originalError.message,
-        serviceError: result.error.serviceError.message,
+        context: result.error.context,
+        errors: {
+          original: result.error.originalError.message,
+          compensation: result.error.serviceError.message,
+        },
       })
     }
     throw handleError(result.error, logger)
