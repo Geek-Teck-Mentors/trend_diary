@@ -1,5 +1,5 @@
 import { expect, Locator, Page, test } from '@playwright/test'
-import articleTestHelper from '@/test/helper/articleTestHelper'
+import articleTestHelper from '@/test/helper/article'
 
 const ARTICLE_COUNT = 10
 const TIMEOUT = 10000

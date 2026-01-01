@@ -97,7 +97,7 @@ type LoginResult = {
   accessToken: string
 }
 
-const authV2TestHelper = {
+const userTestHelper = {
   /**
    * テスト用ユーザーを作成する
    */
@@ -150,4 +150,4 @@ const authV2TestHelper = {
   },
 }
 
-export default authV2TestHelper
+export default userTestHelper
