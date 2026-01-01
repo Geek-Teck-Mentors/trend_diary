@@ -10,6 +10,15 @@ vi.mock('sonner', () => {
   }
 })
 
+vi.mock('swr/mutation', () => {
+  return {
+    default: () => ({
+      trigger: vi.fn(),
+      isMutating: false,
+    }),
+  }
+})
+
 afterEach(() => {
   cleanup()
 })

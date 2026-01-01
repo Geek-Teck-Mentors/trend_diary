@@ -13,15 +13,6 @@ vi.mock('../../components/ui/page-error/use-page-error', () => {
   }
 })
 
-vi.mock('swr/mutation', () => {
-  return {
-    default: () => ({
-      trigger: vi.fn(),
-      isMutating: false,
-    }),
-  }
-})
-
 vi.mock('../../features/create-swr-fetcher', () => {
   return {
     createSWRFetcher: () => ({
