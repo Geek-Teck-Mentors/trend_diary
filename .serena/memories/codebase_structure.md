@@ -39,7 +39,7 @@ trend_diary/
 │   │   └── constants.ts             # 定数定義
 │   │
 │   ├── test/                        # テスト設定
-│   │   ├── vitest-config/           # Vitest設定（各層）
+│   │   ├── vitest/           # Vitest設定（各層）
 │   │   ├── __mocks__/               # モック定義
 │   │   ├── helper/                  # テストヘルパー
 │   │   ├── e2e/                     # E2Eテスト

@@ -2,7 +2,7 @@ import { isSuccess, success } from '@yuukihayashi0510/core'
 import { vi } from 'vitest'
 import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2Repository'
 import type { Command, Query } from '@/domain/user/repository'
-import type { ActiveUser } from '@/domain/user/schema/activeUserSchema'
+import type { ActiveUser } from '@/domain/user/schema/active-user-schema'
 import TEST_ENV from '@/test/env'
 import app from '../../../../server'
 
@@ -51,17 +51,17 @@ const mockCommand: Command = {
 }
 
 // SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
-vi.mock('@/domain/user/infrastructure/supabaseAuthRepository', () => ({
+vi.mock('@/domain/user/infrastructure/supabase-auth-repository', () => ({
   SupabaseAuthRepository: vi.fn(() => mockRepository),
 }))
 
 // QueryImplをモック
-vi.mock('@/domain/user/infrastructure/queryImpl', () => ({
+vi.mock('@/domain/user/infrastructure/query-impl', () => ({
   default: vi.fn(() => mockQuery),
 }))
 
 // CommandImplをモック
-vi.mock('@/domain/user/infrastructure/commandImpl', () => ({
+vi.mock('@/domain/user/infrastructure/command-impl', () => ({
   default: vi.fn(() => mockCommand),
 }))
 

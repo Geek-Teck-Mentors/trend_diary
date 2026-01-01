@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
-import type { ArticleOutput } from '@/domain/article/schema/articleSchema'
+import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
 
