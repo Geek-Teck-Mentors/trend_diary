@@ -3,15 +3,6 @@ import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import useSidebar from './use-sidebar'
 
-vi.mock('sonner', () => {
-  return {
-    toast: {
-      success: vi.fn(),
-      error: vi.fn(),
-    },
-  }
-})
-
 vi.mock('swr/mutation', () => {
   const mockTrigger = vi.fn()
   return {

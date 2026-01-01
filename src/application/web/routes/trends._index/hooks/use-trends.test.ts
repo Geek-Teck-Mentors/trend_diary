@@ -23,12 +23,6 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
-vi.mock('sonner', () => ({
-  toast: {
-    error: vi.fn(),
-  },
-}))
-
 vi.mock('../../../infrastructure/api', () => ({
   default: vi.fn(),
 }))

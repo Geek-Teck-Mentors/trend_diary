@@ -4,13 +4,6 @@ import type { MockedFunction } from 'vitest'
 import getApiClientForClient from '../../../infrastructure/api'
 import useReadArticle from './use-read-article'
 
-vi.mock('sonner', () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}))
-
 vi.mock('../../../infrastructure/api', () => ({
   default: vi.fn(),
 }))
