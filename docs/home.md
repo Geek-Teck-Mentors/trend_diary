@@ -65,10 +65,11 @@
 │   ├── e2e # E2Eテスト
 │   ├── helper # テストヘルパー
 │   └── vitest # Vitest設定
-│       ├── config.domain.ts
-│       ├── config.api.ts
-│       ├── config.frontend.ts
-│       └── config.storybook.ts
+│       └── config
+│           ├── domain.ts
+│           ├── api.ts
+│           ├── frontend.ts
+│           └── storybook.ts
 ├── plugin # カスタムプラグイン
 └── worker.ts # Cloudflare Workersエントリーポイント
 ```
