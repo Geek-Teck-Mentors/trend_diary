@@ -78,7 +78,7 @@ describe('Logger', () => {
     const [entry] = parseLogObjects(logs)
     expect(entry).toMatchObject({
       requestId: 'abc',
-      message: 'failed',
+      msg: 'failed',
       level: 'error',
       err: expect.objectContaining({ type: 'Error', message: 'boom' }),
     })
