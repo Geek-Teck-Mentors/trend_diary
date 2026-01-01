@@ -82,7 +82,7 @@ npm run test:frontend
 
 ### 4. Storybookテスト (`test-storybook`)
 
-**設定ファイル**: `src/test/vitest/config.storybook.ts`
+**設定ファイル**: `src/test/vitest/config/storybook.ts`
 
 **特徴**:
 - UIコンポーネントのビジュアルテスト
