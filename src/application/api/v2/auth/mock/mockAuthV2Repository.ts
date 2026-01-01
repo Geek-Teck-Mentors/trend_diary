@@ -1,7 +1,7 @@
 import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import * as bcrypt from 'bcryptjs'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
-import UnauthorizedError from '@/common/errors/unauthorizedError'
+import UnauthorizedError from '@/common/errors/client-error/unauthorized-error'
 import type {
   AuthV2LoginResult,
   AuthV2Repository,

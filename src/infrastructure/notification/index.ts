@@ -1,1 +1,1 @@
-export { DiscordNotifier } from './discordNotifier'
+export { DiscordNotifier } from './discord'

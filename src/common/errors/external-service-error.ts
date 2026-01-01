@@ -1,4 +1,4 @@
-import ServerError from './serverError'
+import ServerError from './server-error'
 
 /**
  * 外部サービスエラー
