@@ -3,7 +3,7 @@ import { ClientError, ServerError } from '@/common/errors'
 import type { Command, Query } from '@/domain/user/repository'
 import type { CurrentUser } from '@/domain/user/schema/activeUserSchema'
 import type { AuthV2Repository } from './repository'
-import type { AuthenticationSession } from './schema/authenticationSession'
+import type { AuthenticationSession } from './schema/authSchema'
 
 /**
  * 認証v2ユーザーのダミーパスワード

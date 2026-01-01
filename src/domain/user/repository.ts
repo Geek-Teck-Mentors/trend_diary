@@ -2,10 +2,8 @@ import { AsyncResult } from '@yuukihayashi0510/core'
 import { ClientError, ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 
-import { CreateSessionInput } from './dto'
 import type { ActiveUser, CurrentUser } from './schema/activeUserSchema'
-import { AuthenticationSession } from './schema/authenticationSession'
-import { AuthenticationUser } from './schema/authenticationUser'
+import { AuthenticationSession, AuthenticationUser } from './schema/authSchema'
 
 export interface Query {
   findActiveById(id: bigint): AsyncResult<Nullable<CurrentUser>, Error>
@@ -13,6 +11,15 @@ export interface Query {
   findActiveByEmailForAuth(email: string): AsyncResult<Nullable<ActiveUser>, Error>
   findActiveBySessionId(sessionId: string): AsyncResult<Nullable<CurrentUser>, Error>
   findActiveByAuthenticationId(authenticationId: string): AsyncResult<Nullable<CurrentUser>, Error>
+}
+
+export type CreateSessionInput = {
+  sessionId: string
+  activeUserId: bigint
+  expiresAt: Date
+  sessionToken?: string | null | undefined
+  ipAddress?: string | null | undefined
+  userAgent?: string | null | undefined
 }
 
 export interface Command {

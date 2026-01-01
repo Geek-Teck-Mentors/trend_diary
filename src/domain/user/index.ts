@@ -7,8 +7,7 @@ import {
   CurrentUser,
   currentUserSchema,
 } from './schema/activeUserSchema'
-import { AuthenticationSession } from './schema/authenticationSession'
-import { AuthInput, authInputSchema } from './schema/authSchema'
+import { AuthenticationSession, AuthInput, authInputSchema } from './schema/authSchema'
 
 // 型
 export type { ActiveUser, ActiveUserInput, CurrentUser, AuthenticationSession, AuthInput }
