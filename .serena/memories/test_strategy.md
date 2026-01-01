@@ -32,7 +32,7 @@ npm run test:domain
 
 ### 2. API層テスト (`test:api`)
 
-**設定ファイル**: `src/test/vitest/config.api.ts`
+**設定ファイル**: `src/test/vitest/config/api.ts`
 
 **特徴**:
 - **実際のデータベース**を使用した統合テスト
