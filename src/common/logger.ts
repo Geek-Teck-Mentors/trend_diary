@@ -33,7 +33,7 @@ export default class Logger {
     return new Logger(this.level, { ...this.context, ...context })
   }
 
-  private log(level: LogLevel, message: LogMessage): void {
+  private log(level: LogLevel, message: LogMessage, ...args: unknown[]): void {
     if (typeof message === 'string') {
       this.logger[level](this.context, message)
     } else {
@@ -41,19 +41,19 @@ export default class Logger {
     }
   }
 
-  debug(message: LogMessage): void {
-    this.log('debug', message)
+  debug(message: LogMessage, ...args: unknown[]): void {
+    this.log('debug', message, ...args)
   }
 
-  info(message: LogMessage): void {
-    this.log('info', message)
+  info(message: LogMessage, ...args: unknown[]): void {
+    this.log('info', message, ...args)
   }
 
-  warn(message: LogMessage): void {
-    this.log('warn', message)
+  warn(message: LogMessage, ...args: unknown[]): void {
+    this.log('warn', message, ...args)
   }
 
-  error(message: LogMessage, error: Error | unknown): void {
+  error(message: LogMessage, error: Error | unknown, ...args: unknown[]): void {
     const normalizedError = error instanceof Error ? error : new Error(String(error))
 
     // * pinoのstdSerializersで処理されるよう、errプロパティ名を使用
