@@ -193,7 +193,7 @@ describe('GET /api/articles', () => {
   })
 
   describe('既読情報', () => {
-    let AccessToken: string
+    let accessToken: string
 
     async function requestGetArticlesWithAuth(query: string = '', token?: string) {
       const url = query ? `/api/articles?${query}` : '/api/articles'
@@ -209,7 +209,7 @@ describe('GET /api/articles', () => {
       await authV2TestHelper.create('readtest@example.com', 'Test@password123')
       const loginData = await authV2TestHelper.login('readtest@example.com', 'Test@password123')
       const testActiveUserId = loginData.activeUserId
-      AccessToken = loginData.accessToken
+      accessToken = loginData.accessToken
 
       // テスト記事作成
       const article1 = await articleTestHelper.createArticle({
@@ -253,7 +253,7 @@ describe('GET /api/articles', () => {
     })
 
     it('ログイン時は既読記事にisRead: trueが返される', async () => {
-      const res = await requestGetArticlesWithAuth('title=既読記事', AccessToken)
+      const res = await requestGetArticlesWithAuth('title=既読記事', accessToken)
 
       expect(res.status).toBe(200)
       const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
@@ -262,7 +262,7 @@ describe('GET /api/articles', () => {
     })
 
     it('ログイン時は未読記事にisRead: falseが返される', async () => {
-      const res = await requestGetArticlesWithAuth('title=未読記事', AccessToken)
+      const res = await requestGetArticlesWithAuth('title=未読記事', accessToken)
 
       expect(res.status).toBe(200)
       const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
