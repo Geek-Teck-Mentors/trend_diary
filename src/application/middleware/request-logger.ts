@@ -14,7 +14,7 @@ const requestLogger = createMiddleware<Env>(async (c, next) => {
   const { path } = c.req
   const userAgent = c.req.header('user-agent')
 
- const logger = new Logger(c.env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL);
+  const logger = new Logger(c.env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL)
   const requestLogger = logger.with({
     request_id: requestId,
     method,
