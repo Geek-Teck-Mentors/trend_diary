@@ -31,8 +31,6 @@ const mockCommand: Command = {
     return Promise.resolve(success(createMockActiveUser(email, authenticationId)))
   }),
   saveActive: vi.fn(),
-  createSession: vi.fn(),
-  deleteSession: vi.fn(),
 }
 
 // SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
