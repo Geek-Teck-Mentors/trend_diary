@@ -64,7 +64,7 @@ describe('ArticleUseCase', () => {
 
         queryMock.searchArticles.mockResolvedValue(success(mockPaginationResult))
 
-        const result = await useCase.searchArticles(params as QueryParams)
+        const result = await useCase.searchArticles(params)
 
         expect(result).toEqual(success(mockPaginationResult))
         expect(queryMock.searchArticles).toHaveBeenCalledTimes(1)
