@@ -23,7 +23,7 @@ export class UseCase {
     params: QueryParams,
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
-    const optimizedParams: Partial<QueryParams> = {
+    const optimizedParams: QueryParams = {
       title: extractTrimmed(params.title),
       author: extractTrimmed(params.author),
       limit: params.limit ?? 20,

@@ -8,7 +8,6 @@ export function createArticleUseCase(db: RdbClient): UseCase {
   const articleCommand = new CommandImpl(db)
   return new UseCase(articleQuery, articleCommand)
 }
-}
 
 export type { Article } from './schema/article-schema'
 export type { QueryParams } from './schema/query-schema'
