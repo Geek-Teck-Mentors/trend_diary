@@ -1,5 +1,5 @@
 import { ActiveUser as RdbActiveUser } from '@prisma/client'
-import type { CurrentUser } from '../schema/activeUserSchema'
+import type { CurrentUser } from '../schema/active-user-schema'
 
 export function mapToActiveUser(activeUser: RdbActiveUser): CurrentUser {
   return {

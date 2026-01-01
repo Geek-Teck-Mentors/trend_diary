@@ -2,8 +2,8 @@ import { AsyncResult } from '@yuukihayashi0510/core'
 import { ClientError, ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 
-import type { ActiveUser, CurrentUser } from './schema/activeUserSchema'
-import { AuthenticationSession, AuthenticationUser } from './schema/authSchema'
+import type { ActiveUser, CurrentUser } from './schema/active-user-schema'
+import { AuthenticationSession, AuthenticationUser } from './schema/auth-schema'
 
 export interface Query {
   findActiveById(id: bigint): AsyncResult<Nullable<CurrentUser>, Error>

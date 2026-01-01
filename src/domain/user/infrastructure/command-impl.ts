@@ -3,7 +3,7 @@ import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukih
 import { ServerError } from '@/common/errors'
 import { RdbClient } from '@/infrastructure/rdb'
 import { Command } from '../repository'
-import type { ActiveUser, CurrentUser } from '../schema/activeUserSchema'
+import type { ActiveUser, CurrentUser } from '../schema/active-user-schema'
 import { mapToActiveUser } from './mapper'
 
 export default class CommandImpl implements Command {
