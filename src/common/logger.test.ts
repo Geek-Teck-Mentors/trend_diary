@@ -10,7 +10,7 @@ const parseLogObjects = (lines: string[]) =>
     .map((line) => JSON.parse(line))
 
 describe('Logger', () => {
-  it('指定したレベルでpinoを初期化できる', async () => {
+  it('指定したレベルでpinoを初期化できる', () => {
     const cases = [
       { level: 'silent' as const },
       { level: 'debug' as const },
