@@ -1,25 +1,26 @@
 import { z } from 'zod'
 
+export const DEFAULT_LIMIT = 20
+export const DEFAULT_PAGE = 1
+
+function transform(value: string | number | undefined, defaultValue: number) {
+  if (value === undefined || value === null) return defaultValue
+  const num = typeof value === 'string' ? parseInt(value, 10) : value
+  return Number.isNaN(num) ? defaultValue : num
+}
+
 const limit = z
   .union([z.string(), z.number()])
   .optional()
-  .transform((val) => {
-    if (val === undefined || val === null) return 20
-    const num = typeof val === 'string' ? parseInt(val, 10) : val
-    return Number.isNaN(num) ? 20 : Math.min(Math.max(num, 1), 100)
-  })
-  .default(20)
+  .transform((val) => transform(val, DEFAULT_LIMIT))
+  .default(DEFAULT_LIMIT)
 
 export const offsetPaginationSchema = z.object({
   page: z
     .union([z.string(), z.number()])
     .optional()
-    .transform((val) => {
-      if (val === undefined || val === null) return 1
-      const num = typeof val === 'string' ? parseInt(val, 10) : val
-      return Number.isNaN(num) ? 1 : Math.max(num, 1)
-    })
-    .default(1),
+    .transform((val) => transform(val, DEFAULT_PAGE))
+    .default(DEFAULT_PAGE),
   limit,
 })
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
+import { DEFAULT_LIMIT, DEFAULT_PAGE } from '@/common/pagination'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
@@ -29,9 +30,9 @@ export type FetchArticles = (params: {
 export default function useTrends() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [articles, setArticles] = useState<Article[]>([])
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(20)
-  const [totalPages, setTotalPages] = useState(1)
+  const [page, setPage] = useState(DEFAULT_PAGE)
+  const [limit, setLimit] = useState(DEFAULT_LIMIT)
+  const [totalPages, setTotalPages] = useState(DEFAULT_PAGE)
   const [isLoading, setIsLoading] = useState(false)
   const isLoadingRef = useRef(false)
   const isMobile = useIsMobile()
@@ -117,10 +118,12 @@ export default function useTrends() {
     let validLimit: number
     if (limitParam) {
       const currentLimit = parseInt(limitParam, 10)
-      validLimit = Number.isNaN(currentLimit) ? 20 : Math.max(Math.min(currentLimit, 100), 1)
+      validLimit = Number.isNaN(currentLimit)
+        ? DEFAULT_LIMIT
+        : Math.max(Math.min(currentLimit, 100), 1)
     } else {
       // デフォルトのlimitはモバイルなら10、デスクトップなら20
-      validLimit = isMobile ? 10 : 20
+      validLimit = isMobile ? 10 : DEFAULT_LIMIT
     }
 
     fetchArticles({ date, page: validPage, limit: validLimit, media: selectedMedia })
