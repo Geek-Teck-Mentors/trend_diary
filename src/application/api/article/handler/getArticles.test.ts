@@ -56,6 +56,7 @@ describe('GET /api/articles', () => {
   })
 
   beforeEach(async () => {
+    await cleanUp()
     await setupTestData()
   })
 
