@@ -2,7 +2,7 @@ import { vi } from 'vitest'
 import { mockCommand, mockQuery, mockRepository } from '@/test/helper/authV2TestHelper'
 
 // SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
-vi.mock('@/domain/auth-v2/infrastructure/supabaseAuthRepository', () => ({
+vi.mock('@/domain/user/infrastructure/supabaseAuthRepository', () => ({
   SupabaseAuthRepository: vi.fn(() => mockRepository),
 }))
 

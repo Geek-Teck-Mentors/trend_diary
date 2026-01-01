@@ -12,3 +12,24 @@ export const authInputSchema = z.object({
 })
 
 export type AuthInput = z.infer<typeof authInputSchema>
+
+/**
+ * 認証ユーザーモデル
+ */
+export type AuthenticationUser = {
+  id: string
+  email: string
+  emailConfirmedAt?: Date | null
+  createdAt: Date
+}
+
+/**
+ * 認証セッションモデル
+ */
+export type AuthenticationSession = {
+  accessToken: string
+  refreshToken: string
+  expiresIn: number
+  expiresAt?: number
+  user: AuthenticationUser
+}
