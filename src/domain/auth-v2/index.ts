@@ -12,9 +12,9 @@ export function createAuthV2UseCase(client: SupabaseClient, db: RdbClient): Auth
   return new AuthV2UseCase(repository, userCommand, userQuery)
 }
 
+export type { AuthenticationSession } from '../user/schema/authenticationSession'
+export type { AuthenticationUser } from '../user/schema/authenticationUser'
+export * from '../user/schema/authSchema'
 export type { AuthV2Repository } from './repository'
-export type { AuthenticationSession } from './schema/authenticationSession'
-export type { AuthenticationUser } from './schema/authenticationUser'
-export * from './schema/authSchema'
 export type { LoginResult, SignupResult } from './useCase'
 export { AuthV2UseCase } from './useCase'

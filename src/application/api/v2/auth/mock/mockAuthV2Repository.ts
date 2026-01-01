@@ -7,7 +7,7 @@ import type {
   AuthV2Repository,
   AuthV2SignupResult,
 } from '@/domain/auth-v2/repository'
-import type { AuthenticationUser } from '@/domain/auth-v2/schema/authenticationUser'
+import type { AuthenticationUser } from '@/domain/user/schema/authenticationUser'
 
 const BCRYPT_SALT_ROUNDS = 10
 

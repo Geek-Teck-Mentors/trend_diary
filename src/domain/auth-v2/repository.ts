@@ -1,7 +1,7 @@
 import { type AsyncResult } from '@yuukihayashi0510/core'
 import { ClientError, ServerError } from '@/common/errors'
-import type { AuthenticationSession } from './schema/authenticationSession'
-import type { AuthenticationUser } from './schema/authenticationUser'
+import type { AuthenticationSession } from '../user/schema/authenticationSession'
+import type { AuthenticationUser } from '../user/schema/authenticationUser'
 
 /**
  * 認証v2のサインアップ結果

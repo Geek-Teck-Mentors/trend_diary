@@ -2,8 +2,8 @@ import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510
 import { ClientError, ServerError } from '@/common/errors'
 import type { Command, Query } from '@/domain/user/repository'
 import type { CurrentUser } from '@/domain/user/schema/activeUserSchema'
+import type { AuthenticationSession } from '../user/schema/authenticationSession'
 import type { AuthV2Repository } from './repository'
-import type { AuthenticationSession } from './schema/authenticationSession'
 
 /**
  * 認証v2ユーザーのダミーパスワード
