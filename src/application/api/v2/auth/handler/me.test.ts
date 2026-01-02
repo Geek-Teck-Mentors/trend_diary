@@ -65,11 +65,6 @@ vi.mock('@/domain/user/infrastructure/command-impl', () => ({
   default: vi.fn(() => mockCommand),
 }))
 
-// createSupabaseAuthClientはモックして何も返さない（使われないため）
-vi.mock('@/infrastructure/supabase', () => ({
-  createSupabaseAuthClient: () => ({}),
-}))
-
 describe('GET /api/v2/auth/me', () => {
   const TEST_EMAIL = 'me-test@example.com'
   const TEST_PASSWORD = 'test_password123'
