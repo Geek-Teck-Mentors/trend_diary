@@ -40,7 +40,7 @@ export default function Trends() {
 
     // 1. UIを即座に更新（オプティミスティックUI）
     updateArticleReadStatus(articleId, isRead)
-    if (selectedArticle?.articleId == articleId) updateSelectedArticleReadStatus(isRead)
+    if (selectedArticle?.articleId === articleId) updateSelectedArticleReadStatus(isRead)
 
     // 2. APIを呼び出し
     const success = isRead ? await markAsRead(articleId) : await markAsUnread(articleId)
@@ -49,7 +49,8 @@ export default function Trends() {
     if (!success) {
       const currentReadStatus = originalArticle.isRead ?? false
       updateArticleReadStatus(articleId, currentReadStatus)
-      if (selectedArticle?.articleId == articleId) updateSelectedArticleReadStatus(currentReadStatus)
+      if (selectedArticle?.articleId === articleId)
+        updateSelectedArticleReadStatus(currentReadStatus)
     }
   }
 
