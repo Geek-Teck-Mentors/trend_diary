@@ -9,17 +9,14 @@ import {
 import Footer from '../../components/ui/footer'
 import LandingHeader from '../../components/ui/landing-header'
 import { AnchorLink } from '../../components/ui/link'
-import PageError from '../../components/ui/page-error'
-import { PageErrorType } from '../../components/ui/page-error/use-page-error'
 import { AuthenticateForm } from '../../features/authenticate/authenticate-form'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 
 type Props = {
-  pageError?: PageErrorType
   handleSubmit: (data: AuthenticateFormData) => Promise<void>
 }
 
-export default function SignupPage({ pageError, handleSubmit }: Props) {
+export default function SignupPage({ handleSubmit }: Props) {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
       <LandingHeader enableUserFeature={true} />
@@ -27,7 +24,6 @@ export default function SignupPage({ pageError, handleSubmit }: Props) {
         <Card className='flex w-full max-w-md flex-col'>
           <CardHeader className='space-y-1'>
             <CardTitle className='text-2xl font-bold'>アカウント作成</CardTitle>
-            {pageError && <PageError pageError={pageError} />}
             <CardDescription>以下の情報を入力してアカウントを作成してください</CardDescription>
           </CardHeader>
           <CardContent>

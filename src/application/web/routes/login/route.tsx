@@ -35,7 +35,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 export default function Login() {
   const navigate = useNavigate()
-  const { handleSubmit, pageError } = useLogin(navigate)
+  const { handleSubmit } = useLogin(navigate)
 
-  return <LoginPage pageError={pageError} handleSubmit={handleSubmit} />
+  return <LoginPage handleSubmit={handleSubmit} />
 }

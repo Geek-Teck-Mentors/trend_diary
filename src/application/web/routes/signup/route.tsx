@@ -35,7 +35,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 export default function Signup() {
   const navigate = useNavigate()
-  const { handleSubmit, pageError } = useSignup(navigate)
+  const { handleSubmit } = useSignup(navigate)
 
-  return <SignupPage handleSubmit={handleSubmit} pageError={pageError} />
+  return <SignupPage handleSubmit={handleSubmit} />
 }
