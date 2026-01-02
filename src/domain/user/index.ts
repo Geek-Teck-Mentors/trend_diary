@@ -1,6 +1,4 @@
-import { RdbClient } from '@/infrastructure/rdb'
-import CommandImpl from './infrastructure/commandImpl'
-import QueryImpl from './infrastructure/queryImpl'
+import { createAuthV2UseCase } from './factory'
 import {
   ActiveUser,
   ActiveUserInput,
@@ -8,15 +6,14 @@ import {
   activeUserSchema,
   CurrentUser,
   currentUserSchema,
-} from './schema/activeUserSchema'
-import { UseCase } from './useCase'
-
-export function createUserUseCase(db: RdbClient): UseCase {
-  return new UseCase(new QueryImpl(db), new CommandImpl(db))
-}
+} from './schema/active-user-schema'
+import { AuthenticationSession, AuthInput, authInputSchema } from './schema/auth-schema'
 
 // 型
-export type { ActiveUser, ActiveUserInput, CurrentUser }
+export type { ActiveUser, ActiveUserInput, CurrentUser, AuthenticationSession, AuthInput }
 
 // スキーマ
-export { activeUserSchema, activeUserInputSchema, currentUserSchema }
+export { activeUserSchema, activeUserInputSchema, currentUserSchema, authInputSchema }
+
+// ファクトリ
+export { createAuthV2UseCase }

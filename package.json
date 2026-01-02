@@ -11,9 +11,10 @@
     "poststart": "supabase stop",
     "build": "react-router build",
     "supabase:start": "supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit",
-    "test:frontend": "vitest run -c src/test/vitest-config/config.frontend.ts",
-    "test:domain": "vitest run -c src/test/vitest-config/config.domain.ts",
-    "test:api": "vitest run -c src/test/vitest-config/config.api.ts",
+    "test:frontend": "vitest run -c src/test/vitest/config/frontend.ts",
+    "test:domain": "vitest run -c src/test/vitest/config/domain.ts",
+    "test:api": "vitest run -c src/test/vitest/config/api.ts",
+    "test:common": "vitest run -c src/test/vitest/config/common.ts",
     "e2e": "playwright test --config=src/test/e2e/playwright.config.ts",
     "e2e:report": "playwright show-report src/test/e2e/playwright-report",
     "e2e:gen": "playwright codegen --config=src/test/e2e/playwright.config.ts",
@@ -28,7 +29,7 @@
     "db:deploy": "prisma migrate deploy",
     "supabase:db:type-gen": "supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
-    "test-storybook": "vitest run -c src/test/vitest-config/config.storybook.ts"
+    "test-storybook": "vitest run -c src/test/vitest/config/storybook.ts"
   },
   "prisma": {
     "schema": "./src/infrastructure/prisma-orm"
@@ -44,7 +45,7 @@
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.4",
-    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.4",
     "@react-router/cloudflare": "^7.0.0",
     "@supabase/ssr": "^0.7.0",
@@ -102,12 +103,12 @@
     "playwright": "^1.56.1",
     "prisma": "^6.7.0",
     "prisma-erd-generator": "^2.0.4",
-    "storybook": "^9.0.18",
+    "storybook": "^9.1.17",
     "tailwindcss": "^4.0.8",
     "tsx": "^4.20.4",
     "typescript": "^5.7.3",
     "vite": "^5.4.21",
-    "vite-tsconfig-paths": "^5.1.4",
+    "vite-tsconfig-paths": "^6.0.3",
     "vitest": "^3.2.4",
     "vitest-mock-extended": "^3.1.0",
     "wrangler": "^4.27.0"

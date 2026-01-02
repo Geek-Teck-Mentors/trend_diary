@@ -1,13 +1,13 @@
 import { type AsyncResult, failure, success } from '@yuukihayashi0510/core'
 import * as bcrypt from 'bcryptjs'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
-import UnauthorizedError from '@/common/errors/unauthorizedError'
+import UnauthorizedError from '@/common/errors/client-error/unauthorized-error'
 import type {
   AuthV2LoginResult,
   AuthV2Repository,
   AuthV2SignupResult,
-} from '@/domain/auth-v2/repository'
-import type { AuthenticationUser } from '@/domain/auth-v2/schema/authenticationUser'
+} from '@/domain/user/repository'
+import type { AuthenticationUser } from '@/domain/user/schema/auth-schema'
 
 const BCRYPT_SALT_ROUNDS = 10
 
@@ -164,6 +164,19 @@ export class MockAuthV2Repository implements AuthV2Repository {
         user,
       },
     })
+  }
+
+  async deleteUser(userId: string): AsyncResult<void, ServerError> {
+    if (!this.users.has(userId)) {
+      return failure(new ServerError('User not found'))
+    }
+
+    this.users.delete(userId)
+    if (this.currentUserId === userId) {
+      this.currentUserId = null
+    }
+
+    return success(undefined)
   }
 
   // テスト用ヘルパーメソッド

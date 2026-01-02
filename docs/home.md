@@ -64,11 +64,12 @@
 │   ├── __mocks__ # モック
 │   ├── e2e # E2Eテスト
 │   ├── helper # テストヘルパー
-│   └── vitest-config # Vitest設定
-│       ├── config.domain.ts
-│       ├── config.api.ts
-│       ├── config.frontend.ts
-│       └── config.storybook.ts
+│   └── vitest # Vitest設定
+│       └── config
+│           ├── domain.ts
+│           ├── api.ts
+│           ├── frontend.ts
+│           └── storybook.ts
 ├── plugin # カスタムプラグイン
 └── worker.ts # Cloudflare Workersエントリーポイント
 ```
@@ -80,4 +81,4 @@
 - E2Eテスト: `src/test/e2e`に配置
 - テストヘルパー: `src/test/helper`に配置
 - テストモック: `src/test/__mocks__`に配置（ドメイン層テストで使用）
-- Vitest設定: `src/test/vitest-config`に配置
+- Vitest設定: `src/test/vitest/config`に配置

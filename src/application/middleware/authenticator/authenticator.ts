@@ -3,7 +3,7 @@ import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import { Env } from '../../env'
 import CONTEXT_KEY from '../context'
-import { validateSession } from './sessionValidation'
+import { validateSession } from './validate'
 
 const authenticator = createMiddleware<Env>(async (c, next) => {
   const validationResult = await validateSession(c)
