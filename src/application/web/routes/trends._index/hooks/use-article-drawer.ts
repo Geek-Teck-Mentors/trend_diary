@@ -16,14 +16,17 @@ export default function useArticleDrawer() {
     setSelectedArticle(null)
   }
 
-  const updateSelectedArticleReadStatus = useCallback((isRead: boolean) => {
-    if (selectedArticle == null) return
+  const updateSelectedArticleReadStatus = useCallback(
+    (isRead: boolean) => {
+      if (selectedArticle == null) return
 
-    setSelectedArticle({
-      ...selectedArticle,
-      isRead,
-    })
-  }, [selectedArticle])
+      setSelectedArticle({
+        ...selectedArticle,
+        isRead,
+      })
+    },
+    [selectedArticle],
+  )
 
   return {
     isOpen,

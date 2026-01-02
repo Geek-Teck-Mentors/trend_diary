@@ -38,19 +38,20 @@ export default function Trends() {
     const originalArticle = articles.find((a) => a.articleId === articleId)
     if (!originalArticle) return
 
+    const setReadStatus = (status: boolean) => {
+      updateArticleReadStatus(articleId, status)
+      if (selectedArticle?.articleId === articleId) updateSelectedArticleReadStatus(status)
+    }
+
     // 1. UIを即座に更新（オプティミスティックUI）
-    updateArticleReadStatus(articleId, isRead)
-    if (selectedArticle?.articleId === articleId) updateSelectedArticleReadStatus(isRead)
+    setReadStatus(isRead)
 
     // 2. APIを呼び出し
     const success = isRead ? await markAsRead(articleId) : await markAsUnread(articleId)
 
     // 3. 失敗した場合にUIを元に戻す
     if (!success) {
-      const currentReadStatus = originalArticle.isRead ?? false
-      updateArticleReadStatus(articleId, currentReadStatus)
-      if (selectedArticle?.articleId === articleId)
-        updateSelectedArticleReadStatus(currentReadStatus)
+      setReadStatus(originalArticle.isRead ?? false)
     }
   }
 
