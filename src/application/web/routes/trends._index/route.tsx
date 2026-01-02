@@ -26,6 +26,7 @@ export default function Trends() {
   const {
     isOpen: isDrawerOpen,
     selectedArticle,
+    updateSelectedArticleReadStatus,
     open: openDrawer,
     close: closeDrawer,
   } = useArticleDrawer()
@@ -39,13 +40,16 @@ export default function Trends() {
 
     // 1. UIを即座に更新（オプティミスティックUI）
     updateArticleReadStatus(articleId, isRead)
+    if (selectedArticle?.articleId == articleId) updateSelectedArticleReadStatus(isRead)
 
     // 2. APIを呼び出し
     const success = isRead ? await markAsRead(articleId) : await markAsUnread(articleId)
 
     // 3. 失敗した場合にUIを元に戻す
     if (!success) {
-      updateArticleReadStatus(articleId, originalArticle.isRead ?? false)
+      const currentReadStatus = originalArticle.isRead ?? false
+      updateArticleReadStatus(articleId, currentReadStatus)
+      if (selectedArticle?.articleId == articleId) updateSelectedArticleReadStatus(currentReadStatus)
     }
   }
 
