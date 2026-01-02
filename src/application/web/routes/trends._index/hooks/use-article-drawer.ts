@@ -23,7 +23,7 @@ export default function useArticleDrawer() {
       ...selectedArticle,
       isRead,
     })
-  }, [])
+  }, [selectedArticle])
 
   return {
     isOpen,
