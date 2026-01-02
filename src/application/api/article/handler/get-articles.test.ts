@@ -1,7 +1,7 @@
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import articleTestHelper from '@/test/helper/article'
-import userTestHelper, { mockRepository } from '@/test/helper/user'
+import userTestHelper from '@/test/helper/user'
 import app from '../../../server'
 
 import { ArticleListResponse, ArticleWithReadStatusResponse } from './get-articles'
@@ -187,13 +187,13 @@ describe('GET /api/articles', () => {
   })
 
   describe('既読情報', () => {
-    let accessToken: string
+    let AuthCookies: string
 
-    async function requestGetArticlesWithAuth(query: string = '', token?: string) {
+    async function requestGetArticlesWithAuth(query: string = '', cookies?: string) {
       const url = query ? `/api/articles?${query}` : '/api/articles'
       const headers: Record<string, string> = {}
-      if (token) {
-        headers.Cookie = `access_token=${token}`
+      if (cookies) {
+        headers.Cookie = cookies
       }
       return app.request(url, { method: 'GET', headers }, TEST_ENV)
     }
@@ -203,7 +203,7 @@ describe('GET /api/articles', () => {
       await userTestHelper.create('readtest@example.com', 'Test@password123')
       const loginData = await userTestHelper.login('readtest@example.com', 'Test@password123')
       const testActiveUserId = loginData.activeUserId
-      accessToken = loginData.accessToken
+      AuthCookies = loginData.cookies
 
       // テスト記事作成
       const article1 = await articleTestHelper.createArticle({
@@ -233,8 +233,8 @@ describe('GET /api/articles', () => {
     })
 
     it('未ログインの場合はisReadがundefined', async () => {
-      // モックの認証状態をログアウトにする
-      await mockRepository.logout()
+      // 認証状態をログアウトにする
+      await userTestHelper.logout()
 
       const res = await requestGetArticlesWithAuth()
 
@@ -247,7 +247,7 @@ describe('GET /api/articles', () => {
     })
 
     it('ログイン時は既読記事にisRead: trueが返される', async () => {
-      const res = await requestGetArticlesWithAuth('title=既読記事', accessToken)
+      const res = await requestGetArticlesWithAuth('title=既読記事', AuthCookies)
 
       expect(res.status).toBe(200)
       const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
@@ -256,7 +256,7 @@ describe('GET /api/articles', () => {
     })
 
     it('ログイン時は未読記事にisRead: falseが返される', async () => {
-      const res = await requestGetArticlesWithAuth('title=未読記事', accessToken)
+      const res = await requestGetArticlesWithAuth('title=未読記事', AuthCookies)
 
       expect(res.status).toBe(200)
       const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
