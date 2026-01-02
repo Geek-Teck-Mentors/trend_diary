@@ -1,18 +1,14 @@
-import { PrismaClient } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { mockDeep } from 'vitest-mock-extended'
+import prisma from '@/test/__mocks__/prisma'
 import QueryImpl from './query-impl'
-
-// モックの設定
-const mockDb = mockDeep<PrismaClient>()
 
 describe('QueryImpl', () => {
   let useCase: QueryImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useCase = new QueryImpl(mockDb)
+    useCase = new QueryImpl(prisma)
   })
 
   describe('findActiveById', () => {
@@ -33,7 +29,7 @@ describe('QueryImpl', () => {
           updatedAt: new Date(),
         }
 
-        mockDb.activeUser.findUnique.mockResolvedValue(mockActiveUserData)
+        prisma.activeUser.findUnique.mockResolvedValue(mockActiveUserData)
 
         // Act
         const result = await useCase.findActiveById(activeUserId)
@@ -44,7 +40,7 @@ describe('QueryImpl', () => {
           expect(result.data?.activeUserId).toBe(1n)
           expect(result.data?.email).toBe('test@example.com')
         }
-        expect(mockDb.activeUser.findUnique).toHaveBeenCalled()
+        expect(prisma.activeUser.findUnique).toHaveBeenCalled()
       })
     })
 
@@ -52,7 +48,7 @@ describe('QueryImpl', () => {
       it('存在しないActiveUserの場合nullを返す', async () => {
         // Arrange
         const activeUserId = 999n
-        mockDb.activeUser.findUnique.mockResolvedValue(null)
+        prisma.activeUser.findUnique.mockResolvedValue(null)
 
         // Act
         const result = await useCase.findActiveById(activeUserId)
@@ -70,7 +66,7 @@ describe('QueryImpl', () => {
         // Arrange
         const activeUserId = 1n
         const dbError = new Error('Database connection failed')
-        mockDb.activeUser.findUnique.mockRejectedValue(dbError)
+        prisma.activeUser.findUnique.mockRejectedValue(dbError)
 
         // Act
         const result = await useCase.findActiveById(activeUserId)
@@ -102,7 +98,7 @@ describe('QueryImpl', () => {
           updatedAt: new Date(),
         }
 
-        mockDb.activeUser.findUnique.mockResolvedValue(mockActiveUserData)
+        prisma.activeUser.findUnique.mockResolvedValue(mockActiveUserData)
 
         // Act
         const result = await useCase.findActiveByEmail(email)
@@ -113,7 +109,7 @@ describe('QueryImpl', () => {
           expect(result.data?.email).toBe(email)
           expect(result.data?.activeUserId).toBe(1n)
         }
-        expect(mockDb.activeUser.findUnique).toHaveBeenCalled()
+        expect(prisma.activeUser.findUnique).toHaveBeenCalled()
       })
     })
 
@@ -121,7 +117,7 @@ describe('QueryImpl', () => {
       it('存在しないメールアドレスの場合nullを返す', async () => {
         // Arrange
         const email = 'notfound@example.com'
-        mockDb.activeUser.findUnique.mockResolvedValue(null)
+        prisma.activeUser.findUnique.mockResolvedValue(null)
 
         // Act
         const result = await useCase.findActiveByEmail(email)
@@ -139,7 +135,7 @@ describe('QueryImpl', () => {
         // Arrange
         const email = 'test@example.com'
         const dbError = new Error('Database connection failed')
-        mockDb.activeUser.findUnique.mockRejectedValue(dbError)
+        prisma.activeUser.findUnique.mockRejectedValue(dbError)
 
         // Act
         const result = await useCase.findActiveByEmail(email)
@@ -179,7 +175,7 @@ describe('QueryImpl', () => {
           },
         }
 
-        mockDb.session.findFirst.mockResolvedValue(mockSession)
+        prisma.session.findFirst.mockResolvedValue(mockSession)
 
         // Act
         const result = await useCase.findActiveBySessionId(sessionId)
@@ -191,7 +187,7 @@ describe('QueryImpl', () => {
           expect(result.data?.email).toBe('test@example.com')
           expect(result.data).not.toHaveProperty('password')
         }
-        expect(mockDb.session.findFirst).toHaveBeenCalled()
+        expect(prisma.session.findFirst).toHaveBeenCalled()
       })
     })
 
@@ -199,7 +195,7 @@ describe('QueryImpl', () => {
       it('存在しないセッションIDの場合nullを返す', async () => {
         // Arrange
         const sessionId = 'nonexistent'
-        mockDb.session.findFirst.mockResolvedValue(null)
+        prisma.session.findFirst.mockResolvedValue(null)
 
         // Act
         const result = await useCase.findActiveBySessionId(sessionId)
@@ -216,7 +212,7 @@ describe('QueryImpl', () => {
         const sessionId = 'expired-session'
 
         // 期限切れのため結果が返らない
-        mockDb.session.findFirst.mockResolvedValue(null)
+        prisma.session.findFirst.mockResolvedValue(null)
 
         // Act
         const result = await useCase.findActiveBySessionId(sessionId)
@@ -234,7 +230,7 @@ describe('QueryImpl', () => {
         // Arrange
         const sessionId = 'session123'
         const dbError = new Error('Database connection failed')
-        mockDb.session.findFirst.mockRejectedValue(dbError)
+        prisma.session.findFirst.mockRejectedValue(dbError)
 
         // Act
         const result = await useCase.findActiveBySessionId(sessionId)

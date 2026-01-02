@@ -1,61 +1,23 @@
-import { success } from '@yuukihayashi0510/core'
-import { vi } from 'vitest'
-import { MockAuthV2Repository } from '@/application/api/v2/auth/mock/mockAuthV2Repository'
-import type { Command } from '@/domain/user/repository'
-import type { ActiveUser } from '@/domain/user/schema/active-user-schema'
 import TEST_ENV from '@/test/env'
+import userTestHelper from '@/test/helper/user'
 import app from '../../../../server'
 
-const mockRepository = new MockAuthV2Repository()
-
-// モックのActiveUser生成関数
-let activeUserIdCounter = 1n
-function createMockActiveUser(email: string, authenticationId: string): ActiveUser {
-  return {
-    activeUserId: activeUserIdCounter++,
-    userId: activeUserIdCounter,
-    email,
-    password: 'SUPABASE_AUTH_USER',
-    displayName: null,
-    authenticationId,
-    lastLogin: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-}
-
-// モックのCommand
-const mockCommand: Command = {
-  createActive: vi.fn(),
-  createActiveWithAuthenticationId: vi.fn((email, _password, authenticationId) => {
-    return Promise.resolve(success(createMockActiveUser(email, authenticationId)))
-  }),
-  saveActive: vi.fn(),
-}
-
-// SupabaseAuthRepositoryをモックして、MockAuthV2Repositoryを使う
-vi.mock('@/domain/user/infrastructure/supabase-auth-repository', () => ({
-  SupabaseAuthRepository: vi.fn(() => mockRepository),
-}))
-
-// CommandImplをモック
-vi.mock('@/domain/user/infrastructure/command-impl', () => ({
-  default: vi.fn(() => mockCommand),
-}))
-
-// getRdbClientをモックして何も返さない（使われないため）
-vi.mock('@/infrastructure/rdb', () => ({
-  default: () => ({}),
-}))
-
-// createSupabaseAuthClientはモックして何も返さない（使われないため）
-vi.mock('@/infrastructure/supabase', () => ({
-  createSupabaseAuthClient: () => ({}),
-}))
-
 describe('POST /api/v2/auth/signup', () => {
-  beforeEach(() => {
-    mockRepository.clearAll()
+  // signup APIで使用するメールのパターン
+  const SIGNUP_TEST_EMAIL_PATTERN = '@test.com'
+  const DUPLICATE_EMAIL_PATTERN = 'duplicate@example.com'
+
+  beforeEach(async () => {
+    await userTestHelper.cleanUp()
+    // signup APIで直接作成されたユーザーもクリーンアップ
+    await userTestHelper.cleanUpByEmailPattern(SIGNUP_TEST_EMAIL_PATTERN)
+    await userTestHelper.cleanUpByEmailPattern(DUPLICATE_EMAIL_PATTERN)
+  })
+
+  afterAll(async () => {
+    await userTestHelper.cleanUp()
+    await userTestHelper.cleanUpByEmailPattern(SIGNUP_TEST_EMAIL_PATTERN)
+    await userTestHelper.cleanUpByEmailPattern(DUPLICATE_EMAIL_PATTERN)
   })
 
   async function requestSignup(body: string) {

@@ -5,7 +5,7 @@ import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
-import getApiClientForClient from '../../../infrastructure/api'
+import getApiClientForClient from '@/infrastructure/api'
 import useTrends, { type Article } from './use-trends'
 
 // window.matchMediaのモック
@@ -22,16 +22,6 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 })
-
-vi.mock('sonner', () => ({
-  toast: {
-    error: vi.fn(),
-  },
-}))
-
-vi.mock('../../../infrastructure/api', () => ({
-  default: vi.fn(),
-}))
 
 const defaultFakeArticle: Article = {
   articleId: '1',

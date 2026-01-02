@@ -16,7 +16,6 @@ export default defineConfig({
     env: {
       DATABASE_URL: dbUrl,
     },
-    setupFiles: ['./src/test/__mocks__/user.ts'],
     // テスト間の影響が無いようにする
     // 参考: https://zenn.dev/microcms/articles/c3b9d48b5647b4#%E8%A8%AD%E5%AE%9A%E6%96%B9%E6%B3%95
     pool: 'threads',
@@ -36,6 +35,7 @@ export default defineConfig({
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
       include: coverageInclude,
+      exclude: ['src/application/api/handler/factory.ts'],
     },
   },
 })

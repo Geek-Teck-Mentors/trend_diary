@@ -1,18 +1,14 @@
-import { PrismaClient } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { mockDeep } from 'vitest-mock-extended'
+import prisma from '@/test/__mocks__/prisma'
 import CommandImpl from './command-impl'
-
-// モックの設定
-const mockDb = mockDeep<PrismaClient>()
 
 describe('CommandImpl', () => {
   let useCase: CommandImpl
 
   beforeEach(() => {
     vi.clearAllMocks()
-    useCase = new CommandImpl(mockDb)
+    useCase = new CommandImpl(prisma)
   })
 
   describe('createActive', () => {
@@ -38,7 +34,7 @@ describe('CommandImpl', () => {
           updatedAt: new Date(),
         }
 
-        mockDb.$transaction.mockImplementation(async (callback) => {
+        prisma.$transaction.mockImplementation(async (callback) => {
           return await callback({
             // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
             user: { create: vi.fn().mockResolvedValue(mockUser) } as any,
@@ -56,7 +52,7 @@ describe('CommandImpl', () => {
         if (isSuccess(result)) {
           expect(result.data.email).toBe(email)
         }
-        expect(mockDb.$transaction).toHaveBeenCalled()
+        expect(prisma.$transaction).toHaveBeenCalled()
       })
     })
 
@@ -66,7 +62,7 @@ describe('CommandImpl', () => {
         const email = 'test@example.com'
         const hashedPassword = 'hashedPassword123'
         const dbError = new Error('Database connection failed')
-        mockDb.$transaction.mockRejectedValue(dbError)
+        prisma.$transaction.mockRejectedValue(dbError)
 
         // Act
         const result = await useCase.createActive(email, hashedPassword)
@@ -109,7 +105,7 @@ describe('CommandImpl', () => {
           updatedAt: new Date(),
         }
 
-        mockDb.activeUser.update.mockResolvedValue(mockUpdatedUser)
+        prisma.activeUser.update.mockResolvedValue(mockUpdatedUser)
 
         // Act
         const result = await useCase.saveActive(activeUser)
@@ -120,7 +116,7 @@ describe('CommandImpl', () => {
           expect(result.data.activeUserId).toBe(1n)
           expect(result.data.email).toBe('test@example.com')
         }
-        expect(mockDb.activeUser.update).toHaveBeenCalled()
+        expect(prisma.activeUser.update).toHaveBeenCalled()
       })
     })
 
@@ -140,7 +136,7 @@ describe('CommandImpl', () => {
           adminUserId: null,
         }
         const dbError = new Error('Database connection failed')
-        mockDb.activeUser.update.mockRejectedValue(dbError)
+        prisma.activeUser.update.mockRejectedValue(dbError)
 
         // Act
         const result = await useCase.saveActive(activeUser)
