@@ -19,6 +19,12 @@ vi.mock('swr/mutation', () => {
   }
 })
 
+vi.mock('@/infrastructure/api', () => {
+  return {
+    default: vi.fn((url: string) => ({ apiUrl: url })),
+  }
+})
+
 afterEach(() => {
   cleanup()
 })

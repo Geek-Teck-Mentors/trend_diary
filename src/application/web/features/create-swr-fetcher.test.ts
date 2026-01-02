@@ -1,13 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createSWRFetcher } from './create-swr-fetcher'
 
-// モック設定
-vi.mock('../infrastructure/api', () => {
-  return {
-    default: vi.fn(() => ({})),
-  }
-})
-
 global.fetch = vi.fn()
 
 describe('createSWRFetcher', () => {

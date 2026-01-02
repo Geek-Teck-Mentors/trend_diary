@@ -1,12 +1,8 @@
 import { act, renderHook } from '@testing-library/react'
 import { toast } from 'sonner'
 import type { MockedFunction } from 'vitest'
-import getApiClientForClient from '../../../infrastructure/api'
+import getApiClientForClient from '@/infrastructure/api'
 import useReadArticle from './use-read-article'
-
-vi.mock('../../../infrastructure/api', () => ({
-  default: vi.fn(),
-}))
 
 const mockApiClient = {
   articles: {

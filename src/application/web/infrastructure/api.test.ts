@@ -1,12 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
 
-// モック設定
-vi.mock('@/infrastructure/api', () => {
-  return {
-    default: vi.fn((url: string) => ({ apiUrl: url })),
-  }
-})
-
 describe('api', () => {
   describe('getApiClientForClient', () => {
     it('ブラウザ環境でAPIクライアントを取得できる', async () => {
