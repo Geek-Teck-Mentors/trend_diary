@@ -70,7 +70,6 @@ type CreateResult = {
 
 type LoginResult = {
   activeUserId: bigint
-  accessToken: string
   cookies: string
 }
 
@@ -137,20 +136,8 @@ const userTestHelper = {
       throw new Error(`ActiveUser not found for email: ${email}`)
     }
 
-    // accessTokenを抽出（cookies から sb-*-auth-token を探す）
-    let accessToken = ''
-    for (const cookie of setCookieHeaders) {
-      if (cookie.includes('auth-token')) {
-        const match = cookie.match(/=([^;]+)/)
-        if (match) {
-          accessToken = match[1]
-        }
-      }
-    }
-
     return {
       activeUserId: activeUser.activeUserId,
-      accessToken,
       cookies,
     }
   },
