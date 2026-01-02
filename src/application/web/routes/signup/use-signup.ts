@@ -22,7 +22,6 @@ export default function useSignup(navigate: NavigateFunction) {
       },
       onError: (error: Error) => {
         if (error.message.includes('409')) {
-          // newPageError('認証エラー', 'このメールアドレスは既に使用されています')
           toast.error('このメールアドレスは既に使用されています')
         } else if (error.message.includes('500')) {
           toast.error('サーバーエラーが発生しました。時間をおいて再度お試しください。')
