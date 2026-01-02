@@ -65,11 +65,6 @@ vi.mock('@/domain/user/infrastructure/command-impl', () => ({
   default: vi.fn(() => mockCommand),
 }))
 
-// getRdbClientをモックして何も返さない（使われないため）
-vi.mock('@/infrastructure/rdb', () => ({
-  default: () => ({}),
-}))
-
 // createSupabaseAuthClientはモックして何も返さない（使われないため）
 vi.mock('@/infrastructure/supabase', () => ({
   createSupabaseAuthClient: () => ({}),
