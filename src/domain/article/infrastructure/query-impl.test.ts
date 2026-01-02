@@ -308,6 +308,29 @@ describe('QueryImpl', () => {
           expectedLength: 1,
           expectedIsRead: [false],
         },
+        {
+          name: '同じユーザーが同じ記事を複数回読んでいても記事は重複しない',
+          activeUserId: 1n,
+          mockArticles,
+          mockReadHistories: [
+            {
+              readHistoryId: 1n,
+              activeUserId: 1n,
+              articleId: 1n,
+              readAt: new Date('2024-01-16T09:00:00Z'),
+              createdAt: new Date('2024-01-16T09:00:00Z'),
+            },
+            {
+              readHistoryId: 2n,
+              activeUserId: 1n,
+              articleId: 1n,
+              readAt: new Date('2024-01-17T09:00:00Z'),
+              createdAt: new Date('2024-01-17T09:00:00Z'),
+            },
+          ],
+          expectedLength: 2,
+          expectedIsRead: [true, false],
+        },
       ]
 
       readStatusTestCases.forEach(

@@ -9,5 +9,6 @@ model ReadHistory {
 
   activeUser ActiveUser @relation(fields: [activeUserId], references: [activeUserId], onDelete: Cascade)
 
+  @@index([articleId, activeUserId], map: "idx_read_histories_article_user")
   @@map("read_histories")
 }
