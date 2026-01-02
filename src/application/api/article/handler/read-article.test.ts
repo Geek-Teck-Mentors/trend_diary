@@ -72,24 +72,24 @@ describe('API ReadHistoryスキーマ', () => {
 describe('POST /api/articles/:article_id/read', () => {
   let testActiveUserId: bigint
   let testArticleId: bigint
-  let accessToken: string
+  let authCookies: string
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
     await userTestHelper.create('test@example.com', 'Test@password123')
     const loginData = await userTestHelper.login('test@example.com', 'Test@password123')
     testActiveUserId = loginData.activeUserId
-    accessToken = loginData.accessToken
+    authCookies = loginData.cookies
 
     // テスト記事作成
     const article = await articleTestHelper.createArticle()
     testArticleId = article.articleId
   }
 
-  async function requestReadArticle(articleId: string, token: string, readAt?: string) {
+  async function requestReadArticle(articleId: string, cookies: string, readAt?: string) {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      Cookie: `access_token=${token}`,
+      Cookie: cookies,
     }
 
     return app.request(
@@ -119,7 +119,7 @@ describe('POST /api/articles/:article_id/read', () => {
   describe('正常系', () => {
     it('既読履歴を作成できること', async () => {
       const fixedReadAt = '2024-01-01T10:00:00.000Z'
-      const response = await requestReadArticle(testArticleId.toString(), accessToken, fixedReadAt)
+      const response = await requestReadArticle(testArticleId.toString(), authCookies, fixedReadAt)
 
       expect(response.status).toBe(201)
       const json = (await response.json()) as { message: string }
@@ -134,14 +134,14 @@ describe('POST /api/articles/:article_id/read', () => {
 
   describe('準正常系', () => {
     it('無効なarticle_idでバリデーションエラーが発生すること', async () => {
-      const response = await requestReadArticle('invalid-id', accessToken)
+      const response = await requestReadArticle('invalid-id', authCookies)
 
       expect(response.status).toBe(422)
     })
     it('無効なreadAtでバリデーションエラーが発生すること', async () => {
       const response = await requestReadArticle(
         testArticleId.toString(),
-        accessToken,
+        authCookies,
         'invalid-date',
       )
 
@@ -150,7 +150,7 @@ describe('POST /api/articles/:article_id/read', () => {
     it('存在しない記事は既読履歴が作成できない', async () => {
       const nonExistentArticleId = '999999'
 
-      const response = await requestReadArticle(nonExistentArticleId, accessToken)
+      const response = await requestReadArticle(nonExistentArticleId, authCookies)
 
       expect(response.status).toBe(404)
     })

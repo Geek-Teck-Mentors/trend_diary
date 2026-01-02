@@ -27,6 +27,23 @@ function isUserAlreadyExistsError(error: { message: string }): boolean {
   return error.message.includes('already registered')
 }
 
+/**
+ * Supabaseのログインエラーが「認証情報が不正」であることを示すかチェック
+ * NOTE: instanceofチェックが動作しない場合のフォールバック
+ * ローカルSupabaseと本番Supabaseで挙動が異なる可能性がある
+ */
+function isInvalidCredentialsError(error: unknown): boolean {
+  if (error instanceof AuthInvalidCredentialsError) {
+    return true
+  }
+  // フォールバック: メッセージ文字列でも判定
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = (error as { message: string }).message.toLowerCase()
+    return message.includes('invalid login credentials') || message.includes('invalid credentials')
+  }
+  return false
+}
+
 export class SupabaseAuthRepository implements AuthV2Repository {
   constructor(private readonly client: SupabaseClient) {}
 
@@ -126,8 +143,8 @@ export class SupabaseAuthRepository implements AuthV2Repository {
 
     const { data, error } = result.data
     if (error) {
-      // 認証失敗（型安全なチェック）
-      if (error instanceof AuthInvalidCredentialsError) {
+      // 認証失敗チェック（instanceofとメッセージの両方で判定）
+      if (isInvalidCredentialsError(error)) {
         return failure(new ClientError('Invalid email or password', 401))
       }
 
