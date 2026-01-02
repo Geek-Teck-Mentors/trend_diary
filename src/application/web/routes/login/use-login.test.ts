@@ -41,7 +41,6 @@ describe('useLogin', () => {
     it('初期状態が正しく設定される', () => {
       const { result } = setupHook()
 
-      expect(result.current.pageError).toBeNull()
       expect(result.current.isLoading).toBe(false)
       expect(typeof result.current.handleSubmit).toBe('function')
     })

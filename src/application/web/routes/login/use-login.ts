@@ -1,11 +1,10 @@
 import { NavigateFunction } from 'react-router'
+import { toast } from 'sonner'
 import useSWRMutation from 'swr/mutation'
-import { usePageError } from '../../components/ui/page-error/use-page-error'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { createSWRFetcher } from '../../features/create-swr-fetcher'
 
 export default function useLogin(navigate: NavigateFunction) {
-  const { pageError, newPageError, clearPageError } = usePageError()
   const { client, apiCall } = createSWRFetcher()
 
   const { trigger, isMutating } = useSWRMutation(
@@ -26,20 +25,19 @@ export default function useLogin(navigate: NavigateFunction) {
       },
       onError: (error: Error) => {
         if (error.message.includes('401') || error.message.includes('404')) {
-          newPageError('認証エラー', 'メールアドレスまたはパスワードが正しくありません')
+          toast.error('メールアドレスまたはパスワードが正しくありません')
         } else if (error.message.includes('500')) {
-          newPageError('サーバーエラー', '不明なエラーが発生しました')
+          toast.error('サーバーエラーが発生しました。時間をおいて再度お試しください。')
         } else {
-          newPageError('ネットワークエラー', 'ネットワークエラーが発生しました')
+          toast.error('予期せぬエラーが発生しました。')
         }
       },
     },
   )
 
   const handleSubmit = async (data: AuthenticateFormData) => {
-    clearPageError()
     trigger(data)
   }
 
-  return { handleSubmit, pageError, isLoading: isMutating }
+  return { handleSubmit, isLoading: isMutating }
 }
