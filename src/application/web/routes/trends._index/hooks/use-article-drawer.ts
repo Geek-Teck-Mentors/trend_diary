@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Nullable } from '@/common/types/utility'
 import type { Article } from './use-trends'
 
@@ -16,9 +16,22 @@ export default function useArticleDrawer() {
     setSelectedArticle(null)
   }
 
+  const updateSelectedArticleReadStatus = useCallback(
+    (isRead: boolean) => {
+      if (selectedArticle == null) return
+
+      setSelectedArticle({
+        ...selectedArticle,
+        isRead,
+      })
+    },
+    [selectedArticle],
+  )
+
   return {
     isOpen,
     selectedArticle,
+    updateSelectedArticleReadStatus,
     open,
     close,
   }
