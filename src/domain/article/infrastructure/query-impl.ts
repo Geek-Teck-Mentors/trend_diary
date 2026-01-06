@@ -82,11 +82,13 @@ export default class QueryImpl implements Query {
         a.description,
         a.url,
         a.created_at,
-        CASE WHEN rh.read_history_id IS NOT NULL THEN true ELSE false END as is_read
+        EXISTS(
+          SELECT 1
+          FROM read_histories rh
+          WHERE rh.article_id = a.article_id
+            AND rh.active_user_id = ${activeUserId}
+        ) as is_read
       FROM articles a
-      LEFT JOIN read_histories rh
-        ON a.article_id = rh.article_id
-        AND rh.active_user_id = ${activeUserId}
       ${whereClause}
       ORDER BY a.created_at DESC, a.article_id DESC
       LIMIT ${limit} OFFSET ${offset}
