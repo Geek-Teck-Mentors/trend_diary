@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 export const DEFAULT_LIMIT = 20
+export const DEFAULT_MOBILE_LIMIT = 10
 export const DEFAULT_PAGE = 1
 
 function transform(value: string | number | undefined, defaultValue: number) {
