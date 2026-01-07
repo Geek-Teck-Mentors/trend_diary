@@ -18,7 +18,7 @@ export type Article = Omit<ArticleOutput, 'articleId'> & {
 type Params = {
   page: number
   limit: number
-  media: MediaType | null
+  media: MediaType
 }
 
 type ArticlesResponse = {
@@ -123,7 +123,7 @@ export default function useTrends() {
   )
 
   const handleMediaChange = useCallback(
-    (media: MediaType | null) => {
+    (media: MediaType) => {
       const newParams = new URLSearchParams(searchParams)
       if (media) {
         newParams.set('media', media)
