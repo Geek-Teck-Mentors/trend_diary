@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
@@ -39,48 +38,41 @@ export default function useTrends() {
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useIsMobile()
 
-  const date = useMemo(() => new Date(), [])
+  const date = new Date()
   const formattedDate = formatDate(date)
 
-  const params: Params = useMemo(() => {
-    const pageParam = searchParams.get('page')
-    const limitParam = searchParams.get('limit')
-    const mediaParam = searchParams.get('media')
+  const pageParam = searchParams.get('page')
+  const limitParam = searchParams.get('limit')
+  const mediaParam = searchParams.get('media')
 
-    const currentPage = pageParam ? parseInt(pageParam, 10) : DEFAULT_PAGE
-    const validPage = Number.isNaN(currentPage) ? DEFAULT_PAGE : Math.max(currentPage, 1)
+  const currentPage = pageParam ? parseInt(pageParam, 10) : DEFAULT_PAGE
+  const validPage = Number.isNaN(currentPage) ? DEFAULT_PAGE : Math.max(currentPage, 1)
 
-    // limitParamが明示的に指定されている場合はそれを使用
-    // 指定がない場合のみisMobileに基づいたデフォルト値を使用
-    let validLimit: number
-    if (limitParam) {
-      const currentLimit = parseInt(limitParam, 10)
-      validLimit = Number.isNaN(currentLimit)
-        ? DEFAULT_LIMIT
-        : Math.max(Math.min(currentLimit, 100), 1)
-    } else {
-      validLimit = isMobile ? DEFAULT_MOBILE_LIMIT : DEFAULT_LIMIT
-    }
+  // limitParamが明示的に指定されている場合はそれを使用
+  // 指定がない場合のみisMobileに基づいたデフォルト値を使用
+  let validLimit: number
+  if (limitParam) {
+    const currentLimit = parseInt(limitParam, 10)
+    validLimit = Number.isNaN(currentLimit)
+      ? DEFAULT_LIMIT
+      : Math.max(Math.min(currentLimit, 100), 1)
+  } else {
+    validLimit = isMobile ? DEFAULT_MOBILE_LIMIT : DEFAULT_LIMIT
+  }
 
-    return {
-      page: validPage,
-      limit: validLimit,
-      media: mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : null,
-    }
-    // NOTE: isMobileを依存配列から除外することで、初回マウント時のisMobile変化による2重実行を防ぐ
-    // isMobileの最新値はクロージャー経由で常に参照できる
-  }, [searchParams])
+  const params: Params = {
+    page: validPage,
+    limit: validLimit,
+    media: mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : null,
+  }
 
-  const query = useMemo(
-    () => ({
-      to: formattedDate,
-      from: formattedDate,
-      page: params.page,
-      limit: params.limit,
-      ...(params.media && { media: params.media }),
-    }),
-    [formattedDate, params.page, params.limit, params.media],
-  )
+  const query = {
+    to: formattedDate,
+    from: formattedDate,
+    page: params.page,
+    limit: params.limit,
+    ...(params.media && { media: params.media }),
+  }
 
   const cacheKey = ['api/articles', query]
 
@@ -122,31 +114,25 @@ export default function useTrends() {
     },
   )
 
-  const handleMediaChange = useCallback(
-    (media: MediaType) => {
-      const newParams = new URLSearchParams(searchParams)
-      if (media) {
-        newParams.set('media', media)
-      } else {
-        newParams.delete('media')
-      }
-      // メディアを変更したらページを1にリセット
-      newParams.delete('page')
-      setSearchParams(newParams)
-    },
-    [searchParams, setSearchParams],
-  )
+  const handleMediaChange = (media: MediaType) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (media) {
+      newParams.set('media', media)
+    } else {
+      newParams.delete('media')
+    }
+    // メディアを変更したらページを1にリセット
+    newParams.delete('page')
+    setSearchParams(newParams)
+  }
 
-  const updateArticleReadStatus = useCallback(
-    (articleId: string, isRead: boolean) => {
-      if (!data) return
-      const updatedArticles = data.data.map((article) =>
-        article.articleId === articleId ? { ...article, isRead } : article,
-      )
-      mutate({ ...data, data: updatedArticles }, { revalidate: false })
-    },
-    [data, mutate],
-  )
+  const updateArticleReadStatus = (articleId: string, isRead: boolean) => {
+    if (!data) return
+    const updatedArticles = data.data.map((article) =>
+      article.articleId === articleId ? { ...article, isRead } : article,
+    )
+    mutate({ ...data, data: updatedArticles }, { revalidate: false })
+  }
 
   return {
     date,
