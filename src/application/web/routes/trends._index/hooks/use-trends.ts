@@ -122,11 +122,18 @@ export default function useTrends() {
   }
 
   const updateArticleReadStatus = (articleId: string, isRead: boolean) => {
-    if (!data) return
-    const updatedArticles = data.data.map((article) =>
-      article.articleId === articleId ? { ...article, isRead } : article,
+    mutate(
+      (currentData) => {
+        if (!currentData) return currentData
+        return {
+          ...currentData,
+          data: currentData.data.map((article) =>
+            article.articleId === articleId ? { ...article, isRead } : article,
+          ),
+        }
+      },
+      { revalidate: false },
     )
-    mutate({ ...data, data: updatedArticles }, { revalidate: false })
   }
 
   return {
