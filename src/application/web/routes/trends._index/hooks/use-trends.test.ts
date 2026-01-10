@@ -55,18 +55,22 @@ const generateFakeResponse = (
     total: number
     totalPages: number
   }>,
-) => ({
-  status: params?.status || 200,
-  json: vi.fn().mockResolvedValue({
-    data: params?.articles || [],
-    page: params?.page || 1,
-    limit: params?.limit || 20,
-    total: params?.total || 0,
-    totalPages: params?.totalPages || 1,
-    hasNext: (params?.page || 1) < (params?.totalPages || 1),
-    hasPrev: (params?.page || 1) > 1,
-  }),
-})
+) => {
+  const status = params?.status || 200
+  return {
+    status,
+    ok: status >= 200 && status < 300,
+    json: vi.fn().mockResolvedValue({
+      data: params?.articles || [],
+      page: params?.page || 1,
+      limit: params?.limit || 20,
+      total: params?.total || 0,
+      totalPages: params?.totalPages || 1,
+      hasNext: (params?.page || 1) < (params?.totalPages || 1),
+      hasPrev: (params?.page || 1) > 1,
+    }),
+  }
+}
 
 // biome-ignore lint/suspicious/noExplicitAny: getApiClientForClientの型が面倒なのでanyを使用
 const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
@@ -139,6 +143,7 @@ describe('useTrends', () => {
         resolvePromise = () =>
           resolve({
             status: 200,
+            ok: true,
             json: () =>
               Promise.resolve({
                 data: [],
@@ -339,7 +344,9 @@ describe('useTrends', () => {
       const { result } = setupHook()
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('不正なパラメータです')
+        expect(toast.error).toHaveBeenCalledWith(
+          'エラーが発生しました。時間をおいて再度お試しください。',
+        )
         expect(result.current.isLoading).toBe(false)
       })
     })
@@ -352,20 +359,23 @@ describe('useTrends', () => {
       const { result } = setupHook()
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('不明なエラーが発生しました')
+        expect(toast.error).toHaveBeenCalledWith(
+          'エラーが発生しました。時間をおいて再度お試しください。',
+        )
         expect(result.current.isLoading).toBe(false)
       })
     })
 
     it('その他のエラーの時、エラーのtoastが表示される', async () => {
-      const otherErrorMessage = 'その他のエラーが発生しました'
-      const networkError = new Error(otherErrorMessage)
+      const networkError = new Error('ネットワークエラー')
       mockApiClient.articles.$get.mockRejectedValue(networkError)
 
       const { result } = setupHook()
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith(otherErrorMessage)
+        expect(toast.error).toHaveBeenCalledWith(
+          'エラーが発生しました。時間をおいて再度お試しください。',
+        )
         expect(result.current.isLoading).toBe(false)
       })
     })
@@ -380,6 +390,7 @@ describe('useTrends', () => {
 
       const fakeResponse = {
         status: 200,
+        ok: true,
         json: vi.fn().mockResolvedValue({
           data: [
             { ...fakeArticles[0], articleId: '1', isRead: true },
@@ -411,6 +422,7 @@ describe('useTrends', () => {
 
       const fakeResponse = {
         status: 200,
+        ok: true,
         json: vi.fn().mockResolvedValue({
           data: [{ ...fakeArticles[0], articleId: '1', isRead: false }],
           page: 1,
