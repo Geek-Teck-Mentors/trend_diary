@@ -2,13 +2,13 @@ import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
+import createSWRFetcher from '@/application/web/features/create-swr-fetcher'
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from '@/common/pagination'
 import { DEFAULT_MOBILE_LIMIT } from '@/common/pagination/schema'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
-import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
 
-// isRead を含む記事型（フロントエンドではarticleIdをstringに統一）
+// isRead を含む記事型(フロントエンドではarticleIdをstringに統一)
 export type Article = Omit<ArticleOutput, 'articleId'> & {
   articleId: string
   isRead?: boolean
@@ -37,6 +37,7 @@ const formatDate = (rawDate: Date) => {
 export default function useTrends() {
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useIsMobile()
+  const { client, apiCall } = createSWRFetcher()
 
   const date = new Date()
   const formattedDate = formatDate(date)
@@ -74,37 +75,31 @@ export default function useTrends() {
     ...(params.media && { media: params.media }),
   }
 
-  const cacheKey = ['api/articles', query]
+  const cacheKey = ['articles', query]
 
   const { data, isLoading, mutate } = useSWR<ArticlesResponse>(
     cacheKey,
     async () => {
-      const res = await getApiClientForClient().articles.$get(
-        { query },
-        { init: { credentials: 'include' } },
+      const result = await apiCall<ArticlesResponse>(() =>
+        client.articles.$get({ query }, { init: { credentials: 'include' } }),
       )
-      if (res.status === 200) {
-        const resJson = await res.json()
-        return {
-          ...resJson,
-          data: resJson.data.map((_data) => ({
-            ..._data,
-            createdAt: new Date(_data.createdAt),
-          })),
-        }
-      }
-      // 400番台
-      if (res.status >= 400 && res.status < 500) {
-        throw new Error('不正なパラメータです')
+
+      if (!result) {
+        throw new Error('データの取得に失敗しました')
       }
 
-      throw new Error('不明なエラーが発生しました')
+      return {
+        ...result,
+        data: result.data.map((_data) => ({
+          ..._data,
+          createdAt: new Date(_data.createdAt),
+        })),
+      }
     },
     {
       onError: (error) => {
         if (error instanceof Error) {
-          const errorMessage = error.message || 'エラーが発生しました'
-          toast.error(errorMessage)
+          toast.error('エラーが発生しました。時間をおいて再度お試しください。')
         } else {
           toast.error('不明なエラーが発生しました')
           // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
