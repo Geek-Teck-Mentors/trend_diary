@@ -1,16 +1,33 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import useSWR from 'swr'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
-import { DEFAULT_LIMIT, DEFAULT_PAGE } from '@/common/pagination'
+import createSWRFetcher from '@/application/web/features/create-swr-fetcher'
+import {
+  createOffsetPaginationSchema,
+  DEFAULT_LIMIT,
+  DEFAULT_MOBILE_LIMIT,
+} from '@/common/pagination/schema'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
-import getApiClientForClient from '../../../infrastructure/api'
 import { MediaType } from '../components/media-filter'
 
-// isRead を含む記事型（フロントエンドではarticleIdをstringに統一）
+// isRead を含む記事型(フロントエンドではarticleIdをstringに統一)
 export type Article = Omit<ArticleOutput, 'articleId'> & {
   articleId: string
   isRead?: boolean
+}
+
+type Params = {
+  page: number
+  limit: number
+  media: MediaType
+}
+
+type ArticlesResponse = {
+  data: Article[]
+  page: number
+  limit: number
+  totalPages: number
 }
 
 const formatDate = (rawDate: Date) => {
@@ -20,149 +37,112 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
-export type FetchArticles = (params: {
-  date: Date
-  page?: number
-  limit?: number
-  media?: MediaType
-}) => Promise<void>
-
 export default function useTrends() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [articles, setArticles] = useState<Article[]>([])
-  const [page, setPage] = useState(DEFAULT_PAGE)
-  const [limit, setLimit] = useState(DEFAULT_LIMIT)
-  const [totalPages, setTotalPages] = useState(DEFAULT_PAGE)
-  const [isLoading, setIsLoading] = useState(false)
-  const isLoadingRef = useRef(false)
   const isMobile = useIsMobile()
+  const { client, apiCall } = createSWRFetcher()
 
-  const date = useMemo(() => new Date(), [])
+  const date = new Date()
+  const formattedDate = formatDate(date)
 
-  const fetchArticles: FetchArticles = useCallback(
-    async ({ date, page = 1, limit = 20, media = null }) => {
-      if (isLoadingRef.current) return
+  const mediaParam = searchParams.get('media')
 
-      isLoadingRef.current = true
-      setIsLoading(true)
-      try {
-        const queryDate = formatDate(date)
+  // モバイル判定に基づいたデフォルト値でschemaを生成
+  const defaultLimit = isMobile ? DEFAULT_MOBILE_LIMIT : DEFAULT_LIMIT
+  const paginationSchema = createOffsetPaginationSchema(defaultLimit)
 
-        const res = await getApiClientForClient().articles.$get(
-          {
-            query: {
-              to: queryDate,
-              from: queryDate,
-              page,
-              limit,
-              ...(media && { media }),
-            },
-          },
-          { init: { credentials: 'include' } },
-        )
-        if (res.status === 200) {
-          const resJson = await res.json()
-          setArticles(
-            resJson.data.map((data) => ({
-              articleId: data.articleId,
-              media: data.media,
-              title: data.title,
-              author: data.author,
-              description: data.description,
-              url: data.url,
-              createdAt: new Date(data.createdAt),
-              isRead: data.isRead,
-            })),
-          )
-          setPage(resJson.page)
-          setLimit(resJson.limit)
-          setTotalPages(resJson.totalPages)
+  // URLパラメータをschemaでバリデーション
+  // searchParams.get()はnullを返すので、undefinedに変換
+  const { page: validPage, limit: validLimit } = paginationSchema.parse({
+    page: searchParams.get('page') ?? undefined,
+    limit: searchParams.get('limit') ?? undefined,
+  })
 
-          // 400番台
-        } else if (res.status >= 400 && res.status < 500) {
-          throw new Error('不正なパラメータです')
-        } else if (res.status >= 500) {
-          throw new Error('不明なエラーが発生しました')
-        }
-      } catch (error) {
+  const params: Params = {
+    page: validPage,
+    limit: validLimit,
+    media: mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : null,
+  }
+
+  const query = {
+    to: formattedDate,
+    from: formattedDate,
+    page: params.page,
+    limit: params.limit,
+    ...(params.media && { media: params.media }),
+  }
+
+  const cacheKey = ['articles', query]
+
+  const { data, isLoading, mutate } = useSWR<ArticlesResponse>(
+    cacheKey,
+    async () => {
+      const result = await apiCall<ArticlesResponse>(() =>
+        client.articles.$get({ query }, { init: { credentials: 'include' } }),
+      )
+
+      if (!result) {
+        throw new Error('データの取得に失敗しました')
+      }
+
+      return {
+        ...result,
+        data: result.data.map((_data) => ({
+          ..._data,
+          createdAt: new Date(_data.createdAt),
+        })),
+      }
+    },
+    {
+      onError: (error) => {
         if (error instanceof Error) {
-          const errorMessage = error.message || 'エラーが発生しました'
-          toast.error(errorMessage)
+          toast.error('エラーが発生しました。時間をおいて再度お試しください。')
         } else {
           toast.error('不明なエラーが発生しました')
           // biome-ignore lint/suspicious/noConsole: 未知のエラーのため
           console.error(error)
         }
-      } finally {
-        isLoadingRef.current = false
-        setIsLoading(false)
-      }
+      },
     },
-    [],
   )
 
-  const selectedMedia = useMemo<MediaType>(() => {
-    const mediaParam = searchParams.get('media')
-    return mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : null
-  }, [searchParams])
-
-  // INFO: URLパラメータの変更を監視して記事を取得
-  useEffect(() => {
-    const pageParam = searchParams.get('page')
-    const limitParam = searchParams.get('limit')
-    const currentPage = pageParam ? parseInt(pageParam, 10) : 1
-    const validPage = Number.isNaN(currentPage) ? 1 : Math.max(currentPage, 1)
-
-    // limitParamが明示的に指定されている場合はそれを使用
-    // 指定がない場合のみisMobileに基づいたデフォルト値を使用
-    let validLimit: number
-    if (limitParam) {
-      const currentLimit = parseInt(limitParam, 10)
-      validLimit = Number.isNaN(currentLimit)
-        ? DEFAULT_LIMIT
-        : Math.max(Math.min(currentLimit, 100), 1)
+  const handleMediaChange = (media: MediaType) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (media) {
+      newParams.set('media', media)
     } else {
-      // デフォルトのlimitはモバイルなら10、デスクトップなら20
-      validLimit = isMobile ? 10 : DEFAULT_LIMIT
+      newParams.delete('media')
     }
+    // メディアを変更したらページを1にリセット
+    newParams.delete('page')
+    setSearchParams(newParams)
+  }
 
-    fetchArticles({ date, page: validPage, limit: validLimit, media: selectedMedia })
-    // NOTE: isMobileを依存配列から除外することで、初回マウント時のisMobile変化による2重実行を防ぐ
-    // isMobileの最新値はクロージャー経由で常に参照できる
-  }, [searchParams, date, fetchArticles, selectedMedia])
-
-  const handleMediaChange = useCallback(
-    (media: MediaType) => {
-      const newParams = new URLSearchParams(searchParams)
-      if (media) {
-        newParams.set('media', media)
-      } else {
-        newParams.delete('media')
-      }
-      // メディアを変更したらページを1にリセット
-      newParams.delete('page')
-      setSearchParams(newParams)
-    },
-    [searchParams, setSearchParams],
-  )
-
-  const updateArticleReadStatus = useCallback((articleId: string, isRead: boolean) => {
-    setArticles((prev) =>
-      prev.map((article) => (article.articleId === articleId ? { ...article, isRead } : article)),
+  const updateArticleReadStatus = (articleId: string, isRead: boolean) => {
+    mutate(
+      (currentData) => {
+        if (!currentData) return currentData
+        return {
+          ...currentData,
+          data: currentData.data.map((article) =>
+            article.articleId === articleId ? { ...article, isRead } : article,
+          ),
+        }
+      },
+      { revalidate: false },
     )
-  }, [])
+  }
 
   return {
     date,
-    articles,
-    fetchArticles,
-    page,
-    limit,
-    totalPages,
+    articles: data?.data || [],
+    page: data?.page || params.page,
+    limit: data?.limit || params.limit,
+    totalPages: data?.totalPages || 1,
     isLoading,
     setSearchParams,
     handleMediaChange,
-    selectedMedia,
+    selectedMedia: params.media,
     updateArticleReadStatus,
   }
 }
