@@ -13,15 +13,14 @@ export default function Trends() {
   const { isLoggedIn, userFeatureEnabled } = useOutletContext<TrendsOutletContext>()
   const {
     articles,
+    reloadArticles,
     isLoading,
     page,
-    limit,
     totalPages,
     date,
-    setSearchParams,
     handleMediaChange,
+    handlePageChange,
     selectedMedia,
-    updateArticleReadStatus,
   } = useTrends()
   const {
     isOpen: isDrawerOpen,
@@ -37,16 +36,11 @@ export default function Trends() {
     const originalArticle = articles.find((a) => a.articleId === articleId)
     if (!originalArticle) return
 
-    // 1. UIを即座に更新（オプティミスティックUI）
-    updateArticleReadStatus(articleId, isRead)
+    // 1. APIコールで既読/未読を切り替え
+    await (isRead ? markAsRead : markAsUnread)(articleId)
 
-    // 2. APIを呼び出し
-    const success = isRead ? await markAsRead(articleId) : await markAsUnread(articleId)
-
-    // 3. 失敗した場合にUIを元に戻す
-    if (!success) {
-      updateArticleReadStatus(articleId, originalArticle.isRead ?? false)
-    }
+    // 2. 再fetchして状態を更新
+    reloadArticles()
   }
 
   const handleMarkAsRead = async (articleId: string) => {
@@ -58,13 +52,12 @@ export default function Trends() {
       <TrendsPage
         date={date}
         articles={articles}
-        setSearchParams={setSearchParams}
         openDrawer={openDrawer}
         isLoading={isLoading}
         page={page}
-        limit={limit}
         totalPages={totalPages}
         selectedMedia={selectedMedia}
+        onPageChange={handlePageChange}
         onMediaChange={handleMediaChange}
         onToggleRead={handleToggleRead}
         isLoggedIn={isReadArticleEnabled}

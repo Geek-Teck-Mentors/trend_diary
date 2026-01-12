@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
@@ -64,7 +65,7 @@ export default function useTrends() {
     ...(params.media && { media: params.media }),
   }
 
-  const cacheKey = ['articles', query]
+  const cacheKey = 'api/articles'
 
   const { data, isLoading, mutate } = useSWR<ArticlesResponse>(
     cacheKey,
@@ -98,6 +99,19 @@ export default function useTrends() {
     },
   )
 
+  const reloadArticles = () => mutate()
+
+  const handlePageChange = (newPage: number) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (newPage > 1) {
+      newParams.set('page', newPage.toString())
+    } else {
+      newParams.delete('page')
+    }
+
+    setSearchParams(newParams)
+  }
+
   const handleMediaChange = (media: MediaType) => {
     const newParams = new URLSearchParams(searchParams)
     if (media) {
@@ -107,34 +121,27 @@ export default function useTrends() {
     }
     // メディアを変更したらページを1にリセット
     newParams.delete('page')
+
     setSearchParams(newParams)
   }
 
-  const updateArticleReadStatus = (articleId: string, isRead: boolean) => {
-    mutate(
-      (currentData) => {
-        if (!currentData) return currentData
-        return {
-          ...currentData,
-          data: currentData.data.map((article) =>
-            article.articleId === articleId ? { ...article, isRead } : article,
-          ),
-        }
-      },
-      { revalidate: false },
-    )
-  }
+  // searchParamsが変更されたら再fetchする
+  // INFO: 更新のタイミングでのmutateだと、古いパラメータでfetchされてしまうためuseEffect内で実行する
+  useEffect(() => {
+    mutate()
+  }, [searchParams])
 
   return {
     date,
     articles: data?.data || [],
+    reloadArticles,
     page: data?.page || params.page,
     limit: data?.limit || params.limit,
     totalPages: data?.totalPages || 1,
     isLoading,
     setSearchParams,
+    handlePageChange,
     handleMediaChange,
     selectedMedia: params.media,
-    updateArticleReadStatus,
   }
 }

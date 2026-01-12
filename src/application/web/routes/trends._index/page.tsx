@@ -17,13 +17,12 @@ import type { Article } from './hooks/use-trends'
 type Props = {
   date: Date
   articles: Article[]
-  setSearchParams: ReturnType<typeof useSearchParams>[1]
   openDrawer: (article: Article) => void
   isLoading: boolean
   page: number
-  limit: number
   totalPages: number
   selectedMedia: MediaType
+  onPageChange: (newPage: number) => void
   onMediaChange: (media: MediaType) => void
   onToggleRead: (articleId: string, isRead: boolean) => void
   isLoggedIn: boolean
@@ -32,13 +31,12 @@ type Props = {
 export default function TrendsPage({
   date,
   articles,
-  setSearchParams,
   openDrawer,
   isLoading,
   page,
-  limit,
   totalPages,
   selectedMedia,
+  onPageChange,
   onMediaChange,
   onToggleRead,
   isLoggedIn,
@@ -55,31 +53,18 @@ export default function TrendsPage({
     [openDrawer],
   )
 
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      const newParams = new URLSearchParams(searchParams)
-      if (newPage > 1) {
-        newParams.set('page', newPage.toString())
-      } else {
-        newParams.delete('page')
-      }
-      newParams.set('limit', limit.toString())
-      setSearchParams(newParams)
-    },
-    [searchParams, limit, setSearchParams],
-  )
-
-  const handlePrevPageClick = useCallback(() => {
+  const handlePrevPageClick = () => {
     if (!isPrevDisabled) {
-      handlePageChange(page - 1)
+      onPageChange(page - 1)
     }
-  }, [isPrevDisabled, page, handlePageChange])
+  }
 
-  const handleNextPageClick = useCallback(() => {
+  const handleNextPageClick = () => {
     if (!isNextDisabled) {
-      handlePageChange(page + 1)
+      onPageChange(page + 1)
     }
-  }, [isNextDisabled, page, handlePageChange])
+  }
+
   const getPaginationClass = (isDisabled: boolean) => {
     const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
     return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')

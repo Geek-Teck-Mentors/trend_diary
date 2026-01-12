@@ -416,38 +416,5 @@ describe('useTrends', () => {
       expect(result.current.articles[0].isRead).toBe(true)
       expect(result.current.articles[1].isRead).toBe(false)
     })
-
-    it('updateArticleReadStatusで記事の既読状態を更新できる', async () => {
-      const fakeArticles = [generateFakeArticle({ articleId: '1', title: '記事1' })]
-
-      const fakeResponse = {
-        status: 200,
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          data: [{ ...fakeArticles[0], articleId: '1', isRead: false }],
-          page: 1,
-          limit: 20,
-          total: 1,
-          totalPages: 1,
-          hasNext: false,
-          hasPrev: false,
-        }),
-      }
-
-      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
-
-      const { result } = setupHook()
-
-      await waitFor(() => {
-        expect(result.current.articles).toHaveLength(1)
-        expect(result.current.articles[0].isRead).toBe(false)
-      })
-
-      act(() => {
-        result.current.updateArticleReadStatus('1', true)
-      })
-
-      expect(result.current.articles[0].isRead).toBe(true)
-    })
   })
 })
