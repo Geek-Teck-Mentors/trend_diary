@@ -1,0 +1,69 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - link "TrendDiary" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img [ref=e8]
+        - generic [ref=e10]: TrendDiary
+      - generic [ref=e12]:
+        - generic [ref=e13]: Application
+        - list [ref=e15]:
+          - listitem [ref=e16]:
+            - link "トレンド記事" [ref=e17] [cursor=pointer]:
+              - /url: /trends
+              - img [ref=e18]
+              - generic [ref=e21]: トレンド記事
+    - generic [ref=e24]:
+      - heading "- 2026/1/12 -" [level=1] [ref=e25]
+      - button "Qiita" [active] [ref=e27]:
+        - img [ref=e28]
+        - generic [ref=e30]: Qiita
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - button "qiita icon Celer canto valde. Alfred Steuber" [ref=e33] [cursor=pointer]:
+            - generic [ref=e34]:
+              - generic [ref=e35]:
+                - img "qiita icon" [ref=e36]
+                - text: Celer canto valde.
+              - generic [ref=e38]: Alfred Steuber
+          - button "qiita icon Sol caelestis laboriosam vinco. Maxine Carter" [ref=e39] [cursor=pointer]:
+            - generic [ref=e40]:
+              - generic [ref=e41]:
+                - img "qiita icon" [ref=e42]
+                - text: Sol caelestis laboriosam vinco.
+              - generic [ref=e44]: Maxine Carter
+          - button "qiita icon Ratione velum caritas tandem apto decerno. Mack Collins" [ref=e45] [cursor=pointer]:
+            - generic [ref=e46]:
+              - generic [ref=e47]:
+                - img "qiita icon" [ref=e48]
+                - text: Ratione velum caritas tandem apto decerno.
+              - generic [ref=e50]: Mack Collins
+          - button "qiita icon Bellicus paulatim vox iste. Alyssa Jast-Rodriguez" [ref=e51] [cursor=pointer]:
+            - generic [ref=e52]:
+              - generic [ref=e53]:
+                - img "qiita icon" [ref=e54]
+                - text: Bellicus paulatim vox iste.
+              - generic [ref=e56]: Alyssa Jast-Rodriguez
+          - button "qiita icon Advoco compello verecundia debeo tribuo delectus valeo. Tyler Cronin" [ref=e57] [cursor=pointer]:
+            - generic [ref=e58]:
+              - generic [ref=e59]:
+                - img "qiita icon" [ref=e60]
+                - text: Advoco compello verecundia debeo tribuo delectus valeo.
+              - generic [ref=e62]: Tyler Cronin
+        - navigation "pagination" [ref=e63]:
+          - list [ref=e64]:
+            - listitem [ref=e65]:
+              - generic "Go to previous page" [ref=e66]:
+                - img
+                - generic [ref=e67]: 前へ
+            - listitem [ref=e68]:
+              - generic [ref=e69]: ページ 1 / 1
+            - listitem [ref=e70]:
+              - generic "Go to next page" [ref=e71]:
+                - generic [ref=e72]: 次へ
+                - img
+  - region "Notifications alt+T"
+```

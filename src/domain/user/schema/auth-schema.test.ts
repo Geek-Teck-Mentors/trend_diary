@@ -123,49 +123,41 @@ describe('authInputSchema', () => {
         name: '小文字を含まないパスワードでは検証に失敗する',
         email: 'test@example.com',
         password: 'PASSWORD1!',
-        expectedError: '小文字なし',
       },
       {
         name: '大文字を含まないパスワードでは検証に失敗する',
         email: 'test@example.com',
         password: 'password1!',
-        expectedError: '大文字なし',
       },
       {
         name: '数字を含まないパスワードでは検証に失敗する',
         email: 'test@example.com',
         password: 'Password!',
-        expectedError: '数字なし',
       },
       {
         name: '記号を含まないパスワードでは検証に失敗する',
         email: 'test@example.com',
         password: 'Password1',
-        expectedError: '記号なし',
       },
       {
         name: '許可されていない記号#を含むパスワードでは検証に失敗する',
         email: 'test@example.com',
         password: 'Password1#',
-        expectedError: '無効な記号',
       },
       {
         name: '許可されていない記号^を含むパスワードでは検証に失敗する',
         email: 'test@example.com',
         password: 'Password1^',
-        expectedError: '無効な記号',
       },
       {
         name: 'スペースを含むパスワードでは検証に失敗する',
         email: 'test@example.com',
         password: 'Password 1!',
-        expectedError: 'スペース',
       },
       {
         name: '日本語を含むパスワードでは検証に失敗する',
         email: 'test@example.com',
         password: 'パスワード1!Aa',
-        expectedError: '日本語',
       },
     ]
 
