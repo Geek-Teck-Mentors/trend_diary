@@ -102,10 +102,6 @@ class ArticleTestHelper {
     }
   }
 
-  async cleanUpArticles(): Promise<void> {
-    await this.rdb.$queryRaw`TRUNCATE TABLE "articles" CASCADE;`
-  }
-
   async disconnect(): Promise<void> {
     await this.rdb.$disconnect()
   }
