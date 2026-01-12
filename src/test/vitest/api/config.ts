@@ -13,8 +13,7 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
-    globalSetup: [],
-    globalTeardown: ['src/test/vitest/api/globalTeardown.ts'],
+    globalSetup: ['src/test/vitest/api/globalSetup.ts'],
     env: {
       DATABASE_URL: dbUrl,
     },

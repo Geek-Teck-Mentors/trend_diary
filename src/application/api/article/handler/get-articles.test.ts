@@ -220,10 +220,12 @@ describe('GET /api/articles 既読情報', () => {
   })
 
   afterEach(async () => {
-    await userHelper.cleanUp(createdUserIds)
+    await Promise.allSettled([
+      userHelper.cleanUp(createdUserIds),
+      articleHelper.cleanUp(createdArticleIds),
+    ])
     createdUserIds.userIds.length = 0
     createdUserIds.authIds.length = 0
-    await articleHelper.cleanUp(createdArticleIds)
     createdArticleIds.length = 0
   })
 
