@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  createOffsetPaginationSchema,
-  DEFAULT_LIMIT,
-  DEFAULT_MOBILE_LIMIT,
-  DEFAULT_PAGE,
-  offsetPaginationSchema,
-} from './schema'
+import { DEFAULT_LIMIT, DEFAULT_PAGE, offsetPaginationSchema } from './schema'
 
 describe('offsetPaginationSchema', () => {
   const cases = [
@@ -48,40 +42,4 @@ describe('offsetPaginationSchema', () => {
       expect(result).toEqual(expected)
     })
   }
-})
-
-describe('createOffsetPaginationSchema', () => {
-  it('カスタムデフォルト値を指定できる', () => {
-    const customDefault = 10
-    const schema = createOffsetPaginationSchema(customDefault)
-    const result = schema.parse({})
-    expect(result).toEqual({ page: DEFAULT_PAGE, limit: customDefault })
-  })
-
-  it('モバイル用のデフォルト値を使用できる', () => {
-    const schema = createOffsetPaginationSchema(DEFAULT_MOBILE_LIMIT)
-    const result = schema.parse({})
-    expect(result).toEqual({ page: DEFAULT_PAGE, limit: DEFAULT_MOBILE_LIMIT })
-  })
-
-  it('明示的にlimitを指定すればカスタムデフォルト値より優先される', () => {
-    const schema = createOffsetPaginationSchema(10)
-    const result = schema.parse({ limit: 50 })
-    expect(result).toEqual({ page: DEFAULT_PAGE, limit: 50 })
-  })
-
-  it('カスタムデフォルト値でもバリデーション（1-100の範囲）は機能する', () => {
-    const schema = createOffsetPaginationSchema(10)
-    const resultMin = schema.parse({ limit: -5 })
-    const resultMax = schema.parse({ limit: 200 })
-    expect(resultMin.limit).toBe(1)
-    expect(resultMax.limit).toBe(100)
-  })
-
-  it('不正な値の場合はカスタムデフォルト値にフォールバックする', () => {
-    const customDefault = 15
-    const schema = createOffsetPaginationSchema(customDefault)
-    const result = schema.parse({ limit: 'invalid' })
-    expect(result).toEqual({ page: DEFAULT_PAGE, limit: customDefault })
-  })
 })

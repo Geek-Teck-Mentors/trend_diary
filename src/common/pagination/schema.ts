@@ -10,31 +10,27 @@ function transform(value: string | number | undefined, defaultValue: number) {
   return Number.isNaN(num) ? defaultValue : num
 }
 
-const createLimitSchema = (defaultLimit: number = DEFAULT_LIMIT) =>
-  z
+const limit = z
+  .union([z.string(), z.number()])
+  .optional()
+  .transform((val) => {
+    const parsed = transform(val, DEFAULT_LIMIT)
+    if (parsed < 1) return 1
+    if (parsed > 100) return 100
+    return parsed
+  })
+  .default(DEFAULT_LIMIT)
+
+export const offsetPaginationSchema = z.object({
+  page: z
     .union([z.string(), z.number()])
     .optional()
     .transform((val) => {
-      const parsed = transform(val, defaultLimit)
-      if (parsed < 1) return 1
-      if (parsed > 100) return 100
-      return parsed
+      const parsed = transform(val, DEFAULT_PAGE)
+      return parsed < 1 ? 1 : parsed
     })
-    .default(defaultLimit)
-
-export const createOffsetPaginationSchema = (defaultLimit: number = DEFAULT_LIMIT) =>
-  z.object({
-    page: z
-      .union([z.string(), z.number()])
-      .optional()
-      .transform((val) => {
-        const parsed = transform(val, DEFAULT_PAGE)
-        return parsed < 1 ? 1 : parsed
-      })
-      .default(DEFAULT_PAGE),
-    limit: createLimitSchema(defaultLimit),
-  })
-
-export const offsetPaginationSchema = createOffsetPaginationSchema()
+    .default(DEFAULT_PAGE),
+  limit,
+})
 
 export type OffsetPaginationParams = z.infer<typeof offsetPaginationSchema>

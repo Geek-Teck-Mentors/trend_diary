@@ -3,11 +3,8 @@ import { toast } from 'sonner'
 import useSWR from 'swr'
 import { useIsMobile } from '@/application/web/components/shadcn/hooks/use-mobile'
 import createSWRFetcher from '@/application/web/features/create-swr-fetcher'
-import {
-  createOffsetPaginationSchema,
-  DEFAULT_LIMIT,
-  DEFAULT_MOBILE_LIMIT,
-} from '@/common/pagination/schema'
+import { DEFAULT_LIMIT, DEFAULT_PAGE } from '@/common/pagination'
+import { DEFAULT_MOBILE_LIMIT } from '@/common/pagination/schema'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import { MediaType } from '../components/media-filter'
 
@@ -45,18 +42,24 @@ export default function useTrends() {
   const date = new Date()
   const formattedDate = formatDate(date)
 
+  const pageParam = searchParams.get('page')
+  const limitParam = searchParams.get('limit')
   const mediaParam = searchParams.get('media')
 
-  // モバイル判定に基づいたデフォルト値でschemaを生成
-  const defaultLimit = isMobile ? DEFAULT_MOBILE_LIMIT : DEFAULT_LIMIT
-  const paginationSchema = createOffsetPaginationSchema(defaultLimit)
+  const currentPage = pageParam ? parseInt(pageParam, 10) : DEFAULT_PAGE
+  const validPage = Number.isNaN(currentPage) ? DEFAULT_PAGE : Math.max(currentPage, 1)
 
-  // URLパラメータをschemaでバリデーション
-  // searchParams.get()はnullを返すので、undefinedに変換
-  const { page: validPage, limit: validLimit } = paginationSchema.parse({
-    page: searchParams.get('page') ?? undefined,
-    limit: searchParams.get('limit') ?? undefined,
-  })
+  // limitParamが明示的に指定されている場合はそれを使用
+  // 指定がない場合のみisMobileに基づいたデフォルト値を使用
+  let validLimit: number
+  if (limitParam) {
+    const currentLimit = parseInt(limitParam, 10)
+    validLimit = Number.isNaN(currentLimit)
+      ? DEFAULT_LIMIT
+      : Math.max(Math.min(currentLimit, 100), 1)
+  } else {
+    validLimit = isMobile ? DEFAULT_MOBILE_LIMIT : DEFAULT_LIMIT
+  }
 
   const params: Params = {
     page: validPage,
