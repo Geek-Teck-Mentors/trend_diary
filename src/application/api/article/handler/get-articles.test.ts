@@ -12,6 +12,15 @@ type GetArticlesTestCase = {
   status: number
 }
 
+async function requestGetArticles(query: string = '', cookies?: string) {
+  const url = query ? `/api/articles?${query}` : '/api/articles'
+  const headers: Record<string, string> = {}
+  if (cookies) {
+    headers.Cookie = cookies
+  }
+  return app.request(url, { method: 'GET', headers }, TEST_ENV)
+}
+
 describe('GET /api/articles', () => {
   const testArticlesData = [
     {
@@ -34,20 +43,11 @@ describe('GET /api/articles', () => {
 
   const createdArticleIds: bigint[] = []
 
-  async function setupTestData(): Promise<void> {
+  beforeAll(async () => {
     const articles = await Promise.all(
       testArticlesData.map((article) => articleHelper.createArticle(article)),
     )
     createdArticleIds.push(...articles.map((a) => a.articleId))
-  }
-
-  async function requestGetArticles(query: string = '') {
-    const url = query ? `/api/articles?${query}` : '/api/articles'
-    return app.request(url, { method: 'GET' }, TEST_ENV)
-  }
-
-  beforeAll(async () => {
-    await setupTestData()
   })
 
   afterAll(async () => {
@@ -182,99 +182,83 @@ describe('GET /api/articles', () => {
       })
     })
   })
+})
 
-  describe('既読情報', () => {
-    let authCookies: string
-    const authTestArticleIds: bigint[] = []
-    const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
+describe('GET /api/articles 既読情報', () => {
+  let authCookies: string
+  const createdArticleIds: bigint[] = []
+  const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
 
-    async function requestGetArticlesWithAuth(query: string = '', cookies?: string) {
-      const url = query ? `/api/articles?${query}` : '/api/articles'
-      const headers: Record<string, string> = {}
-      if (cookies) {
-        headers.Cookie = cookies
-      }
-      return app.request(url, { method: 'GET', headers }, TEST_ENV)
+  beforeEach(async () => {
+    // クリーンアップ
+    await userHelper.cleanUp(createdUserIds)
+    createdUserIds.userIds.length = 0
+    createdUserIds.authIds.length = 0
+    await articleHelper.cleanUp(createdArticleIds)
+    createdArticleIds.length = 0
+
+    // アカウント作成・ログイン
+    const { userId, authenticationId } = await userHelper.create(
+      'readtest@example.com',
+      'Test@password123',
+    )
+    createdUserIds.userIds.push(userId)
+    createdUserIds.authIds.push(authenticationId)
+
+    const loginData = await userHelper.login('readtest@example.com', 'Test@password123')
+    const testActiveUserId = loginData.activeUserId
+    authCookies = loginData.cookies
+
+    // テスト記事作成
+    const article1 = await articleHelper.createArticle({
+      title: '既読記事',
+      author: 'テスト著者1',
+    })
+    createdArticleIds.push(article1.articleId)
+
+    const article2 = await articleHelper.createArticle({
+      title: '未読記事',
+      author: 'テスト著者2',
+    })
+    createdArticleIds.push(article2.articleId)
+
+    // article1を既読にする
+    await articleHelper.createReadHistory(testActiveUserId, article1.articleId)
+  })
+
+  afterAll(async () => {
+    await userHelper.cleanUp(createdUserIds)
+    await articleHelper.cleanUp(createdArticleIds)
+  })
+
+  it('未ログインの場合はisReadがundefined', async () => {
+    // 認証状態をログアウトにする
+    await userHelper.logout()
+
+    const res = await requestGetArticles()
+    expect(res.status).toBe(200)
+    const data: ArticleListResponse = await res.json()
+    expect(data.data).toHaveLength(2)
+    for (const article of data.data) {
+      expect(article.isRead).toBeUndefined()
     }
+  })
 
-    async function setupAuthTestData(): Promise<void> {
-      // アカウント作成・ログイン
-      const { userId, authenticationId } = await userHelper.create(
-        'readtest@example.com',
-        'Test@password123',
-      )
-      createdUserIds.userIds.push(userId)
-      createdUserIds.authIds.push(authenticationId)
+  it('ログイン時は既読記事にisRead: trueが返される', async () => {
+    const res = await requestGetArticles('title=既読記事', authCookies)
 
-      const loginData = await userHelper.login('readtest@example.com', 'Test@password123')
-      const testActiveUserId = loginData.activeUserId
-      authCookies = loginData.cookies
+    expect(res.status).toBe(200)
+    const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
+    expect(data.data).toHaveLength(1)
+    expect(data.data[0].isRead).toBe(true)
+  })
 
-      // テスト記事作成
-      const article1 = await articleHelper.createArticle({
-        title: '既読記事',
-        author: 'テスト著者1',
-      })
-      authTestArticleIds.push(article1.articleId)
+  it('ログイン時は未読記事にisRead: falseが返される', async () => {
+    const res = await requestGetArticles('title=未読記事', authCookies)
 
-      const article2 = await articleHelper.createArticle({
-        title: '未読記事',
-        author: 'テスト著者2',
-      })
-      authTestArticleIds.push(article2.articleId)
-
-      // article1を既読にする
-      await articleHelper.createReadHistory(testActiveUserId, article1.articleId)
-    }
-
-    beforeEach(async () => {
-      await userHelper.cleanUp(createdUserIds)
-      createdUserIds.userIds.length = 0
-      createdUserIds.authIds.length = 0
-      await articleHelper.cleanUp(authTestArticleIds)
-      authTestArticleIds.length = 0
-      await setupAuthTestData()
-    })
-
-    afterAll(async () => {
-      await userHelper.cleanUp(createdUserIds)
-      await articleHelper.cleanUp(authTestArticleIds)
-    })
-
-    it('未ログインの場合はisReadがundefined', async () => {
-      // 認証状態をログアウトにする
-      await userHelper.logout()
-
-      // 「既読記事」と「未読記事」のみを取得（外側のdescribeで作成した記事と区別）
-      const res1 = await requestGetArticlesWithAuth('title=既読記事')
-      expect(res1.status).toBe(200)
-      const data1 = (await res1.json()) as ArticleListResponse
-      expect(data1.data).toHaveLength(1)
-      expect(data1.data[0].isRead).toBeUndefined()
-
-      const res2 = await requestGetArticlesWithAuth('title=未読記事')
-      expect(res2.status).toBe(200)
-      const data2 = (await res2.json()) as ArticleListResponse
-      expect(data2.data).toHaveLength(1)
-      expect(data2.data[0].isRead).toBeUndefined()
-    })
-
-    it('ログイン時は既読記事にisRead: trueが返される', async () => {
-      const res = await requestGetArticlesWithAuth('title=既読記事', authCookies)
-
-      expect(res.status).toBe(200)
-      const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
-      expect(data.data).toHaveLength(1)
-      expect(data.data[0].isRead).toBe(true)
-    })
-
-    it('ログイン時は未読記事にisRead: falseが返される', async () => {
-      const res = await requestGetArticlesWithAuth('title=未読記事', authCookies)
-
-      expect(res.status).toBe(200)
-      const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
-      expect(data.data).toHaveLength(1)
-      expect(data.data[0].isRead).toBe(false)
-    })
+    expect(res.status).toBe(200)
+    const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
+    expect(data.data).toHaveLength(1)
+    expect(data.data[0].isRead).toBe(false)
   })
 })
