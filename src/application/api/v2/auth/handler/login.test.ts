@@ -1,19 +1,24 @@
 import TEST_ENV from '@/test/env'
-import userTestHelper from '@/test/helper/user'
+import type { CleanUpIds } from '@/test/helper/user'
+import * as userHelper from '@/test/helper/user'
 import app from '../../../../server'
 
 describe('POST /api/v2/auth/login', () => {
   const TEST_EMAIL = 'login-test@example.com'
   const TEST_PASSWORD = 'Test@password123'
+  const createdIds: CleanUpIds = { userIds: [], authIds: [] }
 
   beforeEach(async () => {
-    await userTestHelper.cleanUp()
     // テスト用ユーザーを作成
-    await userTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
+    const { userId, authenticationId } = await userHelper.create(TEST_EMAIL, TEST_PASSWORD)
+    createdIds.userIds.push(userId)
+    createdIds.authIds.push(authenticationId)
   })
 
-  afterAll(async () => {
-    await userTestHelper.cleanUp()
+  afterEach(async () => {
+    await userHelper.cleanUp(createdIds)
+    createdIds.userIds.length = 0
+    createdIds.authIds.length = 0
   })
 
   async function requestLogin(body: string) {
