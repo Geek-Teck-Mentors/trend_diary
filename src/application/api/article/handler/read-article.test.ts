@@ -77,25 +77,6 @@ describe('POST /api/articles/:article_id/read', () => {
   const createdArticleIds: bigint[] = []
   const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
 
-  async function setupTestData(): Promise<void> {
-    // アカウント作成・ログイン
-    const { userId, authenticationId } = await userHelper.create(
-      'test@example.com',
-      'Test@password123',
-    )
-    createdUserIds.userIds.push(userId)
-    createdUserIds.authIds.push(authenticationId)
-
-    const loginData = await userHelper.login('test@example.com', 'Test@password123')
-    testActiveUserId = loginData.activeUserId
-    authCookies = loginData.cookies
-
-    // テスト記事作成
-    const article = await articleHelper.createArticle()
-    testArticleId = article.articleId
-    createdArticleIds.push(article.articleId)
-  }
-
   async function requestReadArticle(articleId: string, cookies: string, readAt?: string) {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -116,17 +97,30 @@ describe('POST /api/articles/:article_id/read', () => {
   }
 
   beforeEach(async () => {
+    // アカウント作成・ログイン
+    const { userId, authenticationId } = await userHelper.create(
+      'test@example.com',
+      'Test@password123',
+    )
+    createdUserIds.userIds.push(userId)
+    createdUserIds.authIds.push(authenticationId)
+
+    const loginData = await userHelper.login('test@example.com', 'Test@password123')
+    testActiveUserId = loginData.activeUserId
+    authCookies = loginData.cookies
+
+    // テスト記事作成
+    const article = await articleHelper.createArticle()
+    testArticleId = article.articleId
+    createdArticleIds.push(article.articleId)
+  })
+
+  afterEach(async () => {
     await userHelper.cleanUp(createdUserIds)
     createdUserIds.userIds.length = 0
     createdUserIds.authIds.length = 0
     await articleHelper.cleanUp(createdArticleIds)
     createdArticleIds.length = 0
-    await setupTestData()
-  })
-
-  afterAll(async () => {
-    await userHelper.cleanUp(createdUserIds)
-    await articleHelper.cleanUp(createdArticleIds)
   })
 
   describe('正常系', () => {

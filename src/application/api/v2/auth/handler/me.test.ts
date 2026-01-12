@@ -9,13 +9,16 @@ describe('GET /api/v2/auth/me', () => {
   const createdIds: CleanUpIds = { userIds: [], authIds: [] }
 
   beforeEach(async () => {
+    // ユーザーを作成
+    const { userId, authenticationId } = await userHelper.create(TEST_EMAIL, TEST_PASSWORD)
+    createdIds.userIds.push(userId)
+    createdIds.authIds.push(authenticationId)
+  })
+
+  afterEach(async () => {
     await userHelper.cleanUp(createdIds)
     createdIds.userIds.length = 0
     createdIds.authIds.length = 0
-  })
-
-  afterAll(async () => {
-    await userHelper.cleanUp(createdIds)
   })
 
   async function requestMe(cookies?: string) {
@@ -37,11 +40,6 @@ describe('GET /api/v2/auth/me', () => {
   }
 
   it('正常系: 現在のユーザー情報を取得できる', async () => {
-    // ユーザーを作成してログイン状態にする
-    const { userId, authenticationId } = await userHelper.create(TEST_EMAIL, TEST_PASSWORD)
-    createdIds.userIds.push(userId)
-    createdIds.authIds.push(authenticationId)
-
     const { cookies } = await userHelper.login(TEST_EMAIL, TEST_PASSWORD)
 
     // ユーザー情報取得（クッキーを渡す）
@@ -59,11 +57,6 @@ describe('GET /api/v2/auth/me', () => {
   })
 
   it('準正常系: ログアウト後は401を返す', async () => {
-    // ユーザーを作成してログイン
-    const { userId, authenticationId } = await userHelper.create(TEST_EMAIL, TEST_PASSWORD)
-    createdIds.userIds.push(userId)
-    createdIds.authIds.push(authenticationId)
-
     await userHelper.login(TEST_EMAIL, TEST_PASSWORD)
 
     // ログアウト（クッキーなしでリクエスト）

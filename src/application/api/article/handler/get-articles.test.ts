@@ -190,13 +190,6 @@ describe('GET /api/articles 既読情報', () => {
   const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
 
   beforeEach(async () => {
-    // クリーンアップ
-    await userHelper.cleanUp(createdUserIds)
-    createdUserIds.userIds.length = 0
-    createdUserIds.authIds.length = 0
-    await articleHelper.cleanUp(createdArticleIds)
-    createdArticleIds.length = 0
-
     // アカウント作成・ログイン
     const { userId, authenticationId } = await userHelper.create(
       'readtest@example.com',
@@ -226,9 +219,12 @@ describe('GET /api/articles 既読情報', () => {
     await articleHelper.createReadHistory(testActiveUserId, article1.articleId)
   })
 
-  afterAll(async () => {
+  afterEach(async () => {
     await userHelper.cleanUp(createdUserIds)
+    createdUserIds.userIds.length = 0
+    createdUserIds.authIds.length = 0
     await articleHelper.cleanUp(createdArticleIds)
+    createdArticleIds.length = 0
   })
 
   it('未ログインの場合はisReadがundefined', async () => {

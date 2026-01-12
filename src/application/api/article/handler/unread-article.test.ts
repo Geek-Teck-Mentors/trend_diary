@@ -11,7 +11,22 @@ describe('DELETE /api/articles/:article_id/unread', () => {
   const createdArticleIds: bigint[] = []
   const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
 
-  async function setupTestData(): Promise<void> {
+  async function requestUnreadArticle(articleId: string, cookies: string) {
+    const headers: Record<string, string> = {
+      Cookie: cookies,
+    }
+
+    return app.request(
+      `/api/articles/${articleId}/unread`,
+      {
+        method: 'DELETE',
+        headers,
+      },
+      TEST_ENV,
+    )
+  }
+
+  beforeEach(async () => {
     // アカウント作成・ログイン
     const { userId, authenticationId } = await userHelper.create(
       'test@example.com',
@@ -35,35 +50,14 @@ describe('DELETE /api/articles/:article_id/unread', () => {
       testArticleId,
       new Date('2024-01-01T10:00:00Z'),
     )
-  }
+  })
 
-  async function requestUnreadArticle(articleId: string, cookies: string) {
-    const headers: Record<string, string> = {
-      Cookie: cookies,
-    }
-
-    return app.request(
-      `/api/articles/${articleId}/unread`,
-      {
-        method: 'DELETE',
-        headers,
-      },
-      TEST_ENV,
-    )
-  }
-
-  beforeEach(async () => {
+  afterEach(async () => {
     await userHelper.cleanUp(createdUserIds)
     createdUserIds.userIds.length = 0
     createdUserIds.authIds.length = 0
     await articleHelper.cleanUp(createdArticleIds)
     createdArticleIds.length = 0
-    await setupTestData()
-  })
-
-  afterAll(async () => {
-    await userHelper.cleanUp(createdUserIds)
-    await articleHelper.cleanUp(createdArticleIds)
   })
 
   describe('正常系', () => {

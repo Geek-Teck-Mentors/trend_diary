@@ -9,18 +9,16 @@ describe('DELETE /api/v2/auth/logout', () => {
   const createdIds: CleanUpIds = { userIds: [], authIds: [] }
 
   beforeEach(async () => {
-    await userHelper.cleanUp(createdIds)
-    createdIds.userIds.length = 0
-    createdIds.authIds.length = 0
-
     // テスト用ユーザーを作成
     const { userId, authenticationId } = await userHelper.create(TEST_EMAIL, TEST_PASSWORD)
     createdIds.userIds.push(userId)
     createdIds.authIds.push(authenticationId)
   })
 
-  afterAll(async () => {
+  afterEach(async () => {
     await userHelper.cleanUp(createdIds)
+    createdIds.userIds.length = 0
+    createdIds.authIds.length = 0
   })
 
   async function requestLogout() {
