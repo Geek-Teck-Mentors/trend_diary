@@ -1,17 +1,21 @@
 import TEST_ENV from '@/test/env'
-import userTestHelper from '@/test/helper/user'
+import type { CleanUpIds } from '@/test/helper/user'
+import * as userHelper from '@/test/helper/user'
 import app from '../../../../server'
 
 describe('GET /api/v2/auth/me', () => {
   const TEST_EMAIL = 'me-test@example.com'
   const TEST_PASSWORD = 'Test@password123'
+  const createdIds: CleanUpIds = { userIds: [], authIds: [] }
 
   beforeEach(async () => {
-    await userTestHelper.cleanUp()
+    await userHelper.cleanUp(createdIds)
+    createdIds.userIds.length = 0
+    createdIds.authIds.length = 0
   })
 
   afterAll(async () => {
-    await userTestHelper.cleanUp()
+    await userHelper.cleanUp(createdIds)
   })
 
   async function requestMe(cookies?: string) {
@@ -34,8 +38,11 @@ describe('GET /api/v2/auth/me', () => {
 
   it('正常系: 現在のユーザー情報を取得できる', async () => {
     // ユーザーを作成してログイン状態にする
-    await userTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
-    const { cookies } = await userTestHelper.login(TEST_EMAIL, TEST_PASSWORD)
+    const { userId, authenticationId } = await userHelper.create(TEST_EMAIL, TEST_PASSWORD)
+    createdIds.userIds.push(userId)
+    createdIds.authIds.push(authenticationId)
+
+    const { cookies } = await userHelper.login(TEST_EMAIL, TEST_PASSWORD)
 
     // ユーザー情報取得（クッキーを渡す）
     const meRes = await requestMe(cookies)
@@ -53,8 +60,11 @@ describe('GET /api/v2/auth/me', () => {
 
   it('準正常系: ログアウト後は401を返す', async () => {
     // ユーザーを作成してログイン
-    await userTestHelper.create(TEST_EMAIL, TEST_PASSWORD)
-    await userTestHelper.login(TEST_EMAIL, TEST_PASSWORD)
+    const { userId, authenticationId } = await userHelper.create(TEST_EMAIL, TEST_PASSWORD)
+    createdIds.userIds.push(userId)
+    createdIds.authIds.push(authenticationId)
+
+    await userHelper.login(TEST_EMAIL, TEST_PASSWORD)
 
     // ログアウト（クッキーなしでリクエスト）
     const res = await requestMe()

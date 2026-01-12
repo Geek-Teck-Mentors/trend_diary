@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker'
 import app from '@/application/server'
 import TEST_ENV from '@/test/env'
-import articleTestHelper from '@/test/helper/article'
-import userTestHelper from '@/test/helper/user'
+import * as articleHelper from '@/test/helper/article'
+import type { CleanUpIds } from '@/test/helper/user'
+import * as userHelper from '@/test/helper/user'
 import { articleIdParamSchema, createReadHistoryApiSchema } from './read-article'
 
 describe('API ReadHistoryスキーマ', () => {
@@ -73,17 +74,26 @@ describe('POST /api/articles/:article_id/read', () => {
   let testActiveUserId: bigint
   let testArticleId: bigint
   let authCookies: string
+  const createdArticleIds: bigint[] = []
+  const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
 
   async function setupTestData(): Promise<void> {
     // アカウント作成・ログイン
-    await userTestHelper.create('test@example.com', 'Test@password123')
-    const loginData = await userTestHelper.login('test@example.com', 'Test@password123')
+    const { userId, authenticationId } = await userHelper.create(
+      'test@example.com',
+      'Test@password123',
+    )
+    createdUserIds.userIds.push(userId)
+    createdUserIds.authIds.push(authenticationId)
+
+    const loginData = await userHelper.login('test@example.com', 'Test@password123')
     testActiveUserId = loginData.activeUserId
     authCookies = loginData.cookies
 
     // テスト記事作成
-    const article = await articleTestHelper.createArticle()
+    const article = await articleHelper.createArticle()
     testArticleId = article.articleId
+    createdArticleIds.push(article.articleId)
   }
 
   async function requestReadArticle(articleId: string, cookies: string, readAt?: string) {
@@ -106,14 +116,17 @@ describe('POST /api/articles/:article_id/read', () => {
   }
 
   beforeEach(async () => {
-    await userTestHelper.cleanUp()
-    await articleTestHelper.cleanUp()
+    await userHelper.cleanUp(createdUserIds)
+    createdUserIds.userIds.length = 0
+    createdUserIds.authIds.length = 0
+    await articleHelper.cleanUp(createdArticleIds)
+    createdArticleIds.length = 0
     await setupTestData()
   })
 
   afterAll(async () => {
-    await userTestHelper.cleanUp()
-    await articleTestHelper.cleanUp()
+    await userHelper.cleanUp(createdUserIds)
+    await articleHelper.cleanUp(createdArticleIds)
   })
 
   describe('正常系', () => {
@@ -126,7 +139,7 @@ describe('POST /api/articles/:article_id/read', () => {
       expect(json.message).toBe('記事を既読にしました')
 
       // DBに実際に記録されていることを確認
-      const readHistory = await articleTestHelper.findReadHistory(testActiveUserId, testArticleId)
+      const readHistory = await articleHelper.findReadHistory(testActiveUserId, testArticleId)
       expect(readHistory).toBeTruthy()
       expect(readHistory!.readAt).toEqual(new Date(fixedReadAt))
     })

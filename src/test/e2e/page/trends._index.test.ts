@@ -1,19 +1,10 @@
 import { expect, Locator, Page, test } from '@playwright/test'
-import articleTestHelper from '@/test/helper/article'
+import * as articleHelper from '@/test/helper/article'
 
 const ARTICLE_COUNT = 10
 const TIMEOUT = 10000
 
 test.describe('記事一覧ページ', () => {
-  test.beforeAll(async () => {
-    await articleTestHelper.cleanUp()
-  })
-
-  test.afterAll(async () => {
-    await articleTestHelper.cleanUp()
-    await articleTestHelper.disconnect()
-  })
-
   test.beforeEach(async ({ page }) => {
     await page.goto('/trends')
   })
@@ -25,16 +16,19 @@ test.describe('記事一覧ページ', () => {
   })
 
   test.describe('記事がある場合', () => {
+    const createdArticleIds: bigint[] = []
+
     test.beforeAll(async () => {
       // 記事を作成
-      await Promise.all(
-        Array.from({ length: ARTICLE_COUNT }, (_, i) => articleTestHelper.createArticle()),
+      const articles = await Promise.all(
+        Array.from({ length: ARTICLE_COUNT }, () => articleHelper.createArticle()),
       )
+      createdArticleIds.push(...articles.map((a) => a.articleId))
     })
 
     test.afterAll(async () => {
       // テスト後に記事をクリーンアップ
-      await articleTestHelper.cleanUp()
+      await articleHelper.cleanUp(createdArticleIds)
     })
 
     test.beforeEach(async ({ page }) => {
@@ -112,25 +106,24 @@ test.describe('記事一覧ページ', () => {
   test.describe('メディアフィルター機能', () => {
     const QIITA_COUNT = 5
     const ZENN_COUNT = 3
+    const createdArticleIds: bigint[] = []
 
     test.beforeAll(async () => {
-      await articleTestHelper.cleanUp()
       // Qiita記事を作成
-      await Promise.all(
-        Array.from({ length: QIITA_COUNT }, () =>
-          articleTestHelper.createArticle({ media: 'qiita' }),
-        ),
+      const qiitaArticles = await Promise.all(
+        Array.from({ length: QIITA_COUNT }, () => articleHelper.createArticle({ media: 'qiita' })),
       )
+      createdArticleIds.push(...qiitaArticles.map((a) => a.articleId))
+
       // Zenn記事を作成
-      await Promise.all(
-        Array.from({ length: ZENN_COUNT }, () =>
-          articleTestHelper.createArticle({ media: 'zenn' }),
-        ),
+      const zennArticles = await Promise.all(
+        Array.from({ length: ZENN_COUNT }, () => articleHelper.createArticle({ media: 'zenn' })),
       )
+      createdArticleIds.push(...zennArticles.map((a) => a.articleId))
     })
 
     test.afterAll(async () => {
-      await articleTestHelper.cleanUp()
+      await articleHelper.cleanUp(createdArticleIds)
     })
 
     test.beforeEach(async ({ page }) => {

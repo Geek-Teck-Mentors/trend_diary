@@ -24,10 +24,6 @@ function getRdb(): RdbClient {
   return rdb
 }
 
-// 作成したユーザーを追跡（クリーンアップ用）
-const createdUserIds: bigint[] = []
-const createdAuthIds: string[] = []
-
 // ActiveUser生成関数（実DBに作成）
 async function createActiveUser(email: string, authenticationId: string): Promise<ActiveUser> {
   const db = getRdb()
@@ -47,9 +43,6 @@ async function createActiveUser(email: string, authenticationId: string): Promis
     },
   })
 
-  // 追跡用に保存
-  createdUserIds.push(user.userId)
-
   return {
     activeUserId: activeUser.activeUserId,
     userId: user.userId,
@@ -63,146 +56,150 @@ async function createActiveUser(email: string, authenticationId: string): Promis
   }
 }
 
-type CreateResult = {
+export type CreateResult = {
   activeUserId: bigint
+  userId: bigint
   authenticationId: string
 }
 
-type LoginResult = {
+export type LoginResult = {
   activeUserId: bigint
   cookies: string
 }
 
-const userTestHelper = {
-  /**
-   * テスト用ユーザーを作成する（Supabase Auth + DB）
-   */
-  async create(email: string, password: string): Promise<CreateResult> {
-    const client = getSupabase()
-
-    const { data, error } = await client.auth.signUp({ email, password })
-    if (error || !data.user) {
-      throw new Error(`Failed to create user: ${error?.message ?? 'Unknown error'}`)
-    }
-
-    const authenticationId = data.user.id
-    createdAuthIds.push(authenticationId)
-
-    const activeUser = await createActiveUser(email, authenticationId)
-
-    // signUp後はログアウトして初期状態にする
-    await client.auth.signOut()
-
-    return {
-      activeUserId: activeUser.activeUserId,
-      authenticationId,
-    }
-  },
-
-  /**
-   * Hono経由でログインしてセッション情報を取得する
-   * Set-Cookieヘッダーも返すので、後続のリクエストに使用できる
-   */
-  async login(email: string, password: string): Promise<LoginResult> {
-    const db = getRdb()
-
-    // Hono経由でログイン
-    const res = await app.request(
-      '/api/v2/auth/login',
-      {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-      TEST_ENV,
-    )
-
-    if (res.status !== 200) {
-      throw new Error(`Failed to login: ${res.status}`)
-    }
-
-    // Set-Cookieヘッダーを取得
-    const setCookieHeaders = res.headers.getSetCookie()
-    const cookies = setCookieHeaders.map((cookie) => cookie.split(';')[0]).join('; ')
-
-    // DBからActiveUserを取得
-    const activeUser = await db.activeUser.findFirst({
-      where: { email },
-    })
-
-    if (!activeUser) {
-      throw new Error(`ActiveUser not found for email: ${email}`)
-    }
-
-    return {
-      activeUserId: activeUser.activeUserId,
-      cookies,
-    }
-  },
-
-  /**
-   * ログアウトする
-   */
-  async logout(): Promise<void> {
-    const client = getSupabase()
-    await client.auth.signOut()
-  },
-
-  /**
-   * テストデータをクリーンアップする（作成したレコードのみ削除）
-   */
-  async cleanUp(): Promise<void> {
-    const db = getRdb()
-
-    // ログアウト
-    const client = getSupabase()
-    await client.auth.signOut()
-
-    // DBのユーザーをバッチ削除
-    if (createdUserIds.length > 0) {
-      await db.activeUser.deleteMany({ where: { userId: { in: createdUserIds } } })
-      await db.user.deleteMany({ where: { userId: { in: createdUserIds } } })
-      createdUserIds.length = 0
-    }
-
-    // Supabase Authのユーザーをバッチ削除
-    if (createdAuthIds.length > 0) {
-      await db.$queryRaw`DELETE FROM auth.users WHERE id = ANY(${createdAuthIds}::uuid[])`
-      createdAuthIds.length = 0
-    }
-  },
-
-  /**
-   * テスト用メールパターンのユーザーを全て削除する（APIテスト用）
-   * signup API などで直接作成されたユーザーもクリーンアップ可能
-   */
-  async cleanUpByEmailPattern(emailPattern: string): Promise<void> {
-    const db = getRdb()
-
-    // DBのユーザーを削除
-    const activeUsers = await db.activeUser.findMany({
-      where: { email: { contains: emailPattern } },
-      select: { userId: true, authenticationId: true },
-    })
-
-    if (activeUsers.length > 0) {
-      const userIds = activeUsers.map((u) => u.userId)
-      const authIds = activeUsers.map((u) => u.authenticationId).filter((id): id is string => !!id)
-
-      await db.activeUser.deleteMany({ where: { userId: { in: userIds } } })
-      await db.user.deleteMany({ where: { userId: { in: userIds } } })
-
-      // Supabase Authのユーザーも削除
-      if (authIds.length > 0) {
-        await db.$queryRaw`DELETE FROM auth.users WHERE id = ANY(${authIds}::uuid[])`
-      }
-    }
-
-    // auth.users に直接存在するユーザーも削除（ActiveUserがない場合）
-    await db.$queryRaw`DELETE FROM auth.users WHERE email LIKE ${`%${emailPattern}%`}`
-  },
+export type CleanUpIds = {
+  userIds: bigint[]
+  authIds: string[]
 }
 
-export default userTestHelper
+/**
+ * テスト用ユーザーを作成する（Supabase Auth + DB）
+ */
+export async function create(email: string, password: string): Promise<CreateResult> {
+  const client = getSupabase()
+
+  const { data, error } = await client.auth.signUp({ email, password })
+  if (error || !data.user) {
+    throw new Error(`Failed to create user: ${error?.message ?? 'Unknown error'}`)
+  }
+
+  const authenticationId = data.user.id
+  const activeUser = await createActiveUser(email, authenticationId)
+
+  // signUp後はログアウトして初期状態にする
+  await client.auth.signOut()
+
+  return {
+    activeUserId: activeUser.activeUserId,
+    userId: activeUser.userId,
+    authenticationId,
+  }
+}
+
+/**
+ * Hono経由でログインしてセッション情報を取得する
+ * Set-Cookieヘッダーも返すので、後続のリクエストに使用できる
+ */
+export async function login(email: string, password: string): Promise<LoginResult> {
+  const db = getRdb()
+
+  // Hono経由でログイン
+  const res = await app.request(
+    '/api/v2/auth/login',
+    {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+    TEST_ENV,
+  )
+
+  if (res.status !== 200) {
+    throw new Error(`Failed to login: ${res.status}`)
+  }
+
+  // Set-Cookieヘッダーを取得
+  const setCookieHeaders = res.headers.getSetCookie()
+  const cookies = setCookieHeaders.map((cookie) => cookie.split(';')[0]).join('; ')
+
+  // DBからActiveUserを取得
+  const activeUser = await db.activeUser.findFirst({
+    where: { email },
+  })
+
+  if (!activeUser) {
+    throw new Error(`ActiveUser not found for email: ${email}`)
+  }
+
+  return {
+    activeUserId: activeUser.activeUserId,
+    cookies,
+  }
+}
+
+/**
+ * ログアウトする
+ */
+export async function logout(): Promise<void> {
+  const client = getSupabase()
+  await client.auth.signOut()
+}
+
+/**
+ * テストデータをクリーンアップする（指定したIDのみ削除）
+ */
+export async function cleanUp(ids: CleanUpIds): Promise<void> {
+  const db = getRdb()
+
+  // ログアウト
+  const client = getSupabase()
+  await client.auth.signOut()
+
+  // DBのユーザーをバッチ削除
+  if (ids.userIds.length > 0) {
+    await db.activeUser.deleteMany({ where: { userId: { in: ids.userIds } } })
+    await db.user.deleteMany({ where: { userId: { in: ids.userIds } } })
+  }
+
+  // Supabase Authのユーザーをバッチ削除
+  if (ids.authIds.length > 0) {
+    await db.$queryRaw`DELETE FROM auth.users WHERE id = ANY(${ids.authIds}::uuid[])`
+  }
+}
+
+/**
+ * テスト用メールパターンのユーザーを全て削除する（APIテスト用）
+ * signup API などで直接作成されたユーザーもクリーンアップ可能
+ */
+export async function cleanUpByEmailPattern(emailPattern: string): Promise<void> {
+  const db = getRdb()
+
+  // DBのユーザーを削除
+  const activeUsers = await db.activeUser.findMany({
+    where: { email: { contains: emailPattern } },
+    select: { userId: true, authenticationId: true },
+  })
+
+  if (activeUsers.length > 0) {
+    const userIds = activeUsers.map((u) => u.userId)
+    const authIds = activeUsers.map((u) => u.authenticationId).filter((id): id is string => !!id)
+
+    await db.activeUser.deleteMany({ where: { userId: { in: userIds } } })
+    await db.user.deleteMany({ where: { userId: { in: userIds } } })
+
+    // Supabase Authのユーザーも削除
+    if (authIds.length > 0) {
+      await db.$queryRaw`DELETE FROM auth.users WHERE id = ANY(${authIds}::uuid[])`
+    }
+  }
+
+  // auth.users に直接存在するユーザーも削除（ActiveUserがない場合）
+  await db.$queryRaw`DELETE FROM auth.users WHERE email LIKE ${`%${emailPattern}%`}`
+}
+
+export async function disconnect(): Promise<void> {
+  const db = getRdb()
+  await db.$disconnect()
+}

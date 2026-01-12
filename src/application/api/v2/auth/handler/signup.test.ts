@@ -1,5 +1,5 @@
 import TEST_ENV from '@/test/env'
-import userTestHelper from '@/test/helper/user'
+import * as userHelper from '@/test/helper/user'
 import app from '../../../../server'
 
 describe('POST /api/v2/auth/signup', () => {
@@ -8,16 +8,14 @@ describe('POST /api/v2/auth/signup', () => {
   const DUPLICATE_EMAIL_PATTERN = 'duplicate@example.com'
 
   beforeEach(async () => {
-    await userTestHelper.cleanUp()
-    // signup APIで直接作成されたユーザーもクリーンアップ
-    await userTestHelper.cleanUpByEmailPattern(SIGNUP_TEST_EMAIL_PATTERN)
-    await userTestHelper.cleanUpByEmailPattern(DUPLICATE_EMAIL_PATTERN)
+    // signup APIで直接作成されたユーザーをクリーンアップ
+    await userHelper.cleanUpByEmailPattern(SIGNUP_TEST_EMAIL_PATTERN)
+    await userHelper.cleanUpByEmailPattern(DUPLICATE_EMAIL_PATTERN)
   })
 
   afterAll(async () => {
-    await userTestHelper.cleanUp()
-    await userTestHelper.cleanUpByEmailPattern(SIGNUP_TEST_EMAIL_PATTERN)
-    await userTestHelper.cleanUpByEmailPattern(DUPLICATE_EMAIL_PATTERN)
+    await userHelper.cleanUpByEmailPattern(SIGNUP_TEST_EMAIL_PATTERN)
+    await userHelper.cleanUpByEmailPattern(DUPLICATE_EMAIL_PATTERN)
   })
 
   async function requestSignup(body: string) {
