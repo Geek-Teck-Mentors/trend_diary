@@ -1,6 +1,9 @@
 import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 
+// テスト環境であることを明示
+process.env.NODE_ENV = 'test'
+
 let rdb: RdbClient | null = null
 
 export function getTestRdb(): RdbClient {
