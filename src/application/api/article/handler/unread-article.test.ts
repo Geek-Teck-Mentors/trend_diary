@@ -44,13 +44,13 @@ describe('DELETE /api/articles/:article_id/unread', () => {
 
   beforeEach(async () => {
     await userTestHelper.cleanUp()
-    await articleTestHelper.cleanUpArticles()
+    await articleTestHelper.cleanUp()
     await setupTestData()
   })
 
   afterAll(async () => {
     await userTestHelper.cleanUp()
-    await articleTestHelper.cleanUpArticles()
+    await articleTestHelper.cleanUp()
   })
 
   describe('正常系', () => {
