@@ -1,8 +1,8 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import app from '@/application/server'
 import type { ActiveUser } from '@/domain/user/schema/active-user-schema'
-import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
+import { getTestRdb } from './rdb'
 
 // Supabaseクライアント
 let supabase: SupabaseClient | null = null
@@ -14,19 +14,9 @@ function getSupabase(): SupabaseClient {
   return supabase
 }
 
-// RDBクライアント
-let rdb: RdbClient | null = null
-
-function getRdb(): RdbClient {
-  if (!rdb) {
-    rdb = getRdbClient(TEST_ENV.DATABASE_URL)
-  }
-  return rdb
-}
-
 // ActiveUser生成関数（実DBに作成）
 async function createActiveUser(email: string, authenticationId: string): Promise<ActiveUser> {
-  const db = getRdb()
+  const db = getTestRdb()
 
   // 実際のDBにユーザーを作成
   const user = await db.user.create({
@@ -101,7 +91,7 @@ export async function create(email: string, password: string): Promise<CreateRes
  * Set-Cookieヘッダーも返すので、後続のリクエストに使用できる
  */
 export async function login(email: string, password: string): Promise<LoginResult> {
-  const db = getRdb()
+  const db = getTestRdb()
 
   // Hono経由でログイン
   const res = await app.request(
@@ -151,7 +141,7 @@ export async function logout(): Promise<void> {
  * テストデータをクリーンアップする（指定したIDのみ削除）
  */
 export async function cleanUp(ids: CleanUpIds): Promise<void> {
-  const db = getRdb()
+  const db = getTestRdb()
 
   // ログアウト
   const client = getSupabase()
@@ -174,7 +164,7 @@ export async function cleanUp(ids: CleanUpIds): Promise<void> {
  * signup API などで直接作成されたユーザーもクリーンアップ可能
  */
 export async function cleanUpByEmailPattern(emailPattern: string): Promise<void> {
-  const db = getRdb()
+  const db = getTestRdb()
 
   // DBのユーザーを削除
   const activeUsers = await db.activeUser.findMany({
@@ -197,9 +187,4 @@ export async function cleanUpByEmailPattern(emailPattern: string): Promise<void>
 
   // auth.users に直接存在するユーザーも削除（ActiveUserがない場合）
   await db.$queryRaw`DELETE FROM auth.users WHERE email LIKE ${`%${emailPattern}%`}`
-}
-
-export async function disconnect(): Promise<void> {
-  const db = getRdb()
-  await db.$disconnect()
 }

@@ -1,10 +1,5 @@
 import { faker } from '@faker-js/faker'
-import getRdbClient from '@/infrastructure/rdb'
-import TEST_ENV from '@/test/env'
-
-process.env.NODE_ENV = 'test'
-
-const rdb = getRdbClient(TEST_ENV.DATABASE_URL)
+import { getTestRdb } from './rdb'
 
 export async function createArticle(options?: {
   media?: 'qiita' | 'zenn'
@@ -14,6 +9,7 @@ export async function createArticle(options?: {
   url?: string
   createdAt?: Date
 }) {
+  const rdb = getTestRdb()
   const media = options?.media ?? faker.helpers.arrayElement(['qiita', 'zenn'])
   const url =
     options?.url ??
@@ -33,6 +29,7 @@ export async function createArticle(options?: {
 }
 
 export async function deleteArticle(articleId: bigint): Promise<void> {
+  const rdb = getTestRdb()
   await rdb.readHistory.deleteMany({
     where: { articleId },
   })
@@ -45,6 +42,7 @@ export async function findReadHistory(
   activeUserId: bigint,
   articleId: bigint,
 ): Promise<{ readHistoryId: bigint; readAt: Date } | null> {
+  const rdb = getTestRdb()
   const readHistory = await rdb.readHistory.findFirst({
     where: {
       activeUserId,
@@ -59,6 +57,7 @@ export async function findReadHistory(
 }
 
 export async function createReadHistory(activeUserId: bigint, articleId: bigint, readAt?: Date) {
+  const rdb = getTestRdb()
   return await rdb.readHistory.create({
     data: {
       activeUserId,
@@ -69,6 +68,7 @@ export async function createReadHistory(activeUserId: bigint, articleId: bigint,
 }
 
 export async function deleteReadHistory(activeUserId: bigint, articleId: bigint): Promise<void> {
+  const rdb = getTestRdb()
   await rdb.readHistory.deleteMany({
     where: {
       activeUserId,
@@ -78,6 +78,7 @@ export async function deleteReadHistory(activeUserId: bigint, articleId: bigint)
 }
 
 export async function countReadHistories(activeUserId: bigint, articleId: bigint): Promise<number> {
+  const rdb = getTestRdb()
   const count = await rdb.readHistory.count({
     where: {
       activeUserId,
@@ -88,6 +89,7 @@ export async function countReadHistories(activeUserId: bigint, articleId: bigint
 }
 
 export async function cleanUp(articleIds: bigint[]): Promise<void> {
+  const rdb = getTestRdb()
   if (articleIds.length > 0) {
     await rdb.readHistory.deleteMany({
       where: { articleId: { in: articleIds } },
@@ -96,8 +98,4 @@ export async function cleanUp(articleIds: bigint[]): Promise<void> {
       where: { articleId: { in: articleIds } },
     })
   }
-}
-
-export async function disconnect(): Promise<void> {
-  await rdb.$disconnect()
 }
