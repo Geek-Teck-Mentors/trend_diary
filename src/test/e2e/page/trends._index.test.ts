@@ -6,11 +6,11 @@ const TIMEOUT = 10000
 
 test.describe('記事一覧ページ', () => {
   test.beforeAll(async () => {
-    await articleTestHelper.cleanUpArticles()
+    await articleTestHelper.cleanUp()
   })
 
   test.afterAll(async () => {
-    await articleTestHelper.cleanUpArticles()
+    await articleTestHelper.cleanUp()
     await articleTestHelper.disconnect()
   })
 
@@ -34,7 +34,7 @@ test.describe('記事一覧ページ', () => {
 
     test.afterAll(async () => {
       // テスト後に記事をクリーンアップ
-      await articleTestHelper.cleanUpArticles()
+      await articleTestHelper.cleanUp()
     })
 
     test.beforeEach(async ({ page }) => {
@@ -114,7 +114,7 @@ test.describe('記事一覧ページ', () => {
     const ZENN_COUNT = 3
 
     test.beforeAll(async () => {
-      await articleTestHelper.cleanUpArticles()
+      await articleTestHelper.cleanUp()
       // Qiita記事を作成
       await Promise.all(
         Array.from({ length: QIITA_COUNT }, () =>
@@ -130,7 +130,7 @@ test.describe('記事一覧ページ', () => {
     })
 
     test.afterAll(async () => {
-      await articleTestHelper.cleanUpArticles()
+      await articleTestHelper.cleanUp()
     })
 
     test.beforeEach(async ({ page }) => {
