@@ -1,4 +1,3 @@
-import getRdbClient, { RdbClient } from '@/infrastructure/rdb'
 import TEST_ENV from '@/test/env'
 import articleTestHelper from '@/test/helper/article'
 import userTestHelper from '@/test/helper/user'
@@ -13,11 +12,9 @@ type GetArticlesTestCase = {
 }
 
 describe('GET /api/articles', () => {
-  let db: RdbClient
-
   const testArticles = [
     {
-      media: 'qiita',
+      media: 'qiita' as const,
       title: 'Reactの基礎',
       author: '山田太郎',
       description: 'Reactについて学ぼう',
@@ -25,7 +22,7 @@ describe('GET /api/articles', () => {
       createdAt: new Date('2025-05-11'),
     },
     {
-      media: 'zenn',
+      media: 'zenn' as const,
       title: 'TypeScriptの応用',
       author: '佐藤花子',
       description: 'TypeScriptの高度な機能',
@@ -34,12 +31,8 @@ describe('GET /api/articles', () => {
     },
   ]
 
-  async function cleanUp(): Promise<void> {
-    await db.$queryRaw`TRUNCATE TABLE "articles";`
-  }
-
   async function setupTestData(): Promise<void> {
-    await Promise.all(testArticles.map((article) => db.article.create({ data: article })))
+    await Promise.all(testArticles.map((article) => articleTestHelper.createArticle(article)))
   }
 
   async function requestGetArticles(query: string = '') {
@@ -48,13 +41,12 @@ describe('GET /api/articles', () => {
   }
 
   beforeAll(async () => {
-    db = getRdbClient(TEST_ENV.DATABASE_URL)
+    await articleTestHelper.cleanUp()
     await setupTestData()
   })
 
   afterAll(async () => {
-    await cleanUp()
-    await db.$disconnect()
+    await articleTestHelper.cleanUp()
   })
 
   describe('正常系', () => {
@@ -223,13 +215,13 @@ describe('GET /api/articles', () => {
 
     beforeEach(async () => {
       await userTestHelper.cleanUp()
-      await articleTestHelper.cleanUpArticles()
+      await articleTestHelper.cleanUp()
       await setupAuthTestData()
     })
 
     afterAll(async () => {
       await userTestHelper.cleanUp()
-      await articleTestHelper.cleanUpArticles()
+      await articleTestHelper.cleanUp()
     })
 
     it('未ログインの場合はisReadがundefined', async () => {
