@@ -6,22 +6,34 @@ process.env.NODE_ENV = 'test'
 
 class ArticleTestHelper {
   private rdb = getRdbClient(TEST_ENV.DATABASE_URL)
+  private createdArticleIds: bigint[] = []
 
-  async createArticle(options?: { media?: 'qiita' | 'zenn'; title?: string; author?: string }) {
+  async createArticle(options?: {
+    media?: 'qiita' | 'zenn'
+    title?: string
+    author?: string
+    description?: string
+    url?: string
+    createdAt?: Date
+  }) {
     const media = options?.media ?? faker.helpers.arrayElement(['qiita', 'zenn'])
     const url =
-      media === 'qiita'
+      options?.url ??
+      (media === 'qiita'
         ? `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
-        : `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
+        : `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`)
 
     const data = {
       media,
       title: options?.title ?? faker.lorem.sentence().substring(0, 100),
       author: options?.author ?? faker.person.fullName().substring(0, 30),
-      description: faker.lorem.paragraph().substring(0, 255),
+      description: options?.description ?? faker.lorem.paragraph().substring(0, 255),
       url,
+      createdAt: options?.createdAt,
     }
-    return await this.rdb.article.create({ data })
+    const article = await this.rdb.article.create({ data })
+    this.createdArticleIds.push(article.articleId)
+    return article
   }
 
   async deleteArticle(articleId: bigint): Promise<void> {
@@ -76,6 +88,18 @@ class ArticleTestHelper {
       },
     })
     return count
+  }
+
+  async cleanUp(): Promise<void> {
+    if (this.createdArticleIds.length > 0) {
+      await this.rdb.readHistory.deleteMany({
+        where: { articleId: { in: this.createdArticleIds } },
+      })
+      await this.rdb.article.deleteMany({
+        where: { articleId: { in: this.createdArticleIds } },
+      })
+      this.createdArticleIds.length = 0
+    }
   }
 
   async cleanUpArticles(): Promise<void> {
