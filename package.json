@@ -82,7 +82,7 @@
     "@hono/vite-dev-server": "^0.18.1",
     "@playwright/test": "^1.56.1",
     "@prisma/generator-helper": "^6.5.0",
-    "@react-router/dev": "^7.0.0",
+    "@react-router/dev": "^7.12.0",
     "@storybook/addon-a11y": "^9.0.18",
     "@storybook/addon-docs": "^9.0.18",
     "@storybook/addon-vitest": "^9.0.18",
