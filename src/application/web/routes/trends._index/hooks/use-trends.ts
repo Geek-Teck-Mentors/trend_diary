@@ -45,9 +45,10 @@ export default function useTrends() {
   const limitParam = searchParams.get('limit')
   const mediaParam = searchParams.get('media')
 
+  // INFO: schemaはnullではなくundefinedを許容するため、nullの場合はundefinedに変換する
   const { page: validPage, limit: validLimit } = (
     isMobile ? offsetPaginationMobileSchema : offsetPaginationSchema
-  ).parse({ page: pageParam, limit: limitParam })
+  ).parse({ page: pageParam ?? undefined, limit: limitParam ?? undefined })
 
   const params: Params = {
     page: validPage,
