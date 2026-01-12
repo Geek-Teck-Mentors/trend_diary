@@ -39,3 +39,18 @@ jobs:
 
       - name: TypeScript型チェック
         run: npm run typecheck
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: Prismaクライアント生成
+        run: npx prisma generate
+
+      - name: ビルド
+        run: npm run build
