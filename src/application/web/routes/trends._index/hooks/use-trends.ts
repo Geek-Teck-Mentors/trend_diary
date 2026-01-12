@@ -80,9 +80,9 @@ export default function useTrends() {
 
       return {
         ...result,
-        data: result.data.map((_data) => ({
-          ..._data,
-          createdAt: new Date(_data.createdAt),
+        data: result.data.map((article) => ({
+          ...article,
+          createdAt: new Date(article.createdAt),
         })),
       }
     },
