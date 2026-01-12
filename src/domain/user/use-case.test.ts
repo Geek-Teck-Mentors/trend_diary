@@ -5,7 +5,7 @@ import { ClientError, ExternalServiceError, ServerError } from '@/common/errors'
 import type { AuthV2Repository, Command, Query } from '@/domain/user/repository'
 import type { CurrentUser } from '@/domain/user/schema/active-user-schema'
 import type { AuthenticationSession, AuthenticationUser } from '@/domain/user/schema/auth-schema'
-import { AuthV2UseCase } from './use-case'
+import { AUTH_V2_DUMMY_PASSWORD, AuthV2UseCase } from './use-case'
 
 const repositoryMock = mockDeep<AuthV2Repository>()
 const commandMock = mockDeep<Command>()
@@ -67,7 +67,7 @@ describe('AuthV2UseCase', () => {
         expect(repositoryMock.signup).toHaveBeenCalledWith('test@example.com', 'Password1!')
         expect(commandMock.createActiveWithAuthenticationId).toHaveBeenCalledWith(
           mockAuthUser.email,
-          'SUPABASE_AUTH_USER',
+          AUTH_V2_DUMMY_PASSWORD,
           mockAuthUser.id,
         )
       })
@@ -90,53 +90,52 @@ describe('AuthV2UseCase', () => {
         expect(commandMock.createActiveWithAuthenticationId).not.toHaveBeenCalled()
       })
 
-      it('ActiveUser作成失敗時、補償トランザクションを実行してエラーを返す', async () => {
-        // Arrange
-        repositoryMock.signup.mockResolvedValue(
-          success({
-            user: mockAuthUser,
-            session: mockSession,
-          }),
-        )
-        const dbError = new ServerError('Database error')
-        commandMock.createActiveWithAuthenticationId.mockResolvedValue(failure(dbError))
-        repositoryMock.deleteUser.mockResolvedValue(success(undefined))
-
-        // Act
-        const result = await useCase.signup('test@example.com', 'Password1!')
-
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error).toBe(dbError)
-        }
-        expect(repositoryMock.deleteUser).toHaveBeenCalledWith(mockAuthUser.id)
-      })
-
-      it('補償トランザクション失敗時、ExternalServiceErrorを返す', async () => {
-        // Arrange
-        repositoryMock.signup.mockResolvedValue(
-          success({
-            user: mockAuthUser,
-            session: mockSession,
-          }),
-        )
-        const dbError = new ServerError('Database error')
-        commandMock.createActiveWithAuthenticationId.mockResolvedValue(failure(dbError))
-        const deleteError = new ServerError('Delete failed')
-        repositoryMock.deleteUser.mockResolvedValue(failure(deleteError))
-
-        // Act
-        const result = await useCase.signup('test@example.com', 'Password1!')
-
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error).toBeInstanceOf(ExternalServiceError)
-          expect(result.error.message).toBe(
-            'Failed to delete Supabase Auth user during compensation',
+      describe('認証成功後', () => {
+        beforeEach(() => {
+          repositoryMock.signup.mockResolvedValue(
+            success({
+              user: mockAuthUser,
+              session: mockSession,
+            }),
           )
-        }
+        })
+
+        it('ActiveUser作成失敗時、補償トランザクションを実行してエラーを返す', async () => {
+          // Arrange
+          const dbError = new ServerError('Database error')
+          commandMock.createActiveWithAuthenticationId.mockResolvedValue(failure(dbError))
+          repositoryMock.deleteUser.mockResolvedValue(success(undefined))
+
+          // Act
+          const result = await useCase.signup('test@example.com', 'Password1!')
+
+          // Assert
+          expect(isFailure(result)).toBe(true)
+          if (isFailure(result)) {
+            expect(result.error).toBe(dbError)
+          }
+          expect(repositoryMock.deleteUser).toHaveBeenCalledWith(mockAuthUser.id)
+        })
+
+        it('補償トランザクション失敗時、ExternalServiceErrorを返す', async () => {
+          // Arrange
+          const dbError = new ServerError('Database error')
+          commandMock.createActiveWithAuthenticationId.mockResolvedValue(failure(dbError))
+          const deleteError = new ServerError('Delete failed')
+          repositoryMock.deleteUser.mockResolvedValue(failure(deleteError))
+
+          // Act
+          const result = await useCase.signup('test@example.com', 'Password1!')
+
+          // Assert
+          expect(isFailure(result)).toBe(true)
+          if (isFailure(result)) {
+            expect(result.error).toBeInstanceOf(ExternalServiceError)
+            expect(result.error.message).toBe(
+              'Failed to delete Supabase Auth user during compensation',
+            )
+          }
+        })
       })
     })
   })
@@ -184,46 +183,45 @@ describe('AuthV2UseCase', () => {
         expect(queryMock.findActiveByAuthenticationId).not.toHaveBeenCalled()
       })
 
-      it('ActiveUserが見つからない場合、ClientError(404)を返す', async () => {
-        // Arrange
-        repositoryMock.login.mockResolvedValue(
-          success({
-            user: mockAuthUser,
-            session: mockSession,
-          }),
-        )
-        queryMock.findActiveByAuthenticationId.mockResolvedValue(success(null))
+      describe('認証成功後', () => {
+        beforeEach(() => {
+          repositoryMock.login.mockResolvedValue(
+            success({
+              user: mockAuthUser,
+              session: mockSession,
+            }),
+          )
+        })
 
-        // Act
-        const result = await useCase.login('test@example.com', 'Password1!')
+        it('ActiveUserが見つからない場合、ClientError(404)を返す', async () => {
+          // Arrange
+          queryMock.findActiveByAuthenticationId.mockResolvedValue(success(null))
 
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error).toBeInstanceOf(ClientError)
-          expect(result.error.message).toBe('User not found')
-        }
-      })
+          // Act
+          const result = await useCase.login('test@example.com', 'Password1!')
 
-      it('クエリ失敗時、ServerErrorを返す', async () => {
-        // Arrange
-        repositoryMock.login.mockResolvedValue(
-          success({
-            user: mockAuthUser,
-            session: mockSession,
-          }),
-        )
-        const dbError = new Error('Database connection failed')
-        queryMock.findActiveByAuthenticationId.mockResolvedValue(failure(dbError))
+          // Assert
+          expect(isFailure(result)).toBe(true)
+          if (isFailure(result)) {
+            expect(result.error).toBeInstanceOf(ClientError)
+            expect(result.error.message).toBe('User not found')
+          }
+        })
 
-        // Act
-        const result = await useCase.login('test@example.com', 'Password1!')
+        it('クエリ失敗時、ServerErrorを返す', async () => {
+          // Arrange
+          const dbError = new Error('Database connection failed')
+          queryMock.findActiveByAuthenticationId.mockResolvedValue(failure(dbError))
 
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error).toBeInstanceOf(ServerError)
-        }
+          // Act
+          const result = await useCase.login('test@example.com', 'Password1!')
+
+          // Assert
+          expect(isFailure(result)).toBe(true)
+          if (isFailure(result)) {
+            expect(result.error).toBeInstanceOf(ServerError)
+          }
+        })
       })
     })
   })
@@ -298,36 +296,40 @@ describe('AuthV2UseCase', () => {
         expect(queryMock.findActiveByAuthenticationId).not.toHaveBeenCalled()
       })
 
-      it('ActiveUserが見つからない場合、ClientError(404)を返す', async () => {
-        // Arrange
-        repositoryMock.getCurrentUser.mockResolvedValue(success(mockAuthUser))
-        queryMock.findActiveByAuthenticationId.mockResolvedValue(success(null))
+      describe('認証成功後', () => {
+        beforeEach(() => {
+          repositoryMock.getCurrentUser.mockResolvedValue(success(mockAuthUser))
+        })
 
-        // Act
-        const result = await useCase.getCurrentActiveUser()
+        it('ActiveUserが見つからない場合、ClientError(404)を返す', async () => {
+          // Arrange
+          queryMock.findActiveByAuthenticationId.mockResolvedValue(success(null))
 
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error).toBeInstanceOf(ClientError)
-          expect(result.error.message).toBe('User not found')
-        }
-      })
+          // Act
+          const result = await useCase.getCurrentActiveUser()
 
-      it('クエリ失敗時、ServerErrorを返す', async () => {
-        // Arrange
-        repositoryMock.getCurrentUser.mockResolvedValue(success(mockAuthUser))
-        const dbError = new Error('Database connection failed')
-        queryMock.findActiveByAuthenticationId.mockResolvedValue(failure(dbError))
+          // Assert
+          expect(isFailure(result)).toBe(true)
+          if (isFailure(result)) {
+            expect(result.error).toBeInstanceOf(ClientError)
+            expect(result.error.message).toBe('User not found')
+          }
+        })
 
-        // Act
-        const result = await useCase.getCurrentActiveUser()
+        it('クエリ失敗時、ServerErrorを返す', async () => {
+          // Arrange
+          const dbError = new Error('Database connection failed')
+          queryMock.findActiveByAuthenticationId.mockResolvedValue(failure(dbError))
 
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error).toBeInstanceOf(ServerError)
-        }
+          // Act
+          const result = await useCase.getCurrentActiveUser()
+
+          // Assert
+          expect(isFailure(result)).toBe(true)
+          if (isFailure(result)) {
+            expect(result.error).toBeInstanceOf(ServerError)
+          }
+        })
       })
     })
   })
@@ -380,46 +382,45 @@ describe('AuthV2UseCase', () => {
         expect(queryMock.findActiveByAuthenticationId).not.toHaveBeenCalled()
       })
 
-      it('ActiveUserが見つからない場合、ClientError(404)を返す', async () => {
-        // Arrange
-        repositoryMock.refreshSession.mockResolvedValue(
-          success({
-            user: mockAuthUser,
-            session: mockSession,
-          }),
-        )
-        queryMock.findActiveByAuthenticationId.mockResolvedValue(success(null))
+      describe('認証成功後', () => {
+        beforeEach(() => {
+          repositoryMock.refreshSession.mockResolvedValue(
+            success({
+              user: mockAuthUser,
+              session: mockSession,
+            }),
+          )
+        })
 
-        // Act
-        const result = await useCase.refreshSession()
+        it('ActiveUserが見つからない場合、ClientError(404)を返す', async () => {
+          // Arrange
+          queryMock.findActiveByAuthenticationId.mockResolvedValue(success(null))
 
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error).toBeInstanceOf(ClientError)
-          expect(result.error.message).toBe('User not found')
-        }
-      })
+          // Act
+          const result = await useCase.refreshSession()
 
-      it('クエリ失敗時、ServerErrorを返す', async () => {
-        // Arrange
-        repositoryMock.refreshSession.mockResolvedValue(
-          success({
-            user: mockAuthUser,
-            session: mockSession,
-          }),
-        )
-        const dbError = new Error('Database connection failed')
-        queryMock.findActiveByAuthenticationId.mockResolvedValue(failure(dbError))
+          // Assert
+          expect(isFailure(result)).toBe(true)
+          if (isFailure(result)) {
+            expect(result.error).toBeInstanceOf(ClientError)
+            expect(result.error.message).toBe('User not found')
+          }
+        })
 
-        // Act
-        const result = await useCase.refreshSession()
+        it('クエリ失敗時、ServerErrorを返す', async () => {
+          // Arrange
+          const dbError = new Error('Database connection failed')
+          queryMock.findActiveByAuthenticationId.mockResolvedValue(failure(dbError))
 
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error).toBeInstanceOf(ServerError)
-        }
+          // Act
+          const result = await useCase.refreshSession()
+
+          // Assert
+          expect(isFailure(result)).toBe(true)
+          if (isFailure(result)) {
+            expect(result.error).toBeInstanceOf(ServerError)
+          }
+        })
       })
     })
   })
