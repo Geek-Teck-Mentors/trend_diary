@@ -110,6 +110,18 @@ export default function useArticles() {
     setSearchParams(newParams)
   }
 
+  const toPreviousPage = (currentPage: number) => {
+    const newPage = currentPage - 1
+
+    handlePageChange(newPage)
+  }
+
+  const toNextPage = (currentPage: number) => {
+    const newPage = currentPage + 1
+
+    handlePageChange(newPage)
+  }
+
   const handleMediaChange = (media: MediaType) => {
     const newParams = new URLSearchParams(searchParams)
     if (media) {
@@ -138,7 +150,8 @@ export default function useArticles() {
     totalPages: data?.totalPages || 1,
     isLoading,
     setSearchParams,
-    handlePageChange,
+    toNextPage,
+    toPreviousPage,
     handleMediaChange,
     selectedMedia: params.media,
   }

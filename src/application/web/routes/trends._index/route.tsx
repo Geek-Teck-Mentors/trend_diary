@@ -3,8 +3,8 @@ import { useOutletContext } from 'react-router'
 import type { TrendsOutletContext } from '../trends'
 import ArticleDrawer from './components/article-drawer'
 import useArticleDrawer from './hooks/use-article-drawer'
-import useReadArticle from './hooks/use-read-article'
 import useArticles from './hooks/use-articles'
+import useReadArticle from './hooks/use-read-article'
 import TrendsPage from './page'
 
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
@@ -19,7 +19,8 @@ export default function Trends() {
     totalPages,
     date,
     handleMediaChange,
-    handlePageChange,
+    toPreviousPage,
+    toNextPage,
     selectedMedia,
   } = useArticles()
   const {
@@ -57,7 +58,8 @@ export default function Trends() {
         page={page}
         totalPages={totalPages}
         selectedMedia={selectedMedia}
-        onPageChange={handlePageChange}
+        toPreviousPage={toPreviousPage}
+        toNextPage={toNextPage}
         onMediaChange={handleMediaChange}
         onToggleRead={handleToggleRead}
         isLoggedIn={isReadArticleEnabled}

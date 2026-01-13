@@ -22,7 +22,8 @@ type Props = {
   page: number
   totalPages: number
   selectedMedia: MediaType
-  onPageChange: (newPage: number) => void
+  toNextPage: (currentPage: number) => void
+  toPreviousPage: (currentPage: number) => void
   onMediaChange: (media: MediaType) => void
   onToggleRead: (articleId: string, isRead: boolean) => void
   isLoggedIn: boolean
@@ -36,7 +37,8 @@ export default function TrendsPage({
   page,
   totalPages,
   selectedMedia,
-  onPageChange,
+  toNextPage,
+  toPreviousPage,
   onMediaChange,
   onToggleRead,
   isLoggedIn,
@@ -55,13 +57,13 @@ export default function TrendsPage({
 
   const handlePrevPageClick = () => {
     if (!isPrevDisabled) {
-      onPageChange(page - 1)
+      toPreviousPage(page)
     }
   }
 
   const handleNextPageClick = () => {
     if (!isNextDisabled) {
-      onPageChange(page + 1)
+      toNextPage(page)
     }
   }
 

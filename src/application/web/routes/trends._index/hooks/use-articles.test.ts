@@ -87,7 +87,7 @@ function setupHook(initialEntries?: string[]): RenderHookResult<UseTrendsHook, u
   })
 }
 
-describe('useTrends', () => {
+describe('useArticles', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetApiClientForClient.mockReturnValue(mockApiClient)
@@ -332,6 +332,154 @@ describe('useTrends', () => {
         },
         { init: { credentials: 'include' } },
       )
+    })
+  })
+
+  describe('ページ遷移', () => {
+    it('toNextPageを呼ぶと次のページに遷移する', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 1,
+        totalPages: 3,
+      })
+
+      const nextPageResponse = generateFakeResponse({
+        articles: [generateFakeArticle({ articleId: '3', title: '2ページ目の記事' })],
+        page: 2,
+        totalPages: 3,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
+
+      const { result } = setupHook()
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(1)
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(nextPageResponse)
+
+      await act(async () => {
+        result.current.toNextPage(1)
+      })
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 2,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+    })
+
+    it('toPreviousPageを呼ぶと前のページに遷移する', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 2,
+        totalPages: 3,
+      })
+
+      const previousPageResponse = generateFakeResponse({
+        articles: [generateFakeArticle({ articleId: '1', title: '1ページ目の記事' })],
+        page: 1,
+        totalPages: 3,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
+
+      const { result } = setupHook(['/?page=2'])
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(previousPageResponse)
+
+      await act(async () => {
+        result.current.toPreviousPage(2)
+      })
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(1)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 1,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+    })
+
+    it('page=1の時にtoNextPageを呼ぶとURLにpage=2が追加される', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 1,
+        totalPages: 3,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(initialResponse)
+
+      const { result } = setupHook()
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(1)
+      })
+
+      await act(async () => {
+        result.current.toNextPage(1)
+      })
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              page: 2,
+            }),
+          }),
+          expect.anything(),
+        )
+      })
+    })
+
+    it('page=2の時にtoPreviousPageを呼ぶとURLからpageパラメータが削除される', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 2,
+        totalPages: 3,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(initialResponse)
+
+      const { result } = setupHook(['/?page=2'])
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
+
+      await act(async () => {
+        result.current.toPreviousPage(2)
+      })
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              page: 1,
+            }),
+          }),
+          expect.anything(),
+        )
+      })
     })
   })
 
