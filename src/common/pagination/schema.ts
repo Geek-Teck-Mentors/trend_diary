@@ -43,8 +43,7 @@ export const offsetPaginationSchema = z.object({
   limit,
 })
 
-export const offsetPaginationMobileSchema = z.object({
-  page,
+export const offsetPaginationMobileSchema = offsetPaginationSchema.extend({
   limit: mobileLimit,
 })
 
