@@ -9,7 +9,7 @@ import type { AuthenticationSession } from './schema/auth-schema'
  * 認証v2ユーザーのダミーパスワード
  * Supabase Authを使用するため、active_userテーブルのpasswordフィールドには実際のパスワードを保存しない
  */
-const AUTH_V2_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
+export const AUTH_V2_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
 
 /**
  * サインアップ結果
