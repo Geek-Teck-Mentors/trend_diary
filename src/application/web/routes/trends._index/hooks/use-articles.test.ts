@@ -565,4 +565,196 @@ describe('useArticles', () => {
       expect(result.current.articles[1].isRead).toBe(false)
     })
   })
+
+  describe('スキーマによるバリデーション (境界値テスト)', () => {
+    describe('pageパラメータの境界値', () => {
+      it('page=0の場合、1に変換される', async () => {
+        const fakeResponse = generateFakeResponse()
+        mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+        const { result } = setupHook(['/?page=0'])
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+
+      it('page=-1の場合、1に変換される', async () => {
+        const fakeResponse = generateFakeResponse()
+        mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+        const { result } = setupHook(['/?page=-1'])
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+
+      it('page=1の場合、そのまま1として扱われる', async () => {
+        const fakeResponse = generateFakeResponse()
+        mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+        const { result } = setupHook(['/?page=1'])
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+    })
+
+    describe('limitパラメータの境界値 (デスクトップ)', () => {
+      it('limit=0の場合、1に変換される', async () => {
+        const fakeResponse = generateFakeResponse({ limit: 1 })
+        mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+        const { result } = setupHook(['/?limit=0'])
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 1,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+
+      it('limit=1の場合、そのまま1として扱われる', async () => {
+        const fakeResponse = generateFakeResponse({ limit: 1 })
+        mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+        const { result } = setupHook(['/?limit=1'])
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 1,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+
+      it('limit=100の場合、そのまま100として扱われる', async () => {
+        const fakeResponse = generateFakeResponse({ limit: 100 })
+        mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+        const { result } = setupHook(['/?limit=100'])
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 100,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+
+      it('limit=101の場合、100に変換される', async () => {
+        const fakeResponse = generateFakeResponse({ limit: 100 })
+        mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+        const { result } = setupHook(['/?limit=101'])
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 100,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+    })
+
+    describe('limitパラメータのデフォルト値', () => {
+      it('limitが指定されていない場合、デスクトップではデフォルト値20が適用される', async () => {
+        const fakeResponse = generateFakeResponse({ limit: 20 })
+        mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+        const { result } = setupHook()
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+    })
+  })
 })
