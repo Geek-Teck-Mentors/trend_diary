@@ -8,7 +8,7 @@ import {
   DrawerTitle,
 } from '@/application/web/components/shadcn/drawer'
 import { toJaDateString } from '@/common/locale'
-import type { Article } from '../hooks/use-trends'
+import type { Article } from '../hooks/use-articles'
 import MediaIcon from './media-icon'
 
 type Props = {

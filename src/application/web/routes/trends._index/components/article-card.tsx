@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/application/web/components/shadcn/card'
 import { cn } from '@/application/web/components/shadcn/lib/utils'
-import type { Article } from '../hooks/use-trends'
+import type { Article } from '../hooks/use-articles'
 import MediaIcon from './media-icon'
 
 type Props = {

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { toJaDateString } from '@/common/locale'
-import type { Article } from '../hooks/use-trends'
+import type { Article } from '../hooks/use-articles'
 import ArticleDrawer from './article-drawer'
 
 const defaultArticle: Article = {
