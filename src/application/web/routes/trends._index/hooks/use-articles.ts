@@ -65,10 +65,8 @@ export default function useArticles() {
     ...(params.media && { media: params.media }),
   }
 
-  const cacheKey = 'api/articles'
-
   const { data, isLoading, mutate } = useSWR<ArticlesResponse>(
-    cacheKey,
+    'api/articles',
     async () => {
       const result = await apiCall<ArticlesResponse>(() =>
         client.articles.$get({ query }, { init: { credentials: 'include' } }),
