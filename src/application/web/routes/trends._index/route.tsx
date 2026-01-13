@@ -4,7 +4,7 @@ import type { TrendsOutletContext } from '../trends'
 import ArticleDrawer from './components/article-drawer'
 import useArticleDrawer from './hooks/use-article-drawer'
 import useReadArticle from './hooks/use-read-article'
-import useTrends from './hooks/use-trends'
+import useArticles from './hooks/use-articles'
 import TrendsPage from './page'
 
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
@@ -21,7 +21,7 @@ export default function Trends() {
     handleMediaChange,
     handlePageChange,
     selectedMedia,
-  } = useTrends()
+  } = useArticles()
   const {
     isOpen: isDrawerOpen,
     selectedArticle,

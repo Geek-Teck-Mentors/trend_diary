@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { SWRConfig } from 'swr'
 import type { MockedFunction } from 'vitest'
 import getApiClientForClient from '@/infrastructure/api'
-import useTrends, { type Article } from './use-trends'
+import useArticles, { type Article } from './use-articles'
 
 // window.matchMediaのモック
 Object.defineProperty(window, 'matchMedia', {
@@ -74,10 +74,10 @@ const generateFakeResponse = (
 
 // biome-ignore lint/suspicious/noExplicitAny: getApiClientForClientの型が面倒なのでanyを使用
 const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
-type UseTrendsHook = ReturnType<typeof useTrends>
+type UseTrendsHook = ReturnType<typeof useArticles>
 
 function setupHook(initialEntries?: string[]): RenderHookResult<UseTrendsHook, unknown> {
-  return renderHook(() => useTrends(), {
+  return renderHook(() => useArticles(), {
     wrapper: ({ children }: { children: ReactNode }) =>
       createElement(
         SWRConfig,

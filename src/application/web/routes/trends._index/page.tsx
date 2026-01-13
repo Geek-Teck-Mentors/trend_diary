@@ -12,7 +12,7 @@ import { toJaDateString } from '@/common/locale'
 import LoadingSpinner from '../../components/ui/loading-spinner'
 import ArticleCard from './components/article-card'
 import MediaFilter, { MediaType } from './components/media-filter'
-import type { Article } from './hooks/use-trends'
+import type { Article } from './hooks/use-articles'
 
 type Props = {
   date: Date

@@ -34,7 +34,7 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
-export default function useTrends() {
+export default function useArticles() {
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useIsMobile()
   const { client, apiCall } = createSWRFetcher()
