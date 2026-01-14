@@ -65,8 +65,9 @@ export default function useArticles() {
     ...(params.media && { media: params.media }),
   }
 
+  const swrKey = ['articles', query]
   const { data, isLoading, mutate } = useSWR<ArticlesResponse>(
-    'api/articles',
+    swrKey,
     async () => {
       const result = await apiCall<ArticlesResponse>(() =>
         client.articles.$get({ query }, { init: { credentials: 'include' } }),
@@ -134,12 +135,6 @@ export default function useArticles() {
 
     setSearchParams(newParams)
   }
-
-  // searchParamsが変更されたら再fetchする
-  // INFO: 更新のタイミングでのmutateだと、古いパラメータでfetchされてしまうためuseEffect内で実行する
-  useEffect(() => {
-    mutate()
-  }, [searchParams])
 
   return {
     date,
