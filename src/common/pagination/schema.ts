@@ -20,10 +20,7 @@ function transformLimit(value: string | number | undefined, defaultValue: number
 const page = z
   .union([z.string(), z.number()])
   .optional()
-  .transform((val) => {
-    const parsed = transform(val, DEFAULT_PAGE)
-    return parsed < 1 ? 1 : parsed
-  })
+  .transform((val) => transform(val, DEFAULT_PAGE))
   .default(DEFAULT_PAGE)
 
 const limit = z
