@@ -5,10 +5,7 @@ import { coverageReporter } from '../generate'
 
 const testInclude = ['src/application/client/**/*.test.ts']
 
-const coverageInclude = [
-  'src/application/client/**/*.ts',
-  'src/application/client/components/**/*.ts',
-]
+const coverageInclude = ['src/application/client/**/*.ts']
 const exclude = ['src/application/client/components/shadcn/**/*', 'src/application/client/**/*.tsx']
 
 export default defineConfig({
