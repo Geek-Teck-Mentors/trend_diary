@@ -32,7 +32,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Lint
-        run: deno lint -c ${{ env.WORKING_DIRECTORY }}/style_config.json
+        run: deno lint -c ./application/supabase/style_config.json
 
   format:
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Format
-        run: deno fmt --check -c ${{ env.WORKING_DIRECTORY }}/style_config.json
+        run: deno fmt --check -c ./application/supabase/style_config.json
 
   type-check:
     runs-on: ubuntu-latest
