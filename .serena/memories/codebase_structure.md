@@ -15,8 +15,8 @@ trend_diary/
 │   │   └── policy/                  # ポリシー集約
 │   │
 │   ├── application/                 # アプリケーション層
-│   │   ├── api/                     # API実装
-│   │   ├── web/                     # Webページ実装
+│   │   ├── server/                     # API実装
+│   │   ├── client/                     # クライアントサイド実装
 │   │   ├── middleware/              # ミドルウェア
 │   │   ├── server.ts                # 開発サーバー（Hono + React Router）
 │   │   └── env.ts                   # 環境変数定義

@@ -63,7 +63,7 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
 
 **テスト:**
 - `npm run test:domain` - ドメイン層のテストを実行
-- `npm run test:api` - API層のテストを実行
+- `npm run test:server` - API層のテストを実行
 - `npm run test:client` - フロントエンドコンポーネントのテストを実行
 - `npm run test-storybook` - Storybookのテストを実行
 - `npm run e2e` - PlaywrightでE2Eテストを実行

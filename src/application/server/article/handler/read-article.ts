@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
   type AuthenticatedRequestContext,
   createAuthenticatedApiHandler,
-} from '@/application/api/handler/factory'
+} from '@/application/server/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
 
 // API用スキーマ
