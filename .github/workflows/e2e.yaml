@@ -22,9 +22,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./application
+
 # 共通の設定を定義
 env:
-  NODE_VERSION_FILE: .node-version
+  NODE_VERSION_FILE: ./application/.node-version
 
 jobs:
   test:
