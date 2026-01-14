@@ -7,10 +7,10 @@ on:
   pull_request:
     paths:
       - '.github/workflows/e2e.yaml'
-      - 'src/test/e2e/**'
-      - 'src/web/client/routes/**'
-      - 'package.json'
-      - 'package-lock.json'
+      - 'application/src/test/e2e/**'
+      - 'application/src/web/client/routes/**'
+      - 'application/package.json'
+      - 'application/package-lock.json'
 
 # カバレッジの可視化で、コメントを残すための権限
 permissions:
@@ -55,7 +55,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: src/test/e2e/playwright-report/
+          path: application/src/test/e2e/playwright-report/
           retention-days: 30
 
   test-diff:

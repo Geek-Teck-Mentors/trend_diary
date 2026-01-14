@@ -9,13 +9,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'src/**'
-      - 'prisma/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'wrangler.toml'
-      - 'tsconfig.json'
-      - 'vite.config.ts'
+      - 'application/src/**'
+      - 'application/prisma/**'
+      - 'application/package.json'
+      - 'application/package-lock.json'
+      - 'application/wrangler.toml'
+      - 'application/tsconfig.json'
+      - 'application/vite.config.ts'
       - '.github/workflows/preview-deploy.yml'
 
 defaults:
@@ -34,7 +34,7 @@ jobs:
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
-          node-version-file: .node-version
+          node-version-file: ./application/.node-version
 
       - name: Prismaクライアント生成
         run: npx prisma generate

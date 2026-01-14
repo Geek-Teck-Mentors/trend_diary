@@ -6,17 +6,17 @@ on:
       - main
     paths:
       - '.github/workflows/test.yaml'
-      - 'src/**'
-      - 'package.json'
-      - 'package-lock.json'
+      - 'application/src/**'
+      - 'application/package.json'
+      - 'application/package-lock.json'
   pull_request:
     branches:
       - main
     paths:
       - '.github/workflows/test.yaml'
-      - 'src/**'
-      - 'package.json'
-      - 'package-lock.json'
+      - 'application/src/**'
+      - 'application/package.json'
+      - 'application/package-lock.json'
 
 # カバレッジの可視化で、コメントを残すための権限
 permissions:
@@ -53,32 +53,32 @@ jobs:
         id: check-test-config
         uses: ./.github/actions/diff
         with:
-          subdir: '.github/workflows/test.yaml src/test/vitest/'
+          subdir: '.github/workflows/test.yaml application/src/test/vitest/'
 
       - name: クライアントの差分チェック
         id: check-client
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/web/client'
-          exclude_pattern: 'src/web/client/components/shadcn'
+          subdir: 'application/src/web/client'
+          exclude_pattern: 'application/src/web/client/components/shadcn'
 
       - name: ドメインの差分チェック
         id: check-domain
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/domain'
+          subdir: 'application/src/domain'
 
       - name: サーバーの差分チェック
         id: check-server
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/web/server'
+          subdir: 'application/src/web/server'
 
       - name: 共通モジュールの差分チェック
         id: check-common
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/common'
+          subdir: 'application/src/common'
 
       - name: 差分結果の表示
         run: |

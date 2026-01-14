@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - "supabase/**"
+      - "application/supabase/**"
       - ".github/workflows/functions_ci.yaml"
   pull_request:
     branches:
       - main
     paths:
-      - "supabase/**"
+      - "application/supabase/**"
       - ".github/workflows/functions_ci.yaml"
 
 permissions:
@@ -32,7 +32,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Lint
-        run: deno lint -c supabase/style_config.json
+        run: deno lint -c ${{ env.WORKING_DIRECTORY }}/style_config.json
 
   format:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
         # deno checkはdeno.jsonのある環境でしか実行できないため、各関数のdeno.jsonを指定する
         run: |
           for function_name in $(ls ${{ env.WORKING_DIRECTORY }}); do
-            find supabase -name "*.ts" | xargs deno check -c ${{ env.WORKING_DIRECTORY }}/$function_name/deno.json
+            find application/supabase -name "*.ts" | xargs deno check -c ${{ env.WORKING_DIRECTORY }}/$function_name/deno.json
           done
 
   test:
@@ -75,12 +75,13 @@ jobs:
       - name: Node.jsの構築(DBのマイグレーション用)
         uses: ./.github/actions/setup_node
         with:
-          node-version-file: .node-version
+          node-version-file: ./application/.node-version
 
       - name: Supabaseのセットアップ
         uses: ./.github/actions/setup_supabase
 
       - name: DBのマイグレーション
+        working-directory: ./application
         run: npm run db:migrate
         env:
           DIRECT_URL: ${{ env.DATABASE_URL }}
@@ -119,5 +120,5 @@ jobs:
       - name: octocovでカバレッジレポート生成
         uses: k1LoW/octocov-action@v1
         with:
-          config: supabase/.octocov.yml
+          config: application/supabase/.octocov.yml
           github-token: ${{ secrets.GITHUB_TOKEN }}
