@@ -3,10 +3,10 @@ import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { coverageReporter } from '../generate'
 
-const testInclude = ['src/application/client/**/*.test.ts']
+const testInclude = ['src/web/client/**/*.test.ts']
 
-const coverageInclude = ['src/application/client/**/*.ts']
-const exclude = ['src/application/client/components/shadcn/**/*', 'src/application/client/**/*.tsx']
+const coverageInclude = ['src/web/client/**/*.ts']
+const exclude = ['src/web/client/components/shadcn/**/*', 'src/web/client/**/*.tsx']
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
