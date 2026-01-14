@@ -28,8 +28,9 @@ src/domain/{aggregate}/
 ├── schema/          # Zodバリデーションスキーマ
 ├── infrastructure/  # リポジトリ実装
 ├── repository.ts    # リポジトリインターフェース
-├── useCase.ts       # ドメインビジネスロジック
-└── index.ts         # 集約エクスポート, factory
+├── use-case.ts      # ドメインビジネスロジック
+├── factory.ts       # ファクトリー関数
+└── index.ts         # 集約エクスポート
 ```
 
 ### Prismaスキーマ
@@ -37,7 +38,7 @@ src/domain/{aggregate}/
 - 全モデルは統一されたID/タイムスタンプパターンでベーススキーマを拡張
 
 ## 命名規約
-- **ファイル名**: camelCase or kebab-case
+- **ファイル名**: kebab-case（推奨）
 - **コンポーネント**: PascalCase
 - **関数・変数**: camelCase
 - **型・インターフェース**: PascalCase

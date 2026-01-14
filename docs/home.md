@@ -14,24 +14,27 @@
 ./src
 ├── web # アプリケーション層
 │   ├── server # Hono API
-│   │   ├── admin # 管理者API
 │   │   ├── article # 記事API
-│   │   ├── policy # ポリシーAPI
-│   │   ├── user # ユーザーAPI
+│   │   ├── handler # ハンドラーファクトリー
 │   │   ├── v2 # API v2
 │   │   └── route.ts
 │   ├── middleware # ミドルウェア
-│   │   ├── authenticator.ts
-│   │   ├── errorHandler.ts
-│   │   ├── requestLogger.ts
-│   │   └── zodValidator.ts
+│   │   ├── authenticator # 認証ミドルウェア
+│   │   ├── context.ts
+│   │   ├── error-handler.ts
+│   │   ├── request-logger.ts
+│   │   └── zod-validator.ts
 │   ├── worker.ts # Cloudflare Workersエントリーポイント
 │   ├── server.ts # アプリケーションサーバ
 │   ├── env.ts
 │   └── client # React Router v7 フロントエンド
 │       ├── components # 共通コンポーネント
+│       │   ├── customized # カスタムコンポーネント
+│       │   ├── shadcn # shadcn/ui統合
+│       │   └── ui # UIコンポーネント
 │       ├── features # 機能別コンポーネント
 │       ├── hooks # カスタムフック
+│       ├── lib # ユーティリティ
 │       ├── routes # ページルート
 │       └── infrastructure # フロントエンド用インフラ
 ├── common # src配下で共通使用するもの
@@ -43,30 +46,36 @@
 │   ├── logger.ts # ロガー
 │   └── schemas.ts # 共通スキーマ
 ├── domain # ドメイン層（DDD）
-│   ├── admin # 管理者集約
 │   ├── article # 記事集約
-│   ├── auth-v2 # 認証v2集約
-│   ├── policy # ポリシー集約
 │   └── user # ユーザー集約
-│       ├── index.ts # 集約エクスポート、factory
+│       ├── index.ts # 集約エクスポート
+│       ├── factory.ts # ファクトリー
 │       ├── infrastructure # リポジトリ実装
 │       ├── schema # バリデーションスキーマ
 │       ├── repository.ts # リポジトリインターフェース
-│       └── useCase.ts # ビジネスロジック
+│       └── use-case.ts # ビジネスロジック
 ├── infrastructure # インフラストラクチャ層
 │   ├── notification # 通知機能
 │   ├── prisma-orm # Prisma ORM設定
 │   │   ├── models # Prismaモデル
 │   │   ├── migrations # マイグレーション
 │   │   └── main.prisma
+│   ├── api.ts # API接続
 │   ├── rdb.ts # RDB接続
 │   └── supabase.ts # Supabase接続
 ├── test # テスト関連
 │   ├── __mocks__ # モック
 │   ├── e2e # E2Eテスト
 │   ├── helper # テストヘルパー
-│   └── vitest # Vitest設定
+│   ├── vitest # Vitest設定
+│   │   ├── client # クライアント側テスト設定
+│   │   ├── common # 共通テスト設定
+│   │   ├── domain # ドメイン層テスト設定
+│   │   ├── server # サーバー側テスト設定
+│   │   └── storybook # Storybook用テスト設定
+│   └── env.ts # テスト環境設定
 ├── plugin # カスタムプラグイン
+│   └── biome # Biomeプラグイン
 ```
 
 環境変数は.dev.vars.exampleファイルを参考に与える。
