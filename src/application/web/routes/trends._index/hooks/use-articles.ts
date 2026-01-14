@@ -64,7 +64,7 @@ export default function useArticles() {
     ...(params.media && { media: params.media }),
   }
 
-  const swrKey = ['articles', query]
+  const swrKey = ['api/articles', query]
   const { data, isLoading, mutate } = useSWR<ArticlesResponse>(
     swrKey,
     async () => {
