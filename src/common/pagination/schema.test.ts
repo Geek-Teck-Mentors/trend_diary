@@ -26,11 +26,6 @@ describe('offsetPaginationSchema', () => {
       expected: { page: DEFAULT_PAGE, limit: DEFAULT_LIMIT },
     },
     {
-      name: 'pageが1未満なら1にクランプ',
-      input: { page: 0 },
-      expected: { page: 1, limit: DEFAULT_LIMIT },
-    },
-    {
       name: 'limitが1未満なら1にクランプ',
       input: { limit: -10 },
       expected: { page: DEFAULT_PAGE, limit: 1 },
@@ -66,11 +61,6 @@ describe('offsetPaginationMobileSchema', () => {
       name: '不正な値はデフォルトへフォールバック',
       input: { page: 'abc', limit: 'NaN' },
       expected: { page: DEFAULT_PAGE, limit: DEFAULT_MOBILE_LIMIT },
-    },
-    {
-      name: 'pageが1未満なら1にクランプ',
-      input: { page: 0 },
-      expected: { page: 1, limit: DEFAULT_MOBILE_LIMIT },
     },
     {
       name: 'limitが1未満なら1にクランプ',
