@@ -5,21 +5,27 @@ on:
     branches:
       - main
     paths:
-      - 'supabase/**'
-      - '.github/workflows/functions_ci.yaml'
+      - "supabase/**"
+      - ".github/workflows/functions_ci.yaml"
   pull_request:
     branches:
       - main
     paths:
-      - 'supabase/**'
-      - '.github/workflows/functions_ci.yaml'
+      - "supabase/**"
+      - ".github/workflows/functions_ci.yaml"
 
 permissions:
   contents: read
   pull-requests: write
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./application
+
 env:
   DENO_VERSION: 2.3.1
+
 jobs:
   lint:
     runs-on: ubuntu-latest
