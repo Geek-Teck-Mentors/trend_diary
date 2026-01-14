@@ -6,15 +6,13 @@ export const DEFAULT_PAGE = 1
 
 function transform(value: string | number | undefined, defaultValue: number) {
   if (value === undefined || value === null) return defaultValue
-
   const num = typeof value === 'string' ? parseInt(value, 10) : value
-  if (Number.isNaN(num)) return defaultValue
-
-  return num < 1 ? 1 : num
+  return Number.isNaN(num) ? defaultValue : num
 }
 
 function transformLimit(value: string | number | undefined, defaultValue: number) {
   const parsed = transform(value, defaultValue)
+  if (parsed < 1) return 1
   if (parsed > 100) return 100
   return parsed
 }
