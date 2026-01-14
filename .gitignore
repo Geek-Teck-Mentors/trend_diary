@@ -1,6 +1,3 @@
-# prod
-build/
-
 # dev
 .yarn/
 !.yarn/releases
@@ -13,42 +10,5 @@ build/
 .idea/usage.statistics.xml
 .idea/shelf
 
-# deps
-node_modules/
-.wrangler
-
-# env
-.env
-.env.*
-.dev.vars
-
-# logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
 # misc
 .DS_Store
-
-# coverage
-coverage/
-
-# Playwright
-/src/test/e2e/test-results/
-/src/test/e2e/playwright-report/
-/src/test/e2e/blob-report/
-/src/test/e2e/playwright/.cache/
-/test-results/
-
-*storybook.log
-storybook-static
-
-# react-router
-.react-router/
-
-# serena
-.serena/cache
