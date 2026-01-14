@@ -21,7 +21,7 @@ trend_diary
 
 ## CI/CD
 - Lint: Biome CI + TypeScript型チェック
-- Test: 多層テスト戦略（domain/api/frontend/storybook/e2e）
+- Test: 多層テスト戦略（domain/api/client/storybook/e2e）
 - CD: Cloudflare Workersへの自動デプロイ
 - Prisma Schema チェック
 - PR毎のCloudflareプレビュー環境自動デプロイ

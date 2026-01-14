@@ -31,7 +31,7 @@
    
    - **フロントエンド変更時**:
      ```bash
-     npm run test:frontend
+     npm run test:client
      ```
    
    - **Storybookコンポーネント変更時**:

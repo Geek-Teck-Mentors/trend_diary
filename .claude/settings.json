@@ -19,7 +19,7 @@
       "Bash(rm:*)",
       "Bash(git add:*)",
       "Bash(npm run check:fix:*)",
-      "Bash(npm run test:frontend:*)",
+      "Bash(npm run test:client:*)",
       "Bash(npm ls:*)",
       "Bash(npm run test-storybook:*)",
       "Bash(find:*)",

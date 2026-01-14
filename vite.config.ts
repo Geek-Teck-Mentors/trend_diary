@@ -23,7 +23,7 @@ export default defineConfig({
     serverAdapter({
       adapter,
       entry: 'src/application/server.ts',
-      exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/web/**'],
+      exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/client/**'],
     }),
   ],
   optimizeDeps: {

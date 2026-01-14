@@ -24,10 +24,10 @@ export default defineConfig(({ mode }) => {
       setupFiles: ['.storybook/vitest.setup.ts'],
       coverage: {
         include: [
-          'src/application/web/components/**/*.tsx',
-          'src/application/web/features/**/*.tsx',
+          'src/application/client/components/**/*.tsx',
+          'src/application/client/features/**/*.tsx',
         ],
-        exclude: ['src/application/web/components/shadcn'],
+        exclude: ['src/application/client/components/shadcn'],
         thresholds: {
           statements: 80,
           branches: 80,
