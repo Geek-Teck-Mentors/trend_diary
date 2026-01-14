@@ -7,13 +7,18 @@ on:
       - main
     paths:
       - 'src/**/*.prisma'
-      - '.github/workflows/check_prisma.yaml'
+      - '.github/workflows/prisma.yaml'
 
 permissions:
   contents: read
 
 env:
-  NODE_VERSION_FILE: .node-version
+  NODE_VERSION_FILE: ./application/.node-version
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./application
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

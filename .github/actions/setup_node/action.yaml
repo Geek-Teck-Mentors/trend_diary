@@ -17,4 +17,5 @@ runs:
 
     - name: ライブラリのインストール
       shell: bash
+      working-directory: ${{ github.workspace }}/application
       run: npm ci
