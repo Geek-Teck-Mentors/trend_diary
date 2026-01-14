@@ -40,7 +40,7 @@ npm run test:domain
 - リクエスト/レスポンスの検証
 
 **対象**:
-- `src/application/server/`配下のAPIエンドポイント
+- `src/web/server/`配下のAPIエンドポイント
 
 **実行コマンド**:
 ```bash
@@ -65,7 +65,7 @@ npm run test:api
 - jsdom環境で実行
 
 **対象**:
-- `src/application/client/`配下のReactコンポーネント
+- `src/web/client/`配下のReactコンポーネント
 - カスタムReact Hooks
 
 **実行コマンド**:

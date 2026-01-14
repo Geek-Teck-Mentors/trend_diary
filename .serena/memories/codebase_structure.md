@@ -78,7 +78,7 @@ trend_diary/
   - `useCase.ts`: ドメインビジネスロジック
   - `index.ts`: 集約エクスポート、factory
 
-### アプリケーション層 (`src/application/`)
+### アプリケーション層 (`src/web/`)
 - API/Webページのエンドポイント実装
 - ミドルウェアの実装
 - ドメイン層とインフラ層の橋渡し
@@ -113,5 +113,5 @@ src/domain/article/
 ## エントリーポイント
 
 1. **Cloudflare Workers**: `src/worker.ts`
-2. **開発サーバー**: `src/application/server.ts`
+2. **開発サーバー**: `src/web/server.ts`
 3. **Supabase Functions**: `supabase/functions/*/index.ts`

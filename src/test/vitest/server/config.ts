@@ -7,7 +7,7 @@ import { coverageReporter, generateIncludes } from '../generate'
 // ローカルではSupabaseが54322ポートで起動する
 const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 
-const { testInclude, coverageInclude } = generateIncludes('src/application/server')
+const { testInclude, coverageInclude } = generateIncludes('src/web/server')
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
@@ -36,7 +36,7 @@ export default defineConfig({
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
       include: coverageInclude,
-      exclude: ['src/application/server/handler/factory.ts'],
+      exclude: ['src/web/server/handler/factory.ts'],
     },
   },
 })

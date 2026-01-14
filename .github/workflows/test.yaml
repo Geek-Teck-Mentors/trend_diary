@@ -54,8 +54,8 @@ jobs:
         id: check-client
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/client'
-          exclude_pattern: 'src/application/client/components/shadcn'
+          subdir: 'src/web/client'
+          exclude_pattern: 'src/web/client/components/shadcn'
 
       - name: ドメインの差分チェック
         id: check-domain
@@ -67,7 +67,7 @@ jobs:
         id: check-server
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/server'
+          subdir: 'src/web/server'
 
       - name: 共通モジュールの差分チェック
         id: check-common

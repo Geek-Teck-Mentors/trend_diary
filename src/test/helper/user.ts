@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import app from '@/application/server'
 import type { ActiveUser } from '@/domain/user/schema/active-user-schema'
 import TEST_ENV from '@/test/env'
+import app from '@/web/server'
 import { getTestRdb } from './rdb'
 
 // Supabaseクライアント
