@@ -65,7 +65,7 @@ npm run test:api
 - jsdom環境で実行
 
 **対象**:
-- `src/application/web/`配下のReactコンポーネント
+- `src/application/client/`配下のReactコンポーネント
 - カスタムReact Hooks
 
 **実行コマンド**:

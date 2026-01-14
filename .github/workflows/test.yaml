@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       test_runner: ubuntu-latest
-      run_frontend_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-frontend.outputs.diff-count != 0 }}
+      run_client_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-client.outputs.diff-count != 0 }}
       run_domain_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-domain.outputs.diff-count != 0 }}
       run_api_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-api.outputs.diff-count != 0 }}
       run_common_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-common.outputs.diff-count != 0 }}
@@ -50,12 +50,12 @@ jobs:
         with:
           subdir: '.github/workflows/test.yaml src/test/vitest/'
 
-      - name: フロントエンドの差分チェック
-        id: check-frontend
+      - name: クライアントの差分チェック
+        id: check-client
         uses: ./.github/actions/diff
         with:
-          subdir: 'src/application/web'
-          exclude_pattern: 'src/application/web/components/shadcn'
+          subdir: 'src/application/client'
+          exclude_pattern: 'src/application/client/components/shadcn'
 
       - name: ドメインの差分チェック
         id: check-domain
@@ -81,7 +81,7 @@ jobs:
             echo "メインブランチなので、リグレッションテストとして全て実行"
           else
             echo "テスト設定差分: ${{ steps.check-test-config.outputs.diff-count }} ファイル"
-            echo "フロントエンド差分: ${{ steps.check-frontend.outputs.diff-count }} ファイル"
+            echo "クライアント差分: ${{ steps.check-client.outputs.diff-count }} ファイル"
             echo "ドメイン差分: ${{ steps.check-domain.outputs.diff-count }} ファイル"
             echo "API差分: ${{ steps.check-api.outputs.diff-count }} ファイル"
             if [[ "${{ steps.check-test-config.outputs.diff-count }}" != "0" ]]; then
@@ -91,10 +91,10 @@ jobs:
           fi
         shell: bash
 
-  frontend:
+  client:
     needs: setup
     runs-on: ${{ needs.setup.outputs.test_runner }}
-    if: ${{ needs.setup.outputs.run_frontend_test == 'true' }}
+    if: ${{ needs.setup.outputs.run_client_test == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -102,10 +102,10 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-      - name: フロントエンドのテスト
+      - name: クライアントのテスト
         uses: ./.github/actions/test_cov
         with:
-          target: frontend
+          target: client
 
   domain:
     needs: setup
