@@ -12,8 +12,8 @@
 
 ```sh
 ./src
-├── application # アプリケーション層
-│   ├── api # Hono API
+├── web # アプリケーション層
+│   ├── server # Hono API
 │   │   ├── admin # 管理者API
 │   │   ├── article # 記事API
 │   │   ├── policy # ポリシーAPI
@@ -25,9 +25,10 @@
 │   │   ├── errorHandler.ts
 │   │   ├── requestLogger.ts
 │   │   └── zodValidator.ts
+│   ├── worker.ts # Cloudflare Workersエントリーポイント
 │   ├── server.ts # アプリケーションサーバ
 │   ├── env.ts
-│   └── web # React Router v7 フロントエンド
+│   └── client # React Router v7 フロントエンド
 │       ├── components # 共通コンポーネント
 │       ├── features # 機能別コンポーネント
 │       ├── hooks # カスタムフック
@@ -66,7 +67,6 @@
 │   ├── helper # テストヘルパー
 │   └── vitest # Vitest設定
 ├── plugin # カスタムプラグイン
-└── worker.ts # Cloudflare Workersエントリーポイント
 ```
 
 環境変数は.dev.vars.exampleファイルを参考に与える。
