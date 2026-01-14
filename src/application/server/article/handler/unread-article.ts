@@ -1,7 +1,7 @@
 import {
   type AuthenticatedRequestContext,
   createAuthenticatedApiHandler,
-} from '@/application/api/handler/factory'
+} from '@/application/server/handler/factory'
 import { createArticleUseCase } from '@/domain/article'
 import { ArticleIdParam } from './read-article'
 

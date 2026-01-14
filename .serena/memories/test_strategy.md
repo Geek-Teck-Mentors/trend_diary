@@ -40,7 +40,7 @@ npm run test:domain
 - リクエスト/レスポンスの検証
 
 **対象**:
-- `src/application/api/`配下のAPIエンドポイント
+- `src/application/server/`配下のAPIエンドポイント
 
 **実行コマンド**:
 ```bash

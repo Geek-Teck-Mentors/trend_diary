@@ -1,10 +1,10 @@
 import { Hono } from 'hono'
 import { timeout } from 'hono/timeout'
 import { AppLoadContext, createRequestHandler } from 'react-router'
-import apiApp from './api/route'
 import { Env } from './env'
 import errorHandler from './middleware/error-handler'
 import requestLogger from './middleware/request-logger'
+import apiApp from './server/route'
 
 const app = new Hono<Env>()
 
