@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
