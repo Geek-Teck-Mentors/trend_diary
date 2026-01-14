@@ -11,6 +11,7 @@ runs:
   steps:
     - name: テストの実行
       shell: bash
+      working-directory: ./application
       run: npm run test:${{ inputs.target }} -- --coverage
 
     - name: カバレッジの可視化
@@ -18,5 +19,5 @@ runs:
       uses: davelosert/vitest-coverage-report-action@v2
       with:
         name: ${{ inputs.target }}
-        vite-config-path: src/test/vitest/${{ inputs.target }}/config.ts
+        vite-config-path: ./application/src/test/vitest/${{ inputs.target }}/config.ts
         comment-on: ${{ github.event_name == 'pull_request' && 'pr' || 'commit' }}
