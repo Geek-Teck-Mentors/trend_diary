@@ -29,7 +29,7 @@
     "db:deploy": "prisma migrate deploy",
     "supabase:db:type-gen": "supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
-    "test-storybook": "vitest run -c src/test/vitest/config/storybook.ts"
+    "test-storybook": "vitest run -c src/test/vitest/storybook/config.ts"
   },
   "prisma": {
     "schema": "./src/infrastructure/prisma-orm"
