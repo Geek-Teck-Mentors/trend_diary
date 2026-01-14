@@ -11,7 +11,7 @@
     "poststart": "supabase stop",
     "build": "react-router build",
     "supabase:start": "supabase start --exclude realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,mailpit",
-    "test:frontend": "vitest run -c src/test/vitest/frontend/config.ts",
+    "test:client": "vitest run -c src/test/vitest/client/config.ts",
     "test:domain": "vitest run -c src/test/vitest/domain/config.ts",
     "test:api": "vitest run -c src/test/vitest/api/config.ts",
     "test:common": "vitest run -c src/test/vitest/common/config.ts",
