@@ -48,7 +48,7 @@ description: Token-efficient Serena MCP command for structured app development a
 /serena "implement user dashboard with charts" -s -t -c
 
 # Deep analysis with documentation
-/serena "migrate to new framework" -d -r -v --focus=frontend
+/serena "migrate to new framework" -d -r -v --focus=client
 ```
 
 ## Context (Auto-gathered)
@@ -137,7 +137,7 @@ All Tasks → Serena MCP
 
 **Thought Control:**
 - `--max-thoughts=N`: Override default thought count
-- `--focus=AREA`: Domain-specific analysis (frontend, backend, database, security)
+- `--focus=AREA`: Domain-specific analysis (client, backend, database, security)
 - `--token-budget=N`: Optimize for token limit
 
 **Integration:**

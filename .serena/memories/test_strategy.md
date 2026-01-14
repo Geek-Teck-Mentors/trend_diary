@@ -55,9 +55,9 @@ npm run test:api
 
 ---
 
-### 3. フロントエンド層テスト (`test:frontend`)
+### 3. フロントエンド層テスト (`test:client`)
 
-**設定ファイル**: `src/test/vitest/config/frontend.ts`
+**設定ファイル**: `src/test/vitest/config/client.ts`
 
 **特徴**:
 - React Testing Libraryを使用
@@ -70,7 +70,7 @@ npm run test:api
 
 **実行コマンド**:
 ```bash
-npm run test:frontend
+npm run test:client
 ```
 
 **用途**:

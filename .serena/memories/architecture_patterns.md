@@ -255,7 +255,7 @@ export function createArticleUseCase(db: PrismaClient) {
 
 - **ドメイン層変更**: `test:domain`（高速）
 - **API層変更**: `test:api`（統合）
-- **UI変更**: `test:frontend`, `test-storybook`
+- **UI変更**: `test:client`, `test-storybook`
 - **クリティカルパス**: `e2e`
 
 ---

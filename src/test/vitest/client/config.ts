@@ -16,7 +16,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/vitest/frontend/setup.ts'],
+    setupFiles: ['./src/test/vitest/client/setup.ts'],
     include: testInclude,
     exclude,
     // テストファイルがない場合にエラーになるため、テストファイルがない場合でも正常終了とする
