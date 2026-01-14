@@ -22,8 +22,8 @@ export default defineConfig({
     reactRouter(),
     serverAdapter({
       adapter,
-      entry: 'src/application/server.ts',
-      exclude: [...defaultOptions.exclude, '/assets/**', '/src/application/web/**'],
+      entry: 'src/web/server.ts',
+      exclude: [...defaultOptions.exclude, '/assets/**', '/src/web/client/**'],
     }),
   ],
   optimizeDeps: {

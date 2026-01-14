@@ -1,4 +1,4 @@
-import { Env } from '@/application/env'
+import { Env } from '@/web/env'
 
 const TEST_ENV = {
   DATABASE_URL:

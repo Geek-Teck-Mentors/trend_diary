@@ -1,4 +1,4 @@
-import { ChatNotifier, RequestInfo } from '@/application/middleware/error-handler'
+import { ChatNotifier, RequestInfo } from '@/web/middleware/error-handler'
 
 type DiscordEmbed = {
   title: string

@@ -26,7 +26,7 @@ npm run test:domain
 npm run test:api
 
 # フロントエンドのテスト（コンポーネント・フック）
-npm run test:frontend
+npm run test:client
 
 # Storybookのテスト（UIコンポーネントのビジュアルテスト）
 npm run test-storybook

@@ -6,9 +6,8 @@
     "includes": [
       "**",
       "!**/.vscode/",
-      "!prisma/ERD.md",
-      "!src/application/web/components/shadcn",
-      "!src/application/web/components/customized",
+      "!src/web/client/components/shadcn",
+      "!src/web/client/components/customized",
       "!**/supabase"
     ]
   },

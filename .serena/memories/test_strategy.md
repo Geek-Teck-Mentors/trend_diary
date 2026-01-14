@@ -40,7 +40,7 @@ npm run test:domain
 - リクエスト/レスポンスの検証
 
 **対象**:
-- `src/application/api/`配下のAPIエンドポイント
+- `src/web/server/`配下のAPIエンドポイント
 
 **実行コマンド**:
 ```bash
@@ -55,9 +55,9 @@ npm run test:api
 
 ---
 
-### 3. フロントエンド層テスト (`test:frontend`)
+### 3. フロントエンド層テスト (`test:client`)
 
-**設定ファイル**: `src/test/vitest/config/frontend.ts`
+**設定ファイル**: `src/test/vitest/config/client.ts`
 
 **特徴**:
 - React Testing Libraryを使用
@@ -65,12 +65,12 @@ npm run test:api
 - jsdom環境で実行
 
 **対象**:
-- `src/application/web/`配下のReactコンポーネント
+- `src/web/client/`配下のReactコンポーネント
 - カスタムReact Hooks
 
 **実行コマンド**:
 ```bash
-npm run test:frontend
+npm run test:client
 ```
 
 **用途**:
