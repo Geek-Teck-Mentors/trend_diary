@@ -24,6 +24,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./application
+
 jobs:
   web:
     runs-on: ubuntu-latest
@@ -44,6 +49,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ./application
           command: deploy
 
       - name: デプロイの出力を表示
