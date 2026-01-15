@@ -4,13 +4,6 @@ compatibility_flags = [ "nodejs_compat" ]
 main = "./src/web/worker.ts"
 assets = { directory = "./build/client" }
 
-[observability.logs]
+[observability]
 enabled = true
 head_sampling_rate = 1
-persist = true
-invocation_logs = true
-
-[observability.traces]
-enabled = true
-head_sampling_rate = 1
-persist = true

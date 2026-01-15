@@ -106,8 +106,9 @@ src/domain/{aggregate}/
 ├── schema/          # Zodバリデーションスキーマ
 ├── infrastructure/  # リポジトリ実装（インフラ層への依存）
 ├── repository.ts    # リポジトリインターフェース
-├── useCase.ts       # ドメインビジネスロジック
-└── index.ts         # 集約エクスポート、factory関数
+├── use-case.ts      # ドメインビジネスロジック
+├── factory.ts       # ファクトリー関数
+└── index.ts         # 集約エクスポート
 ```
 
 ### リポジトリパターン
@@ -119,7 +120,7 @@ src/domain/{aggregate}/
 
 ### ユースケース
 
-**場所**: `src/domain/{aggregate}/useCase.ts`
+**場所**: `src/domain/{aggregate}/use-case.ts`
 
 - ビジネスロジックを含む
 - リポジトリを依存性注入で受け取る

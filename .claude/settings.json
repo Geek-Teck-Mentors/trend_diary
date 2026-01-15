@@ -115,16 +115,5 @@
       "Write(/etc/sudoers)"
     ]
   },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "npm run check:fix"
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }
