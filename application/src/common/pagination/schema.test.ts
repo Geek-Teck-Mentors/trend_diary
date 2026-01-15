@@ -21,11 +21,6 @@ describe('offsetPaginationSchema', () => {
       expected: { page: 3, limit: 45 },
     },
     {
-      name: '不正な値はデフォルトへフォールバック',
-      input: { page: 'abc', limit: 'NaN' },
-      expected: { page: DEFAULT_PAGE, limit: DEFAULT_LIMIT },
-    },
-    {
       name: 'limitが1未満なら1にクランプ',
       input: { limit: -10 },
       expected: { page: DEFAULT_PAGE, limit: 1 },
@@ -43,6 +38,11 @@ describe('offsetPaginationSchema', () => {
       expect(result).toEqual(expected)
     })
   }
+
+  it('不正な値はバリデーションエラーになる', () => {
+    expect(() => offsetPaginationSchema.parse({ page: 'abc' })).toThrow()
+    expect(() => offsetPaginationSchema.parse({ limit: 'invalid' })).toThrow()
+  })
 })
 
 describe('offsetPaginationMobileSchema', () => {
@@ -56,11 +56,6 @@ describe('offsetPaginationMobileSchema', () => {
       name: '文字列を数値に変換する',
       input: { page: '3', limit: '15' },
       expected: { page: 3, limit: 15 },
-    },
-    {
-      name: '不正な値はデフォルトへフォールバック',
-      input: { page: 'abc', limit: 'NaN' },
-      expected: { page: DEFAULT_PAGE, limit: DEFAULT_MOBILE_LIMIT },
     },
     {
       name: 'limitが1未満なら1にクランプ',
@@ -80,4 +75,9 @@ describe('offsetPaginationMobileSchema', () => {
       expect(result).toEqual(expected)
     })
   }
+
+  it('不正な値はバリデーションエラーになる', () => {
+    expect(() => offsetPaginationMobileSchema.parse({ page: 'abc' })).toThrow()
+    expect(() => offsetPaginationMobileSchema.parse({ limit: 'invalid' })).toThrow()
+  })
 })

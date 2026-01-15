@@ -4,36 +4,23 @@ export const DEFAULT_LIMIT = 20
 export const DEFAULT_MOBILE_LIMIT = 10
 export const DEFAULT_PAGE = 1
 
-function transform(value: string | number | undefined, defaultValue: number) {
-  if (value === undefined || value === null) return defaultValue
-  const num = typeof value === 'string' ? parseInt(value, 10) : value
-  return Number.isNaN(num) ? defaultValue : num
-}
+const numericString = z.string().pipe(z.coerce.number())
 
-function transformLimit(value: string | number | undefined, defaultValue: number) {
-  const parsed = transform(value, defaultValue)
-  if (parsed < 1) return 1
-  if (parsed > 100) return 100
-  return parsed
-}
+const clampLimit = (val: number) => Math.min(Math.max(val, 1), 100)
 
-const page = z
-  .union([z.string(), z.number()])
-  .optional()
-  .transform((val) => transform(val, DEFAULT_PAGE))
-  .default(DEFAULT_PAGE)
+const page = z.union([z.number(), numericString]).optional().default(DEFAULT_PAGE)
 
 const limit = z
-  .union([z.string(), z.number()])
+  .union([z.number(), numericString])
   .optional()
-  .transform((val) => transformLimit(val, DEFAULT_LIMIT))
   .default(DEFAULT_LIMIT)
+  .transform(clampLimit)
 
 const mobileLimit = z
-  .union([z.string(), z.number()])
+  .union([z.number(), numericString])
   .optional()
-  .transform((val) => transformLimit(val, DEFAULT_MOBILE_LIMIT))
   .default(DEFAULT_MOBILE_LIMIT)
+  .transform(clampLimit)
 
 export const offsetPaginationSchema = z.object({
   page,
