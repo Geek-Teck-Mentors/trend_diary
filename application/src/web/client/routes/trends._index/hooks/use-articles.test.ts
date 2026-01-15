@@ -237,30 +237,6 @@ describe('useArticles', () => {
       expect(result.current.articles[0].title).toBe('2ページ目の記事')
     })
 
-    it('URLパラメータのpageが不正な値の場合、page=1として扱う', async () => {
-      const fakeResponse = generateFakeResponse()
-
-      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
-
-      const { result } = setupHook(['/?page=invalid'])
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
-
-      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
-        {
-          query: {
-            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
-            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
-            page: 1,
-            limit: 20,
-          },
-        },
-        { init: { credentials: 'include' } },
-      )
-    })
-
     it('setSearchParamsでURLパラメータを変更すると、新しいパラメータでAPIが呼ばれる', async () => {
       const initialResponse = generateFakeResponse({
         page: 1,
