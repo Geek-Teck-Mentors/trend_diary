@@ -51,6 +51,18 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ./application
           command: deploy
+          # Secretsで保存するものをActionsで管理し、環境変数として渡す
+          secrets: |
+            SUPABASE_URL
+            SUPABASE_ANON_KEY
+            DATABASE_URL
+            DISCORD_WEBHOOK_URL
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
 
       - name: デプロイの出力を表示
         env:
