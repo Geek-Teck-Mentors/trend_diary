@@ -4,14 +4,13 @@
 import { defaultOptions } from '@hono/vite-dev-server'
 import adapter from '@hono/vite-dev-server/cloudflare'
 import { reactRouter } from '@react-router/dev/vite'
-import babel from "vite-plugin-babel";
 import tailwindcss from '@tailwindcss/vite'
 import serverAdapter from 'hono-react-router-adapter/vite'
-
 import { defineConfig } from 'vite'
+import babel from 'vite-plugin-babel'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
-const ReactCompilerConfig = {};
+const ReactCompilerConfig = {}
 
 export default defineConfig({
   ssr: {
@@ -26,10 +25,8 @@ export default defineConfig({
     babel({
       filter: /\.[jt]sx?$/,
       babelConfig: {
-        presets: ["@babel/preset-typescript"],
-        plugins: [
-          ["babel-plugin-react-compiler", ReactCompilerConfig],
-        ],
+        presets: ['@babel/preset-typescript'],
+        plugins: [['babel-plugin-react-compiler', ReactCompilerConfig]],
       },
     }),
     serverAdapter({
