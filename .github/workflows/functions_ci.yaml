@@ -75,7 +75,7 @@ jobs:
       - name: Node.jsの構築(DBのマイグレーション用)
         uses: ./.github/actions/setup_node
         with:
-          node-version-file: ./application/.node-version
+          node-version-file: .node-version
 
       - name: Supabaseのセットアップ
         uses: ./.github/actions/setup_supabase

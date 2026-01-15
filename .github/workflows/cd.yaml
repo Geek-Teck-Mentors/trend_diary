@@ -24,6 +24,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./application
+
 jobs:
   web:
     runs-on: ubuntu-latest
@@ -33,7 +38,7 @@ jobs:
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
-          node-version-file: ./application/.node-version
+          node-version-file: .node-version
 
       - name: ビルド
         run: npm run build
@@ -44,6 +49,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ./application
           command: deploy
 
       - name: デプロイの出力を表示
@@ -62,7 +68,7 @@ jobs:
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
-          node-version-file: ./application/.node-version
+          node-version-file: .node-version
 
       - name: Prismaのマイグレーション
         run: npm run db:deploy
