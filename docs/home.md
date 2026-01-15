@@ -8,6 +8,15 @@
 - [ハウツーガイド](how_to_guides/0_top.md)
 - [システム構成](system_config/config.md)
 
+## 技術スタック
+
+- **ランタイム**: Cloudflare Workers + Supabase Functions
+- **バックエンド**: Hono + React Router v7
+- **フロントエンド**: React + TailwindCSS v4 + shadcn/ui
+- **データベース**: PostgreSQL + Prisma ORM
+- **テスト**: Vitest + Playwright
+- **コード品質**: Biome + TypeScript
+
 ## ディレクトリ構成
 
 ```sh

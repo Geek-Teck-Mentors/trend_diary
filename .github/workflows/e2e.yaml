@@ -29,7 +29,7 @@ defaults:
 
 # 共通の設定を定義
 env:
-  NODE_VERSION_FILE: ./application/.node-version
+  NODE_VERSION_FILE: .node-version
 
 jobs:
   test:

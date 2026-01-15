@@ -34,7 +34,7 @@ jobs:
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
-          node-version-file: ./application/.node-version
+          node-version-file: .node-version
 
       - name: Prismaクライアント生成
         run: npx prisma generate
