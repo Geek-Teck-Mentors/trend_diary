@@ -9,17 +9,7 @@
 
 詳細な開発ルールやアーキテクチャ情報は以下のドキュメントを参照すること。
 
-- **[ホーム](docs/home.md)** - プロジェクト全体のドキュメント目次とディレクトリ構成
-- **[開発ルール](docs/development_rule.md)** - 開発フロー、コミット規約、開発コマンド、重要な規約
-- **[ADR](docs/adr/0_top.md)** - アーキテクチャ決定記録
-  - [エラーハンドリング](docs/adr/20250609_error_as_valueの運用.md)
-  - [テスト戦略](docs/adr/20250523_テスト戦略.md)
-- **[ハウツーガイド](docs/how_to_guides/0_top.md)** - 各種セットアップガイド
-
-**技術スタック概要:**
-- ランタイム: Cloudflare Workers + Supabase Functions
-- バックエンド: Hono + React Router v7
-- フロントエンド: React + TailwindCSS v4 + shadcn/ui
-- データベース: PostgreSQL + Prisma ORM
-- テスト: Vitest + Playwright
-- コード品質: Biome + TypeScript
+- [ホーム](docs/home.md) - 目次、ディレクトリ構成、技術スタック
+- [開発ルール](docs/development_rule.md) - コミット規約、レビュールール、開発コマンド
+- [ADR](docs/adr/0_top.md) - アーキテクチャ決定記録
+- [ハウツーガイド](docs/how_to_guides/0_top.md) - 各種セットアップガイド

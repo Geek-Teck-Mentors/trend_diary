@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION_FILE: ./application/.node-version
+  NODE_VERSION_FILE: .node-version
 
 defaults:
   run:
