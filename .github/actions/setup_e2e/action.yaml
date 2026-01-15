@@ -24,10 +24,12 @@ runs:
     - name: Playwrightのセットアップ
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       shell: bash
+      working-directory: ./application
       run: npx playwright install chromium --with-deps
 
     - name: DB Migration
       shell: bash
+      working-directory: ./application
       env:
         DIRECT_URL: ${{ env.DATABASE_URL }}
       run: npm run db:migrate

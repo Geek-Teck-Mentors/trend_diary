@@ -6,7 +6,7 @@
 
 ### 1. ドメイン層テスト (`test:domain`)
 
-**設定ファイル**: `src/test/vitest/config/domain.ts`
+**設定ファイル**: `src/test/vitest/domain/config.ts`
 
 **特徴**:
 - モックPrismaクライアントを使用（`src/test/__mocks__/prisma.ts`）
@@ -15,8 +15,8 @@
 - `vitest-mock-extended`によるモック拡張
 
 **対象**:
-- `src/domain/*/useCase.ts`
-- `src/domain/*/useCase.test.ts`
+- `src/domain/*/use-case.ts`
+- `src/domain/*/use-case.test.ts`
 
 **実行コマンド**:
 ```bash
@@ -32,7 +32,7 @@ npm run test:domain
 
 ### 2. API層テスト (`test:api`)
 
-**設定ファイル**: `src/test/vitest/config/api.ts`
+**設定ファイル**: `src/test/vitest/server/config.ts`
 
 **特徴**:
 - **実際のデータベース**を使用した統合テスト
@@ -57,7 +57,7 @@ npm run test:api
 
 ### 3. フロントエンド層テスト (`test:client`)
 
-**設定ファイル**: `src/test/vitest/config/client.ts`
+**設定ファイル**: `src/test/vitest/client/config.ts`
 
 **特徴**:
 - React Testing Libraryを使用
@@ -82,7 +82,7 @@ npm run test:client
 
 ### 4. Storybookテスト (`test-storybook`)
 
-**設定ファイル**: `src/test/vitest/config/storybook.ts`
+**設定ファイル**: `src/test/vitest/storybook/config.ts`
 
 **特徴**:
 - UIコンポーネントのビジュアルテスト

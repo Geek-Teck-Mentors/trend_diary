@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - 'supabase/**'
-      - '.github/workflows/functions_ci.yaml'
+      - "application/supabase/**"
+      - ".github/workflows/functions_ci.yaml"
   pull_request:
     branches:
       - main
     paths:
-      - 'supabase/**'
-      - '.github/workflows/functions_ci.yaml'
+      - "application/supabase/**"
+      - ".github/workflows/functions_ci.yaml"
 
 permissions:
   contents: read
@@ -20,6 +20,8 @@ permissions:
 
 env:
   DENO_VERSION: 2.3.1
+  WORKING_DIRECTORY: ./application/supabase/functions
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -30,7 +32,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Lint
-        run: deno lint -c supabase/style_config.json
+        run: deno lint -c ./application/supabase/style_config.json
 
   format:
     runs-on: ubuntu-latest
@@ -41,7 +43,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
       - name: Format
-        run: deno fmt --check -c supabase/style_config.json
+        run: deno fmt --check -c ./application/supabase/style_config.json
 
   type-check:
     runs-on: ubuntu-latest
@@ -55,8 +57,8 @@ jobs:
         # deno checkのファイル指定で`**`を使うと、サブディレクトリのファイルがチェックされなくなるため、全部のディレクトリを手動でそれぞれ指定する
         # deno checkはdeno.jsonのある環境でしか実行できないため、各関数のdeno.jsonを指定する
         run: |
-          for function_name in $(ls supabase/functions); do
-            find supabase -name "*.ts" | xargs deno check -c supabase/functions/$function_name/deno.json
+          for function_name in $(ls ${{ env.WORKING_DIRECTORY }}); do
+            find application/supabase -name "*.ts" | xargs deno check -c ${{ env.WORKING_DIRECTORY }}/$function_name/deno.json
           done
 
   test:
@@ -73,12 +75,13 @@ jobs:
       - name: Node.jsの構築(DBのマイグレーション用)
         uses: ./.github/actions/setup_node
         with:
-          node-version-file: .node-version
+          node-version-file: ./application/.node-version
 
       - name: Supabaseのセットアップ
         uses: ./.github/actions/setup_supabase
 
       - name: DBのマイグレーション
+        working-directory: ./application
         run: npm run db:migrate
         env:
           DIRECT_URL: ${{ env.DATABASE_URL }}
@@ -92,10 +95,10 @@ jobs:
 
         # deno testはdeno.jsonのある環境でしか実行できないため、各関数のディレクトリで実行する
         run: |
-          for function_name in $(ls supabase/functions); do
+          for function_name in $(ls ${{ env.WORKING_DIRECTORY }}); do
             # サブシェルで実行することで、cdの影響を局所化
             (
-              cd supabase/functions/$function_name
+              cd ${{ env.WORKING_DIRECTORY }}/$function_name
 
               # deno testの実行
               deno test --allow-read --allow-env --allow-net --allow-write --allow-run -c deno.json --coverage=coverage
@@ -105,9 +108,9 @@ jobs:
         env:
           NO_COLOR: true
         run: |
-          for function_name in $(ls supabase/functions); do
+          for function_name in $(ls ${{ env.WORKING_DIRECTORY }}); do
             (
-              cd supabase/functions/$function_name
+              cd ${{ env.WORKING_DIRECTORY }}/$function_name
 
               # LCOV形式でカバレッジを出力
               deno coverage ./coverage --lcov --output=coverage/lcov.info
@@ -117,5 +120,5 @@ jobs:
       - name: octocovでカバレッジレポート生成
         uses: k1LoW/octocov-action@v1
         with:
-          config: supabase/.octocov.yml
+          config: application/supabase/.octocov.yml
           github-token: ${{ secrets.GITHUB_TOKEN }}
