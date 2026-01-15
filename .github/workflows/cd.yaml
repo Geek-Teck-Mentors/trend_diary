@@ -50,7 +50,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ./application
-          command: deploy
+          command: deploy --env SUPABASE_URL=${{ vars.SUPABASE_URL }}
 
       - name: デプロイの出力を表示
         env:
