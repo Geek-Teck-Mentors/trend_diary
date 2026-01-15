@@ -17,9 +17,9 @@ export interface ChatNotifier {
 /**
  * Discordにエラー通知を送信する
  */
-const notifyDiscord = (chatNotifier: ChatNotifier, err: Error, requestInfo: RequestInfo): void => {
+const notifyDiscord = (chatNotifier: ChatNotifier, err: Error, requestInfo: RequestInfo): Promise<void> => {
   // Discord通知をバックグラウンドで実行
-  chatNotifier.error(err, requestInfo)
+  return chatNotifier.error(err, requestInfo)
 }
 
 const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
@@ -35,7 +35,7 @@ const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
 
   const chatNotifier = new DiscordNotifier(discordWebhookUrl)
   if (err instanceof HTTPException) {
-    if (err.status >= 500) notifyDiscord(chatNotifier, err, requestInfo)
+    if (err.status >= 500) await notifyDiscord(chatNotifier, err, requestInfo)
 
     return c.json(
       {
@@ -49,7 +49,7 @@ const errorHandler = async (err: Error, c: Context<Env>): Promise<Response> => {
 
   // 予期しないエラーの場合
   logger.error('Unhandled error', err)
-  notifyDiscord(chatNotifier, err, requestInfo)
+  await notifyDiscord(chatNotifier, err, requestInfo)
 
   return c.json('Internal Server Error', { status: 500 })
 }
