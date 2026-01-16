@@ -26,6 +26,7 @@ const baseGroup = {
     { path: PATH_INDEX, file: './routes/_index.tsx' },
     { path: '/login', file: './routes/login/route.tsx' },
     { path: '/signup', file: './routes/signup/route.tsx' },
+    { path: '/privacy-policy', file: './routes/privacy-policy/route.tsx' },
   ],
 } as const satisfies GroupRoute
 

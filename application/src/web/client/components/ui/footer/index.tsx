@@ -22,8 +22,18 @@ export default function Footer() {
             </AnchorLink>
           </div>
         </div>
-        <div className='border-t border-slate-800 mt-8 pt-8 text-center text-slate-400'>
-          <p>&copy; 2025 TrendDiary. 技術トレンドを効率的に管理するツール</p>
+        <div className='border-t border-slate-800 mt-8 pt-8 text-slate-400'>
+          <div className='flex flex-col items-center gap-4'>
+            <div className='flex space-x-6'>
+              <AnchorLink
+                to='/privacy-policy'
+                className='text-slate-400 hover:text-white transition-colors'
+              >
+                プライバシーポリシー
+              </AnchorLink>
+            </div>
+            <p>&copy; 2025 TrendDiary. 技術トレンドを効率的に管理するツール</p>
+          </div>
         </div>
       </div>
     </footer>
