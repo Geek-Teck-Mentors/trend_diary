@@ -46,6 +46,8 @@ jobs:
 
       - name: E2Eテストの実行
         run: npm run e2e -- --pass-with-no-tests
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -79,3 +81,5 @@ jobs:
         run: |
           set -euo pipefail
           npm run e2e -- --reporter=github --only-changed=origin/$GITHUB_BASE_REF
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
