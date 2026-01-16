@@ -36,21 +36,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create .dev.vars for Actions
-        run: |
-          cat > .dev.vars <<'EOF'
-          # Dev env for Actions (created from secrets)
-          DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
-          EOF
-
       - name: Supabaseのセットアップ
         uses: ./.github/actions/setup_supabase
-
+        
       - name: E2E環境のセットアップ
         uses: ./.github/actions/setup_e2e
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
+      - name: Create .dev.vars for Actions
+        run: |
+          cat > .dev.vars <<'EOF'
+          # Dev env for Actions (created from secrets)
+          DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
+          SUPABASE_URL=${{ env.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ env.SUPABASE_ANON_KEY || '' }}
+          DATABASE_URL=${{ env.DATABASE_URL }}
+          EOF
+          
       - name: E2Eテストの実行
         run: npm run e2e -- --pass-with-no-tests
 
@@ -90,6 +93,9 @@ jobs:
           cat > .dev.vars <<'EOF'
           # Dev env for Actions (created from secrets)
           DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
+          SUPABASE_URL=${{ env.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ env.SUPABASE_ANON_KEY || '' }}
+          DATABASE_URL=${{ env.DATABASE_URL }}
           EOF
 
       - name: E2Eテストの差分実行
