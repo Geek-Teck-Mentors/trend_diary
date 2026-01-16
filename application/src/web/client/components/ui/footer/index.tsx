@@ -1,5 +1,7 @@
 import { AnchorLink } from '../link'
 
+const CONTACT_FORM_URL = 'https://forms.gle/HgaE9qMXq6MJAxNG9'
+
 export default function Footer() {
   return (
     <footer className='bg-slate-900 py-8'>
@@ -12,10 +14,7 @@ export default function Footer() {
             <AnchorLink to='/privacy-policy' className='hover:text-white transition-colors'>
               プライバシーポリシー
             </AnchorLink>
-            <AnchorLink
-              to='https://forms.gle/HgaE9qMXq6MJAxNG9'
-              className='hover:text-white transition-colors'
-            >
+            <AnchorLink to={CONTACT_FORM_URL} className='hover:text-white transition-colors'>
               お問い合わせ
             </AnchorLink>
           </nav>
