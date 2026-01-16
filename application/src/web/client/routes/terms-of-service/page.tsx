@@ -59,9 +59,7 @@ export default function TermsOfServicePage() {
             </li>
             <li>他のユーザーに成りすます行為</li>
             <li>運営者が許諾しない本サービス上での宣伝、広告、勧誘、または営業行為</li>
-            <li>
-              本サービスに関連して、反社会的勢力に対して直接または間接に利益を供与する行為
-            </li>
+            <li>本サービスに関連して、反社会的勢力に対して直接または間接に利益を供与する行為</li>
             <li>過度にサーバーに負荷をかける行為</li>
             <li>本サービスの不具合を意図的に利用する行為</li>
             <li>不正アクセスまたはこれに類する行為</li>
@@ -128,9 +126,7 @@ export default function TermsOfServicePage() {
 
           <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第8条（料金）</h2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
-            <li>
-              本サービスは現在無料で提供していますが、将来的に有料化する可能性があります。
-            </li>
+            <li>本サービスは現在無料で提供していますが、将来的に有料化する可能性があります。</li>
             <li>有料化を行う場合、運営者は事前にユーザーに通知するものとします。</li>
             <li>料金の支払い方法、返金等の詳細は、有料化時に別途定めるものとします。</li>
           </ol>
@@ -158,25 +154,19 @@ export default function TermsOfServicePage() {
             <li>
               運営者は、ユーザーに通知することにより、いつでも本規約を変更することができるものとします。
             </li>
-            <li>
-              変更後の規約は、本サービス上に掲示された時点から効力を生じるものとします。
-            </li>
+            <li>変更後の規約は、本サービス上に掲示された時点から効力を生じるものとします。</li>
             <li>
               規約変更後にユーザーが本サービスを利用した場合、変更後の規約に同意したものとみなします。
             </li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>
-            第12条（個人情報の取扱い）
-          </h2>
+          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第12条（個人情報の取扱い）</h2>
           <p className='mb-6 leading-relaxed'>
             運営者は、本サービスの利用によって取得する個人情報については、プライバシーポリシーに従い適切に取り扱うものとします。
           </p>
 
           <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第13条（準拠法）</h2>
-          <p className='mb-6 leading-relaxed'>
-            本規約の解釈にあたっては、日本法を準拠法とします。
-          </p>
+          <p className='mb-6 leading-relaxed'>本規約の解釈にあたっては、日本法を準拠法とします。</p>
 
           <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第14条（紛争解決）</h2>
           <p className='mb-6 leading-relaxed'>

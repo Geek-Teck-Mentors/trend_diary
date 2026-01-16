@@ -3,8 +3,7 @@ import TermsOfServicePage from './page'
 
 export const meta: MetaFunction = () => {
   const title = '利用規約 | TrendDiary'
-  const description =
-    'TrendDiaryの利用規約。サービスのご利用条件についてご確認いただけます。'
+  const description = 'TrendDiaryの利用規約。サービスのご利用条件についてご確認いただけます。'
 
   return [
     { title },
