@@ -101,27 +101,27 @@ export default function ArticleDrawer({
               {article.description}
             </p>
           </div>
-        </div>
 
-        <div className='border-t p-4 space-y-3'>
-          <button
-            type='button'
-            onClick={handleReadArticle}
-            className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
-            data-slot='drawer-content-button'
-          >
-            <ExternalLink className='size-4' />
-            記事を読む
-          </button>
-          {isLoggedIn && (
+          <div className='border-t p-4 space-y-3'>
             <button
               type='button'
-              onClick={handleToggleRead}
-              className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100'
+              onClick={handleReadArticle}
+              className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
+              data-slot='drawer-content-button'
             >
-              {isRead ? '未読に戻す' : '既読にする'}
+              <ExternalLink className='size-4' />
+              記事を読む
             </button>
-          )}
+            {isLoggedIn && (
+              <button
+                type='button'
+                onClick={handleToggleRead}
+                className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100'
+              >
+                {isRead ? '未読に戻す' : '既読にする'}
+              </button>
+            )}
+          </div>
         </div>
       </DrawerContent>
     </Drawer>,
