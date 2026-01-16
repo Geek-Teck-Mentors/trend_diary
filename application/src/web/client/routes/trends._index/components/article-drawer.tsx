@@ -76,7 +76,10 @@ export default function ArticleDrawer({
         {/* Drawer内では文字選択とドラッグしてDrawerを閉じるアクションがバッティングする */}
         {/* data-vaul-no-dragをfalseに指定し、ドラッグしてDrawerが閉じないように */}
         <div className='flex-1 overflow-y-auto px-4 select-text' data-vaul-no-drag={false}>
-          <div className='mb-6 flex flex-wrap items-center gap-6 text-sm text-gray-600' data-slot='drawer-content-meta'>
+          <div
+            className='mb-6 flex flex-wrap items-center gap-6 text-sm text-gray-600'
+            data-slot='drawer-content-meta'
+          >
             <div className='flex items-center gap-1' data-slot='drawer-content-author'>
               <User className='size-4' />
               <span className='text-sm font-medium text-gray-700'>{article.author}</span>
