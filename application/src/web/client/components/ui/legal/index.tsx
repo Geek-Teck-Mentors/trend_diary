@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { cn } from '../../shadcn/lib/utils'
 
 interface HeadingProps {
   children: ReactNode
@@ -21,6 +22,6 @@ export function Heading3({ children }: HeadingProps) {
   return <h3 className='mb-3 mt-6 text-lg font-semibold text-slate-900'>{children}</h3>
 }
 
-export function Paragraph({ children, className = 'mb-6' }: ParagraphProps) {
-  return <p className={`leading-relaxed ${className}`}>{children}</p>
+export function Paragraph({ children, className }: ParagraphProps) {
+  return <p className={cn('mb-6 leading-relaxed', className)}>{children}</p>
 }
