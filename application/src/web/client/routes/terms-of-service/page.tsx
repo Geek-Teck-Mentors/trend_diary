@@ -1,5 +1,6 @@
 import Footer from '../../components/ui/footer'
 import LandingHeader from '../../components/ui/landing-header'
+import { Heading1, Heading2, Paragraph } from '../../components/ui/legal'
 
 export default function TermsOfServicePage() {
   return (
@@ -7,17 +8,17 @@ export default function TermsOfServicePage() {
       <LandingHeader enableUserFeature={false} />
       <main className='mx-auto max-w-3xl px-4 py-12'>
         <article className='text-slate-700'>
-          <h1 className='mb-8 text-3xl font-bold text-slate-900'>利用規約</h1>
-          <p className='mb-6 leading-relaxed'>
+          <Heading1>利用規約</Heading1>
+          <Paragraph>
             本利用規約（以下「本規約」）は、TrendDiary（以下「本サービス」）の利用条件を定めるものです。ユーザーは本サービスを利用することにより、本規約に同意したものとみなされます。
-          </p>
+          </Paragraph>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第1条（適用）</h2>
-          <p className='mb-6 leading-relaxed'>
+          <Heading2>第1条（適用）</Heading2>
+          <Paragraph>
             本規約は、ユーザーと本サービス運営チーム（以下「運営者」）との間の本サービスの利用に関わる一切の関係に適用されるものとします。
-          </p>
+          </Paragraph>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第2条（利用登録）</h2>
+          <Heading2>第2条（利用登録）</Heading2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
             <li>
               ユーザーは、本規約に同意の上、運営者の定める方法によって利用登録を申請するものとします。
@@ -33,7 +34,7 @@ export default function TermsOfServicePage() {
             </li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第3条（アカウント管理）</h2>
+          <Heading2>第3条（アカウント管理）</Heading2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
             <li>
               ユーザーは、自己の責任において、本サービスのアカウント情報（ID、パスワード等）を適切に管理するものとします。
@@ -46,10 +47,10 @@ export default function TermsOfServicePage() {
             </li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第4条（禁止事項）</h2>
-          <p className='mb-4 leading-relaxed'>
+          <Heading2>第4条（禁止事項）</Heading2>
+          <Paragraph className='mb-4'>
             ユーザーは、本サービスの利用にあたり、以下の行為をしてはなりません：
-          </p>
+          </Paragraph>
           <ol className='mb-4 list-decimal space-y-1 pl-6'>
             <li>法令または公序良俗に違反する行為</li>
             <li>犯罪行為に関連する行為</li>
@@ -67,9 +68,7 @@ export default function TermsOfServicePage() {
             <li>その他、運営者が不適当と判断する行為</li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>
-            第5条（本サービスの提供の停止等）
-          </h2>
+          <Heading2>第5条（本サービスの提供の停止等）</Heading2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
             <li>
               運営者は、以下のいずれかの事由があると判断した場合、ユーザーに事前に通知することなく本サービスの全部または一部の提供を停止または中断することができるものとします：
@@ -87,9 +86,7 @@ export default function TermsOfServicePage() {
             </li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>
-            第6条（利用制限および登録抹消）
-          </h2>
+          <Heading2>第6条（利用制限および登録抹消）</Heading2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
             <li>
               運営者は、ユーザーが以下のいずれかに該当する場合、事前の通知なく、ユーザーに対して本サービスの全部もしくは一部の利用を制限し、またはユーザーとしての登録を抹消することができるものとします：
@@ -104,9 +101,7 @@ export default function TermsOfServicePage() {
             </li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>
-            第7条（コンテンツの利用権限）
-          </h2>
+          <Heading2>第7条（コンテンツの利用権限）</Heading2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
             <li>
               ユーザーが本サービス上で作成した読了記録、メモ等のコンテンツ（以下「ユーザーコンテンツ」）の著作権はユーザーに帰属します。
@@ -124,14 +119,14 @@ export default function TermsOfServicePage() {
             </li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第8条（料金）</h2>
+          <Heading2>第8条（料金）</Heading2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
             <li>本サービスは現在無料で提供していますが、将来的に有料化する可能性があります。</li>
             <li>有料化を行う場合、運営者は事前にユーザーに通知するものとします。</li>
             <li>料金の支払い方法、返金等の詳細は、有料化時に別途定めるものとします。</li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第9条（免責事項）</h2>
+          <Heading2>第9条（免責事項）</Heading2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
             <li>
               運営者は、本サービスに事実上または法律上の瑕疵（安全性、信頼性、正確性、完全性、有効性、特定の目的への適合性、セキュリティなどに関する欠陥、エラーやバグ、権利侵害などを含みます。）がないことを明示的にも黙示的にも保証しておりません。
@@ -144,12 +139,12 @@ export default function TermsOfServicePage() {
             </li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第10条（サービス終了）</h2>
-          <p className='mb-6 leading-relaxed'>
+          <Heading2>第10条（サービス終了）</Heading2>
+          <Paragraph>
             運営者は、運営者の判断により、本サービスの全部または一部を予告なく終了することができるものとします。サービス終了により生じるユーザーの損害について、運営者は一切の責任を負いません。
-          </p>
+          </Paragraph>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第11条（規約の変更）</h2>
+          <Heading2>第11条（規約の変更）</Heading2>
           <ol className='mb-4 list-decimal space-y-2 pl-6'>
             <li>
               運営者は、ユーザーに通知することにより、いつでも本規約を変更することができるものとします。
@@ -160,18 +155,18 @@ export default function TermsOfServicePage() {
             </li>
           </ol>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第12条（個人情報の取扱い）</h2>
-          <p className='mb-6 leading-relaxed'>
+          <Heading2>第12条（個人情報の取扱い）</Heading2>
+          <Paragraph>
             運営者は、本サービスの利用によって取得する個人情報については、プライバシーポリシーに従い適切に取り扱うものとします。
-          </p>
+          </Paragraph>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第13条（準拠法）</h2>
-          <p className='mb-6 leading-relaxed'>本規約の解釈にあたっては、日本法を準拠法とします。</p>
+          <Heading2>第13条（準拠法）</Heading2>
+          <Paragraph>本規約の解釈にあたっては、日本法を準拠法とします。</Paragraph>
 
-          <h2 className='mb-4 mt-8 text-xl font-bold text-slate-900'>第14条（紛争解決）</h2>
-          <p className='mb-6 leading-relaxed'>
+          <Heading2>第14条（紛争解決）</Heading2>
+          <Paragraph>
             本サービスに関して紛争が生じた場合、当事者間で誠実に協議するものとします。
-          </p>
+          </Paragraph>
 
           <hr className='my-8 border-slate-200' />
 
