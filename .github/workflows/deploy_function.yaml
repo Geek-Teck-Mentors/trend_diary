@@ -27,6 +27,7 @@ jobs:
           version: latest
 
       - name: デプロイ
+        working-directory: application/supabase
         run: supabase functions deploy ${{ inputs.functionName }} --project-ref $PROJECT_ID
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
