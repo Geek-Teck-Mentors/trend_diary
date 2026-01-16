@@ -17,11 +17,6 @@ permissions:
   contents: read
   pull-requests: write
 
-# 連続push時に同じジョブが並列で実行されるのを防ぐ
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 defaults:
   run:
     shell: bash
