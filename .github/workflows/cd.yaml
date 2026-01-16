@@ -63,7 +63,6 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-
       - name: デプロイの出力を表示
         env:
           CMD_OUTPUT: ${{ steps.deploy.outputs.command-output }}
@@ -73,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'database' }}
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
