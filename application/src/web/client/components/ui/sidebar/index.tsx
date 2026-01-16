@@ -1,4 +1,4 @@
-import { BookOpen, TrendingUp } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { isLoggedIn } from '../../../features/authenticate/user-status'
 import { InternalPath } from '../../../routes'
