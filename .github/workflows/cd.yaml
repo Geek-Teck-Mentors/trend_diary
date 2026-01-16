@@ -43,14 +43,14 @@ jobs:
       - name: ビルド
         run: npm run build
 
-      - name: デプロイ
+      - name: バージョンをアップロード
         id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ./application
-          command: deploy
+          command: versions upload
           # Secretsで保存するものをActionsで管理し、環境変数として渡す
           secrets: |
             SUPABASE_URL
@@ -62,6 +62,12 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: 本番にデプロイ
+        run: npx wrangler versions deploy --yes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: デプロイの出力を表示
         env:
