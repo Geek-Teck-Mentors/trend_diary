@@ -6,11 +6,11 @@ on:
       - main
   pull_request:
     paths:
-      - '.github/workflows/e2e.yaml'
-      - 'application/src/test/e2e/**'
-      - 'application/src/web/client/routes/**'
-      - 'application/package.json'
-      - 'application/package-lock.json'
+      - ".github/workflows/e2e.yaml"
+      - "application/src/test/e2e/**"
+      - "application/src/web/client/routes/**"
+      - "application/package.json"
+      - "application/package-lock.json"
 
 # カバレッジの可視化で、コメントを残すための権限
 permissions:
@@ -33,10 +33,15 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     environment: develop
-    env:
-      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Create .dev.vars for Actions
+        run: |
+          cat > .dev.vars <<'EOF'
+          # Dev env for Actions (created from secrets)
+          DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
+          EOF
 
       - name: Supabaseのセットアップ
         uses: ./.github/actions/setup_supabase
@@ -56,14 +61,16 @@ jobs:
           path: application/src/test/e2e/playwright-report/
           retention-days: 30
 
+      - name: Cleanup .dev.vars
+        if: always()
+        run: rm -f .dev.vars
+
   test-diff:
     name: Diff
     if: github.event_name == 'pull_request'
     timeout-minutes: 10
     runs-on: ubuntu-latest
     environment: develop
-    env:
-      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -78,8 +85,19 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
+      - name: Create .dev.vars for Actions
+        run: |
+          cat > .dev.vars <<'EOF'
+          # Dev env for Actions (created from secrets)
+          DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
+          EOF
+
       - name: E2Eテストの差分実行
         shell: bash
         run: |
           set -euo pipefail
           npm run e2e -- --reporter=github --only-changed=origin/$GITHUB_BASE_REF
+
+      - name: Cleanup .dev.vars
+        if: always()
+        run: rm -f .dev.vars
