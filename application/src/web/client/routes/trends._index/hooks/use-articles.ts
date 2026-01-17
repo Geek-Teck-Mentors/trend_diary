@@ -1,7 +1,12 @@
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
-import { offsetPaginationMobileSchema, offsetPaginationSchema } from '@/common/pagination/schema'
+import {
+  MAX_LIMIT,
+  MIN_LIMIT,
+  offsetPaginationMobileSchema,
+  offsetPaginationSchema,
+} from '@/common/pagination/schema'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
 import createSWRFetcher from '@/web/client/features/create-swr-fetcher'
@@ -33,6 +38,8 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
+const clampLimit = (val: number) => Math.min(Math.max(val, MIN_LIMIT), MAX_LIMIT)
+
 export default function useArticles() {
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useIsMobile()
@@ -45,10 +52,13 @@ export default function useArticles() {
   const limitParam = searchParams.get('limit')
   const mediaParam = searchParams.get('media')
 
+  // INFO: limitパラメータを数値に変換してクランプ
+  const clampedLimit = limitParam ? clampLimit(Number(limitParam)) : undefined
+
   // INFO: schemaはnullではなくundefinedを許容するため、nullの場合はundefinedに変換する
   const { page: validPage, limit: validLimit } = (
     isMobile ? offsetPaginationMobileSchema : offsetPaginationSchema
-  ).parse({ page: pageParam ?? undefined, limit: limitParam ?? undefined })
+  ).parse({ page: pageParam ?? undefined, limit: clampedLimit })
 
   const params: Params = {
     page: validPage,
