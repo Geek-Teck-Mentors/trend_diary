@@ -32,18 +32,30 @@ describe('offsetPaginationSchema', () => {
   }
 
   it('不正な値はバリデーションエラーになる', () => {
-    expect(() => offsetPaginationSchema.parse({ page: 'abc' })).toThrow()
-    expect(() => offsetPaginationSchema.parse({ limit: 'invalid' })).toThrow()
+    expect(() => offsetPaginationSchema.parse({ page: 'abc' })).toThrow(
+      'Expected number, received nan',
+    )
+    expect(() => offsetPaginationSchema.parse({ limit: 'invalid' })).toThrow(
+      'Expected number, received nan',
+    )
   })
 
   it(`limitが${MIN_LIMIT}未満ならバリデーションエラー`, () => {
-    expect(() => offsetPaginationSchema.parse({ limit: 0 })).toThrow()
-    expect(() => offsetPaginationSchema.parse({ limit: -10 })).toThrow()
+    expect(() => offsetPaginationSchema.parse({ limit: 0 })).toThrow(
+      `Number must be greater than or equal to ${MIN_LIMIT}`,
+    )
+    expect(() => offsetPaginationSchema.parse({ limit: -10 })).toThrow(
+      `Number must be greater than or equal to ${MIN_LIMIT}`,
+    )
   })
 
   it(`limitが${MAX_LIMIT}より大きいならバリデーションエラー`, () => {
-    expect(() => offsetPaginationSchema.parse({ limit: 101 })).toThrow()
-    expect(() => offsetPaginationSchema.parse({ limit: 500 })).toThrow()
+    expect(() => offsetPaginationSchema.parse({ limit: 101 })).toThrow(
+      `Number must be less than or equal to ${MAX_LIMIT}`,
+    )
+    expect(() => offsetPaginationSchema.parse({ limit: 500 })).toThrow(
+      `Number must be less than or equal to ${MAX_LIMIT}`,
+    )
   })
 })
 
@@ -69,17 +81,29 @@ describe('offsetPaginationMobileSchema', () => {
   }
 
   it('不正な値はバリデーションエラーになる', () => {
-    expect(() => offsetPaginationMobileSchema.parse({ page: 'abc' })).toThrow()
-    expect(() => offsetPaginationMobileSchema.parse({ limit: 'invalid' })).toThrow()
+    expect(() => offsetPaginationMobileSchema.parse({ page: 'abc' })).toThrow(
+      'Expected number, received nan',
+    )
+    expect(() => offsetPaginationMobileSchema.parse({ limit: 'invalid' })).toThrow(
+      'Expected number, received nan',
+    )
   })
 
   it(`limitが${MIN_LIMIT}未満ならバリデーションエラー`, () => {
-    expect(() => offsetPaginationMobileSchema.parse({ limit: 0 })).toThrow()
-    expect(() => offsetPaginationMobileSchema.parse({ limit: -10 })).toThrow()
+    expect(() => offsetPaginationMobileSchema.parse({ limit: 0 })).toThrow(
+      `Number must be greater than or equal to ${MIN_LIMIT}`,
+    )
+    expect(() => offsetPaginationMobileSchema.parse({ limit: -10 })).toThrow(
+      `Number must be greater than or equal to ${MIN_LIMIT}`,
+    )
   })
 
   it(`limitが${MAX_LIMIT}より大きいならバリデーションエラー`, () => {
-    expect(() => offsetPaginationMobileSchema.parse({ limit: 101 })).toThrow()
-    expect(() => offsetPaginationMobileSchema.parse({ limit: 500 })).toThrow()
+    expect(() => offsetPaginationMobileSchema.parse({ limit: 101 })).toThrow(
+      `Number must be less than or equal to ${MAX_LIMIT}`,
+    )
+    expect(() => offsetPaginationMobileSchema.parse({ limit: 500 })).toThrow(
+      `Number must be less than or equal to ${MAX_LIMIT}`,
+    )
   })
 })
