@@ -3,10 +3,10 @@ import { z } from 'zod'
 export const DEFAULT_LIMIT = 20
 export const DEFAULT_MOBILE_LIMIT = 10
 export const DEFAULT_PAGE = 1
+export const MIN_LIMIT = 1
+export const MAX_LIMIT = 100
 
 const numericString = z.string().pipe(z.coerce.number())
-
-const clampLimit = (val: number) => Math.min(Math.max(val, 1), 100)
 
 const page = z.union([z.number(), numericString]).optional().default(DEFAULT_PAGE)
 
@@ -14,13 +14,13 @@ const limit = z
   .union([z.number(), numericString])
   .optional()
   .default(DEFAULT_LIMIT)
-  .transform(clampLimit)
+  .pipe(z.number().min(MIN_LIMIT).max(MAX_LIMIT))
 
 const mobileLimit = z
   .union([z.number(), numericString])
   .optional()
   .default(DEFAULT_MOBILE_LIMIT)
-  .transform(clampLimit)
+  .pipe(z.number().min(MIN_LIMIT).max(MAX_LIMIT))
 
 export const offsetPaginationSchema = z.object({
   page,
