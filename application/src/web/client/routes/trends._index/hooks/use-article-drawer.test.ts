@@ -1,7 +1,7 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import useArticleDrawer from './use-article-drawer'
-import type { Article } from './use-trends'
+import type { Article } from './use-articles'
 
 type UseArticleDrawerHook = ReturnType<typeof useArticleDrawer>
 

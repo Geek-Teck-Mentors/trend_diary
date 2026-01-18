@@ -3,8 +3,8 @@ import { useOutletContext } from 'react-router'
 import type { TrendsOutletContext } from '../trends'
 import ArticleDrawer from './components/article-drawer'
 import useArticleDrawer from './hooks/use-article-drawer'
+import useArticles from './hooks/use-articles'
 import useReadArticle from './hooks/use-read-article'
-import useTrends from './hooks/use-trends'
 import TrendsPage from './page'
 
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
@@ -13,16 +13,16 @@ export default function Trends() {
   const { isLoggedIn, userFeatureEnabled } = useOutletContext<TrendsOutletContext>()
   const {
     articles,
+    reloadArticles,
     isLoading,
     page,
-    limit,
     totalPages,
     date,
-    setSearchParams,
     handleMediaChange,
+    toPreviousPage,
+    toNextPage,
     selectedMedia,
-    updateArticleReadStatus,
-  } = useTrends()
+  } = useArticles()
   const {
     isOpen: isDrawerOpen,
     selectedArticle,
@@ -37,16 +37,11 @@ export default function Trends() {
     const originalArticle = articles.find((a) => a.articleId === articleId)
     if (!originalArticle) return
 
-    // 1. UIを即座に更新（オプティミスティックUI）
-    updateArticleReadStatus(articleId, isRead)
+    // 1. APIコールで既読/未読を切り替え
+    await (isRead ? markAsRead : markAsUnread)(articleId)
 
-    // 2. APIを呼び出し
-    const success = isRead ? await markAsRead(articleId) : await markAsUnread(articleId)
-
-    // 3. 失敗した場合にUIを元に戻す
-    if (!success) {
-      updateArticleReadStatus(articleId, originalArticle.isRead ?? false)
-    }
+    // 2. 再fetchして状態を更新
+    reloadArticles()
   }
 
   const handleMarkAsRead = async (articleId: string) => {
@@ -58,13 +53,13 @@ export default function Trends() {
       <TrendsPage
         date={date}
         articles={articles}
-        setSearchParams={setSearchParams}
         openDrawer={openDrawer}
         isLoading={isLoading}
         page={page}
-        limit={limit}
         totalPages={totalPages}
         selectedMedia={selectedMedia}
+        toPreviousPage={toPreviousPage}
+        toNextPage={toNextPage}
         onMediaChange={handleMediaChange}
         onToggleRead={handleToggleRead}
         isLoggedIn={isReadArticleEnabled}

@@ -12,18 +12,18 @@ import {
 import LoadingSpinner from '../../components/ui/loading-spinner'
 import ArticleCard from './components/article-card'
 import MediaFilter, { MediaType } from './components/media-filter'
-import type { Article } from './hooks/use-trends'
+import type { Article } from './hooks/use-articles'
 
 type Props = {
   date: Date
   articles: Article[]
-  setSearchParams: ReturnType<typeof useSearchParams>[1]
   openDrawer: (article: Article) => void
   isLoading: boolean
   page: number
-  limit: number
   totalPages: number
   selectedMedia: MediaType
+  toNextPage: (currentPage: number) => void
+  toPreviousPage: (currentPage: number) => void
   onMediaChange: (media: MediaType) => void
   onToggleRead: (articleId: string, isRead: boolean) => void
   isLoggedIn: boolean
@@ -32,13 +32,13 @@ type Props = {
 export default function TrendsPage({
   date,
   articles,
-  setSearchParams,
   openDrawer,
   isLoading,
   page,
-  limit,
   totalPages,
   selectedMedia,
+  toNextPage,
+  toPreviousPage,
   onMediaChange,
   onToggleRead,
   isLoggedIn,
@@ -55,31 +55,18 @@ export default function TrendsPage({
     [openDrawer],
   )
 
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      const newParams = new URLSearchParams(searchParams)
-      if (newPage > 1) {
-        newParams.set('page', newPage.toString())
-      } else {
-        newParams.delete('page')
-      }
-      newParams.set('limit', limit.toString())
-      setSearchParams(newParams)
-    },
-    [searchParams, limit, setSearchParams],
-  )
-
-  const handlePrevPageClick = useCallback(() => {
+  const handlePrevPageClick = () => {
     if (!isPrevDisabled) {
-      handlePageChange(page - 1)
+      toPreviousPage(page)
     }
-  }, [isPrevDisabled, page, handlePageChange])
+  }
 
-  const handleNextPageClick = useCallback(() => {
+  const handleNextPageClick = () => {
     if (!isNextDisabled) {
-      handlePageChange(page + 1)
+      toNextPage(page)
     }
-  }, [isNextDisabled, page, handlePageChange])
+  }
+
   const getPaginationClass = (isDisabled: boolean) => {
     const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
     return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')

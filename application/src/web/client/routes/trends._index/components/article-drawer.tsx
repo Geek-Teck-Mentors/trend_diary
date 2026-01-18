@@ -8,7 +8,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/web/client/components/shadcn/drawer'
-import type { Article } from '../hooks/use-trends'
+import type { Article } from '../hooks/use-articles'
 import MediaIcon from './media-icon'
 
 type Props = {

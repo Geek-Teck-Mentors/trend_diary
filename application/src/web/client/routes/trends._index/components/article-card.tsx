@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardTitle } from '@/web/client/components/shadcn/card'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
-import type { Article } from '../hooks/use-trends'
+import type { Article } from '../hooks/use-articles'
 import MediaIcon from './media-icon'
 
 type Props = {
