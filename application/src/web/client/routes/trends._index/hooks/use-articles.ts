@@ -1,7 +1,13 @@
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
-import { offsetPaginationMobileSchema, offsetPaginationSchema } from '@/common/pagination/schema'
+import {
+  DEFAULT_LIMIT,
+  DEFAULT_MOBILE_LIMIT,
+  DEFAULT_PAGE,
+  offsetPaginationMobileSchema,
+  offsetPaginationSchema,
+} from '@/common/pagination/schema'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
 import createSWRFetcher from '@/web/client/features/create-swr-fetcher'
@@ -46,12 +52,14 @@ export default function useArticles() {
   const mediaParam = searchParams.get('media')
 
   // INFO: schemaはnullではなくundefinedを許容するため、nullの場合はundefinedに変換する
-  const { page: validPage, limit: validLimit } = (
-    isMobile ? offsetPaginationMobileSchema : offsetPaginationSchema
-  ).parse({
+  const parseResult = (isMobile ? offsetPaginationMobileSchema : offsetPaginationSchema).safeParse({
     page: pageParam ?? undefined,
     limit: limitParam ?? undefined,
   })
+
+  const { page: validPage, limit: validLimit } = parseResult.success
+    ? parseResult.data
+    : { page: DEFAULT_PAGE, limit: isMobile ? DEFAULT_MOBILE_LIMIT : DEFAULT_LIMIT }
 
   const params: Params = {
     page: validPage,

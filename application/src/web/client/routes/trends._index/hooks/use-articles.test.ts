@@ -505,6 +505,120 @@ describe('useArticles', () => {
     })
   })
 
+  describe('無効なURLパラメータのフォールバック', () => {
+    it('pageに数値以外が指定された場合、デフォルト値（1）でAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle()],
+        page: 1,
+        totalPages: 1,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?page=abc'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 1,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+    })
+
+    it('limitに数値以外が指定された場合、デフォルト値（20）でAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle()],
+        page: 1,
+        totalPages: 1,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?limit=invalid'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 1,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+    })
+
+    it('limitが範囲外（MAX_LIMIT超過）の場合、デフォルト値でAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle()],
+        page: 1,
+        totalPages: 1,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?limit=999'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 1,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+    })
+
+    it('pageとlimitの両方が無効な場合、両方ともデフォルト値でAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle()],
+        page: 1,
+        totalPages: 1,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?page=invalid&limit=abc'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 1,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+    })
+  })
+
   describe('既読状態管理', () => {
     it('isRead付きの記事を取得できる', async () => {
       const fakeArticles = [
