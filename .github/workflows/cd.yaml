@@ -32,6 +32,7 @@ defaults:
 jobs:
   web:
     runs-on: ubuntu-latest
+    environment: production
     if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'web' }}
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +52,17 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ./application
           command: deploy
+          # Secretsで保存するものをActionsで管理し、環境変数として渡す
+          secrets: |
+            SUPABASE_URL
+            SUPABASE_ANON_KEY
+            DATABASE_URL
+            DISCORD_WEBHOOK_URL
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: デプロイの出力を表示
         env:
@@ -59,9 +71,10 @@ jobs:
 
   database:
     runs-on: ubuntu-latest
+    environment: production
     if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'database' }}
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4

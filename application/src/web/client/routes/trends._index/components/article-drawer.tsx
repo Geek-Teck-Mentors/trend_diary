@@ -54,6 +54,9 @@ export default function ArticleDrawer({
         <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
           <div className='flex flex-1 items-center gap-2' data-slot='drawer-header-icon'>
             <MediaIcon media={media} />
+            <DrawerTitle className='text-xl leading-relaxed font-bold text-gray-900'>
+              {article.title}
+            </DrawerTitle>
             {isRead && (
               <span
                 data-testid='drawer-read-indicator'
@@ -73,27 +76,22 @@ export default function ArticleDrawer({
         {/* Drawer内では文字選択とドラッグしてDrawerを閉じるアクションがバッティングする */}
         {/* data-vaul-no-dragをfalseに指定し、ドラッグしてDrawerが閉じないように */}
         <div className='flex-1 overflow-y-auto px-4 select-text' data-vaul-no-drag={false}>
-          <DrawerTitle className='mb-4 text-xl leading-relaxed font-bold text-gray-900'>
-            {article.title}
-          </DrawerTitle>
-
           <div
-            className='mb-6 flex items-center gap-4 text-sm text-gray-600'
+            className='mb-6 flex flex-wrap items-center gap-6 text-sm text-gray-600'
             data-slot='drawer-content-meta'
           >
+            <div className='flex items-center gap-1' data-slot='drawer-content-author'>
+              <User className='size-4' />
+              <span className='text-sm font-medium text-gray-700'>{article.author}</span>
+            </div>
             <div className='flex items-center gap-1'>
               <Calendar className='size-4' />
               <span>{toJaDateString(article.createdAt)}</span>
             </div>
           </div>
 
-          <div className='flex items-center gap-1 mb-6' data-slot='drawer-content-author'>
-            <User className='size-4' />
-            <span className='text-sm font-medium text-gray-700'>{article.author}</span>
-          </div>
-
           <div className='mb-8' data-slot='drawer-content-description'>
-            <h3 className='mb-3 text-lg font-semibold text-gray-900'>記事の概要</h3>
+            <h3 className='mb-3 text-lg font-semibold text-gray-900'>概要</h3>
             <p
               className='leading-relaxed text-gray-700'
               data-slot='drawer-content-description-content'
@@ -101,27 +99,27 @@ export default function ArticleDrawer({
               {article.description}
             </p>
           </div>
-        </div>
 
-        <div className='border-t p-4 space-y-3'>
-          <button
-            type='button'
-            onClick={handleReadArticle}
-            className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
-            data-slot='drawer-content-button'
-          >
-            <ExternalLink className='size-4' />
-            記事を読む
-          </button>
-          {isLoggedIn && (
+          <div className='border-t p-4 space-y-3'>
             <button
               type='button'
-              onClick={handleToggleRead}
-              className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100'
+              onClick={handleReadArticle}
+              className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600'
+              data-slot='drawer-content-button'
             >
-              {isRead ? '未読に戻す' : '既読にする'}
+              <ExternalLink className='size-4' />
+              記事を読む
             </button>
-          )}
+            {isLoggedIn && (
+              <button
+                type='button'
+                onClick={handleToggleRead}
+                className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100'
+              >
+                {isRead ? '未読に戻す' : '既読にする'}
+              </button>
+            )}
+          </div>
         </div>
       </DrawerContent>
     </Drawer>,

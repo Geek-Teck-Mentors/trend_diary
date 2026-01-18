@@ -1,4 +1,4 @@
-import { BookOpen, TrendingUp } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { isLoggedIn } from '../../../features/authenticate/user-status'
 import { InternalPath } from '../../../routes'
@@ -52,7 +52,7 @@ export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
             to='/'
             className='flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-md transition-colors'
           >
-            <BookOpen className='h-6 w-6' />
+            <TrendingUp className='h-8 w-8 text-blue-600' />
             <span className='text-xl font-semibold'>TrendDiary</span>
           </AnchorLink>
         </SidebarHeader>

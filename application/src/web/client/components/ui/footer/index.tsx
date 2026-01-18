@@ -1,29 +1,35 @@
-import { TrendingUp } from 'lucide-react'
 import { AnchorLink } from '../link'
+
+const CONTACT_FORM_URL = 'https://forms.gle/HgaE9qMXq6MJAxNG9'
 
 export default function Footer() {
   return (
-    <footer className='bg-slate-900 text-white py-12'>
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex flex-col md:flex-row justify-between items-center'>
-          <AnchorLink
-            to='/'
-            className='flex items-center space-x-2 mb-4 md:mb-0 hover:opacity-80 transition-opacity'
-          >
-            <TrendingUp className='h-6 w-6 text-blue-400' />
-            <span className='text-xl font-bold'>TrendDiary</span>
-          </AnchorLink>
-          <div className='flex space-x-6'>
-            <AnchorLink to='/login' className='text-slate-300 hover:text-white transition-colors'>
-              ログイン
+    <footer className='bg-slate-900 py-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+        <div className='flex flex-col items-center gap-4 text-slate-400'>
+          <nav className='flex flex-col items-center gap-3 md:flex-row md:gap-6'>
+            <AnchorLink
+              to='/terms-of-service'
+              className='block md:py-0 hover:text-white transition-colors'
+            >
+              利用規約
             </AnchorLink>
-            <AnchorLink to='/signup' className='text-slate-300 hover:text-white transition-colors'>
-              アカウント作成
+            <AnchorLink
+              to='/privacy-policy'
+              className='block md:py-0 hover:text-white transition-colors'
+            >
+              プライバシーポリシー
             </AnchorLink>
-          </div>
-        </div>
-        <div className='border-t border-slate-800 mt-8 pt-8 text-center text-slate-400'>
-          <p>&copy; 2025 TrendDiary. 技術トレンドを効率的に管理するツール</p>
+            <AnchorLink
+              to={CONTACT_FORM_URL}
+              className='block md:py-0 hover:text-white transition-colors'
+            >
+              お問い合わせ
+            </AnchorLink>
+          </nav>
+          <p className='text-sm text-center md:text-base'>
+            &copy; 2025 TrendDiary. 技術トレンドを効率的に管理するツール
+          </p>
         </div>
       </div>
     </footer>

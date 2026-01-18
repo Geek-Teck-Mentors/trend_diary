@@ -23,11 +23,6 @@ permissions:
   contents: read
   pull-requests: write
 
-# 連続push時に同じジョブが並列で実行されるのを防ぐ
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version

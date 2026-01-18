@@ -16,7 +16,7 @@ export default function MediaTag({ media }: { media: MediaType }) {
     <img
       src={iconImage}
       alt={altText}
-      className='inline-block w-4 h-4 align-middle mr-1.5 mb-1'
+      className='inline-block w-4 h-4 align-middle'
       data-slot='media-icon'
     />
   )

@@ -39,7 +39,7 @@ export default function ArticleCard({
       <CardContent className='flex h-full flex-col p-0'>
         <CardTitle className='line-clamp-2 flex-1 overflow-hidden text-sm leading-relaxed font-bold text-gray-700'>
           <MediaIcon media={article.media === 'qiita' ? 'qiita' : 'zenn'} />
-          <span>{article.title}</span>
+          <span className='ml-1.5'>{article.title}</span>
           {isRead && (
             <span
               data-testid='read-indicator'
