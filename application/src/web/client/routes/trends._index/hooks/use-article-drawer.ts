@@ -1,24 +1,22 @@
 import { useState } from 'react'
 import { Nullable } from '@/common/types/utility'
-import type { Article } from './use-articles'
-
 export default function useArticleDrawer() {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedArticle, setSelectedArticle] = useState<Nullable<Article>>(null)
+  const [selectedArticleId, setSelectedArticleId] = useState<Nullable<string>>(null)
 
-  const open = (article: Article) => {
-    setSelectedArticle(article)
+  const open = (articleId: string) => {
+    setSelectedArticleId(articleId)
     setIsOpen(true)
   }
 
   const close = () => {
     setIsOpen(false)
-    setSelectedArticle(null)
+    setSelectedArticleId(null)
   }
 
   return {
     isOpen,
-    selectedArticle,
+    selectedArticleId,
     open,
     close,
   }

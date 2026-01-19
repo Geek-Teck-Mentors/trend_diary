@@ -17,7 +17,7 @@ import type { Article } from './hooks/use-articles'
 type Props = {
   date: Date
   articles: Article[]
-  openDrawer: (article: Article) => void
+  openDrawer: (articleId: string) => void
   isLoading: boolean
   page: number
   totalPages: number
@@ -50,7 +50,7 @@ export default function TrendsPage({
 
   const handleCardClick = useCallback(
     (article: Article) => {
-      openDrawer(article)
+      openDrawer(article.articleId)
     },
     [openDrawer],
   )

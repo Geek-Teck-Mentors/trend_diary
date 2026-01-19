@@ -25,7 +25,7 @@ export default function Trends() {
   } = useArticles()
   const {
     isOpen: isDrawerOpen,
-    selectedArticle,
+    selectedArticleId,
     open: openDrawer,
     close: closeDrawer,
   } = useArticleDrawer()
@@ -47,6 +47,8 @@ export default function Trends() {
   const handleMarkAsRead = async (articleId: string) => {
     await handleToggleRead(articleId, true)
   }
+
+  const selectedArticle = articles.find((a) => a.articleId === selectedArticleId)
 
   return (
     <>
