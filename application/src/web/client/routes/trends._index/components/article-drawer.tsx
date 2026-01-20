@@ -40,6 +40,8 @@ export default function ArticleDrawer({
       // onMarkAsReadはawaitせず、バックグラウンドで実行
       onMarkAsRead?.(article.articleId)
     }
+
+    onClose()
   }
 
   return createPortal(

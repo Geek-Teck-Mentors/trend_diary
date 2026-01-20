@@ -32,7 +32,7 @@ const meta: Meta<typeof ArticleDrawer> = {
   },
   args: {
     isOpen: true,
-    onClose: () => null,
+    onClose: fn(),
     onMarkAsRead: fn(),
     isLoggedIn: false,
   },
@@ -150,14 +150,14 @@ export const UnreadArticleLoggedIn: Story = {
   },
 }
 
-// 「記事を読む」クリック時にonMarkAsReadが呼ばれる
+// 「記事を読む」クリック時にonMarkAsReadとonCloseが呼ばれる
 export const MarkAsReadOnClick: Story = {
   args: {
     article: unreadArticle,
     isLoggedIn: true,
   },
   play: async ({ args, step }) => {
-    await step('「記事を読む」クリックでonMarkAsReadが呼ばれることを確認', async () => {
+    await step('「記事を読む」クリックでonMarkAsReadとonCloseが呼ばれることを確認', async () => {
       await waitFor(() => {
         within(document.body).getByRole('dialog', { hidden: true })
       })
@@ -165,6 +165,7 @@ export const MarkAsReadOnClick: Story = {
       await userEvent.click(readButton)
 
       await expect(args.onMarkAsRead).toHaveBeenCalledWith(unreadArticle.articleId.toString())
+      await expect(args.onClose).toHaveBeenCalled()
     })
   },
 }
