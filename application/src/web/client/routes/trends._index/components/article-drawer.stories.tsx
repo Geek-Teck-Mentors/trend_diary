@@ -150,14 +150,32 @@ export const UnreadArticleLoggedIn: Story = {
   },
 }
 
-// 「記事を読む」クリック時にonMarkAsReadとonCloseが呼ばれる
-export const MarkAsReadOnClick: Story = {
+// 「記事を読む」クリック時にonCloseが呼ばれる
+export const CloseOnReadArticleClick: Story = {
+  args: {
+    article: unreadArticle,
+  },
+  play: async ({ args, step }) => {
+    await step('「記事を読む」クリックでonCloseが呼ばれることを確認', async () => {
+      await waitFor(() => {
+        within(document.body).getByRole('dialog', { hidden: true })
+      })
+      const readButton = within(document.body).getByText('記事を読む')
+      await userEvent.click(readButton)
+
+      await expect(args.onClose).toHaveBeenCalled()
+    })
+  },
+}
+
+// ログイン時に「記事を読む」クリックでonMarkAsReadが呼ばれる
+export const MarkAsReadOnClickLoggedIn: Story = {
   args: {
     article: unreadArticle,
     isLoggedIn: true,
   },
   play: async ({ args, step }) => {
-    await step('「記事を読む」クリックでonMarkAsReadとonCloseが呼ばれることを確認', async () => {
+    await step('ログイン時に「記事を読む」クリックでonMarkAsReadが呼ばれることを確認', async () => {
       await waitFor(() => {
         within(document.body).getByRole('dialog', { hidden: true })
       })
@@ -165,7 +183,28 @@ export const MarkAsReadOnClick: Story = {
       await userEvent.click(readButton)
 
       await expect(args.onMarkAsRead).toHaveBeenCalledWith(unreadArticle.articleId.toString())
-      await expect(args.onClose).toHaveBeenCalled()
     })
+  },
+}
+
+// 未ログイン時に「記事を読む」クリックでonMarkAsReadが呼ばれない
+export const MarkAsReadNotCalledWhenNotLoggedIn: Story = {
+  args: {
+    article: unreadArticle,
+    isLoggedIn: false,
+  },
+  play: async ({ args, step }) => {
+    await step(
+      '未ログイン時に「記事を読む」クリックでonMarkAsReadが呼ばれないことを確認',
+      async () => {
+        await waitFor(() => {
+          within(document.body).getByRole('dialog', { hidden: true })
+        })
+        const readButton = within(document.body).getByText('記事を読む')
+        await userEvent.click(readButton)
+
+        await expect(args.onMarkAsRead).not.toHaveBeenCalled()
+      },
+    )
   },
 }
