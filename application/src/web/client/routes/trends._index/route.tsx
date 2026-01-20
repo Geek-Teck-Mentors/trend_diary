@@ -70,7 +70,6 @@ export default function Trends() {
           isOpen={isDrawerOpen}
           onClose={closeDrawer}
           onMarkAsRead={handleMarkAsRead}
-          onToggleRead={handleToggleRead}
           isLoggedIn={isReadArticleEnabled}
         />
       )}
