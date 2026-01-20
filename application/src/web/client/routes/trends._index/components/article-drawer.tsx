@@ -16,7 +16,6 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   onMarkAsRead?: (articleId: string) => void | Promise<void>
-  onToggleRead?: (articleId: string, isRead: boolean) => void
   isLoggedIn?: boolean
 }
 
@@ -25,7 +24,6 @@ export default function ArticleDrawer({
   isOpen,
   onClose,
   onMarkAsRead,
-  onToggleRead,
   isLoggedIn = false,
 }: Props) {
   const handleOpenChange = (open: boolean) => {
@@ -42,10 +40,6 @@ export default function ArticleDrawer({
       // onMarkAsReadはawaitせず、バックグラウンドで実行
       onMarkAsRead?.(article.articleId)
     }
-  }
-
-  const handleToggleRead = () => {
-    onToggleRead?.(article.articleId, !isRead)
   }
 
   return createPortal(
@@ -110,15 +104,6 @@ export default function ArticleDrawer({
               <ExternalLink className='size-4' />
               記事を読む
             </button>
-            {isLoggedIn && (
-              <button
-                type='button'
-                onClick={handleToggleRead}
-                className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100'
-              >
-                {isRead ? '未読に戻す' : '既読にする'}
-              </button>
-            )}
           </div>
         </div>
       </DrawerContent>

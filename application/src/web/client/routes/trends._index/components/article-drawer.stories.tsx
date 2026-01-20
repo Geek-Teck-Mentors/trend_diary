@@ -34,7 +34,6 @@ const meta: Meta<typeof ArticleDrawer> = {
     isOpen: true,
     onClose: () => null,
     onMarkAsRead: fn(),
-    onToggleRead: fn(),
     isLoggedIn: false,
   },
 }
@@ -130,11 +129,6 @@ export const ReadArticleLoggedIn: Story = {
         expect(readIndicator).toBeInTheDocument()
       })
     })
-
-    await step('「未読に戻す」ボタンが表示されることを確認', async () => {
-      const toggleButton = within(document.body).getByText('未読に戻す')
-      await expect(toggleButton).toBeInTheDocument()
-    })
   },
 }
 
@@ -152,28 +146,6 @@ export const UnreadArticleLoggedIn: Story = {
       })
       const readIndicator = within(document.body).queryByTestId('drawer-read-indicator')
       await expect(readIndicator).not.toBeInTheDocument()
-    })
-
-    await step('「既読にする」ボタンが表示されることを確認', async () => {
-      const toggleButton = within(document.body).getByText('既読にする')
-      await expect(toggleButton).toBeInTheDocument()
-    })
-  },
-}
-
-// 未ログイン時は既読ボタン非表示
-export const NotLoggedIn: Story = {
-  args: {
-    article: unreadArticle,
-    isLoggedIn: false,
-  },
-  play: async ({ step }) => {
-    await step('既読切り替えボタンが表示されないことを確認', async () => {
-      await waitFor(() => {
-        within(document.body).getByRole('dialog', { hidden: true })
-      })
-      const toggleButton = within(document.body).queryByText(/既読にする|未読に戻す/)
-      await expect(toggleButton).not.toBeInTheDocument()
     })
   },
 }
@@ -193,25 +165,6 @@ export const MarkAsReadOnClick: Story = {
       await userEvent.click(readButton)
 
       await expect(args.onMarkAsRead).toHaveBeenCalledWith(unreadArticle.articleId.toString())
-    })
-  },
-}
-
-// 既読切り替えボタンのテスト
-export const ToggleReadInteraction: Story = {
-  args: {
-    article: unreadArticle,
-    isLoggedIn: true,
-  },
-  play: async ({ args, step }) => {
-    await step('既読ボタンクリックでonToggleReadが呼ばれることを確認', async () => {
-      await waitFor(() => {
-        within(document.body).getByRole('dialog', { hidden: true })
-      })
-      const toggleButton = within(document.body).getByText('既読にする')
-      await userEvent.click(toggleButton)
-
-      await expect(args.onToggleRead).toHaveBeenCalledWith(unreadArticle.articleId, true)
     })
   },
 }
