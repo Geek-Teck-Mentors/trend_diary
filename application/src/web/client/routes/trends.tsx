@@ -21,7 +21,7 @@ export type TrendsOutletContext = {
 
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
-  const [email, setemail] = useState('')
+  const [email, setEmail] = useState('')
   const { userFeatureEnabled } = useLoaderData<typeof loader>()
 
   useEffect(() => {
@@ -33,9 +33,9 @@ export default function Layout() {
       const res = await client.v2.auth.me.$get({}, { init: { credentials: 'include' } })
       if (res.status === 200) {
         const resJson = await res.json()
-        setemail(resJson.user?.email ?? '')
+        setEmail(resJson.user?.email ?? '')
       } else {
-        setemail('')
+        setEmail('')
       }
     }
 
