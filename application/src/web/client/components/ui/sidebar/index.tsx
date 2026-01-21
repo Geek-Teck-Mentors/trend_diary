@@ -36,11 +36,11 @@ export const menuItems: MenuItem[] = [
 ]
 
 type Props = {
-  displayName: string
+  email: string
   userFeatureEnabled: boolean
 }
 
-export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
+export default function AppSidebar({ email, userFeatureEnabled }: Props) {
   const navigate = useNavigate()
   const { handleLogout, isLoading } = useSidebar(navigate)
 
@@ -63,16 +63,11 @@ export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
               <NavMenu variant='sidebar' menuItems={menuItems} />
             </SidebarGroupContent>
           </SidebarGroup>
-          {userFeatureEnabled && isLoggedIn(displayName) && (
+          {userFeatureEnabled && isLoggedIn(email) && (
             <SidebarGroup className='absolute bottom-0 left-0 w-full'>
               <SidebarGroupLabel>User</SidebarGroupLabel>
               <SidebarGroupContent>
-                <UserSection
-                  variant='sidebar'
-                  displayName={displayName}
-                  onLogout={handleLogout}
-                  isLoading={isLoading}
-                />
+                <UserSection variant='sidebar' onLogout={handleLogout} isLoading={isLoading} />
               </SidebarGroupContent>
             </SidebarGroup>
           )}

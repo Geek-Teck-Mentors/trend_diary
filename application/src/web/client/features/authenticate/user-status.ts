@@ -1,3 +1,3 @@
-export function isLoggedIn(displayName: string): boolean {
-  return displayName.trim() !== ''
+export function isLoggedIn(email: string): boolean {
+  return email.trim() !== ''
 }
