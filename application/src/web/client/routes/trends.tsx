@@ -5,6 +5,7 @@ import AppHeader from '../components/ui/app-header'
 import AppSidebar from '../components/ui/sidebar'
 import { isUserFeatureEnabled } from '../features/feature-flag'
 import getApiClientForClient from '../infrastructure/api'
+import { isLoggedIn } from '../features/authenticate/user-status'
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const env = context.cloudflare?.env
@@ -47,12 +48,10 @@ export default function Layout() {
     }
   }, [])
 
-  const isLoggedIn = email !== ''
-
   const outletContext: TrendsOutletContext = {
-    email: email,
+    email,
     userFeatureEnabled,
-    isLoggedIn,
+    isLoggedIn: isLoggedIn(email),
   }
 
   return (
