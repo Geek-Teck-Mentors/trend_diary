@@ -39,8 +39,8 @@ describe('POST /api/v2/auth/login', () => {
     const res = await requestLogin(JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD }))
 
     expect(res.status).toBe(200)
-    const body = (await res.json()) as { displayName: string | null }
-    expect(body).toHaveProperty('displayName')
+    const body = (await res.json()) as { email: string | null }
+    expect(body).toHaveProperty('email')
   })
 
   describe('準正常系', () => {

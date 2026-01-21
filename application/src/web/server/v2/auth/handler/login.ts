@@ -22,7 +22,7 @@ export default async function login(c: ZodValidatedContext<AuthInput>) {
 
   return c.json(
     {
-      displayName: activeUser.displayName,
+      email: activeUser.email,
     },
     200,
   )

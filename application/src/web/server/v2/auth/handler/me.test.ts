@@ -46,9 +46,9 @@ describe('GET /api/v2/auth/me', () => {
     const meRes = await requestMe(cookies)
     expect(meRes.status).toBe(200)
 
-    const body = (await meRes.json()) as { user: { displayName: string | null } }
+    const body = (await meRes.json()) as { user: { email: string | null } }
     expect(body).toHaveProperty('user')
-    expect(body.user).toHaveProperty('displayName')
+    expect(body.user).toHaveProperty('email')
   })
 
   it('準正常系: ログインしていない場合は401を返す', async () => {

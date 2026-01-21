@@ -24,7 +24,7 @@ export default async function me(c: Context) {
 
   return c.json({
     user: {
-      displayName: activeUser.displayName,
+      email: activeUser.email,
     },
   })
 }
