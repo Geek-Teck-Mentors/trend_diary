@@ -3,9 +3,9 @@ import { LoaderFunctionArgs, Outlet, useLoaderData } from 'react-router'
 import { SidebarProvider } from '../components/shadcn/sidebar'
 import AppHeader from '../components/ui/app-header'
 import AppSidebar from '../components/ui/sidebar'
+import { isLoggedIn } from '../features/authenticate/user-status'
 import { isUserFeatureEnabled } from '../features/feature-flag'
 import getApiClientForClient from '../infrastructure/api'
-import { isLoggedIn } from '../features/authenticate/user-status'
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const env = context.cloudflare?.env
