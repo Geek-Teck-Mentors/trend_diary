@@ -45,7 +45,7 @@ type Story = StoryObj<typeof AppSidebar>
 
 export const Default: Story = {
   args: {
-    isLoggedIn: true
+    isLoggedIn: true,
   },
   beforeEach: setDefaultMock,
   play: async ({ canvas }) => {
@@ -65,7 +65,7 @@ export const Default: Story = {
 
 export const InteractiveLogout: Story = {
   args: {
-    isLoggedIn: true
+    isLoggedIn: true,
   },
   beforeEach: setDefaultMock,
   play: async ({ canvas }) => {
@@ -80,7 +80,7 @@ export const InteractiveLogout: Story = {
 
 export const LoadingState: Story = {
   args: {
-    isLoggedIn: true
+    isLoggedIn: true,
   },
   beforeEach: () => {
     // ローディング状態のモックを設定

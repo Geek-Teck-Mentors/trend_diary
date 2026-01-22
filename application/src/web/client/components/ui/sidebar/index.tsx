@@ -66,11 +66,7 @@ export default function AppSidebar({ isLoggedIn, userFeatureEnabled }: Props) {
             <SidebarGroup className='absolute bottom-0 left-0 w-full'>
               <SidebarGroupLabel>User</SidebarGroupLabel>
               <SidebarGroupContent>
-                <UserSection
-                  variant='sidebar'
-                  onLogout={handleLogout}
-                  isLoading={isLoading}
-                />
+                <UserSection variant='sidebar' onLogout={handleLogout} isLoading={isLoading} />
               </SidebarGroupContent>
             </SidebarGroup>
           )}

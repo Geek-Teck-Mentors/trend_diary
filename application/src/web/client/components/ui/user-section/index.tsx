@@ -7,11 +7,7 @@ type UserSectionProps = {
   isLoading: boolean
 }
 
-export default function UserSection({
-  variant,
-  onLogout,
-  isLoading,
-}: UserSectionProps) {
+export default function UserSection({ variant, onLogout, isLoading }: UserSectionProps) {
   if (variant === 'sidebar') {
     return (
       <SidebarMenu>

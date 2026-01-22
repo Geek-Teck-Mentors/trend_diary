@@ -48,11 +48,7 @@ export default function AppHeader({ isLoggedIn, userFeatureEnabled }: Props) {
               <NavMenu variant='sheet' menuItems={menuItems} />
 
               {userFeatureEnabled && isLoggedIn && (
-                <UserSection
-                  variant='sheet'
-                  onLogout={handleLogout}
-                  isLoading={isLoading}
-                />
+                <UserSection variant='sheet' onLogout={handleLogout} isLoading={isLoading} />
               )}
             </div>
           </SheetContent>
