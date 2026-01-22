@@ -39,7 +39,7 @@ export default function Layout() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [userFeatureEnabled])
 
   const outletContext: TrendsOutletContext = {
     userFeatureEnabled,
