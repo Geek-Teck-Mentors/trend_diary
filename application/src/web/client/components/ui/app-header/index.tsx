@@ -1,6 +1,5 @@
 import { BookOpen, Menu } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { isLoggedIn } from '../../../features/authenticate/user-status'
 import { Button } from '../../shadcn/button'
 import {
   Sheet,
@@ -17,11 +16,11 @@ import useSidebar from '../sidebar/use-sidebar'
 import UserSection from '../user-section'
 
 type Props = {
-  displayName: string
+  isLoggedIn: boolean
   userFeatureEnabled: boolean
 }
 
-export default function AppHeader({ displayName, userFeatureEnabled }: Props) {
+export default function AppHeader({ isLoggedIn, userFeatureEnabled }: Props) {
   const navigate = useNavigate()
   const { handleLogout, isLoading } = useSidebar(navigate)
 
@@ -48,10 +47,9 @@ export default function AppHeader({ displayName, userFeatureEnabled }: Props) {
             <div className='flex flex-col gap-4'>
               <NavMenu variant='sheet' menuItems={menuItems} />
 
-              {userFeatureEnabled && isLoggedIn(displayName) && (
+              {userFeatureEnabled && isLoggedIn && (
                 <UserSection
                   variant='sheet'
-                  displayName={displayName}
                   onLogout={handleLogout}
                   isLoading={isLoading}
                 />

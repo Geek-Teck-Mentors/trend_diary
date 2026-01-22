@@ -14,14 +14,13 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 export type TrendsOutletContext = {
-  displayName: string
   userFeatureEnabled: boolean
   isLoggedIn: boolean
 }
 
 // remixではOutletがChildrenの役割を果たす
 export default function Layout() {
-  const [displayName, setDisplayName] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const { userFeatureEnabled } = useLoaderData<typeof loader>()
 
   useEffect(() => {
@@ -32,10 +31,9 @@ export default function Layout() {
     const f = async () => {
       const res = await client.v2.auth.me.$get({}, { init: { credentials: 'include' } })
       if (res.status === 200) {
-        const resJson = await res.json()
-        setDisplayName(resJson.user?.displayName ?? '')
+        setIsLoggedIn(true)
       } else {
-        setDisplayName('')
+        setIsLoggedIn(false)
       }
     }
 
@@ -47,19 +45,16 @@ export default function Layout() {
     }
   }, [])
 
-  const isLoggedIn = displayName !== ''
-
   const outletContext: TrendsOutletContext = {
-    displayName,
     userFeatureEnabled,
     isLoggedIn,
   }
 
   return (
     <SidebarProvider>
-      <AppSidebar displayName={displayName} userFeatureEnabled={userFeatureEnabled} />
+      <AppSidebar isLoggedIn={isLoggedIn} userFeatureEnabled={userFeatureEnabled} />
       <div className='w-full'>
-        <AppHeader displayName={displayName} userFeatureEnabled={userFeatureEnabled} />
+        <AppHeader isLoggedIn={isLoggedIn} userFeatureEnabled={userFeatureEnabled} />
         <Outlet context={outletContext} />
       </div>
     </SidebarProvider>
