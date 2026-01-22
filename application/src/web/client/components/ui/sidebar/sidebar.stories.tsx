@@ -45,7 +45,7 @@ type Story = StoryObj<typeof AppSidebar>
 
 export const Default: Story = {
   args: {
-    displayName: '田中太郎',
+    isLoggedIn: true,
   },
   beforeEach: setDefaultMock,
   play: async ({ canvas }) => {
@@ -63,32 +63,9 @@ export const Default: Story = {
   },
 }
 
-export const LongDisplayName: Story = {
-  args: {
-    displayName: 'とても長いユーザー名のテストケースです',
-  },
-  beforeEach: setDefaultMock,
-  play: async ({ canvas }) => {
-    await expect(canvas.getByText('TrendDiary')).toBeInTheDocument()
-    await expect(
-      canvas.getByText('ユーザー名：とても長いユーザー名のテストケースです'),
-    ).toBeInTheDocument()
-  },
-}
-
-export const ShortDisplayName: Story = {
-  args: {
-    displayName: 'A',
-  },
-  beforeEach: setDefaultMock,
-  play: async ({ canvas }) => {
-    await expect(canvas.getByText('ユーザー名：A')).toBeInTheDocument()
-  },
-}
-
 export const InteractiveLogout: Story = {
   args: {
-    displayName: '山田花子',
+    isLoggedIn: true,
   },
   beforeEach: setDefaultMock,
   play: async ({ canvas }) => {
@@ -103,7 +80,7 @@ export const InteractiveLogout: Story = {
 
 export const LoadingState: Story = {
   args: {
-    displayName: '佐藤次郎',
+    isLoggedIn: true,
   },
   beforeEach: () => {
     // ローディング状態のモックを設定

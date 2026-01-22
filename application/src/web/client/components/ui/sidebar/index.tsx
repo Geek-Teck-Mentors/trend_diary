@@ -1,6 +1,5 @@
 import { TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { isLoggedIn } from '../../../features/authenticate/user-status'
 import { InternalPath } from '../../../routes'
 import {
   Sidebar,
@@ -36,11 +35,11 @@ export const menuItems: MenuItem[] = [
 ]
 
 type Props = {
-  displayName: string
+  isLoggedIn: boolean
   userFeatureEnabled: boolean
 }
 
-export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
+export default function AppSidebar({ isLoggedIn, userFeatureEnabled }: Props) {
   const navigate = useNavigate()
   const { handleLogout, isLoading } = useSidebar(navigate)
 
@@ -63,16 +62,10 @@ export default function AppSidebar({ displayName, userFeatureEnabled }: Props) {
               <NavMenu variant='sidebar' menuItems={menuItems} />
             </SidebarGroupContent>
           </SidebarGroup>
-          {userFeatureEnabled && isLoggedIn(displayName) && (
+          {userFeatureEnabled && isLoggedIn && (
             <SidebarGroup className='absolute bottom-0 left-0 w-full'>
-              <SidebarGroupLabel>User</SidebarGroupLabel>
               <SidebarGroupContent>
-                <UserSection
-                  variant='sidebar'
-                  displayName={displayName}
-                  onLogout={handleLogout}
-                  isLoading={isLoading}
-                />
+                <UserSection variant='sidebar' onLogout={handleLogout} isLoading={isLoading} />
               </SidebarGroupContent>
             </SidebarGroup>
           )}
