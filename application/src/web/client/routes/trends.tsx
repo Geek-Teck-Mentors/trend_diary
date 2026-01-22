@@ -30,11 +30,7 @@ export default function Layout() {
 
     const f = async () => {
       const res = await client.v2.auth.me.$get({}, { init: { credentials: 'include' } })
-      if (res.status === 200) {
-        setIsLoggedIn(true)
-      } else {
-        setIsLoggedIn(false)
-      }
+      setIsLoggedIn(res.status === 200)
     }
 
     if (isMounted) {
