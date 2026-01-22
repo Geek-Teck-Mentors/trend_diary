@@ -22,7 +22,6 @@ export default function UserSection({ variant, onLogout, isLoading }: UserSectio
 
   return (
     <div className='border-t pt-4 mt-auto'>
-      <div className='text-xs font-semibold text-gray-500 mb-2 px-3'>User</div>
       <div className='flex flex-col gap-2 px-3'>
         <Button onClick={onLogout} disabled={isLoading} variant='outline'>
           {isLoading ? 'ログアウト中...' : 'ログアウト'}
