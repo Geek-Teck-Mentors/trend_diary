@@ -58,8 +58,6 @@ jobs:
 
   auto-format:
     runs-on: ubuntu-latest
-    needs: code-quality
-    if: success()
     permissions:
       contents: write
     steps:
