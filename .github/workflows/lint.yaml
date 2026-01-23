@@ -1,8 +1,6 @@
 name: Lint
 
-on:
-  push:
-  pull_request:
+on: push
 
 permissions:
   contents: read
@@ -99,19 +97,41 @@ jobs:
 
   request-gemini-review:
     runs-on: ubuntu-latest
-    # Lintジョブが全て成功し、かつPRの場合のみ実行
+    # Lintジョブが全て成功した場合のみ実行
     needs: [code-quality, ts-compile, build]
-    if: github.event_name == 'pull_request'
     concurrency:
-      group: gemini-review-${{ github.event.pull_request.number }}
+      group: gemini-review-${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - name: Check review request count
-        id: check_count
+      - name: Get PR number
+        id: pr
         uses: actions/github-script@v7
         with:
           script: |
-            const prNumber = context.payload.pull_request.number;
+            const ref = context.ref.replace('refs/heads/', '');
+
+            // ブランチに紐づくオープンなPRを検索
+            const pulls = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${ref}`,
+              state: 'open'
+            });
+
+            if (pulls.data.length === 0) {
+              core.info('No open PR found for this branch. Skipping review request.');
+              return null;
+            }
+
+            return pulls.data[0].number;
+
+      - name: Check review request count
+        id: check_count
+        if: steps.pr.outputs.result != 'null'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.result }};
 
             // PRの全コメントを取得
             const comments = await github.rest.issues.listComments({
@@ -143,13 +163,13 @@ jobs:
             return botReviewRequests < 3;
 
       - name: Comment on PR to request Gemini review
-        if: steps.check_count.outputs.result == 'true'
+        if: steps.pr.outputs.result != 'null' && steps.check_count.outputs.result == 'true'
         uses: actions/github-script@v7
         with:
           script: |
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
+              issue_number: ${{ steps.pr.outputs.result }},
               body: '/gemini review'
             });
