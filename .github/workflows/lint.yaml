@@ -8,6 +8,7 @@ permissions:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
+  BIOME_VERSION: 2.0.6
 
 defaults:
   run:
@@ -22,10 +23,10 @@ jobs:
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          version: 2.0.6
+          version: ${{ env.BIOME_VERSION }}
 
-      - name: Run Biome
-        run: biome ci .
+      - name: Run Biome Lint
+        run: biome lint .
 
   # 本来であれば、概念的にコンパイルはLint/Formatと同列ではないが、実行時間短縮のために並列実行にしている
   ts-compile:
@@ -54,3 +55,41 @@ jobs:
 
       - name: ビルド
         run: npm run build
+
+  auto-format:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # git pushするためにはtokenが必要
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: ${{ env.BIOME_VERSION }}
+
+      - name: Check format
+        id: check
+        # formatのチェックが失敗してもジョブを続行
+        continue-on-error: true
+        working-directory: ./application
+        run: biome format --diagnostic-level=error .
+
+      - name: Run format
+        # チェックが失敗した場合のみフォーマットを実行
+        if: steps.check.outcome == 'failure'
+        working-directory: ./application
+        run: biome format --write .
+
+      - name: Commit and push changes
+        # チェックが失敗していた場合のみコミット＆プッシュ
+        if: steps.check.outcome == 'failure'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add application
+          git commit -m "chore: biome format"
+          git push
