@@ -58,11 +58,13 @@ jobs:
             SUPABASE_ANON_KEY
             DATABASE_URL
             DISCORD_WEBHOOK_URL
+            FEATURE_USER_ENABLED
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          FEATURE_USER_ENABLED: true
 
       - name: デプロイの出力を表示
         env:
