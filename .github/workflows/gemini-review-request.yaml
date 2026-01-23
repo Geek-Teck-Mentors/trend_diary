@@ -12,6 +12,9 @@ permissions:
 jobs:
   comment-review-request:
     runs-on: ubuntu-latest
+    concurrency:
+      group: gemini-review-${{ github.event.workflow_run.head_branch }}
+      cancel-in-progress: false
     # Lintワークフローが成功し、かつPRからのトリガーの場合のみ実行
     if: >
       github.event.workflow_run.conclusion == 'success' &&
@@ -36,7 +39,33 @@ jobs:
 
             return pulls.data[0].number;
 
+      - name: Check review request count
+        id: check_count
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.result }};
+
+            // PRの全コメントを取得
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+
+            // github-actions[bot]による'/gemini review'コメントの数をカウント
+            const botReviewRequests = comments.data.filter(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              comment.body.trim() === '/gemini review'
+            ).length;
+
+            core.info(`Bot has requested Gemini review ${botReviewRequests} times`);
+
+            // 3回未満ならコメント投稿を許可
+            return botReviewRequests < 3;
+
       - name: Comment on PR to request Gemini review
+        if: steps.check_count.outputs.result == 'true'
         uses: actions/github-script@v7
         with:
           script: |
