@@ -1,9 +1,12 @@
 name: Lint
 
-on: push
+on:
+  push:
+  pull_request:
 
 permissions:
   contents: read
+  pull-requests: write
 
 # 共通の設定を定義
 env:
@@ -93,3 +96,49 @@ jobs:
           git add application
           git commit -m "chore: biome format"
           git push
+
+  request-gemini-review:
+    runs-on: ubuntu-latest
+    # Lintジョブが全て成功し、かつPRの場合のみ実行
+    needs: [code-quality, ts-compile, build]
+    if: github.event_name == 'pull_request'
+    concurrency:
+      group: gemini-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Check review request count
+        id: check_count
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+
+            // PRの全コメントを取得
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+
+            // github-actions[bot]による'/gemini review'コメントの数をカウント
+            const botReviewRequests = comments.data.filter(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              comment.body.trim() === '/gemini review'
+            ).length;
+
+            core.info(`Bot has requested Gemini review ${botReviewRequests} times`);
+
+            // 3回未満ならコメント投稿を許可
+            return botReviewRequests < 3;
+
+      - name: Comment on PR to request Gemini review
+        if: steps.check_count.outputs.result == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: '/gemini review'
+            });
