@@ -3,7 +3,7 @@ name: Lint
 on: push
 
 permissions:
-  contents: write
+  contents: read
 
 # 共通の設定を定義
 env:
@@ -57,6 +57,8 @@ jobs:
 
   auto-format:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
