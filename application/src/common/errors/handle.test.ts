@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { LoggerType } from '@/common/logger'
 
 import ClientError from './client-error/client-error'
+import ExternalServiceError from './external-service-error'
 import handleError from './handle'
 import ServerError from './server-error'
 
@@ -49,6 +50,42 @@ describe('handleError', () => {
     expect(result.message).toBe('db down')
     expect(logger.error).toHaveBeenCalledTimes(1)
     expect(logger.error).toHaveBeenCalledWith('internal server error', error)
+    expect(logger.warn).not.toHaveBeenCalled()
+  })
+
+  it('ExternalServiceErrorをHTTPExceptionに変換して詳細情報を含むerrorログを出す', () => {
+    const logger = createLoggerMock()
+    const originalError = new ServerError('ActiveUser creation failed')
+    const serviceError = new ServerError('Supabase Auth deletion failed')
+    const context = { userId: 'auth-user-123' }
+    const error = new ExternalServiceError(
+      'Failed to delete Supabase Auth user during compensation',
+      originalError,
+      serviceError,
+      context,
+    )
+
+    const result = handleError(error, logger as unknown as LoggerType)
+
+    expect(result).toBeInstanceOf(HTTPException)
+    expect(result.status).toBe(500)
+    expect(result.message).toBe('Failed to delete Supabase Auth user during compensation')
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error).toHaveBeenCalledWith(
+      {
+        msg: 'external service error',
+        originalError: {
+          message: originalError.message,
+          stack: originalError.stack,
+        },
+        serviceError: {
+          message: serviceError.message,
+          stack: serviceError.stack,
+        },
+        context,
+      },
+      error,
+    )
     expect(logger.warn).not.toHaveBeenCalled()
   })
 
