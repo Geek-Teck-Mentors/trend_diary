@@ -92,7 +92,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add .
-          git commit -m "style: auto format by biome
-
-          https://claude.ai/code/session_014NDYRTho6EyUEQvLJVYqAi"
+          git commit -m "style: auto format by biome"
           git push
