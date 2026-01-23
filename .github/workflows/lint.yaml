@@ -3,7 +3,7 @@ name: Lint
 on: push
 
 permissions:
-  contents: read
+  contents: write
 
 # 共通の設定を定義
 env:
@@ -54,3 +54,43 @@ jobs:
 
       - name: ビルド
         run: npm run build
+
+  auto-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # git pushするためにはtokenが必要
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: 2.0.6
+
+      - name: Check format
+        id: check
+        # formatのチェックが失敗してもジョブを続行
+        continue-on-error: true
+        working-directory: ./application
+        run: biome format .
+
+      - name: Run format
+        # チェックが失敗した場合のみフォーマットを実行
+        if: steps.check.outcome == 'failure'
+        working-directory: ./application
+        run: biome format --write .
+
+      - name: Commit and push changes
+        # チェックが失敗していた場合のみコミット＆プッシュ
+        if: steps.check.outcome == 'failure'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          # 変更がある場合のみコミット
+          git diff --staged --quiet || git commit -m "style: auto format by biome
+
+          https://claude.ai/code/session_014NDYRTho6EyUEQvLJVYqAi"
+          # コミットがある場合のみプッシュ
+          git diff HEAD@{1} --quiet || git push
