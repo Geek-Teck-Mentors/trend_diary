@@ -140,14 +140,14 @@ jobs:
               issue_number: prNumber
             });
 
-            // gemini-code-assistantのコメントに'unable'が含まれているかチェック
+            // gemini-code-assistのコメントに'unable'が含まれているかチェック
             const hasUnableComment = comments.data.some(comment =>
-              comment.user.login.includes('gemini-code-assistant') &&
+              comment.user.login.includes('gemini-code-assist') &&
               comment.body.toLowerCase().includes('unable')
             );
 
             if (hasUnableComment) {
-              core.info('Gemini code assistant has an "unable" comment. Skipping review request.');
+              core.info('Gemini code assist has an "unable" comment. Skipping review request.');
               return false;
             }
 
