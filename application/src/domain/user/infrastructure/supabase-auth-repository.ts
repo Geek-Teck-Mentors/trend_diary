@@ -104,7 +104,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       }
 
       // その他のエラーは一般化（Supabaseの内部エラーメッセージを露出しない）
-      return failure(new ServerError('Authentication service error'))
+      return failure(new ServerError(`Authentication service error: ${error}`))
     }
 
     if (!data.user) {
@@ -149,7 +149,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       }
 
       // その他のエラーも一般化（Supabaseの内部エラーメッセージを露出しない）
-      return failure(new ServerError('Authentication service error'))
+      return failure(new ServerError(`Authentication service error: ${error}`))
     }
 
     if (!data.user || !data.session) {
