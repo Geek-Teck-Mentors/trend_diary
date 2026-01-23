@@ -4,6 +4,7 @@ on: push
 
 permissions:
   contents: read
+  pull-requests: write
 
 # 共通の設定を定義
 env:
@@ -93,3 +94,82 @@ jobs:
           git add application
           git commit -m "chore: biome format"
           git push
+
+  request-gemini-review:
+    runs-on: ubuntu-latest
+    # Lintジョブが全て成功した場合のみ実行
+    needs: [code-quality, ts-compile, build]
+    concurrency:
+      group: gemini-review-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Get PR number
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ref = context.ref.replace('refs/heads/', '');
+
+            // ブランチに紐づくオープンなPRを検索
+            const pulls = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${ref}`,
+              state: 'open'
+            });
+
+            if (pulls.data.length === 0) {
+              core.info('No open PR found for this branch. Skipping review request.');
+              return null;
+            }
+
+            return pulls.data[0].number;
+
+      - name: Check review request count
+        id: check_count
+        if: steps.pr.outputs.result != 'null'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.result }};
+
+            // PRの全コメントを取得
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+
+            // gemini-code-assistのコメントに'unable'が含まれているかチェック
+            const hasUnableComment = comments.data.some(comment =>
+              comment.user.login.includes('gemini-code-assist') &&
+              comment.body.toLowerCase().includes('unable')
+            );
+
+            if (hasUnableComment) {
+              core.info('Gemini code assist has an "unable" comment. Skipping review request.');
+              return false;
+            }
+
+            // github-actions[bot]による'/gemini review'コメントの数をカウント
+            const botReviewRequests = comments.data.filter(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              comment.body.trim() === '/gemini review'
+            ).length;
+
+            core.info(`Bot has requested Gemini review ${botReviewRequests} times`);
+
+            // 10回未満ならコメント投稿を許可
+            return botReviewRequests < 10;
+
+      - name: Comment on PR to request Gemini review
+        if: steps.pr.outputs.result != 'null' && steps.check_count.outputs.result == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.result }},
+              body: '/gemini review'
+            });
