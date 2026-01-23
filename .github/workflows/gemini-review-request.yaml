@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: gemini-review-${{ github.event.workflow_run.head_branch }}
-      cancel-in-progress: false
+      cancel-in-progress: true
     # Lintワークフローが成功し、かつPRからのトリガーの場合のみ実行
     if: >
       github.event.workflow_run.conclusion == 'success' &&
