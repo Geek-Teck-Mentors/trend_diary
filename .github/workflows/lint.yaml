@@ -98,7 +98,7 @@ jobs:
   request-gemini-review:
     runs-on: ubuntu-latest
     # Lintジョブが全て成功した場合のみ実行
-    needs: [code-quality, ts-compile, build]
+    needs: [code-quality, ts-compile, build, auto-format]
     concurrency:
       group: gemini-review-${{ github.ref }}
       cancel-in-progress: true
