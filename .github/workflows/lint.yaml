@@ -120,6 +120,17 @@ jobs:
               issue_number: prNumber
             });
 
+            // gemini-code-assistantのコメントに'unable'が含まれているかチェック
+            const hasUnableComment = comments.data.some(comment =>
+              comment.user.login === 'gemini-code-assistant' &&
+              comment.body.toLowerCase().includes('unable')
+            );
+
+            if (hasUnableComment) {
+              core.info('Gemini code assistant has an "unable" comment. Skipping review request.');
+              return false;
+            }
+
             // github-actions[bot]による'/gemini review'コメントの数をカウント
             const botReviewRequests = comments.data.filter(comment =>
               comment.user.login === 'github-actions[bot]' &&
