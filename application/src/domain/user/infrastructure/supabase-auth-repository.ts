@@ -103,7 +103,6 @@ export class SupabaseAuthRepository implements AuthV2Repository {
         return failure(new AlreadyExistsError('User already exists'))
       }
 
-      // その他のエラーは一般化（Supabaseの内部エラーメッセージを露出しない）
       return failure(new ServerError(`Authentication service error: ${error.message}`))
     }
 
@@ -148,7 +147,6 @@ export class SupabaseAuthRepository implements AuthV2Repository {
         return failure(new ClientError('Invalid email or password', 401))
       }
 
-      // その他のエラーも一般化（Supabaseの内部エラーメッセージを露出しない）
       return failure(new ServerError(`Authentication service error: ${error.message}`))
     }
 
@@ -177,8 +175,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
 
     const { error } = result.data
     if (error) {
-      // Supabaseの内部エラーメッセージを露出しない
-      return failure(new ServerError('Logout failed'))
+      return failure(new ServerError(`Logout failed: ${error.message}`))
     }
 
     return success(undefined)
@@ -228,8 +225,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       error,
     } = result.data
     if (error || !session) {
-      // Supabaseの内部エラーメッセージを露出しない
-      return failure(new ServerError('Session refresh failed'))
+      return failure(new ServerError(`Session refresh failed: ${error?.message}`))
     }
 
     const userResult = this.toAuthenticationUser(session.user)
@@ -251,7 +247,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
 
     const { error } = result.data
     if (error) {
-      return failure(new ServerError('User deletion failed'))
+      return failure(new ServerError(`User deletion failed: ${error.message}`))
     }
 
     return success(undefined)
