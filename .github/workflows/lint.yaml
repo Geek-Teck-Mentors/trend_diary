@@ -71,17 +71,21 @@ jobs:
         with:
           version: 2.0.6
 
-      - name: Run format and check
+      - name: Check format
         id: check
         # formatのチェックが失敗してもジョブを続行
         continue-on-error: true
         working-directory: ./application
-        run: |
-          biome format --write .
-          git diff --exit-code
+        run: biome format --diagnostic-level=error .
+
+      - name: Run format
+        # チェックが失敗した場合のみフォーマットを実行
+        if: steps.check.outcome == 'failure'
+        working-directory: ./application
+        run: biome format --write .
 
       - name: Commit and push changes
-        # formatで変更があった場合のみコミット＆プッシュ
+        # チェックが失敗していた場合のみコミット＆プッシュ
         if: steps.check.outcome == 'failure'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
