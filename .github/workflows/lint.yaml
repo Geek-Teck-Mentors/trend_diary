@@ -142,7 +142,7 @@ jobs:
 
             // gemini-code-assistantのコメントに'unable'が含まれているかチェック
             const hasUnableComment = comments.data.some(comment =>
-              comment.user.login === 'gemini-code-assistant' &&
+              comment.user.login.includes('gemini-code-assistant') &&
               comment.body.toLowerCase().includes('unable')
             );
 
@@ -159,8 +159,8 @@ jobs:
 
             core.info(`Bot has requested Gemini review ${botReviewRequests} times`);
 
-            // 3回未満ならコメント投稿を許可
-            return botReviewRequests < 3;
+            // 10回未満ならコメント投稿を許可
+            return botReviewRequests < 10;
 
       - name: Comment on PR to request Gemini review
         if: steps.pr.outputs.result != 'null' && steps.check_count.outputs.result == 'true'
