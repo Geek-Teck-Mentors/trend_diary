@@ -93,12 +93,12 @@ export const OpenDropdownMenu: Story = {
     })
 
     await step('ドロップダウンメニューが表示され、3つの項目があることを確認', async () => {
-      await waitFor(async () => {
-        const body = within(canvasElement.ownerDocument.body)
-        const allItem = body.getByRole('menuitem', { name: 'すべて' })
-        const qiitaItem = body.getByRole('menuitem', { name: 'Qiita' })
-        const zennItem = body.getByRole('menuitem', { name: 'Zenn' })
+      const body = within(canvasElement.ownerDocument.body)
+      const allItem = await body.findByRole('menuitem', { name: 'すべて' })
+      const qiitaItem = await body.findByRole('menuitem', { name: 'Qiita' })
+      const zennItem = await body.findByRole('menuitem', { name: 'Zenn' })
 
+      await waitFor(async () => {
         await expect(allItem).toBeVisible()
         await expect(qiitaItem).toBeVisible()
         await expect(zennItem).toBeVisible()
@@ -122,11 +122,9 @@ export const SelectQiitaFromDropdown: Story = {
     })
 
     await step('Qiita項目をクリック', async () => {
-      await waitFor(async () => {
-        const body = within(canvasElement.ownerDocument.body)
-        const qiitaItem = body.getByRole('menuitem', { name: 'Qiita' })
-        await userEvent.click(qiitaItem)
-      })
+      const body = within(canvasElement.ownerDocument.body)
+      const qiitaItem = await body.findByRole('menuitem', { name: 'Qiita' })
+      await userEvent.click(qiitaItem)
     })
   },
 }
@@ -146,11 +144,9 @@ export const SelectZennFromDropdown: Story = {
     })
 
     await step('Zenn項目をクリック', async () => {
-      await waitFor(async () => {
-        const body = within(canvasElement.ownerDocument.body)
-        const zennItem = body.getByRole('menuitem', { name: 'Zenn' })
-        await userEvent.click(zennItem)
-      })
+      const body = within(canvasElement.ownerDocument.body)
+      const zennItem = await body.findByRole('menuitem', { name: 'Zenn' })
+      await userEvent.click(zennItem)
     })
   },
 }
@@ -174,11 +170,9 @@ export const ResetFilter: Story = {
     })
 
     await step('「すべて」項目をクリック', async () => {
-      await waitFor(async () => {
-        const body = within(canvasElement.ownerDocument.body)
-        const allItem = body.getByRole('menuitem', { name: 'すべて' })
-        await userEvent.click(allItem)
-      })
+      const body = within(canvasElement.ownerDocument.body)
+      const allItem = await body.findByRole('menuitem', { name: 'すべて' })
+      await userEvent.click(allItem)
     })
   },
 }
