@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect } from 'storybook/test'
+import { expect, waitFor } from 'storybook/test'
 import { AuthenticateForm } from './authenticate-form'
 
 const meta: Meta<typeof AuthenticateForm> = {
@@ -14,7 +14,7 @@ const defaultArgs = {
   submitButtonText: 'ログイン',
   async handleSubmit() {
     await new Promise((resolve) => {
-      setTimeout(() => resolve, 300)
+      setTimeout(resolve, 300)
     })
   },
 }
@@ -35,9 +35,9 @@ export const EmptyForm: Story = {
     await expect(canvas.getByRole('button')).toHaveTextContent('ログイン')
 
     // エラーメッセージが表示されていないことを確認
-    await expect(canvas.queryByText('Invalid email')).not.toBeInTheDocument()
+    await expect(canvas.queryByText('有効なメールアドレスを入力してください')).not.toBeInTheDocument()
     await expect(
-      canvas.queryByText('String must contain at least 8 character(s)'),
+      canvas.queryByText('パスワードは8文字以上必要です'),
     ).not.toBeInTheDocument()
 
     // aria-invalid属性が設定されていないことを確認
@@ -54,11 +54,13 @@ export const FilledForm: Story = {
   play: async ({ canvas, userEvent }) => {
     await userEvent.type(canvas.getByLabelText('メールアドレス'), 'email@provider.com')
 
-    await userEvent.type(canvas.getByLabelText('パスワード'), 'a-random-password')
+    await userEvent.type(canvas.getByLabelText('パスワード'), 'Password1!')
 
     await userEvent.click(canvas.getByRole('button'))
 
-    await expect(canvas.getByRole('button')).toHaveTextContent('ログイン中...')
+    await waitFor(() => {
+      expect(canvas.getByRole('button')).toHaveTextContent('ログイン中...')
+    })
   },
 }
 
@@ -76,7 +78,7 @@ export const FormValidationError: Story = {
 
     // バリデーションエラーメッセージが表示されることを確認
     await expect(
-      canvas.getByText('String must contain at least 8 character(s)'),
+      canvas.getByText('パスワードは8文字以上必要です'),
     ).toBeInTheDocument()
 
     // aria-invalid属性が正しく設定されることを確認
