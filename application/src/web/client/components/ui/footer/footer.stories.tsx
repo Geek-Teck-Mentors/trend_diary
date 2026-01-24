@@ -46,14 +46,16 @@ export const HoverInteraction: Story = {
 export const LinkValidation: Story = {
   play: async ({ canvas }) => {
     // リンクのhref属性が正しく設定されていることを確認
-    const termsLink = canvas.getByRole('link', { name: '利用規約' })
-    await expect(termsLink).toHaveAttribute('href', '/terms-of-service')
+    const linksToValidate = [
+      { name: '利用規約', href: '/terms-of-service' },
+      { name: 'プライバシーポリシー', href: '/privacy-policy' },
+      { name: 'お問い合わせ', href: 'https://forms.gle/HgaE9qMXq6MJAxNG9' },
+    ]
 
-    const privacyLink = canvas.getByRole('link', { name: 'プライバシーポリシー' })
-    await expect(privacyLink).toHaveAttribute('href', '/privacy-policy')
-
-    const contactLink = canvas.getByRole('link', { name: 'お問い合わせ' })
-    await expect(contactLink).toHaveAttribute('href', 'https://forms.gle/HgaE9qMXq6MJAxNG9')
+    for (const { name, href } of linksToValidate) {
+      const link = canvas.getByRole('link', { name })
+      await expect(link).toHaveAttribute('href', href)
+    }
   },
 }
 
