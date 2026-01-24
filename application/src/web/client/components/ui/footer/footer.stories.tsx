@@ -95,11 +95,11 @@ export const DarkTheme: Story = {
     await expect(footer).toHaveClass('bg-slate-900')
 
     // リンクにホバー効果が設定されていることを確認
-    const termsLink = canvas.getByRole('link', { name: '利用規約' })
-    await expect(termsLink).toHaveClass('hover:text-white')
-
-    const privacyLink = canvas.getByRole('link', { name: 'プライバシーポリシー' })
-    await expect(privacyLink).toHaveClass('hover:text-white')
+    const linkNames = ['利用規約', 'プライバシーポリシー', 'お問い合わせ']
+    for (const name of linkNames) {
+      const link = canvas.getByRole('link', { name })
+      await expect(link).toHaveClass('hover:text-white')
+    }
 
     // コピーライトテキストの色が正しく設定されていることを確認
     const copyrightSection = footer.querySelector('.text-slate-400')
