@@ -31,20 +31,15 @@ export const Default: Story = {
 
 export const HoverInteraction: Story = {
   play: async ({ canvas }) => {
-    // 利用規約リンクにホバーした時の動作を確認
-    const termsLink = canvas.getByRole('link', { name: '利用規約' })
-    await userEvent.hover(termsLink)
-    await expect(termsLink).toHaveClass('hover:text-white')
-
-    // プライバシーポリシーリンクにホバーした時の動作を確認
-    const privacyLink = canvas.getByRole('link', { name: 'プライバシーポリシー' })
-    await userEvent.hover(privacyLink)
-    await expect(privacyLink).toHaveClass('hover:text-white')
-
-    // お問い合わせリンクにホバーした時の動作を確認
-    const contactLink = canvas.getByRole('link', { name: 'お問い合わせ' })
-    await userEvent.hover(contactLink)
-    await expect(contactLink).toHaveClass('hover:text-white')
+    // 各リンクのホバー動作を確認
+    const linksToTest = ['利用規約', 'プライバシーポリシー', 'お問い合わせ']
+    for (const name of linksToTest) {
+      const link = canvas.getByRole('link', { name })
+      await userEvent.hover(link)
+      await expect(link).toHaveClass('hover:text-white')
+      // 次の操作のためにホバーを解除
+      await userEvent.unhover(link)
+    }
   },
 }
 
