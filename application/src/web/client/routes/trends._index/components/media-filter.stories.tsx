@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, waitFor } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import MediaFilter from './media-filter'
 
 const meta: Meta<typeof MediaFilter> = {
@@ -85,7 +85,7 @@ export const OpenDropdownMenu: Story = {
       // Storybook display only
     },
   },
-  play: async ({ canvas, step }) => {
+  play: async ({ canvasElement, canvas, step }) => {
     const trigger = canvas.getByRole('button')
 
     await step('フィルタトリガーをクリックしてドロップダウンを開く', async () => {
@@ -94,9 +94,10 @@ export const OpenDropdownMenu: Story = {
 
     await step('ドロップダウンメニューが表示され、3つの項目があることを確認', async () => {
       await waitFor(async () => {
-        const allItem = canvas.getByRole('menuitem', { name: 'すべて' })
-        const qiitaItem = canvas.getByRole('menuitem', { name: 'Qiita' })
-        const zennItem = canvas.getByRole('menuitem', { name: 'Zenn' })
+        const body = within(canvasElement.ownerDocument.body)
+        const allItem = body.getByRole('menuitem', { name: 'すべて' })
+        const qiitaItem = body.getByRole('menuitem', { name: 'Qiita' })
+        const zennItem = body.getByRole('menuitem', { name: 'Zenn' })
 
         await expect(allItem).toBeVisible()
         await expect(qiitaItem).toBeVisible()
@@ -113,7 +114,7 @@ export const SelectQiitaFromDropdown: Story = {
       // Storybook display only
     },
   },
-  play: async ({ canvas, step }) => {
+  play: async ({ canvasElement, canvas, step }) => {
     const trigger = canvas.getByRole('button')
 
     await step('フィルタトリガーをクリック', async () => {
@@ -122,7 +123,8 @@ export const SelectQiitaFromDropdown: Story = {
 
     await step('Qiita項目をクリック', async () => {
       await waitFor(async () => {
-        const qiitaItem = canvas.getByRole('menuitem', { name: 'Qiita' })
+        const body = within(canvasElement.ownerDocument.body)
+        const qiitaItem = body.getByRole('menuitem', { name: 'Qiita' })
         await userEvent.click(qiitaItem)
       })
     })
@@ -136,7 +138,7 @@ export const SelectZennFromDropdown: Story = {
       // Storybook display only
     },
   },
-  play: async ({ canvas, step }) => {
+  play: async ({ canvasElement, canvas, step }) => {
     const trigger = canvas.getByRole('button')
 
     await step('フィルタトリガーをクリック', async () => {
@@ -145,7 +147,8 @@ export const SelectZennFromDropdown: Story = {
 
     await step('Zenn項目をクリック', async () => {
       await waitFor(async () => {
-        const zennItem = canvas.getByRole('menuitem', { name: 'Zenn' })
+        const body = within(canvasElement.ownerDocument.body)
+        const zennItem = body.getByRole('menuitem', { name: 'Zenn' })
         await userEvent.click(zennItem)
       })
     })
@@ -159,7 +162,7 @@ export const ResetFilter: Story = {
       // Storybook display only
     },
   },
-  play: async ({ canvas, step }) => {
+  play: async ({ canvasElement, canvas, step }) => {
     const trigger = canvas.getByRole('button')
 
     await step('初期状態でQiitaが選択されていることを確認', async () => {
@@ -172,7 +175,8 @@ export const ResetFilter: Story = {
 
     await step('「すべて」項目をクリック', async () => {
       await waitFor(async () => {
-        const allItem = canvas.getByRole('menuitem', { name: 'すべて' })
+        const body = within(canvasElement.ownerDocument.body)
+        const allItem = body.getByRole('menuitem', { name: 'すべて' })
         await userEvent.click(allItem)
       })
     })
