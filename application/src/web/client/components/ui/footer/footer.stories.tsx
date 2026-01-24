@@ -82,7 +82,7 @@ export const ResponsiveLayout: Story = {
     const footer = canvas.getByRole('contentinfo')
     const navElement = footer.querySelector('nav')
     await expect(navElement).toBeInTheDocument()
-    await expect(navElement).toHaveClass('flex-col')
+    await expect(navElement).toHaveClass('flex-col', 'md:flex-row')
   },
 }
 
