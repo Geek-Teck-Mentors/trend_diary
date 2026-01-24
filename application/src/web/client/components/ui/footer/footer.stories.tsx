@@ -18,61 +18,47 @@ export const Default: Story = {
     const footer = canvas.getByRole('contentinfo')
     await expect(footer).toBeInTheDocument()
 
-    // サイトタイトルが表示されることを確認
-    await expect(canvas.getByText('TrendDiary')).toBeInTheDocument()
-
-    // ロゴアイコンが存在することを確認（TrendingUpアイコン）
-    const logo = footer.querySelector('.text-blue-400')
-    await expect(logo).toBeInTheDocument()
-
     // ナビゲーションリンクが存在することを確認
-    await expect(canvas.getByRole('link', { name: 'ログイン' })).toBeInTheDocument()
-    await expect(canvas.getByRole('link', { name: 'アカウント作成' })).toBeInTheDocument()
+    await expect(canvas.getByRole('link', { name: '利用規約' })).toBeInTheDocument()
+    await expect(canvas.getByRole('link', { name: 'プライバシーポリシー' })).toBeInTheDocument()
+    await expect(canvas.getByRole('link', { name: 'お問い合わせ' })).toBeInTheDocument()
 
     // コピーライト表記が存在することを確認
     await expect(canvas.getByText(/© 2025 TrendDiary/)).toBeInTheDocument()
     await expect(canvas.getByText(/技術トレンドを効率的に管理するツール/)).toBeInTheDocument()
-
-    // TOPページへのリンクが存在することを確認
-    const homeLink = canvas.getAllByRole('link').find((link) => link.getAttribute('href') === '/')
-    await expect(homeLink).toBeInTheDocument()
   },
 }
 
 export const HoverInteraction: Story = {
   play: async ({ canvas }) => {
-    // サイトロゴにホバーした時の動作を確認
-    const homeLink = canvas.getAllByRole('link').find((link) => link.getAttribute('href') === '/')
+    // 利用規約リンクにホバーした時の動作を確認
+    const termsLink = canvas.getByRole('link', { name: '利用規約' })
+    await userEvent.hover(termsLink)
+    await expect(termsLink).toHaveClass('hover:text-white')
 
-    if (homeLink) {
-      await userEvent.hover(homeLink)
-      // ホバー効果が適用されることを確認（opacity変化）
-      await expect(homeLink).toHaveClass('hover:opacity-80')
-    }
+    // プライバシーポリシーリンクにホバーした時の動作を確認
+    const privacyLink = canvas.getByRole('link', { name: 'プライバシーポリシー' })
+    await userEvent.hover(privacyLink)
+    await expect(privacyLink).toHaveClass('hover:text-white')
 
-    // ログインリンクにホバーした時の動作を確認
-    const loginLink = canvas.getByRole('link', { name: 'ログイン' })
-    await userEvent.hover(loginLink)
-    await expect(loginLink).toHaveClass('hover:text-white')
-
-    // アカウント作成リンクにホバーした時の動作を確認
-    const signupLink = canvas.getByRole('link', { name: 'アカウント作成' })
-    await userEvent.hover(signupLink)
-    await expect(signupLink).toHaveClass('hover:text-white')
+    // お問い合わせリンクにホバーした時の動作を確認
+    const contactLink = canvas.getByRole('link', { name: 'お問い合わせ' })
+    await userEvent.hover(contactLink)
+    await expect(contactLink).toHaveClass('hover:text-white')
   },
 }
 
 export const LinkValidation: Story = {
   play: async ({ canvas }) => {
     // リンクのhref属性が正しく設定されていることを確認
-    const homeLink = canvas.getAllByRole('link').find((link) => link.getAttribute('href') === '/')
-    await expect(homeLink).toHaveAttribute('href', '/')
+    const termsLink = canvas.getByRole('link', { name: '利用規約' })
+    await expect(termsLink).toHaveAttribute('href', '/terms-of-service')
 
-    const loginLink = canvas.getByRole('link', { name: 'ログイン' })
-    await expect(loginLink).toHaveAttribute('href', '/login')
+    const privacyLink = canvas.getByRole('link', { name: 'プライバシーポリシー' })
+    await expect(privacyLink).toHaveAttribute('href', '/privacy-policy')
 
-    const signupLink = canvas.getByRole('link', { name: 'アカウント作成' })
-    await expect(signupLink).toHaveAttribute('href', '/signup')
+    const contactLink = canvas.getByRole('link', { name: 'お問い合わせ' })
+    await expect(contactLink).toHaveAttribute('href', 'https://forms.gle/HgaE9qMXq6MJAxNG9')
   },
 }
 
@@ -84,17 +70,19 @@ export const ResponsiveLayout: Story = {
   },
   play: async ({ canvas }) => {
     // モバイル表示でも要素が正しく表示されることを確認
-    await expect(canvas.getByText('TrendDiary')).toBeInTheDocument()
-    await expect(canvas.getByRole('link', { name: 'ログイン' })).toBeInTheDocument()
-    await expect(canvas.getByRole('link', { name: 'アカウント作成' })).toBeInTheDocument()
+    await expect(canvas.getByRole('link', { name: '利用規約' })).toBeInTheDocument()
+    await expect(canvas.getByRole('link', { name: 'プライバシーポリシー' })).toBeInTheDocument()
+    await expect(canvas.getByRole('link', { name: 'お問い合わせ' })).toBeInTheDocument()
 
     // レスポンシブクラスが適用されていることを確認
     const container = canvas.getByRole('contentinfo').querySelector('.max-w-7xl')
     await expect(container).toBeInTheDocument()
 
     // フレックスボックスレイアウトクラスが適用されていることを確認
-    const flexContainer = canvas.getByRole('contentinfo').querySelector('.flex-col.md\\:flex-row')
-    await expect(flexContainer).toBeInTheDocument()
+    const footer = canvas.getByRole('contentinfo')
+    const navElement = footer.querySelector('nav')
+    await expect(navElement).toBeInTheDocument()
+    await expect(navElement).toHaveClass('flex-col')
   },
 }
 
@@ -108,14 +96,13 @@ export const DarkTheme: Story = {
     // ダークテーマでのスタイリングが適用されていることを確認
     const footer = canvas.getByRole('contentinfo')
     await expect(footer).toHaveClass('bg-slate-900')
-    await expect(footer).toHaveClass('text-white')
 
-    // リンクの色が正しく設定されていることを確認
-    const loginLink = canvas.getByRole('link', { name: 'ログイン' })
-    await expect(loginLink).toHaveClass('text-slate-300')
+    // リンクにホバー効果が設定されていることを確認
+    const termsLink = canvas.getByRole('link', { name: '利用規約' })
+    await expect(termsLink).toHaveClass('hover:text-white')
 
-    const signupLink = canvas.getByRole('link', { name: 'アカウント作成' })
-    await expect(signupLink).toHaveClass('text-slate-300')
+    const privacyLink = canvas.getByRole('link', { name: 'プライバシーポリシー' })
+    await expect(privacyLink).toHaveClass('hover:text-white')
 
     // コピーライトテキストの色が正しく設定されていることを確認
     const copyrightSection = footer.querySelector('.text-slate-400')
