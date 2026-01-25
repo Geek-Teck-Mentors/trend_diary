@@ -57,48 +57,10 @@ jobs:
       - name: ビルド
         run: npm run build
 
-  auto-format:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # git pushするためにはtokenが必要
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Biome
-        uses: biomejs/setup-biome@v2
-        with:
-          version: ${{ env.BIOME_VERSION }}
-
-      - name: Check format
-        id: check
-        # formatのチェックが失敗してもジョブを続行
-        continue-on-error: true
-        working-directory: ./application
-        run: biome format --diagnostic-level=error .
-
-      - name: Run format
-        # チェックが失敗した場合のみフォーマットを実行
-        if: steps.check.outcome == 'failure'
-        working-directory: ./application
-        run: biome format --write .
-
-      - name: Commit and push changes
-        # チェックが失敗していた場合のみコミット＆プッシュ
-        if: steps.check.outcome == 'failure'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add application
-          git commit -m "chore: biome format"
-          git push
-
   request-gemini-review:
     runs-on: ubuntu-latest
     # Lintジョブが全て成功した場合のみ実行
-    needs: [code-quality, ts-compile, build, auto-format]
+    needs: [code-quality, ts-compile, build]
     concurrency:
       group: gemini-review-${{ github.ref }}
       cancel-in-progress: true
