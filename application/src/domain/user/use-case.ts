@@ -6,12 +6,6 @@ import type { AuthV2Repository } from './repository'
 import type { AuthenticationSession } from './schema/auth-schema'
 
 /**
- * 認証v2ユーザーのダミーパスワード
- * Supabase Authを使用するため、active_userテーブルのpasswordフィールドには実際のパスワードを保存しない
- */
-export const AUTH_V2_DUMMY_PASSWORD = 'SUPABASE_AUTH_USER' as const
-
-/**
  * サインアップ結果
  */
 export type SignupResult = {
@@ -44,10 +38,9 @@ export class AuthV2UseCase {
 
     const { user, session } = authResult.data
 
-    // active_userを作成（パスワードはダミーハッシュ、認証v2を使うため不要）
+    // active_userを作成
     const activeUserResult = await this.userCommand.createActiveWithAuthenticationId(
       user.email,
-      AUTH_V2_DUMMY_PASSWORD,
       user.id,
     )
 
