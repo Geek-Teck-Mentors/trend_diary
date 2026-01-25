@@ -5,7 +5,6 @@ import {
   activeUserInputSchema,
   activeUserSchema,
   CurrentUser,
-  currentUserSchema,
 } from './schema/active-user-schema'
 import { AuthenticationSession, AuthInput, authInputSchema } from './schema/auth-schema'
 
@@ -13,7 +12,7 @@ import { AuthenticationSession, AuthInput, authInputSchema } from './schema/auth
 export type { ActiveUser, ActiveUserInput, CurrentUser, AuthenticationSession, AuthInput }
 
 // スキーマ
-export { activeUserSchema, activeUserInputSchema, currentUserSchema, authInputSchema }
+export { activeUserSchema, activeUserInputSchema, authInputSchema }
 
 // ファクトリ
 export { createAuthV2UseCase }

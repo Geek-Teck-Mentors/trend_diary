@@ -27,7 +27,6 @@ async function createActiveUser(email: string, authenticationId: string): Promis
     data: {
       userId: user.userId,
       email,
-      password: 'SUPABASE_AUTH_USER',
       displayName: null,
       authenticationId,
     },
@@ -37,10 +36,8 @@ async function createActiveUser(email: string, authenticationId: string): Promis
     activeUserId: activeUser.activeUserId,
     userId: user.userId,
     email: activeUser.email,
-    password: activeUser.password,
     displayName: activeUser.displayName,
     authenticationId: activeUser.authenticationId ?? undefined,
-    lastLogin: activeUser.lastLogin ?? undefined,
     createdAt: activeUser.createdAt,
     updatedAt: activeUser.updatedAt,
   }
