@@ -5,7 +5,7 @@ import { ClientError, ExternalServiceError, ServerError } from '@/common/errors'
 import type { AuthV2Repository, Command, Query } from '@/domain/user/repository'
 import type { CurrentUser } from '@/domain/user/schema/active-user-schema'
 import type { AuthenticationSession, AuthenticationUser } from '@/domain/user/schema/auth-schema'
-import { AUTH_V2_DUMMY_PASSWORD, AuthV2UseCase } from './use-case'
+import { AuthV2UseCase } from './use-case'
 
 const repositoryMock = mockDeep<AuthV2Repository>()
 const commandMock = mockDeep<Command>()
@@ -31,7 +31,6 @@ const mockActiveUser: CurrentUser = {
   userId: 2n,
   email: 'test@example.com',
   displayName: 'テストユーザー',
-  lastLogin: new Date(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -67,7 +66,6 @@ describe('AuthV2UseCase', () => {
         expect(repositoryMock.signup).toHaveBeenCalledWith('test@example.com', 'Password1!')
         expect(commandMock.createActiveWithAuthenticationId).toHaveBeenCalledWith(
           mockAuthUser.email,
-          AUTH_V2_DUMMY_PASSWORD,
           mockAuthUser.id,
         )
       })
