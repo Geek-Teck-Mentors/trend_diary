@@ -1,0 +1,50 @@
+name: Auto Format
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+permissions:
+  contents: write
+
+env:
+  BIOME_VERSION: 2.0.6
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./application
+
+jobs:
+  auto-format:
+    # botによるpushでは実行しない（無限ループ防止）
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: ${{ env.BIOME_VERSION }}
+
+      - name: Check format
+        id: check
+        continue-on-error: true
+        run: biome format --diagnostic-level=error .
+
+      - name: Run format
+        if: steps.check.outcome == 'failure'
+        run: biome format --write .
+
+      - name: Commit and push changes
+        if: steps.check.outcome == 'failure'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "chore: biome format"
+          git push
