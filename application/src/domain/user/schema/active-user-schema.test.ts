@@ -8,10 +8,8 @@ describe('ActiveUserスキーマ', () => {
         activeUserId: 1n,
         userId: 2n,
         email: 'test@example.com',
-        password: 'password123',
         displayName: 'テストユーザー',
         authenticationId: null,
-        lastLogin: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -23,7 +21,6 @@ describe('ActiveUserスキーマ', () => {
     it('有効なActiveUserInputを検証できる', () => {
       const validInput = {
         email: 'test@example.com',
-        password: 'password123',
         displayName: 'テストユーザー',
       }
 
@@ -34,7 +31,6 @@ describe('ActiveUserスキーマ', () => {
     it('displayNameがnullでも検証に成功する', () => {
       const validInput = {
         email: 'test@example.com',
-        password: 'password123',
         displayName: null,
       }
 
@@ -49,7 +45,6 @@ describe('ActiveUserスキーマ', () => {
         activeUserId: 1n,
         userId: 2n,
         email: 'test@example.com',
-        password: 'password123',
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -63,17 +58,6 @@ describe('ActiveUserスキーマ', () => {
     it('無効なメールアドレスでは検証に失敗する', () => {
       const invalidData = {
         email: 'invalid-email',
-        password: 'password123',
-      }
-
-      const result = activeUserInputSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
-
-    it('短すぎるパスワードでは検証に失敗する', () => {
-      const invalidData = {
-        email: 'test@example.com',
-        password: '1234567', // 8文字未満
       }
 
       const result = activeUserInputSchema.safeParse(invalidData)
@@ -85,7 +69,6 @@ describe('ActiveUserスキーマ', () => {
         activeUserId: -1n,
         userId: 2n,
         email: 'test@example.com',
-        password: 'password123',
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -97,18 +80,7 @@ describe('ActiveUserスキーマ', () => {
     it('長すぎるdisplayNameでは検証に失敗する', () => {
       const invalidData = {
         email: 'test@example.com',
-        password: 'password123',
-        displayName: 'a'.repeat(1025), // 1024文字を超える
-      }
-
-      const result = activeUserInputSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
-
-    it('長すぎるパスワードでは検証に失敗する', () => {
-      const invalidData = {
-        email: 'test@example.com',
-        password: 'a'.repeat(51), // 50文字を超える
+        displayName: 'a'.repeat(65), // 64文字を超える
       }
 
       const result = activeUserInputSchema.safeParse(invalidData)

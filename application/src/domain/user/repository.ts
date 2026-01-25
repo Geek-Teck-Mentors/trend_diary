@@ -2,25 +2,21 @@ import { AsyncResult } from '@yuukihayashi0510/core'
 import { ClientError, ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 
-import type { ActiveUser, CurrentUser } from './schema/active-user-schema'
+import type { CurrentUser } from './schema/active-user-schema'
 import { AuthenticationSession, AuthenticationUser } from './schema/auth-schema'
 
 export interface Query {
   findActiveById(id: bigint): AsyncResult<Nullable<CurrentUser>, Error>
   findActiveByEmail(email: string): AsyncResult<Nullable<CurrentUser>, Error>
-  findActiveByEmailForAuth(email: string): AsyncResult<Nullable<ActiveUser>, Error>
   findActiveByAuthenticationId(authenticationId: string): AsyncResult<Nullable<CurrentUser>, Error>
 }
 
 export interface Command {
-  createActive(email: string, hashedPassword: string): AsyncResult<CurrentUser, ServerError>
   createActiveWithAuthenticationId(
     email: string,
-    hashedPassword: string,
     authenticationId: string,
     displayName?: string | null,
   ): AsyncResult<CurrentUser, ServerError>
-  saveActive(activeUser: ActiveUser): AsyncResult<CurrentUser, ServerError>
 }
 
 /**
