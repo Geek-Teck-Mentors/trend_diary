@@ -4,8 +4,9 @@
 
 - 仕様はテストコードに記載する（コードを書かずともテストケース名は記載する）
 - リファクタリング時は必ずlint、format、testコマンドを実行する
-- 日本語を使用する
+- 必ず日本語を使用する
 - 敬語は使用しない
+- `.claude/skills`にCommit、TDDの設定を入れている。必要に応じて参照すること
 
 ### レビュー時のprefix
 
@@ -16,32 +17,6 @@
 - `[nits]` - ささいな指摘（nitpick）
 - `[ask]` - 質問
 - `[fyi]` - 参考情報
-
-### コミットメッセージ（Conventional Commits）
-
-コミットタイプを明確にすることで、変更の種類を一目で把握できるようにする。
-
-- `feat:` - 新機能追加
-- `fix:` - バグ修正
-- `refactor:` - リファクタリング（機能変更なし）
-- `test:` - テスト追加・修正
-- `docs:` - ドキュメント更新
-- `style:` - コードスタイル修正（フォーマット等）
-- `perf:` - パフォーマンス改善
-- `chore:` - ビルドプロセス・補助ツール等の変更
-
-**使用例:**
-
-```bash
-# 新機能の場合
-git commit -m "feat: add user authentication TDD cycle complete"
-
-# バグ修正の場合
-git commit -m "fix: resolve login validation issue TDD cycle complete"
-
-# リファクタリングの場合
-git commit -m "refactor: improve article domain structure TDD cycle complete"
-```
 
 ### 重要な規約
 
@@ -65,27 +40,3 @@ git commit -m "refactor: improve article domain structure TDD cycle complete"
     - ドメイン固有のロジックは各集約内に配置
 - Pinoロガーで構造化ログを使用
 
-### 開発コマンド
-
-主要なコマンドは以下の通り。詳細は`package.json`を参照。
-
-**ビルドとデプロイ:**
-- `npm start` - React Routerで開発サーバーを起動
-- `npm run build` - 本番用ビルド
-
-**テスト:**
-- `npm run test:domain` - ドメイン層のテストを実行
-- `npm run test:server` - API層のテストを実行
-- `npm run test:client` - フロントエンドコンポーネントのテストを実行
-- `npm run test-storybook` - Storybookのテストを実行
-- `npm run e2e` - PlaywrightでE2Eテストを実行
-
-**データベース:**
-- `npm run db:migrate` - Prismaマイグレーション実行（開発用）
-- `npm run db:migrate:sql-only` - SQLのみのマイグレーション実行
-- `npm run db:reset` - データベースリセット
-- `npm run db:seed` - データベースシード実行
-- `npm run supabase:db:type-gen` - Supabase型生成
-
-**コード品質:**
-- `npm run lint` - Biome CI実行 + TypeScript型チェック（基本的にこれを使用する）
