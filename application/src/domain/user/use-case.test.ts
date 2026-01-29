@@ -1,7 +1,7 @@
 import { failure, isFailure, isSuccess, success } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
-import { ClientError, ExternalServiceError, ServerError } from '@/common/errors'
+import { ClientError, ServerError } from '@/common/errors'
 import type { AuthV2Repository, Command, Query } from '@/domain/user/repository'
 import type { CurrentUser } from '@/domain/user/schema/active-user-schema'
 import type { AuthenticationSession, AuthenticationUser } from '@/domain/user/schema/auth-schema'
