@@ -88,53 +88,53 @@ describe('AuthV2UseCase', () => {
         expect(commandMock.createActiveWithAuthenticationId).not.toHaveBeenCalled()
       })
 
-      describe('認証成功後', () => {
-        beforeEach(() => {
-          repositoryMock.signup.mockResolvedValue(
-            success({
-              user: mockAuthUser,
-              session: mockSession,
-            }),
-          )
-        })
-
-        // it('ActiveUser作成失敗時、補償トランザクションを実行してエラーを返す', async () => {
-        //   // Arrange
-        //   const dbError = new ServerError('Database error')
-        //   commandMock.createActiveWithAuthenticationId.mockResolvedValue(failure(dbError))
-        //   repositoryMock.deleteUser.mockResolvedValue(success(undefined))
-        //
-        //   // Act
-        //   const result = await useCase.signup('test@example.com', 'Password1!')
-        //
-        //   // Assert
-        //   expect(isFailure(result)).toBe(true)
-        //   if (isFailure(result)) {
-        //     expect(result.error).toBe(dbError)
-        //   }
-        //   expect(repositoryMock.deleteUser).toHaveBeenCalledWith(mockAuthUser.id)
-        // })
-        //
-        // it('補償トランザクション失敗時、ExternalServiceErrorを返す', async () => {
-        //   // Arrange
-        //   const dbError = new ServerError('Database error')
-        //   commandMock.createActiveWithAuthenticationId.mockResolvedValue(failure(dbError))
-        //   const deleteError = new ServerError('Delete failed')
-        //   repositoryMock.deleteUser.mockResolvedValue(failure(deleteError))
-        //
-        //   // Act
-        //   const result = await useCase.signup('test@example.com', 'Password1!')
-        //
-        //   // Assert
-        //   expect(isFailure(result)).toBe(true)
-        //   if (isFailure(result)) {
-        //     expect(result.error).toBeInstanceOf(ExternalServiceError)
-        //     expect(result.error.message).toBe(
-        //       'Failed to delete Supabase Auth user during compensation',
-        //     )
-        //   }
-        })
-      })
+      // describe('認証成功後', () => {
+      //   beforeEach(() => {
+      //     repositoryMock.signup.mockResolvedValue(
+      //       success({
+      //         user: mockAuthUser,
+      //         session: mockSession,
+      //       }),
+      //     )
+      //   })
+      //
+      //   // it('ActiveUser作成失敗時、補償トランザクションを実行してエラーを返す', async () => {
+      //   //   // Arrange
+      //   //   const dbError = new ServerError('Database error')
+      //   //   commandMock.createActiveWithAuthenticationId.mockResolvedValue(failure(dbError))
+      //   //   repositoryMock.deleteUser.mockResolvedValue(success(undefined))
+      //   //
+      //   //   // Act
+      //   //   const result = await useCase.signup('test@example.com', 'Password1!')
+      //   //
+      //   //   // Assert
+      //   //   expect(isFailure(result)).toBe(true)
+      //   //   if (isFailure(result)) {
+      //   //     expect(result.error).toBe(dbError)
+      //   //   }
+      //   //   expect(repositoryMock.deleteUser).toHaveBeenCalledWith(mockAuthUser.id)
+      //   // })
+      //   //
+      //   // it('補償トランザクション失敗時、ExternalServiceErrorを返す', async () => {
+      //   //   // Arrange
+      //   //   const dbError = new ServerError('Database error')
+      //   //   commandMock.createActiveWithAuthenticationId.mockResolvedValue(failure(dbError))
+      //   //   const deleteError = new ServerError('Delete failed')
+      //   //   repositoryMock.deleteUser.mockResolvedValue(failure(deleteError))
+      //   //
+      //   //   // Act
+      //   //   const result = await useCase.signup('test@example.com', 'Password1!')
+      //   //
+      //   //   // Assert
+      //   //   expect(isFailure(result)).toBe(true)
+      //   //   if (isFailure(result)) {
+      //   //     expect(result.error).toBeInstanceOf(ExternalServiceError)
+      //   //     expect(result.error.message).toBe(
+      //   //       'Failed to delete Supabase Auth user during compensation',
+      //   //     )
+      //   //   }
+      //   // })
+      // })
     })
   })
 
