@@ -1,5 +1,4 @@
-import { LoaderFunctionArgs, type MetaFunction, redirect, useNavigate } from 'react-router'
-import { isUserFeatureEnabled } from '../../features/feature-flag'
+import { type MetaFunction, useNavigate } from 'react-router'
 import SignupPage from './page'
 import useSignup from './use-signup'
 
@@ -24,14 +23,6 @@ export const meta: MetaFunction = () => [
       'TrendDiaryのアカウントを作成して、技術トレンドの管理を始めましょう。無料で始められる技術者向けサービスです。',
   },
 ]
-
-export async function loader({ context }: LoaderFunctionArgs) {
-  const env = context.cloudflare?.env
-  if (!isUserFeatureEnabled(env)) {
-    throw redirect('/?error=user_feature_disabled')
-  }
-  return null
-}
 
 export default function Signup() {
   const navigate = useNavigate()

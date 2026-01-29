@@ -17,10 +17,9 @@ import UserSection from '../user-section'
 
 type Props = {
   isLoggedIn: boolean
-  userFeatureEnabled: boolean
 }
 
-export default function AppHeader({ isLoggedIn, userFeatureEnabled }: Props) {
+export default function AppHeader({ isLoggedIn }: Props) {
   const navigate = useNavigate()
   const { handleLogout, isLoading } = useSidebar(navigate)
 
@@ -47,7 +46,7 @@ export default function AppHeader({ isLoggedIn, userFeatureEnabled }: Props) {
             <div className='flex flex-col gap-4'>
               <NavMenu variant='sheet' menuItems={menuItems} />
 
-              {userFeatureEnabled && isLoggedIn && (
+              {isLoggedIn && (
                 <UserSection variant='sheet' onLogout={handleLogout} isLoading={isLoading} />
               )}
             </div>

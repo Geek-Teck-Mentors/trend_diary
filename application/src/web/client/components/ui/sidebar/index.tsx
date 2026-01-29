@@ -36,10 +36,9 @@ export const menuItems: MenuItem[] = [
 
 type Props = {
   isLoggedIn: boolean
-  userFeatureEnabled: boolean
 }
 
-export default function AppSidebar({ isLoggedIn, userFeatureEnabled }: Props) {
+export default function AppSidebar({ isLoggedIn }: Props) {
   const navigate = useNavigate()
   const { handleLogout, isLoading } = useSidebar(navigate)
 
@@ -62,7 +61,7 @@ export default function AppSidebar({ isLoggedIn, userFeatureEnabled }: Props) {
               <NavMenu variant='sidebar' menuItems={menuItems} />
             </SidebarGroupContent>
           </SidebarGroup>
-          {userFeatureEnabled && isLoggedIn && (
+          {isLoggedIn && (
             <SidebarGroup className='absolute bottom-0 left-0 w-full'>
               <SidebarGroupContent>
                 <UserSection variant='sidebar' onLogout={handleLogout} isLoading={isLoading} />

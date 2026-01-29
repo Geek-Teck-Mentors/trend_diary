@@ -12,7 +12,6 @@ export type Env = {
   Bindings: {
     DATABASE_URL: string
     DISCORD_WEBHOOK_URL: string
-    FEATURE_USER_ENABLED: string
     SUPABASE_URL: string
     SUPABASE_ANON_KEY: string
     LOG_LEVEL?: LogLevel
