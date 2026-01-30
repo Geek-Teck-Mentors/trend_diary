@@ -5,7 +5,7 @@ import { Heading1, Heading2, Heading3, Paragraph } from '../../components/ui/leg
 export default function PrivacyPolicyPage() {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
-      <LandingHeader enableUserFeature={false} />
+      <LandingHeader />
       <main className='mx-auto max-w-3xl px-4 py-12'>
         <article className='text-slate-700'>
           <Heading1>プライバシーポリシー</Heading1>

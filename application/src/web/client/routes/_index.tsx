@@ -1,10 +1,9 @@
 import { BookOpen, Calendar, Monitor, TrendingUp, Users } from 'lucide-react'
-import { type LoaderFunctionArgs, type MetaFunction, useLoaderData } from 'react-router'
+import type { MetaFunction } from 'react-router'
 import { ClipText } from '../components/ui/clip-text'
 import Footer from '../components/ui/footer'
 import LandingHeader from '../components/ui/landing-header'
 import { AnchorLink } from '../components/ui/link'
-import { isUserFeatureEnabled } from '../features/feature-flag'
 
 export const meta: MetaFunction = () => [
   { property: 'og:title', content: 'TrendDiary | 技術トレンドを効率的に管理' },
@@ -22,19 +21,10 @@ export const meta: MetaFunction = () => [
   },
 ]
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  const env = context.cloudflare?.env
-  return {
-    userFeatureEnabled: isUserFeatureEnabled(env),
-  }
-}
-
 const TrendDiaryTopPage = () => {
-  const { userFeatureEnabled } = useLoaderData<typeof loader>()
-
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
-      <LandingHeader enableUserFeature={userFeatureEnabled} />
+      <LandingHeader />
 
       {/* Hero Section */}
       <section className='relative overflow-hidden'>
@@ -66,14 +56,12 @@ const TrendDiaryTopPage = () => {
               >
                 今すぐ始める
               </AnchorLink>
-              {userFeatureEnabled && (
-                <AnchorLink
-                  to='/login'
-                  className='inline-flex items-center px-8 py-4 border-2 border-slate-300 text-slate-700 rounded-lg text-lg font-semibold hover:border-slate-400 hover:bg-slate-50 transition-all duration-200'
-                >
-                  ログイン
-                </AnchorLink>
-              )}
+              <AnchorLink
+                to='/login'
+                className='inline-flex items-center px-8 py-4 border-2 border-slate-300 text-slate-700 rounded-lg text-lg font-semibold hover:border-slate-400 hover:bg-slate-50 transition-all duration-200'
+              >
+                ログイン
+              </AnchorLink>
             </div>
           </div>
         </div>
@@ -107,7 +95,6 @@ const TrendDiaryTopPage = () => {
               <h3 className='text-xl font-semibold text-slate-900 mb-2'>読書状況の管理</h3>
               <p className='text-slate-600'>
                 記事を読んだかどうかを簡単に記録し、読み逃しを防げます。
-                {!userFeatureEnabled && '（ログイン機能は近日公開予定）'}
               </p>
             </div>
 
@@ -182,12 +169,10 @@ const TrendDiaryTopPage = () => {
             効率的な技術トレンドのキャッチアップを体験してください
           </p>
           <AnchorLink
-            to={userFeatureEnabled ? '/signup' : '/trends'}
+            to='/signup'
             className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
-            <ClipText
-              text={userFeatureEnabled ? '無料でアカウントを作成' : 'トレンド記事の一覧へ'}
-            />
+            <ClipText text='無料でアカウントを作成' />
           </AnchorLink>
         </div>
       </section>

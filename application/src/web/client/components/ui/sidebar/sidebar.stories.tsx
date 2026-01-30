@@ -26,9 +26,6 @@ const meta: Meta<typeof AppSidebar> = {
   parameters: {
     layout: 'fullscreen',
   },
-  args: {
-    userFeatureEnabled: true,
-  },
   decorators: [
     (Story) => (
       <SidebarProvider>

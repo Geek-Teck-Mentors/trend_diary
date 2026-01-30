@@ -5,7 +5,7 @@ import { Heading1, Heading2, Paragraph } from '../../components/ui/legal'
 export default function TermsOfServicePage() {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
-      <LandingHeader enableUserFeature={false} />
+      <LandingHeader />
       <main className='mx-auto max-w-3xl px-4 py-12'>
         <article className='text-slate-700'>
           <Heading1>利用規約</Heading1>
