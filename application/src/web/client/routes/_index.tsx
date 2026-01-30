@@ -169,12 +169,10 @@ const TrendDiaryTopPage = () => {
             効率的な技術トレンドのキャッチアップを体験してください
           </p>
           <AnchorLink
-            to="/signup"
+            to='/signup'
             className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
-            <ClipText
-              text='無料でアカウントを作成'
-            />
+            <ClipText text='無料でアカウントを作成' />
           </AnchorLink>
         </div>
       </section>
