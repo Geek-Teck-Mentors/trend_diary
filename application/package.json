@@ -79,7 +79,7 @@
     "@cloudflare/workers-types": "^4.20241218.0",
     "@faker-js/faker": "^9.7.0",
     "@hono/vite-build": "^1.2.0",
-    "@hono/vite-dev-server": "^0.18.1",
+    "@hono/vite-dev-server": "^0.25.0",
     "@playwright/test": "^1.57.0",
     "@react-router/dev": "^7.12.0",
     "@storybook/addon-a11y": "^9.0.18",
