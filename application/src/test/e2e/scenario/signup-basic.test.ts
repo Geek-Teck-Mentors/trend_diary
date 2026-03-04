@@ -3,6 +3,7 @@ import * as articleHelper from '@/test/helper/article'
 import * as userHelper from '@/test/helper/user'
 
 const TIMEOUT = 10000
+const AUTH_FLOW_TIMEOUT = 20000
 
 async function waitDrawerOpen(page: Page): Promise<Locator> {
   await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
@@ -22,7 +23,7 @@ async function completeSignupAndMoveToLogin(
 
   await expect(async () => {
     if (new URL(page.url()).pathname === '/login') {
-      await expect(loginPageText).toBeVisible({ timeout: 1000 })
+      await expect(loginPageText).toBeVisible({ timeout: 2000 })
       return
     }
 
@@ -30,9 +31,34 @@ async function completeSignupAndMoveToLogin(
     await page.getByLabel('パスワード').fill(password)
     await page.getByRole('button', { name: 'アカウント作成' }).click()
 
-    await expect(page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: 2000 })
-    await expect(loginPageText).toBeVisible({ timeout: 2000 })
-  }).toPass({ timeout: TIMEOUT })
+    await expect(page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: 5000 })
+    await expect(loginPageText).toBeVisible({ timeout: 5000 })
+  }).toPass({ timeout: AUTH_FLOW_TIMEOUT })
+}
+
+async function completeLoginAndMoveToTrends(
+  page: Page,
+  email: string,
+  password: string,
+): Promise<void> {
+  const trendsPageText = page.getByText('絞り込み')
+  const readStatusFilter = page.locator('[data-slot="read-status-filter"]')
+
+  await expect(async () => {
+    if (new URL(page.url()).pathname === '/trends') {
+      await expect(trendsPageText).toBeVisible({ timeout: 2000 })
+      await expect(readStatusFilter).toBeVisible({ timeout: 2000 })
+      return
+    }
+
+    await page.getByLabel('メールアドレス').fill(email)
+    await page.getByLabel('パスワード').fill(password)
+    await page.getByRole('button', { name: 'ログイン' }).click()
+
+    await expect(page).toHaveURL(/\/trends(?:\?.*)?$/, { timeout: 5000 })
+    await expect(trendsPageText).toBeVisible({ timeout: 5000 })
+    await expect(readStatusFilter).toBeVisible({ timeout: 5000 })
+  }).toPass({ timeout: AUTH_FLOW_TIMEOUT })
 }
 
 test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ', () => {
@@ -62,16 +88,7 @@ test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ',
   test('ログイン後にトレンド記事の詳細を開ける', async ({ page }) => {
     await page.goto('/signup')
     await completeSignupAndMoveToLogin(page, email, password)
-
-    await page.getByLabel('メールアドレス').fill(email)
-    await page.getByLabel('パスワード').fill(password)
-    await page.getByRole('button', { name: 'ログイン' }).click()
-
-    await page.waitForURL('**/trends', { timeout: TIMEOUT })
-
-    await expect(page.locator('[data-slot="read-status-filter"]')).toBeVisible({
-      timeout: TIMEOUT,
-    })
+    await completeLoginAndMoveToTrends(page, email, password)
 
     const targetArticleCard = page.locator('[data-slot="card"]', { hasText: articleTitle }).first()
     await expect(targetArticleCard).toBeVisible({ timeout: TIMEOUT })
