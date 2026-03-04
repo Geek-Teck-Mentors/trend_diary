@@ -18,13 +18,11 @@ describe('QueryImpl', () => {
         const activeUserId = 1n
 
         const mockActiveUserData = {
-          activeUserId: 1n,
-          userId: 2n,
+          activeUserId: 1,
+          userId: 2,
           email: 'test@example.com',
-          password: 'hashedPassword123',
           displayName: 'テストユーザー',
           authenticationId: null,
-          lastLogin: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
         }
@@ -87,13 +85,11 @@ describe('QueryImpl', () => {
         const email = 'test@example.com'
 
         const mockActiveUserData = {
-          activeUserId: 1n,
-          userId: 2n,
+          activeUserId: 1,
+          userId: 2,
           email,
-          password: 'hashedPassword123',
           displayName: 'テストユーザー',
           authenticationId: null,
-          lastLogin: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
         }
@@ -156,13 +152,11 @@ describe('QueryImpl', () => {
         const authenticationId = 'auth-id-123'
 
         const mockActiveUserData = {
-          activeUserId: 1n,
-          userId: 2n,
+          activeUserId: 1,
+          userId: 2,
           email: 'test@example.com',
-          password: 'hashedPassword123',
           displayName: 'テストユーザー',
           authenticationId,
-          lastLogin: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
         }

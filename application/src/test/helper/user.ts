@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { ActiveUser } from '@/domain/user/schema/active-user-schema'
-import { generateBigIntId } from '@/infrastructure/rdb-id'
+import { fromDbId, toDbIds } from '@/infrastructure/rdb-id'
 import TEST_ENV from '@/test/env'
 import app from '@/web/server'
 import { getTestRdb } from './rdb'
@@ -58,12 +58,11 @@ async function createActiveUser(email: string, authenticationId: string): Promis
 
   // 実際のDBにユーザーを作成
   const user = await db.user.create({
-    data: { userId: generateBigIntId() },
+    data: {},
   })
 
   const activeUser = await db.activeUser.create({
     data: {
-      activeUserId: generateBigIntId(),
       userId: user.userId,
       email,
       displayName: null,
@@ -72,8 +71,8 @@ async function createActiveUser(email: string, authenticationId: string): Promis
   })
 
   return {
-    activeUserId: activeUser.activeUserId,
-    userId: user.userId,
+    activeUserId: fromDbId(activeUser.activeUserId),
+    userId: fromDbId(user.userId),
     email: activeUser.email,
     displayName: activeUser.displayName,
     authenticationId: activeUser.authenticationId ?? undefined,
@@ -131,8 +130,8 @@ export async function create(email: string, password: string): Promise<CreateRes
 
   const activeUser = existingActiveUser
     ? {
-        activeUserId: existingActiveUser.activeUserId,
-        userId: existingActiveUser.userId,
+        activeUserId: fromDbId(existingActiveUser.activeUserId),
+        userId: fromDbId(existingActiveUser.userId),
       }
     : await createActiveUser(email, authenticationId)
 
@@ -184,7 +183,7 @@ export async function login(email: string, password: string): Promise<LoginResul
   }
 
   return {
-    activeUserId: activeUser.activeUserId,
+    activeUserId: fromDbId(activeUser.activeUserId),
     cookies,
   }
 }
@@ -209,8 +208,9 @@ export async function cleanUp(ids: CleanUpIds): Promise<void> {
 
   // DBのユーザーをバッチ削除
   if (ids.userIds.length > 0) {
-    await db.activeUser.deleteMany({ where: { userId: { in: ids.userIds } } })
-    await db.user.deleteMany({ where: { userId: { in: ids.userIds } } })
+    const dbUserIds = toDbIds(ids.userIds)
+    await db.activeUser.deleteMany({ where: { userId: { in: dbUserIds } } })
+    await db.user.deleteMany({ where: { userId: { in: dbUserIds } } })
   }
 
   // Supabase Authのユーザーをバッチ削除

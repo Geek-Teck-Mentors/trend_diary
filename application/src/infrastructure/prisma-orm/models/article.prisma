@@ -1,5 +1,5 @@
 model Article {
-  articleId   BigInt   @id @default(autoincrement()) @map("article_id")
+  articleId   Int      @id @default(autoincrement()) @map("article_id")
   /// メディア種別: "qiita", "zenn", "note"など
   media       String   @map("media")
   /// 記事タイトル（100文字制限）

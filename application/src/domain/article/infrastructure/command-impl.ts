@@ -3,7 +3,7 @@ import { ServerError } from '@/common/errors'
 import { Command } from '@/domain/article/repository'
 import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
 import { RdbClient } from '@/infrastructure/rdb'
-import { generateBigIntId, shouldUseExplicitBigIntId } from '@/infrastructure/rdb-id'
+import { fromDbId, toDbId } from '@/infrastructure/rdb-id'
 
 export default class CommandImpl implements Command {
   constructor(private readonly db: RdbClient) {}
@@ -13,13 +13,13 @@ export default class CommandImpl implements Command {
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
-    const explicitIdRequired = shouldUseExplicitBigIntId()
+    const dbActiveUserId = toDbId(activeUserId)
+    const dbArticleId = toDbId(articleId)
     const result = await wrapAsyncCall(() =>
       this.db.readHistory.create({
         data: {
-          ...(explicitIdRequired ? { readHistoryId: generateBigIntId() } : {}),
-          activeUserId,
-          articleId,
+          activeUserId: dbActiveUserId,
+          articleId: dbArticleId,
           readAt,
         },
       }),
@@ -30,9 +30,9 @@ export default class CommandImpl implements Command {
 
     const createdReadHistory = result.data
     const readHistory: ReadHistory = {
-      readHistoryId: createdReadHistory.readHistoryId,
-      activeUserId: createdReadHistory.activeUserId,
-      articleId: createdReadHistory.articleId,
+      readHistoryId: fromDbId(createdReadHistory.readHistoryId),
+      activeUserId: fromDbId(createdReadHistory.activeUserId),
+      articleId: fromDbId(createdReadHistory.articleId),
       readAt: createdReadHistory.readAt,
       createdAt: createdReadHistory.createdAt,
     }
@@ -40,11 +40,13 @@ export default class CommandImpl implements Command {
   }
 
   async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {
+    const dbActiveUserId = toDbId(activeUserId)
+    const dbArticleId = toDbId(articleId)
     const result = await wrapAsyncCall(() =>
       this.db.readHistory.deleteMany({
         where: {
-          activeUserId,
-          articleId,
+          activeUserId: dbActiveUserId,
+          articleId: dbArticleId,
         },
       }),
     )

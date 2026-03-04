@@ -8,6 +8,7 @@ import { Query } from '@/domain/article/repository'
 import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
 import { QueryParams } from '@/domain/article/schema/query-schema'
 import { RdbClient } from '@/infrastructure/rdb'
+import { fromDbId, toDbId } from '@/infrastructure/rdb-id'
 
 export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
@@ -46,12 +47,13 @@ export default class QueryImpl implements Query {
     const mappedArticles: ArticleWithOptionalReadStatus[] = articles.map(fromPrismaToArticle)
 
     if (activeUserId !== undefined && mappedArticles.length > 0) {
+      const dbActiveUserId = toDbId(activeUserId)
       const readHistoriesResult = await wrapAsyncCall(() =>
         this.db.readHistory.findMany({
           where: {
-            activeUserId,
+            activeUserId: dbActiveUserId,
             articleId: {
-              in: mappedArticles.map((article) => article.articleId),
+              in: mappedArticles.map((article) => toDbId(article.articleId)),
             },
           },
           select: {
@@ -64,7 +66,9 @@ export default class QueryImpl implements Query {
         return failure(new ServerError(readHistoriesResult.error))
       }
 
-      const readArticleIdSet = new Set(readHistoriesResult.data.map((history) => history.articleId))
+      const readArticleIdSet = new Set(
+        readHistoriesResult.data.map((history) => fromDbId(history.articleId)),
+      )
       mappedArticles.forEach((article) => {
         article.isRead = readArticleIdSet.has(article.articleId)
       })
@@ -87,9 +91,10 @@ export default class QueryImpl implements Query {
   }
 
   async findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError> {
+    const dbArticleId = toDbId(articleId)
     const result = await wrapAsyncCall(() =>
       this.db.article.findUnique({
-        where: { articleId },
+        where: { articleId: dbArticleId },
       }),
     )
     if (isFailure(result)) {

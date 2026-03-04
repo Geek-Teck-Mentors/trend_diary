@@ -4,7 +4,9 @@ import { mapToActiveUser } from './mapper'
 
 describe('mapToActiveUser', () => {
   // テストデータ作成ヘルパー
-  const createMockRdbActiveUser = (overrides: Partial<RdbActiveUser> = {}): RdbActiveUser => {
+  const createMockRdbActiveUser = (
+    overrides: Partial<Record<keyof RdbActiveUser, unknown>> = {},
+  ): RdbActiveUser => {
     const now = new Date('2024-01-15T09:30:00Z')
 
     return {
@@ -16,7 +18,7 @@ describe('mapToActiveUser', () => {
       createdAt: new Date('2023-11-20T10:15:30Z'),
       updatedAt: now,
       ...overrides,
-    }
+    } as unknown as RdbActiveUser
   }
 
   describe('基本動作', () => {

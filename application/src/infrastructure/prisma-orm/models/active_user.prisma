@@ -1,5 +1,5 @@
 model ActiveUser {
-  activeUserId     BigInt   @id @default(autoincrement()) @map("active_user_id")
+  activeUserId     Int      @id @default(autoincrement()) @map("active_user_id")
   /// RFC 5321準拠（320文字）+ 余裕を持たせて1024文字
   email            String   @unique
   /// 表示名（日本語等マルチバイト文字対応で余裕を持たせて1024文字）
@@ -9,7 +9,7 @@ model ActiveUser {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  userId BigInt @unique @map("user_id")
+  userId Int @unique @map("user_id")
 
   user          User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
   readHistories ReadHistory[]

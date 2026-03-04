@@ -1,3 +1,4 @@
+import { Article as PrismaArticle, ReadHistory as PrismaReadHistory } from '@prisma/client'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it } from 'vitest'
 import mockDb from '@/test/__mocks__/prisma'
@@ -34,7 +35,7 @@ describe('QueryImpl', () => {
   describe('searchArticles', () => {
     it('ページネーション付きで記事を検索できる', async () => {
       mockDb.article.count.mockResolvedValue(2)
-      mockDb.article.findMany.mockResolvedValue(mockArticles)
+      mockDb.article.findMany.mockResolvedValue(mockArticles as unknown as PrismaArticle[])
 
       const result = await queryImpl.searchArticles({ page: 1, limit: 20 })
 
@@ -48,7 +49,7 @@ describe('QueryImpl', () => {
 
     it('activeUserId指定時は既読状態を返す', async () => {
       mockDb.article.count.mockResolvedValue(2)
-      mockDb.article.findMany.mockResolvedValue(mockArticles)
+      mockDb.article.findMany.mockResolvedValue(mockArticles as unknown as PrismaArticle[])
       mockDb.readHistory.findMany.mockResolvedValue([
         {
           readHistoryId: 1n,
@@ -57,7 +58,7 @@ describe('QueryImpl', () => {
           readAt: new Date('2024-01-20T00:00:00Z'),
           createdAt: new Date('2024-01-20T00:00:00Z'),
         },
-      ])
+      ] as unknown as PrismaReadHistory[])
 
       const result = await queryImpl.searchArticles({ page: 1, limit: 20 }, 10n)
 
@@ -82,7 +83,7 @@ describe('QueryImpl', () => {
 
   describe('findArticleById', () => {
     it('記事をIDで検索できる', async () => {
-      mockDb.article.findUnique.mockResolvedValue(mockArticles[0])
+      mockDb.article.findUnique.mockResolvedValue(mockArticles[0] as unknown as PrismaArticle)
 
       const result = await queryImpl.findArticleById(1n)
 

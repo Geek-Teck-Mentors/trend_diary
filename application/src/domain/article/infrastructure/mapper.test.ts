@@ -4,7 +4,9 @@ import fromPrismaToArticle from './mapper'
 
 describe('fromPrismaToArticle', () => {
   // テストデータ作成ヘルパー
-  const createMockPrismaArticle = (overrides: Partial<PrismaArticle> = {}): PrismaArticle => {
+  const createMockPrismaArticle = (
+    overrides: Partial<Record<keyof PrismaArticle, unknown>> = {},
+  ): PrismaArticle => {
     return {
       articleId: 1n,
       media: 'Qiita',
@@ -14,7 +16,7 @@ describe('fromPrismaToArticle', () => {
       url: 'https://example.com/article/1',
       createdAt: new Date('2024-01-15T09:30:00Z'),
       ...overrides,
-    }
+    } as unknown as PrismaArticle
   }
 
   describe('基本動作', () => {

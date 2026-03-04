@@ -1,5 +1,5 @@
 model LeavedUser {
-  userId    BigInt   @unique @map("user_id")
+  userId    Int      @unique @map("user_id")
   reason    String?
   createdAt DateTime @default(now()) @map("created_at")
 

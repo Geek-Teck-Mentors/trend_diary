@@ -1,9 +1,8 @@
-import { Article } from '@prisma/client'
 import { AsyncResult } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
-import type { ArticleWithOptionalReadStatus } from './schema/article-schema'
+import type { Article, ArticleWithOptionalReadStatus } from './schema/article-schema'
 import { QueryParams } from './schema/query-schema'
 import type { ReadHistory } from './schema/read-history-schema'
 

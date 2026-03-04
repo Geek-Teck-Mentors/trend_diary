@@ -2,6 +2,7 @@ import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukih
 import { ServerError } from '@/common/errors'
 import { Nullable } from '@/common/types/utility'
 import { RdbClient } from '@/infrastructure/rdb'
+import { toDbId } from '@/infrastructure/rdb-id'
 import { Query } from '../repository'
 import type { CurrentUser } from '../schema/active-user-schema'
 import { mapToActiveUser } from './mapper'
@@ -10,9 +11,10 @@ export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
   async findActiveById(id: bigint): AsyncResult<Nullable<CurrentUser>, Error> {
+    const dbId = toDbId(id)
     const activeUserResult = await wrapAsyncCall(() =>
       this.db.activeUser.findUnique({
-        where: { activeUserId: id },
+        where: { activeUserId: dbId },
       }),
     )
     if (isFailure(activeUserResult)) {

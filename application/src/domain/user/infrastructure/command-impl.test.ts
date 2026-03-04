@@ -1,6 +1,5 @@
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { shouldUseExplicitBigIntId } from '@/infrastructure/rdb-id'
 import prisma from '@/test/__mocks__/prisma'
 import CommandImpl from './command-impl'
 
@@ -14,10 +13,10 @@ describe('CommandImpl', () => {
 
   describe('createActiveWithAuthenticationId', () => {
     it('displayName付きでActiveUserを作成できる', async () => {
-      const createdUser = { userId: 2n, createdAt: new Date() }
+      const createdUser = { userId: 2, createdAt: new Date() }
       const createdActiveUser = {
-        activeUserId: 1n,
-        userId: 2n,
+        activeUserId: 1,
+        userId: 2,
         email: 'test@example.com',
         displayName: '表示名',
         authenticationId: 'auth-id-123',
@@ -38,25 +37,19 @@ describe('CommandImpl', () => {
       if (isSuccess(result)) {
         expect(result.data.email).toBe('test@example.com')
         expect(result.data.displayName).toBe('表示名')
+        expect(result.data.activeUserId).toBe(1n)
+        expect(result.data.userId).toBe(2n)
       }
       const userCreateArgs = prisma.user.create.mock.calls[0]?.[0]
-      if (shouldUseExplicitBigIntId()) {
-        expect(typeof userCreateArgs?.data?.userId).toBe('bigint')
-      } else {
-        expect(userCreateArgs).toEqual({ data: {} })
-      }
+      expect(userCreateArgs).toEqual({ data: {} })
       const activeUserCreateArgs = prisma.activeUser.create.mock.calls[0]?.[0]
       expect(activeUserCreateArgs?.data).toMatchObject({
-        userId: 2n,
+        userId: 2,
         email: 'test@example.com',
         authenticationId: 'auth-id-123',
         displayName: '表示名',
       })
-      if (shouldUseExplicitBigIntId()) {
-        expect(typeof activeUserCreateArgs?.data?.activeUserId).toBe('bigint')
-      } else {
-        expect(activeUserCreateArgs?.data?.activeUserId).toBeUndefined()
-      }
+      expect(activeUserCreateArgs?.data?.activeUserId).toBeUndefined()
     })
 
     it('トランザクション失敗時にエラーを返す', async () => {
