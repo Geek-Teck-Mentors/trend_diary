@@ -9,7 +9,7 @@ enabled = true
 head_sampling_rate = 1
 
 [triggers]
-crons = ["0 */8 * * *"]
+crons = ["0 */4 * * *"]
 
 [[d1_databases]]
 binding = "DB"
