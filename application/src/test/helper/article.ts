@@ -1,12 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { getTestRdb } from './rdb'
 
-let urlSequence = 0
-function nextUrlSuffix(): string {
-  urlSequence += 1
-  return `tid-${urlSequence}`
-}
-
 function getTodayJstNoon(): Date {
   const jstParts = new Intl.DateTimeFormat('ja-JP', {
     timeZone: 'Asia/Tokyo',
@@ -41,7 +35,7 @@ export async function createArticle(options?: {
     (media === 'qiita'
       ? `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
       : `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`)
-  const uniqueSuffix = nextUrlSuffix()
+  const uniqueSuffix = `tid-${crypto.randomUUID()}`
 
   const data = {
     media,
