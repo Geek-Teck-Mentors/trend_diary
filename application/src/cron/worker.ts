@@ -12,8 +12,24 @@ type CronWorkerEnv = {
   ZENN_CRON?: string
 }
 
+type Media = 'qiita' | 'zenn'
+
 const DEFAULT_QIITA_CRON = '0 */8 * * *'
 const DEFAULT_ZENN_CRON = '0 */8 * * *'
+
+const MEDIA_CRON_CONFIG: ReadonlyArray<{
+  media: Media
+  getCron: (env: CronWorkerEnv) => string
+}> = [
+  {
+    media: 'qiita',
+    getCron: (env) => env.QIITA_CRON || DEFAULT_QIITA_CRON,
+  },
+  {
+    media: 'zenn',
+    getCron: (env) => env.ZENN_CRON || DEFAULT_ZENN_CRON,
+  },
+]
 
 async function notifyDiscord(webhookUrl: string, message: string) {
   if (!webhookUrl) return
@@ -29,14 +45,16 @@ async function notifyDiscord(webhookUrl: string, message: string) {
   })
 }
 
-function resolveMedia(cron: string, env: CronWorkerEnv): Array<'qiita' | 'zenn'> {
-  const qiitaCron = env.QIITA_CRON || DEFAULT_QIITA_CRON
-  const zennCron = env.ZENN_CRON || DEFAULT_ZENN_CRON
+function resolveMedia(cron: string, env: CronWorkerEnv): Media[] {
+  const mediaToFetch = new Set<Media>()
 
-  if (cron === qiitaCron && cron === zennCron) return ['qiita', 'zenn']
-  if (cron === qiitaCron) return ['qiita']
-  if (cron === zennCron) return ['zenn']
-  return []
+  for (const { media, getCron } of MEDIA_CRON_CONFIG) {
+    if (cron === getCron(env)) {
+      mediaToFetch.add(media)
+    }
+  }
+
+  return [...mediaToFetch]
 }
 
 export default {
