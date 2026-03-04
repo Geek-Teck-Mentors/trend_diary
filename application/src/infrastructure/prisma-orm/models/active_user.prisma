@@ -7,7 +7,7 @@ model ActiveUser {
   /// Supabase AuthenticationユーザーID（UUID）
   authenticationId String?  @unique @map("authentication_id")
   createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
 
   userId Int @unique @map("user_id")
 
