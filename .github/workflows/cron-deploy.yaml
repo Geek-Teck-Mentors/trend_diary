@@ -56,4 +56,4 @@ jobs:
       - name: デプロイの出力を表示
         env:
           CMD_OUTPUT: ${{ steps.deploy.outputs.command-output }}
-        run: echo $CMD_OUTPUT
+        run: echo "$CMD_OUTPUT"
