@@ -1,0 +1,54 @@
+name: Cron Test
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cron-test.yaml'
+      - '.github/workflows/cron-deploy.yaml'
+      - '.github/actions/setup_node/action.yaml'
+      - 'application/wrangler.cron.toml'
+      - 'application/package.json'
+      - 'application/package-lock.json'
+      - 'application/src/cron/**'
+      - 'application/src/common/**'
+      - 'application/src/infrastructure/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cron-test.yaml'
+      - '.github/workflows/cron-deploy.yaml'
+      - '.github/actions/setup_node/action.yaml'
+      - 'application/wrangler.cron.toml'
+      - 'application/package.json'
+      - 'application/package-lock.json'
+      - 'application/src/cron/**'
+      - 'application/src/common/**'
+      - 'application/src/infrastructure/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./application
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: .node-version
+
+      - name: Cronテスト
+        run: npm run test:cron

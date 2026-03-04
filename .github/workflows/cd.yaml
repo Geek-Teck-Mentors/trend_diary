@@ -15,7 +15,6 @@ on:
         type: choice
         options:
           - web
-          - cron
           - database
 
 permissions:
@@ -69,30 +68,6 @@ jobs:
         env:
           CMD_OUTPUT: ${{ steps.deploy.outputs.command-output }}
         run: echo $CMD_OUTPUT
-
-  cron:
-    runs-on: ubuntu-latest
-    environment: production
-    if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'cron' }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Node.jsの構築
-        uses: ./.github/actions/setup_node
-        with:
-          node-version-file: .node-version
-
-      - name: Cron Workerをデプロイ
-        id: deploy-cron
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: ./application
-          command: deploy --config wrangler.cron.toml
-          secrets: |
-            DISCORD_WEBHOOK_URL
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   database:
     runs-on: ubuntu-latest
