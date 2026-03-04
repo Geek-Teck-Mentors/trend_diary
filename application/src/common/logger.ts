@@ -34,11 +34,24 @@ export default class Logger {
   }
 
   private log(level: LogLevel, message: LogMessage, ...args: unknown[]): void {
+    const extra = args[0]
+
     if (typeof message === 'string') {
+      if (extra instanceof Error) {
+        this.logger[level]({ ...this.context, err: extra }, message)
+        return
+      }
+
+      if (extra && typeof extra === 'object') {
+        this.logger[level]({ ...this.context, ...(extra as Record<string, unknown>) }, message)
+        return
+      }
+
       this.logger[level](this.context, message)
-    } else {
-      this.logger[level]({ ...this.context, ...message })
+      return
     }
+
+    this.logger[level]({ ...this.context, ...message })
   }
 
   debug(message: LogMessage, ...args: unknown[]): void {

@@ -1,5 +1,6 @@
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr'
 import type { Context } from 'hono'
+import { HTTPException } from 'hono/http-exception'
 
 export type SupabaseAuthClient = ReturnType<typeof createSupabaseAuthClient>
 
@@ -8,7 +9,9 @@ export function createSupabaseAuthClient(c: Context) {
   const supabaseAnonKey = c.env.SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY must be set in environment variables')
+    throw new HTTPException(503, {
+      message: 'Supabase auth is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY.',
+    })
   }
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {

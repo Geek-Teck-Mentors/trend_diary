@@ -18,13 +18,17 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
   if (isFailure(result)) {
     // 補償トランザクション失敗時のログ出力
     if (result.error instanceof ExternalServiceError) {
-      logger.error(result.error.message, {
-        context: result.error.context,
-        errors: {
-          original: result.error.originalError.message,
-          compensation: result.error.serviceError.message,
+      logger.error(
+        {
+          msg: result.error.message,
+          context: result.error.context,
+          errors: {
+            original: result.error.originalError.message,
+            compensation: result.error.serviceError.message,
+          },
         },
-      })
+        result.error,
+      )
     }
     throw handleError(result.error, logger)
   }
