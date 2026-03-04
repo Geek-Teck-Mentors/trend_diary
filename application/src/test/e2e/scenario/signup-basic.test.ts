@@ -35,7 +35,7 @@ async function completeSignupAndMoveToLogin(
   }).toPass({ timeout: TIMEOUT })
 }
 
-test.describe('ログイン後の記事詳細閲覧シナリオ', () => {
+test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ', () => {
   const password = 'Aa1@aaaa'
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const email = `e2e-scenario-${suffix}@example.com`
