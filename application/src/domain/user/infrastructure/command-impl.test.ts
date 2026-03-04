@@ -45,14 +45,18 @@ describe('CommandImpl', () => {
       } else {
         expect(userCreateArgs).toEqual({ data: {} })
       }
-      expect(prisma.activeUser.create).toHaveBeenCalledWith({
-        data: {
-          userId: 2n,
-          email: 'test@example.com',
-          authenticationId: 'auth-id-123',
-          displayName: '表示名',
-        },
+      const activeUserCreateArgs = prisma.activeUser.create.mock.calls[0]?.[0]
+      expect(activeUserCreateArgs?.data).toMatchObject({
+        userId: 2n,
+        email: 'test@example.com',
+        authenticationId: 'auth-id-123',
+        displayName: '表示名',
       })
+      if (shouldUseExplicitBigIntId()) {
+        expect(typeof activeUserCreateArgs?.data?.activeUserId).toBe('bigint')
+      } else {
+        expect(activeUserCreateArgs?.data?.activeUserId).toBeUndefined()
+      }
     })
 
     it('トランザクション失敗時にエラーを返す', async () => {
