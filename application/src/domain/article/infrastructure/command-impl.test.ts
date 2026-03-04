@@ -7,6 +7,7 @@ describe('CommandImpl', () => {
   let commandImpl: CommandImpl
 
   beforeEach(() => {
+    mockDb.readHistory.findFirst.mockResolvedValue(null)
     commandImpl = new CommandImpl(mockDb)
   })
 
@@ -30,7 +31,7 @@ describe('CommandImpl', () => {
 
         // Assert
         expect(mockDb.readHistory.create).toHaveBeenCalledWith({
-          data: { activeUserId, articleId, readAt },
+          data: { readHistoryId: 1n, activeUserId, articleId, readAt },
         })
       })
 

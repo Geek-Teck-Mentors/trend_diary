@@ -1,6 +1,12 @@
 import { faker } from '@faker-js/faker'
 import { getTestRdb } from './rdb'
 
+let idSequence = 0n
+function nextTestId(): bigint {
+  idSequence = (idSequence + 1n) % 1000000n
+  return BigInt(Date.now()) * 1000000n + idSequence
+}
+
 export async function createArticle(options?: {
   media?: 'qiita' | 'zenn'
   title?: string
@@ -16,13 +22,15 @@ export async function createArticle(options?: {
     (media === 'qiita'
       ? `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
       : `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`)
+  const uniqueSuffix = `tid-${nextTestId().toString()}`
 
   const data = {
+    articleId: nextTestId(),
     media,
     title: options?.title ?? faker.lorem.sentence().substring(0, 100),
     author: options?.author ?? faker.person.fullName().substring(0, 30),
     description: options?.description ?? faker.lorem.paragraph().substring(0, 255),
-    url,
+    url: url.includes('?') ? `${url}&${uniqueSuffix}` : `${url}?${uniqueSuffix}`,
     createdAt: options?.createdAt,
   }
   return await rdb.article.create({ data })
@@ -60,6 +68,7 @@ export async function createReadHistory(activeUserId: bigint, articleId: bigint,
   const rdb = getTestRdb()
   return await rdb.readHistory.create({
     data: {
+      readHistoryId: nextTestId(),
       activeUserId,
       articleId,
       readAt: readAt || faker.date.recent(),

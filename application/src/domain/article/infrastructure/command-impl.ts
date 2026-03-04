@@ -12,9 +12,22 @@ export default class CommandImpl implements Command {
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
+    const lastReadHistoryResult = await wrapAsyncCall(() =>
+      this.db.readHistory.findFirst({
+        orderBy: { readHistoryId: 'desc' },
+        select: { readHistoryId: true },
+      }),
+    )
+    if (isFailure(lastReadHistoryResult)) {
+      return failure(new ServerError(lastReadHistoryResult.error))
+    }
+
+    const nextReadHistoryId = (lastReadHistoryResult.data?.readHistoryId ?? 0n) + 1n
+
     const result = await wrapAsyncCall(() =>
       this.db.readHistory.create({
         data: {
+          readHistoryId: nextReadHistoryId,
           activeUserId,
           articleId,
           readAt,

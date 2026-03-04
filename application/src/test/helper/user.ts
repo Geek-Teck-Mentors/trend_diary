@@ -4,8 +4,13 @@ import TEST_ENV from '@/test/env'
 import app from '@/web/server'
 import { getTestRdb } from './rdb'
 
+function canDeleteSupabaseUsersViaSql(): boolean {
+  return TEST_ENV.DATABASE_URL.startsWith('postgresql://')
+}
+
 // Supabaseクライアント
 let supabase: SupabaseClient | null = null
+let supabaseAdmin: SupabaseClient | null = null
 
 function getSupabase(): SupabaseClient {
   if (!supabase) {
@@ -14,17 +19,60 @@ function getSupabase(): SupabaseClient {
   return supabase
 }
 
+function getSupabaseAdmin(): SupabaseClient | null {
+  if (!TEST_ENV.SUPABASE_SERVICE_ROLE_KEY) return null
+  if (!supabaseAdmin) {
+    supabaseAdmin = createClient(TEST_ENV.SUPABASE_URL, TEST_ENV.SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  }
+  return supabaseAdmin
+}
+
+async function deleteAuthUsersByEmailPattern(emailPattern: string): Promise<void> {
+  const admin = getSupabaseAdmin()
+  if (!admin) return
+
+  let page = 1
+  const perPage = 200
+
+  while (true) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage })
+    if (error) break
+
+    const matchedIds = data.users
+      .filter((user) => (user.email ?? '').includes(emailPattern))
+      .map((user) => user.id)
+
+    await Promise.all(matchedIds.map((id) => admin.auth.admin.deleteUser(id)))
+
+    if (data.users.length < perPage) break
+    page += 1
+  }
+}
+
 // ActiveUser生成関数（実DBに作成）
 async function createActiveUser(email: string, authenticationId: string): Promise<ActiveUser> {
   const db = getTestRdb()
+  const lastUser = await db.user.findFirst({
+    orderBy: { userId: 'desc' },
+    select: { userId: true },
+  })
+  const lastActiveUser = await db.activeUser.findFirst({
+    orderBy: { activeUserId: 'desc' },
+    select: { activeUserId: true },
+  })
 
   // 実際のDBにユーザーを作成
   const user = await db.user.create({
-    data: {},
+    data: {
+      userId: (lastUser?.userId ?? 0n) + 1n,
+    },
   })
 
   const activeUser = await db.activeUser.create({
     data: {
+      activeUserId: (lastActiveUser?.activeUserId ?? 0n) + 1n,
       userId: user.userId,
       email,
       displayName: null,
@@ -64,14 +112,38 @@ export type CleanUpIds = {
  */
 export async function create(email: string, password: string): Promise<CreateResult> {
   const client = getSupabase()
+  const db = getTestRdb()
 
-  const { data, error } = await client.auth.signUp({ email, password })
-  if (error || !data.user) {
-    throw new Error(`Failed to create user: ${error?.message ?? 'Unknown error'}`)
+  const signUpResult = await client.auth.signUp({ email, password })
+
+  let authenticationId: string
+  if (signUpResult.error) {
+    if (!signUpResult.error.message.includes('User already registered')) {
+      throw new Error(`Failed to create user: ${signUpResult.error.message}`)
+    }
+
+    const signInResult = await client.auth.signInWithPassword({ email, password })
+    if (signInResult.error || !signInResult.data.user) {
+      throw new Error(`Failed to create user: ${signInResult.error?.message ?? 'Unknown error'}`)
+    }
+    authenticationId = signInResult.data.user.id
+  } else if (signUpResult.data.user) {
+    authenticationId = signUpResult.data.user.id
+  } else {
+    throw new Error('Failed to create user: Unknown error')
   }
 
-  const authenticationId = data.user.id
-  const activeUser = await createActiveUser(email, authenticationId)
+  const existingActiveUser = await db.activeUser.findFirst({
+    where: { authenticationId },
+    select: { activeUserId: true, userId: true },
+  })
+
+  const activeUser = existingActiveUser
+    ? {
+        activeUserId: existingActiveUser.activeUserId,
+        userId: existingActiveUser.userId,
+      }
+    : await createActiveUser(email, authenticationId)
 
   // signUp後はログアウトして初期状態にする
   await client.auth.signOut()
@@ -151,8 +223,13 @@ export async function cleanUp(ids: CleanUpIds): Promise<void> {
   }
 
   // Supabase Authのユーザーをバッチ削除
-  if (ids.authIds.length > 0) {
+  if (ids.authIds.length > 0 && canDeleteSupabaseUsersViaSql()) {
     await db.$queryRaw`DELETE FROM auth.users WHERE id = ANY(${ids.authIds}::uuid[])`
+  } else if (ids.authIds.length > 0) {
+    const admin = getSupabaseAdmin()
+    if (admin) {
+      await Promise.all(ids.authIds.map((id) => admin.auth.admin.deleteUser(id)))
+    }
   }
 }
 
@@ -177,11 +254,20 @@ export async function cleanUpByEmailPattern(emailPattern: string): Promise<void>
     await db.user.deleteMany({ where: { userId: { in: userIds } } })
 
     // Supabase Authのユーザーも削除
-    if (authIds.length > 0) {
+    if (authIds.length > 0 && canDeleteSupabaseUsersViaSql()) {
       await db.$queryRaw`DELETE FROM auth.users WHERE id = ANY(${authIds}::uuid[])`
+    } else if (authIds.length > 0) {
+      const admin = getSupabaseAdmin()
+      if (admin) {
+        await Promise.all(authIds.map((id) => admin.auth.admin.deleteUser(id)))
+      }
     }
   }
 
   // auth.users に直接存在するユーザーも削除（ActiveUserがない場合）
-  await db.$queryRaw`DELETE FROM auth.users WHERE email LIKE ${`%${emailPattern}%`}`
+  if (canDeleteSupabaseUsersViaSql()) {
+    await db.$queryRaw`DELETE FROM auth.users WHERE email LIKE ${`%${emailPattern}%`}`
+  } else {
+    await deleteAuthUsersByEmailPattern(emailPattern)
+  }
 }

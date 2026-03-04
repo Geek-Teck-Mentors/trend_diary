@@ -1,0 +1,63 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import worker from './worker'
+
+const runScheduledFetchMock = vi.hoisted(() => vi.fn())
+
+vi.mock('./fetch-articles', () => ({
+  runScheduledFetch: runScheduledFetchMock,
+}))
+
+describe('cron worker', () => {
+  beforeEach(() => {
+    runScheduledFetchMock.mockReset()
+  })
+
+  it('既知のcron式でfetchジョブを実行する', async () => {
+    runScheduledFetchMock.mockResolvedValue(undefined)
+
+    const waitUntilCalls: Promise<unknown>[] = []
+    const event = { cron: '0 */8 * * *' } as ScheduledController
+    const env = {
+      DB: {} as D1Database,
+      DISCORD_WEBHOOK_URL: '',
+      QIITA_CRON: '0 */8 * * *',
+      ZENN_CRON: '0 */8 * * *',
+      LOG_LEVEL: 'silent' as const,
+    }
+
+    await worker.scheduled(event, env, {
+      waitUntil: (promise: Promise<unknown>) => {
+        waitUntilCalls.push(promise)
+      },
+    } as ExecutionContext)
+
+    expect(waitUntilCalls).toHaveLength(1)
+    await Promise.all(waitUntilCalls)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
+  })
+
+  it('未知のcron式はスキップする', async () => {
+    const waitUntilCalls: Promise<unknown>[] = []
+    const event = { cron: '5 * * * *' } as ScheduledController
+    const env = {
+      DB: {} as D1Database,
+      DISCORD_WEBHOOK_URL: '',
+      QIITA_CRON: '0 */8 * * *',
+      ZENN_CRON: '0 */8 * * *',
+      LOG_LEVEL: 'silent' as const,
+    }
+
+    await worker.scheduled(event, env, {
+      waitUntil: (promise: Promise<unknown>) => {
+        waitUntilCalls.push(promise)
+      },
+    } as ExecutionContext)
+
+    expect(waitUntilCalls).toHaveLength(0)
+    expect(runScheduledFetchMock).not.toHaveBeenCalled()
+  })
+})
+
+type D1Database = import('@cloudflare/workers-types').D1Database

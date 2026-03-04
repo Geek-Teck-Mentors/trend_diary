@@ -1,5 +1,7 @@
+import { faker } from '@faker-js/faker'
 import TEST_ENV from '@/test/env'
 import * as articleHelper from '@/test/helper/article'
+import { getTestRdb } from '@/test/helper/rdb'
 import type { CleanUpIds } from '@/test/helper/user'
 import * as userHelper from '@/test/helper/user'
 import app from '../../../server'
@@ -22,19 +24,25 @@ async function requestGetArticles(query: string = '', cookies?: string) {
 }
 
 describe('GET /api/articles', () => {
+  const titleCleanupPrefix = 'GET_ARTICLES_TEST_'
+  const qiitaTitle = `${titleCleanupPrefix}Reactの基礎-${faker.string.alphanumeric(8)}`
+  const zennTitle = `${titleCleanupPrefix}TypeScriptの応用-${faker.string.alphanumeric(8)}`
+  const qiitaAuthor = `山田太郎-${faker.string.alphanumeric(6)}`
+  const zennAuthor = `佐藤花子-${faker.string.alphanumeric(6)}`
+
   const testArticlesData = [
     {
       media: 'qiita' as const,
-      title: 'Reactの基礎',
-      author: '山田太郎',
+      title: qiitaTitle,
+      author: qiitaAuthor,
       description: 'Reactについて学ぼう',
       url: 'https://qiita.com/test1',
       createdAt: new Date('2025-05-11'),
     },
     {
       media: 'zenn' as const,
-      title: 'TypeScriptの応用',
-      author: '佐藤花子',
+      title: zennTitle,
+      author: zennAuthor,
       description: 'TypeScriptの高度な機能',
       url: 'https://zenn.dev/test2',
       createdAt: new Date('2025-05-12'),
@@ -44,6 +52,10 @@ describe('GET /api/articles', () => {
   const createdArticleIds: bigint[] = []
 
   beforeAll(async () => {
+    const db = getTestRdb()
+    await db.readHistory.deleteMany()
+    await db.article.deleteMany()
+
     const articles = await Promise.all(
       testArticlesData.map((article) => articleHelper.createArticle(article)),
     )
@@ -61,28 +73,28 @@ describe('GET /api/articles', () => {
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
       expect(data.data).toHaveLength(2)
-      expect(data.data[0].title).toBe('TypeScriptの応用')
-      expect(data.data[1].title).toBe('Reactの基礎')
+      expect(data.data[0].title).toBe(zennTitle)
+      expect(data.data[1].title).toBe(qiitaTitle)
       expect(data.hasNext).toBe(false)
       expect(data.hasPrev).toBe(false)
     })
 
     it('titleで検索', async () => {
-      const res = await requestGetArticles('title=React')
+      const res = await requestGetArticles(`title=${encodeURIComponent(qiitaTitle)}`)
 
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
       expect(data.data).toHaveLength(1)
-      expect(data.data[0].title).toBe('Reactの基礎')
+      expect(data.data[0].title).toBe(qiitaTitle)
     })
 
     it('authorで検索', async () => {
-      const res = await requestGetArticles('author=山田')
+      const res = await requestGetArticles(`author=${encodeURIComponent(qiitaAuthor)}`)
 
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
       expect(data.data).toHaveLength(1)
-      expect(data.data[0].author).toBe('山田太郎')
+      expect(data.data[0].author).toBe(qiitaAuthor)
     })
 
     it('mediaで検索', async () => {
@@ -103,12 +115,12 @@ describe('GET /api/articles', () => {
     })
 
     it('複数条件での検索', async () => {
-      const res = await requestGetArticles('media=qiita&author=山田')
+      const res = await requestGetArticles(`media=qiita&author=${encodeURIComponent(qiitaAuthor)}`)
 
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
       expect(data.data).toHaveLength(1)
-      expect(data.data[0].title).toBe('Reactの基礎')
+      expect(data.data[0].title).toBe(qiitaTitle)
     })
 
     it('fromパラメータで検索', async () => {
@@ -117,7 +129,7 @@ describe('GET /api/articles', () => {
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
       expect(data.data).toHaveLength(1)
-      expect(data.data[0].title).toBe('TypeScriptの応用')
+      expect(data.data[0].title).toBe(zennTitle)
     })
 
     it('toパラメータで検索', async () => {
@@ -126,7 +138,7 @@ describe('GET /api/articles', () => {
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
       expect(data.data).toHaveLength(1)
-      expect(data.data[0].title).toBe('Reactの基礎')
+      expect(data.data[0].title).toBe(qiitaTitle)
     })
 
     it('from/toパラメータの範囲検索', async () => {
@@ -190,6 +202,27 @@ describe('GET /api/articles 既読情報', () => {
   const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
 
   beforeEach(async () => {
+    const db = getTestRdb()
+    const staleArticles = await db.article.findMany({
+      where: {
+        title: { in: ['既読記事', '未読記事'] },
+      },
+      select: { articleId: true },
+    })
+    const staleArticleIds = staleArticles.map((article) => article.articleId)
+    if (staleArticleIds.length > 0) {
+      await db.readHistory.deleteMany({
+        where: {
+          articleId: { in: staleArticleIds },
+        },
+      })
+    }
+    await db.article.deleteMany({
+      where: {
+        title: { in: ['既読記事', '未読記事'] },
+      },
+    })
+
     // アカウント作成・ログイン
     const { userId, authenticationId } = await userHelper.create(
       'readtest@example.com',

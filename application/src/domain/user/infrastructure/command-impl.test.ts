@@ -8,114 +8,49 @@ describe('CommandImpl', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    prisma.user.findFirst.mockResolvedValue(null)
+    prisma.activeUser.findFirst.mockResolvedValue(null)
     useCase = new CommandImpl(prisma)
   })
 
   describe('createActiveWithAuthenticationId', () => {
-    describe('基本動作', () => {
-      const testCases = [
-        {
-          name: 'displayNameなしでActiveUserを作成できる',
-          email: 'test@example.com',
-          authenticationId: 'auth-id-123',
-          displayName: undefined,
-          expectedDisplayName: null,
-        },
-        {
-          name: 'displayName付きでActiveUserを作成できる',
-          email: 'test2@example.com',
-          authenticationId: 'auth-id-456',
-          displayName: 'カスタム表示名',
-          expectedDisplayName: 'カスタム表示名',
-        },
-        {
-          name: 'displayNameがnullの場合もActiveUserを作成できる',
-          email: 'test3@example.com',
-          authenticationId: 'auth-id-789',
-          displayName: null,
-          expectedDisplayName: null,
-        },
-      ]
+    it('displayName付きでActiveUserを作成できる', async () => {
+      prisma.user.create.mockResolvedValue({ userId: 2n, createdAt: new Date() })
+      prisma.activeUser.create.mockResolvedValue({
+        activeUserId: 1n,
+        userId: 2n,
+        email: 'test@example.com',
+        displayName: '表示名',
+        authenticationId: 'auth-id-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
 
-      it.each(testCases)(
-        '$name',
-        async ({ email, authenticationId, displayName, expectedDisplayName }) => {
-          // Arrange
-          const mockUser = { userId: 2n }
-
-          const mockActiveUser = {
-            activeUserId: 1n,
-            userId: 2n,
-            email,
-            displayName: expectedDisplayName,
-            authenticationId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          }
-
-          prisma.$transaction.mockImplementation(async (callback) => {
-            return await callback({
-              // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
-              user: { create: vi.fn().mockResolvedValue(mockUser) } as any,
-              // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
-              activeUser: { create: vi.fn().mockResolvedValue(mockActiveUser) } as any,
-              // biome-ignore lint/suspicious/noExplicitAny: 戻り値の型が面倒なためanyを使用
-            } as any)
-          })
-
-          // Act
-          const result = await useCase.createActiveWithAuthenticationId(
-            email,
-            authenticationId,
-            displayName,
-          )
-
-          // Assert
-          expect(isSuccess(result)).toBe(true)
-          if (isSuccess(result)) {
-            expect(result.data.email).toBe(email)
-            expect(result.data.displayName).toBe(expectedDisplayName)
-          }
-          expect(prisma.$transaction).toHaveBeenCalled()
-        },
+      const result = await useCase.createActiveWithAuthenticationId(
+        'test@example.com',
+        'auth-id-123',
+        '表示名',
       )
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data.email).toBe('test@example.com')
+        expect(result.data.displayName).toBe('表示名')
+      }
     })
 
-    describe('例外・制約違反', () => {
-      const errorTestCases = [
-        {
-          name: 'データベース接続エラー時は適切にエラーを返す',
-          error: new Error('Database connection failed'),
-          expectedMessage: 'Database connection failed',
-        },
-        {
-          name: 'ユニーク制約違反時は適切にエラーを返す',
-          error: new Error('Unique constraint failed on the fields: (`email`)'),
-          expectedMessage: 'Unique constraint failed on the fields: (`email`)',
-        },
-        {
-          name: 'authenticationIdユニーク制約違反時は適切にエラーを返す',
-          error: new Error('Unique constraint failed on the fields: (`authenticationId`)'),
-          expectedMessage: 'Unique constraint failed on the fields: (`authenticationId`)',
-        },
-      ]
+    it('activeUser作成失敗時にuser削除の補償処理を行う', async () => {
+      prisma.user.create.mockResolvedValue({ userId: 2n, createdAt: new Date() })
+      prisma.activeUser.create.mockRejectedValue(new Error('create active failed'))
+      prisma.user.delete.mockResolvedValue({ userId: 2n, createdAt: new Date() })
 
-      it.each(errorTestCases)('$name', async ({ error, expectedMessage }) => {
-        // Arrange
-        prisma.$transaction.mockRejectedValue(error)
+      const result = await useCase.createActiveWithAuthenticationId(
+        'test@example.com',
+        'auth-id-123',
+      )
 
-        // Act
-        const result = await useCase.createActiveWithAuthenticationId(
-          'test@example.com',
-          'auth-id-123',
-        )
-
-        // Assert
-        expect(isFailure(result)).toBe(true)
-        if (isFailure(result)) {
-          expect(result.error.message).toBe(expectedMessage)
-        }
-      })
+      expect(isFailure(result)).toBe(true)
+      expect(prisma.user.delete).toHaveBeenCalledWith({ where: { userId: 2n } })
     })
   })
 })

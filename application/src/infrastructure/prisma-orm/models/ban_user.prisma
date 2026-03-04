@@ -1,8 +1,8 @@
 model BannedUser {
-  userId    BigInt   @unique @map("user_id") @db.BigInt
-  bannedAt  DateTime @default(now()) @map("banned_at") @db.Timestamptz()
-  reason    String?  @db.VarChar(1024)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  userId    BigInt   @unique @map("user_id")
+  bannedAt  DateTime @default(now()) @map("banned_at")
+  reason    String?
+  createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
 

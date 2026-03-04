@@ -30,6 +30,4 @@ runs:
     - name: DB Migration
       shell: bash
       working-directory: ./application
-      env:
-        DIRECT_URL: ${{ env.DATABASE_URL }}
       run: npm run db:migrate

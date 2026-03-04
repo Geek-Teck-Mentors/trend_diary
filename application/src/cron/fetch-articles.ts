@@ -1,0 +1,144 @@
+import Parser from 'rss-parser'
+import Logger from '@/common/logger'
+import getRdbClient from '@/infrastructure/rdb'
+
+type CronEnv = {
+  DB: D1Database
+  DATABASE_URL?: string
+  LOG_LEVEL?: import('@/common/logger').LogLevel
+}
+
+type D1Database = import('@cloudflare/workers-types').D1Database
+
+type FeedItem = {
+  title: string
+  author: string
+  description: string
+  url: string
+}
+
+const MAX_LENGTH = {
+  media: 10,
+  title: 100,
+  author: 30,
+  description: 1024,
+}
+
+function truncateByCodePoint(text: string, maxLength: number): string {
+  return [...text].slice(0, maxLength).join('')
+}
+
+async function fetchRssFeed<T>(url: string) {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch rss feed: ${url}, status=${response.status}`)
+  }
+
+  const parser = new Parser<{ items: T[] }, T>()
+  const xml = await response.text()
+  const feed = await parser.parseString(xml)
+  return feed.items
+}
+
+async function storeArticles(media: 'qiita' | 'zenn', items: FeedItem[], env: CronEnv) {
+  const db = getRdbClient({ db: env.DB, databaseUrl: env.DATABASE_URL })
+  try {
+    if (items.length === 0) return 0
+
+    const normalized = items.map((item) => ({
+      media: truncateByCodePoint(media, MAX_LENGTH.media),
+      title: truncateByCodePoint(item.title, MAX_LENGTH.title),
+      author: truncateByCodePoint(item.author, MAX_LENGTH.author),
+      description: truncateByCodePoint(item.description, MAX_LENGTH.description),
+      url: item.url,
+    }))
+
+    const existing = await db.article.findMany({
+      where: {
+        url: {
+          in: normalized.map((item) => item.url),
+        },
+      },
+      select: {
+        url: true,
+      },
+    })
+
+    const existingUrlSet = new Set(existing.map((item) => item.url))
+    const toInsert = normalized.filter((item) => !existingUrlSet.has(item.url))
+
+    if (toInsert.length === 0) return 0
+
+    const lastArticle = await db.article.findFirst({
+      orderBy: { articleId: 'desc' },
+      select: { articleId: true },
+    })
+    const baseArticleId = lastArticle?.articleId ?? 0n
+    const toInsertWithId = toInsert.map((article, index) => ({
+      ...article,
+      articleId: baseArticleId + BigInt(index + 1),
+    }))
+
+    const result = await db.article.createMany({
+      data: toInsertWithId,
+    })
+    return result.count
+  } finally {
+    await db.$disconnect()
+  }
+}
+
+export async function fetchQiitaArticles(env: CronEnv): Promise<number> {
+  const items = await fetchRssFeed<{
+    title: string
+    author: string
+    content: string
+    link: string
+  }>('https://qiita.com/popular-items/feed.atom')
+
+  return storeArticles(
+    'qiita',
+    items.map((item) => ({
+      title: item.title,
+      author: item.author,
+      description: item.content,
+      url: item.link,
+    })),
+    env,
+  )
+}
+
+export async function fetchZennArticles(env: CronEnv): Promise<number> {
+  const items = await fetchRssFeed<{
+    title: string
+    creator: string
+    content: string
+    link: string
+  }>('https://zenn.dev/feed')
+
+  return storeArticles(
+    'zenn',
+    items.map((item) => ({
+      title: item.title,
+      author: item.creator,
+      description: item.content,
+      url: item.link,
+    })),
+    env,
+  )
+}
+
+export async function runScheduledFetch(
+  media: 'qiita' | 'zenn',
+  env: CronEnv,
+  logger: Logger,
+): Promise<void> {
+  const insertedCount =
+    media === 'qiita' ? await fetchQiitaArticles(env) : await fetchZennArticles(env)
+
+  logger.info({
+    msg: 'cron fetch completed',
+    media,
+    insertedCount,
+  })
+}

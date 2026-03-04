@@ -1,9 +1,6 @@
-# SupabaseのDB URLを設定
-# edge環境ではprisma://から始まるURLにする必要がある
-DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
-
-# Direct connection to the database. Used for migrations
-DIRECT_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+# ローカル/テスト向けフォールバックDB
+# Cloudflare D1 binding(DB)がない環境でのみ参照される
+DATABASE_URL=file:./dev.db
 
 # Discord webhook URL for alert
 DISCORD_WEBHOOK_URL=
