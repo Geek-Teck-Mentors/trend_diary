@@ -15,6 +15,7 @@ on:
         type: choice
         options:
           - web
+          - cron
           - database
 
 permissions:
@@ -56,28 +57,24 @@ jobs:
           secrets: |
             SUPABASE_URL
             SUPABASE_ANON_KEY
-            DATABASE_URL
             DISCORD_WEBHOOK_URL
             FEATURE_USER_ENABLED
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           FEATURE_USER_ENABLED: ${{ vars.FEATURE_USER_ENABLED }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
 
       - name: デプロイの出力を表示
         env:
           CMD_OUTPUT: ${{ steps.deploy.outputs.command-output }}
         run: echo $CMD_OUTPUT
 
-  database:
+  cron:
     runs-on: ubuntu-latest
     environment: production
-    if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'database' }}
-    env:
-      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
-      DIRECT_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+    if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'cron' }}
     steps:
       - uses: actions/checkout@v4
       - name: Node.jsの構築
@@ -85,5 +82,35 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - name: Prismaのマイグレーション
-        run: npm run db:deploy
+      - name: Cron Workerをデプロイ
+        id: deploy-cron
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ./application
+          command: deploy --config wrangler.cron.toml
+          secrets: |
+            DISCORD_WEBHOOK_URL
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+
+  database:
+    runs-on: ubuntu-latest
+    environment: production
+    if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'database' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node.jsの構築
+        uses: ./.github/actions/setup_node
+        with:
+          node-version-file: .node-version
+
+      - name: D1のマイグレーション適用
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ./application
+          command: d1 migrations apply trend-diary-db --remote

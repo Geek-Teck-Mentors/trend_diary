@@ -26,6 +26,7 @@ permissions:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
+  DATABASE_URL: file:./test.db
 
 defaults:
   run:
@@ -138,8 +139,6 @@ jobs:
         uses: ./.github/actions/setup_supabase
 
       - name: DB Migration
-        env:
-          DIRECT_URL: ${{ env.DATABASE_URL }}
         run: npm run db:migrate
 
       - name: サーバーのテスト

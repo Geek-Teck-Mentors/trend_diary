@@ -1,5 +1,25 @@
 import { faker } from '@faker-js/faker'
+import { generateBigIntId } from '@/infrastructure/rdb-id'
 import { getTestRdb } from './rdb'
+
+function getTodayJstNoon(): Date {
+  const jstParts = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const year = jstParts.find((part) => part.type === 'year')?.value
+  const month = jstParts.find((part) => part.type === 'month')?.value
+  const day = jstParts.find((part) => part.type === 'day')?.value
+  if (!year || !month || !day) {
+    return new Date()
+  }
+
+  // INFO: trends APIは日付フィルタをJSTで評価するため、E2EデータもJST当日内に固定する
+  return new Date(`${year}-${month}-${day}T12:00:00+09:00`)
+}
 
 export async function createArticle(options?: {
   media?: 'qiita' | 'zenn'
@@ -16,14 +36,16 @@ export async function createArticle(options?: {
     (media === 'qiita'
       ? `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
       : `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`)
+  const uniqueSuffix = `tid-${crypto.randomUUID()}`
 
   const data = {
+    articleId: generateBigIntId(),
     media,
     title: options?.title ?? faker.lorem.sentence().substring(0, 100),
     author: options?.author ?? faker.person.fullName().substring(0, 30),
     description: options?.description ?? faker.lorem.paragraph().substring(0, 255),
-    url,
-    createdAt: options?.createdAt,
+    url: url.includes('?') ? `${url}&${uniqueSuffix}` : `${url}?${uniqueSuffix}`,
+    createdAt: options?.createdAt ?? getTodayJstNoon(),
   }
   return await rdb.article.create({ data })
 }
@@ -60,6 +82,7 @@ export async function createReadHistory(activeUserId: bigint, articleId: bigint,
   const rdb = getTestRdb()
   return await rdb.readHistory.create({
     data: {
+      readHistoryId: generateBigIntId(),
       activeUserId,
       articleId,
       readAt: readAt || faker.date.recent(),

@@ -3,6 +3,7 @@ import { ServerError } from '@/common/errors'
 import { Command } from '@/domain/article/repository'
 import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
 import { RdbClient } from '@/infrastructure/rdb'
+import { generateBigIntId, shouldUseExplicitBigIntId } from '@/infrastructure/rdb-id'
 
 export default class CommandImpl implements Command {
   constructor(private readonly db: RdbClient) {}
@@ -12,9 +13,11 @@ export default class CommandImpl implements Command {
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
+    const explicitIdRequired = shouldUseExplicitBigIntId()
     const result = await wrapAsyncCall(() =>
       this.db.readHistory.create({
         data: {
+          ...(explicitIdRequired ? { readHistoryId: generateBigIntId() } : {}),
           activeUserId,
           articleId,
           readAt,

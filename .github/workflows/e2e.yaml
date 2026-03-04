@@ -25,6 +25,7 @@ defaults:
 # 共通の設定を定義
 env:
   NODE_VERSION_FILE: .node-version
+  DATABASE_URL: file:./test.db
 
 jobs:
   test:

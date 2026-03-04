@@ -10,7 +10,7 @@ export default async function me(c: Context) {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
 
   const client = createSupabaseAuthClient(c)
-  const rdb = getRdbClient(c.env.DATABASE_URL)
+  const rdb = getRdbClient({ db: c.env.DB, databaseUrl: c.env.DATABASE_URL })
   const useCase = createAuthV2UseCase(client, rdb)
 
   const activeUserResult = await useCase.getCurrentActiveUser()

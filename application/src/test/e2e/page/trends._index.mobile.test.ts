@@ -5,6 +5,34 @@ const ARTICLE_COUNT = 10
 const TIMEOUT = 10000
 const MOBILE_VIEWPORT = { width: 375, height: 667 }
 
+async function waitForArticleCards(page: Page): Promise<void> {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const date = `${year}-${month}-${day}`
+
+  // INFO: 先にAPI側で記事が返ることを待ち、UI描画待ちの不安定さを減らす
+  await expect
+    .poll(
+      async () => {
+        const response = await page.request.get(
+          `/api/articles?from=${date}&to=${date}&page=1&limit=${ARTICLE_COUNT}`,
+        )
+        if (!response.ok()) {
+          return -1
+        }
+
+        const body = (await response.json()) as { data?: Array<unknown> }
+        return body.data?.length ?? 0
+      },
+      { timeout: TIMEOUT },
+    )
+    .toBeGreaterThan(0)
+
+  await expect(page.locator("[data-slot='card']").first()).toBeVisible({ timeout: TIMEOUT })
+}
+
 test.describe('記事一覧ページ(モバイル)', () => {
   test.use({ viewport: MOBILE_VIEWPORT })
 
@@ -67,8 +95,9 @@ test.describe('記事一覧ページ(モバイル)', () => {
     })
 
     test.beforeEach(async ({ page }) => {
+      await page.goto('/trends')
       // カードが表示されるのを待機
-      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
+      await waitForArticleCards(page)
     })
 
     async function waitDrawerOpen(page: Page): Promise<Locator> {
@@ -179,7 +208,7 @@ test.describe('記事一覧ページ(モバイル)', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/trends')
       // カードが表示されるのを待機
-      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
+      await waitForArticleCards(page)
     })
 
     test('メディアフィルタートリガーが表示される', async ({ page }) => {

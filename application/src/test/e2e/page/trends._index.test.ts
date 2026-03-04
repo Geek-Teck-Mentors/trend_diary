@@ -211,9 +211,13 @@ test.describe('記事一覧ページ', () => {
       await expect(qiitaArticleCards).toHaveCount(QIITA_COUNT)
 
       // すべてフィルターを選択
-      await filterTrigger.click()
+      const filterTriggerAgain = page.locator('[data-slot="media-filter-trigger"]')
+      await filterTriggerAgain.waitFor({ state: 'visible', timeout: TIMEOUT })
       const allOption = page.locator('[data-slot="media-filter-all"]')
-      await allOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await expect(async () => {
+        await filterTriggerAgain.click()
+        await expect(allOption).toBeVisible({ timeout: 1000 })
+      }).toPass({ timeout: TIMEOUT })
       await allOption.click()
 
       // URLパラメータからmediaが削除されるのを待機

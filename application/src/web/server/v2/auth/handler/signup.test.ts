@@ -3,6 +3,12 @@ import * as userHelper from '@/test/helper/user'
 import app from '../../../../server'
 
 describe('POST /api/v2/auth/signup', () => {
+  let emailSequence = 0
+  const nextEmail = (prefix: string) => {
+    emailSequence += 1
+    return `${prefix}+${Date.now()}-${emailSequence}@test.com`
+  }
+
   // signup APIで使用するメールのパターン
   const SIGNUP_TEST_EMAIL_PATTERN = '@test.com'
   const DUPLICATE_EMAIL_PATTERN = 'duplicate@example.com'
@@ -33,9 +39,8 @@ describe('POST /api/v2/auth/signup', () => {
   }
 
   it('正常系: signupが成功する', async () => {
-    const res = await requestSignup(
-      JSON.stringify({ email: 'signup@test.com', password: 'Test@password123' }),
-    )
+    const email = nextEmail('signup')
+    const res = await requestSignup(JSON.stringify({ email, password: 'Test@password123' }))
 
     expect(res.status).toBe(201)
     const body = (await res.json()) as Record<string, never>
@@ -68,7 +73,7 @@ describe('POST /api/v2/auth/signup', () => {
     })
 
     it('既に存在するメールアドレスの場合', async () => {
-      const email = 'duplicate@example.com'
+      const email = nextEmail('duplicate')
 
       // 1回目の登録
       const res1 = await requestSignup(JSON.stringify({ email, password: 'Test@password123' }))

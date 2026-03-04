@@ -3,16 +3,22 @@
 ## データベース接続時の型取得
 
 - アプリケーション側（バックエンド/API）
-  - `@prisma/client` を使用
+  - `@prisma/client` + `@prisma/adapter-d1` を使用
 - Supabase Edge Functions側
   - `supabase-js` を使用
 
 ## マイグレーションファイルの生成
 
-Prisma公式ドキュメントに従い以下を実行
+Prisma schemaを編集後、ローカル(SQLite)に反映する場合:
 
 1. Prisma schemaを編集
 2. `npm run db:migrate`
+
+D1向けSQLを作成・適用する場合:
+
+1. `npm run db:d1:diff:init` （初期作成時）
+2. `npm run db:d1:migrations:apply:local`
+3. 本番は `npm run db:d1:migrations:apply:remote`
 
 (参考: https://www.prisma.io/docs/orm/prisma-migrate/getting-started)
 

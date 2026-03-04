@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client/edge'
+import { Prisma } from '@prisma/client'
 import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { DEFAULT_LIMIT, DEFAULT_PAGE, OffsetPaginationResult } from '@/common/pagination'
@@ -16,12 +16,6 @@ export default class QueryImpl implements Query {
     params: QueryParams,
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
-    // activeUserIdがある場合は生SQLでLEFT JOINして1クエリで取得
-    if (activeUserId !== undefined) {
-      return this.searchArticlesWithReadStatus(params, activeUserId)
-    }
-
-    // activeUserIdがない場合は従来通り
     const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, ...searchParams } = params
     const where = QueryImpl.buildWhereClause(searchParams)
     const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
@@ -29,113 +23,56 @@ export default class QueryImpl implements Query {
       { articleId: 'desc' },
     ]
 
-    const result = await wrapAsyncCall(() =>
-      this.db.$transaction([
-        this.db.article.count({ where }),
-        this.db.article.findMany({
-          where,
-          orderBy,
-          skip: (page - 1) * limit,
-          take: limit,
-        }),
-      ]),
-    )
-
-    if (isFailure(result)) {
-      return failure(new ServerError(result.error))
+    const totalResult = await wrapAsyncCall(() => this.db.article.count({ where }))
+    if (isFailure(totalResult)) {
+      return failure(new ServerError(totalResult.error))
     }
 
-    const [total, articles] = result.data
-    const mappedArticles: ArticleWithOptionalReadStatus[] = articles.map((article) => ({
-      ...fromPrismaToArticle(article),
-      isRead: undefined,
-    }))
-
-    const totalPages = Math.ceil(total / limit)
-    return success({
-      data: mappedArticles,
-      page,
-      limit,
-      total,
-      totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1,
-    })
-  }
-
-  private async searchArticlesWithReadStatus(
-    params: QueryParams,
-    activeUserId: bigint,
-  ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
-    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, ...searchParams } = params
-    const offset = (page - 1) * limit
-
-    const whereClause = QueryImpl.buildWhereClauseForRawSql(searchParams)
-
-    const countSql = Prisma.sql`SELECT COUNT(*)::int as count FROM articles a ${whereClause}`
-    const dataSql = Prisma.sql`
-      SELECT
-        a.article_id,
-        a.media,
-        a.title,
-        a.author,
-        a.description,
-        a.url,
-        a.created_at,
-        EXISTS(
-          SELECT 1
-          FROM read_histories rh
-          WHERE rh.article_id = a.article_id
-            AND rh.active_user_id = ${activeUserId}
-        ) as is_read
-      FROM articles a
-      ${whereClause}
-      ORDER BY a.created_at DESC, a.article_id DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `
-
-    type CountResult = { count: number }
-    type RawDataRow = {
-      // biome-ignore lint/style/useNamingConvention: データベースのカラム名
-      article_id: bigint
-      media: string
-      title: string
-      author: string
-      description: string
-      url: string
-      // biome-ignore lint/style/useNamingConvention: データベースのカラム名
-      created_at: Date
-      // biome-ignore lint/style/useNamingConvention: データベースのカラム名
-      is_read: boolean
-    }
-
-    const result = await wrapAsyncCall(() =>
-      this.db.$transaction([
-        this.db.$queryRaw<CountResult[]>(countSql),
-        this.db.$queryRaw<RawDataRow[]>(dataSql),
-      ]),
-    )
-
-    if (isFailure(result)) {
-      return failure(new ServerError(result.error))
-    }
-
-    const [countResult, dataResult] = result.data
-    const total = countResult[0]?.count ?? 0
-
-    // 結果をマッピング（fromPrismaToArticleを再利用）
-    const mappedArticles: ArticleWithOptionalReadStatus[] = dataResult.map((row) => ({
-      ...fromPrismaToArticle({
-        articleId: row.article_id,
-        media: row.media,
-        title: row.title,
-        author: row.author,
-        description: row.description,
-        url: row.url,
-        createdAt: row.created_at,
+    const articlesResult = await wrapAsyncCall(() =>
+      this.db.article.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
       }),
-      isRead: row.is_read,
-    }))
+    )
+
+    if (isFailure(articlesResult)) {
+      return failure(new ServerError(articlesResult.error))
+    }
+
+    const total = totalResult.data
+    const articles = articlesResult.data
+    const mappedArticles: ArticleWithOptionalReadStatus[] = articles.map(fromPrismaToArticle)
+
+    if (activeUserId !== undefined && mappedArticles.length > 0) {
+      const readHistoriesResult = await wrapAsyncCall(() =>
+        this.db.readHistory.findMany({
+          where: {
+            activeUserId,
+            articleId: {
+              in: mappedArticles.map((article) => article.articleId),
+            },
+          },
+          select: {
+            articleId: true,
+          },
+        }),
+      )
+
+      if (isFailure(readHistoriesResult)) {
+        return failure(new ServerError(readHistoriesResult.error))
+      }
+
+      const readArticleIdSet = new Set(readHistoriesResult.data.map((history) => history.articleId))
+      mappedArticles.forEach((article) => {
+        article.isRead = readArticleIdSet.has(article.articleId)
+      })
+    } else {
+      mappedArticles.forEach((article) => {
+        article.isRead = undefined
+      })
+    }
 
     const totalPages = Math.ceil(total / limit)
     return success({
@@ -164,22 +101,18 @@ export default class QueryImpl implements Query {
     return success(fromPrismaToArticle(article))
   }
 
-  private static buildWhereClause(
-    params: Omit<QueryParams, 'page' | 'limit'>,
-  ): Prisma.ArticleWhereInput {
+  private static buildWhereClause(params: Omit<QueryParams, 'page' | 'limit'>) {
     const where: Prisma.ArticleWhereInput = {}
 
     if (params.title) {
       where.title = {
         contains: params.title,
-        mode: 'insensitive',
       }
     }
 
     if (params.author) {
       where.author = {
         contains: params.author,
-        mode: 'insensitive',
       }
     }
 
@@ -205,39 +138,5 @@ export default class QueryImpl implements Query {
     }
 
     return where
-  }
-
-  private static buildWhereClauseForRawSql(
-    params: Omit<QueryParams, 'page' | 'limit'>,
-  ): Prisma.Sql {
-    const conditions: Prisma.Sql[] = []
-
-    if (params.title) {
-      conditions.push(Prisma.sql`a.title ILIKE ${`%${params.title}%`}`)
-    }
-
-    if (params.author) {
-      conditions.push(Prisma.sql`a.author ILIKE ${`%${params.author}%`}`)
-    }
-
-    if (params.media) {
-      conditions.push(Prisma.sql`a.media = ${params.media}`)
-    }
-
-    if (params.from) {
-      conditions.push(Prisma.sql`a.created_at >= ${new Date(`${params.from}T00:00:00+09:00`)}`)
-    }
-
-    if (params.to) {
-      const toDate = new Date(`${params.to}T00:00:00+09:00`)
-      toDate.setDate(toDate.getDate() + 1)
-      conditions.push(Prisma.sql`a.created_at < ${toDate}`)
-    }
-
-    if (conditions.length === 0) {
-      return Prisma.empty
-    }
-
-    return Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
   }
 }

@@ -1,12 +1,20 @@
-name = "trend-diary"
+name = "trend-diary-cron"
 compatibility_date = "2025-04-01"
 compatibility_flags = [ "nodejs_compat" ]
-main = "./src/web/worker.ts"
-assets = { directory = "./build/client" }
+main = "./src/cron/worker.ts"
+workers_dev = false
 
 [observability]
 enabled = true
 head_sampling_rate = 1
+
+[vars]
+# 現行値が確定したら上書きすること
+QIITA_CRON = "0 */8 * * *"
+ZENN_CRON = "0 */8 * * *"
+
+[triggers]
+crons = ["0 */8 * * *"]
 
 [[d1_databases]]
 binding = "DB"

@@ -17,7 +17,7 @@ Nodeモジュールのインストール
 npm ci
 ```
 
-Supabaseを起動
+Supabaseを起動（Auth用途）
 
 ```sh
 supabase start
@@ -29,10 +29,16 @@ supabase start
 cp .dev.vars.example .dev.vars
 ```
 
-SupabaseのDBにマイグレーションを適用
+ローカルDB(SQLite)にマイグレーションを適用
 
 ```sh
 npm run db:migrate
+```
+
+Cloudflare D1ローカルマイグレーション適用（必要な場合）
+
+```sh
+npm run db:d1:migrations:apply:local
 ```
 
 サーバの起動（Hono上でAPIとRemixが起動する）
