@@ -1,5 +1,6 @@
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { shouldUseExplicitBigIntId } from '@/infrastructure/rdb-id'
 import prisma from '@/test/__mocks__/prisma'
 import CommandImpl from './command-impl'
 
@@ -38,7 +39,12 @@ describe('CommandImpl', () => {
         expect(result.data.email).toBe('test@example.com')
         expect(result.data.displayName).toBe('表示名')
       }
-      expect(prisma.user.create).toHaveBeenCalledWith({ data: {} })
+      const userCreateArgs = prisma.user.create.mock.calls[0]?.[0]
+      if (shouldUseExplicitBigIntId()) {
+        expect(typeof userCreateArgs?.data?.userId).toBe('bigint')
+      } else {
+        expect(userCreateArgs).toEqual({ data: {} })
+      }
       expect(prisma.activeUser.create).toHaveBeenCalledWith({
         data: {
           userId: 2n,

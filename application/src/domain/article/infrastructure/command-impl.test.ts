@@ -1,5 +1,6 @@
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { shouldUseExplicitBigIntId } from '@/infrastructure/rdb-id'
 import mockDb from '@/test/__mocks__/prisma'
 import CommandImpl from './command-impl'
 
@@ -29,9 +30,13 @@ describe('CommandImpl', () => {
         await commandImpl.createReadHistory(activeUserId, articleId, readAt)
 
         // Assert
-        expect(mockDb.readHistory.create).toHaveBeenCalledWith({
-          data: { activeUserId, articleId, readAt },
-        })
+        const createArgs = mockDb.readHistory.create.mock.calls[0]?.[0]
+        expect(createArgs?.data).toMatchObject({ activeUserId, articleId, readAt })
+        if (shouldUseExplicitBigIntId()) {
+          expect(typeof createArgs?.data?.readHistoryId).toBe('bigint')
+        } else {
+          expect(createArgs?.data?.readHistoryId).toBeUndefined()
+        }
       })
 
       const basicTestCases = [
