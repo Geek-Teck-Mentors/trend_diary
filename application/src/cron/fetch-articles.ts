@@ -1,5 +1,5 @@
-import Parser from 'rss-parser'
 import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
+import Parser from 'rss-parser'
 import Logger from '@/common/logger'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -76,9 +76,7 @@ async function storeArticles(media: 'qiita' | 'zenn', items: FeedItem[], env: Cr
       })
       return result.count
     },
-    () => {
-      void db.$disconnect()
-    },
+    () => db.$disconnect(),
   )
   if (isFailure(result)) {
     throw result.error

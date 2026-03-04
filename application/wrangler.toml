@@ -11,5 +11,5 @@ head_sampling_rate = 1
 [[d1_databases]]
 binding = "DB"
 database_name = "trend-diary-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "${D1_DATABASE_ID}"
 migrations_dir = "migrations"
