@@ -38,7 +38,7 @@ npm run db:migrate
 Cloudflare D1ローカルマイグレーション適用（必要な場合）
 
 ```sh
-npm run db:d1:migrations:apply:local
+npm run d1:apply:local
 ```
 
 サーバの起動（Hono上でAPIとRemixが起動する）
