@@ -19,9 +19,7 @@ describe('useDebounce', () => {
   })
 
   afterEach(() => {
-    act(() => {
-      vi.runOnlyPendingTimers()
-    })
+    vi.runOnlyPendingTimers()
     vi.clearAllTimers()
   })
 

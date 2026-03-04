@@ -32,7 +32,7 @@ CREATE TABLE "active_users_new" (
     "display_name" TEXT,
     "authentication_id" TEXT,
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" DATETIME NOT NULL,
     "user_id" INTEGER NOT NULL,
     CONSTRAINT "active_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users_new" ("user_id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -124,15 +124,5 @@ CREATE UNIQUE INDEX "articles_url_key" ON "articles"("url");
 CREATE UNIQUE INDEX "banned_users_user_id_key" ON "banned_users"("user_id");
 CREATE UNIQUE INDEX "leaved_users_user_id_key" ON "leaved_users"("user_id");
 CREATE INDEX "idx_read_histories_article_user" ON "read_histories"("article_id", "active_user_id");
-
-CREATE TRIGGER "active_users_set_updated_at"
-AFTER UPDATE ON "active_users"
-FOR EACH ROW
-WHEN NEW."updated_at" = OLD."updated_at"
-BEGIN
-  UPDATE "active_users"
-  SET "updated_at" = CURRENT_TIMESTAMP
-  WHERE "active_user_id" = OLD."active_user_id";
-END;
 
 PRAGMA foreign_keys=ON;
