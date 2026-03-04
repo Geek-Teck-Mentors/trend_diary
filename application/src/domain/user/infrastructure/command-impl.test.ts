@@ -13,7 +13,6 @@ describe('CommandImpl', () => {
 
   describe('createActiveWithAuthenticationId', () => {
     it('displayName付きでActiveUserを作成できる', async () => {
-      const createdUser = { userId: 2, createdAt: new Date() }
       const createdActiveUser = {
         activeUserId: 1,
         userId: 2,
@@ -23,9 +22,7 @@ describe('CommandImpl', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       }
-      prisma.user.create.mockResolvedValue(createdUser)
       prisma.activeUser.create.mockResolvedValue(createdActiveUser)
-      prisma.$transaction.mockImplementation(async (callback) => await callback(prisma))
 
       const result = await useCase.createActiveWithAuthenticationId(
         'test@example.com',
@@ -40,20 +37,18 @@ describe('CommandImpl', () => {
         expect(result.data.activeUserId).toBe(1n)
         expect(result.data.userId).toBe(2n)
       }
-      const userCreateArgs = prisma.user.create.mock.calls[0]?.[0]
-      expect(userCreateArgs).toEqual({ data: {} })
       const activeUserCreateArgs = prisma.activeUser.create.mock.calls[0]?.[0]
       expect(activeUserCreateArgs?.data).toMatchObject({
-        userId: 2,
         email: 'test@example.com',
         authenticationId: 'auth-id-123',
         displayName: '表示名',
       })
+      expect(activeUserCreateArgs?.data?.user).toEqual({ create: {} })
       expect(activeUserCreateArgs?.data?.activeUserId).toBeUndefined()
     })
 
-    it('トランザクション失敗時にエラーを返す', async () => {
-      prisma.$transaction.mockRejectedValue(new Error('create active failed'))
+    it('activeUser作成失敗時にエラーを返す', async () => {
+      prisma.activeUser.create.mockRejectedValue(new Error('create active failed'))
 
       const result = await useCase.createActiveWithAuthenticationId(
         'test@example.com',

@@ -14,18 +14,15 @@ export default class CommandImpl implements Command {
     displayName?: string | null,
   ): AsyncResult<CurrentUser, ServerError> {
     const activeUserResult = await wrapAsyncCall(() =>
-      this.db.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: {},
-        })
-        return await tx.activeUser.create({
-          data: {
-            userId: user.userId,
-            email,
-            authenticationId,
-            displayName,
+      this.db.activeUser.create({
+        data: {
+          email,
+          authenticationId,
+          displayName,
+          user: {
+            create: {},
           },
-        })
+        },
       }),
     )
 
