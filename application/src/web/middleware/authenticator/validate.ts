@@ -37,35 +37,38 @@ export async function validateSession(
   c: Context<Env>,
 ): Promise<Result<AuthValidationSuccess, AuthValidationError>> {
   const logger = c.get(CONTEXT_KEY.APP_LOG)
+  try {
+    const supabaseClient = createSupabaseAuthClient(c)
+    const rdb = getRdbClient({ db: c.env.DB, databaseUrl: c.env.DATABASE_URL })
+    const useCase = createAuthV2UseCase(supabaseClient, rdb)
 
-  const supabaseClient = createSupabaseAuthClient(c)
-  const rdb = getRdbClient({ db: c.env.DB, databaseUrl: c.env.DATABASE_URL })
-  const useCase = createAuthV2UseCase(supabaseClient, rdb)
+    const result = await useCase.getCurrentActiveUser()
+    if (isFailure(result)) {
+      if (result.error instanceof UnauthorizedError) {
+        return failure(createAuthValidationError('no_session', 'No session found'))
+      }
+      if (result.error instanceof ClientError || result.error instanceof ServerError) {
+        logger.warn('Session validation failed', { error: result.error })
+      } else {
+        logger.error('Unexpected error occurred', { error: result.error })
+      }
+      return failure(createAuthValidationError('validation_failed', 'Session validation failed'))
+    }
 
-  const result = await useCase.getCurrentActiveUser()
-  if (isFailure(result)) {
-    if (result.error instanceof UnauthorizedError) {
-      return failure(createAuthValidationError('no_session', 'No session found'))
+    if (!result.data) {
+      return failure(createAuthValidationError('user_not_found', 'User not found'))
     }
-    if (result.error instanceof ClientError || result.error instanceof ServerError) {
-      logger.warn('Session validation failed', { error: result.error })
-    } else {
-      logger.error('Unexpected error occurred', { error: result.error })
+
+    // 管理者権限をチェック
+    const sessionUser: SessionUser = {
+      activeUserId: result.data.activeUserId,
+      displayName: result.data.displayName,
+      email: result.data.email,
     }
+
+    return success({ sessionUser })
+  } catch (error) {
+    logger.warn('Session validation setup failed', { error })
     return failure(createAuthValidationError('validation_failed', 'Session validation failed'))
   }
-
-  if (!result.data) {
-    return failure(createAuthValidationError('user_not_found', 'User not found'))
-  }
-
-  // 管理者権限をチェック
-
-  const sessionUser: SessionUser = {
-    activeUserId: result.data.activeUserId,
-    displayName: result.data.displayName,
-    email: result.data.email,
-  }
-
-  return success({ sessionUser })
 }

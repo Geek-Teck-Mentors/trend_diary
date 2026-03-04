@@ -7,6 +7,25 @@ function nextTestId(): bigint {
   return BigInt(Date.now()) * 1000000n + idSequence
 }
 
+function getTodayJstNoon(): Date {
+  const jstParts = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const year = jstParts.find((part) => part.type === 'year')?.value
+  const month = jstParts.find((part) => part.type === 'month')?.value
+  const day = jstParts.find((part) => part.type === 'day')?.value
+  if (!year || !month || !day) {
+    return new Date()
+  }
+
+  // INFO: trends APIは日付フィルタをJSTで評価するため、E2EデータもJST当日内に固定する
+  return new Date(`${year}-${month}-${day}T12:00:00+09:00`)
+}
+
 export async function createArticle(options?: {
   media?: 'qiita' | 'zenn'
   title?: string
@@ -31,7 +50,7 @@ export async function createArticle(options?: {
     author: options?.author ?? faker.person.fullName().substring(0, 30),
     description: options?.description ?? faker.lorem.paragraph().substring(0, 255),
     url: url.includes('?') ? `${url}&${uniqueSuffix}` : `${url}?${uniqueSuffix}`,
-    createdAt: options?.createdAt,
+    createdAt: options?.createdAt ?? getTodayJstNoon(),
   }
   return await rdb.article.create({ data })
 }

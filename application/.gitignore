@@ -25,6 +25,7 @@ lerna-debug.log*
 
 # coverage
 coverage/
+src/infrastructure/prisma-orm/test.db
 
 # Playwright
 /src/test/e2e/test-results/

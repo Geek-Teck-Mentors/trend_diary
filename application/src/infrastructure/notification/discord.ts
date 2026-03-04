@@ -21,8 +21,8 @@ export class DiscordNotifier implements ChatNotifier {
 
   private readonly maxFieldLength = 1018 // Discord field limit (1024) minus code block chars (6)
 
-  constructor(webhookUrl: string) {
-    this.webhookUrl = webhookUrl
+  constructor(webhookUrl?: string) {
+    this.webhookUrl = webhookUrl ?? ''
   }
 
   async error(error: Error, requestInfo: RequestInfo): Promise<void> {

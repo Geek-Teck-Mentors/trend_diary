@@ -13,6 +13,15 @@ type RdbInput = string | RdbConfig
 export default function getRdbClient(input: RdbInput) {
   const isTest = process.env.NODE_ENV === 'test'
   const config: RdbConfig = typeof input === 'string' ? { databaseUrl: input } : input
+  const resolvedDatabaseUrl = config.databaseUrl ?? process.env.DATABASE_URL
+
+  // INFO: E2E/ローカルSQLiteではDATABASE_URL(file:)を優先し、D1バインディングとの分離を防ぐ
+  if (resolvedDatabaseUrl?.startsWith('file:')) {
+    return new PrismaClient({
+      datasourceUrl: resolvedDatabaseUrl,
+      log: isTest ? ['error'] : ['warn', 'error'],
+    })
+  }
 
   if (config.db) {
     const adapter = new PrismaD1(config.db)
@@ -23,12 +32,12 @@ export default function getRdbClient(input: RdbInput) {
     })
   }
 
-  if (!config.databaseUrl) {
+  if (!resolvedDatabaseUrl) {
     throw new Error('Either D1 binding (db) or databaseUrl must be provided')
   }
 
   return new PrismaClient({
-    datasourceUrl: config.databaseUrl,
+    datasourceUrl: resolvedDatabaseUrl,
     log: isTest ? ['error'] : ['warn', 'error'],
   })
 }

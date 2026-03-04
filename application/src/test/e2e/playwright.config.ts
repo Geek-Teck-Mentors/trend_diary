@@ -76,7 +76,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm start',
+    command: 'DATABASE_URL=file:./test.db npm start',
+    cwd: '../../..',
     url: 'http://localhost:5173',
     // INFO: CIに合わせる
     reuseExistingServer: false,
