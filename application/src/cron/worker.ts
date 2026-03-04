@@ -56,7 +56,6 @@ function resolveMedia(cron: string, env: CronWorkerEnv): Media[] {
 
   return [...mediaToFetch]
 }
-
 export default {
   async scheduled(event: ScheduledController, env: CronWorkerEnv, ctx: ExecutionContext) {
     const logger = new Logger(env.LOG_LEVEL || 'info', {
@@ -75,17 +74,17 @@ export default {
 
     ctx.waitUntil(
       (async () => {
-        try {
-          for (const media of mediaList) {
+        for (const media of mediaList) {
+          try {
             await runScheduledFetch(media, env, logger)
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            logger.error({ msg: 'cron fetch failed', media }, error)
+            await notifyDiscord(
+              env.DISCORD_WEBHOOK_URL,
+              `[trend-diary cron] fetch failed\ncron: ${event.cron}\nmedia: ${media}\nerror: ${message}`,
+            )
           }
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error)
-          logger.error({ msg: 'cron fetch failed', mediaList }, error)
-          await notifyDiscord(
-            env.DISCORD_WEBHOOK_URL,
-            `[trend-diary cron] fetch failed\ncron: ${event.cron}\nmedia: ${mediaList.join(',')}\nerror: ${message}`,
-          )
         }
       })(),
     )

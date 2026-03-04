@@ -58,6 +58,36 @@ describe('cron worker', () => {
     expect(waitUntilCalls).toHaveLength(0)
     expect(runScheduledFetchMock).not.toHaveBeenCalled()
   })
+
+  it('片方のmediaで失敗しても残りのmediaは実行する', async () => {
+    runScheduledFetchMock.mockImplementation(async (media: 'qiita' | 'zenn') => {
+      if (media === 'qiita') {
+        throw new Error('qiita failed')
+      }
+    })
+
+    const waitUntilCalls: Promise<unknown>[] = []
+    const event = { cron: '0 */8 * * *' } as ScheduledController
+    const env = {
+      DB: {} as D1Database,
+      DISCORD_WEBHOOK_URL: '',
+      QIITA_CRON: '0 */8 * * *',
+      ZENN_CRON: '0 */8 * * *',
+      LOG_LEVEL: 'silent' as const,
+    }
+
+    await worker.scheduled(event, env, {
+      waitUntil: (promise: Promise<unknown>) => {
+        waitUntilCalls.push(promise)
+      },
+    } as ExecutionContext)
+
+    expect(waitUntilCalls).toHaveLength(1)
+    await Promise.all(waitUntilCalls)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
+  })
 })
 
 type D1Database = import('@cloudflare/workers-types').D1Database
