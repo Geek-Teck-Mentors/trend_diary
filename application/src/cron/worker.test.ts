@@ -20,8 +20,6 @@ describe('cron worker', () => {
     const env = {
       DB: {} as D1Database,
       DISCORD_WEBHOOK_URL: '',
-      QIITA_CRON: '0 */8 * * *',
-      ZENN_CRON: '0 */8 * * *',
       LOG_LEVEL: 'silent' as const,
     }
 
@@ -38,14 +36,14 @@ describe('cron worker', () => {
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
   })
 
-  it('未知のcron式はスキップする', async () => {
+  it('cron式に関係なくfetchジョブを実行する', async () => {
+    runScheduledFetchMock.mockResolvedValue(undefined)
+
     const waitUntilCalls: Promise<unknown>[] = []
     const event = { cron: '5 * * * *' } as ScheduledController
     const env = {
       DB: {} as D1Database,
       DISCORD_WEBHOOK_URL: '',
-      QIITA_CRON: '0 */8 * * *',
-      ZENN_CRON: '0 */8 * * *',
       LOG_LEVEL: 'silent' as const,
     }
 
@@ -55,8 +53,11 @@ describe('cron worker', () => {
       },
     } as ExecutionContext)
 
-    expect(waitUntilCalls).toHaveLength(0)
-    expect(runScheduledFetchMock).not.toHaveBeenCalled()
+    expect(waitUntilCalls).toHaveLength(1)
+    await Promise.all(waitUntilCalls)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
   })
 
   it('片方のmediaで失敗しても残りのmediaは実行する', async () => {
@@ -71,8 +72,6 @@ describe('cron worker', () => {
     const env = {
       DB: {} as D1Database,
       DISCORD_WEBHOOK_URL: '',
-      QIITA_CRON: '0 */8 * * *',
-      ZENN_CRON: '0 */8 * * *',
       LOG_LEVEL: 'silent' as const,
     }
 

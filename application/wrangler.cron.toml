@@ -8,11 +8,6 @@ workers_dev = false
 enabled = true
 head_sampling_rate = 1
 
-[vars]
-# 現行値が確定したら上書きすること
-QIITA_CRON = "0 */8 * * *"
-ZENN_CRON = "0 */8 * * *"
-
 [triggers]
 crons = ["0 */8 * * *"]
 

@@ -8,28 +8,10 @@ type CronWorkerEnv = {
   DATABASE_URL?: string
   DISCORD_WEBHOOK_URL: string
   LOG_LEVEL?: import('@/common/logger').LogLevel
-  QIITA_CRON?: string
-  ZENN_CRON?: string
 }
 
 type Media = 'qiita' | 'zenn'
-
-const DEFAULT_QIITA_CRON = '0 */8 * * *'
-const DEFAULT_ZENN_CRON = '0 */8 * * *'
-
-const MEDIA_CRON_CONFIG: ReadonlyArray<{
-  media: Media
-  getCron: (env: CronWorkerEnv) => string
-}> = [
-  {
-    media: 'qiita',
-    getCron: (env) => env.QIITA_CRON || DEFAULT_QIITA_CRON,
-  },
-  {
-    media: 'zenn',
-    getCron: (env) => env.ZENN_CRON || DEFAULT_ZENN_CRON,
-  },
-]
+const MEDIA_LIST: ReadonlyArray<Media> = ['qiita', 'zenn']
 
 async function notifyDiscord(webhookUrl: string, message: string) {
   if (!webhookUrl) return
@@ -45,17 +27,6 @@ async function notifyDiscord(webhookUrl: string, message: string) {
   })
 }
 
-function resolveMedia(cron: string, env: CronWorkerEnv): Media[] {
-  const mediaToFetch = new Set<Media>()
-
-  for (const { media, getCron } of MEDIA_CRON_CONFIG) {
-    if (cron === getCron(env)) {
-      mediaToFetch.add(media)
-    }
-  }
-
-  return [...mediaToFetch]
-}
 export default {
   async scheduled(event: ScheduledController, env: CronWorkerEnv, ctx: ExecutionContext) {
     const logger = new Logger(env.LOG_LEVEL || 'info', {
@@ -63,18 +34,9 @@ export default {
       cron: event.cron,
     })
 
-    const mediaList = resolveMedia(event.cron, env)
-    if (mediaList.length === 0) {
-      logger.warn({
-        msg: 'unknown cron expression. skip',
-        cron: event.cron,
-      })
-      return
-    }
-
     ctx.waitUntil(
       (async () => {
-        for (const media of mediaList) {
+        for (const media of MEDIA_LIST) {
           try {
             await runScheduledFetch(media, env, logger)
           } catch (error) {
