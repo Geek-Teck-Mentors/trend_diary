@@ -1,4 +1,5 @@
 import Parser from 'rss-parser'
+import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
 import Logger from '@/common/logger'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -42,40 +43,47 @@ async function fetchRssFeed<T>(url: string) {
 
 async function storeArticles(media: 'qiita' | 'zenn', items: FeedItem[], env: CronEnv) {
   const db = getRdbClient({ db: env.DB, databaseUrl: env.DATABASE_URL })
-  try {
-    if (items.length === 0) return 0
+  const result = await wrapAsyncCall(
+    async () => {
+      if (items.length === 0) return 0
 
-    const normalized = items.map((item) => ({
-      media: truncateByCodePoint(media, MAX_LENGTH.media),
-      title: truncateByCodePoint(item.title, MAX_LENGTH.title),
-      author: truncateByCodePoint(item.author, MAX_LENGTH.author),
-      description: truncateByCodePoint(item.description, MAX_LENGTH.description),
-      url: item.url,
-    }))
+      const normalized = items.map((item) => ({
+        media: truncateByCodePoint(media, MAX_LENGTH.media),
+        title: truncateByCodePoint(item.title, MAX_LENGTH.title),
+        author: truncateByCodePoint(item.author, MAX_LENGTH.author),
+        description: truncateByCodePoint(item.description, MAX_LENGTH.description),
+        url: item.url,
+      }))
 
-    const existing = await db.article.findMany({
-      where: {
-        url: {
-          in: normalized.map((item) => item.url),
+      const existing = await db.article.findMany({
+        where: {
+          url: {
+            in: normalized.map((item) => item.url),
+          },
         },
-      },
-      select: {
-        url: true,
-      },
-    })
+        select: {
+          url: true,
+        },
+      })
 
-    const existingUrlSet = new Set(existing.map((item) => item.url))
-    const toInsert = normalized.filter((item) => !existingUrlSet.has(item.url))
+      const existingUrlSet = new Set(existing.map((item) => item.url))
+      const toInsert = normalized.filter((item) => !existingUrlSet.has(item.url))
 
-    if (toInsert.length === 0) return 0
+      if (toInsert.length === 0) return 0
 
-    const result = await db.article.createMany({
-      data: toInsert,
-    })
-    return result.count
-  } finally {
-    await db.$disconnect()
+      const result = await db.article.createMany({
+        data: toInsert,
+      })
+      return result.count
+    },
+    () => {
+      void db.$disconnect()
+    },
+  )
+  if (isFailure(result)) {
+    throw result.error
   }
+  return result.data
 }
 
 export async function fetchQiitaArticles(env: CronEnv): Promise<number> {
