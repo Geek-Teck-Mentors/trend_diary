@@ -26,6 +26,7 @@ lerna-debug.log*
 # coverage
 coverage/
 /test.db
+**/test.db
 
 # Playwright
 /src/test/e2e/test-results/
