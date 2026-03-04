@@ -19,10 +19,13 @@ export default function Trends() {
     totalPages,
     date,
     handleMediaChange,
+    handleReadStatusChange,
+    handleFiltersApply,
     toPreviousPage,
     toNextPage,
     selectedMedia,
-  } = useArticles()
+    selectedReadStatus,
+  } = useArticles(isLoggedIn)
   const {
     isOpen: isDrawerOpen,
     selectedArticle,
@@ -59,6 +62,9 @@ export default function Trends() {
         toPreviousPage={toPreviousPage}
         toNextPage={toNextPage}
         onMediaChange={handleMediaChange}
+        selectedReadStatus={selectedReadStatus}
+        onReadStatusChange={handleReadStatusChange}
+        onApplyFilters={handleFiltersApply}
         onToggleRead={handleToggleRead}
         isLoggedIn={isLoggedIn}
       />

@@ -12,8 +12,14 @@ type RdbInput = string | RdbConfig
 
 export default function getRdbClient(input: RdbInput) {
   const isTest = process.env.NODE_ENV === 'test'
-  const config: RdbConfig = typeof input === 'string' ? { databaseUrl: input } : input
-  const resolvedDatabaseUrl = config.databaseUrl ?? process.env.DATABASE_URL
+  const isStringInput = typeof input === 'string'
+  const config: RdbConfig = isStringInput ? { databaseUrl: input } : input
+  const processDatabaseUrl = process.env.DATABASE_URL?.trim()
+  const configDatabaseUrl = config.databaseUrl?.trim()
+  // INFO: 文字列入力(明示指定)は最優先、オブジェクト入力ではprocess.envを優先してE2E時の不一致を防ぐ
+  const resolvedDatabaseUrl = isStringInput
+    ? configDatabaseUrl || processDatabaseUrl || config.databaseUrl || process.env.DATABASE_URL
+    : processDatabaseUrl || configDatabaseUrl || process.env.DATABASE_URL || config.databaseUrl
 
   // INFO: E2E/ローカルSQLiteではDATABASE_URL(file:)を優先し、D1バインディングとの分離を防ぐ
   if (resolvedDatabaseUrl?.startsWith('file:')) {

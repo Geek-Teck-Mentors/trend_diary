@@ -76,8 +76,13 @@ const generateFakeResponse = (
 const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
 type UseTrendsHook = ReturnType<typeof useArticles>
 
-function setupHook(initialEntries?: string[]): RenderHookResult<UseTrendsHook, unknown> {
-  return renderHook(() => useArticles(), {
+function setupHook(
+  initialEntries?: string[],
+  options?: {
+    isLoggedIn?: boolean
+  },
+): RenderHookResult<UseTrendsHook, unknown> {
+  return renderHook(() => useArticles(options?.isLoggedIn), {
     wrapper: ({ children }: { children: ReactNode }) =>
       createElement(
         SWRConfig,
@@ -308,6 +313,30 @@ describe('useArticles', () => {
         },
         { init: { credentials: 'include' } },
       )
+    })
+
+    it('ログイン時にread_status=0があると未読フィルタ付きでAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle()],
+      })
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      setupHook(['/?read_status=0'], { isLoggedIn: true })
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+              read_status: '0',
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
     })
   })
 
@@ -653,6 +682,110 @@ describe('useArticles', () => {
 
       expect(result.current.articles[0].isRead).toBe(true)
       expect(result.current.articles[1].isRead).toBe(false)
+    })
+  })
+
+  describe('既読状態フィルタ', () => {
+    it('handleReadStatusChangeで未読を選ぶとread_status=0でAPIが呼ばれる', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 2,
+        totalPages: 3,
+      })
+      const unreadResponse = generateFakeResponse({
+        page: 1,
+        totalPages: 1,
+      })
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
+
+      const { result } = setupHook(['/?page=2'], { isLoggedIn: true })
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(unreadResponse)
+
+      await act(async () => {
+        result.current.handleReadStatusChange('unread')
+      })
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+              read_status: '0',
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+    })
+
+    it('未ログインでread_status指定時はフィルタを無視してAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle()],
+      })
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      setupHook(['/?read_status=0'])
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+    })
+
+    it('handleFiltersApplyで媒体と未読を一括適用できる', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 2,
+        totalPages: 3,
+      })
+      const filteredResponse = generateFakeResponse({
+        page: 1,
+        totalPages: 1,
+      })
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
+
+      const { result } = setupHook(['/?page=2'], { isLoggedIn: true })
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(filteredResponse)
+
+      await act(async () => {
+        result.current.handleFiltersApply({ media: 'qiita', readStatus: 'unread' })
+      })
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+              media: 'qiita',
+              read_status: '0',
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
     })
   })
 })

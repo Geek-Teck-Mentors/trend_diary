@@ -16,9 +16,9 @@ Prisma schemaを編集後、ローカル(SQLite)に反映する場合:
 
 D1向けSQLを作成・適用する場合:
 
-1. `npm run db:d1:diff:init` （初期作成時）
-2. `npm run db:d1:migrations:apply:local`
-3. 本番は `npm run db:d1:migrations:apply:remote`
+1. `npm run d1:diff:init` （初期作成時）
+2. `npm run d1:apply:local`
+3. 本番は `npm run d1:apply:remote`
 
 (参考: https://www.prisma.io/docs/orm/prisma-migrate/getting-started)
 

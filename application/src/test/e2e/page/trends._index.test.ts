@@ -4,6 +4,15 @@ import * as articleHelper from '@/test/helper/article'
 const ARTICLE_COUNT = 10
 const TIMEOUT = 10000
 
+async function waitForArticleCards(page: Page): Promise<void> {
+  // INFO: API依存の待機は環境差で不安定なので、UI描画を直接待つ
+  await expect
+    .poll(async () => page.locator("[data-slot='card']").count(), { timeout: TIMEOUT })
+    .toBeGreaterThan(0)
+
+  await expect(page.locator("[data-slot='card']").first()).toBeVisible({ timeout: TIMEOUT })
+}
+
 test.describe('記事一覧ページ', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/trends')
@@ -33,7 +42,7 @@ test.describe('記事一覧ページ', () => {
 
     test.beforeEach(async ({ page }) => {
       // カードが表示されるのを待機
-      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
+      await waitForArticleCards(page)
     })
 
     async function waitDrawerOpen(page: Page): Promise<Locator> {
@@ -129,7 +138,7 @@ test.describe('記事一覧ページ', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/trends')
       // カードが表示されるのを待機
-      await page.locator("[data-slot='card']").nth(0).waitFor({ timeout: TIMEOUT })
+      await waitForArticleCards(page)
     })
 
     test('メディアフィルタートリガーが表示される', async ({ page }) => {

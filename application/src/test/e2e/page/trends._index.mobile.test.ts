@@ -6,28 +6,9 @@ const TIMEOUT = 10000
 const MOBILE_VIEWPORT = { width: 375, height: 667 }
 
 async function waitForArticleCards(page: Page): Promise<void> {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  const date = `${year}-${month}-${day}`
-
-  // INFO: 先にAPI側で記事が返ることを待ち、UI描画待ちの不安定さを減らす
+  // INFO: API依存の待機は環境差で不安定なので、UI描画を直接待つ
   await expect
-    .poll(
-      async () => {
-        const response = await page.request.get(
-          `/api/articles?from=${date}&to=${date}&page=1&limit=${ARTICLE_COUNT}`,
-        )
-        if (!response.ok()) {
-          return -1
-        }
-
-        const body = (await response.json()) as { data?: Array<unknown> }
-        return body.data?.length ?? 0
-      },
-      { timeout: TIMEOUT },
-    )
+    .poll(async () => page.locator("[data-slot='card']").count(), { timeout: TIMEOUT })
     .toBeGreaterThan(0)
 
   await expect(page.locator("[data-slot='card']").first()).toBeVisible({ timeout: TIMEOUT })
@@ -212,24 +193,31 @@ test.describe('記事一覧ページ(モバイル)', () => {
     })
 
     test('メディアフィルタートリガーが表示される', async ({ page }) => {
-      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      const filterTrigger = page.locator('[data-slot="mobile-filter-trigger"]')
       await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
       await expect(filterTrigger).toBeVisible()
-
-      // デフォルトでは「すべて」が表示されている
-      await expect(filterTrigger).toContainText('すべて')
+      await expect(filterTrigger).toContainText('絞り込み')
     })
 
     test('Qiitaフィルターを選択すると、Qiita記事のみが表示される', async ({ page }) => {
-      // ドロップダウントリガーをクリック
-      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      // 絞り込みを開く
+      const filterTrigger = page.locator('[data-slot="mobile-filter-trigger"]')
       await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
       await filterTrigger.click()
+      await page.locator('[data-slot="mobile-filter-panel"]').waitFor({ timeout: TIMEOUT })
+
+      // 媒体ドロップダウンを開く
+      const mediaFilterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await mediaFilterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await mediaFilterTrigger.click()
 
       // Qiitaメニューアイテムをクリック
       const qiitaOption = page.locator('[data-slot="media-filter-qiita"]')
       await qiitaOption.waitFor({ state: 'visible', timeout: TIMEOUT })
       await qiitaOption.click()
+
+      // 適用
+      await page.locator('[data-slot="mobile-filter-apply"]').click()
 
       // URLパラメータが変更されるのを待機
       await page.waitForURL('**/trends?media=qiita', { timeout: TIMEOUT })
@@ -244,15 +232,24 @@ test.describe('記事一覧ページ(モバイル)', () => {
     })
 
     test('Zennフィルターを選択すると、Zenn記事のみが表示される', async ({ page }) => {
-      // ドロップダウントリガーをクリック
-      const filterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      // 絞り込みを開く
+      const filterTrigger = page.locator('[data-slot="mobile-filter-trigger"]')
       await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
       await filterTrigger.click()
+      await page.locator('[data-slot="mobile-filter-panel"]').waitFor({ timeout: TIMEOUT })
+
+      // 媒体ドロップダウンを開く
+      const mediaFilterTrigger = page.locator('[data-slot="media-filter-trigger"]')
+      await mediaFilterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+      await mediaFilterTrigger.click()
 
       // Zennメニューアイテムをクリック
       const zennOption = page.locator('[data-slot="media-filter-zenn"]')
       await zennOption.waitFor({ state: 'visible', timeout: TIMEOUT })
       await zennOption.click()
+
+      // 適用
+      await page.locator('[data-slot="mobile-filter-apply"]').click()
 
       // URLパラメータが変更されるのを待機
       await page.waitForURL('**/trends?media=zenn', { timeout: TIMEOUT })

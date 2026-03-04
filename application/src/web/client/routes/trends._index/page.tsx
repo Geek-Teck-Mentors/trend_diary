@@ -1,7 +1,10 @@
-import { useCallback, useEffect } from 'react'
+import { ChevronDown, Funnel } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { twMerge } from 'tailwind-merge'
 import { toJaDateString } from '@/common/locale'
+import { Button } from '@/web/client/components/shadcn/button'
+import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
 import {
   Pagination,
   PaginationContent,
@@ -12,6 +15,7 @@ import {
 import LoadingSpinner from '../../components/ui/loading-spinner'
 import ArticleCard from './components/article-card'
 import MediaFilter, { MediaType } from './components/media-filter'
+import ReadStatusFilter, { type ReadStatusType } from './components/read-status-filter'
 import type { Article } from './hooks/use-articles'
 
 type Props = {
@@ -22,9 +26,12 @@ type Props = {
   page: number
   totalPages: number
   selectedMedia: MediaType
+  selectedReadStatus: ReadStatusType
   toNextPage: (currentPage: number) => void
   toPreviousPage: (currentPage: number) => void
   onMediaChange: (media: MediaType) => void
+  onReadStatusChange: (readStatus: ReadStatusType) => void
+  onApplyFilters: (filters: { media: MediaType; readStatus: ReadStatusType }) => void
   onToggleRead: (articleId: string, isRead: boolean) => void
   isLoggedIn: boolean
 }
@@ -37,13 +44,20 @@ export default function TrendsPage({
   page,
   totalPages,
   selectedMedia,
+  selectedReadStatus,
   toNextPage,
   toPreviousPage,
   onMediaChange,
+  onReadStatusChange,
+  onApplyFilters,
   onToggleRead,
   isLoggedIn,
 }: Props) {
   const [searchParams] = useSearchParams()
+  const isMobile = useIsMobile()
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [draftMedia, setDraftMedia] = useState<MediaType>(selectedMedia)
+  const [draftReadStatus, setDraftReadStatus] = useState<ReadStatusType>(selectedReadStatus)
 
   const isPrevDisabled = page <= 1
   const isNextDisabled = page >= totalPages
@@ -77,12 +91,121 @@ export default function TrendsPage({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [searchParams])
 
+  const appliedFilterCount =
+    (selectedMedia ? 1 : 0) + (isLoggedIn && selectedReadStatus === 'unread' ? 1 : 0)
+
+  const handleToggleFilter = () => {
+    if (!isFilterOpen) {
+      setDraftMedia(selectedMedia)
+      setDraftReadStatus(selectedReadStatus)
+    }
+    setIsFilterOpen(!isFilterOpen)
+  }
+
+  const handleCancelFilter = () => {
+    setDraftMedia(selectedMedia)
+    setDraftReadStatus(selectedReadStatus)
+    setIsFilterOpen(false)
+  }
+
+  const handleClearFilter = () => {
+    setDraftMedia(null)
+    setDraftReadStatus('all')
+  }
+
+  const handleApplyFilter = () => {
+    onApplyFilters({ media: draftMedia, readStatus: draftReadStatus })
+    setIsFilterOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
       <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
-      <div className='mb-4'>
-        <MediaFilter selectedMedia={selectedMedia} onMediaChange={onMediaChange} />
-      </div>
+      {isMobile ? (
+        <div className='mb-4 rounded-lg border border-gray-300 bg-white/50 p-4'>
+          <button
+            type='button'
+            className='flex w-full items-center justify-between'
+            onClick={handleToggleFilter}
+            data-slot='mobile-filter-trigger'
+          >
+            <span className='inline-flex items-center gap-2'>
+              <Funnel className='h-4 w-4 text-gray-600' />
+              <span className='text-sm font-semibold text-gray-700'>絞り込み</span>
+              {appliedFilterCount > 0 && (
+                <span
+                  className='rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700'
+                  data-slot='mobile-filter-applied-count'
+                >
+                  {appliedFilterCount}件適用中
+                </span>
+              )}
+            </span>
+            <ChevronDown
+              className={twMerge(
+                'h-4 w-4 text-gray-600 transition-transform',
+                isFilterOpen ? 'rotate-180' : '',
+              )}
+            />
+          </button>
+          {isFilterOpen && (
+            <div className='mt-4 space-y-4' data-slot='mobile-filter-panel'>
+              <div className='flex flex-wrap items-center gap-2'>
+                <span className='text-sm font-medium text-gray-600'>媒体</span>
+                <MediaFilter selectedMedia={draftMedia} onMediaChange={setDraftMedia} />
+              </div>
+              {isLoggedIn && (
+                <div className='flex flex-wrap items-center gap-2'>
+                  <span className='text-sm font-medium text-gray-600'>既読状態</span>
+                  <ReadStatusFilter
+                    selectedReadStatus={draftReadStatus}
+                    onReadStatusChange={setDraftReadStatus}
+                  />
+                </div>
+              )}
+              <div className='flex items-center justify-end gap-2 pt-2'>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  onClick={handleCancelFilter}
+                  data-slot='mobile-filter-cancel'
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={handleClearFilter}
+                  data-slot='mobile-filter-clear'
+                >
+                  クリア
+                </Button>
+                <Button type='button' onClick={handleApplyFilter} data-slot='mobile-filter-apply'>
+                  適用
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className='mb-4 rounded-lg border border-gray-300 bg-white/50 p-4'>
+          <h2 className='mb-3 text-sm font-semibold text-gray-700'>絞り込み</h2>
+          <div className='flex flex-wrap items-center gap-2'>
+            <span className='text-sm font-medium text-gray-600'>媒体</span>
+            <MediaFilter selectedMedia={selectedMedia} onMediaChange={onMediaChange} />
+          </div>
+          {isLoggedIn && (
+            <div className='mt-3 flex flex-wrap items-center gap-2'>
+              <span className='text-sm font-medium text-gray-600'>既読状態</span>
+              <ReadStatusFilter
+                selectedReadStatus={selectedReadStatus}
+                onReadStatusChange={onReadStatusChange}
+              />
+            </div>
+          )}
+        </div>
+      )}
       {articles.length === 0 ? (
         <div className='text-gray-500'>記事がありません</div>
       ) : (

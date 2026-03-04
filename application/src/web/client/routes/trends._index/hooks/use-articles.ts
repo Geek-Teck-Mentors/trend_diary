@@ -12,6 +12,7 @@ import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
 import createSWRFetcher from '@/web/client/features/create-swr-fetcher'
 import { MediaType } from '../components/media-filter'
+import type { ReadStatusType } from '../components/read-status-filter'
 
 // isRead を含む記事型(フロントエンドではarticleIdをstringに統一)
 export type Article = Omit<ArticleOutput, 'articleId'> & {
@@ -23,6 +24,12 @@ type Params = {
   page: number
   limit: number
   media: MediaType
+  readStatus: ReadStatusType
+}
+
+type FilterParams = {
+  media: MediaType
+  readStatus: ReadStatusType
 }
 
 type ArticlesResponse = {
@@ -39,7 +46,7 @@ const formatDate = (rawDate: Date) => {
   return `${year}-${month}-${day}`
 }
 
-export default function useArticles() {
+export default function useArticles(isLoggedIn = false) {
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useIsMobile()
   const { client, apiCall } = createSWRFetcher()
@@ -50,6 +57,7 @@ export default function useArticles() {
   const pageParam = searchParams.get('page')
   const limitParam = searchParams.get('limit')
   const mediaParam = searchParams.get('media')
+  const readStatusParam = searchParams.get('read_status')
 
   // INFO: schemaはnullではなくundefinedを許容するため、nullの場合はundefinedに変換する
   const parseResult = (isMobile ? offsetPaginationMobileSchema : offsetPaginationSchema).safeParse({
@@ -65,6 +73,7 @@ export default function useArticles() {
     page: validPage,
     limit: validLimit,
     media: mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : null,
+    readStatus: readStatusParam === '0' ? 'unread' : 'all',
   }
 
   const query = {
@@ -73,6 +82,7 @@ export default function useArticles() {
     page: params.page,
     limit: params.limit,
     ...(params.media && { media: params.media }),
+    ...(params.readStatus === 'unread' && isLoggedIn && { read_status: '0' as const }),
   }
 
   const swrKey = ['api/articles', query]
@@ -121,6 +131,11 @@ export default function useArticles() {
     setSearchParams(newParams)
   }
 
+  const clearPageParam = (params: URLSearchParams) => {
+    params.delete('page')
+    return params
+  }
+
   const toPreviousPage = (currentPage: number) => {
     const newPage = currentPage - 1
 
@@ -140,9 +155,38 @@ export default function useArticles() {
     } else {
       newParams.delete('media')
     }
-    // メディアを変更したらページを1にリセット
-    newParams.delete('page')
+    clearPageParam(newParams)
 
+    setSearchParams(newParams)
+  }
+
+  const handleReadStatusChange = (readStatus: ReadStatusType) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (readStatus === 'unread') {
+      newParams.set('read_status', '0')
+    } else {
+      newParams.delete('read_status')
+    }
+    clearPageParam(newParams)
+
+    setSearchParams(newParams)
+  }
+
+  const handleFiltersApply = ({ media, readStatus }: FilterParams) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (media) {
+      newParams.set('media', media)
+    } else {
+      newParams.delete('media')
+    }
+
+    if (readStatus === 'unread') {
+      newParams.set('read_status', '0')
+    } else {
+      newParams.delete('read_status')
+    }
+
+    clearPageParam(newParams)
     setSearchParams(newParams)
   }
 
@@ -158,6 +202,9 @@ export default function useArticles() {
     toNextPage,
     toPreviousPage,
     handleMediaChange,
+    handleReadStatusChange,
+    handleFiltersApply,
     selectedMedia: params.media,
+    selectedReadStatus: params.readStatus,
   }
 }
