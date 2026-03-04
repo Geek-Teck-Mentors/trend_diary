@@ -13,6 +13,28 @@ async function waitDrawerOpen(page: Page): Promise<Locator> {
   return drawer
 }
 
+async function completeSignupAndMoveToLogin(
+  page: Page,
+  email: string,
+  password: string,
+): Promise<void> {
+  const loginPageText = page.getByText('アカウントをお持ちでないですか？')
+
+  await expect(async () => {
+    if (new URL(page.url()).pathname === '/login') {
+      await expect(loginPageText).toBeVisible({ timeout: 1000 })
+      return
+    }
+
+    await page.getByLabel('メールアドレス').fill(email)
+    await page.getByLabel('パスワード').fill(password)
+    await page.getByRole('button', { name: 'アカウント作成' }).click()
+
+    await expect(page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: 2000 })
+    await expect(loginPageText).toBeVisible({ timeout: 2000 })
+  }).toPass({ timeout: TIMEOUT })
+}
+
 test.describe('ログイン後の記事詳細閲覧シナリオ', () => {
   const password = 'Aa1@aaaa'
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -39,12 +61,7 @@ test.describe('ログイン後の記事詳細閲覧シナリオ', () => {
 
   test('ログイン後にトレンド記事の詳細を開ける', async ({ page }) => {
     await page.goto('/signup')
-
-    await page.getByLabel('メールアドレス').fill(email)
-    await page.getByLabel('パスワード').fill(password)
-    await page.getByRole('button', { name: 'アカウント作成' }).click()
-
-    await page.waitForURL('**/login', { timeout: TIMEOUT })
+    await completeSignupAndMoveToLogin(page, email, password)
 
     await page.getByLabel('メールアドレス').fill(email)
     await page.getByLabel('パスワード').fill(password)
