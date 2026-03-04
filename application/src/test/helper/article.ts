@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { generateBigIntId } from '@/infrastructure/rdb-id'
 import { getTestRdb } from './rdb'
 
 function getTodayJstNoon(): Date {
@@ -38,6 +39,7 @@ export async function createArticle(options?: {
   const uniqueSuffix = `tid-${crypto.randomUUID()}`
 
   const data = {
+    articleId: generateBigIntId(),
     media,
     title: options?.title ?? faker.lorem.sentence().substring(0, 100),
     author: options?.author ?? faker.person.fullName().substring(0, 30),
@@ -80,6 +82,7 @@ export async function createReadHistory(activeUserId: bigint, articleId: bigint,
   const rdb = getTestRdb()
   return await rdb.readHistory.create({
     data: {
+      readHistoryId: generateBigIntId(),
       activeUserId,
       articleId,
       readAt: readAt || faker.date.recent(),

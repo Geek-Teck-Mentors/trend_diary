@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { ActiveUser } from '@/domain/user/schema/active-user-schema'
+import { generateBigIntId } from '@/infrastructure/rdb-id'
 import TEST_ENV from '@/test/env'
 import app from '@/web/server'
 import { getTestRdb } from './rdb'
@@ -57,11 +58,12 @@ async function createActiveUser(email: string, authenticationId: string): Promis
 
   // 実際のDBにユーザーを作成
   const user = await db.user.create({
-    data: {},
+    data: { userId: generateBigIntId() },
   })
 
   const activeUser = await db.activeUser.create({
     data: {
+      activeUserId: generateBigIntId(),
       userId: user.userId,
       email,
       displayName: null,

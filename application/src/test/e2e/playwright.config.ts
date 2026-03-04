@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'file:./test.db'
+}
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -76,7 +80,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'DATABASE_URL=file:./test.db npm start',
+    command: 'CHOKIDAR_USEPOLLING=1 DATABASE_URL=file:./test.db npm start',
     cwd: '../../..',
     url: 'http://localhost:5173',
     // INFO: CIに合わせる
