@@ -26,6 +26,7 @@ export default function getRdbClient(input: RdbInput) {
   if (config.db) {
     const adapter = new PrismaD1(config.db)
     return new PrismaClient({
+      // TODO: @prisma/adapter-d1 と @prisma/client の型互換が揃ったら `as never` を削除する
       // NOTE: adapter-d1と@prisma/clientの型バージョン差分を吸収
       adapter: adapter as never,
       log: isTest ? ['error'] : ['warn', 'error'],

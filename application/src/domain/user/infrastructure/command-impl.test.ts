@@ -8,15 +8,13 @@ describe('CommandImpl', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    prisma.user.findFirst.mockResolvedValue(null)
-    prisma.activeUser.findFirst.mockResolvedValue(null)
     useCase = new CommandImpl(prisma)
   })
 
   describe('createActiveWithAuthenticationId', () => {
     it('displayName付きでActiveUserを作成できる', async () => {
-      prisma.user.create.mockResolvedValue({ userId: 2n, createdAt: new Date() })
-      prisma.activeUser.create.mockResolvedValue({
+      const createdUser = { userId: 2n, createdAt: new Date() }
+      const createdActiveUser = {
         activeUserId: 1n,
         userId: 2n,
         email: 'test@example.com',
@@ -24,7 +22,10 @@ describe('CommandImpl', () => {
         authenticationId: 'auth-id-123',
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      }
+      prisma.user.create.mockResolvedValue(createdUser)
+      prisma.activeUser.create.mockResolvedValue(createdActiveUser)
+      prisma.$transaction.mockImplementation(async (callback) => await callback(prisma))
 
       const result = await useCase.createActiveWithAuthenticationId(
         'test@example.com',
@@ -37,12 +38,19 @@ describe('CommandImpl', () => {
         expect(result.data.email).toBe('test@example.com')
         expect(result.data.displayName).toBe('表示名')
       }
+      expect(prisma.user.create).toHaveBeenCalledWith({ data: {} })
+      expect(prisma.activeUser.create).toHaveBeenCalledWith({
+        data: {
+          userId: 2n,
+          email: 'test@example.com',
+          authenticationId: 'auth-id-123',
+          displayName: '表示名',
+        },
+      })
     })
 
-    it('activeUser作成失敗時にuser削除の補償処理を行う', async () => {
-      prisma.user.create.mockResolvedValue({ userId: 2n, createdAt: new Date() })
-      prisma.activeUser.create.mockRejectedValue(new Error('create active failed'))
-      prisma.user.delete.mockResolvedValue({ userId: 2n, createdAt: new Date() })
+    it('トランザクション失敗時にエラーを返す', async () => {
+      prisma.$transaction.mockRejectedValue(new Error('create active failed'))
 
       const result = await useCase.createActiveWithAuthenticationId(
         'test@example.com',
@@ -50,7 +58,10 @@ describe('CommandImpl', () => {
       )
 
       expect(isFailure(result)).toBe(true)
-      expect(prisma.user.delete).toHaveBeenCalledWith({ where: { userId: 2n } })
+      expect(prisma.user.delete).not.toHaveBeenCalled()
+      if (isFailure(result)) {
+        expect(result.error.message).toBe('Failed to create active user')
+      }
     })
   })
 })

@@ -54,25 +54,14 @@ async function deleteAuthUsersByEmailPattern(emailPattern: string): Promise<void
 // ActiveUser生成関数（実DBに作成）
 async function createActiveUser(email: string, authenticationId: string): Promise<ActiveUser> {
   const db = getTestRdb()
-  const lastUser = await db.user.findFirst({
-    orderBy: { userId: 'desc' },
-    select: { userId: true },
-  })
-  const lastActiveUser = await db.activeUser.findFirst({
-    orderBy: { activeUserId: 'desc' },
-    select: { activeUserId: true },
-  })
 
   // 実際のDBにユーザーを作成
   const user = await db.user.create({
-    data: {
-      userId: (lastUser?.userId ?? 0n) + 1n,
-    },
+    data: {},
   })
 
   const activeUser = await db.activeUser.create({
     data: {
-      activeUserId: (lastActiveUser?.activeUserId ?? 0n) + 1n,
       userId: user.userId,
       email,
       displayName: null,

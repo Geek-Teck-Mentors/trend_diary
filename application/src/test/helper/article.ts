@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker'
 import { getTestRdb } from './rdb'
 
-let idSequence = 0n
-function nextTestId(): bigint {
-  idSequence = (idSequence + 1n) % 1000000n
-  return BigInt(Date.now()) * 1000000n + idSequence
+let urlSequence = 0
+function nextUrlSuffix(): string {
+  urlSequence += 1
+  return `tid-${urlSequence}`
 }
 
 function getTodayJstNoon(): Date {
@@ -41,10 +41,9 @@ export async function createArticle(options?: {
     (media === 'qiita'
       ? `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
       : `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`)
-  const uniqueSuffix = `tid-${nextTestId().toString()}`
+  const uniqueSuffix = nextUrlSuffix()
 
   const data = {
-    articleId: nextTestId(),
     media,
     title: options?.title ?? faker.lorem.sentence().substring(0, 100),
     author: options?.author ?? faker.person.fullName().substring(0, 30),
@@ -87,7 +86,6 @@ export async function createReadHistory(activeUserId: bigint, articleId: bigint,
   const rdb = getTestRdb()
   return await rdb.readHistory.create({
     data: {
-      readHistoryId: nextTestId(),
       activeUserId,
       articleId,
       readAt: readAt || faker.date.recent(),

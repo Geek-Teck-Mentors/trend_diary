@@ -69,18 +69,8 @@ async function storeArticles(media: 'qiita' | 'zenn', items: FeedItem[], env: Cr
 
     if (toInsert.length === 0) return 0
 
-    const lastArticle = await db.article.findFirst({
-      orderBy: { articleId: 'desc' },
-      select: { articleId: true },
-    })
-    const baseArticleId = lastArticle?.articleId ?? 0n
-    const toInsertWithId = toInsert.map((article, index) => ({
-      ...article,
-      articleId: baseArticleId + BigInt(index + 1),
-    }))
-
     const result = await db.article.createMany({
-      data: toInsertWithId,
+      data: toInsert,
     })
     return result.count
   } finally {
