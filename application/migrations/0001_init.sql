@@ -5,7 +5,7 @@ CREATE TABLE "active_users" (
     "display_name" TEXT,
     "authentication_id" TEXT,
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL,
+    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "user_id" BIGINT NOT NULL,
     CONSTRAINT "active_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("user_id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -74,3 +74,14 @@ CREATE UNIQUE INDEX "leaved_users_user_id_key" ON "leaved_users"("user_id");
 
 -- CreateIndex
 CREATE INDEX "idx_read_histories_article_user" ON "read_histories"("article_id", "active_user_id");
+
+-- CreateTrigger
+CREATE TRIGGER "active_users_set_updated_at"
+AFTER UPDATE ON "active_users"
+FOR EACH ROW
+WHEN NEW."updated_at" = OLD."updated_at"
+BEGIN
+  UPDATE "active_users"
+  SET "updated_at" = CURRENT_TIMESTAMP
+  WHERE "active_user_id" = OLD."active_user_id";
+END;
