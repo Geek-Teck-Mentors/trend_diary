@@ -57,5 +57,3 @@ npm start
 - [React Router Hono Adapter](https://github.com/yusukebe/hono-react-router-adapter)
 - [Hono](https://hono.dev/docs/)
 - [TailwindCSS Using Vite](https://tailwindcss.com/docs/installation/using-vite)
-- [Using Prisma on Cloudflare Workers](https://hono.dev/examples/prisma)
-- [Claude Codeを10倍賢くする無料ツール「Serena」の威力とトークン効率化術](https://zenn.dev/sc30gsw/articles/ff81891959aaef)
