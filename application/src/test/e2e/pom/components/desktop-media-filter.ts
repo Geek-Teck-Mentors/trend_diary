@@ -4,31 +4,24 @@ import { TIMEOUT } from '@/test/e2e/pom/constants'
 type MediaOption = 'all' | 'qiita' | 'zenn'
 
 export class DesktopMediaFilter {
-  private readonly trigger: Locator
   private readonly allOption: Locator
   private readonly qiitaOption: Locator
   private readonly zennOption: Locator
 
   constructor(private readonly page: Page) {
-    this.trigger = page.getByRole('button', { name: /^メディアフィルター:/ })
-    this.allOption = page.getByRole('menuitem', { name: 'すべて' })
-    this.qiitaOption = page.getByRole('menuitem', { name: 'Qiita' })
-    this.zennOption = page.getByRole('menuitem', { name: 'Zenn' })
+    this.allOption = page.locator("[data-slot='media-filter-all']")
+    this.qiitaOption = page.locator("[data-slot='media-filter-qiita']")
+    this.zennOption = page.locator("[data-slot='media-filter-zenn']")
   }
 
-  async expectTriggerLabel(label: string): Promise<void> {
-    await this.trigger.waitFor({ state: 'visible', timeout: TIMEOUT })
-    await expect(this.trigger).toContainText(label)
+  async expectVisible(): Promise<void> {
+    await this.allOption.waitFor({ state: 'visible', timeout: TIMEOUT })
+    await expect(this.qiitaOption).toBeVisible()
+    await expect(this.zennOption).toBeVisible()
   }
 
   async select(media: MediaOption): Promise<void> {
-    const option = this.option(media)
-
-    await expect(async () => {
-      await this.trigger.click()
-      await expect(option).toBeVisible({ timeout: 1000 })
-    }).toPass({ timeout: TIMEOUT })
-    await option.click()
+    await this.option(media).click()
   }
 
   private option(media: MediaOption): Locator {

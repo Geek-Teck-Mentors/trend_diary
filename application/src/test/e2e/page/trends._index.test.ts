@@ -99,9 +99,9 @@ test.describe('記事一覧ページ', () => {
       await trendsPage.waitForArticleCards()
     })
 
-    test('メディアフィルタートリガーが表示される', async ({ page }) => {
+    test('メディアフィルターが表示される', async ({ page }) => {
       const mediaFilter = new DesktopMediaFilter(page)
-      await mediaFilter.expectTriggerLabel('すべて')
+      await mediaFilter.expectVisible()
     })
 
     test('初期状態では全ての記事が表示される', async ({ page }) => {
@@ -109,7 +109,7 @@ test.describe('記事一覧ページ', () => {
       await trendsPage.expectArticleCount(QIITA_COUNT + ZENN_COUNT)
     })
 
-    test('Qiitaフィルターを選択すると、Qiita記事のみが表示される', async ({ page }) => {
+    test('Qiitaを選択すると即時反映でQiita記事のみが表示される', async ({ page }) => {
       const mediaFilter = new DesktopMediaFilter(page)
       await mediaFilter.select('qiita')
 
@@ -119,7 +119,7 @@ test.describe('記事一覧ページ', () => {
       await trendsPage.expectQiitaIconCount(QIITA_COUNT)
     })
 
-    test('Zennフィルターを選択すると、Zenn記事のみが表示される', async ({ page }) => {
+    test('Zennを選択すると即時反映でZenn記事のみが表示される', async ({ page }) => {
       const mediaFilter = new DesktopMediaFilter(page)
       await mediaFilter.select('zenn')
 
@@ -129,9 +129,7 @@ test.describe('記事一覧ページ', () => {
       await trendsPage.expectZennIconCount(ZENN_COUNT)
     })
 
-    test('Qiitaフィルター選択後、すべてフィルターを選択すると全記事が表示される', async ({
-      page,
-    }) => {
+    test('すべてを選択すると即時反映で全記事が表示される', async ({ page }) => {
       const mediaFilter = new DesktopMediaFilter(page)
       await mediaFilter.select('qiita')
 
@@ -144,7 +142,7 @@ test.describe('記事一覧ページ', () => {
       await trendsPage.expectArticleCount(QIITA_COUNT + ZENN_COUNT)
     })
 
-    test('フィルター切り替え時にページがリセットされる', async ({ page }) => {
+    test('媒体選択時にページがリセットされる', async ({ page }) => {
       const trendsPage = new TrendsPage(page)
       await trendsPage.goto('/trends?page=2')
       await page.waitForLoadState('networkidle')
@@ -153,6 +151,18 @@ test.describe('記事一覧ページ', () => {
       await mediaFilter.select('qiita')
       await trendsPage.waitForUrl(/\/trends\?media=qiita$/)
       trendsPage.expectQueryParamNull('page')
+    })
+
+    test('すべて選択時にページがリセットされる', async ({ page }) => {
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.goto('/trends?media=qiita&page=2')
+      await page.waitForLoadState('networkidle')
+
+      const mediaFilter = new DesktopMediaFilter(page)
+      await mediaFilter.select('all')
+      await trendsPage.waitForUrl(/\/trends$/)
+      trendsPage.expectQueryParamNull('page')
+      trendsPage.expectQueryParamNull('media')
     })
   })
 })

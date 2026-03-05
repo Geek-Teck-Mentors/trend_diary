@@ -787,5 +787,43 @@ describe('useArticles', () => {
         )
       })
     })
+
+    it('handleFiltersApplyですべてを適用するとmedia/read_status/pageが除去される', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 2,
+        totalPages: 3,
+      })
+      const clearedResponse = generateFakeResponse({
+        page: 1,
+        totalPages: 1,
+      })
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
+
+      const { result } = setupHook(['/?media=qiita&read_status=0&page=2'], { isLoggedIn: true })
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(clearedResponse)
+
+      await act(async () => {
+        result.current.handleFiltersApply({ media: null, readStatus: 'all' })
+      })
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+          {
+            query: {
+              to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+              page: 1,
+              limit: 20,
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+    })
   })
 })

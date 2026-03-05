@@ -10,6 +10,21 @@ import { QueryParams } from '@/domain/article/schema/query-schema'
 import { RdbClient } from '@/infrastructure/rdb'
 import { fromDbId, toDbId } from '@/infrastructure/rdb-id'
 
+type RawArticleRow = {
+  articleId: number | bigint
+  media: string
+  title: string
+  author: string
+  description: string
+  url: string
+  createdAt: string | Date | number | bigint
+  isRead?: number | bigint | boolean | null
+}
+
+type RawCountRow = {
+  total: number | bigint
+}
+
 export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
@@ -17,66 +32,65 @@ export default class QueryImpl implements Query {
     params: QueryParams,
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
-    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, ...searchParams } = params
-    const where = QueryImpl.buildWhereClause(searchParams)
-    const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
-      { createdAt: 'desc' },
-      { articleId: 'desc' },
-    ]
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, from, to, ...searchParams } = params
+    const dbActiveUserId = activeUserId !== undefined ? toDbId(activeUserId) : undefined
+    const whereSql = QueryImpl.buildSqlWhereClause({
+      title: searchParams.title,
+      author: searchParams.author,
+      media: searchParams.media,
+      from,
+      to,
+      readStatus: searchParams.readStatus,
+      activeUserId: dbActiveUserId,
+    })
 
-    const totalResult = await wrapAsyncCall(() => this.db.article.count({ where }))
+    const totalResult = await wrapAsyncCall(() =>
+      this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
+        SELECT COUNT(*) as total
+        FROM articles
+        ${whereSql}
+      `),
+    )
     if (isFailure(totalResult)) {
       return failure(new ServerError(totalResult.error))
     }
 
-    const articlesResult = await wrapAsyncCall(() =>
-      this.db.article.findMany({
-        where,
-        orderBy,
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-    )
+    const readStatusSql =
+      dbActiveUserId !== undefined
+        ? Prisma.sql`
+            EXISTS (
+              SELECT 1
+              FROM read_histories rh
+              WHERE rh.article_id = articles.article_id
+                AND rh.active_user_id = ${dbActiveUserId}
+            )
+          `
+        : Prisma.sql`NULL`
 
+    const articlesResult = await wrapAsyncCall(() =>
+      this.db.$queryRaw<RawArticleRow[]>(Prisma.sql`
+        SELECT
+          article_id as articleId,
+          media,
+          title,
+          author,
+          description,
+          url,
+          created_at as createdAt,
+          ${readStatusSql} as isRead
+        FROM articles
+        ${whereSql}
+        ORDER BY ${QueryImpl.getNormalizedCreatedAtSql()} DESC, article_id DESC
+        LIMIT ${limit}
+        OFFSET ${(page - 1) * limit}
+      `),
+    )
     if (isFailure(articlesResult)) {
       return failure(new ServerError(articlesResult.error))
     }
 
-    const total = totalResult.data
-    const articles = articlesResult.data
-    const mappedArticles: ArticleWithOptionalReadStatus[] = articles.map(fromPrismaToArticle)
-
-    if (activeUserId !== undefined && mappedArticles.length > 0) {
-      const dbActiveUserId = toDbId(activeUserId)
-      const readHistoriesResult = await wrapAsyncCall(() =>
-        this.db.readHistory.findMany({
-          where: {
-            activeUserId: dbActiveUserId,
-            articleId: {
-              in: mappedArticles.map((article) => toDbId(article.articleId)),
-            },
-          },
-          select: {
-            articleId: true,
-          },
-        }),
-      )
-
-      if (isFailure(readHistoriesResult)) {
-        return failure(new ServerError(readHistoriesResult.error))
-      }
-
-      const readArticleIdSet = new Set(
-        readHistoriesResult.data.map((history) => fromDbId(history.articleId)),
-      )
-      mappedArticles.forEach((article) => {
-        article.isRead = readArticleIdSet.has(article.articleId)
-      })
-    } else {
-      mappedArticles.forEach((article) => {
-        article.isRead = undefined
-      })
-    }
+    const total = Number(totalResult.data[0]?.total ?? 0)
+    const mappedArticles = articlesResult.data.map(QueryImpl.mapRawArticleToDomain)
 
     const totalPages = Math.ceil(total / limit)
     return success({
@@ -106,42 +120,108 @@ export default class QueryImpl implements Query {
     return success(fromPrismaToArticle(article))
   }
 
-  private static buildWhereClause(params: Omit<QueryParams, 'page' | 'limit'>) {
-    const where: Prisma.ArticleWhereInput = {}
+  private static getNormalizedCreatedAtSql() {
+    // INFO: created_atはSQLiteでinteger(text含む)が混在しうるため正規化して比較する
+    return Prisma.sql`
+      CASE
+        WHEN typeof(created_at) = 'integer' THEN datetime(created_at / 1000, 'unixepoch')
+        ELSE datetime(created_at)
+      END
+    `
+  }
 
-    if (params.title) {
-      where.title = {
-        contains: params.title,
+  private static buildSqlWhereClause(params: {
+    title?: string
+    author?: string
+    media?: string
+    from?: string
+    to?: string
+    readStatus?: boolean
+    activeUserId?: number
+  }) {
+    const { title, author, media, from, to, readStatus, activeUserId } = params
+    const conditions: Prisma.Sql[] = []
+
+    if (title) {
+      conditions.push(Prisma.sql`title LIKE ${`%${title}%`}`)
+    }
+    if (author) {
+      conditions.push(Prisma.sql`author LIKE ${`%${author}%`}`)
+    }
+    if (media) {
+      conditions.push(Prisma.sql`media = ${media}`)
+    }
+
+    const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(from, to)
+    if (fromDate) {
+      conditions.push(
+        Prisma.sql`${QueryImpl.getNormalizedCreatedAtSql()} >= datetime(${fromDate.toISOString()})`,
+      )
+    }
+    if (toDateExclusive) {
+      conditions.push(
+        Prisma.sql`${QueryImpl.getNormalizedCreatedAtSql()} < datetime(${toDateExclusive.toISOString()})`,
+      )
+    }
+
+    if (readStatus !== undefined && activeUserId !== undefined) {
+      if (readStatus) {
+        conditions.push(Prisma.sql`
+          EXISTS (
+            SELECT 1
+            FROM read_histories rh
+            WHERE rh.article_id = articles.article_id
+              AND rh.active_user_id = ${activeUserId}
+          )
+        `)
+      } else {
+        conditions.push(Prisma.sql`
+          NOT EXISTS (
+            SELECT 1
+            FROM read_histories rh
+            WHERE rh.article_id = articles.article_id
+              AND rh.active_user_id = ${activeUserId}
+          )
+        `)
       }
     }
 
-    if (params.author) {
-      where.author = {
-        contains: params.author,
-      }
+    if (conditions.length === 0) {
+      return Prisma.empty
     }
 
-    if (params.media) {
-      where.media = params.media
+    return Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+  }
+
+  private static buildDateRange(from?: string, to?: string) {
+    // INFO: APIの指定日はJST日付として扱う
+    const fromDate = from ? new Date(`${from}T00:00:00+09:00`) : undefined
+    const toDateExclusive = to ? new Date(`${to}T00:00:00+09:00`) : undefined
+    if (toDateExclusive) {
+      toDateExclusive.setDate(toDateExclusive.getDate() + 1)
+    }
+    return { fromDate, toDateExclusive }
+  }
+
+  private static mapRawArticleToDomain(row: RawArticleRow): ArticleWithOptionalReadStatus {
+    let createdAt: Date
+    if (row.createdAt instanceof Date) {
+      createdAt = row.createdAt
+    } else if (typeof row.createdAt === 'bigint') {
+      createdAt = new Date(Number(row.createdAt))
+    } else {
+      createdAt = new Date(row.createdAt)
     }
 
-    if (params.from || params.to) {
-      const dateRange: { gte?: Date; lt?: Date } = {}
-
-      if (params.from) {
-        // INFO: 日付をJSTのoffsetをつけて変換
-        dateRange.gte = new Date(`${params.from}T00:00:00+09:00`)
-      }
-
-      if (params.to) {
-        const toDate = new Date(`${params.to}T00:00:00+09:00`)
-        toDate.setDate(toDate.getDate() + 1)
-        dateRange.lt = toDate
-      }
-
-      where.createdAt = dateRange
+    return {
+      articleId: fromDbId(row.articleId),
+      media: row.media,
+      title: row.title,
+      author: row.author,
+      description: row.description,
+      url: row.url,
+      createdAt,
+      isRead: row.isRead === null || row.isRead === undefined ? undefined : Boolean(row.isRead),
     }
-
-    return where
   }
 }

@@ -29,8 +29,6 @@ type Props = {
   selectedReadStatus: ReadStatusType
   toNextPage: (currentPage: number) => void
   toPreviousPage: (currentPage: number) => void
-  onMediaChange: (media: MediaType) => void
-  onReadStatusChange: (readStatus: ReadStatusType) => void
   onApplyFilters: (filters: { media: MediaType; readStatus: ReadStatusType }) => void
   onToggleRead: (articleId: string, isRead: boolean) => void
   isLoggedIn: boolean
@@ -47,8 +45,6 @@ export default function TrendsPage({
   selectedReadStatus,
   toNextPage,
   toPreviousPage,
-  onMediaChange,
-  onReadStatusChange,
   onApplyFilters,
   onToggleRead,
   isLoggedIn,
@@ -91,6 +87,11 @@ export default function TrendsPage({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [searchParams])
 
+  useEffect(() => {
+    setDraftMedia(selectedMedia)
+    setDraftReadStatus(selectedReadStatus)
+  }, [selectedMedia, selectedReadStatus])
+
   const appliedFilterCount =
     (selectedMedia ? 1 : 0) + (isLoggedIn && selectedReadStatus === 'unread' ? 1 : 0)
 
@@ -111,11 +112,30 @@ export default function TrendsPage({
   const handleClearFilter = () => {
     setDraftMedia(null)
     setDraftReadStatus('all')
+    onApplyFilters({ media: null, readStatus: 'all' })
+    if (isMobile) {
+      setIsFilterOpen(false)
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleApplyFilter = () => {
     onApplyFilters({ media: draftMedia, readStatus: draftReadStatus })
-    setIsFilterOpen(false)
+    if (isMobile) {
+      setIsFilterOpen(false)
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleDesktopMediaChange = (media: MediaType) => {
+    setDraftMedia(media)
+    onApplyFilters({ media, readStatus: draftReadStatus })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleDesktopReadStatusChange = (readStatus: ReadStatusType) => {
+    setDraftReadStatus(readStatus)
+    onApplyFilters({ media: draftMedia, readStatus })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -190,20 +210,27 @@ export default function TrendsPage({
         </div>
       ) : (
         <div className='mb-4 rounded-lg border border-gray-300 bg-white/50 p-4'>
-          <h2 className='mb-3 text-sm font-semibold text-gray-700'>絞り込み</h2>
-          <div className='flex flex-wrap items-center gap-2'>
-            <span className='text-sm font-medium text-gray-600'>媒体</span>
-            <MediaFilter selectedMedia={selectedMedia} onMediaChange={onMediaChange} />
-          </div>
-          {isLoggedIn && (
-            <div className='mt-3 flex flex-wrap items-center gap-2'>
-              <span className='text-sm font-medium text-gray-600'>既読状態</span>
-              <ReadStatusFilter
-                selectedReadStatus={selectedReadStatus}
-                onReadStatusChange={onReadStatusChange}
-              />
+          <h2 className='mb-3 inline-flex items-center gap-2 text-sm font-semibold text-gray-700'>
+            <Funnel className='h-4 w-4 text-gray-600' />
+            <span>絞り込み</span>
+          </h2>
+          <div className='space-y-3'>
+            <div className='flex items-start gap-4'>
+              <div className='flex flex-col gap-1'>
+                <span className='text-xs font-medium text-gray-600'>媒体</span>
+                <MediaFilter selectedMedia={draftMedia} onMediaChange={handleDesktopMediaChange} />
+              </div>
+              {isLoggedIn && (
+                <div className='flex flex-col gap-1'>
+                  <span className='text-xs font-medium text-gray-600'>既読状態</span>
+                  <ReadStatusFilter
+                    selectedReadStatus={draftReadStatus}
+                    onReadStatusChange={handleDesktopReadStatusChange}
+                  />
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
       {articles.length === 0 ? (

@@ -1,10 +1,4 @@
-import { Filter } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/web/client/components/shadcn/dropdown-menu'
+import { Button } from '@/web/client/components/shadcn/button'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
 
 export type MediaType = 'qiita' | 'zenn' | null
@@ -21,36 +15,26 @@ const mediaOptions = [
 ] as const
 
 export default function MediaFilter({ selectedMedia, onMediaChange }: Props) {
-  const isFilterActive = selectedMedia !== null
-  const currentLabel =
-    mediaOptions.find((option) => option.value === selectedMedia)?.label || mediaOptions[0].label
-
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors'
-        aria-label={`メディアフィルター: ${currentLabel}`}
-        data-slot='media-filter-trigger'
-      >
-        <Filter
-          className={cn(
-            'w-4 h-4 transition-colors',
-            isFilterActive ? 'text-blue-600' : 'text-gray-600',
-          )}
-        />
-        <span className='text-sm font-medium'>{currentLabel}</span>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align='start'>
-        {mediaOptions.map((option) => (
-          <DropdownMenuItem
+    <div className='flex items-center gap-2' data-slot='media-filter'>
+      {mediaOptions.map((option) => {
+        const isSelected = selectedMedia === option.value
+        return (
+          <Button
             key={option.dataSlot}
+            type='button'
+            variant='outline'
+            className={cn(
+              'border-gray-300 text-gray-700 hover:bg-gray-100',
+              isSelected && 'border-blue-600 bg-blue-50 text-blue-700 hover:bg-blue-100',
+            )}
             onClick={() => onMediaChange(option.value)}
             data-slot={option.dataSlot}
           >
             {option.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </Button>
+        )
+      })}
+    </div>
   )
 }
