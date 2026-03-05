@@ -31,9 +31,10 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(3)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
   })
 
   it('cron式に関係なくfetchジョブを実行する', async () => {
@@ -55,13 +56,14 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(3)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
   })
 
   it('片方のmediaで失敗しても残りのmediaは実行する', async () => {
-    runScheduledFetchMock.mockImplementation(async (media: 'qiita' | 'zenn') => {
+    runScheduledFetchMock.mockImplementation(async (media: 'qiita' | 'zenn' | 'hatena') => {
       if (media === 'qiita') {
         throw new Error('qiita failed')
       }
@@ -83,9 +85,10 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(3)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
   })
 })
 

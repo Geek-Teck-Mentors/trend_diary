@@ -10,8 +10,8 @@ type CronWorkerEnv = {
   LOG_LEVEL?: import('@/common/logger').LogLevel
 }
 
-type Media = 'qiita' | 'zenn'
-const MEDIA_LIST: ReadonlyArray<Media> = ['qiita', 'zenn']
+type Media = 'qiita' | 'zenn' | 'hatena'
+const MEDIA_LIST: ReadonlyArray<Media> = ['qiita', 'zenn', 'hatena']
 
 async function notifyDiscord(webhookUrl: string, message: string) {
   if (!webhookUrl) return
