@@ -18,6 +18,7 @@ type RawArticleRow = {
   description: string
   url: string
   createdAt: string | Date | number | bigint
+  isRead?: number | bigint | boolean | null
 }
 
 type RawCountRow = {
@@ -32,115 +33,64 @@ export default class QueryImpl implements Query {
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
     const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, from, to, ...searchParams } = params
-    const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
-      { createdAt: 'desc' },
-      { articleId: 'desc' },
-    ]
-
-    let total = 0
-    let mappedArticles: ArticleWithOptionalReadStatus[] = []
     const dbActiveUserId = activeUserId !== undefined ? toDbId(activeUserId) : undefined
-    const useRawSql =
-      Boolean(from || to) || (searchParams.readStatus !== undefined && dbActiveUserId !== undefined)
+    const whereSql = QueryImpl.buildSqlWhereClause({
+      title: searchParams.title,
+      author: searchParams.author,
+      media: searchParams.media,
+      from,
+      to,
+      readStatus: searchParams.readStatus,
+      activeUserId: dbActiveUserId,
+    })
 
-    if (useRawSql) {
-      const whereSql = QueryImpl.buildSqlWhereClause({
-        title: searchParams.title,
-        author: searchParams.author,
-        media: searchParams.media,
-        from,
-        to,
-        readStatus: searchParams.readStatus,
-        activeUserId: dbActiveUserId,
-      })
-
-      const totalResult = await wrapAsyncCall(() =>
-        this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
-          SELECT COUNT(*) as total
-          FROM articles
-          ${whereSql}
-        `),
-      )
-      if (isFailure(totalResult)) {
-        return failure(new ServerError(totalResult.error))
-      }
-
-      const articlesResult = await wrapAsyncCall(() =>
-        this.db.$queryRaw<RawArticleRow[]>(Prisma.sql`
-          SELECT
-            article_id as articleId,
-            media,
-            title,
-            author,
-            description,
-            url,
-            created_at as createdAt
-          FROM articles
-          ${whereSql}
-          ORDER BY ${QueryImpl.getNormalizedCreatedAtSql()} DESC, article_id DESC
-          LIMIT ${limit}
-          OFFSET ${(page - 1) * limit}
-        `),
-      )
-      if (isFailure(articlesResult)) {
-        return failure(new ServerError(articlesResult.error))
-      }
-
-      total = Number(totalResult.data[0]?.total ?? 0)
-      mappedArticles = articlesResult.data.map(QueryImpl.mapRawArticleToDomain)
-    } else {
-      const where = QueryImpl.buildWhereClause(searchParams)
-      const totalResult = await wrapAsyncCall(() => this.db.article.count({ where }))
-      if (isFailure(totalResult)) {
-        return failure(new ServerError(totalResult.error))
-      }
-
-      const articlesResult = await wrapAsyncCall(() =>
-        this.db.article.findMany({
-          where,
-          orderBy,
-          skip: (page - 1) * limit,
-          take: limit,
-        }),
-      )
-      if (isFailure(articlesResult)) {
-        return failure(new ServerError(articlesResult.error))
-      }
-
-      total = totalResult.data
-      mappedArticles = articlesResult.data.map(fromPrismaToArticle)
+    const totalResult = await wrapAsyncCall(() =>
+      this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
+        SELECT COUNT(*) as total
+        FROM articles
+        ${whereSql}
+      `),
+    )
+    if (isFailure(totalResult)) {
+      return failure(new ServerError(totalResult.error))
     }
 
-    if (activeUserId !== undefined && mappedArticles.length > 0) {
-      const readHistoriesResult = await wrapAsyncCall(() =>
-        this.db.readHistory.findMany({
-          where: {
-            activeUserId: toDbId(activeUserId),
-            articleId: {
-              in: mappedArticles.map((article) => toDbId(article.articleId)),
-            },
-          },
-          select: {
-            articleId: true,
-          },
-        }),
-      )
+    const readStatusSql =
+      dbActiveUserId !== undefined
+        ? Prisma.sql`
+            EXISTS (
+              SELECT 1
+              FROM read_histories rh
+              WHERE rh.article_id = articles.article_id
+                AND rh.active_user_id = ${dbActiveUserId}
+            )
+          `
+        : Prisma.sql`NULL`
 
-      if (isFailure(readHistoriesResult)) {
-        return failure(new ServerError(readHistoriesResult.error))
-      }
-
-      const readArticleIdSet = new Set(
-        readHistoriesResult.data.map((history) => fromDbId(history.articleId)),
-      )
-      mappedArticles.forEach((article) => {
-        article.isRead = readArticleIdSet.has(article.articleId)
-      })
-    } else {
-      mappedArticles.forEach((article) => {
-        article.isRead = undefined
-      })
+    const articlesResult = await wrapAsyncCall(() =>
+      this.db.$queryRaw<RawArticleRow[]>(Prisma.sql`
+        SELECT
+          article_id as articleId,
+          media,
+          title,
+          author,
+          description,
+          url,
+          created_at as createdAt,
+          ${readStatusSql} as isRead
+        FROM articles
+        ${whereSql}
+        ORDER BY ${QueryImpl.getNormalizedCreatedAtSql()} DESC, article_id DESC
+        LIMIT ${limit}
+        OFFSET ${(page - 1) * limit}
+      `),
+    )
+    if (isFailure(articlesResult)) {
+      return failure(new ServerError(articlesResult.error))
     }
+
+    const total = Number(totalResult.data[0]?.total ?? 0)
+    const mappedArticles = articlesResult.data.map(QueryImpl.mapRawArticleToDomain)
 
     const totalPages = Math.ceil(total / limit)
     return success({
@@ -168,28 +118,6 @@ export default class QueryImpl implements Query {
     const article = result.data
     if (!article) return success(null)
     return success(fromPrismaToArticle(article))
-  }
-
-  private static buildWhereClause(params: Omit<QueryParams, 'page' | 'limit' | 'from' | 'to'>) {
-    const where: Prisma.ArticleWhereInput = {}
-
-    if (params.title) {
-      where.title = {
-        contains: params.title,
-      }
-    }
-
-    if (params.author) {
-      where.author = {
-        contains: params.author,
-      }
-    }
-
-    if (params.media) {
-      where.media = params.media
-    }
-
-    return where
   }
 
   private static getNormalizedCreatedAtSql() {
@@ -293,7 +221,7 @@ export default class QueryImpl implements Query {
       description: row.description,
       url: row.url,
       createdAt,
-      isRead: undefined,
+      isRead: row.isRead === null || row.isRead === undefined ? undefined : Boolean(row.isRead),
     }
   }
 }
