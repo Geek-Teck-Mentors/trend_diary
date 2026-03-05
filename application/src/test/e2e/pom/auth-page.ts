@@ -56,7 +56,9 @@ export class AuthPage {
   }
 
   private async fillCredentials(email: string, password: string): Promise<void> {
-    for (let attempt = 0; attempt < 3; attempt += 1) {
+    await this.waitForFormReady()
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
       await this.emailInput.fill(email)
       await this.passwordInput.fill(password)
 
@@ -71,5 +73,26 @@ export class AuthPage {
     }
 
     throw new Error('failed to fill auth credentials')
+  }
+
+  private async waitForFormReady(): Promise<void> {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await expect(this.emailInput).toBeVisible()
+      await expect(this.passwordInput).toBeVisible()
+
+      const probeEmail = `ready-check-${attempt}@example.com`
+      await this.emailInput.fill(probeEmail)
+      await this.page.waitForTimeout(200)
+
+      if ((await this.emailInput.inputValue()) === probeEmail) {
+        await this.emailInput.fill('')
+        await this.passwordInput.fill('')
+        return
+      }
+
+      await this.page.waitForTimeout(200)
+    }
+
+    throw new Error('auth form is not ready')
   }
 }
