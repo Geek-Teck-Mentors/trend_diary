@@ -6,7 +6,8 @@
   },
   "scripts": {
     "postinstall": "prisma generate",
-    "start": "react-router dev",
+    "start": "DATABASE_URL=file:$(pwd)/dev.db react-router dev",
+    "start:e2e": "DATABASE_URL=file:./test.db react-router dev",
     "build": "react-router build",
     "test:client": "vitest run -c src/test/vitest/client/config.ts",
     "test:domain": "vitest run -c src/test/vitest/domain/config.ts",

@@ -82,7 +82,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'CHOKIDAR_USEPOLLING=1 DATABASE_URL=file:./test.db npm start',
+    command: 'CHOKIDAR_USEPOLLING=1 npm run start:e2e',
     cwd: '../../..',
     url: 'http://localhost:5173',
     // INFO: CIに合わせる

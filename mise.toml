@@ -2,6 +2,4 @@
 node = "22.13.0"
 
 [env]
-DATABASE_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
-DIRECT_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 DISCORD_WEBHOOK_URL = ""
