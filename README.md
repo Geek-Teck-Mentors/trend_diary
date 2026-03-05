@@ -29,11 +29,13 @@ supabase start
 cp .dev.vars.example .dev.vars
 ```
 
-ローカルDB(SQLite)にマイグレーションを適用
+ローカル開発用DB(SQLite: `dev.db`)にマイグレーションを適用
 
 ```sh
-npm run db:migrate
+npm run db:migrate:dev
 ```
+
+`DATABASE_URL`を指定した環境（例: CIの`test.db`）に適用する場合は`npm run db:migrate`を使う
 
 Cloudflare D1ローカルマイグレーション適用（必要な場合）
 

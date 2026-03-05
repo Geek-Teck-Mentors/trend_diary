@@ -9,7 +9,12 @@
 
 ## マイグレーションファイルの生成
 
-Prisma schemaを編集後、ローカル(SQLite)に反映する場合:
+Prisma schemaを編集後、ローカル開発DB(SQLite: `dev.db`)に反映する場合:
+
+1. Prisma schemaを編集
+2. `npm run db:migrate:dev`
+
+`DATABASE_URL`で接続先を指定した環境（例: CIの`test.db`）に反映する場合:
 
 1. Prisma schemaを編集
 2. `npm run db:migrate`
