@@ -161,7 +161,7 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await mobileFilter.apply()
 
       const trendsPage = new TrendsPage(page)
-      await trendsPage.waitForUrl('**/trends?media=qiita')
+      await trendsPage.waitForUrl(/\/trends\?media=qiita$/)
       await trendsPage.expectArticleCount(QIITA_COUNT)
       await trendsPage.expectQiitaIconCount(QIITA_COUNT)
     })
@@ -173,7 +173,7 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await mobileFilter.apply()
 
       const trendsPage = new TrendsPage(page)
-      await trendsPage.waitForUrl('**/trends?media=zenn')
+      await trendsPage.waitForUrl(/\/trends\?media=zenn$/)
       await trendsPage.expectArticleCount(ZENN_COUNT)
       await trendsPage.expectZennIconCount(ZENN_COUNT)
     })

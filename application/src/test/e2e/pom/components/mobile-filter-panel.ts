@@ -5,6 +5,7 @@ type MediaOption = 'all' | 'qiita' | 'zenn'
 
 export class MobileFilterPanel {
   private readonly trigger: Locator
+  private readonly mediaTrigger: Locator
   private readonly allOption: Locator
   private readonly qiitaOption: Locator
   private readonly zennOption: Locator
@@ -12,6 +13,7 @@ export class MobileFilterPanel {
 
   constructor(private readonly page: Page) {
     this.trigger = page.getByRole('button', { name: '絞り込み' })
+    this.mediaTrigger = page.getByRole('button', { name: 'メディアフィルター' })
     this.allOption = page.getByRole('menuitem', { name: 'すべて' })
     this.qiitaOption = page.getByRole('menuitem', { name: 'Qiita' })
     this.zennOption = page.getByRole('menuitem', { name: 'Zenn' })
@@ -31,8 +33,8 @@ export class MobileFilterPanel {
 
   async select(media: MediaOption): Promise<void> {
     await this.applyButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-    await this.mediaTrigger().waitFor({ state: 'visible', timeout: TIMEOUT })
-    await this.mediaTrigger().click()
+    await this.mediaTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
+    await this.mediaTrigger.click()
 
     const option = this.option(media)
     await option.waitFor({ state: 'visible', timeout: TIMEOUT })
@@ -47,9 +49,5 @@ export class MobileFilterPanel {
     if (media === 'all') return this.allOption
     if (media === 'qiita') return this.qiitaOption
     return this.zennOption
-  }
-
-  private mediaTrigger(): Locator {
-    return this.page.getByRole('button', { name: /すべて|Qiita|Zenn/ }).first()
   }
 }

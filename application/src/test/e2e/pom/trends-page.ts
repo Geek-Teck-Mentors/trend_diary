@@ -61,11 +61,6 @@ export class TrendsPage {
   }
 
   async waitForUrl(url: string | RegExp): Promise<void> {
-    if (typeof url === 'string') {
-      await this.page.waitForURL(url, { timeout: TIMEOUT })
-      return
-    }
-
     await expect(this.page).toHaveURL(url, { timeout: TIMEOUT })
   }
 

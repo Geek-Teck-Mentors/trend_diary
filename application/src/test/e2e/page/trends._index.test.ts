@@ -114,7 +114,7 @@ test.describe('記事一覧ページ', () => {
       await mediaFilter.select('qiita')
 
       const trendsPage = new TrendsPage(page)
-      await trendsPage.waitForUrl('**/trends?media=qiita')
+      await trendsPage.waitForUrl(/\/trends\?media=qiita$/)
       await trendsPage.expectArticleCount(QIITA_COUNT)
       await trendsPage.expectQiitaIconCount(QIITA_COUNT)
     })
@@ -124,7 +124,7 @@ test.describe('記事一覧ページ', () => {
       await mediaFilter.select('zenn')
 
       const trendsPage = new TrendsPage(page)
-      await trendsPage.waitForUrl('**/trends?media=zenn')
+      await trendsPage.waitForUrl(/\/trends\?media=zenn$/)
       await trendsPage.expectArticleCount(ZENN_COUNT)
       await trendsPage.expectZennIconCount(ZENN_COUNT)
     })
@@ -136,11 +136,11 @@ test.describe('記事一覧ページ', () => {
       await mediaFilter.select('qiita')
 
       const trendsPage = new TrendsPage(page)
-      await trendsPage.waitForUrl('**/trends?media=qiita')
+      await trendsPage.waitForUrl(/\/trends\?media=qiita$/)
       await trendsPage.expectArticleCount(QIITA_COUNT)
 
       await mediaFilter.select('all')
-      await trendsPage.waitForUrl('**/trends')
+      await trendsPage.waitForUrl(/\/trends$/)
       await trendsPage.expectArticleCount(QIITA_COUNT + ZENN_COUNT)
     })
 
@@ -151,7 +151,7 @@ test.describe('記事一覧ページ', () => {
 
       const mediaFilter = new DesktopMediaFilter(page)
       await mediaFilter.select('qiita')
-      await trendsPage.waitForUrl('**/trends?media=qiita')
+      await trendsPage.waitForUrl(/\/trends\?media=qiita$/)
       trendsPage.expectQueryParamNull('page')
     })
   })
