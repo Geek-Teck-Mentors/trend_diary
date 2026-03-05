@@ -19,6 +19,16 @@ runs:
       shell: bash
       working-directory: ./application
       run: |
-        SUPABASE_JSON=$(supabase status --output json)
-        echo "SUPABASE_ANON_KEY=$(echo $SUPABASE_JSON | jq -r '.ANON_KEY')" >> $GITHUB_ENV
-        echo "SUPABASE_URL=$(echo $SUPABASE_JSON | jq -r '.API_URL')" >> $GITHUB_ENV
+        set -euo pipefail
+        SUPABASE_ENV="$(supabase status --output env)"
+        SUPABASE_ANON_KEY="$(echo "$SUPABASE_ENV" | sed -n 's/^ANON_KEY=//p' | head -n 1)"
+        SUPABASE_URL="$(echo "$SUPABASE_ENV" | sed -n 's/^API_URL=//p' | head -n 1)"
+
+        if [[ -z "$SUPABASE_ANON_KEY" || -z "$SUPABASE_URL" ]]; then
+          echo "::error::Failed to read SUPABASE_ANON_KEY or SUPABASE_URL from 'supabase status --output env'."
+          echo "$SUPABASE_ENV"
+          exit 1
+        fi
+
+        echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> "$GITHUB_ENV"
+        echo "SUPABASE_URL=$SUPABASE_URL" >> "$GITHUB_ENV"

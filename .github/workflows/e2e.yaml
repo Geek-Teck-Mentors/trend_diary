@@ -50,7 +50,7 @@ jobs:
           cat > .dev.vars <<'EOF'
           # Dev env for Actions (created from secrets)
           DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
-          SUPABASE_URL=${{ env.SUPABASE_URL }}
+          SUPABASE_URL=${{ env.SUPABASE_URL || '' }}
           SUPABASE_ANON_KEY=${{ env.SUPABASE_ANON_KEY || '' }}
           DATABASE_URL=${{ env.DATABASE_URL }}
           EOF
@@ -105,7 +105,7 @@ jobs:
           cat > .dev.vars <<'EOF'
           # Dev env for Actions (created from secrets)
           DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
-          SUPABASE_URL=${{ env.SUPABASE_URL }}
+          SUPABASE_URL=${{ env.SUPABASE_URL || '' }}
           SUPABASE_ANON_KEY=${{ env.SUPABASE_ANON_KEY || '' }}
           DATABASE_URL=${{ env.DATABASE_URL }}
           EOF
