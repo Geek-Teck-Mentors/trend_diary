@@ -60,7 +60,7 @@ test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ',
       }
       expect([201, 409]).toContain(signupStatus)
 
-      await authPage.moveToLoginIfOnSignup()
+      await authPage.gotoLogin()
       await authPage.waitForLoginPage()
 
       let loginStatus = 0
