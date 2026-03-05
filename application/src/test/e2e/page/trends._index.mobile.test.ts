@@ -154,7 +154,17 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await mobileFilter.expectTriggerLabel('絞り込み')
     })
 
-    test('Qiitaフィルターを選択すると、Qiita記事のみが表示される', async ({ page }) => {
+    test('Qiitaを選択しても適用前は記事一覧に反映されない', async ({ page }) => {
+      const mobileFilter = new MobileFilterPanel(page)
+      await mobileFilter.openPanel()
+      await mobileFilter.select('qiita')
+
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForUrl(/\/trends$/)
+      await trendsPage.expectArticleCount(QIITA_COUNT + ZENN_COUNT)
+    })
+
+    test('Qiitaフィルターを選択して適用すると、Qiita記事のみが表示される', async ({ page }) => {
       const mobileFilter = new MobileFilterPanel(page)
       await mobileFilter.openPanel()
       await mobileFilter.select('qiita')
@@ -176,6 +186,24 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await trendsPage.waitForUrl(/\/trends\?media=zenn$/)
       await trendsPage.expectArticleCount(ZENN_COUNT)
       await trendsPage.expectZennIconCount(ZENN_COUNT)
+    })
+
+    test('クリアを押すと即時反映で全記事が表示され、パネルが閉じる', async ({ page }) => {
+      const mobileFilter = new MobileFilterPanel(page)
+      await mobileFilter.openPanel()
+      await mobileFilter.select('qiita')
+      await mobileFilter.apply()
+
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForUrl(/\/trends\?media=qiita$/)
+      await trendsPage.expectArticleCount(QIITA_COUNT)
+
+      await mobileFilter.openPanel()
+      await mobileFilter.clear()
+
+      await trendsPage.waitForUrl(/\/trends$/)
+      await trendsPage.expectArticleCount(QIITA_COUNT + ZENN_COUNT)
+      await expect(page.locator("[data-slot='mobile-filter-panel']")).not.toBeVisible()
     })
   })
 })

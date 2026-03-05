@@ -5,19 +5,19 @@ type MediaOption = 'all' | 'qiita' | 'zenn'
 
 export class MobileFilterPanel {
   private readonly trigger: Locator
-  private readonly mediaTrigger: Locator
   private readonly allOption: Locator
   private readonly qiitaOption: Locator
   private readonly zennOption: Locator
   private readonly applyButton: Locator
+  private readonly clearButton: Locator
 
   constructor(private readonly page: Page) {
     this.trigger = page.getByRole('button', { name: '絞り込み' })
-    this.mediaTrigger = page.getByRole('button', { name: /^メディアフィルター:/ })
-    this.allOption = page.getByRole('menuitem', { name: 'すべて' })
-    this.qiitaOption = page.getByRole('menuitem', { name: 'Qiita' })
-    this.zennOption = page.getByRole('menuitem', { name: 'Zenn' })
-    this.applyButton = page.getByRole('button', { name: '適用' })
+    this.allOption = page.locator("[data-slot='media-filter-all']")
+    this.qiitaOption = page.locator("[data-slot='media-filter-qiita']")
+    this.zennOption = page.locator("[data-slot='media-filter-zenn']")
+    this.applyButton = page.locator("[data-slot='mobile-filter-apply']")
+    this.clearButton = page.locator("[data-slot='mobile-filter-clear']")
   }
 
   async expectTriggerLabel(label: string): Promise<void> {
@@ -33,9 +33,6 @@ export class MobileFilterPanel {
 
   async select(media: MediaOption): Promise<void> {
     await this.applyButton.waitFor({ state: 'visible', timeout: TIMEOUT })
-    await this.mediaTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
-    await this.mediaTrigger.click()
-
     const option = this.option(media)
     await option.waitFor({ state: 'visible', timeout: TIMEOUT })
     await option.click()
@@ -43,6 +40,10 @@ export class MobileFilterPanel {
 
   async apply(): Promise<void> {
     await this.applyButton.click()
+  }
+
+  async clear(): Promise<void> {
+    await this.clearButton.click()
   }
 
   private option(media: MediaOption): Locator {

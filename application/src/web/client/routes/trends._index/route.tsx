@@ -18,8 +18,6 @@ export default function Trends() {
     page,
     totalPages,
     date,
-    handleMediaChange,
-    handleReadStatusChange,
     handleFiltersApply,
     toPreviousPage,
     toNextPage,
@@ -61,9 +59,7 @@ export default function Trends() {
         selectedMedia={selectedMedia}
         toPreviousPage={toPreviousPage}
         toNextPage={toNextPage}
-        onMediaChange={handleMediaChange}
         selectedReadStatus={selectedReadStatus}
-        onReadStatusChange={handleReadStatusChange}
         onApplyFilters={handleFiltersApply}
         onToggleRead={handleToggleRead}
         isLoggedIn={isLoggedIn}

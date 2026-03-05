@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, fn, userEvent } from 'storybook/test'
 import MediaFilter from './media-filter'
 
 const meta: Meta<typeof MediaFilter> = {
@@ -15,21 +15,13 @@ type Story = StoryObj<typeof MediaFilter>
 export const AllSelected: Story = {
   args: {
     selectedMedia: null,
-    onMediaChange: () => {
-      // Storybook display only
-    },
+    onMediaChange: fn(),
   },
   play: async ({ canvas, step }) => {
-    let trigger: HTMLElement
-    await step('フィルタトリガーが表示され、「すべて」と表示されることを確認', async () => {
-      trigger = canvas.getByRole('button')
-      await expect(trigger).toBeInTheDocument()
-      await expect(trigger).toHaveTextContent('すべて')
-    })
-
-    await step('フィルタがアクティブでないため、アイコンが灰色であることを確認', async () => {
-      const icon = trigger.querySelector('svg')
-      await expect(icon).toHaveClass('text-gray-600')
+    await step('「すべて」が選択状態で表示される', async () => {
+      await expect(canvas.getByRole('button', { name: 'すべて' })).toHaveClass(/bg-blue-50/)
+      await expect(canvas.getByRole('button', { name: 'Qiita' })).not.toHaveClass(/bg-blue-50/)
+      await expect(canvas.getByRole('button', { name: 'Zenn' })).not.toHaveClass(/bg-blue-50/)
     })
   },
 }
@@ -37,21 +29,11 @@ export const AllSelected: Story = {
 export const QiitaSelected: Story = {
   args: {
     selectedMedia: 'qiita',
-    onMediaChange: () => {
-      // Storybook display only
-    },
+    onMediaChange: fn(),
   },
   play: async ({ canvas, step }) => {
-    let trigger: HTMLElement
-    await step('フィルタトリガーが表示され、「Qiita」と表示されることを確認', async () => {
-      trigger = canvas.getByRole('button')
-      await expect(trigger).toBeInTheDocument()
-      await expect(trigger).toHaveTextContent('Qiita')
-    })
-
-    await step('フィルタがアクティブなため、アイコンが青色であることを確認', async () => {
-      const icon = trigger.querySelector('svg')
-      await expect(icon).toHaveClass('text-blue-600')
+    await step('「Qiita」が選択状態で表示される', async () => {
+      await expect(canvas.getByRole('button', { name: 'Qiita' })).toHaveClass(/bg-blue-50/)
     })
   },
 }
@@ -59,120 +41,24 @@ export const QiitaSelected: Story = {
 export const ZennSelected: Story = {
   args: {
     selectedMedia: 'zenn',
-    onMediaChange: () => {
-      // Storybook display only
-    },
+    onMediaChange: fn(),
   },
   play: async ({ canvas, step }) => {
-    let trigger: HTMLElement
-    await step('フィルタトリガーが表示され、「Zenn」と表示されることを確認', async () => {
-      trigger = canvas.getByRole('button')
-      await expect(trigger).toBeInTheDocument()
-      await expect(trigger).toHaveTextContent('Zenn')
-    })
-
-    await step('フィルタがアクティブなため、アイコンが青色であることを確認', async () => {
-      const icon = trigger.querySelector('svg')
-      await expect(icon).toHaveClass('text-blue-600')
+    await step('「Zenn」が選択状態で表示される', async () => {
+      await expect(canvas.getByRole('button', { name: 'Zenn' })).toHaveClass(/bg-blue-50/)
     })
   },
 }
 
-export const OpenDropdownMenu: Story = {
+export const SelectQiita: Story = {
   args: {
     selectedMedia: null,
-    onMediaChange: () => {
-      // Storybook display only
-    },
+    onMediaChange: fn(),
   },
-  play: async ({ canvasElement, canvas, step }) => {
-    const trigger = canvas.getByRole('button')
-
-    await step('フィルタトリガーをクリックしてドロップダウンを開く', async () => {
-      await userEvent.click(trigger)
-    })
-
-    await step('ドロップダウンメニューが表示され、3つの項目があることを確認', async () => {
-      const body = within(canvasElement.ownerDocument.body)
-      const allItem = await body.findByRole('menuitem', { name: 'すべて' })
-      const qiitaItem = await body.findByRole('menuitem', { name: 'Qiita' })
-      const zennItem = await body.findByRole('menuitem', { name: 'Zenn' })
-
-      await waitFor(async () => {
-        await expect(allItem).toBeVisible()
-        await expect(qiitaItem).toBeVisible()
-        await expect(zennItem).toBeVisible()
-      })
-    })
-  },
-}
-
-export const SelectQiitaFromDropdown: Story = {
-  args: {
-    selectedMedia: null,
-    onMediaChange: () => {
-      // Storybook display only
-    },
-  },
-  play: async ({ canvasElement, canvas, step }) => {
-    const trigger = canvas.getByRole('button')
-
-    await step('フィルタトリガーをクリック', async () => {
-      await userEvent.click(trigger)
-    })
-
-    await step('Qiita項目をクリック', async () => {
-      const body = within(canvasElement.ownerDocument.body)
-      const qiitaItem = await body.findByRole('menuitem', { name: 'Qiita' })
-      await userEvent.click(qiitaItem)
-    })
-  },
-}
-
-export const SelectZennFromDropdown: Story = {
-  args: {
-    selectedMedia: null,
-    onMediaChange: () => {
-      // Storybook display only
-    },
-  },
-  play: async ({ canvasElement, canvas, step }) => {
-    const trigger = canvas.getByRole('button')
-
-    await step('フィルタトリガーをクリック', async () => {
-      await userEvent.click(trigger)
-    })
-
-    await step('Zenn項目をクリック', async () => {
-      const body = within(canvasElement.ownerDocument.body)
-      const zennItem = await body.findByRole('menuitem', { name: 'Zenn' })
-      await userEvent.click(zennItem)
-    })
-  },
-}
-
-export const ResetFilter: Story = {
-  args: {
-    selectedMedia: 'qiita',
-    onMediaChange: () => {
-      // Storybook display only
-    },
-  },
-  play: async ({ canvasElement, canvas, step }) => {
-    const trigger = canvas.getByRole('button')
-
-    await step('初期状態でQiitaが選択されていることを確認', async () => {
-      await expect(trigger).toHaveTextContent('Qiita')
-    })
-
-    await step('フィルタトリガーをクリック', async () => {
-      await userEvent.click(trigger)
-    })
-
-    await step('「すべて」項目をクリック', async () => {
-      const body = within(canvasElement.ownerDocument.body)
-      const allItem = await body.findByRole('menuitem', { name: 'すべて' })
-      await userEvent.click(allItem)
+  play: async ({ args, canvas, step }) => {
+    await step('Qiitaを押すとコールバックが呼ばれる', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: 'Qiita' }))
+      await expect(args.onMediaChange).toHaveBeenCalledWith('qiita')
     })
   },
 }

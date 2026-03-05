@@ -29,8 +29,6 @@ type Props = {
   selectedReadStatus: ReadStatusType
   toNextPage: (currentPage: number) => void
   toPreviousPage: (currentPage: number) => void
-  onMediaChange: (media: MediaType) => void
-  onReadStatusChange: (readStatus: ReadStatusType) => void
   onApplyFilters: (filters: { media: MediaType; readStatus: ReadStatusType }) => void
   onToggleRead: (articleId: string, isRead: boolean) => void
   isLoggedIn: boolean
@@ -47,8 +45,6 @@ export default function TrendsPage({
   selectedReadStatus,
   toNextPage,
   toPreviousPage,
-  onMediaChange,
-  onReadStatusChange,
   onApplyFilters,
   onToggleRead,
   isLoggedIn,
@@ -91,6 +87,11 @@ export default function TrendsPage({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [searchParams])
 
+  useEffect(() => {
+    setDraftMedia(selectedMedia)
+    setDraftReadStatus(selectedReadStatus)
+  }, [selectedMedia, selectedReadStatus])
+
   const appliedFilterCount =
     (selectedMedia ? 1 : 0) + (isLoggedIn && selectedReadStatus === 'unread' ? 1 : 0)
 
@@ -111,11 +112,18 @@ export default function TrendsPage({
   const handleClearFilter = () => {
     setDraftMedia(null)
     setDraftReadStatus('all')
+    onApplyFilters({ media: null, readStatus: 'all' })
+    if (isMobile) {
+      setIsFilterOpen(false)
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleApplyFilter = () => {
     onApplyFilters({ media: draftMedia, readStatus: draftReadStatus })
-    setIsFilterOpen(false)
+    if (isMobile) {
+      setIsFilterOpen(false)
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -193,17 +201,30 @@ export default function TrendsPage({
           <h2 className='mb-3 text-sm font-semibold text-gray-700'>絞り込み</h2>
           <div className='flex flex-wrap items-center gap-2'>
             <span className='text-sm font-medium text-gray-600'>媒体</span>
-            <MediaFilter selectedMedia={selectedMedia} onMediaChange={onMediaChange} />
+            <MediaFilter selectedMedia={draftMedia} onMediaChange={setDraftMedia} />
           </div>
           {isLoggedIn && (
             <div className='mt-3 flex flex-wrap items-center gap-2'>
               <span className='text-sm font-medium text-gray-600'>既読状態</span>
               <ReadStatusFilter
-                selectedReadStatus={selectedReadStatus}
-                onReadStatusChange={onReadStatusChange}
+                selectedReadStatus={draftReadStatus}
+                onReadStatusChange={setDraftReadStatus}
               />
             </div>
           )}
+          <div className='mt-4 flex items-center justify-end gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={handleClearFilter}
+              data-slot='desktop-filter-clear'
+            >
+              クリア
+            </Button>
+            <Button type='button' onClick={handleApplyFilter} data-slot='desktop-filter-apply'>
+              適用
+            </Button>
+          </div>
         </div>
       )}
       {articles.length === 0 ? (
