@@ -25,8 +25,7 @@ export class AuthPage {
   }
 
   async submitSignup(email: string, password: string): Promise<void> {
-    await this.emailInput.fill(email)
-    await this.passwordInput.fill(password)
+    await this.fillCredentials(email, password)
     await this.signupButton.click()
   }
 
@@ -46,8 +45,7 @@ export class AuthPage {
   }
 
   async submitLogin(email: string, password: string): Promise<void> {
-    await this.emailInput.fill(email)
-    await this.passwordInput.fill(password)
+    await this.fillCredentials(email, password)
     await this.loginButton.click()
   }
 
@@ -55,5 +53,23 @@ export class AuthPage {
     await expect(this.page).toHaveURL(/\/trends(?:\?.*)?$/, { timeout: AUTH_FLOW_TIMEOUT })
     await expect(this.trendsPageText).toBeVisible({ timeout: 5000 })
     await expect(this.readStatusFilter).toBeVisible({ timeout: 5000 })
+  }
+
+  private async fillCredentials(email: string, password: string): Promise<void> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await this.emailInput.fill(email)
+      await this.passwordInput.fill(password)
+
+      const currentEmail = await this.emailInput.inputValue()
+      const currentPassword = await this.passwordInput.inputValue()
+
+      if (currentEmail === email && currentPassword === password) {
+        return
+      }
+
+      await this.page.waitForTimeout(100)
+    }
+
+    throw new Error('failed to fill auth credentials')
   }
 }
