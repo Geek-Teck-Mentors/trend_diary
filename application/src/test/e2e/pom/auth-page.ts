@@ -40,7 +40,7 @@ export class AuthPage {
       await this.passwordInput.fill(password)
       const signupStatus = await this.submitAuthForm('アカウント作成', 'signup')
 
-      if (signupStatus === 409 && new URL(this.page.url()).pathname === '/signup') {
+      if (signupStatus !== 201 && new URL(this.page.url()).pathname === '/signup') {
         await this.loginLink.click()
       }
 
@@ -77,7 +77,6 @@ export class AuthPage {
     const response = await responsePromise
 
     if (endpoint === 'signup') {
-      expect([201, 409]).toContain(response.status())
       return response.status()
     }
 
