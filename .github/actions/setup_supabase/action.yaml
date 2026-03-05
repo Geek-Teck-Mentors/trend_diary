@@ -24,8 +24,12 @@ runs:
         SUPABASE_ANON_KEY="$(echo "$SUPABASE_ENV" | sed -n 's/^ANON_KEY=//p' | head -n 1)"
         SUPABASE_URL="$(echo "$SUPABASE_ENV" | sed -n 's/^API_URL=//p' | head -n 1)"
 
-        if [[ -z "$SUPABASE_ANON_KEY" || -z "$SUPABASE_URL" ]]; then
-          echo "::error::Failed to read SUPABASE_ANON_KEY or SUPABASE_URL from 'supabase status --output env'."
+        if [[ -z "$SUPABASE_URL" ]]; then
+          SUPABASE_URL="http://127.0.0.1:54321"
+        fi
+
+        if [[ -z "$SUPABASE_ANON_KEY" ]]; then
+          echo "::error::Failed to read SUPABASE_ANON_KEY from 'supabase status --output env'."
           echo "$SUPABASE_ENV"
           exit 1
         fi
