@@ -114,7 +114,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run e2e -- --reporter=github,html --fail-on-flaky-tests
+          LIST_OUTPUT="$(mktemp)"
+          npm run e2e -- --only-changed=origin/$GITHUB_BASE_REF --list | tee "$LIST_OUTPUT"
+
+          if grep -q "Total: 0 tests" "$LIST_OUTPUT"; then
+            echo "No changed E2E tests. Skip."
+            exit 0
+          fi
+
+          npm run e2e -- --reporter=github,html --only-changed=origin/$GITHUB_BASE_REF --fail-on-flaky-tests
 
       - name: Playwrightレポートを保存
         uses: actions/upload-artifact@v4
