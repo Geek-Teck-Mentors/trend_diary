@@ -5,6 +5,22 @@ import * as userHelper from '@/test/helper/user'
 const TIMEOUT = 10000
 const AUTH_FLOW_TIMEOUT = 20000
 
+async function submitAuthForm(
+  page: Page,
+  submitButtonName: 'アカウント作成' | 'ログイン',
+  endpoint: 'signup' | 'login',
+): Promise<void> {
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' && response.url().includes(`/api/v2/auth/${endpoint}`),
+    { timeout: 5000 },
+  )
+
+  await page.getByRole('button', { name: submitButtonName }).click()
+  const response = await responsePromise
+  expect(response.ok()).toBeTruthy()
+}
+
 async function waitDrawerOpen(page: Page): Promise<Locator> {
   await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
 
@@ -29,7 +45,7 @@ async function completeSignupAndMoveToLogin(
 
     await page.getByLabel('メールアドレス').fill(email)
     await page.getByLabel('パスワード').fill(password)
-    await page.getByRole('button', { name: 'アカウント作成' }).click()
+    await submitAuthForm(page, 'アカウント作成', 'signup')
 
     await expect(page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: 5000 })
     await expect(loginPageText).toBeVisible({ timeout: 5000 })
@@ -53,7 +69,7 @@ async function completeLoginAndMoveToTrends(
 
     await page.getByLabel('メールアドレス').fill(email)
     await page.getByLabel('パスワード').fill(password)
-    await page.getByRole('button', { name: 'ログイン' }).click()
+    await submitAuthForm(page, 'ログイン', 'login')
 
     await expect(page).toHaveURL(/\/trends(?:\?.*)?$/, { timeout: 5000 })
     await expect(trendsPageText).toBeVisible({ timeout: 5000 })
