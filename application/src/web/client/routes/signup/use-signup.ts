@@ -32,8 +32,8 @@ export default function useSignup(navigate: NavigateFunction) {
     },
   )
 
-  const handleSubmit = async (data: AuthenticateFormData) => {
-    trigger(data)
+  async function handleSubmit(data: AuthenticateFormData): Promise<void> {
+    await trigger(data)
   }
 
   return { handleSubmit, isLoading: isMutating }

@@ -6,6 +6,7 @@ export class AuthPage {
   private readonly passwordInput: Locator
   private readonly signupButton: Locator
   private readonly loginButton: Locator
+  private readonly signupPageLoginLink: Locator
   private readonly loginPageText: Locator
   private readonly trendsPageText: Locator
   private readonly readStatusFilter: Locator
@@ -15,6 +16,9 @@ export class AuthPage {
     this.passwordInput = page.getByLabel('パスワード')
     this.signupButton = page.getByRole('button', { name: 'アカウント作成' })
     this.loginButton = page.getByRole('button', { name: 'ログイン' })
+    this.signupPageLoginLink = page
+      .getByText('既にアカウントをお持ちですか？')
+      .getByRole('link', { name: 'ログイン' })
     this.loginPageText = page.getByText('アカウントをお持ちでないですか？')
     this.trendsPageText = page.getByText('絞り込み')
     this.readStatusFilter = page.getByRole('button', { name: '未読のみ' })
@@ -24,29 +28,28 @@ export class AuthPage {
     await this.page.goto('/signup')
   }
 
-  async signupAndMoveToLogin(email: string, password: string): Promise<void> {
-    if (new URL(this.page.url()).pathname !== '/login') {
-      await this.emailInput.fill(email)
-      await this.passwordInput.fill(password)
-      await this.signupButton.click()
-      await this.page.waitForURL(/\/login(?:\?.*)?$/, { timeout: 5000 }).catch(() => undefined)
+  async submitSignup(email: string, password: string): Promise<void> {
+    await this.emailInput.fill(email)
+    await this.passwordInput.fill(password)
+    await this.signupButton.click()
+  }
 
-      if (new URL(this.page.url()).pathname === '/signup') {
-        await this.page.goto('/login')
-      }
-    }
+  async moveToLoginFromSignup(): Promise<void> {
+    await this.signupPageLoginLink.click()
+  }
 
+  async waitForLoginPage(): Promise<void> {
     await expect(this.page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: AUTH_FLOW_TIMEOUT })
     await expect(this.loginPageText).toBeVisible({ timeout: 5000 })
   }
 
-  async loginAndMoveToTrends(email: string, password: string): Promise<void> {
-    if (new URL(this.page.url()).pathname !== '/trends') {
-      await this.emailInput.fill(email)
-      await this.passwordInput.fill(password)
-      await this.loginButton.click()
-    }
+  async submitLogin(email: string, password: string): Promise<void> {
+    await this.emailInput.fill(email)
+    await this.passwordInput.fill(password)
+    await this.loginButton.click()
+  }
 
+  async waitForTrendsPage(): Promise<void> {
     await expect(this.page).toHaveURL(/\/trends(?:\?.*)?$/, { timeout: AUTH_FLOW_TIMEOUT })
     await expect(this.trendsPageText).toBeVisible({ timeout: 5000 })
     await expect(this.readStatusFilter).toBeVisible({ timeout: 5000 })

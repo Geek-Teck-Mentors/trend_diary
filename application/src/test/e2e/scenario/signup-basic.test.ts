@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { waitAuthApiResponse } from '@/test/e2e/helper/auth-api'
 import { AuthPage } from '@/test/e2e/pom/auth-page'
 import { ArticleDrawer } from '@/test/e2e/pom/components/article-drawer'
 import { TrendsPage } from '@/test/e2e/pom/trends-page'
@@ -36,17 +37,37 @@ test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ',
   })
 
   test('ログイン後にトレンド記事の詳細を開ける', async ({ page }) => {
-    const authPage = new AuthPage(page)
-    await authPage.gotoSignup()
-    await authPage.signupAndMoveToLogin(email, password)
-    await authPage.loginAndMoveToTrends(email, password)
+    {
+      const authPage = new AuthPage(page)
+      await authPage.gotoSignup()
 
-    const trendsPage = new TrendsPage(page)
-    await trendsPage.openArticleByTitle(articleTitle)
+      const signupResponsePromise = waitAuthApiResponse(page, 'signup')
+      await authPage.submitSignup(email, password)
+      const signupStatus = (await signupResponsePromise).status()
+      expect([201, 409]).toContain(signupStatus)
 
-    const drawer = new ArticleDrawer(page)
-    await drawer.waitOpen()
-    await drawer.expectContains(articleTitle)
-    await drawer.expectReadArticleButtonVisible()
+      if (signupStatus === 409) {
+        await authPage.moveToLoginFromSignup()
+      }
+
+      await authPage.waitForLoginPage()
+
+      const loginResponsePromise = waitAuthApiResponse(page, 'login')
+      await authPage.submitLogin(email, password)
+      expect((await loginResponsePromise).status()).toBe(200)
+      await authPage.waitForTrendsPage()
+    }
+
+    {
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.openArticleByTitle(articleTitle)
+    }
+
+    {
+      const drawer = new ArticleDrawer(page)
+      await drawer.waitOpen()
+      await drawer.expectContains(articleTitle)
+      await drawer.expectReadArticleButtonVisible()
+    }
   })
 })
