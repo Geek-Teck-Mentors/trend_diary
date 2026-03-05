@@ -10,8 +10,8 @@ runs:
     - name: Supabaseの起動
       shell: bash
       working-directory: ./application
-      # INFO: DBと認証とfunctionsのみ起動
-      run: supabase start -x storage-api,imgproxy,edge-runtime,realtime,vector,studio,postgres-meta,mailpit,logflare,supavisor
+      # INFO: 認証のみ起動
+      run: supabase start -x storage-api,imgproxy,realtime
 
     - name: Supabaseのキーを環境変数に設定
       id: get-keys
