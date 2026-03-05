@@ -24,6 +24,10 @@ export class AuthPage {
     await this.page.goto('/signup')
   }
 
+  async gotoLogin(): Promise<void> {
+    await this.page.goto('/login')
+  }
+
   async submitSignup(email: string, password: string): Promise<void> {
     await this.fillCredentials(email, password)
     await this.signupButton.click()
