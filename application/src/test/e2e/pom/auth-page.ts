@@ -6,7 +6,6 @@ export class AuthPage {
   private readonly passwordInput: Locator
   private readonly signupButton: Locator
   private readonly loginButton: Locator
-  private readonly signupPageLoginLink: Locator
   private readonly loginPageText: Locator
   private readonly trendsPageText: Locator
   private readonly readStatusFilter: Locator
@@ -16,9 +15,6 @@ export class AuthPage {
     this.passwordInput = page.getByLabel('パスワード')
     this.signupButton = page.getByRole('button', { name: 'アカウント作成' })
     this.loginButton = page.getByRole('button', { name: 'ログイン' })
-    this.signupPageLoginLink = page
-      .getByText('既にアカウントをお持ちですか？')
-      .getByRole('link', { name: 'ログイン' })
     this.loginPageText = page.getByText('アカウントをお持ちでないですか？')
     this.trendsPageText = page.getByText('絞り込み')
     this.readStatusFilter = page.getByRole('button', { name: '未読のみ' })
@@ -35,7 +31,13 @@ export class AuthPage {
   }
 
   async moveToLoginFromSignup(): Promise<void> {
-    await this.signupPageLoginLink.click()
+    await this.page.goto('/login')
+  }
+
+  async moveToLoginIfOnSignup(): Promise<void> {
+    if (new URL(this.page.url()).pathname === '/signup') {
+      await this.moveToLoginFromSignup()
+    }
   }
 
   async waitForLoginPage(): Promise<void> {

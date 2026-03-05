@@ -46,10 +46,7 @@ test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ',
       const signupStatus = (await signupResponsePromise).status()
       expect([201, 409]).toContain(signupStatus)
 
-      if (signupStatus === 409) {
-        await authPage.moveToLoginFromSignup()
-      }
-
+      await authPage.moveToLoginIfOnSignup()
       await authPage.waitForLoginPage()
 
       const loginResponsePromise = waitAuthApiResponse(page, 'login')
