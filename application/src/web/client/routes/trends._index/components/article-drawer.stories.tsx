@@ -94,18 +94,24 @@ export const LongDescriptionToggle: Story = {
     }),
   },
   play: async ({ step }) => {
+    const getDescriptionElement = () => {
+      const description = document.body.querySelector(
+        "[data-slot='drawer-content-description-content']",
+      ) as HTMLElement | null
+      expect(description).not.toBeNull()
+      if (!description) {
+        throw new Error('description element not found')
+      }
+      return description
+    }
+
     await step('初期表示で続きを読むボタンが表示されることを確認', async () => {
       const toggle = within(document.body).getByRole('button', { name: '続きを読む' })
       await expect(toggle).toBeInTheDocument()
     })
 
     await step('初期状態で概要が4行折りたたみであることを確認', async () => {
-      const description = document.body.querySelector(
-        "[data-slot='drawer-content-description-content']",
-      ) as HTMLElement | null
-      expect(description).not.toBeNull()
-      if (!description) return
-
+      const description = getDescriptionElement()
       await expect(description).toHaveClass('line-clamp-4')
     })
 
@@ -116,12 +122,7 @@ export const LongDescriptionToggle: Story = {
       const closeToggle = within(document.body).getByRole('button', { name: '閉じる' })
       await expect(closeToggle).toBeInTheDocument()
 
-      const description = document.body.querySelector(
-        "[data-slot='drawer-content-description-content']",
-      ) as HTMLElement | null
-      expect(description).not.toBeNull()
-      if (!description) return
-
+      const description = getDescriptionElement()
       await expect(description).not.toHaveClass('line-clamp-4')
     })
   },

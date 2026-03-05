@@ -10,6 +10,7 @@ import {
   DrawerTitle,
 } from '@/web/client/components/shadcn/drawer'
 import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
+import { cn } from '@/web/client/components/shadcn/lib/utils'
 import type { Article } from '../hooks/use-articles'
 import MediaIcon from './media-icon'
 
@@ -105,7 +106,10 @@ export default function ArticleDrawer({
           <div className='mb-8' data-slot='drawer-content-description'>
             <h3 className='mb-3 text-lg font-semibold text-gray-900'>概要</h3>
             <p
-              className={`leading-relaxed text-gray-700 ${isDescriptionExpanded ? '' : 'line-clamp-4'}`}
+              className={cn(
+                'leading-relaxed text-gray-700',
+                shouldShowDescriptionToggle && !isDescriptionExpanded && 'line-clamp-4',
+              )}
               data-slot='drawer-content-description-content'
             >
               {article.description}
