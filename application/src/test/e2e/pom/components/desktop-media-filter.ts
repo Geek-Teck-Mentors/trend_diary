@@ -7,15 +7,11 @@ export class DesktopMediaFilter {
   private readonly allOption: Locator
   private readonly qiitaOption: Locator
   private readonly zennOption: Locator
-  private readonly applyButton: Locator
-  private readonly clearButton: Locator
 
   constructor(private readonly page: Page) {
     this.allOption = page.locator("[data-slot='media-filter-all']")
     this.qiitaOption = page.locator("[data-slot='media-filter-qiita']")
     this.zennOption = page.locator("[data-slot='media-filter-zenn']")
-    this.applyButton = page.locator("[data-slot='desktop-filter-apply']")
-    this.clearButton = page.locator("[data-slot='desktop-filter-clear']")
   }
 
   async expectVisible(): Promise<void> {
@@ -26,14 +22,6 @@ export class DesktopMediaFilter {
 
   async select(media: MediaOption): Promise<void> {
     await this.option(media).click()
-  }
-
-  async apply(): Promise<void> {
-    await this.applyButton.click()
-  }
-
-  async clear(): Promise<void> {
-    await this.clearButton.click()
   }
 
   private option(media: MediaOption): Locator {

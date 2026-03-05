@@ -127,6 +127,18 @@ export default function TrendsPage({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const handleDesktopMediaChange = (media: MediaType) => {
+    setDraftMedia(media)
+    onApplyFilters({ media, readStatus: draftReadStatus })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleDesktopReadStatusChange = (readStatus: ReadStatusType) => {
+    setDraftReadStatus(readStatus)
+    onApplyFilters({ media: draftMedia, readStatus })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <div className='relative min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
       <h1 className='pb-4 text-xl italic'>- {toJaDateString(date)} -</h1>
@@ -198,32 +210,26 @@ export default function TrendsPage({
         </div>
       ) : (
         <div className='mb-4 rounded-lg border border-gray-300 bg-white/50 p-4'>
-          <h2 className='mb-3 text-sm font-semibold text-gray-700'>絞り込み</h2>
-          <div className='flex flex-wrap items-center gap-2'>
-            <span className='text-sm font-medium text-gray-600'>媒体</span>
-            <MediaFilter selectedMedia={draftMedia} onMediaChange={setDraftMedia} />
-          </div>
-          {isLoggedIn && (
-            <div className='mt-3 flex flex-wrap items-center gap-2'>
-              <span className='text-sm font-medium text-gray-600'>既読状態</span>
-              <ReadStatusFilter
-                selectedReadStatus={draftReadStatus}
-                onReadStatusChange={setDraftReadStatus}
-              />
+          <h2 className='mb-3 inline-flex items-center gap-2 text-sm font-semibold text-gray-700'>
+            <Funnel className='h-4 w-4 text-gray-600' />
+            <span>絞り込み</span>
+          </h2>
+          <div className='space-y-3'>
+            <div className='flex items-start gap-4'>
+              <div className='flex flex-col gap-1'>
+                <span className='text-xs font-medium text-gray-600'>媒体</span>
+                <MediaFilter selectedMedia={draftMedia} onMediaChange={handleDesktopMediaChange} />
+              </div>
+              {isLoggedIn && (
+                <div className='flex flex-col gap-1'>
+                  <span className='text-xs font-medium text-gray-600'>既読状態</span>
+                  <ReadStatusFilter
+                    selectedReadStatus={draftReadStatus}
+                    onReadStatusChange={handleDesktopReadStatusChange}
+                  />
+                </div>
+              )}
             </div>
-          )}
-          <div className='mt-4 flex items-center justify-end gap-2'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={handleClearFilter}
-              data-slot='desktop-filter-clear'
-            >
-              クリア
-            </Button>
-            <Button type='button' onClick={handleApplyFilter} data-slot='desktop-filter-apply'>
-              適用
-            </Button>
           </div>
         </div>
       )}
