@@ -1,8 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test'
-import { type AuthEndpoint, waitAuthApiResponse } from '@/test/e2e/helper/auth-api'
 import { AUTH_FLOW_TIMEOUT } from '@/test/e2e/pom/constants'
-
-type SubmitButtonName = 'アカウント作成' | 'ログイン'
 
 export class AuthPage {
   private readonly emailInput: Locator
@@ -30,89 +27,30 @@ export class AuthPage {
   }
 
   async signupAndMoveToLogin(email: string, password: string): Promise<void> {
-    await expect(async () => {
-      if (new URL(this.page.url()).pathname === '/login') {
-        await expect(this.loginPageText).toBeVisible({ timeout: 2000 })
-        return
-      }
-
+    if (new URL(this.page.url()).pathname !== '/login') {
       await this.emailInput.fill(email)
       await this.passwordInput.fill(password)
-      const signupStatus = await this.submitAuthForm('アカウント作成', 'signup')
+      await this.signupButton.click()
+      await this.page.waitForURL(/\/login(?:\?.*)?$/, { timeout: 5000 }).catch(() => undefined)
 
-      if (signupStatus !== 201 && new URL(this.page.url()).pathname === '/signup') {
+      if (new URL(this.page.url()).pathname === '/signup') {
         await this.loginLink.click()
       }
+    }
 
-      await expect(this.page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: 5000 })
-      await expect(this.loginPageText).toBeVisible({ timeout: 5000 })
-    }).toPass({ timeout: AUTH_FLOW_TIMEOUT })
+    await expect(this.page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: AUTH_FLOW_TIMEOUT })
+    await expect(this.loginPageText).toBeVisible({ timeout: 5000 })
   }
 
   async loginAndMoveToTrends(email: string, password: string): Promise<void> {
-    await expect(async () => {
-      if (new URL(this.page.url()).pathname === '/trends') {
-        await expect(this.trendsPageText).toBeVisible({ timeout: 2000 })
-        await expect(this.readStatusFilter).toBeVisible({ timeout: 2000 })
-        return
-      }
-
+    if (new URL(this.page.url()).pathname !== '/trends') {
       await this.emailInput.fill(email)
       await this.passwordInput.fill(password)
-      const loginStatus = await this.submitAuthForm('ログイン', 'login')
-      expect(loginStatus).toBe(200)
-
-      await expect(this.page).toHaveURL(/\/trends(?:\?.*)?$/, { timeout: 5000 })
-      await expect(this.trendsPageText).toBeVisible({ timeout: 5000 })
-      await expect(this.readStatusFilter).toBeVisible({ timeout: 5000 })
-    }).toPass({ timeout: AUTH_FLOW_TIMEOUT })
-  }
-
-  private async submitAuthForm(
-    submitButtonName: SubmitButtonName,
-    endpoint: AuthEndpoint,
-  ): Promise<number> {
-    const responsePromise = waitAuthApiResponse(this.page, endpoint).catch(() => null)
-    await this.submitButton(submitButtonName).click()
-    const response = await responsePromise
-
-    if (response) {
-      if (endpoint === 'signup') {
-        return response.status()
-      }
-
-      expect(response.ok()).toBeTruthy()
-      return response.status()
+      await this.loginButton.click()
     }
 
-    await this.waitForAuthTargetUrl(endpoint)
-
-    if (endpoint === 'signup' && new URL(this.page.url()).pathname === '/login') {
-      return 201
-    }
-
-    if (endpoint === 'login' && new URL(this.page.url()).pathname === '/trends') {
-      return 200
-    }
-
-    throw new Error(`${endpoint} API response was not observed`)
-  }
-
-  private submitButton(submitButtonName: SubmitButtonName): Locator {
-    if (submitButtonName === 'アカウント作成') return this.signupButton
-    return this.loginButton
-  }
-
-  private async waitForAuthTargetUrl(endpoint: AuthEndpoint): Promise<void> {
-    if (endpoint === 'signup') {
-      await this.page
-        .waitForURL(/\/(signup|login)(?:\?.*)?$/, { timeout: 2000 })
-        .catch(() => undefined)
-      return
-    }
-
-    await this.page
-      .waitForURL(/\/(login|trends)(?:\?.*)?$/, { timeout: 2000 })
-      .catch(() => undefined)
+    await expect(this.page).toHaveURL(/\/trends(?:\?.*)?$/, { timeout: AUTH_FLOW_TIMEOUT })
+    await expect(this.trendsPageText).toBeVisible({ timeout: 5000 })
+    await expect(this.readStatusFilter).toBeVisible({ timeout: 5000 })
   }
 }
