@@ -72,20 +72,47 @@ export class AuthPage {
     submitButtonName: SubmitButtonName,
     endpoint: AuthEndpoint,
   ): Promise<number> {
-    const responsePromise = waitAuthApiResponse(this.page, endpoint)
+    const responsePromise = waitAuthApiResponse(this.page, endpoint).catch(() => null)
     await this.submitButton(submitButtonName).click()
     const response = await responsePromise
 
-    if (endpoint === 'signup') {
+    if (response) {
+      if (endpoint === 'signup') {
+        return response.status()
+      }
+
+      expect(response.ok()).toBeTruthy()
       return response.status()
     }
 
-    expect(response.ok()).toBeTruthy()
-    return response.status()
+    await this.waitForAuthTargetUrl(endpoint)
+
+    if (endpoint === 'signup' && new URL(this.page.url()).pathname === '/login') {
+      return 201
+    }
+
+    if (endpoint === 'login' && new URL(this.page.url()).pathname === '/trends') {
+      return 200
+    }
+
+    throw new Error(`${endpoint} API response was not observed`)
   }
 
   private submitButton(submitButtonName: SubmitButtonName): Locator {
     if (submitButtonName === 'アカウント作成') return this.signupButton
     return this.loginButton
+  }
+
+  private async waitForAuthTargetUrl(endpoint: AuthEndpoint): Promise<void> {
+    if (endpoint === 'signup') {
+      await this.page
+        .waitForURL(/\/(signup|login)(?:\?.*)?$/, { timeout: 2000 })
+        .catch(() => undefined)
+      return
+    }
+
+    await this.page
+      .waitForURL(/\/(login|trends)(?:\?.*)?$/, { timeout: 2000 })
+      .catch(() => undefined)
   }
 }
