@@ -63,7 +63,7 @@ jobs:
         if: ${{ always() && !cancelled() }}
         with:
           name: playwright-report-main-${{ github.run_id }}-${{ github.run_attempt }}
-          path: application/src/test/e2e/playwright-report/
+          path: application/playwright-report/
           if-no-files-found: ignore
           retention-days: 30
 
@@ -72,7 +72,7 @@ jobs:
         if: ${{ always() && !cancelled() }}
         with:
           name: playwright-test-results-main-${{ github.run_id }}-${{ github.run_attempt }}
-          path: application/src/test/e2e/test-results/
+          path: application/test-results/
           if-no-files-found: ignore
           retention-days: 30
 
@@ -121,7 +121,7 @@ jobs:
         if: ${{ always() && !cancelled() }}
         with:
           name: playwright-report-diff-${{ github.run_id }}-${{ github.run_attempt }}
-          path: application/src/test/e2e/playwright-report/
+          path: application/playwright-report/
           if-no-files-found: ignore
           retention-days: 30
 
@@ -130,7 +130,7 @@ jobs:
         if: ${{ always() && !cancelled() }}
         with:
           name: playwright-test-results-diff-${{ github.run_id }}-${{ github.run_attempt }}
-          path: application/src/test/e2e/test-results/
+          path: application/test-results/
           if-no-files-found: ignore
           retention-days: 30
 
