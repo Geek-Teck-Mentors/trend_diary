@@ -10,14 +10,29 @@ runs:
     - name: Supabaseの起動
       shell: bash
       working-directory: ./application
-      # INFO: DBと認証とfunctionsのみ起動
-      run: supabase start -x storage-api,imgproxy,edge-runtime,realtime,vector,studio,postgres-meta,mailpit,logflare,supavisor
+      # INFO: 認証のみ起動
+      # link: https://supabase.com/docs/reference/cli/supabase-start
+      run: supabase start -x realtime,storage-api,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
     - name: Supabaseのキーを環境変数に設定
       id: get-keys
       shell: bash
       working-directory: ./application
       run: |
-        SUPABASE_JSON=$(supabase status --output json)
-        echo "SUPABASE_ANON_KEY=$(echo $SUPABASE_JSON | jq -r '.ANON_KEY')" >> $GITHUB_ENV
-        echo "SUPABASE_URL=$(echo $SUPABASE_JSON | jq -r '.API_URL')" >> $GITHUB_ENV
+        set -euo pipefail
+        SUPABASE_ENV="$(supabase status --output env)"
+        SUPABASE_ANON_KEY="$(echo "$SUPABASE_ENV" | sed -n 's/^ANON_KEY=//p' | head -n 1)"
+        SUPABASE_URL="$(echo "$SUPABASE_ENV" | sed -n 's/^API_URL=//p' | head -n 1)"
+
+        if [[ -z "$SUPABASE_URL" ]]; then
+          SUPABASE_URL="http://127.0.0.1:54321"
+        fi
+
+        if [[ -z "$SUPABASE_ANON_KEY" ]]; then
+          echo "::error::Failed to read SUPABASE_ANON_KEY from 'supabase status --output env'."
+          echo "$SUPABASE_ENV"
+          exit 1
+        fi
+
+        echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> "$GITHUB_ENV"
+        echo "SUPABASE_URL=$SUPABASE_URL" >> "$GITHUB_ENV"

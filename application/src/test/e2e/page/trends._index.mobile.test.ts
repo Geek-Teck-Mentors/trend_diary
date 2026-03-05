@@ -1,39 +1,33 @@
-import { expect, Locator, Page, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { ArticleDrawer } from '@/test/e2e/pom/components/article-drawer'
+import { MobileFilterPanel } from '@/test/e2e/pom/components/mobile-filter-panel'
+import { TIMEOUT } from '@/test/e2e/pom/constants'
+import { TrendsPage } from '@/test/e2e/pom/trends-page'
 import * as articleHelper from '@/test/helper/article'
 
 const ARTICLE_COUNT = 10
-const TIMEOUT = 10000
 const MOBILE_VIEWPORT = { width: 375, height: 667 }
-
-async function waitForArticleCards(page: Page): Promise<void> {
-  // INFO: API依存の待機は環境差で不安定なので、UI描画を直接待つ
-  await expect
-    .poll(async () => page.locator("[data-slot='card']").count(), { timeout: TIMEOUT })
-    .toBeGreaterThan(0)
-
-  await expect(page.locator("[data-slot='card']").first()).toBeVisible({ timeout: TIMEOUT })
-}
 
 test.describe('記事一覧ページ(モバイル)', () => {
   test.use({ viewport: MOBILE_VIEWPORT })
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/trends')
+    const trendsPage = new TrendsPage(page)
+    await trendsPage.goto()
   })
 
   test.describe('レイアウト確認', () => {
     test('AppHeaderが表示され、AppSidebarが非表示であること', async ({ page }) => {
       // AppHeaderが表示されていること
-      const header = page.locator('header')
+      const header = page.getByRole('banner')
       await expect(header).toBeVisible()
 
       // ハンバーガーメニューボタンが表示されていること
       const menuButton = page.getByRole('button', { name: 'メニューを開く' })
       await expect(menuButton).toBeVisible()
 
-      // AppSidebarが非表示であること(data-slot='sidebar'で判定)
-      const sidebar = page.locator('[data-slot="sidebar"]')
-      await expect(sidebar).not.toBeVisible()
+      // AppSidebar側のラベルは初期状態で非表示
+      await expect(page.getByText('Application')).not.toBeVisible()
     })
 
     test('ハンバーガーメニューを開いてメニュー項目が表示されること', async ({ page }) => {
@@ -42,7 +36,7 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await menuButton.click()
 
       // Sheetが開くのを待機
-      const sheet = page.getByRole('dialog')
+      const sheet = page.getByRole('dialog', { name: 'メニュー' })
       await expect(sheet).toBeVisible({ timeout: TIMEOUT })
 
       // Applicationラベルが表示されていること
@@ -55,7 +49,8 @@ test.describe('記事一覧ページ(モバイル)', () => {
 
   test.describe('記事がない場合', () => {
     test('記事がないと表示される', async ({ page }) => {
-      await expect(page.getByText('記事がありません')).toBeVisible({ timeout: TIMEOUT })
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.expectNoArticlesMessage()
     })
   })
 
@@ -76,25 +71,13 @@ test.describe('記事一覧ページ(モバイル)', () => {
     })
 
     test.beforeEach(async ({ page }) => {
-      await page.goto('/trends')
-      // カードが表示されるのを待機
-      await waitForArticleCards(page)
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForArticleCards()
     })
 
-    async function waitDrawerOpen(page: Page): Promise<Locator> {
-      // ドロワーが開くのを待機
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: TIMEOUT })
-
-      // ドロワーの存在を確認
-      const drawer = page.getByRole('dialog')
-      await expect(drawer).toBeVisible()
-
-      return drawer
-    }
-
     test('記事カードがモバイルサイズで全幅表示されること', async ({ page }) => {
-      // 記事カードの存在を確認
-      const articleCard = page.locator('[data-slot="card"]').first()
+      const trendsPage = new TrendsPage(page)
+      const articleCard = trendsPage.firstArticleCard()
       await expect(articleCard).toBeVisible()
 
       // カードの幅を取得(w-fullで375pxに近い値になるはず)
@@ -108,55 +91,30 @@ test.describe('記事一覧ページ(モバイル)', () => {
     })
 
     test('記事一覧から記事詳細を閲覧し、再び記事一覧に戻る', async ({ page }) => {
-      // 記事カードの存在を確認
-      const articleCards = page.locator('[data-slot="card"]')
-      const articleCard = articleCards.first()
+      const trendsPage = new TrendsPage(page)
+      const articleCard = trendsPage.firstArticleCard()
       await expect(articleCard).toBeVisible()
 
-      await articleCard.click()
+      await trendsPage.openFirstArticle()
 
-      const drawer = await waitDrawerOpen(page)
-      await drawer.getByRole('button', { name: 'Close' }).click()
-
-      // ドロワーが閉じるのを待機
-      await page.getByRole('dialog').waitFor({
-        state: 'detached',
-        timeout: TIMEOUT,
-      })
+      const drawer = new ArticleDrawer(page)
+      await drawer.waitOpen()
+      await drawer.close()
+      await drawer.expectClosed()
 
       // 記事一覧に戻っていることを確認(記事カードが表示されていること)
       await expect(articleCard).toBeVisible()
-      // ドロワーが閉じていることを確認
-      await expect(page.getByRole('dialog')).not.toBeVisible()
     })
 
     test('記事一覧から記事詳細を閲覧し、その実際の記事を閲覧する', async ({ page }) => {
-      // window.openをモックして、開かれたURLを記録
-      let openedUrl = ''
-      await page.evaluate(() => {
-        window.open = (url: string | URL | undefined) => {
-          if (url) {
-            // biome-ignore lint/suspicious/noExplicitAny: E2Eテストでのwindow拡張のため
-            ;(window as any).__lastOpenedUrl = url.toString()
-          }
-          return null
-        }
-      })
+      const drawer = new ArticleDrawer(page)
+      await drawer.mockWindowOpen()
 
-      // 記事カードをクリック
-      const articleCard = page.locator('[data-slot="card"]').first()
-      await articleCard.click()
-
-      const drawer = await waitDrawerOpen(page)
-      const drawerButton = drawer.getByRole('button', { name: '記事を読む' })
-      await expect(drawerButton).toBeVisible()
-
-      // ボタンをクリック
-      await drawerButton.click()
-
-      // window.openで開かれたURLを取得
-      // biome-ignore lint/suspicious/noExplicitAny: E2Eテストでのwindow拡張のため
-      openedUrl = await page.evaluate(() => (window as any).__lastOpenedUrl)
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.openFirstArticle()
+      await drawer.waitOpen()
+      await drawer.clickReadArticle()
+      const openedUrl = await drawer.getLastOpenedUrl()
 
       // 記事URLが開かれることを確認
       expect(openedUrl).toMatch(/zenn\.dev|qiita\.com/)
@@ -187,80 +145,37 @@ test.describe('記事一覧ページ(モバイル)', () => {
     })
 
     test.beforeEach(async ({ page }) => {
-      await page.goto('/trends')
-      // カードが表示されるのを待機
-      await waitForArticleCards(page)
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForArticleCards()
     })
 
     test('メディアフィルタートリガーが表示される', async ({ page }) => {
-      const filterTrigger = page.locator('[data-slot="mobile-filter-trigger"]')
-      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await expect(filterTrigger).toBeVisible()
-      await expect(filterTrigger).toContainText('絞り込み')
+      const mobileFilter = new MobileFilterPanel(page)
+      await mobileFilter.expectTriggerLabel('絞り込み')
     })
 
     test('Qiitaフィルターを選択すると、Qiita記事のみが表示される', async ({ page }) => {
-      // 絞り込みを開く
-      const filterTrigger = page.locator('[data-slot="mobile-filter-trigger"]')
-      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await filterTrigger.click()
-      await page.locator('[data-slot="mobile-filter-panel"]').waitFor({ timeout: TIMEOUT })
+      const mobileFilter = new MobileFilterPanel(page)
+      await mobileFilter.openPanel()
+      await mobileFilter.select('qiita')
+      await mobileFilter.apply()
 
-      // 媒体ドロップダウンを開く
-      const mediaFilterTrigger = page.locator('[data-slot="media-filter-trigger"]')
-      await mediaFilterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await mediaFilterTrigger.click()
-
-      // Qiitaメニューアイテムをクリック
-      const qiitaOption = page.locator('[data-slot="media-filter-qiita"]')
-      await qiitaOption.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await qiitaOption.click()
-
-      // 適用
-      await page.locator('[data-slot="mobile-filter-apply"]').click()
-
-      // URLパラメータが変更されるのを待機
-      await page.waitForURL('**/trends?media=qiita', { timeout: TIMEOUT })
-
-      // 記事カードの数を確認
-      const articleCards = page.locator('[data-slot="card"]')
-      await expect(articleCards).toHaveCount(QIITA_COUNT)
-
-      // 全てのカードにQiitaアイコンが表示されることを確認
-      const qiitaIcons = page.locator('img[src="/images/qiita-icon.png"]')
-      await expect(qiitaIcons).toHaveCount(QIITA_COUNT)
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForUrl(/\/trends\?media=qiita$/)
+      await trendsPage.expectArticleCount(QIITA_COUNT)
+      await trendsPage.expectQiitaIconCount(QIITA_COUNT)
     })
 
     test('Zennフィルターを選択すると、Zenn記事のみが表示される', async ({ page }) => {
-      // 絞り込みを開く
-      const filterTrigger = page.locator('[data-slot="mobile-filter-trigger"]')
-      await filterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await filterTrigger.click()
-      await page.locator('[data-slot="mobile-filter-panel"]').waitFor({ timeout: TIMEOUT })
+      const mobileFilter = new MobileFilterPanel(page)
+      await mobileFilter.openPanel()
+      await mobileFilter.select('zenn')
+      await mobileFilter.apply()
 
-      // 媒体ドロップダウンを開く
-      const mediaFilterTrigger = page.locator('[data-slot="media-filter-trigger"]')
-      await mediaFilterTrigger.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await mediaFilterTrigger.click()
-
-      // Zennメニューアイテムをクリック
-      const zennOption = page.locator('[data-slot="media-filter-zenn"]')
-      await zennOption.waitFor({ state: 'visible', timeout: TIMEOUT })
-      await zennOption.click()
-
-      // 適用
-      await page.locator('[data-slot="mobile-filter-apply"]').click()
-
-      // URLパラメータが変更されるのを待機
-      await page.waitForURL('**/trends?media=zenn', { timeout: TIMEOUT })
-
-      // 記事カードの数を確認
-      const articleCards = page.locator('[data-slot="card"]')
-      await expect(articleCards).toHaveCount(ZENN_COUNT)
-
-      // 全てのカードにZennアイコンが表示されることを確認
-      const zennIcons = page.locator('img[src="/images/zenn-icon.svg"]')
-      await expect(zennIcons).toHaveCount(ZENN_COUNT)
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForUrl(/\/trends\?media=zenn$/)
+      await trendsPage.expectArticleCount(ZENN_COUNT)
+      await trendsPage.expectZennIconCount(ZENN_COUNT)
     })
   })
 })

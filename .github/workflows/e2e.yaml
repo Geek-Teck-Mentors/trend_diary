@@ -50,19 +50,30 @@ jobs:
           cat > .dev.vars <<'EOF'
           # Dev env for Actions (created from secrets)
           DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
-          SUPABASE_URL=${{ env.SUPABASE_URL }}
+          SUPABASE_URL=${{ env.SUPABASE_URL || 'http://127.0.0.1:54321' }}
           SUPABASE_ANON_KEY=${{ env.SUPABASE_ANON_KEY || '' }}
           DATABASE_URL=${{ env.DATABASE_URL }}
           EOF
           
       - name: E2Eテストの実行
-        run: npm run e2e -- --pass-with-no-tests
+        run: npm run e2e -- --fail-on-flaky-tests
 
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+      - name: Playwrightレポートを保存
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && !cancelled() }}
         with:
-          name: playwright-report
-          path: application/src/test/e2e/playwright-report/
+          name: playwright-report-main-${{ github.run_id }}-${{ github.run_attempt }}
+          path: application/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Playwright成果物を保存
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && !cancelled() }}
+        with:
+          name: playwright-test-results-main-${{ github.run_id }}-${{ github.run_attempt }}
+          path: application/test-results/
+          if-no-files-found: ignore
           retention-days: 30
 
       - name: Cleanup .dev.vars
@@ -94,16 +105,31 @@ jobs:
           cat > .dev.vars <<'EOF'
           # Dev env for Actions (created from secrets)
           DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL || '' }}
-          SUPABASE_URL=${{ env.SUPABASE_URL }}
+          SUPABASE_URL=${{ env.SUPABASE_URL || 'http://127.0.0.1:54321' }}
           SUPABASE_ANON_KEY=${{ env.SUPABASE_ANON_KEY || '' }}
           DATABASE_URL=${{ env.DATABASE_URL }}
           EOF
 
       - name: E2Eテストの差分実行
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm run e2e -- --reporter=github --only-changed=origin/$GITHUB_BASE_REF
+        run: npm run e2e -- --reporter=github,html --only-changed=origin/$GITHUB_BASE_REF --pass-with-no-tests --fail-on-flaky-tests
+
+      - name: Playwrightレポートを保存
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && !cancelled() }}
+        with:
+          name: playwright-report-diff-${{ github.run_id }}-${{ github.run_attempt }}
+          path: application/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Playwright成果物を保存
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && !cancelled() }}
+        with:
+          name: playwright-test-results-diff-${{ github.run_id }}-${{ github.run_attempt }}
+          path: application/test-results/
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: Cleanup .dev.vars
         if: always()

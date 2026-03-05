@@ -1,0 +1,3 @@
+interface:
+  display_name: "E2E Debug Playwright"
+  short_description: "Debug Playwright E2E failures in CI"
