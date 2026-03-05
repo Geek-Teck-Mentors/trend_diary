@@ -1,4 +1,4 @@
-import { BookOpen, Menu } from 'lucide-react'
+import { Menu, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../shadcn/button'
 import {
@@ -27,7 +27,7 @@ export default function AppHeader({ isLoggedIn }: Props) {
     <header className='border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50 md:hidden'>
       <div className='flex justify-between items-center h-16 px-4'>
         <AnchorLink to='/' className='flex items-center gap-2 hover:opacity-80 transition-opacity'>
-          <BookOpen className='h-6 w-6' />
+          <TrendingUp className='h-6 w-6 text-blue-600' />
           <span className='text-xl font-semibold'>TrendDiary</span>
         </AnchorLink>
 
