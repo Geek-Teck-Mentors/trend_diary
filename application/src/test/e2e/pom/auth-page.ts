@@ -33,16 +33,6 @@ export class AuthPage {
     await this.signupButton.click()
   }
 
-  async moveToLoginFromSignup(): Promise<void> {
-    await this.page.goto('/login')
-  }
-
-  async moveToLoginIfOnSignup(): Promise<void> {
-    if (new URL(this.page.url()).pathname === '/signup') {
-      await this.moveToLoginFromSignup()
-    }
-  }
-
   async waitForLoginPage(): Promise<void> {
     await expect(this.page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: AUTH_FLOW_TIMEOUT })
     await expect(this.loginPageText).toBeVisible({ timeout: 5000 })
