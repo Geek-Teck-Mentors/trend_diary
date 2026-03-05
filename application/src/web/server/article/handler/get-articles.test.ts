@@ -292,4 +292,14 @@ describe('GET /api/articles 既読情報', () => {
     expect(data.data).toHaveLength(1)
     expect(data.data[0].isRead).toBe(false)
   })
+
+  it('ログイン時にread_status=0を指定すると未読記事のみ返る', async () => {
+    const res = await requestGetArticles('read_status=0', authCookies)
+
+    expect(res.status).toBe(200)
+    const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
+    expect(data.data).toHaveLength(1)
+    expect(data.data[0].title).toBe('未読記事')
+    expect(data.data[0].isRead).toBe(false)
+  })
 })

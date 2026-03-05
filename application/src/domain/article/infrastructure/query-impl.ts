@@ -17,7 +17,7 @@ type RawArticleRow = {
   author: string
   description: string
   url: string
-  createdAt: string | Date
+  createdAt: string | Date | number | bigint
 }
 
 type RawCountRow = {
@@ -39,14 +39,19 @@ export default class QueryImpl implements Query {
 
     let total = 0
     let mappedArticles: ArticleWithOptionalReadStatus[] = []
+    const dbActiveUserId = activeUserId !== undefined ? toDbId(activeUserId) : undefined
+    const useRawSql =
+      Boolean(from || to) || (searchParams.readStatus !== undefined && dbActiveUserId !== undefined)
 
-    if (from || to) {
+    if (useRawSql) {
       const whereSql = QueryImpl.buildSqlWhereClause({
         title: searchParams.title,
         author: searchParams.author,
         media: searchParams.media,
         from,
         to,
+        readStatus: searchParams.readStatus,
+        activeUserId: dbActiveUserId,
       })
 
       const totalResult = await wrapAsyncCall(() =>
@@ -72,7 +77,7 @@ export default class QueryImpl implements Query {
             created_at as createdAt
           FROM articles
           ${whereSql}
-          ORDER BY datetime(created_at) DESC, article_id DESC
+          ORDER BY ${QueryImpl.getNormalizedCreatedAtSql()} DESC, article_id DESC
           LIMIT ${limit}
           OFFSET ${(page - 1) * limit}
         `),
@@ -107,11 +112,10 @@ export default class QueryImpl implements Query {
     }
 
     if (activeUserId !== undefined && mappedArticles.length > 0) {
-      const dbActiveUserId = toDbId(activeUserId)
       const readHistoriesResult = await wrapAsyncCall(() =>
         this.db.readHistory.findMany({
           where: {
-            activeUserId: dbActiveUserId,
+            activeUserId: toDbId(activeUserId),
             articleId: {
               in: mappedArticles.map((article) => toDbId(article.articleId)),
             },
@@ -188,14 +192,26 @@ export default class QueryImpl implements Query {
     return where
   }
 
+  private static getNormalizedCreatedAtSql() {
+    // INFO: created_atはSQLiteでinteger(text含む)が混在しうるため正規化して比較する
+    return Prisma.sql`
+      CASE
+        WHEN typeof(created_at) = 'integer' THEN datetime(created_at / 1000, 'unixepoch')
+        ELSE datetime(created_at)
+      END
+    `
+  }
+
   private static buildSqlWhereClause(params: {
     title?: string
     author?: string
     media?: string
     from?: string
     to?: string
+    readStatus?: boolean
+    activeUserId?: number
   }) {
-    const { title, author, media, from, to } = params
+    const { title, author, media, from, to, readStatus, activeUserId } = params
     const conditions: Prisma.Sql[] = []
 
     if (title) {
@@ -210,10 +226,36 @@ export default class QueryImpl implements Query {
 
     const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(from, to)
     if (fromDate) {
-      conditions.push(Prisma.sql`datetime(created_at) >= datetime(${fromDate.toISOString()})`)
+      conditions.push(
+        Prisma.sql`${QueryImpl.getNormalizedCreatedAtSql()} >= datetime(${fromDate.toISOString()})`,
+      )
     }
     if (toDateExclusive) {
-      conditions.push(Prisma.sql`datetime(created_at) < datetime(${toDateExclusive.toISOString()})`)
+      conditions.push(
+        Prisma.sql`${QueryImpl.getNormalizedCreatedAtSql()} < datetime(${toDateExclusive.toISOString()})`,
+      )
+    }
+
+    if (readStatus !== undefined && activeUserId !== undefined) {
+      if (readStatus) {
+        conditions.push(Prisma.sql`
+          EXISTS (
+            SELECT 1
+            FROM read_histories rh
+            WHERE rh.article_id = articles.article_id
+              AND rh.active_user_id = ${activeUserId}
+          )
+        `)
+      } else {
+        conditions.push(Prisma.sql`
+          NOT EXISTS (
+            SELECT 1
+            FROM read_histories rh
+            WHERE rh.article_id = articles.article_id
+              AND rh.active_user_id = ${activeUserId}
+          )
+        `)
+      }
     }
 
     if (conditions.length === 0) {
@@ -234,7 +276,15 @@ export default class QueryImpl implements Query {
   }
 
   private static mapRawArticleToDomain(row: RawArticleRow): ArticleWithOptionalReadStatus {
-    const createdAt = row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt)
+    let createdAt: Date
+    if (row.createdAt instanceof Date) {
+      createdAt = row.createdAt
+    } else if (typeof row.createdAt === 'bigint') {
+      createdAt = new Date(Number(row.createdAt))
+    } else {
+      createdAt = new Date(row.createdAt)
+    }
+
     return {
       articleId: fromDbId(row.articleId),
       media: row.media,
