@@ -9,6 +9,7 @@ export class ArticleDrawer {
   private readonly drawer: Locator
   private readonly closeButton: Locator
   private readonly readArticleButton: Locator
+  private readonly descriptionContent: Locator
 
   constructor(private readonly page: Page) {
     this.drawer = page
@@ -16,6 +17,9 @@ export class ArticleDrawer {
       .filter({ has: page.getByRole('button', { name: '記事を読む' }) })
     this.closeButton = this.drawer.getByRole('button', { name: 'Close' })
     this.readArticleButton = this.drawer.getByRole('button', { name: '記事を読む' })
+    this.descriptionContent = this.drawer.locator(
+      "[data-slot='drawer-content-description-content']",
+    )
   }
 
   async waitOpen(): Promise<void> {
@@ -44,6 +48,24 @@ export class ArticleDrawer {
   async clickReadArticle(): Promise<void> {
     await this.expectReadArticleButtonVisible()
     await this.readArticleButton.click()
+  }
+
+  async expectDescriptionToggle(label: '続きを読む' | '閉じる'): Promise<void> {
+    await expect(this.drawer.getByRole('button', { name: label })).toBeVisible({ timeout: TIMEOUT })
+  }
+
+  async clickDescriptionToggle(label: '続きを読む' | '閉じる'): Promise<void> {
+    const toggleButton = this.drawer.getByRole('button', { name: label })
+    await expect(toggleButton).toBeVisible({ timeout: TIMEOUT })
+    await toggleButton.click()
+  }
+
+  async expectDescriptionCollapsed(): Promise<void> {
+    await expect(this.descriptionContent).toHaveClass(/line-clamp-4/)
+  }
+
+  async expectDescriptionExpanded(): Promise<void> {
+    await expect(this.descriptionContent).not.toHaveClass(/line-clamp-4/)
   }
 
   async mockWindowOpen(): Promise<void> {

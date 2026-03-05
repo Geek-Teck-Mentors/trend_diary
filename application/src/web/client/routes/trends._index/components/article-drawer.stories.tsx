@@ -14,6 +14,10 @@ const defaultArticle: Article = {
   createdAt: new Date('2024-01-01T00:00:00Z'),
 }
 
+const longDescription = `TrendDiaryは技術トレンドの収集と閲覧を効率化するためのサービスであり、
+記事の要点を短時間で把握しながら、必要に応じて元記事に素早くアクセスできる体験を提供する。
+この説明文はモバイル表示での折りたたみ挙動を確認するために十分な長さを持たせている。`
+
 // モックのArticleデータ
 const generateArticle = (params?: Partial<Article>): Article => ({
   ...defaultArticle,
@@ -78,6 +82,47 @@ export const Default: Story = {
     await step('閉じるボタンが存在することを確認', async () => {
       const closeButton = within(document.body).getByRole('button', { name: 'Close' })
       await expect(closeButton).toBeInTheDocument()
+    })
+  },
+}
+
+export const LongDescriptionToggle: Story = {
+  args: {
+    article: generateArticle({
+      articleId: '2',
+      description: longDescription,
+    }),
+  },
+  play: async ({ step }) => {
+    await step('初期表示で続きを読むボタンが表示されることを確認', async () => {
+      const toggle = within(document.body).getByRole('button', { name: '続きを読む' })
+      await expect(toggle).toBeInTheDocument()
+    })
+
+    await step('初期状態で概要が4行折りたたみであることを確認', async () => {
+      const description = document.body.querySelector(
+        "[data-slot='drawer-content-description-content']",
+      ) as HTMLElement | null
+      expect(description).not.toBeNull()
+      if (!description) return
+
+      await expect(description).toHaveClass('line-clamp-4')
+    })
+
+    await step('続きを読む押下で展開され、閉じるに切り替わることを確認', async () => {
+      const toggle = within(document.body).getByRole('button', { name: '続きを読む' })
+      await userEvent.click(toggle)
+
+      const closeToggle = within(document.body).getByRole('button', { name: '閉じる' })
+      await expect(closeToggle).toBeInTheDocument()
+
+      const description = document.body.querySelector(
+        "[data-slot='drawer-content-description-content']",
+      ) as HTMLElement | null
+      expect(description).not.toBeNull()
+      if (!description) return
+
+      await expect(description).not.toHaveClass('line-clamp-4')
     })
   },
 }
