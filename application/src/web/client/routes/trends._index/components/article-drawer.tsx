@@ -1,4 +1,5 @@
 import { Calendar, Check, ExternalLink, User, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { toJaDateString } from '@/common/locale'
 import {
@@ -8,8 +9,12 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/web/client/components/shadcn/drawer'
+import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
+import { cn } from '@/web/client/components/shadcn/lib/utils'
 import type { Article } from '../hooks/use-articles'
 import MediaIcon from './media-icon'
+
+const DESCRIPTION_TOGGLE_THRESHOLD = 100
 
 type Props = {
   article: Article
@@ -26,12 +31,26 @@ export default function ArticleDrawer({
   onMarkAsRead,
   isLoggedIn = false,
 }: Props) {
+  const isMobile = useIsMobile()
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsDescriptionExpanded(false)
+    }
+  }, [article.articleId, isOpen])
+
   const handleOpenChange = (open: boolean) => {
     if (!open) onClose()
   }
 
   const isRead = article.isRead ?? false
   const media = article.media === 'qiita' ? 'qiita' : 'zenn'
+  const drawerDirection = isMobile ? 'bottom' : 'right'
+  const drawerContentClass = isMobile
+    ? 'h-[90vh] w-full data-[vaul-drawer-direction=bottom]:max-h-[90vh]'
+    : 'h-full w-3/4 md:w-1/2'
+  const shouldShowDescriptionToggle = article.description.length > DESCRIPTION_TOGGLE_THRESHOLD
 
   const handleReadArticle = () => {
     // ポップアップブロッカー対策として、先にウィンドウを開く
@@ -45,8 +64,8 @@ export default function ArticleDrawer({
   }
 
   return createPortal(
-    <Drawer open={isOpen} onOpenChange={handleOpenChange} direction='right'>
-      <DrawerContent className='h-full w-3/4 md:w-1/2'>
+    <Drawer open={isOpen} onOpenChange={handleOpenChange} direction={drawerDirection}>
+      <DrawerContent className={drawerContentClass}>
         <DrawerHeader className='flex flex-row items-center justify-between pb-4'>
           <div className='flex flex-1 items-center gap-2' data-slot='drawer-header-icon'>
             <MediaIcon media={media} />
@@ -89,11 +108,24 @@ export default function ArticleDrawer({
           <div className='mb-8' data-slot='drawer-content-description'>
             <h3 className='mb-3 text-lg font-semibold text-gray-900'>概要</h3>
             <p
-              className='leading-relaxed text-gray-700'
+              className={cn(
+                'leading-relaxed text-gray-700',
+                shouldShowDescriptionToggle && !isDescriptionExpanded && 'line-clamp-4',
+              )}
               data-slot='drawer-content-description-content'
             >
               {article.description}
             </p>
+            {shouldShowDescriptionToggle && (
+              <button
+                type='button'
+                onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+                className='mt-2 cursor-pointer text-sm font-medium text-blue-600 underline decoration-transparent transition-colors hover:text-blue-700 hover:decoration-current'
+                data-slot='drawer-description-toggle'
+              >
+                {isDescriptionExpanded ? '閉じる' : '続きを読む'}
+              </button>
+            )}
           </div>
 
           <div className='border-t p-4 space-y-3'>

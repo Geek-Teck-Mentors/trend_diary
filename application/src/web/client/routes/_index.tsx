@@ -49,16 +49,16 @@ const TrendDiaryTopPage = () => {
               日々のキャッチアップを日記のように記録できるブラウザアプリです。
             </p>
 
-            <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+            <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center'>
               <AnchorLink
                 to='/trends'
-                className='inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl'
+                className='inline-flex w-44 sm:w-auto items-center justify-center px-4 py-2.5 sm:px-8 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-base sm:text-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl'
               >
                 今すぐ始める
               </AnchorLink>
               <AnchorLink
                 to='/login'
-                className='inline-flex items-center px-8 py-4 border-2 border-slate-300 text-slate-700 rounded-lg text-lg font-semibold hover:border-slate-400 hover:bg-slate-50 transition-all duration-200'
+                className='inline-flex w-44 sm:w-auto items-center justify-center px-4 py-2.5 sm:px-8 sm:py-4 border-2 border-slate-300 text-slate-700 rounded-lg text-base sm:text-lg font-semibold hover:border-slate-400 hover:bg-slate-50 transition-all duration-200'
               >
                 ログイン
               </AnchorLink>
@@ -170,7 +170,7 @@ const TrendDiaryTopPage = () => {
           </p>
           <AnchorLink
             to='/signup'
-            className='inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
+            className='inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-white text-blue-600 rounded-lg text-base sm:text-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl'
           >
             <ClipText text='無料でアカウントを作成' />
           </AnchorLink>
