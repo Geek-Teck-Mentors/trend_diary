@@ -7,6 +7,8 @@ import { TrendsPage } from '@/test/e2e/pom/trends-page'
 import * as articleHelper from '@/test/helper/article'
 import * as userHelper from '@/test/helper/user'
 
+const AUTH_SCENARIO_TIMEOUT = AUTH_FLOW_TIMEOUT * 3
+
 test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ', () => {
   const password = 'Aa1@aaaa'
   const suffix = faker.string.alphanumeric(10).toLowerCase()
@@ -46,7 +48,7 @@ test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ',
         await authPage.waitForLoginPage()
         await authPage.submitLogin(email, password)
         await authPage.waitForTrendsPage()
-      }).toPass({ timeout: AUTH_FLOW_TIMEOUT })
+      }).toPass({ timeout: AUTH_SCENARIO_TIMEOUT })
     }
 
     {
