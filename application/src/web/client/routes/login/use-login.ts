@@ -21,6 +21,7 @@ export default function useLogin(navigate: NavigateFunction) {
     },
     {
       onSuccess: () => {
+        toast.success('ログインしました')
         navigate('/trends')
       },
       onError: (error: Error) => {

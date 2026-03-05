@@ -18,6 +18,7 @@ export default function useSignup(navigate: NavigateFunction) {
     },
     {
       onSuccess: () => {
+        toast.success('アカウントを作成しました。ログインしてください。')
         navigate('/login')
       },
       onError: (error: Error) => {

@@ -1,15 +1,12 @@
-import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { toast } from 'sonner'
+import useSWRMutation from 'swr/mutation'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import useLogin from './use-login'
 
-vi.mock('../../components/ui/page-error/use-page-error', () => {
+vi.mock('swr/mutation', () => {
   return {
-    usePageError: () => ({
-      pageError: null,
-      newPageError: vi.fn(),
-      clearPageError: vi.fn(),
-    }),
+    default: vi.fn(),
   }
 })
 
@@ -17,10 +14,12 @@ vi.mock('../../features/create-swr-fetcher', () => {
   return {
     createSWRFetcher: () => ({
       client: {
-        account: {
-          login: {
-            // biome-ignore lint/style/useNamingConvention: API client property
-            $post: vi.fn(),
+        v2: {
+          auth: {
+            login: {
+              // biome-ignore lint/style/useNamingConvention: API client property
+              $post: vi.fn(),
+            },
           },
         },
       },
@@ -29,62 +28,81 @@ vi.mock('../../features/create-swr-fetcher', () => {
   }
 })
 
-type UseLoginHook = ReturnType<typeof useLogin>
-
-function setupHook(): RenderHookResult<UseLoginHook, unknown> {
-  const mockNavigate = vi.fn()
-  return renderHook(() => useLogin(mockNavigate))
+type MutationOptions = {
+  onSuccess?: () => void
+  onError?: (error: Error) => void
 }
 
 describe('useLogin', () => {
-  describe('基本動作', () => {
-    it('初期状態が正しく設定される', () => {
-      const { result } = setupHook()
+  const mockTrigger = vi.fn()
+  const mockedUseSWRMutation = vi.mocked(useSWRMutation)
 
-      expect(result.current.isLoading).toBe(false)
-      expect(typeof result.current.handleSubmit).toBe('function')
-    })
-
-    it('handleSubmitが呼び出し可能である', () => {
-      const { result } = setupHook()
-
-      const testData = {
-        email: 'test@example.com',
-        password: 'password123',
-      }
-
-      expect(() => {
-        act(() => {
-          result.current.handleSubmit(testData)
-        })
-      }).not.toThrow()
-    })
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockTrigger.mockResolvedValue(undefined)
+    mockedUseSWRMutation.mockReturnValue({
+      trigger: mockTrigger,
+      isMutating: false,
+    } as never)
   })
 
-  describe('フォーム送信', () => {
-    it('正しいデータでhandleSubmitを実行できる', () => {
-      const { result } = setupHook()
+  it('初期状態ではisLoadingがfalse', () => {
+    const { result } = renderHook(() => useLogin(vi.fn()))
 
-      const testData = {
-        email: 'test@example.com',
-        password: 'password123',
-      }
-
-      act(() => {
-        result.current.handleSubmit(testData)
-      })
-
-      // エラーが発生しないことを確認
-      expect(result.current.handleSubmit).toBeDefined()
-    })
+    expect(result.current.isLoading).toBe(false)
   })
 
-  describe('境界値テスト', () => {
-    it('フック初期化時の予期しないエラー', () => {
-      expect(() => {
-        const { result } = setupHook()
-        expect(result.current).toBeDefined()
-      }).not.toThrow()
+  it('認証成功時はトースト表示後にトレンド画面へ遷移する', () => {
+    const mockNavigate = vi.fn()
+    renderHook(() => useLogin(mockNavigate))
+
+    const options = mockedUseSWRMutation.mock.calls[0]?.[2] as MutationOptions
+    options.onSuccess?.()
+
+    expect(toast.success).toHaveBeenCalledWith('ログインしました')
+    expect(mockNavigate).toHaveBeenCalledWith('/trends')
+  })
+
+  it('handleSubmitでtriggerを実行する', async () => {
+    const { result } = renderHook(() => useLogin(vi.fn()))
+    const formData = {
+      email: 'test@example.com',
+      password: 'password123',
+    }
+
+    await act(async () => {
+      await result.current.handleSubmit(formData)
     })
+
+    expect(mockTrigger).toHaveBeenCalledWith(formData)
+  })
+
+  it('401/404エラー時は認証エラートーストを表示する', () => {
+    renderHook(() => useLogin(vi.fn()))
+
+    const options = mockedUseSWRMutation.mock.calls[0]?.[2] as MutationOptions
+    options.onError?.(new Error('HTTP 401: Unauthorized'))
+
+    expect(toast.error).toHaveBeenCalledWith('メールアドレスまたはパスワードが正しくありません')
+  })
+
+  it('500エラー時はサーバーエラートーストを表示する', () => {
+    renderHook(() => useLogin(vi.fn()))
+
+    const options = mockedUseSWRMutation.mock.calls[0]?.[2] as MutationOptions
+    options.onError?.(new Error('HTTP 500: Internal Server Error'))
+
+    expect(toast.error).toHaveBeenCalledWith(
+      'サーバーエラーが発生しました。時間をおいて再度お試しください。',
+    )
+  })
+
+  it('想定外エラー時は汎用エラートーストを表示する', () => {
+    renderHook(() => useLogin(vi.fn()))
+
+    const options = mockedUseSWRMutation.mock.calls[0]?.[2] as MutationOptions
+    options.onError?.(new Error('HTTP 418: I am a teapot'))
+
+    expect(toast.error).toHaveBeenCalledWith('予期せぬエラーが発生しました。')
   })
 })
