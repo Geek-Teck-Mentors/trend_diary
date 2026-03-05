@@ -79,6 +79,48 @@ describe('QueryImpl', () => {
         expect(result.error.message).toBe('count failed')
       }
     })
+
+    it('from/to指定時は取得後に日付で絞り込みできる', async () => {
+      mockDb.$queryRaw.mockResolvedValueOnce([{ total: 2 }]).mockResolvedValueOnce([
+        {
+          articleId: 1,
+          media: 'qiita',
+          title: '対象記事1',
+          author: '山田',
+          description: '当日の記事1',
+          url: 'https://example.com/article/1',
+          createdAt: '2026-03-04T15:00:00.000Z',
+        },
+        {
+          articleId: 2,
+          media: 'zenn',
+          title: '対象記事2',
+          author: '鈴木',
+          description: '当日の記事2',
+          url: 'https://example.com/article/2',
+          createdAt: '2026-03-05T14:59:59.999Z',
+        },
+      ])
+
+      const result = await queryImpl.searchArticles({
+        page: 1,
+        limit: 20,
+        from: '2026-03-05',
+        to: '2026-03-05',
+      })
+
+      expect(isSuccess(result)).toBe(true)
+      expect(mockDb.article.count).not.toHaveBeenCalled()
+      expect(mockDb.article.findMany).not.toHaveBeenCalled()
+      expect(mockDb.$queryRaw).toHaveBeenCalledTimes(2)
+
+      if (isSuccess(result)) {
+        expect(result.data.total).toBe(2)
+        expect(result.data.data).toHaveLength(2)
+        expect(result.data.data[0].title).toBe('対象記事1')
+        expect(result.data.data[1].title).toBe('対象記事2')
+      }
+    })
   })
 
   describe('findArticleById', () => {

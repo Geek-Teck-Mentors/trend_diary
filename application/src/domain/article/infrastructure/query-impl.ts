@@ -10,6 +10,20 @@ import { QueryParams } from '@/domain/article/schema/query-schema'
 import { RdbClient } from '@/infrastructure/rdb'
 import { fromDbId, toDbId } from '@/infrastructure/rdb-id'
 
+type RawArticleRow = {
+  articleId: number | bigint
+  media: string
+  title: string
+  author: string
+  description: string
+  url: string
+  createdAt: string | Date
+}
+
+type RawCountRow = {
+  total: number | bigint
+}
+
 export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
@@ -17,34 +31,80 @@ export default class QueryImpl implements Query {
     params: QueryParams,
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError> {
-    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, ...searchParams } = params
-    const where = QueryImpl.buildWhereClause(searchParams)
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, from, to, ...searchParams } = params
     const orderBy: Prisma.ArticleOrderByWithRelationInput[] = [
       { createdAt: 'desc' },
       { articleId: 'desc' },
     ]
 
-    const totalResult = await wrapAsyncCall(() => this.db.article.count({ where }))
-    if (isFailure(totalResult)) {
-      return failure(new ServerError(totalResult.error))
+    let total = 0
+    let mappedArticles: ArticleWithOptionalReadStatus[] = []
+
+    if (from || to) {
+      const whereSql = QueryImpl.buildSqlWhereClause({
+        title: searchParams.title,
+        author: searchParams.author,
+        media: searchParams.media,
+        from,
+        to,
+      })
+
+      const totalResult = await wrapAsyncCall(() =>
+        this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
+          SELECT COUNT(*) as total
+          FROM articles
+          ${whereSql}
+        `),
+      )
+      if (isFailure(totalResult)) {
+        return failure(new ServerError(totalResult.error))
+      }
+
+      const articlesResult = await wrapAsyncCall(() =>
+        this.db.$queryRaw<RawArticleRow[]>(Prisma.sql`
+          SELECT
+            article_id as articleId,
+            media,
+            title,
+            author,
+            description,
+            url,
+            created_at as createdAt
+          FROM articles
+          ${whereSql}
+          ORDER BY datetime(created_at) DESC, article_id DESC
+          LIMIT ${limit}
+          OFFSET ${(page - 1) * limit}
+        `),
+      )
+      if (isFailure(articlesResult)) {
+        return failure(new ServerError(articlesResult.error))
+      }
+
+      total = Number(totalResult.data[0]?.total ?? 0)
+      mappedArticles = articlesResult.data.map(QueryImpl.mapRawArticleToDomain)
+    } else {
+      const where = QueryImpl.buildWhereClause(searchParams)
+      const totalResult = await wrapAsyncCall(() => this.db.article.count({ where }))
+      if (isFailure(totalResult)) {
+        return failure(new ServerError(totalResult.error))
+      }
+
+      const articlesResult = await wrapAsyncCall(() =>
+        this.db.article.findMany({
+          where,
+          orderBy,
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      )
+      if (isFailure(articlesResult)) {
+        return failure(new ServerError(articlesResult.error))
+      }
+
+      total = totalResult.data
+      mappedArticles = articlesResult.data.map(fromPrismaToArticle)
     }
-
-    const articlesResult = await wrapAsyncCall(() =>
-      this.db.article.findMany({
-        where,
-        orderBy,
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-    )
-
-    if (isFailure(articlesResult)) {
-      return failure(new ServerError(articlesResult.error))
-    }
-
-    const total = totalResult.data
-    const articles = articlesResult.data
-    const mappedArticles: ArticleWithOptionalReadStatus[] = articles.map(fromPrismaToArticle)
 
     if (activeUserId !== undefined && mappedArticles.length > 0) {
       const dbActiveUserId = toDbId(activeUserId)
@@ -106,7 +166,7 @@ export default class QueryImpl implements Query {
     return success(fromPrismaToArticle(article))
   }
 
-  private static buildWhereClause(params: Omit<QueryParams, 'page' | 'limit'>) {
+  private static buildWhereClause(params: Omit<QueryParams, 'page' | 'limit' | 'from' | 'to'>) {
     const where: Prisma.ArticleWhereInput = {}
 
     if (params.title) {
@@ -125,23 +185,65 @@ export default class QueryImpl implements Query {
       where.media = params.media
     }
 
-    if (params.from || params.to) {
-      const dateRange: { gte?: Date; lt?: Date } = {}
+    return where
+  }
 
-      if (params.from) {
-        // INFO: 日付をJSTのoffsetをつけて変換
-        dateRange.gte = new Date(`${params.from}T00:00:00+09:00`)
-      }
+  private static buildSqlWhereClause(params: {
+    title?: string
+    author?: string
+    media?: string
+    from?: string
+    to?: string
+  }) {
+    const { title, author, media, from, to } = params
+    const conditions: Prisma.Sql[] = []
 
-      if (params.to) {
-        const toDate = new Date(`${params.to}T00:00:00+09:00`)
-        toDate.setDate(toDate.getDate() + 1)
-        dateRange.lt = toDate
-      }
-
-      where.createdAt = dateRange
+    if (title) {
+      conditions.push(Prisma.sql`title LIKE ${`%${title}%`}`)
+    }
+    if (author) {
+      conditions.push(Prisma.sql`author LIKE ${`%${author}%`}`)
+    }
+    if (media) {
+      conditions.push(Prisma.sql`media = ${media}`)
     }
 
-    return where
+    const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(from, to)
+    if (fromDate) {
+      conditions.push(Prisma.sql`datetime(created_at) >= datetime(${fromDate.toISOString()})`)
+    }
+    if (toDateExclusive) {
+      conditions.push(Prisma.sql`datetime(created_at) < datetime(${toDateExclusive.toISOString()})`)
+    }
+
+    if (conditions.length === 0) {
+      return Prisma.empty
+    }
+
+    return Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+  }
+
+  private static buildDateRange(from?: string, to?: string) {
+    // INFO: APIの指定日はJST日付として扱う
+    const fromDate = from ? new Date(`${from}T00:00:00+09:00`) : undefined
+    const toDateExclusive = to ? new Date(`${to}T00:00:00+09:00`) : undefined
+    if (toDateExclusive) {
+      toDateExclusive.setDate(toDateExclusive.getDate() + 1)
+    }
+    return { fromDate, toDateExclusive }
+  }
+
+  private static mapRawArticleToDomain(row: RawArticleRow): ArticleWithOptionalReadStatus {
+    const createdAt = row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt)
+    return {
+      articleId: fromDbId(row.articleId),
+      media: row.media,
+      title: row.title,
+      author: row.author,
+      description: row.description,
+      url: row.url,
+      createdAt,
+      isRead: undefined,
+    }
   }
 }
