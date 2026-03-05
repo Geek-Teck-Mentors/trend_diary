@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { test } from '@playwright/test'
 import { AuthPage } from '@/test/e2e/pom/auth-page'
 import { ArticleDrawer } from '@/test/e2e/pom/components/article-drawer'
@@ -7,8 +8,13 @@ import * as userHelper from '@/test/helper/user'
 
 test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ', () => {
   const password = 'Aa1@aaaa'
-  const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-  const email = `e2e-scenario-${suffix}@example.com`
+  const suffix = faker.string.alphanumeric(10).toLowerCase()
+  const email = faker.internet.email({
+    firstName: 'e2e',
+    lastName: `scenario${suffix}`,
+    provider: 'example.com',
+    allowSpecialCharacters: false,
+  })
   const articleTitle = `E2Eシナリオ記事-${suffix}`
 
   let createdArticleId: bigint | null = null
@@ -26,7 +32,7 @@ test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ',
       await articleHelper.cleanUp([createdArticleId])
     }
 
-    await userHelper.cleanUpByEmailPattern(suffix)
+    await userHelper.cleanUpByEmailPattern(email)
   })
 
   test('ログイン後にトレンド記事の詳細を開ける', async ({ page }) => {

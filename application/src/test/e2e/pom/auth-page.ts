@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test'
-import { type AuthEndpoint, waitAuthApiSuccess } from '@/test/e2e/helper/auth-api'
+import { type AuthEndpoint, waitAuthApiResponse } from '@/test/e2e/helper/auth-api'
 import { AUTH_FLOW_TIMEOUT } from '@/test/e2e/pom/constants'
 
 type SubmitButtonName = 'アカウント作成' | 'ログイン'
@@ -9,6 +9,7 @@ export class AuthPage {
   private readonly passwordInput: Locator
   private readonly signupButton: Locator
   private readonly loginButton: Locator
+  private readonly loginLink: Locator
   private readonly loginPageText: Locator
   private readonly trendsPageText: Locator
   private readonly readStatusFilter: Locator
@@ -18,6 +19,7 @@ export class AuthPage {
     this.passwordInput = page.getByLabel('パスワード')
     this.signupButton = page.getByRole('button', { name: 'アカウント作成' })
     this.loginButton = page.getByRole('button', { name: 'ログイン' })
+    this.loginLink = page.getByRole('link', { name: 'ログイン' })
     this.loginPageText = page.getByText('アカウントをお持ちでないですか？')
     this.trendsPageText = page.getByText('絞り込み')
     this.readStatusFilter = page.getByRole('button', { name: '未読のみ' })
@@ -36,7 +38,11 @@ export class AuthPage {
 
       await this.emailInput.fill(email)
       await this.passwordInput.fill(password)
-      await this.submitAuthForm('アカウント作成', 'signup')
+      const signupStatus = await this.submitAuthForm('アカウント作成', 'signup')
+
+      if (signupStatus === 409 && new URL(this.page.url()).pathname === '/signup') {
+        await this.loginLink.click()
+      }
 
       await expect(this.page).toHaveURL(/\/login(?:\?.*)?$/, { timeout: 5000 })
       await expect(this.loginPageText).toBeVisible({ timeout: 5000 })
@@ -53,7 +59,8 @@ export class AuthPage {
 
       await this.emailInput.fill(email)
       await this.passwordInput.fill(password)
-      await this.submitAuthForm('ログイン', 'login')
+      const loginStatus = await this.submitAuthForm('ログイン', 'login')
+      expect(loginStatus).toBe(200)
 
       await expect(this.page).toHaveURL(/\/trends(?:\?.*)?$/, { timeout: 5000 })
       await expect(this.trendsPageText).toBeVisible({ timeout: 5000 })
@@ -64,10 +71,18 @@ export class AuthPage {
   private async submitAuthForm(
     submitButtonName: SubmitButtonName,
     endpoint: AuthEndpoint,
-  ): Promise<void> {
-    const responsePromise = waitAuthApiSuccess(this.page, endpoint)
+  ): Promise<number> {
+    const responsePromise = waitAuthApiResponse(this.page, endpoint)
     await this.submitButton(submitButtonName).click()
-    await responsePromise
+    const response = await responsePromise
+
+    if (endpoint === 'signup') {
+      expect([201, 409]).toContain(response.status())
+      return response.status()
+    }
+
+    expect(response.ok()).toBeTruthy()
+    return response.status()
   }
 
   private submitButton(submitButtonName: SubmitButtonName): Locator {
