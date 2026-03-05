@@ -10,7 +10,7 @@ export class DesktopMediaFilter {
   private readonly zennOption: Locator
 
   constructor(private readonly page: Page) {
-    this.trigger = page.getByRole('button', { name: 'メディアフィルター' })
+    this.trigger = page.getByRole('button', { name: /^メディアフィルター:/ })
     this.allOption = page.getByRole('menuitem', { name: 'すべて' })
     this.qiitaOption = page.getByRole('menuitem', { name: 'Qiita' })
     this.zennOption = page.getByRole('menuitem', { name: 'Zenn' })

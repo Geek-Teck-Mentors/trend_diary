@@ -19,7 +19,7 @@ export class AuthPage {
     this.passwordInput = page.getByLabel('パスワード')
     this.signupButton = page.getByRole('button', { name: 'アカウント作成' })
     this.loginButton = page.getByRole('button', { name: 'ログイン' })
-    this.loginLink = page.getByRole('link', { name: 'ログイン' })
+    this.loginLink = page.getByRole('main').getByRole('link', { name: 'ログイン' })
     this.loginPageText = page.getByText('アカウントをお持ちでないですか？')
     this.trendsPageText = page.getByText('絞り込み')
     this.readStatusFilter = page.getByRole('button', { name: '未読のみ' })

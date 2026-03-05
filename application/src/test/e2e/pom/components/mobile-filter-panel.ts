@@ -13,7 +13,7 @@ export class MobileFilterPanel {
 
   constructor(private readonly page: Page) {
     this.trigger = page.getByRole('button', { name: '絞り込み' })
-    this.mediaTrigger = page.getByRole('button', { name: 'メディアフィルター' })
+    this.mediaTrigger = page.getByRole('button', { name: /^メディアフィルター:/ })
     this.allOption = page.getByRole('menuitem', { name: 'すべて' })
     this.qiitaOption = page.getByRole('menuitem', { name: 'Qiita' })
     this.zennOption = page.getByRole('menuitem', { name: 'Zenn' })

@@ -29,7 +29,7 @@ export default function MediaFilter({ selectedMedia, onMediaChange }: Props) {
     <DropdownMenu>
       <DropdownMenuTrigger
         className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors'
-        aria-label='メディアフィルター'
+        aria-label={`メディアフィルター: ${currentLabel}`}
         data-slot='media-filter-trigger'
       >
         <Filter
