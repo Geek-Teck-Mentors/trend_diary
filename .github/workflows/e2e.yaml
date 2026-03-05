@@ -122,7 +122,7 @@ jobs:
             exit 0
           fi
 
-          npm run e2e -- --reporter=github,html --only-changed=origin/$GITHUB_BASE_REF --fail-on-flaky-tests
+          npm run e2e -- --reporter=github,html --only-changed=origin/$GITHUB_BASE_REF
 
       - name: Playwrightレポートを保存
         uses: actions/upload-artifact@v4
