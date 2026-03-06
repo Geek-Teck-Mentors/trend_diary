@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
 import { fromDbId, toDbId, toDbIds } from '@/infrastructure/rdb-id'
 import { getTestRdb } from './rdb'
 
@@ -22,7 +23,7 @@ function getTodayJstNoon(): Date {
 }
 
 export async function createArticle(options?: {
-  media?: 'qiita' | 'zenn' | 'hatena'
+  media?: ArticleMedia
   title?: string
   author?: string
   description?: string
@@ -30,7 +31,7 @@ export async function createArticle(options?: {
   createdAt?: Date
 }) {
   const rdb = getTestRdb()
-  const media = options?.media ?? faker.helpers.arrayElement(['qiita', 'zenn', 'hatena'])
+  const media = options?.media ?? faker.helpers.arrayElement(ARTICLE_MEDIA)
   let generatedUrl: string
   if (media === 'qiita') {
     generatedUrl = `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`

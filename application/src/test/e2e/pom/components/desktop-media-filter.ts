@@ -1,7 +1,8 @@
 import { expect, type Locator, type Page } from '@playwright/test'
+import type { ArticleMedia } from '@/domain/article/media'
 import { TIMEOUT } from '@/test/e2e/pom/constants'
 
-type MediaOption = 'all' | 'qiita' | 'zenn' | 'hatena'
+type MediaOption = 'all' | ArticleMedia
 
 export class DesktopMediaFilter {
   private readonly allOption: Locator

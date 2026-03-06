@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { ArticleMedia } from '@/domain/article/media'
 import worker from './worker'
 
 const runScheduledFetchMock = vi.hoisted(() => vi.fn())
@@ -63,7 +64,7 @@ describe('cron worker', () => {
   })
 
   it('片方のmediaで失敗しても残りのmediaは実行する', async () => {
-    runScheduledFetchMock.mockImplementation(async (media: 'qiita' | 'zenn' | 'hatena') => {
+    runScheduledFetchMock.mockImplementation(async (media: ArticleMedia) => {
       if (media === 'qiita') {
         throw new Error('qiita failed')
       }
