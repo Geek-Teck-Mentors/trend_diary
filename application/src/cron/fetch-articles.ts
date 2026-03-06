@@ -1,6 +1,5 @@
 import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
 import Parser from 'rss-parser'
-import Logger from '@/common/logger'
 import type { ArticleMedia } from '@/domain/article/media'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -145,11 +144,7 @@ export async function fetchHatenaArticles(env: CronEnv): Promise<number> {
   )
 }
 
-export async function runScheduledFetch(
-  media: ArticleMedia,
-  env: CronEnv,
-  logger: Logger,
-): Promise<void> {
+export async function runScheduledFetch(media: ArticleMedia, env: CronEnv): Promise<number> {
   let insertedCount: number
   if (media === 'qiita') {
     insertedCount = await fetchQiitaArticles(env)
@@ -159,9 +154,5 @@ export async function runScheduledFetch(
     insertedCount = await fetchHatenaArticles(env)
   }
 
-  logger.info({
-    msg: 'cron fetch completed',
-    media,
-    insertedCount,
-  })
+  return insertedCount
 }
