@@ -120,7 +120,7 @@ test.describe('記事一覧ページ(モバイル)', () => {
       const openedUrl = await drawer.getLastOpenedUrl()
 
       // 記事URLが開かれることを確認
-      expect(openedUrl).toMatch(/zenn\.dev|qiita\.com/)
+      expect(openedUrl).toMatch(/zenn\.dev|qiita\.com|b\.hatena\.ne\.jp/)
     })
   })
 

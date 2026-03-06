@@ -3,13 +3,14 @@ import { z } from 'zod'
 import { handleError } from '@/common/errors'
 import { OffsetPaginationResult, offsetPaginationSchema } from '@/common/pagination'
 import { createArticleUseCase, QueryParams } from '@/domain/article'
+import { ARTICLE_MEDIA } from '@/domain/article/media'
 import type { ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
 import { ArticleOutput } from '@/domain/article/schema/article-schema'
 import getRdbClient from '@/infrastructure/rdb'
 import CONTEXT_KEY from '@/web/middleware/context'
 import { ZodValidatedQueryContext } from '@/web/middleware/zod-validator'
 
-const mediaEnum = z.enum(['qiita', 'zenn'])
+const mediaEnum = z.enum(ARTICLE_MEDIA)
 const readStatusEnum = z.enum(['0', '1'])
 const dateStringSchema = z
   .string()

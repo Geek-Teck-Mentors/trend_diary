@@ -1,13 +1,14 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 import { TIMEOUT } from '@/test/e2e/pom/constants'
 
-type MediaOption = 'all' | 'qiita' | 'zenn'
+type MediaOption = 'all' | 'qiita' | 'zenn' | 'hatena'
 
 export class MobileFilterPanel {
   private readonly trigger: Locator
   private readonly allOption: Locator
   private readonly qiitaOption: Locator
   private readonly zennOption: Locator
+  private readonly hatenaOption: Locator
   private readonly applyButton: Locator
   private readonly clearButton: Locator
 
@@ -16,6 +17,7 @@ export class MobileFilterPanel {
     this.allOption = page.locator("[data-slot='media-filter-all']")
     this.qiitaOption = page.locator("[data-slot='media-filter-qiita']")
     this.zennOption = page.locator("[data-slot='media-filter-zenn']")
+    this.hatenaOption = page.locator("[data-slot='media-filter-hatena']")
     this.applyButton = page.locator("[data-slot='mobile-filter-apply']")
     this.clearButton = page.locator("[data-slot='mobile-filter-clear']")
   }
@@ -49,6 +51,7 @@ export class MobileFilterPanel {
   private option(media: MediaOption): Locator {
     if (media === 'all') return this.allOption
     if (media === 'qiita') return this.qiitaOption
-    return this.zennOption
+    if (media === 'zenn') return this.zennOption
+    return this.hatenaOption
   }
 }

@@ -1,5 +1,8 @@
-type MediaType = 'qiita' | 'zenn'
-const mediaAttributes = {
+import type { ArticleMedia } from '@/domain/article/media'
+
+export type MediaType = ArticleMedia
+
+const mediaConfig: Record<MediaType, { iconImage: string; altText: string }> = {
   qiita: {
     iconImage: '/images/qiita-icon.png',
     altText: 'qiita icon',
@@ -8,16 +11,18 @@ const mediaAttributes = {
     iconImage: '/images/zenn-icon.svg',
     altText: 'zenn icon',
   },
-} as const
+  hatena: {
+    iconImage: '/images/hatena-icon.svg',
+    altText: 'hatena icon',
+  },
+}
 
-export default function MediaTag({ media }: { media: MediaType }) {
-  const { iconImage, altText } = mediaAttributes[media]
-  return (
-    <img
-      src={iconImage}
-      alt={altText}
-      className='inline-block w-4 h-4 align-middle'
-      data-slot='media-icon'
-    />
-  )
+type Props = {
+  media: MediaType
+}
+
+export default function MediaIcon({ media }: Props) {
+  const config = mediaConfig[media]
+
+  return <img src={config.iconImage} alt={config.altText} className='h-6 w-6 rounded-sm' />
 }

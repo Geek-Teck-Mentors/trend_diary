@@ -1,6 +1,7 @@
 import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
 import Parser from 'rss-parser'
 import Logger from '@/common/logger'
+import type { ArticleMedia } from '@/domain/article/media'
 import getRdbClient from '@/infrastructure/rdb'
 
 type CronEnv = {
@@ -41,7 +42,7 @@ async function fetchRssFeed<T>(url: string) {
   return feed.items
 }
 
-async function storeArticles(media: 'qiita' | 'zenn', items: FeedItem[], env: CronEnv) {
+async function storeArticles(media: ArticleMedia, items: FeedItem[], env: CronEnv) {
   const db = getRdbClient({ db: env.DB, databaseUrl: env.DATABASE_URL })
   const result = await wrapAsyncCall(
     async () => {
@@ -124,13 +125,39 @@ export async function fetchZennArticles(env: CronEnv): Promise<number> {
   )
 }
 
+export async function fetchHatenaArticles(env: CronEnv): Promise<number> {
+  const items = await fetchRssFeed<{
+    title: string
+    creator: string
+    content: string
+    link: string
+  }>('https://b.hatena.ne.jp/hotentry/it.rss')
+
+  return storeArticles(
+    'hatena',
+    items.map((item) => ({
+      title: item.title,
+      author: item.creator,
+      description: item.content,
+      url: item.link,
+    })),
+    env,
+  )
+}
+
 export async function runScheduledFetch(
-  media: 'qiita' | 'zenn',
+  media: ArticleMedia,
   env: CronEnv,
   logger: Logger,
 ): Promise<void> {
-  const insertedCount =
-    media === 'qiita' ? await fetchQiitaArticles(env) : await fetchZennArticles(env)
+  let insertedCount: number
+  if (media === 'qiita') {
+    insertedCount = await fetchQiitaArticles(env)
+  } else if (media === 'zenn') {
+    insertedCount = await fetchZennArticles(env)
+  } else {
+    insertedCount = await fetchHatenaArticles(env)
+  }
 
   logger.info({
     msg: 'cron fetch completed',

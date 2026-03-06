@@ -619,6 +619,36 @@ describe('useArticles', () => {
       )
     })
 
+    it('media=hatenaが指定された場合、media条件付きでAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle({ media: 'hatena' })],
+        page: 1,
+        totalPages: 1,
+      })
+
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const { result } = setupHook(['/?media=hatena'])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+        {
+          query: {
+            to: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            from: expect.stringMatching(/\d{4}-\d{2}-\d{2}/),
+            page: 1,
+            limit: 20,
+            media: 'hatena',
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+      expect(result.current.selectedMedia).toBe('hatena')
+    })
+
     it('pageとlimitの両方が無効な場合、両方ともデフォルト値でAPIが呼ばれる', async () => {
       const fakeResponse = generateFakeResponse({
         articles: [generateFakeArticle()],
