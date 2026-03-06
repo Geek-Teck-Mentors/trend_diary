@@ -1,6 +1,7 @@
 import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
 import Parser from 'rss-parser'
 import Logger from '@/common/logger'
+import type { ArticleMedia } from '@/domain/article/media'
 import getRdbClient from '@/infrastructure/rdb'
 
 type CronEnv = {
@@ -41,7 +42,7 @@ async function fetchRssFeed<T>(url: string) {
   return feed.items
 }
 
-async function storeArticles(media: 'qiita' | 'zenn' | 'hatena', items: FeedItem[], env: CronEnv) {
+async function storeArticles(media: ArticleMedia, items: FeedItem[], env: CronEnv) {
   const db = getRdbClient({ db: env.DB, databaseUrl: env.DATABASE_URL })
   const result = await wrapAsyncCall(
     async () => {
@@ -145,7 +146,7 @@ export async function fetchHatenaArticles(env: CronEnv): Promise<number> {
 }
 
 export async function runScheduledFetch(
-  media: 'qiita' | 'zenn' | 'hatena',
+  media: ArticleMedia,
   env: CronEnv,
   logger: Logger,
 ): Promise<void> {

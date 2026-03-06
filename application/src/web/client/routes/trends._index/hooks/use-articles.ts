@@ -8,6 +8,7 @@ import {
   offsetPaginationMobileSchema,
   offsetPaginationSchema,
 } from '@/common/pagination/schema'
+import { isArticleMedia } from '@/domain/article/media'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
 import createSWRFetcher from '@/web/client/features/create-swr-fetcher'
@@ -72,10 +73,7 @@ export default function useArticles(isLoggedIn = false) {
   const params: Params = {
     page: validPage,
     limit: validLimit,
-    media:
-      mediaParam === 'qiita' || mediaParam === 'zenn' || mediaParam === 'hatena'
-        ? mediaParam
-        : null,
+    media: mediaParam && isArticleMedia(mediaParam) ? mediaParam : null,
     readStatus: readStatusParam === '0' ? 'unread' : 'all',
   }
 

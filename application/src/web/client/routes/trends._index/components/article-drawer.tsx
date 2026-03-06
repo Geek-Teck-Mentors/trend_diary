@@ -2,6 +2,7 @@ import { Calendar, Check, ExternalLink, User, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { toJaDateString } from '@/common/locale'
+import { isArticleMedia } from '@/domain/article/media'
 import {
   Drawer,
   DrawerClose,
@@ -46,7 +47,7 @@ export default function ArticleDrawer({
 
   const isRead = article.isRead ?? false
   const toMediaType = (media: string): MediaType => {
-    if (media === 'qiita' || media === 'zenn' || media === 'hatena') return media
+    if (isArticleMedia(media)) return media
     return 'zenn'
   }
 

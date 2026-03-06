@@ -1,7 +1,8 @@
+import type { ArticleMedia } from '@/domain/article/media'
 import { Button } from '@/web/client/components/shadcn/button'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
 
-export type MediaType = 'qiita' | 'zenn' | 'hatena' | null
+export type MediaType = ArticleMedia | null
 
 type Props = {
   selectedMedia: MediaType

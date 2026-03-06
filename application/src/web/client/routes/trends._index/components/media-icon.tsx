@@ -1,4 +1,6 @@
-export type MediaType = 'qiita' | 'zenn' | 'hatena'
+import type { ArticleMedia } from '@/domain/article/media'
+
+export type MediaType = ArticleMedia
 
 const mediaConfig: Record<MediaType, { iconImage: string; altText: string }> = {
   qiita: {

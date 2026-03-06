@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react'
+import { isArticleMedia } from '@/domain/article/media'
 import { Card, CardContent, CardDescription, CardTitle } from '@/web/client/components/shadcn/card'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
 import type { Article } from '../hooks/use-articles'
@@ -12,7 +13,7 @@ type Props = {
 }
 
 const toMediaType = (media: string): MediaType => {
-  if (media === 'qiita' || media === 'zenn' || media === 'hatena') return media
+  if (isArticleMedia(media)) return media
   return 'zenn'
 }
 
