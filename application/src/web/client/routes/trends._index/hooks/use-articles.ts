@@ -49,17 +49,16 @@ type ArticlesResponse = {
 
 const DATE_STRING_REGEX = /^\d{4}-\d{2}-\d{2}$/
 
-const datePresetMap: Record<DatePresetType, number> = {
+const DATE_PRESET_MAP: Record<DatePresetType, number> = {
   today: 0,
   last3days: 2,
   last7days: 6,
 }
-const datePresets = DATE_PRESETS
 
 const isValidDateString = (value: string | null) => !!value && DATE_STRING_REGEX.test(value)
 
 const getDateRangeByPreset = (datePreset: DatePresetType, todayJstDateString: string) => {
-  const fromDateResult = addJstDays(todayJstDateString, -datePresetMap[datePreset])
+  const fromDateResult = addJstDays(todayJstDateString, -DATE_PRESET_MAP[datePreset])
   if (isFailure(fromDateResult)) {
     return { from: todayJstDateString, to: todayJstDateString }
   }
@@ -86,7 +85,7 @@ const parseDatePreset = (
 ): DatePresetType => {
   if (!isValidDateString(fromParam) || !isValidDateString(toParam)) return 'today'
 
-  const matchedPreset = datePresets.find((preset) => {
+  const matchedPreset = DATE_PRESETS.find((preset) => {
     const range = getDateRangeByPreset(preset, todayJstDateString)
     return range.from === fromParam && range.to === toParam
   })

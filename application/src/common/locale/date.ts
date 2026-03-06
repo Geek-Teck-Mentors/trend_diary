@@ -44,6 +44,7 @@ export const addJstDays = (baseDateString: string, days: number): Result<string,
     return failure(new Error(`不正な日付文字列です: ${baseDateString}`))
   }
 
+  // +09:00 固定の日時を UTC で日付加算すると、JST の暦日をずらした結果と一致する。
   baseDate.setUTCDate(baseDate.getUTCDate() + days)
   return toJstDateString(baseDate)
 }
