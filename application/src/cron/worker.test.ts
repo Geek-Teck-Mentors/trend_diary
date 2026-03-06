@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { ArticleMedia } from '@/domain/article/media'
+import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
 import worker from './worker'
 
 const runScheduledFetchMock = vi.hoisted(() => vi.fn())
@@ -32,7 +32,7 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(3)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(ARTICLE_MEDIA.length)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
@@ -57,7 +57,7 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(3)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(ARTICLE_MEDIA.length)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
@@ -86,7 +86,7 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(3)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(ARTICLE_MEDIA.length)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
