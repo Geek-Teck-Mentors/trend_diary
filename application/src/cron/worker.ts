@@ -1,4 +1,5 @@
 import Logger from '@/common/logger'
+import type { ArticleMedia } from '@/domain/article/media'
 import { runScheduledFetch } from './fetch-articles'
 
 type D1Database = import('@cloudflare/workers-types').D1Database
@@ -10,8 +11,7 @@ type CronWorkerEnv = {
   LOG_LEVEL?: import('@/common/logger').LogLevel
 }
 
-type Media = 'qiita' | 'zenn'
-const MEDIA_LIST: ReadonlyArray<Media> = ['qiita', 'zenn']
+const MEDIA_LIST: ReadonlyArray<ArticleMedia> = ['qiita', 'zenn', 'hatena']
 
 async function notifyDiscord(webhookUrl: string, message: string) {
   if (!webhookUrl) return

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
 import worker from './worker'
 
 const runScheduledFetchMock = vi.hoisted(() => vi.fn())
@@ -31,9 +32,10 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(ARTICLE_MEDIA.length)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
   })
 
   it('cron式に関係なくfetchジョブを実行する', async () => {
@@ -55,13 +57,14 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(ARTICLE_MEDIA.length)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
   })
 
   it('片方のmediaで失敗しても残りのmediaは実行する', async () => {
-    runScheduledFetchMock.mockImplementation(async (media: 'qiita' | 'zenn') => {
+    runScheduledFetchMock.mockImplementation(async (media: ArticleMedia) => {
       if (media === 'qiita') {
         throw new Error('qiita failed')
       }
@@ -83,9 +86,10 @@ describe('cron worker', () => {
 
     expect(waitUntilCalls).toHaveLength(1)
     await Promise.all(waitUntilCalls)
-    expect(runScheduledFetchMock).toHaveBeenCalledTimes(2)
+    expect(runScheduledFetchMock).toHaveBeenCalledTimes(ARTICLE_MEDIA.length)
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(1, 'qiita', env, expect.anything())
     expect(runScheduledFetchMock).toHaveBeenNthCalledWith(2, 'zenn', env, expect.anything())
+    expect(runScheduledFetchMock).toHaveBeenNthCalledWith(3, 'hatena', env, expect.anything())
   })
 })
 

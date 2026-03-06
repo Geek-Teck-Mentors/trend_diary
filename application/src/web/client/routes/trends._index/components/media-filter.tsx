@@ -1,7 +1,8 @@
+import type { ArticleMedia } from '@/domain/article/media'
 import { Button } from '@/web/client/components/shadcn/button'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
 
-export type MediaType = 'qiita' | 'zenn' | null
+export type MediaType = ArticleMedia | null
 
 type Props = {
   selectedMedia: MediaType
@@ -12,6 +13,7 @@ const mediaOptions = [
   { value: null, label: 'すべて', dataSlot: 'media-filter-all' },
   { value: 'qiita', label: 'Qiita', dataSlot: 'media-filter-qiita' },
   { value: 'zenn', label: 'Zenn', dataSlot: 'media-filter-zenn' },
+  { value: 'hatena', label: 'はてブ', dataSlot: 'media-filter-hatena' },
 ] as const
 
 export default function MediaFilter({ selectedMedia, onMediaChange }: Props) {

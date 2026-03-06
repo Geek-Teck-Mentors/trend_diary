@@ -1,23 +1,27 @@
 import { expect, type Locator, type Page } from '@playwright/test'
+import type { ArticleMedia } from '@/domain/article/media'
 import { TIMEOUT } from '@/test/e2e/pom/constants'
 
-type MediaOption = 'all' | 'qiita' | 'zenn'
+type MediaOption = 'all' | ArticleMedia
 
 export class DesktopMediaFilter {
   private readonly allOption: Locator
   private readonly qiitaOption: Locator
   private readonly zennOption: Locator
+  private readonly hatenaOption: Locator
 
   constructor(private readonly page: Page) {
     this.allOption = page.locator("[data-slot='media-filter-all']")
     this.qiitaOption = page.locator("[data-slot='media-filter-qiita']")
     this.zennOption = page.locator("[data-slot='media-filter-zenn']")
+    this.hatenaOption = page.locator("[data-slot='media-filter-hatena']")
   }
 
   async expectVisible(): Promise<void> {
     await this.allOption.waitFor({ state: 'visible', timeout: TIMEOUT })
     await expect(this.qiitaOption).toBeVisible()
     await expect(this.zennOption).toBeVisible()
+    await expect(this.hatenaOption).toBeVisible()
   }
 
   async select(media: MediaOption): Promise<void> {
@@ -27,6 +31,7 @@ export class DesktopMediaFilter {
   private option(media: MediaOption): Locator {
     if (media === 'all') return this.allOption
     if (media === 'qiita') return this.qiitaOption
-    return this.zennOption
+    if (media === 'zenn') return this.zennOption
+    return this.hatenaOption
   }
 }

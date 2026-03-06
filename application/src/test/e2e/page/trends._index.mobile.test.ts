@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { ArticleDrawer } from '@/test/e2e/pom/components/article-drawer'
 import { MobileFilterPanel } from '@/test/e2e/pom/components/mobile-filter-panel'
-import { TIMEOUT } from '@/test/e2e/pom/constants'
+import { SUPPORTED_ARTICLE_URL_PATTERN, TIMEOUT } from '@/test/e2e/pom/constants'
 import { TrendsPage } from '@/test/e2e/pom/trends-page'
 import * as articleHelper from '@/test/helper/article'
 
@@ -120,7 +120,7 @@ test.describe('記事一覧ページ(モバイル)', () => {
       const openedUrl = await drawer.getLastOpenedUrl()
 
       // 記事URLが開かれることを確認
-      expect(openedUrl).toMatch(/zenn\.dev|qiita\.com/)
+      expect(openedUrl).toMatch(SUPPORTED_ARTICLE_URL_PATTERN)
     })
   })
 

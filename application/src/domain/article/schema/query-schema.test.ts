@@ -85,6 +85,12 @@ describe('記事検索スキーマ', () => {
           media: 'zenn',
         })
       }).not.toThrow()
+
+      expect(() => {
+        articleQuerySchema.parse({
+          media: 'hatena',
+        })
+      }).not.toThrow()
     })
 
     it('無効なmedia値を拒否すること', () => {
@@ -96,7 +102,7 @@ describe('記事検索スキーマ', () => {
 
       expect(() => {
         articleQuerySchema.parse({
-          media: 'hatena',
+          media: 'note',
         })
       }).toThrow()
     })

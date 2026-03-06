@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { ArticleDrawer } from '@/test/e2e/pom/components/article-drawer'
 import { DesktopMediaFilter } from '@/test/e2e/pom/components/desktop-media-filter'
+import { SUPPORTED_ARTICLE_URL_PATTERN } from '@/test/e2e/pom/constants'
 import { TrendsPage } from '@/test/e2e/pom/trends-page'
 import * as articleHelper from '@/test/helper/article'
 
@@ -67,7 +68,7 @@ test.describe('記事一覧ページ', () => {
       const openedUrl = await drawer.getLastOpenedUrl()
 
       // 記事URLが開かれることを確認
-      expect(openedUrl).toMatch(/zenn\.dev|qiita\.com/)
+      expect(openedUrl).toMatch(SUPPORTED_ARTICLE_URL_PATTERN)
     })
   })
 

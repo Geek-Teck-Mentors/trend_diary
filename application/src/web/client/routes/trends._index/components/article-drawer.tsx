@@ -2,6 +2,7 @@ import { Calendar, Check, ExternalLink, User, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { toJaDateString } from '@/common/locale'
+import { isArticleMedia } from '@/domain/article/media'
 import {
   Drawer,
   DrawerClose,
@@ -12,7 +13,7 @@ import {
 import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
 import type { Article } from '../hooks/use-articles'
-import MediaIcon from './media-icon'
+import MediaIcon, { type MediaType } from './media-icon'
 
 const DESCRIPTION_TOGGLE_THRESHOLD = 100
 
@@ -45,7 +46,12 @@ export default function ArticleDrawer({
   }
 
   const isRead = article.isRead ?? false
-  const media = article.media === 'qiita' ? 'qiita' : 'zenn'
+  const toMediaType = (media: string): MediaType => {
+    if (isArticleMedia(media)) return media
+    return 'zenn'
+  }
+
+  const media = toMediaType(article.media)
   const drawerDirection = isMobile ? 'bottom' : 'right'
   const drawerContentClass = isMobile
     ? 'h-[90vh] w-full data-[vaul-drawer-direction=bottom]:max-h-[90vh]'

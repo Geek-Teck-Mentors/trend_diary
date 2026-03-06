@@ -1,14 +1,20 @@
 import { Check } from 'lucide-react'
+import { isArticleMedia } from '@/domain/article/media'
 import { Card, CardContent, CardDescription, CardTitle } from '@/web/client/components/shadcn/card'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
 import type { Article } from '../hooks/use-articles'
-import MediaIcon from './media-icon'
+import MediaIcon, { type MediaType } from './media-icon'
 
 type Props = {
   article: Article
   onCardClick: (article: Article) => void
   onToggleRead?: (articleId: string, isRead: boolean) => void
   isLoggedIn?: boolean
+}
+
+const toMediaType = (media: string): MediaType => {
+  if (isArticleMedia(media)) return media
+  return 'zenn'
 }
 
 export default function ArticleCard({
@@ -38,7 +44,7 @@ export default function ArticleCard({
     >
       <CardContent className='flex h-full flex-col p-0'>
         <CardTitle className='line-clamp-2 flex-1 overflow-hidden text-sm leading-relaxed font-bold text-gray-700'>
-          <MediaIcon media={article.media === 'qiita' ? 'qiita' : 'zenn'} />
+          <MediaIcon media={toMediaType(article.media)} />
           <span className='ml-1.5'>{article.title}</span>
           {isRead && (
             <span
