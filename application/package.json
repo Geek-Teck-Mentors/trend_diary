@@ -29,7 +29,6 @@
     "supabase:start": "supabase start -x realtime,storage-api,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor",
     "supabase:status": "supabase status",
     "supabase:stop": "supabase stop",
-    "supabase:db:type-gen": "supabase gen types typescript --local > supabase/functions/infrastructure/database.types.ts",
     "storybook": "storybook dev -p 6006",
     "test-storybook": "vitest run -c src/test/vitest/storybook/config.ts"
   },
