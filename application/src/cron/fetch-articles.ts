@@ -24,9 +24,19 @@ const MAX_LENGTH = {
   author: 30,
   description: 1024,
 }
+const HATENA_FALLBACK_AUTHOR = 'はてなブックマーク'
 
 function truncateByCodePoint(text: string, maxLength: number): string {
   return [...text].slice(0, maxLength).join('')
+}
+
+function pickNonEmpty(...candidates: Array<string | undefined>): string | undefined {
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') continue
+    const trimmed = candidate.trim()
+    if (trimmed.length > 0) return trimmed
+  }
+  return undefined
 }
 
 async function fetchRssFeed<T>(url: string) {
@@ -127,8 +137,10 @@ export async function fetchZennArticles(env: CronEnv): Promise<number> {
 export async function fetchHatenaArticles(env: CronEnv): Promise<number> {
   const items = await fetchRssFeed<{
     title: string
-    creator: string
-    content: string
+    creator?: string
+    content?: string
+    'content:encoded'?: string
+    contentSnippet?: string
     link: string
   }>('https://b.hatena.ne.jp/hotentry/it.rss')
 
@@ -136,8 +148,8 @@ export async function fetchHatenaArticles(env: CronEnv): Promise<number> {
     'hatena',
     items.map((item) => ({
       title: item.title,
-      author: item.creator,
-      description: item.content,
+      author: pickNonEmpty(item.creator) || HATENA_FALLBACK_AUTHOR,
+      description: pickNonEmpty(item.content, item['content:encoded'], item.contentSnippet) || '',
       url: item.link,
     })),
     env,
