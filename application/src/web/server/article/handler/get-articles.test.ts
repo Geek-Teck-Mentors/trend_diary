@@ -27,8 +27,10 @@ describe('GET /api/articles', () => {
   const titleCleanupPrefix = 'GET_ARTICLES_TEST_'
   const qiitaTitle = `${titleCleanupPrefix}Reactの基礎-${faker.string.alphanumeric(8)}`
   const zennTitle = `${titleCleanupPrefix}TypeScriptの応用-${faker.string.alphanumeric(8)}`
+  const hatenaTitle = `${titleCleanupPrefix}はてブ注目記事-${faker.string.alphanumeric(8)}`
   const qiitaAuthor = `山田太郎-${faker.string.alphanumeric(6)}`
   const zennAuthor = `佐藤花子-${faker.string.alphanumeric(6)}`
+  const hatenaAuthor = `鈴木次郎-${faker.string.alphanumeric(6)}`
 
   const testArticlesData = [
     {
@@ -46,6 +48,14 @@ describe('GET /api/articles', () => {
       description: 'TypeScriptの高度な機能',
       url: 'https://zenn.dev/test2',
       createdAt: new Date('2025-05-12'),
+    },
+    {
+      media: 'hatena' as const,
+      title: hatenaTitle,
+      author: hatenaAuthor,
+      description: 'はてブの注目記事',
+      url: 'https://b.hatena.ne.jp/entry/s/example.com/test3',
+      createdAt: new Date('2025-05-13'),
     },
   ]
 
@@ -72,9 +82,10 @@ describe('GET /api/articles', () => {
 
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
-      expect(data.data).toHaveLength(2)
-      expect(data.data[0].title).toBe(zennTitle)
-      expect(data.data[1].title).toBe(qiitaTitle)
+      expect(data.data).toHaveLength(3)
+      expect(data.data[0].title).toBe(hatenaTitle)
+      expect(data.data[1].title).toBe(zennTitle)
+      expect(data.data[2].title).toBe(qiitaTitle)
       expect(data.hasNext).toBe(false)
       expect(data.hasPrev).toBe(false)
     })
@@ -106,12 +117,21 @@ describe('GET /api/articles', () => {
       expect(data.data[0].media).toBe('qiita')
     })
 
+    it('media=hatenaで検索できる', async () => {
+      const res = await requestGetArticles('media=hatena')
+
+      expect(res.status).toBe(200)
+      const data: ArticleListResponse = await res.json()
+      expect(data.data).toHaveLength(1)
+      expect(data.data[0].media).toBe('hatena')
+    })
+
     it('read_statusパラメータを受け取る', async () => {
       const res = await requestGetArticles('read_status=1')
 
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
-      expect(data.data).toHaveLength(2)
+      expect(data.data).toHaveLength(3)
     })
 
     it('複数条件での検索', async () => {
@@ -128,8 +148,7 @@ describe('GET /api/articles', () => {
 
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
-      expect(data.data).toHaveLength(1)
-      expect(data.data[0].title).toBe(zennTitle)
+      expect(data.data).toHaveLength(2)
     })
 
     it('toパラメータで検索', async () => {

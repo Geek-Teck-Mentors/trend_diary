@@ -6,14 +6,16 @@ export class TrendsPage {
   private readonly articleCards: Locator
   private readonly qiitaIcons: Locator
   private readonly zennIcons: Locator
+  private readonly hatenaIcons: Locator
 
   constructor(private readonly page: Page) {
     this.noArticlesMessage = page.getByText('記事がありません')
     this.articleCards = page
       .getByRole('button')
-      .filter({ has: page.getByRole('img', { name: /(?:qiita|zenn) icon/ }) })
+      .filter({ has: page.getByRole('img', { name: /(?:qiita|zenn|hatena) icon/ }) })
     this.qiitaIcons = page.getByRole('img', { name: 'qiita icon' })
     this.zennIcons = page.getByRole('img', { name: 'zenn icon' })
+    this.hatenaIcons = page.getByRole('img', { name: 'hatena icon' })
   }
 
   async goto(path = '/trends'): Promise<void> {
@@ -58,6 +60,10 @@ export class TrendsPage {
 
   async expectZennIconCount(count: number): Promise<void> {
     await expect(this.zennIcons).toHaveCount(count)
+  }
+
+  async expectHatenaIconCount(count: number): Promise<void> {
+    await expect(this.hatenaIcons).toHaveCount(count)
   }
 
   async waitForUrl(url: string | RegExp): Promise<void> {

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { offsetPaginationSchema } from '@/common/pagination'
 
-const mediaEnum = z.enum(['qiita', 'zenn'])
+const mediaEnum = z.enum(['qiita', 'zenn', 'hatena'])
 
 const baseArticleSearchSchema = z.object({
   title: z.string().optional(),

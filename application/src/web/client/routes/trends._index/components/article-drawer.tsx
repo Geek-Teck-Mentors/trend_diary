@@ -12,7 +12,7 @@ import {
 import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
 import type { Article } from '../hooks/use-articles'
-import MediaIcon from './media-icon'
+import MediaIcon, { type MediaType } from './media-icon'
 
 const DESCRIPTION_TOGGLE_THRESHOLD = 100
 
@@ -45,7 +45,12 @@ export default function ArticleDrawer({
   }
 
   const isRead = article.isRead ?? false
-  const media = article.media === 'qiita' ? 'qiita' : 'zenn'
+  const toMediaType = (media: string): MediaType => {
+    if (media === 'qiita' || media === 'zenn' || media === 'hatena') return media
+    return 'zenn'
+  }
+
+  const media = toMediaType(article.media)
   const drawerDirection = isMobile ? 'bottom' : 'right'
   const drawerContentClass = isMobile
     ? 'h-[90vh] w-full data-[vaul-drawer-direction=bottom]:max-h-[90vh]'

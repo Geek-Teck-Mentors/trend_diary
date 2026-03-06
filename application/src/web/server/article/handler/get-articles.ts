@@ -9,7 +9,7 @@ import getRdbClient from '@/infrastructure/rdb'
 import CONTEXT_KEY from '@/web/middleware/context'
 import { ZodValidatedQueryContext } from '@/web/middleware/zod-validator'
 
-const mediaEnum = z.enum(['qiita', 'zenn'])
+const mediaEnum = z.enum(['qiita', 'zenn', 'hatena'])
 const readStatusEnum = z.enum(['0', '1'])
 const dateStringSchema = z
   .string()

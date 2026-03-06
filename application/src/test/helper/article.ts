@@ -22,7 +22,7 @@ function getTodayJstNoon(): Date {
 }
 
 export async function createArticle(options?: {
-  media?: 'qiita' | 'zenn'
+  media?: 'qiita' | 'zenn' | 'hatena'
   title?: string
   author?: string
   description?: string
@@ -30,12 +30,16 @@ export async function createArticle(options?: {
   createdAt?: Date
 }) {
   const rdb = getTestRdb()
-  const media = options?.media ?? faker.helpers.arrayElement(['qiita', 'zenn'])
-  const url =
-    options?.url ??
-    (media === 'qiita'
-      ? `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
-      : `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`)
+  const media = options?.media ?? faker.helpers.arrayElement(['qiita', 'zenn', 'hatena'])
+  let generatedUrl: string
+  if (media === 'qiita') {
+    generatedUrl = `https://qiita.com/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
+  } else if (media === 'zenn') {
+    generatedUrl = `https://zenn.dev/${faker.internet.username()}/${faker.string.alphanumeric(20)}`
+  } else {
+    generatedUrl = `https://b.hatena.ne.jp/entry/s/${faker.internet.domainName()}/${faker.string.alphanumeric(20)}`
+  }
+  const url = options?.url ?? generatedUrl
   const uniqueSuffix = `tid-${crypto.randomUUID()}`
 
   const data = {

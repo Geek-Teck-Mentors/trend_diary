@@ -72,7 +72,10 @@ export default function useArticles(isLoggedIn = false) {
   const params: Params = {
     page: validPage,
     limit: validLimit,
-    media: mediaParam === 'qiita' || mediaParam === 'zenn' ? mediaParam : null,
+    media:
+      mediaParam === 'qiita' || mediaParam === 'zenn' || mediaParam === 'hatena'
+        ? mediaParam
+        : null,
     readStatus: readStatusParam === '0' ? 'unread' : 'all',
   }
 
