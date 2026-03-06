@@ -19,7 +19,9 @@ function getTodayJstNoon(daysOffset = 0): Date {
   const month = jstParts.find((part) => part.type === 'month')?.value
   const day = jstParts.find((part) => part.type === 'day')?.value
 
-  if (!year || !month || !day) return new Date()
+  if (!year || !month || !day) {
+    throw new Error('JST日付の取得に失敗しました')
+  }
 
   const date = new Date(`${year}-${month}-${day}T12:00:00+09:00`)
   date.setUTCDate(date.getUTCDate() + daysOffset)

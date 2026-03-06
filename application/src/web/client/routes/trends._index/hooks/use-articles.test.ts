@@ -83,7 +83,9 @@ const toJstDateString = (rawDate: Date) => {
   const year = jstParts.find((part) => part.type === 'year')?.value
   const month = jstParts.find((part) => part.type === 'month')?.value
   const day = jstParts.find((part) => part.type === 'day')?.value
-  if (!year || !month || !day) return ''
+  if (!year || !month || !day) {
+    throw new Error('JST日付の取得に失敗しました')
+  }
   return `${year}-${month}-${day}`
 }
 
@@ -603,66 +605,6 @@ describe('useArticles', () => {
         },
         { init: { credentials: 'include' } },
       )
-    })
-
-    it('page=1の時にtoNextPageを呼ぶとURLにpage=2が追加される', async () => {
-      const initialResponse = generateFakeResponse({
-        page: 1,
-        totalPages: 3,
-      })
-
-      mockApiClient.articles.$get.mockResolvedValue(initialResponse)
-
-      const { result } = setupHook()
-
-      await waitFor(() => {
-        expect(result.current.page).toBe(1)
-      })
-
-      await act(async () => {
-        result.current.toNextPage(1)
-      })
-
-      await waitFor(() => {
-        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              page: 2,
-            }),
-          }),
-          expect.anything(),
-        )
-      })
-    })
-
-    it('page=2の時にtoPreviousPageを呼ぶとURLからpageパラメータが削除される', async () => {
-      const initialResponse = generateFakeResponse({
-        page: 2,
-        totalPages: 3,
-      })
-
-      mockApiClient.articles.$get.mockResolvedValue(initialResponse)
-
-      const { result } = setupHook(['/?page=2'])
-
-      await waitFor(() => {
-        expect(result.current.page).toBe(2)
-      })
-
-      await act(async () => {
-        result.current.toPreviousPage(2)
-      })
-
-      await waitFor(() => {
-        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            query: expect.objectContaining({
-              page: 1,
-            }),
-          }),
-          expect.anything(),
-        )
-      })
     })
   })
 

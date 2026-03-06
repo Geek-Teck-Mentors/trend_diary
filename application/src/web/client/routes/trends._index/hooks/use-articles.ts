@@ -51,6 +51,7 @@ const datePresetMap: Record<DatePresetType, number> = {
   last3days: 2,
   last7days: 6,
 }
+const datePresets = Object.keys(datePresetMap) as DatePresetType[]
 
 const toJstDateString = (rawDate: Date) => {
   const jstParts = new Intl.DateTimeFormat('ja-JP', {
@@ -64,7 +65,9 @@ const toJstDateString = (rawDate: Date) => {
   const month = jstParts.find((part) => part.type === 'month')?.value
   const day = jstParts.find((part) => part.type === 'day')?.value
 
-  if (!year || !month || !day) return ''
+  if (!year || !month || !day) {
+    throw new Error('JST日付の取得に失敗しました')
+  }
 
   return `${year}-${month}-${day}`
 }
@@ -89,8 +92,7 @@ const parseDatePreset = (
 ): DatePresetType => {
   if (!isValidDateString(fromParam) || !isValidDateString(toParam)) return 'today'
 
-  const presets: DatePresetType[] = ['today', 'last3days', 'last7days']
-  const matchedPreset = presets.find((preset) => {
+  const matchedPreset = datePresets.find((preset) => {
     const range = getDateRangeByPreset(preset, todayJstDateString)
     return range.from === fromParam && range.to === toParam
   })
