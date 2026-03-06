@@ -18,7 +18,7 @@ const mediaOptions = [
 
 export default function MediaFilter({ selectedMedia, onMediaChange }: Props) {
   return (
-    <div className='flex items-center gap-2' data-slot='media-filter'>
+    <div className='flex flex-wrap items-center gap-2' data-slot='media-filter'>
       {mediaOptions.map((option) => {
         const isSelected = selectedMedia === option.value
         return (

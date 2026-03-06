@@ -15,7 +15,7 @@ const readStatusOptions = [
 
 export default function ReadStatusFilter({ selectedReadStatus, onReadStatusChange }: Props) {
   return (
-    <div className='flex items-center gap-2' data-slot='read-status-filter'>
+    <div className='flex flex-wrap items-center gap-2' data-slot='read-status-filter'>
       {readStatusOptions.map((option) => {
         const isSelected = selectedReadStatus === option.value
         return (

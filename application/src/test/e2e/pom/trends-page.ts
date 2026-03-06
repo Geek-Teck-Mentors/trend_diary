@@ -74,4 +74,9 @@ export class TrendsPage {
     const url = new URL(this.page.url())
     expect(url.searchParams.get(paramName)).toBeNull()
   }
+
+  expectQueryParamPresent(paramName: string): void {
+    const url = new URL(this.page.url())
+    expect(url.searchParams.get(paramName)).not.toBeNull()
+  }
 }

@@ -1,6 +1,7 @@
 import type { ArticleMedia } from '@/domain/article/media'
 
 export type MediaType = ArticleMedia
+type IconSize = 'sm' | 'md'
 
 const mediaConfig: Record<MediaType, { iconImage: string; altText: string }> = {
   qiita: {
@@ -19,10 +20,23 @@ const mediaConfig: Record<MediaType, { iconImage: string; altText: string }> = {
 
 type Props = {
   media: MediaType
+  size?: IconSize
 }
 
-export default function MediaIcon({ media }: Props) {
-  const config = mediaConfig[media]
+const iconSizeClassMap: Record<IconSize, string> = {
+  sm: 'h-4 w-4',
+  md: 'h-6 w-6',
+}
 
-  return <img src={config.iconImage} alt={config.altText} className='h-6 w-6 rounded-sm' />
+export default function MediaIcon({ media, size = 'md' }: Props) {
+  const config = mediaConfig[media]
+  const sizeClass = iconSizeClassMap[size]
+
+  return (
+    <img
+      src={config.iconImage}
+      alt={config.altText}
+      className={`inline-block ${sizeClass} rounded-sm align-middle`}
+    />
+  )
 }

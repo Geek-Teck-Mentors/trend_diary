@@ -1,6 +1,8 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
+import { addJstDays, toJstDateString } from '@/common/locale/date'
 import {
   DEFAULT_LIMIT,
   DEFAULT_MOBILE_LIMIT,
@@ -12,7 +14,7 @@ import { isArticleMedia } from '@/domain/article/media'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
 import { useIsMobile } from '@/web/client/components/shadcn/hooks/use-mobile'
 import createSWRFetcher from '@/web/client/features/create-swr-fetcher'
-import { MediaType } from '../components/media-filter'
+import type { MediaType } from '../components/media-filter'
 import type { ReadStatusType } from '../components/read-status-filter'
 
 // isRead を含む記事型(フロントエンドではarticleIdをstringに統一)
@@ -21,16 +23,21 @@ export type Article = Omit<ArticleOutput, 'articleId'> & {
   isRead?: boolean
 }
 
+export const DATE_PRESETS = ['today', 'last3days', 'last7days'] as const
+export type DatePresetType = (typeof DATE_PRESETS)[number]
+
 type Params = {
   page: number
   limit: number
   media: MediaType
   readStatus: ReadStatusType
+  datePreset: DatePresetType
 }
 
 type FilterParams = {
   media: MediaType
   readStatus: ReadStatusType
+  datePreset: DatePresetType
 }
 
 type ArticlesResponse = {
@@ -40,11 +47,66 @@ type ArticlesResponse = {
   totalPages: number
 }
 
-const formatDate = (rawDate: Date) => {
-  const year = rawDate.getFullYear()
-  const month = String(rawDate.getMonth() + 1).padStart(2, '0')
-  const day = String(rawDate.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+const DATE_STRING_REGEX = /^\d{4}-\d{2}-\d{2}$/
+
+const DATE_PRESET_MAP: Record<DatePresetType, number> = {
+  today: 0,
+  last3days: 2,
+  last7days: 6,
+}
+
+const isValidDateString = (value: string | null) => !!value && DATE_STRING_REGEX.test(value)
+
+const getDateRangeByPreset = (datePreset: DatePresetType, todayJstDateString: string) => {
+  const fromDateResult = addJstDays(todayJstDateString, -DATE_PRESET_MAP[datePreset])
+  if (isFailure(fromDateResult)) {
+    return { from: todayJstDateString, to: todayJstDateString }
+  }
+
+  return {
+    from: fromDateResult.data,
+    to: todayJstDateString,
+  }
+}
+
+const getTodayJstDateString = (baseDate: Date): string => {
+  const todayJstDateResult = toJstDateString(baseDate)
+  if (isFailure(todayJstDateResult)) {
+    return baseDate.toISOString().slice(0, 10)
+  }
+
+  return todayJstDateResult.data
+}
+
+const parseDatePreset = (
+  fromParam: string | null,
+  toParam: string | null,
+  todayJstDateString: string,
+): DatePresetType => {
+  if (!isValidDateString(fromParam) || !isValidDateString(toParam)) return 'today'
+
+  const matchedPreset = DATE_PRESETS.find((preset) => {
+    const range = getDateRangeByPreset(preset, todayJstDateString)
+    return range.from === fromParam && range.to === toParam
+  })
+
+  return matchedPreset ?? 'today'
+}
+
+const applyDatePresetToSearchParams = (
+  params: URLSearchParams,
+  datePreset: DatePresetType,
+  todayJstDateString: string,
+) => {
+  if (datePreset === 'today') {
+    params.delete('from')
+    params.delete('to')
+    return
+  }
+
+  const { from, to } = getDateRangeByPreset(datePreset, todayJstDateString)
+  params.set('from', from)
+  params.set('to', to)
 }
 
 export default function useArticles(isLoggedIn = false) {
@@ -53,12 +115,14 @@ export default function useArticles(isLoggedIn = false) {
   const { client, apiCall } = createSWRFetcher()
 
   const date = new Date()
-  const formattedDate = formatDate(date)
+  const todayJstDateString = getTodayJstDateString(date)
 
   const pageParam = searchParams.get('page')
   const limitParam = searchParams.get('limit')
   const mediaParam = searchParams.get('media')
   const readStatusParam = searchParams.get('read_status')
+  const fromParam = searchParams.get('from')
+  const toParam = searchParams.get('to')
 
   // INFO: schemaはnullではなくundefinedを許容するため、nullの場合はundefinedに変換する
   const parseResult = (isMobile ? offsetPaginationMobileSchema : offsetPaginationSchema).safeParse({
@@ -75,11 +139,13 @@ export default function useArticles(isLoggedIn = false) {
     limit: validLimit,
     media: mediaParam && isArticleMedia(mediaParam) ? mediaParam : null,
     readStatus: readStatusParam === '0' ? 'unread' : 'all',
+    datePreset: parseDatePreset(fromParam, toParam, todayJstDateString),
   }
 
+  const dateRange = getDateRangeByPreset(params.datePreset, todayJstDateString)
   const query = {
-    to: formattedDate,
-    from: formattedDate,
+    to: dateRange.to,
+    from: dateRange.from,
     page: params.page,
     limit: params.limit,
     ...(params.media && { media: params.media }),
@@ -173,7 +239,7 @@ export default function useArticles(isLoggedIn = false) {
     setSearchParams(newParams)
   }
 
-  const handleFiltersApply = ({ media, readStatus }: FilterParams) => {
+  const handleFiltersApply = ({ media, readStatus, datePreset }: FilterParams) => {
     const newParams = new URLSearchParams(searchParams)
     if (media) {
       newParams.set('media', media)
@@ -186,6 +252,8 @@ export default function useArticles(isLoggedIn = false) {
     } else {
       newParams.delete('read_status')
     }
+
+    applyDatePresetToSearchParams(newParams, datePreset, todayJstDateString)
 
     clearPageParam(newParams)
     setSearchParams(newParams)
@@ -207,5 +275,6 @@ export default function useArticles(isLoggedIn = false) {
     handleFiltersApply,
     selectedMedia: params.media,
     selectedReadStatus: params.readStatus,
+    selectedDatePreset: params.datePreset,
   }
 }

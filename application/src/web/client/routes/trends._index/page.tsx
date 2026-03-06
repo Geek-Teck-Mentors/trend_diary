@@ -14,9 +14,10 @@ import {
 } from '@/web/client/components/shadcn/pagination'
 import LoadingSpinner from '../../components/ui/loading-spinner'
 import ArticleCard from './components/article-card'
-import MediaFilter, { MediaType } from './components/media-filter'
+import DatePresetFilter from './components/date-preset-filter'
+import MediaFilter, { type MediaType } from './components/media-filter'
 import ReadStatusFilter, { type ReadStatusType } from './components/read-status-filter'
-import type { Article } from './hooks/use-articles'
+import type { Article, DatePresetType } from './hooks/use-articles'
 
 type Props = {
   date: Date
@@ -27,9 +28,14 @@ type Props = {
   totalPages: number
   selectedMedia: MediaType
   selectedReadStatus: ReadStatusType
+  selectedDatePreset: DatePresetType
   toNextPage: (currentPage: number) => void
   toPreviousPage: (currentPage: number) => void
-  onApplyFilters: (filters: { media: MediaType; readStatus: ReadStatusType }) => void
+  onApplyFilters: (filters: {
+    media: MediaType
+    readStatus: ReadStatusType
+    datePreset: DatePresetType
+  }) => void
   onToggleRead: (articleId: string, isRead: boolean) => void
   isLoggedIn: boolean
 }
@@ -43,6 +49,7 @@ export default function TrendsPage({
   totalPages,
   selectedMedia,
   selectedReadStatus,
+  selectedDatePreset,
   toNextPage,
   toPreviousPage,
   onApplyFilters,
@@ -54,6 +61,7 @@ export default function TrendsPage({
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [draftMedia, setDraftMedia] = useState<MediaType>(selectedMedia)
   const [draftReadStatus, setDraftReadStatus] = useState<ReadStatusType>(selectedReadStatus)
+  const [draftDatePreset, setDraftDatePreset] = useState<DatePresetType>(selectedDatePreset)
 
   const isPrevDisabled = page <= 1
   const isNextDisabled = page >= totalPages
@@ -90,15 +98,19 @@ export default function TrendsPage({
   useEffect(() => {
     setDraftMedia(selectedMedia)
     setDraftReadStatus(selectedReadStatus)
-  }, [selectedMedia, selectedReadStatus])
+    setDraftDatePreset(selectedDatePreset)
+  }, [selectedMedia, selectedReadStatus, selectedDatePreset])
 
   const appliedFilterCount =
-    (selectedMedia ? 1 : 0) + (isLoggedIn && selectedReadStatus === 'unread' ? 1 : 0)
+    (selectedMedia ? 1 : 0) +
+    (isLoggedIn && selectedReadStatus === 'unread' ? 1 : 0) +
+    (selectedDatePreset !== 'today' ? 1 : 0)
 
   const handleToggleFilter = () => {
     if (!isFilterOpen) {
       setDraftMedia(selectedMedia)
       setDraftReadStatus(selectedReadStatus)
+      setDraftDatePreset(selectedDatePreset)
     }
     setIsFilterOpen(!isFilterOpen)
   }
@@ -106,13 +118,15 @@ export default function TrendsPage({
   const handleCancelFilter = () => {
     setDraftMedia(selectedMedia)
     setDraftReadStatus(selectedReadStatus)
+    setDraftDatePreset(selectedDatePreset)
     setIsFilterOpen(false)
   }
 
   const handleClearFilter = () => {
     setDraftMedia(null)
     setDraftReadStatus('all')
-    onApplyFilters({ media: null, readStatus: 'all' })
+    setDraftDatePreset('today')
+    onApplyFilters({ media: null, readStatus: 'all', datePreset: 'today' })
     if (isMobile) {
       setIsFilterOpen(false)
     }
@@ -120,7 +134,7 @@ export default function TrendsPage({
   }
 
   const handleApplyFilter = () => {
-    onApplyFilters({ media: draftMedia, readStatus: draftReadStatus })
+    onApplyFilters({ media: draftMedia, readStatus: draftReadStatus, datePreset: draftDatePreset })
     if (isMobile) {
       setIsFilterOpen(false)
     }
@@ -129,14 +143,17 @@ export default function TrendsPage({
 
   const handleDesktopMediaChange = (media: MediaType) => {
     setDraftMedia(media)
-    onApplyFilters({ media, readStatus: draftReadStatus })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    onApplyFilters({ media, readStatus: draftReadStatus, datePreset: draftDatePreset })
   }
 
   const handleDesktopReadStatusChange = (readStatus: ReadStatusType) => {
     setDraftReadStatus(readStatus)
-    onApplyFilters({ media: draftMedia, readStatus })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    onApplyFilters({ media: draftMedia, readStatus, datePreset: draftDatePreset })
+  }
+
+  const handleDesktopDatePresetChange = (datePreset: DatePresetType) => {
+    setDraftDatePreset(datePreset)
+    onApplyFilters({ media: draftMedia, readStatus: draftReadStatus, datePreset })
   }
 
   return (
@@ -171,12 +188,19 @@ export default function TrendsPage({
           </button>
           {isFilterOpen && (
             <div className='mt-4 space-y-4' data-slot='mobile-filter-panel'>
-              <div className='flex flex-wrap items-center gap-2'>
+              <div className='flex w-full flex-col items-start gap-2'>
                 <span className='text-sm font-medium text-gray-600'>媒体</span>
                 <MediaFilter selectedMedia={draftMedia} onMediaChange={setDraftMedia} />
               </div>
+              <div className='flex w-full flex-col items-start gap-2'>
+                <span className='text-sm font-medium text-gray-600'>日付</span>
+                <DatePresetFilter
+                  selectedDatePreset={draftDatePreset}
+                  onDatePresetChange={setDraftDatePreset}
+                />
+              </div>
               {isLoggedIn && (
-                <div className='flex flex-wrap items-center gap-2'>
+                <div className='flex w-full flex-col items-start gap-2'>
                   <span className='text-sm font-medium text-gray-600'>既読状態</span>
                   <ReadStatusFilter
                     selectedReadStatus={draftReadStatus}
@@ -219,6 +243,13 @@ export default function TrendsPage({
               <div className='flex flex-col gap-1'>
                 <span className='text-xs font-medium text-gray-600'>媒体</span>
                 <MediaFilter selectedMedia={draftMedia} onMediaChange={handleDesktopMediaChange} />
+              </div>
+              <div className='flex flex-col gap-1'>
+                <span className='text-xs font-medium text-gray-600'>日付</span>
+                <DatePresetFilter
+                  selectedDatePreset={draftDatePreset}
+                  onDatePresetChange={handleDesktopDatePresetChange}
+                />
               </div>
               {isLoggedIn && (
                 <div className='flex flex-col gap-1'>

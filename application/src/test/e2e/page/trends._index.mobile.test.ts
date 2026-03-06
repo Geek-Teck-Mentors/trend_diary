@@ -203,6 +203,18 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await trendsPage.expectArticleCount(QIITA_COUNT + ZENN_COUNT)
     })
 
+    test('7日を選択しても適用前は日付条件が反映されない', async ({ page }) => {
+      const mobileFilter = new MobileFilterPanel(page)
+      await mobileFilter.openPanel()
+      await mobileFilter.selectDatePreset('last7days')
+
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForUrl(/\/trends$/)
+      trendsPage.expectQueryParamNull('from')
+      trendsPage.expectQueryParamNull('to')
+      await trendsPage.expectArticleCount(QIITA_COUNT + ZENN_COUNT)
+    })
+
     test('Qiitaフィルターを選択して適用すると、Qiita記事のみが表示される', async ({ page }) => {
       const mobileFilter = new MobileFilterPanel(page)
       await mobileFilter.openPanel()
@@ -225,6 +237,19 @@ test.describe('記事一覧ページ(モバイル)', () => {
       await trendsPage.waitForUrl(/\/trends\?media=zenn$/)
       await trendsPage.expectArticleCount(ZENN_COUNT)
       await trendsPage.expectZennIconCount(ZENN_COUNT)
+    })
+
+    test('7日を選択して適用するとfrom/to付きURLで反映される', async ({ page }) => {
+      const mobileFilter = new MobileFilterPanel(page)
+      await mobileFilter.openPanel()
+      await mobileFilter.selectDatePreset('last7days')
+      await mobileFilter.apply()
+
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForUrl(/\/trends\?from=\d{4}-\d{2}-\d{2}&to=\d{4}-\d{2}-\d{2}$/)
+      trendsPage.expectQueryParamPresent('from')
+      trendsPage.expectQueryParamPresent('to')
+      await trendsPage.expectArticleCount(QIITA_COUNT + ZENN_COUNT)
     })
 
     test('クリアを押すと即時反映で全記事が表示され、パネルが閉じる', async ({ page }) => {
