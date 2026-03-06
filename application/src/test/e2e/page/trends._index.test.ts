@@ -7,6 +7,25 @@ import * as articleHelper from '@/test/helper/article'
 
 const ARTICLE_COUNT = 10
 
+function getTodayJstNoon(daysOffset = 0): Date {
+  const jstParts = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const year = jstParts.find((part) => part.type === 'year')?.value
+  const month = jstParts.find((part) => part.type === 'month')?.value
+  const day = jstParts.find((part) => part.type === 'day')?.value
+
+  if (!year || !month || !day) return new Date()
+
+  const date = new Date(`${year}-${month}-${day}T12:00:00+09:00`)
+  date.setUTCDate(date.getUTCDate() + daysOffset)
+  return date
+}
+
 test.describe('記事一覧ページ', () => {
   test.beforeEach(async ({ page }) => {
     const trendsPage = new TrendsPage(page)
@@ -164,6 +183,64 @@ test.describe('記事一覧ページ', () => {
       await trendsPage.waitForUrl(/\/trends$/)
       trendsPage.expectQueryParamNull('page')
       trendsPage.expectQueryParamNull('media')
+    })
+  })
+
+  test.describe('日付フィルター機能', () => {
+    const createdArticleIds: bigint[] = []
+
+    test.beforeAll(async () => {
+      const todayArticle = await articleHelper.createArticle({
+        media: 'qiita',
+        title: '日付フィルタ_当日',
+        createdAt: getTodayJstNoon(0),
+      })
+      const withinWeekArticle = await articleHelper.createArticle({
+        media: 'zenn',
+        title: '日付フィルタ_5日前',
+        createdAt: getTodayJstNoon(-5),
+      })
+      const outOfWeekArticle = await articleHelper.createArticle({
+        media: 'hatena',
+        title: '日付フィルタ_8日前',
+        createdAt: getTodayJstNoon(-8),
+      })
+      createdArticleIds.push(
+        todayArticle.articleId,
+        withinWeekArticle.articleId,
+        outOfWeekArticle.articleId,
+      )
+    })
+
+    test.afterAll(async () => {
+      await articleHelper.cleanUp(createdArticleIds)
+    })
+
+    test.beforeEach(async ({ page }) => {
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForArticleCards()
+    })
+
+    test('初期状態では当日記事のみ表示される', async ({ page }) => {
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.expectArticleCount(1)
+      await trendsPage.expectQiitaIconCount(1)
+      await trendsPage.expectZennIconCount(0)
+      await trendsPage.expectHatenaIconCount(0)
+      await trendsPage.waitForUrl(/\/trends$/)
+    })
+
+    test('7日を選択すると直近7日まで表示される', async ({ page }) => {
+      await page.locator("[data-slot='date-preset-filter-last7days']").click()
+
+      const trendsPage = new TrendsPage(page)
+      await trendsPage.waitForUrl(/\/trends\?from=\d{4}-\d{2}-\d{2}&to=\d{4}-\d{2}-\d{2}$/)
+      await trendsPage.expectArticleCount(2)
+      await trendsPage.expectQiitaIconCount(1)
+      await trendsPage.expectZennIconCount(1)
+      await trendsPage.expectHatenaIconCount(0)
+      trendsPage.expectQueryParamPresent('from')
+      trendsPage.expectQueryParamPresent('to')
     })
   })
 })

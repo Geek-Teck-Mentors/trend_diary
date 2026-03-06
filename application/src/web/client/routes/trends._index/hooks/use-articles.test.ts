@@ -72,6 +72,27 @@ const generateFakeResponse = (
   }
 }
 
+const toJstDateString = (rawDate: Date) => {
+  const jstParts = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(rawDate)
+
+  const year = jstParts.find((part) => part.type === 'year')?.value
+  const month = jstParts.find((part) => part.type === 'month')?.value
+  const day = jstParts.find((part) => part.type === 'day')?.value
+  if (!year || !month || !day) return ''
+  return `${year}-${month}-${day}`
+}
+
+const addJstDays = (baseDateString: string, days: number) => {
+  const baseDate = new Date(`${baseDateString}T00:00:00+09:00`)
+  baseDate.setUTCDate(baseDate.getUTCDate() + days)
+  return toJstDateString(baseDate)
+}
+
 // biome-ignore lint/suspicious/noExplicitAny: getApiClientForClientの型が面倒なのでanyを使用
 const mockGetApiClientForClient = getApiClientForClient as MockedFunction<any>
 type UseTrendsHook = ReturnType<typeof useArticles>
@@ -337,6 +358,163 @@ describe('useArticles', () => {
           { init: { credentials: 'include' } },
         )
       })
+    })
+  })
+
+  describe('日付プリセット', () => {
+    it('from/toが7日プリセットに一致する場合、selectedDatePresetがlast7daysになる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle()],
+        page: 1,
+        totalPages: 1,
+      })
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const today = toJstDateString(new Date())
+      const last7daysFrom = addJstDays(today, -6)
+      const { result } = setupHook([`/?from=${last7daysFrom}&to=${today}`])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(result.current.selectedDatePreset).toBe('last7days')
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+        {
+          query: {
+            from: last7daysFrom,
+            to: today,
+            page: 1,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+    })
+
+    it('from/toがプリセット外の場合、todayとしてAPIが呼ばれる', async () => {
+      const fakeResponse = generateFakeResponse({
+        articles: [generateFakeArticle()],
+        page: 1,
+        totalPages: 1,
+      })
+      mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
+
+      const today = toJstDateString(new Date())
+      const customFrom = addJstDays(today, -4)
+      const customTo = addJstDays(today, -1)
+      const { result } = setupHook([`/?from=${customFrom}&to=${customTo}`])
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(result.current.selectedDatePreset).toBe('today')
+      expect(mockApiClient.articles.$get).toHaveBeenCalledWith(
+        {
+          query: {
+            from: today,
+            to: today,
+            page: 1,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+    })
+
+    it('handleFiltersApplyで7日を適用するとfrom/to付きでAPIが呼ばれる', async () => {
+      const initialResponse = generateFakeResponse({
+        page: 2,
+        totalPages: 3,
+      })
+      const filteredResponse = generateFakeResponse({
+        page: 1,
+        totalPages: 1,
+      })
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
+
+      const { result } = setupHook(['/?page=2'], { isLoggedIn: true })
+
+      await waitFor(() => {
+        expect(result.current.page).toBe(2)
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(filteredResponse)
+
+      await act(async () => {
+        result.current.handleFiltersApply({
+          media: 'qiita',
+          readStatus: 'unread',
+          datePreset: 'last7days',
+        })
+      })
+
+      const today = toJstDateString(new Date())
+      const last7daysFrom = addJstDays(today, -6)
+
+      await waitFor(() => {
+        expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+          {
+            query: {
+              from: last7daysFrom,
+              to: today,
+              page: 1,
+              limit: 20,
+              media: 'qiita',
+              read_status: '0',
+            },
+          },
+          { init: { credentials: 'include' } },
+        )
+      })
+    })
+
+    it('handleFiltersApplyでtodayを適用するとselectedDatePresetがtodayになる', async () => {
+      const today = toJstDateString(new Date())
+      const last7daysFrom = addJstDays(today, -6)
+      const initialResponse = generateFakeResponse({
+        page: 2,
+        totalPages: 3,
+      })
+      const filteredResponse = generateFakeResponse({
+        page: 1,
+        totalPages: 1,
+      })
+      mockApiClient.articles.$get.mockResolvedValueOnce(initialResponse)
+
+      const { result } = setupHook([`/?from=${last7daysFrom}&to=${today}&page=2`], {
+        isLoggedIn: true,
+      })
+
+      await waitFor(() => {
+        expect(result.current.selectedDatePreset).toBe('last7days')
+      })
+
+      mockApiClient.articles.$get.mockResolvedValueOnce(filteredResponse)
+
+      await act(async () => {
+        result.current.handleFiltersApply({
+          media: null,
+          readStatus: 'all',
+          datePreset: 'today',
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current.selectedDatePreset).toBe('today')
+      })
+      expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
+        {
+          query: {
+            from: today,
+            to: today,
+            page: 1,
+            limit: 20,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
     })
   })
 
@@ -798,7 +976,11 @@ describe('useArticles', () => {
       mockApiClient.articles.$get.mockResolvedValueOnce(filteredResponse)
 
       await act(async () => {
-        result.current.handleFiltersApply({ media: 'qiita', readStatus: 'unread' })
+        result.current.handleFiltersApply({
+          media: 'qiita',
+          readStatus: 'unread',
+          datePreset: 'today',
+        })
       })
 
       await waitFor(() => {
@@ -838,7 +1020,7 @@ describe('useArticles', () => {
       mockApiClient.articles.$get.mockResolvedValueOnce(clearedResponse)
 
       await act(async () => {
-        result.current.handleFiltersApply({ media: null, readStatus: 'all' })
+        result.current.handleFiltersApply({ media: null, readStatus: 'all', datePreset: 'today' })
       })
 
       await waitFor(() => {
