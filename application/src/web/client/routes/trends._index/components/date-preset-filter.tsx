@@ -9,8 +9,8 @@ type Props = {
 
 const datePresetOptions = [
   { value: 'today', label: '今日', dataSlot: 'date-preset-filter-today' },
-  { value: 'last3days', label: '3日', dataSlot: 'date-preset-filter-last3days' },
-  { value: 'last7days', label: '7日', dataSlot: 'date-preset-filter-last7days' },
+  { value: 'last3days', label: '3日前', dataSlot: 'date-preset-filter-last3days' },
+  { value: 'last7days', label: '7日前', dataSlot: 'date-preset-filter-last7days' },
 ] as const satisfies ReadonlyArray<{
   value: DatePresetType
   label: string
