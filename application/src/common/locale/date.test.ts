@@ -1,3 +1,4 @@
+import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { addJstDays, toJaDateString, toJstDateString } from './date'
 
 describe('Common Date Module', () => {
@@ -36,22 +37,37 @@ describe('Common Date Module', () => {
   describe('toJstDateString', () => {
     it('DateをJSTのYYYY-MM-DD形式に変換できること', () => {
       const result = toJstDateString(new Date('2024-01-01T00:00:00Z'))
-      expect(result).toBe('2024-01-01')
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toBe('2024-01-01')
+      }
     })
 
-    it('無効なDateの場合はエラーになること', () => {
-      expect(() => toJstDateString(new Date('invalid-date'))).toThrow('無効な日付です')
+    it('無効なDateの場合はfailureを返すこと', () => {
+      const result = toJstDateString(new Date('invalid-date'))
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error.message).toBe('無効な日付です')
+      }
     })
   })
 
   describe('addJstDays', () => {
     it('JST基準で日付加算できること', () => {
       const result = addJstDays('2024-01-01', -1)
-      expect(result).toBe('2023-12-31')
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toBe('2023-12-31')
+      }
     })
 
-    it('不正な日付文字列の場合はエラーになること', () => {
-      expect(() => addJstDays('invalid', 1)).toThrow('不正な日付文字列です')
+    it('不正な日付文字列の場合はfailureを返し、詳細メッセージを保持すること', () => {
+      const invalidInput = 'invalid'
+      const result = addJstDays(invalidInput, 1)
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error.message).toBe(`不正な日付文字列です: ${invalidInput}`)
+      }
     })
   })
 })

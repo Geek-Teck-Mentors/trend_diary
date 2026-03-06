@@ -1,11 +1,13 @@
 import { faker } from '@faker-js/faker'
+import { isFailure } from '@yuukihayashi0510/core'
 import { toJstDateString } from '@/common/locale/date'
 import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
 import { fromDbId, toDbId, toDbIds } from '@/infrastructure/rdb-id'
 import { getTestRdb } from './rdb'
 
 function getTodayJstNoon(): Date {
-  const todayJst = toJstDateString(new Date())
+  const todayJstResult = toJstDateString(new Date())
+  const todayJst = isFailure(todayJstResult) ? '1970-01-01' : todayJstResult.data
   // INFO: trends APIは日付フィルタをJSTで評価するため、E2EデータもJST当日内に固定する
   return new Date(`${todayJst}T12:00:00+09:00`)
 }

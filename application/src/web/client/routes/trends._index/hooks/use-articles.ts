@@ -1,3 +1,4 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import useSWR from 'swr'
@@ -22,7 +23,8 @@ export type Article = Omit<ArticleOutput, 'articleId'> & {
   isRead?: boolean
 }
 
-export type DatePresetType = 'today' | 'last3days' | 'last7days'
+export const DATE_PRESETS = ['today', 'last3days', 'last7days'] as const
+export type DatePresetType = (typeof DATE_PRESETS)[number]
 
 type Params = {
   page: number
@@ -52,14 +54,30 @@ const datePresetMap: Record<DatePresetType, number> = {
   last3days: 2,
   last7days: 6,
 }
-const datePresets = Object.keys(datePresetMap) as DatePresetType[]
+const datePresets = DATE_PRESETS
 
 const isValidDateString = (value: string | null) => !!value && DATE_STRING_REGEX.test(value)
 
-const getDateRangeByPreset = (datePreset: DatePresetType, todayJstDateString: string) => ({
-  from: addJstDays(todayJstDateString, -datePresetMap[datePreset]),
-  to: todayJstDateString,
-})
+const getDateRangeByPreset = (datePreset: DatePresetType, todayJstDateString: string) => {
+  const fromDateResult = addJstDays(todayJstDateString, -datePresetMap[datePreset])
+  if (isFailure(fromDateResult)) {
+    return { from: todayJstDateString, to: todayJstDateString }
+  }
+
+  return {
+    from: fromDateResult.data,
+    to: todayJstDateString,
+  }
+}
+
+const getTodayJstDateString = (baseDate: Date): string => {
+  const todayJstDateResult = toJstDateString(baseDate)
+  if (isFailure(todayJstDateResult)) {
+    return baseDate.toISOString().slice(0, 10)
+  }
+
+  return todayJstDateResult.data
+}
 
 const parseDatePreset = (
   fromParam: string | null,
@@ -98,7 +116,7 @@ export default function useArticles(isLoggedIn = false) {
   const { client, apiCall } = createSWRFetcher()
 
   const date = new Date()
-  const todayJstDateString = toJstDateString(date)
+  const todayJstDateString = getTodayJstDateString(date)
 
   const pageParam = searchParams.get('page')
   const limitParam = searchParams.get('limit')

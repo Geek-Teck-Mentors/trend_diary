@@ -1,5 +1,6 @@
 import type { RenderHookResult } from '@testing-library/react'
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { isFailure } from '@yuukihayashi0510/core'
 import type { ReactNode } from 'react'
 import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
@@ -71,6 +72,24 @@ const generateFakeResponse = (
       hasPrev: (params?.page || 1) > 1,
     }),
   }
+}
+
+const resolveJstDateString = (rawDate: Date): string => {
+  const result = toJstDateString(rawDate)
+  if (isFailure(result)) {
+    return '1970-01-01'
+  }
+
+  return result.data
+}
+
+const resolveJstDateWithOffset = (baseDateString: string, days: number): string => {
+  const result = addJstDays(baseDateString, days)
+  if (isFailure(result)) {
+    return baseDateString
+  }
+
+  return result.data
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: getApiClientForClientの型が面倒なのでanyを使用
@@ -350,8 +369,8 @@ describe('useArticles', () => {
       })
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
-      const today = toJstDateString(new Date())
-      const last7daysFrom = addJstDays(today, -6)
+      const today = resolveJstDateString(new Date())
+      const last7daysFrom = resolveJstDateWithOffset(today, -6)
       const { result } = setupHook([`/?from=${last7daysFrom}&to=${today}`])
 
       await waitFor(() => {
@@ -380,9 +399,9 @@ describe('useArticles', () => {
       })
       mockApiClient.articles.$get.mockResolvedValue(fakeResponse)
 
-      const today = toJstDateString(new Date())
-      const customFrom = addJstDays(today, -4)
-      const customTo = addJstDays(today, -1)
+      const today = resolveJstDateString(new Date())
+      const customFrom = resolveJstDateWithOffset(today, -4)
+      const customTo = resolveJstDateWithOffset(today, -1)
       const { result } = setupHook([`/?from=${customFrom}&to=${customTo}`])
 
       await waitFor(() => {
@@ -430,8 +449,8 @@ describe('useArticles', () => {
         })
       })
 
-      const today = toJstDateString(new Date())
-      const last7daysFrom = addJstDays(today, -6)
+      const today = resolveJstDateString(new Date())
+      const last7daysFrom = resolveJstDateWithOffset(today, -6)
 
       await waitFor(() => {
         expect(mockApiClient.articles.$get).toHaveBeenLastCalledWith(
@@ -451,8 +470,8 @@ describe('useArticles', () => {
     })
 
     it('handleFiltersApplyでtodayを適用するとselectedDatePresetがtodayになる', async () => {
-      const today = toJstDateString(new Date())
-      const last7daysFrom = addJstDays(today, -6)
+      const today = resolveJstDateString(new Date())
+      const last7daysFrom = resolveJstDateWithOffset(today, -6)
       const initialResponse = generateFakeResponse({
         page: 2,
         totalPages: 3,
