@@ -144,19 +144,16 @@ export default function TrendsPage({
   const handleDesktopMediaChange = (media: MediaType) => {
     setDraftMedia(media)
     onApplyFilters({ media, readStatus: draftReadStatus, datePreset: draftDatePreset })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDesktopReadStatusChange = (readStatus: ReadStatusType) => {
     setDraftReadStatus(readStatus)
     onApplyFilters({ media: draftMedia, readStatus, datePreset: draftDatePreset })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDesktopDatePresetChange = (datePreset: DatePresetType) => {
     setDraftDatePreset(datePreset)
     onApplyFilters({ media: draftMedia, readStatus: draftReadStatus, datePreset })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (

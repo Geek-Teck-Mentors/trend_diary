@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router'
 import { toast } from 'sonner'
 import { SWRConfig } from 'swr'
 import type { MockedFunction } from 'vitest'
+import { addJstDays, toJstDateString } from '@/common/locale/date'
 import getApiClientForClient from '@/infrastructure/api'
 import useArticles, { type Article } from './use-articles'
 
@@ -70,29 +71,6 @@ const generateFakeResponse = (
       hasPrev: (params?.page || 1) > 1,
     }),
   }
-}
-
-const toJstDateString = (rawDate: Date) => {
-  const jstParts = new Intl.DateTimeFormat('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(rawDate)
-
-  const year = jstParts.find((part) => part.type === 'year')?.value
-  const month = jstParts.find((part) => part.type === 'month')?.value
-  const day = jstParts.find((part) => part.type === 'day')?.value
-  if (!year || !month || !day) {
-    throw new Error('JST日付の取得に失敗しました')
-  }
-  return `${year}-${month}-${day}`
-}
-
-const addJstDays = (baseDateString: string, days: number) => {
-  const baseDate = new Date(`${baseDateString}T00:00:00+09:00`)
-  baseDate.setUTCDate(baseDate.getUTCDate() + days)
-  return toJstDateString(baseDate)
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: getApiClientForClientの型が面倒なのでanyを使用

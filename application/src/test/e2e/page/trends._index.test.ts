@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { addJstDays, toJstDateString } from '@/common/locale/date'
 import { ArticleDrawer } from '@/test/e2e/pom/components/article-drawer'
 import { DesktopMediaFilter } from '@/test/e2e/pom/components/desktop-media-filter'
 import { SUPPORTED_ARTICLE_URL_PATTERN } from '@/test/e2e/pom/constants'
@@ -8,24 +9,9 @@ import * as articleHelper from '@/test/helper/article'
 const ARTICLE_COUNT = 10
 
 function getTodayJstNoon(daysOffset = 0): Date {
-  const jstParts = new Intl.DateTimeFormat('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date())
-
-  const year = jstParts.find((part) => part.type === 'year')?.value
-  const month = jstParts.find((part) => part.type === 'month')?.value
-  const day = jstParts.find((part) => part.type === 'day')?.value
-
-  if (!year || !month || !day) {
-    throw new Error('JST日付の取得に失敗しました')
-  }
-
-  const date = new Date(`${year}-${month}-${day}T12:00:00+09:00`)
-  date.setUTCDate(date.getUTCDate() + daysOffset)
-  return date
+  const today = toJstDateString(new Date())
+  const dateString = addJstDays(today, daysOffset)
+  return new Date(`${dateString}T12:00:00+09:00`)
 }
 
 test.describe('記事一覧ページ', () => {
