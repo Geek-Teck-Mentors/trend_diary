@@ -191,11 +191,11 @@ export default function TrendsPage({
           </button>
           {isFilterOpen && (
             <div className='mt-4 space-y-4' data-slot='mobile-filter-panel'>
-              <div className='flex flex-wrap items-center gap-2'>
+              <div className='flex w-full flex-col items-start gap-2'>
                 <span className='text-sm font-medium text-gray-600'>媒体</span>
                 <MediaFilter selectedMedia={draftMedia} onMediaChange={setDraftMedia} />
               </div>
-              <div className='flex flex-wrap items-center gap-2'>
+              <div className='flex w-full flex-col items-start gap-2'>
                 <span className='text-sm font-medium text-gray-600'>日付</span>
                 <DatePresetFilter
                   selectedDatePreset={draftDatePreset}
@@ -203,7 +203,7 @@ export default function TrendsPage({
                 />
               </div>
               {isLoggedIn && (
-                <div className='flex flex-wrap items-center gap-2'>
+                <div className='flex w-full flex-col items-start gap-2'>
                   <span className='text-sm font-medium text-gray-600'>既読状態</span>
                   <ReadStatusFilter
                     selectedReadStatus={draftReadStatus}

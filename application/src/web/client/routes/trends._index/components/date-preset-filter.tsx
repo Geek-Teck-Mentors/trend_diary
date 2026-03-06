@@ -19,7 +19,7 @@ const datePresetOptions = [
 
 export default function DatePresetFilter({ selectedDatePreset, onDatePresetChange }: Props) {
   return (
-    <div className='flex items-center gap-2' data-slot='date-preset-filter'>
+    <div className='flex flex-wrap items-center gap-2' data-slot='date-preset-filter'>
       {datePresetOptions.map((option) => {
         const isSelected = selectedDatePreset === option.value
         return (
