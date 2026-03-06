@@ -169,7 +169,7 @@ describe('GET /api/articles', () => {
     })
 
     it('from/toパラメータの範囲検索（該当なし）', async () => {
-      const res = await requestGetArticles('from=2025-05-13&to=2025-05-14')
+      const res = await requestGetArticles('from=2025-05-14&to=2025-05-15')
 
       expect(res.status).toBe(200)
       const data: ArticleListResponse = await res.json()
