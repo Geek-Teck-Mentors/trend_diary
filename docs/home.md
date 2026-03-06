@@ -10,7 +10,7 @@
 
 ## 技術スタック
 
-- **ランタイム**: Cloudflare Workers + Supabase Functions
+- **ランタイム**: Cloudflare Workers
 - **バックエンド**: Hono + React Router v7
 - **フロントエンド**: React + TailwindCSS v4 + shadcn/ui
 - **データベース**: PostgreSQL + Prisma ORM
