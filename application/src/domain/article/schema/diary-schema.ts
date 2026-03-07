@@ -1,0 +1,36 @@
+import { z } from 'zod'
+import type { OffsetPaginationResult } from '@/common/pagination'
+import { ARTICLE_MEDIA } from '@/domain/article/media'
+
+const mediaEnum = z.enum(ARTICLE_MEDIA)
+
+export const diarySummarySchema = z.object({
+  read: z.number().int().min(0),
+  skip: z.number().int().min(0),
+})
+
+export const diarySourceSchema = z.object({
+  media: mediaEnum,
+  read: z.number().int().min(0),
+  skip: z.number().int().min(0),
+})
+
+export const diaryReadItemSchema = z.object({
+  readHistoryId: z.bigint(),
+  articleId: z.bigint(),
+  media: mediaEnum,
+  title: z.string(),
+  url: z.string().url(),
+  readAt: z.date(),
+})
+
+export type DiarySummary = z.infer<typeof diarySummarySchema>
+export type DiarySource = z.infer<typeof diarySourceSchema>
+export type DiaryReadItem = z.infer<typeof diaryReadItemSchema>
+
+export type DailyDiary = {
+  date: string
+  summary: DiarySummary
+  sources: DiarySource[]
+  reads: OffsetPaginationResult<DiaryReadItem>
+}
