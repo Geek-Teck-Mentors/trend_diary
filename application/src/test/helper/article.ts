@@ -53,6 +53,9 @@ export async function deleteArticle(articleId: bigint): Promise<void> {
   await rdb.readHistory.deleteMany({
     where: { articleId: toDbId(articleId) },
   })
+  await rdb.skippedArticle.deleteMany({
+    where: { articleId: toDbId(articleId) },
+  })
   await rdb.article.deleteMany({
     where: { articleId: toDbId(articleId) },
   })
@@ -107,6 +110,22 @@ export async function deleteReadHistory(activeUserId: bigint, articleId: bigint)
   })
 }
 
+export async function createSkippedArticle(activeUserId: bigint, articleId: bigint) {
+  const rdb = getTestRdb()
+  const skippedArticle = await rdb.skippedArticle.create({
+    data: {
+      activeUserId: toDbId(activeUserId),
+      articleId: toDbId(articleId),
+    },
+  })
+  return {
+    ...skippedArticle,
+    skippedArticleId: fromDbId(skippedArticle.skippedArticleId),
+    activeUserId: fromDbId(skippedArticle.activeUserId),
+    articleId: fromDbId(skippedArticle.articleId),
+  }
+}
+
 export async function countReadHistories(activeUserId: bigint, articleId: bigint): Promise<number> {
   const rdb = getTestRdb()
   const count = await rdb.readHistory.count({
@@ -122,6 +141,9 @@ export async function cleanUp(articleIds: bigint[]): Promise<void> {
   const rdb = getTestRdb()
   if (articleIds.length > 0) {
     const dbArticleIds = toDbIds(articleIds)
+    await rdb.skippedArticle.deleteMany({
+      where: { articleId: { in: dbArticleIds } },
+    })
     await rdb.readHistory.deleteMany({
       where: { articleId: { in: dbArticleIds } },
     })

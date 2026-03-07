@@ -36,17 +36,70 @@ describe('CommandImpl', () => {
       }
     })
 
-    it('DBエラー時は失敗を返す', async () => {
-      const dbError = new Error('Database connection failed')
-      mockDb.readHistory.create.mockRejectedValue(dbError)
+    it.each([{ errorMessage: 'Database connection failed' }])(
+      'DBエラー時は失敗を返す',
+      async ({ errorMessage }) => {
+        mockDb.readHistory.create.mockRejectedValue(new Error(errorMessage))
 
-      const result = await commandImpl.createReadHistory(1n, 100n, new Date('2024-01-15T09:30:00Z'))
+        const result = await commandImpl.createReadHistory(
+          1n,
+          100n,
+          new Date('2024-01-15T09:30:00Z'),
+        )
 
-      expect(isFailure(result)).toBe(true)
-      if (isFailure(result)) {
-        expect(result.error.message).toBe('Database connection failed')
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
+          expect(result.error.message).toBe(errorMessage)
+        }
+      },
+    )
+  })
+
+  describe('createSkippedArticle', () => {
+    it('DBにはnumberで渡し、戻り値はbigintに変換する', async () => {
+      mockDb.skippedArticle.upsert.mockResolvedValue({
+        skippedArticleId: 10,
+        activeUserId: 1,
+        articleId: 100,
+        createdAt: new Date('2024-01-15T09:30:00Z'),
+      })
+
+      const result = await commandImpl.createSkippedArticle(1n, 100n)
+
+      expect(mockDb.skippedArticle.upsert).toHaveBeenCalledWith({
+        where: {
+          articleIdActiveUserId: {
+            articleId: 100,
+            activeUserId: 1,
+          },
+        },
+        update: {},
+        create: {
+          activeUserId: 1,
+          articleId: 100,
+        },
+      })
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data.skippedArticleId).toBe(10n)
+        expect(result.data.activeUserId).toBe(1n)
+        expect(result.data.articleId).toBe(100n)
       }
     })
+
+    it.each([{ errorMessage: 'Database connection failed' }])(
+      'DBエラー時は失敗を返す',
+      async ({ errorMessage }) => {
+        mockDb.skippedArticle.upsert.mockRejectedValue(new Error(errorMessage))
+
+        const result = await commandImpl.createSkippedArticle(1n, 100n)
+
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
+          expect(result.error.message).toBe(errorMessage)
+        }
+      },
+    )
   })
 
   describe('deleteAllReadHistory', () => {
@@ -61,16 +114,18 @@ describe('CommandImpl', () => {
       expect(isSuccess(result)).toBe(true)
     })
 
-    it('DBエラー時は失敗を返す', async () => {
-      const dbError = new Error('Database connection failed')
-      mockDb.readHistory.deleteMany.mockRejectedValue(dbError)
+    it.each([{ errorMessage: 'Database connection failed' }])(
+      'DBエラー時は失敗を返す',
+      async ({ errorMessage }) => {
+        mockDb.readHistory.deleteMany.mockRejectedValue(new Error(errorMessage))
 
-      const result = await commandImpl.deleteAllReadHistory(1n, 100n)
+        const result = await commandImpl.deleteAllReadHistory(1n, 100n)
 
-      expect(isFailure(result)).toBe(true)
-      if (isFailure(result)) {
-        expect(result.error.message).toBe('Database connection failed')
-      }
-    })
+        expect(isFailure(result)).toBe(true)
+        if (isFailure(result)) {
+          expect(result.error.message).toBe(errorMessage)
+        }
+      },
+    )
   })
 })

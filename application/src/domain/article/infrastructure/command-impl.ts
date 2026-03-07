@@ -2,6 +2,7 @@ import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukih
 import { ServerError } from '@/common/errors'
 import { Command } from '@/domain/article/repository'
 import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
+import type { SkippedArticle } from '@/domain/article/schema/skipped-article-schema'
 import { RdbClient } from '@/infrastructure/rdb'
 import { fromDbId, toDbId } from '@/infrastructure/rdb-id'
 
@@ -55,5 +56,40 @@ export default class CommandImpl implements Command {
     }
 
     return success(undefined)
+  }
+
+  async createSkippedArticle(
+    activeUserId: bigint,
+    articleId: bigint,
+  ): AsyncResult<SkippedArticle, Error> {
+    const dbActiveUserId = toDbId(activeUserId)
+    const dbArticleId = toDbId(articleId)
+
+    const result = await wrapAsyncCall(() =>
+      this.db.skippedArticle.upsert({
+        where: {
+          articleIdActiveUserId: {
+            articleId: dbArticleId,
+            activeUserId: dbActiveUserId,
+          },
+        },
+        update: {},
+        create: {
+          activeUserId: dbActiveUserId,
+          articleId: dbArticleId,
+        },
+      }),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
+    }
+
+    const skippedArticle = result.data
+    return success({
+      skippedArticleId: fromDbId(skippedArticle.skippedArticleId),
+      activeUserId: fromDbId(skippedArticle.activeUserId),
+      articleId: fromDbId(skippedArticle.articleId),
+      createdAt: skippedArticle.createdAt,
+    })
   }
 }

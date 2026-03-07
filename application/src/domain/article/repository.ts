@@ -2,9 +2,11 @@ import { AsyncResult } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
+import type { ArticleMedia } from '@/domain/article/media'
 import type { Article, ArticleWithOptionalReadStatus } from './schema/article-schema'
 import { QueryParams } from './schema/query-schema'
 import type { ReadHistory } from './schema/read-history-schema'
+import type { SkippedArticle } from './schema/skipped-article-schema'
 
 export interface Query {
   /**
@@ -17,6 +19,12 @@ export interface Query {
     activeUserId?: bigint,
   ): AsyncResult<OffsetPaginationResult<ArticleWithOptionalReadStatus>, ServerError>
 
+  getUnreadDigestionArticles(
+    activeUserId: bigint,
+    targetDateJst: string,
+    media?: ArticleMedia,
+  ): AsyncResult<Article[], ServerError>
+
   findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError>
 }
 
@@ -26,6 +34,8 @@ export interface Command {
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error>
+
+  createSkippedArticle(activeUserId: bigint, articleId: bigint): AsyncResult<SkippedArticle, Error>
 
   deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error>
 }

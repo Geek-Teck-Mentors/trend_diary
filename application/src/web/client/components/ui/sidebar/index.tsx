@@ -1,4 +1,4 @@
-import { TrendingUp } from 'lucide-react'
+import { Inbox, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { InternalPath } from '../../../routes'
 import {
@@ -27,12 +27,19 @@ export const menuItems: MenuItem[] = [
     url: '/trends',
     icon: TrendingUp,
   },
-  // {
-  //   title: '読んだ記事',
-  //   url: '#',
-  //   icon: Newspaper,
-  // },
 ]
+
+const loggedInMenuItems: MenuItem[] = [
+  {
+    title: '未読消化',
+    url: '/inbox',
+    icon: Inbox,
+  },
+]
+
+export function getVisibleMenuItems(isLoggedIn: boolean): MenuItem[] {
+  return isLoggedIn ? [...menuItems, ...loggedInMenuItems] : menuItems
+}
 
 type Props = {
   isLoggedIn: boolean
@@ -41,6 +48,7 @@ type Props = {
 export default function AppSidebar({ isLoggedIn }: Props) {
   const navigate = useNavigate()
   const { handleLogout, isLoading } = useSidebar(navigate)
+  const visibleMenuItems = getVisibleMenuItems(isLoggedIn)
 
   return (
     <div className='hidden md:block'>
@@ -58,7 +66,7 @@ export default function AppSidebar({ isLoggedIn }: Props) {
           <SidebarGroup>
             <SidebarGroupLabel>Application</SidebarGroupLabel>
             <SidebarGroupContent>
-              <NavMenu variant='sidebar' menuItems={menuItems} />
+              <NavMenu variant='sidebar' menuItems={visibleMenuItems} />
             </SidebarGroupContent>
           </SidebarGroup>
           {isLoggedIn && (

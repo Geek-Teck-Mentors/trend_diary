@@ -166,4 +166,60 @@ describe('QueryImpl', () => {
       }
     })
   })
+
+  describe('getUnreadDigestionArticles', () => {
+    it.each([
+      {
+        name: 'createdAtがstring',
+        createdAt: '2026-03-07T01:00:00.000Z',
+        expectedIso: '2026-03-07T01:00:00.000Z',
+        media: undefined,
+      },
+      {
+        name: 'createdAtがDate',
+        createdAt: new Date('2026-03-07T02:00:00.000Z'),
+        expectedIso: '2026-03-07T02:00:00.000Z',
+        media: 'qiita' as const,
+      },
+      {
+        name: 'createdAtがbigint(epoch ms)',
+        createdAt: 1_772_852_400_000n,
+        expectedIso: '2026-03-07T03:00:00.000Z',
+        media: 'zenn' as const,
+      },
+    ])('$name をArticleへ変換できる', async ({ createdAt, expectedIso, media }) => {
+      mockDb.$queryRaw.mockResolvedValue([
+        {
+          articleId: 1,
+          media: 'qiita',
+          title: '未読消化対象',
+          author: '山田太郎',
+          description: '未読消化の説明',
+          url: 'https://example.com/unread',
+          createdAt,
+        },
+      ])
+
+      const result = await queryImpl.getUnreadDigestionArticles(10n, '2026-03-07', media)
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toHaveLength(1)
+        expect(result.data[0].articleId).toBe(1n)
+        expect(result.data[0].title).toBe('未読消化対象')
+        expect(result.data[0].createdAt.toISOString()).toBe(expectedIso)
+      }
+    })
+
+    it('DB取得失敗時はエラーを返す', async () => {
+      mockDb.$queryRaw.mockRejectedValue(new Error('unread digestion failed'))
+
+      const result = await queryImpl.getUnreadDigestionArticles(10n, '2026-03-07')
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error.message).toBe('unread digestion failed')
+      }
+    })
+  })
 })

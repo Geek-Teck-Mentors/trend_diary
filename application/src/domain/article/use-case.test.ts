@@ -7,6 +7,7 @@ import { Command, Query } from '@/domain/article/repository'
 import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
 import { QueryParams } from '@/domain/article/schema/query-schema'
 import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
+import type { SkippedArticle } from '@/domain/article/schema/skipped-article-schema'
 import { UseCase } from './use-case'
 
 const mockArticle: Article = {
@@ -386,6 +387,73 @@ describe('ArticleUseCase', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error).toBe(dbError)
+      }
+    })
+  })
+
+  describe('getUnreadDigestionArticles', () => {
+    it.each([
+      {
+        name: 'media未指定',
+        media: undefined,
+      },
+      {
+        name: 'media指定あり',
+        media: 'qiita' as const,
+      },
+    ])('$name で当日JST日付を使って取得できる', async ({ media }) => {
+      queryMock.getUnreadDigestionArticles.mockResolvedValue(success([mockArticle]))
+      const now = new Date('2026-03-07T00:00:00.000Z')
+
+      const result = await useCase.getUnreadDigestionArticles(100n, media, now)
+
+      expect(isSuccess(result)).toBe(true)
+      expect(queryMock.getUnreadDigestionArticles).toHaveBeenCalledWith(100n, '2026-03-07', media)
+    })
+  })
+
+  describe('createSkippedArticle', () => {
+    it('記事が存在する場合にskip登録できる', async () => {
+      const activeUserId = 100n
+      const articleId = 200n
+      const mockSkippedArticle: SkippedArticle = {
+        skippedArticleId: 1n,
+        activeUserId,
+        articleId,
+        createdAt: new Date(),
+      }
+
+      queryMock.findArticleById.mockResolvedValue(success(mockArticle))
+      commandMock.createSkippedArticle.mockResolvedValue(success(mockSkippedArticle))
+
+      const result = await useCase.createSkippedArticle(activeUserId, articleId)
+
+      expect(isSuccess(result)).toBe(true)
+      expect(commandMock.createSkippedArticle).toHaveBeenCalledWith(
+        activeUserId,
+        mockArticle.articleId,
+      )
+    })
+
+    it.each([
+      {
+        name: '記事が存在しない',
+        arrange: () => queryMock.findArticleById.mockResolvedValue(success(null)),
+        expectedError: NotFoundError,
+      },
+      {
+        name: '記事検索で失敗',
+        arrange: () => queryMock.findArticleById.mockResolvedValue(failure(new ServerError('db'))),
+        expectedError: ServerError,
+      },
+    ])('$name 場合は失敗を返す', async ({ arrange, expectedError }) => {
+      arrange()
+
+      const result = await useCase.createSkippedArticle(100n, 200n)
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error).toBeInstanceOf(expectedError)
       }
     })
   })

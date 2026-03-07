@@ -1,12 +1,15 @@
 import { AsyncResult, failure, isFailure, success } from '@yuukihayashi0510/core'
 import { NotFoundError, ServerError } from '@/common/errors'
+import { toJstDateString } from '@/common/locale/date'
 import { DEFAULT_LIMIT, DEFAULT_PAGE, OffsetPaginationResult } from '@/common/pagination'
 import extractTrimmed from '@/common/sanitization'
 import { isNull } from '@/common/types/utility'
+import type { ArticleMedia } from '@/domain/article/media'
 import { Command, Query } from '@/domain/article/repository'
 import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
 import { QueryParams } from '@/domain/article/schema/query-schema'
 import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
+import type { SkippedArticle } from '@/domain/article/schema/skipped-article-schema'
 
 export class UseCase {
   constructor(
@@ -42,17 +45,47 @@ export class UseCase {
     articleId: bigint,
     readAt: Date,
   ): AsyncResult<ReadHistory, Error> {
-    const articleValidation = await this.validateArticleExists(articleId)
-    if (isFailure(articleValidation)) return articleValidation
+    return this.withValidatedArticle(articleId, () =>
+      this.command.createReadHistory(activeUserId, articleId, readAt),
+    )
+  }
 
-    return this.command.createReadHistory(activeUserId, articleId, readAt)
+  async getUnreadDigestionArticles(
+    activeUserId: bigint,
+    media?: ArticleMedia,
+    now: Date = new Date(),
+  ): AsyncResult<Article[], Error> {
+    const targetDateJstResult = toJstDateString(now)
+    if (isFailure(targetDateJstResult)) {
+      return failure(new ServerError(targetDateJstResult.error))
+    }
+
+    return this.query.getUnreadDigestionArticles(activeUserId, targetDateJstResult.data, media)
+  }
+
+  async createSkippedArticle(
+    activeUserId: bigint,
+    articleId: bigint,
+  ): AsyncResult<SkippedArticle, Error> {
+    return this.withValidatedArticle(articleId, (validatedArticleId) =>
+      this.command.createSkippedArticle(activeUserId, validatedArticleId),
+    )
   }
 
   async deleteAllReadHistory(activeUserId: bigint, articleId: bigint): AsyncResult<void, Error> {
+    return this.withValidatedArticle(articleId, (validatedArticleId) =>
+      this.command.deleteAllReadHistory(activeUserId, validatedArticleId),
+    )
+  }
+
+  private async withValidatedArticle<T>(
+    articleId: bigint,
+    action: (validatedArticleId: bigint) => AsyncResult<T, Error>,
+  ): AsyncResult<T, Error> {
     const articleValidation = await this.validateArticleExists(articleId)
     if (isFailure(articleValidation)) return articleValidation
 
-    return this.command.deleteAllReadHistory(activeUserId, articleValidation.data.articleId)
+    return action(articleValidation.data.articleId)
   }
 
   private async validateArticleExists(articleId: bigint): AsyncResult<Article, Error> {

@@ -1,6 +1,6 @@
 import type { MetaFunction } from 'react-router'
 import { useOutletContext } from 'react-router'
-import type { TrendsOutletContext } from '../trends'
+import type { AppLayoutOutletContext } from '../app-layout'
 import ArticleDrawer from './components/article-drawer'
 import useArticleDrawer from './hooks/use-article-drawer'
 import useArticles from './hooks/use-articles'
@@ -10,7 +10,7 @@ import TrendsPage from './page'
 export const meta: MetaFunction = () => [{ title: 'トレンド一覧 | TrendDiary' }]
 
 export default function Trends() {
-  const { isLoggedIn } = useOutletContext<TrendsOutletContext>()
+  const { isLoggedIn } = useOutletContext<AppLayoutOutletContext>()
   const {
     articles,
     reloadArticles,

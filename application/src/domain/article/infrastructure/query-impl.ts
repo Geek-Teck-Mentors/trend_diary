@@ -4,6 +4,7 @@ import { ServerError } from '@/common/errors'
 import { DEFAULT_LIMIT, DEFAULT_PAGE, OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/mapper'
+import type { ArticleMedia } from '@/domain/article/media'
 import { Query } from '@/domain/article/repository'
 import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
 import { QueryParams } from '@/domain/article/schema/query-schema'
@@ -120,6 +121,54 @@ export default class QueryImpl implements Query {
     return success(fromPrismaToArticle(article))
   }
 
+  async getUnreadDigestionArticles(
+    activeUserId: bigint,
+    targetDateJst: string,
+    media?: ArticleMedia,
+  ): AsyncResult<Article[], ServerError> {
+    const dbActiveUserId = toDbId(activeUserId)
+    const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(targetDateJst, targetDateJst)
+    if (!fromDate || !toDateExclusive) return success([])
+
+    const mediaCondition = media ? Prisma.sql`AND articles.media = ${media}` : Prisma.empty
+
+    const result = await wrapAsyncCall(() =>
+      this.db.$queryRaw<RawArticleRow[]>(Prisma.sql`
+        SELECT
+          article_id as articleId,
+          media,
+          title,
+          author,
+          description,
+          url,
+          created_at as createdAt
+        FROM articles
+        WHERE
+          ${QueryImpl.getNormalizedCreatedAtSql()} >= datetime(${fromDate.toISOString()})
+          AND ${QueryImpl.getNormalizedCreatedAtSql()} < datetime(${toDateExclusive.toISOString()})
+          AND NOT EXISTS (
+            SELECT 1
+            FROM read_histories rh
+            WHERE rh.article_id = articles.article_id
+              AND rh.active_user_id = ${dbActiveUserId}
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM skipped_articles sa
+            WHERE sa.article_id = articles.article_id
+              AND sa.active_user_id = ${dbActiveUserId}
+          )
+          ${mediaCondition}
+        ORDER BY ${QueryImpl.getNormalizedCreatedAtSql()} DESC, article_id DESC
+      `),
+    )
+    if (isFailure(result)) {
+      return failure(new ServerError(result.error))
+    }
+
+    return success(result.data.map(QueryImpl.mapRawArticle))
+  }
+
   private static getNormalizedCreatedAtSql() {
     // INFO: created_atはSQLiteでinteger(text含む)が混在しうるため正規化して比較する
     return Prisma.sql`
@@ -204,15 +253,15 @@ export default class QueryImpl implements Query {
   }
 
   private static mapRawArticleToDomain(row: RawArticleRow): ArticleWithOptionalReadStatus {
-    let createdAt: Date
-    if (row.createdAt instanceof Date) {
-      createdAt = row.createdAt
-    } else if (typeof row.createdAt === 'bigint') {
-      createdAt = new Date(Number(row.createdAt))
-    } else {
-      createdAt = new Date(row.createdAt)
-    }
+    const article = QueryImpl.mapRawArticle(row)
 
+    return {
+      ...article,
+      isRead: row.isRead === null || row.isRead === undefined ? undefined : Boolean(row.isRead),
+    }
+  }
+
+  private static mapRawArticle(row: RawArticleRow): Article {
     return {
       articleId: fromDbId(row.articleId),
       media: row.media,
@@ -220,8 +269,17 @@ export default class QueryImpl implements Query {
       author: row.author,
       description: row.description,
       url: row.url,
-      createdAt,
-      isRead: row.isRead === null || row.isRead === undefined ? undefined : Boolean(row.isRead),
+      createdAt: QueryImpl.convertRawCreatedAt(row.createdAt),
     }
+  }
+
+  private static convertRawCreatedAt(rawCreatedAt: RawArticleRow['createdAt']): Date {
+    if (rawCreatedAt instanceof Date) {
+      return rawCreatedAt
+    }
+    if (typeof rawCreatedAt === 'bigint') {
+      return new Date(Number(rawCreatedAt))
+    }
+    return new Date(rawCreatedAt)
   }
 }

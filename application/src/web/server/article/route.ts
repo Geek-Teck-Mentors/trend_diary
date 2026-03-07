@@ -7,16 +7,32 @@ import readArticle, {
   articleIdParamSchema,
   createReadHistoryApiSchema,
 } from './handler/read-article'
+import skipArticle from './handler/skip-article'
 import unreadArticle from './handler/unread-article'
+import unreadDigestionArticles, {
+  unreadDigestionQuerySchema,
+} from './handler/unread-digestion-articles'
 
 const app = new Hono<Env>()
   .get('/', optionalAuthenticator, zodValidator('query', apiArticleQuerySchema), getArticles)
+  .get(
+    '/unread-digestion',
+    authenticator,
+    zodValidator('query', unreadDigestionQuerySchema),
+    unreadDigestionArticles,
+  )
   .post(
     '/:article_id/read',
     authenticator,
     zodValidator('param', articleIdParamSchema),
     zodValidator('json', createReadHistoryApiSchema),
     readArticle,
+  )
+  .post(
+    '/:article_id/skip',
+    authenticator,
+    zodValidator('param', articleIdParamSchema),
+    skipArticle,
   )
   .delete(
     '/:article_id/unread',
