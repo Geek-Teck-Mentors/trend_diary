@@ -60,7 +60,8 @@ export default function useAnalytics(enabled: boolean) {
     page: pageParam ?? undefined,
     limit: 10,
   })
-  const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
+  const rawPage = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
+  const page = rawPage >= DEFAULT_PAGE ? rawPage : DEFAULT_PAGE
 
   const summaryKey = enabled ? ['api/articles/diary-summary-range', ...availableDates] : null
   const { data: summaryRangeData, isLoading: isSummaryLoading } = useSWR<SummaryRangeData>(

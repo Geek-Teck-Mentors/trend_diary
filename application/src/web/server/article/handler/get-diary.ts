@@ -75,13 +75,36 @@ export default async function getDiary(c: ZodValidatedQueryContext<DiaryQuery>) 
 }
 
 function resolveTargetDate(inputDate?: string): string {
-  if (inputDate) return inputDate
+  if (inputDate) return ensureValidDiaryDate(inputDate)
 
   const todayResult = toJstDateString(new Date())
   if (isFailure(todayResult)) {
     throw new HTTPException(500, { message: 'Failed to resolve JST date' })
   }
   return todayResult.data
+}
+
+function ensureValidDiaryDate(inputDate: string): string {
+  const parsed = new Date(`${inputDate}T00:00:00+09:00`)
+  if (Number.isNaN(parsed.getTime())) {
+    throwInvalidDateError()
+  }
+
+  const normalized = toJstDateString(parsed)
+  if (isFailure(normalized) || normalized.data !== inputDate) {
+    throwInvalidDateError()
+  }
+
+  return inputDate
+}
+
+function throwInvalidDateError(): never {
+  throw new HTTPException(422, {
+    message: 'Invalid input',
+    cause: {
+      date: ['date must be a valid JST date'],
+    },
+  })
 }
 
 function validateDiaryRange(targetDate: string) {

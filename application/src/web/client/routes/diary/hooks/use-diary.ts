@@ -48,7 +48,8 @@ export default function useDiary(enabled: boolean) {
     page: pageParam ?? undefined,
     limit: 10,
   })
-  const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
+  const rawPage = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
+  const page = rawPage >= DEFAULT_PAGE ? rawPage : DEFAULT_PAGE
 
   const swrKey = enabled ? ['api/articles/diary', todayJst, page] : null
   const { data, isLoading } = useSWR(swrKey, () => fetchDiary(todayJst, page))
