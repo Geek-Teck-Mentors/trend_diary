@@ -20,6 +20,8 @@ export const AuthenticateForm = ({
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (isLoading) return
+
     setIsLoading(true)
     setErrors({})
 
@@ -36,7 +38,7 @@ export const AuthenticateForm = ({
   }
 
   return (
-    <form onSubmit={onSubmit} className='flex flex-1 flex-col gap-6'>
+    <form method='post' onSubmit={onSubmit} className='flex flex-1 flex-col gap-6'>
       <div className='space-y-2'>
         <Label htmlFor='email'>メールアドレス</Label>
         <Input

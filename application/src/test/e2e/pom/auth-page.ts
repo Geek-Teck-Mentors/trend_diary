@@ -28,9 +28,13 @@ export class AuthPage {
     await this.page.goto('/login')
   }
 
-  async submitSignup(email: string, password: string): Promise<void> {
+  async submitSignup(email: string, password: string): Promise<number> {
     await this.fillCredentials(email, password)
-    await this.signupButton.click()
+    const [response] = await Promise.all([
+      this.waitForAuthApiResponse('/api/v2/auth/signup'),
+      this.signupButton.click(),
+    ])
+    return response.status()
   }
 
   async waitForLoginPage(): Promise<void> {
@@ -38,9 +42,13 @@ export class AuthPage {
     await expect(this.loginPageText).toBeVisible({ timeout: 5000 })
   }
 
-  async submitLogin(email: string, password: string): Promise<void> {
+  async submitLogin(email: string, password: string): Promise<number> {
     await this.fillCredentials(email, password)
-    await this.loginButton.click()
+    const [response] = await Promise.all([
+      this.waitForAuthApiResponse('/api/v2/auth/login'),
+      this.loginButton.click(),
+    ])
+    return response.status()
   }
 
   async waitForTrendsPage(): Promise<void> {
@@ -88,5 +96,16 @@ export class AuthPage {
     }
 
     throw new Error('auth form is not ready')
+  }
+
+  private async waitForAuthApiResponse(path: '/api/v2/auth/signup' | '/api/v2/auth/login') {
+    return this.page.waitForResponse(
+      (response) =>
+        response.url().includes(path) &&
+        response.request().method() === 'POST' &&
+        response.status() >= 200 &&
+        response.status() < 500,
+      { timeout: AUTH_FLOW_TIMEOUT },
+    )
   }
 }
