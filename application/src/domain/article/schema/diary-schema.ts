@@ -34,3 +34,9 @@ export type DailyDiary = {
   sources: DiarySource[]
   reads: OffsetPaginationResult<DiaryReadItem>
 }
+
+export type DailyDiaryRangeItem = {
+  date: string
+  summary: DiarySummary
+  sources: DiarySource[]
+}

@@ -4,7 +4,7 @@ import { OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
 import type { ArticleMedia } from '@/domain/article/media'
 import type { Article, ArticleWithOptionalReadStatus } from './schema/article-schema'
-import type { DailyDiary } from './schema/diary-schema'
+import type { DailyDiary, DailyDiaryRangeItem } from './schema/diary-schema'
 import { QueryParams } from './schema/query-schema'
 import type { ReadHistory } from './schema/read-history-schema'
 import type { SkippedArticle } from './schema/skipped-article-schema'
@@ -32,6 +32,12 @@ export interface Query {
     page: number,
     limit: number,
   ): AsyncResult<DailyDiary, ServerError>
+
+  getDailyDiaryRange(
+    activeUserId: bigint,
+    fromDateJst: string,
+    toDateJst: string,
+  ): AsyncResult<DailyDiaryRangeItem[], ServerError>
 
   findArticleById(articleId: bigint): AsyncResult<Nullable<Article>, ServerError>
 }

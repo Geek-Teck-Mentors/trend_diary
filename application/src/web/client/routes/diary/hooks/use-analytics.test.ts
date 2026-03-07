@@ -6,7 +6,7 @@ import { SWRConfig } from 'swr'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { addJstDays, toJstDateString } from '@/common/locale/date'
 import useAnalytics from './use-analytics'
-import useDiaryApi, { type DiaryResponse } from './use-diary-api'
+import useDiaryApi, { type DiaryRangeItemResponse, type DiaryResponse } from './use-diary-api'
 
 vi.mock('./use-diary-api', () => ({
   default: vi.fn(),
@@ -53,6 +53,20 @@ const buildDailyResponse = (date: string, read: number, skip: number): DiaryResp
   },
 })
 
+const buildRangeItemResponse = (
+  date: string,
+  read: number,
+  skip: number,
+): DiaryRangeItemResponse => ({
+  date,
+  summary: { read, skip },
+  sources: [
+    { media: 'qiita', read, skip },
+    { media: 'zenn', read: 0, skip: 0 },
+    { media: 'hatena', read: 0, skip: 0 },
+  ],
+})
+
 const getTodayJst = () => {
   const result = toJstDateString(new Date())
   if (isFailure(result)) return '1970-01-01'
@@ -72,14 +86,15 @@ describe('useAnalytics', () => {
   })
 
   it('日付未選択時は過去1週間の集計を表示する', async () => {
-    const fetchDiaryRange = vi
-      .fn()
-      .mockImplementation((dates: string[]) =>
-        Promise.resolve(dates.map((date, index) => buildDailyResponse(date, index + 1, 0))),
-      )
+    const fetchDiaryRange = vi.fn().mockImplementation((from: string, to: string) => {
+      const dates = buildDates(to).filter((date) => date >= from)
+      return Promise.resolve(dates.map((date, index) => buildRangeItemResponse(date, index + 1, 0)))
+    })
+
+    const fetchDiary = vi.fn()
 
     mockedUseDiaryApi.mockReturnValue({
-      fetchDiary: vi.fn(),
+      fetchDiary,
       fetchDiaryRange,
     })
 
@@ -90,24 +105,26 @@ describe('useAnalytics', () => {
     })
 
     const expectedDates = buildDates(getTodayJst())
-    expect(fetchDiaryRange).toHaveBeenCalledWith(expectedDates)
+    expect(fetchDiaryRange).toHaveBeenCalledWith(expectedDates[0], expectedDates[6])
     expect(result.current.mode).toBe('analytics')
     expect(result.current.selectedDate).toBeNull()
     expect(result.current.summaryRange).toHaveLength(7)
     expect(result.current.weeklySummary).toEqual({ read: 28, skip: 0 })
     expect(result.current.sources[0]).toEqual({ media: 'qiita', read: 28, skip: 0 })
+    expect(fetchDiary).not.toHaveBeenCalled()
   })
 
   it('選択日の1ページ目は日次集計を表示する', async () => {
     const targetDate = buildDates(getTodayJst())[5]
-    const fetchDiaryRange = vi.fn().mockImplementation((dates: string[]) =>
-      Promise.resolve(
+    const fetchDiaryRange = vi.fn().mockImplementation((from: string, to: string) => {
+      const dates = buildDates(to).filter((date) => date >= from)
+      return Promise.resolve(
         dates.map((date) => {
-          if (date === targetDate) return buildDailyResponse(date, 2, 1)
-          return buildDailyResponse(date, 1, 0)
+          if (date === targetDate) return buildRangeItemResponse(date, 2, 1)
+          return buildRangeItemResponse(date, 1, 0)
         }),
-      ),
-    )
+      )
+    })
 
     const fetchDiary = vi.fn().mockResolvedValue(buildDailyResponse(targetDate, 2, 1))
 
@@ -140,11 +157,10 @@ describe('useAnalytics', () => {
         hasPrev: true,
       },
     })
-    const fetchDiaryRange = vi
-      .fn()
-      .mockImplementation((dates: string[]) =>
-        Promise.resolve(dates.map((date) => buildDailyResponse(date, 1, 0))),
-      )
+    const fetchDiaryRange = vi.fn().mockImplementation((from: string, to: string) => {
+      const dates = buildDates(to).filter((date) => date >= from)
+      return Promise.resolve(dates.map((date) => buildRangeItemResponse(date, 1, 0)))
+    })
 
     mockedUseDiaryApi.mockReturnValue({
       fetchDiary,

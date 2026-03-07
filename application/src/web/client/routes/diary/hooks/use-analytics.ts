@@ -5,7 +5,11 @@ import useSWR from 'swr'
 import { addJstDays, toJstDateString } from '@/common/locale/date'
 import { DEFAULT_PAGE, offsetPaginationSchema } from '@/common/pagination/schema'
 import type { ArticleMedia } from '@/domain/article/media'
-import useDiaryApi, { type DiaryResponse, type DiarySource } from './use-diary-api'
+import useDiaryApi, {
+  type DiaryRangeItemResponse,
+  type DiaryResponse,
+  type DiarySource,
+} from './use-diary-api'
 
 type DiaryPoint = {
   date: string
@@ -16,7 +20,6 @@ type DiaryPoint = {
 type SummaryRangeData = {
   points: DiaryPoint[]
   weeklySources: DiarySource[]
-  dailyByDate: Record<string, DiaryResponse>
 }
 
 const DIARY_DAYS = 7
@@ -67,11 +70,17 @@ export default function useAnalytics(enabled: boolean) {
   const { data: summaryRangeData, isLoading: isSummaryLoading } = useSWR<SummaryRangeData>(
     summaryKey,
     async () => {
-      const responses = await fetchDiaryRange(availableDates)
-
-      const points = responses.map((response) => ({
+      const from = availableDates[0]
+      const to = availableDates[availableDates.length - 1]
+      const responses = await fetchDiaryRange(from, to)
+      const responseMap = new Map(responses.map((response) => [response.date, response] as const))
+      const normalizedResponses = availableDates.map(
+        (date): DiaryRangeItemResponse => responseMap.get(date) ?? buildEmptyRangeItem(date),
+      )
+      const points = normalizedResponses.map((response) => ({
         date: response.date,
-        ...sumSourceSummary(response.sources),
+        read: response.summary.read,
+        skip: response.summary.skip,
       }))
 
       const sourceMap: Record<ArticleMedia, { read: number; skip: number }> = {
@@ -80,7 +89,7 @@ export default function useAnalytics(enabled: boolean) {
         hatena: { read: 0, skip: 0 },
       }
 
-      for (const response of responses) {
+      for (const response of normalizedResponses) {
         for (const source of response.sources) {
           sourceMap[source.media].read += source.read
           sourceMap[source.media].skip += source.skip
@@ -94,9 +103,6 @@ export default function useAnalytics(enabled: boolean) {
           read: sourceMap[media].read,
           skip: sourceMap[media].skip,
         })),
-        dailyByDate: Object.fromEntries(
-          responses.map((response) => [response.date, response] as const),
-        ),
       }
     },
   )
@@ -106,12 +112,6 @@ export default function useAnalytics(enabled: boolean) {
     if (!selectedDate) {
       throw new Error('対象日が未選択です')
     }
-
-    const cachedDaily = summaryRangeData?.dailyByDate[selectedDate]
-    if (page === 1 && cachedDaily) {
-      return cachedDaily
-    }
-
     return fetchDiary(selectedDate, page)
   })
 
@@ -178,5 +178,17 @@ export default function useAnalytics(enabled: boolean) {
     clearSelectedDate,
     toNextPage: () => updatePage(page + 1),
     toPrevPage: () => updatePage(page - 1),
+  }
+}
+
+function buildEmptyRangeItem(date: string): DiaryRangeItemResponse {
+  return {
+    date,
+    summary: { read: 0, skip: 0 },
+    sources: [
+      { media: 'qiita', read: 0, skip: 0 },
+      { media: 'zenn', read: 0, skip: 0 },
+      { media: 'hatena', read: 0, skip: 0 },
+    ],
   }
 }

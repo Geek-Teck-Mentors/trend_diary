@@ -28,6 +28,15 @@ export type DiaryResponse = {
   }
 }
 
+export type DiaryRangeItemResponse = {
+  date: string
+  summary: {
+    read: number
+    skip: number
+  }
+  sources: DiarySource[]
+}
+
 export default function useDiaryApi() {
   const { client, apiCall } = createSWRFetcher()
 
@@ -51,9 +60,22 @@ export default function useDiaryApi() {
     return result
   }
 
-  const fetchDiaryRange = async (dates: string[]) => {
-    const responses = await Promise.all(dates.map((date) => fetchDiary(date, 1)))
-    return responses
+  const fetchDiaryRange = async (from: string, to: string) => {
+    const result = await apiCall<{ data: DiaryRangeItemResponse[] }>(() =>
+      client.articles['diary-range'].$get(
+        {
+          query: {
+            from,
+            to,
+          },
+        },
+        { init: { credentials: 'include' } },
+      ),
+    )
+    if (!result) {
+      throw new Error('ダイアリー範囲の取得に失敗しました')
+    }
+    return result.data
   }
 
   return {

@@ -48,9 +48,10 @@ export default async function getDiary(c: ZodValidatedQueryContext<DiaryQuery>) 
   const logger = c.get(CONTEXT_KEY.APP_LOG)
   const sessionUser = c.get(CONTEXT_KEY.SESSION_USER)!
   const query = c.req.valid('query')
+  const todayJst = resolveTodayJst()
 
-  const targetDate = resolveTargetDate(query.date)
-  validateDiaryRange(targetDate)
+  const targetDate = resolveTargetDate(query.date, todayJst)
+  validateDiaryRange(targetDate, todayJst)
 
   const rdb = getRdbClient({ db: c.env.DB, databaseUrl: c.env.DATABASE_URL })
   const useCase = createArticleUseCase(rdb)
@@ -74,9 +75,13 @@ export default async function getDiary(c: ZodValidatedQueryContext<DiaryQuery>) 
   return c.json(toDiaryResponse(result.data), 200)
 }
 
-function resolveTargetDate(inputDate?: string): string {
+function resolveTargetDate(inputDate: string | undefined, todayJst: string): string {
   if (inputDate) return ensureValidDiaryDate(inputDate)
 
+  return todayJst
+}
+
+function resolveTodayJst(): string {
   const todayResult = toJstDateString(new Date())
   if (isFailure(todayResult)) {
     throw new HTTPException(500, { message: 'Failed to resolve JST date' })
@@ -107,22 +112,17 @@ function throwInvalidDateError(): never {
   })
 }
 
-function validateDiaryRange(targetDate: string) {
-  const todayResult = toJstDateString(new Date())
-  if (isFailure(todayResult)) {
-    throw new HTTPException(500, { message: 'Failed to resolve JST date' })
-  }
-
-  const earliestResult = addJstDays(todayResult.data, -(DIARY_DAYS - 1))
+function validateDiaryRange(targetDate: string, todayJst: string) {
+  const earliestResult = addJstDays(todayJst, -(DIARY_DAYS - 1))
   if (isFailure(earliestResult)) {
     throw new HTTPException(500, { message: 'Failed to resolve diary date range' })
   }
 
-  if (targetDate < earliestResult.data || targetDate > todayResult.data) {
+  if (targetDate < earliestResult.data || targetDate > todayJst) {
     throw new HTTPException(422, {
       message: 'Invalid input',
       cause: {
-        date: [`date must be between ${earliestResult.data} and ${todayResult.data}`],
+        date: [`date must be between ${earliestResult.data} and ${todayJst}`],
       },
     })
   }

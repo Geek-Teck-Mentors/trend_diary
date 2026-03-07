@@ -4,6 +4,7 @@ import { authenticator, optionalAuthenticator } from '@/web/middleware/authentic
 import zodValidator from '@/web/middleware/zod-validator'
 import getArticles, { apiArticleQuerySchema } from './handler/get-articles'
 import getDiary, { diaryQuerySchema } from './handler/get-diary'
+import getDiaryRange, { diaryRangeQuerySchema } from './handler/get-diary-range'
 import readArticle, {
   articleIdParamSchema,
   createReadHistoryApiSchema,
@@ -17,6 +18,7 @@ import unreadDigestionArticles, {
 const app = new Hono<Env>()
   .get('/', optionalAuthenticator, zodValidator('query', apiArticleQuerySchema), getArticles)
   .get('/diary', authenticator, zodValidator('query', diaryQuerySchema), getDiary)
+  .get('/diary-range', authenticator, zodValidator('query', diaryRangeQuerySchema), getDiaryRange)
   .get(
     '/unread-digestion',
     authenticator,

@@ -236,7 +236,6 @@ describe('QueryImpl', () => {
           { media: 'qiita', count: 1 },
           { media: 'hatena', count: 1 },
         ]) // skip sources
-        .mockResolvedValueOnce([{ total: 3 }]) // reads total
         .mockResolvedValueOnce([
           {
             readHistoryId: 10,
@@ -282,6 +281,54 @@ describe('QueryImpl', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error.message).toBe('daily diary failed')
+      }
+    })
+  })
+
+  describe('getDailyDiaryRange', () => {
+    it('指定期間の日次サマリーとsourcesを取得できる', async () => {
+      mockDb.$queryRaw
+        .mockResolvedValueOnce([
+          { date: '2026-03-06', media: 'qiita', count: 2 },
+          { date: '2026-03-07', media: 'zenn', count: 1 },
+        ])
+        .mockResolvedValueOnce([{ date: '2026-03-07', media: 'hatena', count: 1 }])
+
+      const result = await queryImpl.getDailyDiaryRange(10n, '2026-03-06', '2026-03-07')
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toEqual([
+          {
+            date: '2026-03-06',
+            summary: { read: 2, skip: 0 },
+            sources: [
+              { media: 'qiita', read: 2, skip: 0 },
+              { media: 'zenn', read: 0, skip: 0 },
+              { media: 'hatena', read: 0, skip: 0 },
+            ],
+          },
+          {
+            date: '2026-03-07',
+            summary: { read: 1, skip: 1 },
+            sources: [
+              { media: 'qiita', read: 0, skip: 0 },
+              { media: 'zenn', read: 1, skip: 0 },
+              { media: 'hatena', read: 0, skip: 1 },
+            ],
+          },
+        ])
+      }
+    })
+
+    it('DB取得失敗時はエラーを返す', async () => {
+      mockDb.$queryRaw.mockRejectedValue(new Error('daily diary range failed'))
+
+      const result = await queryImpl.getDailyDiaryRange(10n, '2026-03-06', '2026-03-07')
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error.message).toBe('daily diary range failed')
       }
     })
   })

@@ -28,6 +28,21 @@ type DiaryResponse = {
   }
 }
 
+type DiaryRangeResponse = {
+  data: Array<{
+    date: string
+    summary: {
+      read: number
+      skip: number
+    }
+    sources: Array<{
+      media: string
+      read: number
+      skip: number
+    }>
+  }>
+}
+
 const getTodayJst = () => {
   const result = toJstDateString(new Date())
   if (isFailure(result)) throw result.error
@@ -47,6 +62,23 @@ async function requestDiary(query?: string, cookies?: string) {
 
   return app.request(
     `/api/articles/diary${suffix}`,
+    {
+      method: 'GET',
+      headers,
+    },
+    TEST_ENV,
+  )
+}
+
+async function requestDiaryRange(query?: string, cookies?: string) {
+  const suffix = query ? `?${query}` : ''
+  const headers: Record<string, string> = {}
+  if (cookies) {
+    headers.Cookie = cookies
+  }
+
+  return app.request(
+    `/api/articles/diary-range${suffix}`,
     {
       method: 'GET',
       headers,
@@ -157,5 +189,106 @@ describe('GET /api/articles/diary', () => {
 
     const response = await requestDiary(`date=${tooOldDateResult.data}`, authCookies)
     expect(response.status).toBe(422)
+  })
+})
+
+describe('GET /api/articles/diary-range', () => {
+  let authCookies: string
+  let activeUserId: bigint
+  let todayJst: string
+  const createdArticleIds: bigint[] = []
+  const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
+
+  beforeEach(async () => {
+    todayJst = getTodayJst()
+    const { userId, authenticationId } = await userHelper.create(
+      'diary-range-test@example.com',
+      'Test@password123',
+    )
+    createdUserIds.userIds.push(userId)
+    createdUserIds.authIds.push(authenticationId)
+
+    const loginData = await userHelper.login('diary-range-test@example.com', 'Test@password123')
+    authCookies = loginData.cookies
+    activeUserId = loginData.activeUserId
+
+    const qiitaArticle = await articleHelper.createArticle({
+      media: 'qiita',
+      title: 'Go error handling',
+      createdAt: toJstDateTime(todayJst, '09:00:00'),
+    })
+    const zennArticle = await articleHelper.createArticle({
+      media: 'zenn',
+      title: 'Bun runtime',
+      createdAt: toJstDateTime(todayJst, '09:30:00'),
+    })
+    createdArticleIds.push(qiitaArticle.articleId, zennArticle.articleId)
+
+    await articleHelper.createReadHistory(
+      activeUserId,
+      qiitaArticle.articleId,
+      toJstDateTime(todayJst, '10:00:00'),
+    )
+    await articleHelper.createReadHistory(
+      activeUserId,
+      qiitaArticle.articleId,
+      toJstDateTime(todayJst, '10:05:00'),
+    )
+    await articleHelper.createSkippedArticle(activeUserId, zennArticle.articleId)
+  })
+
+  afterEach(async () => {
+    await Promise.allSettled([
+      userHelper.cleanUp(createdUserIds),
+      articleHelper.cleanUp(createdArticleIds),
+    ])
+    createdUserIds.userIds.length = 0
+    createdUserIds.authIds.length = 0
+    createdArticleIds.length = 0
+  })
+
+  it('指定期間のダイアリー集計を取得できる', async () => {
+    const fromResult = addJstDays(todayJst, -6)
+    if (isFailure(fromResult)) throw fromResult.error
+
+    const response = await requestDiaryRange(`from=${fromResult.data}&to=${todayJst}`, authCookies)
+
+    expect(response.status).toBe(200)
+    const json = (await response.json()) as DiaryRangeResponse
+    expect(json.data).toHaveLength(7)
+    const today = json.data.find((item) => item.date === todayJst)
+    expect(today).toEqual({
+      date: todayJst,
+      summary: { read: 2, skip: 1 },
+      sources: [
+        { media: 'qiita', read: 2, skip: 0 },
+        { media: 'zenn', read: 0, skip: 1 },
+        { media: 'hatena', read: 0, skip: 0 },
+      ],
+    })
+  })
+
+  it('from > to は422', async () => {
+    const fromResult = addJstDays(todayJst, -1)
+    if (isFailure(fromResult)) throw fromResult.error
+
+    const response = await requestDiaryRange(`from=${todayJst}&to=${fromResult.data}`, authCookies)
+    expect(response.status).toBe(422)
+  })
+
+  it('7日範囲外の期間は422', async () => {
+    const fromResult = addJstDays(todayJst, -7)
+    if (isFailure(fromResult)) throw fromResult.error
+
+    const response = await requestDiaryRange(`from=${fromResult.data}&to=${todayJst}`, authCookies)
+    expect(response.status).toBe(422)
+  })
+
+  it('未認証時は401', async () => {
+    const fromResult = addJstDays(todayJst, -6)
+    if (isFailure(fromResult)) throw fromResult.error
+
+    const response = await requestDiaryRange(`from=${fromResult.data}&to=${todayJst}`)
+    expect(response.status).toBe(401)
   })
 })
