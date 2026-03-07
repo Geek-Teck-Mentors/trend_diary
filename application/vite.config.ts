@@ -47,6 +47,11 @@ export default defineConfig({
       '@radix-ui/react-separator',
       '@radix-ui/react-slot',
       '@radix-ui/react-tooltip',
+      'next-themes',
+      'sonner',
+      'swr',
+      'swr/mutation',
+      'vaul',
     ],
   },
   test: {
