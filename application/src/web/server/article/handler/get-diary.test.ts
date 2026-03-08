@@ -183,11 +183,24 @@ describe('GET /api/articles/diary', () => {
     expect(response.status).toBe(422)
   })
 
+  it('存在しない日付は422', async () => {
+    const response = await requestDiary('date=2026-02-30', authCookies)
+    expect(response.status).toBe(422)
+  })
+
   it('7日範囲外の日付は422', async () => {
     const tooOldDateResult = addJstDays(todayJst, -7)
     if (isFailure(tooOldDateResult)) throw tooOldDateResult.error
 
     const response = await requestDiary(`date=${tooOldDateResult.data}`, authCookies)
+    expect(response.status).toBe(422)
+  })
+
+  it('未来日付は422', async () => {
+    const tomorrowResult = addJstDays(todayJst, 1)
+    if (isFailure(tomorrowResult)) throw tomorrowResult.error
+
+    const response = await requestDiary(`date=${tomorrowResult.data}`, authCookies)
     expect(response.status).toBe(422)
   })
 })
@@ -281,6 +294,19 @@ describe('GET /api/articles/diary-range', () => {
     if (isFailure(fromResult)) throw fromResult.error
 
     const response = await requestDiaryRange(`from=${fromResult.data}&to=${todayJst}`, authCookies)
+    expect(response.status).toBe(422)
+  })
+
+  it('存在しない日付を含む期間は422', async () => {
+    const response = await requestDiaryRange(`from=2026-02-30&to=${todayJst}`, authCookies)
+    expect(response.status).toBe(422)
+  })
+
+  it('未来日付を含む期間は422', async () => {
+    const toResult = addJstDays(todayJst, 1)
+    if (isFailure(toResult)) throw toResult.error
+
+    const response = await requestDiaryRange(`from=${todayJst}&to=${toResult.data}`, authCookies)
     expect(response.status).toBe(422)
   })
 

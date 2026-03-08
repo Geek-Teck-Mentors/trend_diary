@@ -2,9 +2,10 @@ import { isFailure } from '@yuukihayashi0510/core'
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import useSWR from 'swr'
-import { addJstDays, toJstDateString } from '@/common/locale/date'
+import { addJstDays } from '@/common/locale/date'
 import { DEFAULT_PAGE, offsetPaginationSchema } from '@/common/pagination/schema'
 import type { ArticleMedia } from '@/domain/article/media'
+import { getTodayJst, sumSourceSummary } from '@/web/client/routes/diary/hooks/diary-shared'
 import useDiaryApi, {
   type DiaryRangeItemResponse,
   type DiaryResponse,
@@ -24,29 +25,12 @@ type SummaryRangeData = {
 
 const DIARY_DAYS = 7
 
-const getTodayJst = () => {
-  const result = toJstDateString(new Date())
-  if (isFailure(result)) {
-    return new Date().toISOString().slice(0, 10)
-  }
-  return result.data
-}
-
 const buildAvailableDates = (todayJst: string) =>
   Array.from({ length: DIARY_DAYS }, (_, index) => {
     const dateResult = addJstDays(todayJst, -(DIARY_DAYS - 1 - index))
     if (isFailure(dateResult)) return todayJst
     return dateResult.data
   })
-
-const sumSourceSummary = (sources: Array<{ read: number; skip: number }>) =>
-  sources.reduce(
-    (acc, source) => ({
-      read: acc.read + source.read,
-      skip: acc.skip + source.skip,
-    }),
-    { read: 0, skip: 0 },
-  )
 
 export default function useAnalytics(enabled: boolean) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -63,8 +47,7 @@ export default function useAnalytics(enabled: boolean) {
     page: pageParam ?? undefined,
     limit: 10,
   })
-  const rawPage = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
-  const page = Math.max(rawPage, DEFAULT_PAGE)
+  const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
 
   const summaryKey = enabled ? ['api/articles/diary-summary-range', ...availableDates] : null
   const { data: summaryRangeData, isLoading: isSummaryLoading } = useSWR<SummaryRangeData>(

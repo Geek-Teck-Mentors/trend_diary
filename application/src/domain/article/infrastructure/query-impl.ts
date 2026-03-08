@@ -423,14 +423,18 @@ export default class QueryImpl implements Query {
   private static unwrapResultTuple<T extends readonly unknown[]>(
     results: { [K in keyof T]: Result<T[K], Error> },
   ): Result<T, ServerError> {
-    const data: unknown[] = []
-    for (const result of results) {
-      if (isFailure(result)) {
-        return failure(new ServerError(result.error))
-      }
-      data.push(result.data)
+    const firstFailure = results.find(isFailure)
+    if (firstFailure) {
+      return failure(new ServerError(firstFailure.error))
     }
-    return success(data as unknown as T)
+    return success(
+      results.map((result) => {
+        if (isFailure(result)) {
+          throw new ServerError(result.error)
+        }
+        return result.data
+      }) as unknown as T,
+    )
   }
 
   private static buildSqlWhereClause(params: {

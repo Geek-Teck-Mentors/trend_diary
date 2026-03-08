@@ -1,9 +1,8 @@
-import { isFailure } from '@yuukihayashi0510/core'
 import { useSearchParams } from 'react-router'
 import useSWR from 'swr'
-import { toJstDateString } from '@/common/locale/date'
 import { DEFAULT_PAGE, offsetPaginationSchema } from '@/common/pagination/schema'
 import type { ArticleMedia } from '@/domain/article/media'
+import { getTodayJst, sumSourceSummary } from '@/web/client/routes/diary/hooks/diary-shared'
 import useDiaryApi from './use-diary-api'
 
 type DiaryReadItem = {
@@ -21,23 +20,6 @@ const emptySources = [
   { media: 'hatena' as const, read: 0, skip: 0 },
 ]
 
-const getTodayJst = () => {
-  const result = toJstDateString(new Date())
-  if (isFailure(result)) {
-    return new Date().toISOString().slice(0, 10)
-  }
-  return result.data
-}
-
-const sumSourceSummary = (sources: Array<{ read: number; skip: number }>) =>
-  sources.reduce(
-    (acc, source) => ({
-      read: acc.read + source.read,
-      skip: acc.skip + source.skip,
-    }),
-    { read: 0, skip: 0 },
-  )
-
 export default function useDiary(enabled: boolean) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { fetchDiary } = useDiaryApi()
@@ -48,8 +30,7 @@ export default function useDiary(enabled: boolean) {
     page: pageParam ?? undefined,
     limit: 10,
   })
-  const rawPage = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
-  const page = rawPage >= DEFAULT_PAGE ? rawPage : DEFAULT_PAGE
+  const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
 
   const swrKey = enabled ? ['api/articles/diary', todayJst, page] : null
   const { data, isLoading } = useSWR(swrKey, () => fetchDiary(todayJst, page))

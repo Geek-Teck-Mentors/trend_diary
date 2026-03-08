@@ -2,15 +2,19 @@ import { isFailure } from '@yuukihayashi0510/core'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { handleError } from '@/common/errors'
-import { addJstDays, toJstDateString } from '@/common/locale/date'
+import { addJstDays } from '@/common/locale/date'
 import { DEFAULT_PAGE } from '@/common/pagination'
 import { createArticleUseCase } from '@/domain/article'
 import type { DailyDiary } from '@/domain/article/schema/diary-schema'
 import getRdbClient from '@/infrastructure/rdb'
 import CONTEXT_KEY from '@/web/middleware/context'
 import type { ZodValidatedQueryContext } from '@/web/middleware/zod-validator'
+import {
+  DATE_STRING_REGEX,
+  ensureValidDiaryDate,
+  resolveTodayJst,
+} from '@/web/server/article/handler/diary-date'
 
-const DATE_STRING_REGEX = /^\d{4}-\d{2}-\d{2}$/
 const DIARY_DAYS = 7
 export const DIARY_READ_LIMIT = 10
 
@@ -79,37 +83,6 @@ function resolveTargetDate(inputDate: string | undefined, todayJst: string): str
   if (inputDate) return ensureValidDiaryDate(inputDate)
 
   return todayJst
-}
-
-function resolveTodayJst(): string {
-  const todayResult = toJstDateString(new Date())
-  if (isFailure(todayResult)) {
-    throw new HTTPException(500, { message: 'Failed to resolve JST date' })
-  }
-  return todayResult.data
-}
-
-function ensureValidDiaryDate(inputDate: string): string {
-  const parsed = new Date(`${inputDate}T00:00:00+09:00`)
-  if (Number.isNaN(parsed.getTime())) {
-    throwInvalidDateError()
-  }
-
-  const normalized = toJstDateString(parsed)
-  if (isFailure(normalized) || normalized.data !== inputDate) {
-    throwInvalidDateError()
-  }
-
-  return inputDate
-}
-
-function throwInvalidDateError(): never {
-  throw new HTTPException(422, {
-    message: 'Invalid input',
-    cause: {
-      date: ['date must be a valid JST date'],
-    },
-  })
 }
 
 function validateDiaryRange(targetDate: string, todayJst: string) {
