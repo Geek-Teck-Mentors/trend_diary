@@ -4,6 +4,10 @@ import { HTTPException } from 'hono/http-exception'
 
 export type SupabaseAuthClient = ReturnType<typeof createSupabaseAuthClient>
 
+function isDevelopmentNodeEnv() {
+  return typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+}
+
 export function createSupabaseAuthClient(c: Context) {
   const supabaseUrl = c.env.SUPABASE_URL
   const supabaseAnonKey = c.env.SUPABASE_ANON_KEY
@@ -26,7 +30,7 @@ export function createSupabaseAuthClient(c: Context) {
         cookiesToSet.forEach(({ name, value, options }) => {
           const mergedOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
+            secure: !isDevelopmentNodeEnv(),
             sameSite: 'lax' as const,
             ...options,
           }

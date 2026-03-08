@@ -25,10 +25,25 @@ function readEnv(value?: string) {
   return trimmed ? trimmed : undefined
 }
 
+function readNodeEnv(key: 'SUPABASE_URL' | 'SUPABASE_ANON_KEY') {
+  if (typeof process === 'undefined') {
+    return undefined
+  }
+  return readEnv(process.env[key])
+}
+
+function isDevelopmentNodeEnv() {
+  return typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+}
+
+export function shouldUseSecureCookie() {
+  return !isDevelopmentNodeEnv()
+}
+
 export function resolveSupabaseAuthConfig(context: AuthActionContext) {
   const env = context.cloudflare?.env
-  const supabaseUrl = readEnv(env?.SUPABASE_URL) ?? readEnv(process.env.SUPABASE_URL)
-  const supabaseAnonKey = readEnv(env?.SUPABASE_ANON_KEY) ?? readEnv(process.env.SUPABASE_ANON_KEY)
+  const supabaseUrl = readEnv(env?.SUPABASE_URL) ?? readNodeEnv('SUPABASE_URL')
+  const supabaseAnonKey = readEnv(env?.SUPABASE_ANON_KEY) ?? readNodeEnv('SUPABASE_ANON_KEY')
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(AUTH_CONFIG_ERROR_MESSAGE)
@@ -53,7 +68,7 @@ export function createAuthActionUseCase(request: Request, context: AuthActionCon
         cookiesToSet.forEach(({ name, value, options }) => {
           const mergedOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
+            secure: shouldUseSecureCookie(),
             sameSite: 'lax' as const,
             ...options,
           }
