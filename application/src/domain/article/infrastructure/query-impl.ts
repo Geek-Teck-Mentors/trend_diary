@@ -353,7 +353,7 @@ export default class QueryImpl implements Query {
             rh.active_user_id = ${dbActiveUserId}
             AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} >= datetime(${fromDate.toISOString()})
             AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} < datetime(${toDateExclusive.toISOString()})
-          GROUP BY 1, a.media
+          GROUP BY date(${QueryImpl.getNormalizedDateTimeSql('rh.read_at')}, '+9 hours'), a.media
         `),
       ),
       wrapAsyncCall(() =>
@@ -368,7 +368,7 @@ export default class QueryImpl implements Query {
             sa.active_user_id = ${dbActiveUserId}
             AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} >= datetime(${fromDate.toISOString()})
             AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} < datetime(${toDateExclusive.toISOString()})
-          GROUP BY 1, a.media
+          GROUP BY date(${QueryImpl.getNormalizedDateTimeSql('sa.created_at')}, '+9 hours'), a.media
         `),
       ),
     ])
@@ -427,14 +427,8 @@ export default class QueryImpl implements Query {
     if (firstFailure) {
       return failure(new ServerError(firstFailure.error))
     }
-    return success(
-      results.map((result) => {
-        if (isFailure(result)) {
-          throw new ServerError(result.error)
-        }
-        return result.data
-      }) as unknown as T,
-    )
+    const successResults = results as unknown as { [K in keyof T]: { data: T[K] } }
+    return success(successResults.map((result) => result.data) as unknown as T)
   }
 
   private static buildSqlWhereClause(params: {
