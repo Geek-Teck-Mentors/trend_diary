@@ -157,14 +157,14 @@ export async function fetchHatenaArticles(env: CronEnv): Promise<number> {
 }
 
 export async function runScheduledFetch(media: ArticleMedia, env: CronEnv): Promise<number> {
-  let insertedCount: number
-  if (media === 'qiita') {
-    insertedCount = await fetchQiitaArticles(env)
-  } else if (media === 'zenn') {
-    insertedCount = await fetchZennArticles(env)
-  } else {
-    insertedCount = await fetchHatenaArticles(env)
+  switch (media) {
+    case 'qiita':
+      return fetchQiitaArticles(env)
+    case 'zenn':
+      return fetchZennArticles(env)
+    default:
+      // For any other media type, fall back to Hatena as in the original implementation.
+      return fetchHatenaArticles(env)
   }
-
-  return insertedCount
 }
+
