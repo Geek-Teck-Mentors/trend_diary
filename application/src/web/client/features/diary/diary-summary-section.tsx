@@ -1,5 +1,5 @@
 import { toJaDateString, toJstDate } from '@/common/locale/date'
-import type { ArticleMedia } from '@/domain/article/media'
+import { ARTICLE_MEDIA_LABELS } from '@/domain/article/media'
 import {
   Table,
   TableBody,
@@ -10,12 +10,6 @@ import {
   TableRow,
 } from '@/web/client/components/shadcn/table'
 import type { Source, Summary } from '@/web/client/features/diary/types'
-
-const mediaLabels: Record<ArticleMedia, string> = {
-  qiita: 'Qiita',
-  zenn: 'Zenn',
-  hatena: 'はてブ',
-}
 
 type Props = {
   sources: Source[]
@@ -44,7 +38,7 @@ export default function DiarySummarySection({ sources, displaySummary, targetDat
           <TableBody>
             {sources.map((source) => (
               <TableRow key={source.media}>
-                <TableCell>{mediaLabels[source.media]}</TableCell>
+                <TableCell>{ARTICLE_MEDIA_LABELS[source.media]}</TableCell>
                 <TableCell className='text-right'>{source.read}件</TableCell>
                 <TableCell className='text-right'>{source.skip}件</TableCell>
               </TableRow>

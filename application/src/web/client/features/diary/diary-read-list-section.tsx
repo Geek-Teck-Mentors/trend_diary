@@ -1,5 +1,5 @@
 import { toJaTimeString } from '@/common/locale/date'
-import { AnchorLink } from '@/web/client/components/ui/link'
+import { AnchorLink, type ExternalPath } from '@/web/client/components/ui/link'
 import type { ReadItem } from '@/web/client/features/diary/types'
 import MediaIcon from '@/web/client/routes/trends._index/components/media-icon'
 
@@ -7,6 +7,19 @@ type Props = {
   isLoading: boolean
   shouldShowDailyDetails: boolean
   reads: ReadItem[]
+}
+
+function toSafeExternalPath(url: string): ExternalPath | null {
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return url as ExternalPath
+    }
+  } catch {
+    return null
+  }
+
+  return null
 }
 
 export default function DiaryReadListSection({ isLoading, shouldShowDailyDetails, reads }: Props) {
@@ -26,23 +39,31 @@ export default function DiaryReadListSection({ isLoading, shouldShowDailyDetails
       )}
       {!isLoading && shouldShowDailyDetails && reads.length > 0 && (
         <ul className='mt-2 space-y-2 text-sm' data-slot='diary-read-list'>
-          {reads.map((read) => (
-            <li
-              key={read.readHistoryId}
-              className='flex items-center justify-between gap-3 text-gray-800'
-            >
-              <div className='flex min-w-0 flex-1 items-center gap-2'>
-                <MediaIcon media={read.media} size='sm' />
-                <AnchorLink
-                  to={read.url as `https://${string}`}
-                  className='block truncate text-blue-700 underline hover:text-blue-800'
-                >
-                  {read.title}
-                </AnchorLink>
-              </div>
-              <p className='shrink-0 text-xs text-gray-500'>{toJaTimeString(read.readAt)}</p>
-            </li>
-          ))}
+          {reads.map((read) => {
+            const safeUrl = toSafeExternalPath(read.url)
+
+            return (
+              <li
+                key={read.readHistoryId}
+                className='flex items-center justify-between gap-3 text-gray-800'
+              >
+                <div className='flex min-w-0 flex-1 items-center gap-2'>
+                  <MediaIcon media={read.media} size='sm' />
+                  {safeUrl ? (
+                    <AnchorLink
+                      to={safeUrl}
+                      className='block truncate text-blue-700 underline hover:text-blue-800'
+                    >
+                      {read.title}
+                    </AnchorLink>
+                  ) : (
+                    <span className='block truncate text-gray-700'>{read.title}</span>
+                  )}
+                </div>
+                <p className='shrink-0 text-xs text-gray-500'>{toJaTimeString(read.readAt)}</p>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
