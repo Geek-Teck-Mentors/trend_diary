@@ -21,6 +21,14 @@ description: GitHub Pull Requestのレビューコメント対応を、修正実
 - `gh api graphql` で `reviewThreads` を取得し、`isResolved == false` を対象にする。
 - 返信先は `pulls/{pull_number}/comments/{comment_id}/replies` を使う。
 
+実用コマンド例（未解決だけ抽出）:
+
+```bash
+gh api graphql -f query='query($owner:String!, $name:String!, $number:Int!){ repository(owner:$owner, name:$name){ pullRequest(number:$number){ reviewThreads(first:100){ nodes{ id isResolved comments(first:20){ nodes{ databaseId body path line originalLine url author{login} } } } } } } }' \
+  -f owner=<owner> -f name=<repo> -F number=<pr_number> \
+  --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved==false) | {threadId:.id, comment:(.comments.nodes[-1])}'
+```
+
 ## 2) 修正実装
 
 - 指摘の「事実」と「期待動作」を分離してから修正する。
@@ -51,6 +59,16 @@ gh api -X POST repos/<owner>/<repo>/pulls/<pr_number>/comments/<comment_id>/repl
   -f body='対応した。コミット: <short_sha>'
 ```
 
+実用コマンド例（複数コメントへ一括返信）:
+
+```bash
+for id in <comment_id_1> <comment_id_2> <comment_id_3>; do
+  gh api -X POST repos/<owner>/<repo>/pulls/<pr_number>/comments/$id/replies \
+    -f body='対応した。コミット: <short_sha>' >/dev/null
+  echo "replied:$id"
+done
+```
+
 ## 6) スレッドresolve
 
 - 返信後、対応済みスレッドを resolve する。
@@ -60,6 +78,16 @@ gh api -X POST repos/<owner>/<repo>/pulls/<pr_number>/comments/<comment_id>/repl
 ```bash
 gh api graphql -f query='mutation ResolveReviewThread($threadId:ID!){ resolveReviewThread(input:{threadId:$threadId}){ thread{ id isResolved } } }' \
   -f threadId=<thread_id>
+```
+
+実用コマンド例（複数スレッドを一括resolve）:
+
+```bash
+for thread in <thread_id_1> <thread_id_2> <thread_id_3>; do
+  gh api graphql -f query='mutation ResolveReviewThread($threadId:ID!){ resolveReviewThread(input:{threadId:$threadId}){ thread{ id isResolved } } }' \
+    -f threadId=$thread >/dev/null
+  echo "resolved:$thread"
+done
 ```
 
 ## 7) Gemini再レビュー依頼（必須）
@@ -73,3 +101,15 @@ gh pr comment <pr_number> --body '/gemini review'
 ```
 
 - 投稿後、チェック状態も確認する。
+
+確認コマンド例:
+
+```bash
+# 未解決スレッド数
+gh api graphql -f query='query($owner:String!, $name:String!, $number:Int!){ repository(owner:$owner,name:$name){ pullRequest(number:$number){ reviewThreads(first:100){ nodes{ isResolved } } } } }' \
+  -f owner=<owner> -f name=<repo> -F number=<pr_number> \
+  --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved==false)] | length'
+
+# CIチェック状況
+gh pr checks <pr_number>
+```
