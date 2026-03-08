@@ -5,6 +5,7 @@ import * as articleHelper from '@/test/helper/article'
 import type { CleanUpIds } from '@/test/helper/user'
 import * as userHelper from '@/test/helper/user'
 import app from '@/web/server'
+import { diaryQuerySchema } from './get-diary'
 
 type DiaryRangeResponse = {
   data: Array<{
@@ -61,6 +62,22 @@ async function requestDiaryRange(query?: string, cookies?: string) {
     TEST_ENV,
   )
 }
+
+describe('diaryQuerySchema', () => {
+  it('存在しない日付を拒否する', () => {
+    const result = diaryQuerySchema.safeParse({
+      from: '2026-02-30',
+      to: '2026-02-30',
+      page: 1,
+    })
+    expect(result.success).toBe(false)
+    if (result.success) return
+
+    const errors = result.error.flatten().fieldErrors
+    expect(errors.from).toContain('date must be a valid JST date')
+    expect(errors.to).toContain('date must be a valid JST date')
+  })
+})
 
 describe('GET /api/articles/diary (単日詳細)', () => {
   let authCookies: string
@@ -165,6 +182,8 @@ describe('GET /api/articles/diary (単日詳細)', () => {
   it('存在しない日付は422', async () => {
     const response = await requestDiaryRange(`from=2026-02-30&to=2026-02-30&page=1`, authCookies)
     expect(response.status).toBe(422)
+    const json = (await response.json()) as { message: string }
+    expect(json.message).toBe('Invalid input')
   })
 
   it('7日範囲外の日付は422', async () => {
@@ -297,6 +316,8 @@ describe('GET /api/articles/diary', () => {
   it('存在しない日付を含む期間は422', async () => {
     const response = await requestDiaryRange(`from=2026-02-30&to=${todayJst}`, authCookies)
     expect(response.status).toBe(422)
+    const json = (await response.json()) as { message: string }
+    expect(json.message).toBe('Invalid input')
   })
 
   it('未来日付を含む期間は422', async () => {

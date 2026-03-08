@@ -11,10 +11,21 @@ import CONTEXT_KEY from '@/web/middleware/context'
 import type { ZodValidatedQueryContext } from '@/web/middleware/zod-validator'
 
 const DATE_STRING_REGEX = /^\d{4}-\d{2}-\d{2}$/
+const DIARY_DATE_MESSAGE = 'date must be a valid JST date'
+const diaryDateSchema = z
+  .string()
+  .regex(DATE_STRING_REGEX)
+  .refine((inputDate) => {
+    const parsed = toJstDate(inputDate)
+    if (Number.isNaN(parsed.getTime())) return false
+
+    const normalized = toJstDateString(parsed)
+    return !isFailure(normalized) && normalized.data === inputDate
+  }, DIARY_DATE_MESSAGE)
 
 export const diaryQuerySchema = z.object({
-  from: z.string().regex(DATE_STRING_REGEX),
-  to: z.string().regex(DATE_STRING_REGEX),
+  from: diaryDateSchema,
+  to: diaryDateSchema,
   page: z.coerce.number().int().min(1).optional(),
 })
 
@@ -54,8 +65,8 @@ export default async function getDiary(c: ZodValidatedQueryContext<DiaryQuery>) 
   const sessionUser = c.get(CONTEXT_KEY.SESSION_USER)!
   const query = c.req.valid('query')
   const todayJst = resolveTodayJst()
-  const fromDate = ensureValidDiaryDate(query.from)
-  const toDate = ensureValidDiaryDate(query.to)
+  const fromDate = query.from
+  const toDate = query.to
 
   validateDiaryDateRange(fromDate, toDate, todayJst)
 
@@ -106,29 +117,6 @@ function resolveTodayJst(): string {
     throw new HTTPException(500, { message: 'Failed to resolve JST date' })
   }
   return todayResult.data
-}
-
-function ensureValidDiaryDate(inputDate: string): string {
-  const parsed = toJstDate(inputDate)
-  if (Number.isNaN(parsed.getTime())) {
-    throwInvalidDateError()
-  }
-
-  const normalized = toJstDateString(parsed)
-  if (isFailure(normalized) || normalized.data !== inputDate) {
-    throwInvalidDateError()
-  }
-
-  return inputDate
-}
-
-function throwInvalidDateError(): never {
-  throw new HTTPException(422, {
-    message: 'Invalid input',
-    cause: {
-      date: ['date must be a valid JST date'],
-    },
-  })
 }
 
 function validateDiaryDateRange(fromDate: string, toDate: string, todayJst: string) {

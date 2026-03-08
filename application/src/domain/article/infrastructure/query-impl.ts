@@ -372,8 +372,12 @@ export default class QueryImpl implements Query {
   }
 
   private static getNormalizedDateTimeSql(columnName: string) {
+    return QueryImpl.getNormalizedDateTimeSqlForSqlite(columnName)
+  }
+
+  private static getNormalizedDateTimeSqlForSqlite(columnName: string) {
     const column = Prisma.raw(columnName)
-    // INFO: typeof()はSQLite固有関数。timestampの型揺れ(integer/text)を吸収するためSQLite前提で正規化する
+    // INFO: typeof()はSQLite固有関数。方言差分はこのメソッドに閉じ込める
     return Prisma.sql`
       CASE
         WHEN typeof(${column}) = 'integer' THEN datetime(${column} / 1000, 'unixepoch')

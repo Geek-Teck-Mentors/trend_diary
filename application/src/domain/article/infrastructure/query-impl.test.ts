@@ -32,6 +32,8 @@ describe('QueryImpl', () => {
     queryImpl = new QueryImpl(mockDb)
   })
 
+  it.todo('DB方言ごとにcreatedAt/readAtの日時正規化SQLを切り替えられる')
+
   describe('searchArticles', () => {
     it('ページネーション付きで記事を検索できる', async () => {
       mockDb.$queryRaw.mockResolvedValueOnce([{ total: 2 }]).mockResolvedValueOnce([
