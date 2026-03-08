@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router'
 import useSWR from 'swr'
 import { addJstDays } from '@/common/locale/date'
 import { DEFAULT_PAGE, offsetPaginationSchema } from '@/common/pagination/schema'
-import { DIARY_DAYS } from '@/domain/article/diary'
+import { DIARY_DAYS, DIARY_READ_LIMIT } from '@/domain/article/diary'
 import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
 import { getTodayJst, sumSourceSummary } from '@/web/client/features/diary/diary-shared'
 import useDiaryApi, {
@@ -44,7 +44,7 @@ export default function useAnalytics(enabled: boolean) {
 
   const parseResult = offsetPaginationSchema.safeParse({
     page: pageParam ?? undefined,
-    limit: 10,
+    limit: DIARY_READ_LIMIT,
   })
   const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
 

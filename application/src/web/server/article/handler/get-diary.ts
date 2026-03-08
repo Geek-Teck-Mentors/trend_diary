@@ -4,13 +4,12 @@ import { z } from 'zod'
 import { handleError } from '@/common/errors'
 import { addJstDays, toJstDate, toJstDateString, toTodayJstDateString } from '@/common/locale/date'
 import { createArticleUseCase } from '@/domain/article'
-import { DIARY_DAYS } from '@/domain/article/diary'
+import { DIARY_DAYS, DIARY_READ_LIMIT } from '@/domain/article/diary'
 import type { DailyDiary, DailyDiaryRangeItem } from '@/domain/article/schema/diary-schema'
 import getRdbClient from '@/infrastructure/rdb'
 import CONTEXT_KEY from '@/web/middleware/context'
 import type { ZodValidatedQueryContext } from '@/web/middleware/zod-validator'
 
-const DIARY_READ_LIMIT = 10
 const DATE_STRING_REGEX = /^\d{4}-\d{2}-\d{2}$/
 
 export const diaryQuerySchema = z.object({
