@@ -42,7 +42,7 @@ function pickNonEmpty(...candidates: Array<string | undefined>): string | undefi
 async function fetchRssFeed<T>(url: string) {
   const response = await fetch(url)
   if (!response.ok) {
-    throw new Error(`Failed to fetch rss feed: ${url}, status=${response.status}`)
+    throw new Error(`Failed to fetch RSS feed: ${url}, status=${response.status}`)
   }
 
   const parser = new Parser<{ items: T[] }, T>()
