@@ -75,7 +75,7 @@ export default function InboxPage({
             <div className='mt-3 flex items-center gap-2'>
               <CheckCircle2 className='h-5 w-5 shrink-0' />
               <p className='text-sm leading-relaxed text-emerald-800'>
-                いいペース。次の更新までこの達成をキープしよう。
+                いいペース。次の更新までこのペースをキープしよう。
               </p>
             </div>
           </section>
