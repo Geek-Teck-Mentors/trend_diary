@@ -109,7 +109,7 @@ export default function AnalyticsPage({
                 <button
                   type='button'
                   onClick={onClearSelectedDate}
-                  className='w-[96px] rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100'
+                  className='w-24 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100'
                   data-slot='diary-clear-selected-date'
                 >
                   選択をクリア

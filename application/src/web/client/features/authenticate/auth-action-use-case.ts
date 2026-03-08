@@ -1,4 +1,5 @@
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr'
+import { isDevelopmentNodeEnv } from '@/common/env'
 import { createAuthV2UseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 
@@ -30,10 +31,6 @@ function readNodeEnv(key: 'SUPABASE_URL' | 'SUPABASE_ANON_KEY') {
     return undefined
   }
   return readEnv(process.env[key])
-}
-
-function isDevelopmentNodeEnv() {
-  return typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
 }
 
 export function shouldUseSecureCookie() {

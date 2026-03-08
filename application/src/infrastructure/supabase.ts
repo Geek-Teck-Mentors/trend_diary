@@ -1,12 +1,9 @@
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr'
 import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
+import { isDevelopmentNodeEnv } from '@/common/env'
 
 export type SupabaseAuthClient = ReturnType<typeof createSupabaseAuthClient>
-
-function isDevelopmentNodeEnv() {
-  return typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
-}
 
 export function createSupabaseAuthClient(c: Context) {
   const supabaseUrl = c.env.SUPABASE_URL
