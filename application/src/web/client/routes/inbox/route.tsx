@@ -11,13 +11,21 @@ export const meta: MetaFunction = () => [{ title: '未読消化 | TrendDiary' }]
 export default function InboxRoute() {
   const { isLoggedIn } = useOutletContext<AppLayoutOutletContext>()
   const [selectedMedia, setSelectedMedia] = useState<MediaType>(null)
-  const { isLoading, currentArticle, remainingCount, handleSkip, handleRead, handleLater } =
-    useUnreadDigestion(isLoggedIn, selectedMedia)
+  const {
+    isLoading,
+    isJustCompleted,
+    currentArticle,
+    remainingCount,
+    handleSkip,
+    handleRead,
+    handleLater,
+  } = useUnreadDigestion(isLoggedIn, selectedMedia)
 
   return (
     <InboxPage
       article={currentArticle}
       isLoading={isLoading}
+      isJustCompleted={isJustCompleted}
       isLoggedIn={isLoggedIn}
       remainingCount={remainingCount}
       onSkip={handleSkip}

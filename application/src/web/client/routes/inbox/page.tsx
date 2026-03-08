@@ -1,3 +1,4 @@
+import { CheckCircle2 } from 'lucide-react'
 import { isArticleMedia } from '@/domain/article/media'
 import { Button } from '@/web/client/components/shadcn/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/web/client/components/shadcn/tooltip'
@@ -10,6 +11,7 @@ import type { Article } from './hooks/use-unread-digestion'
 type Props = {
   article: Article | null
   isLoading: boolean
+  isJustCompleted: boolean
   isLoggedIn: boolean
   onSkip: () => Promise<void>
   onRead: () => Promise<void>
@@ -27,6 +29,7 @@ const toMediaType = (media: string): IconMediaType => {
 export default function InboxPage({
   article,
   isLoading,
+  isJustCompleted,
   isLoggedIn,
   onSkip,
   onRead,
@@ -48,7 +51,7 @@ export default function InboxPage({
     <div className='min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
       <div className='mx-auto w-full max-w-3xl rounded-2xl border border-white/40 bg-white/50 p-6 shadow-xl backdrop-blur-sm'>
         <h1 className='text-xl font-semibold text-gray-900'>未読消化</h1>
-        <p className='mt-0.5 text-sm text-gray-600'>当日の未読記事を1件ずつ確認できます。</p>
+        <p className='mt-0.5 text-sm text-gray-600'>未読記事を1件ずつ確認できます。</p>
         <div className='mt-2'>
           <p className='mb-2 text-sm text-gray-600'>メディア</p>
           <MediaFilter selectedMedia={selectedMedia} onMediaChange={onMediaChange} />
@@ -57,8 +60,25 @@ export default function InboxPage({
 
         {isLoading && <p className='mt-4 text-sm text-gray-600'>読み込み中...</p>}
 
-        {!isLoading && !article && (
-          <p className='mt-4 text-sm text-gray-600'>当日の未読記事はありません</p>
+        {!isLoading && !article && !isJustCompleted && (
+          <p className='mt-4 text-sm text-gray-600'>未読記事はありません</p>
+        )}
+
+        {!isLoading && !article && isJustCompleted && (
+          <section
+            data-slot='inbox-completion-card'
+            className='animate-in fade-in zoom-in-95 mt-4 rounded-xl border border-emerald-200 bg-emerald-50/80 p-5 text-emerald-900 duration-700'
+          >
+            <span className='inline-flex items-center rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold'>
+              消化完了
+            </span>
+            <div className='mt-3 flex items-center gap-2'>
+              <CheckCircle2 className='h-5 w-5 shrink-0' />
+              <p className='text-sm leading-relaxed text-emerald-800'>
+                いいペース。次の更新までこの達成をキープしよう。
+              </p>
+            </div>
+          </section>
         )}
 
         {!isLoading && article && (

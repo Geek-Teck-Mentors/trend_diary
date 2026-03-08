@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import useSWR from 'swr'
 import type { ArticleOutput } from '@/domain/article/schema/article-schema'
@@ -15,12 +15,38 @@ type UnreadDigestionResponse = {
 }
 
 const SkipErrorMessage = 'スキップに失敗しました'
+const CompletionPendingStorageKey = 'inbox-completion-pending'
+const CompletionDisplayDurationMs = 2500
+
+const setCompletionPending = (pending: boolean) => {
+  try {
+    if (pending) {
+      window.sessionStorage.setItem(CompletionPendingStorageKey, '1')
+      return
+    }
+
+    window.sessionStorage.removeItem(CompletionPendingStorageKey)
+  } catch {
+    // INFO: ストレージ利用不可環境では完了演出の遅延再生を無効化する
+  }
+}
+
+const hasCompletionPending = () => {
+  try {
+    return window.sessionStorage.getItem(CompletionPendingStorageKey) === '1'
+  } catch {
+    return false
+  }
+}
 
 export default function useUnreadDigestion(enabled: boolean, selectedMedia: MediaType) {
   const { client, apiCall } = createSWRFetcher()
   const { markAsRead } = useReadArticle()
   const [queue, setQueue] = useState<Article[]>([])
   const [isActionLoading, setIsActionLoading] = useState(false)
+  const [isJustCompleted, setIsJustCompleted] = useState(false)
+  const previousRemainingCountRef = useRef<number | null>(null)
+  const completionTriggeredByActionRef = useRef(false)
 
   const swrKey = enabled ? ['api/articles/unread-digestion', selectedMedia] : null
   const { data, isLoading } = useSWR<UnreadDigestionResponse>(swrKey, async () => {
@@ -42,8 +68,57 @@ export default function useUnreadDigestion(enabled: boolean, selectedMedia: Medi
   })
 
   useEffect(() => {
+    completionTriggeredByActionRef.current = false
     setQueue(data?.data ?? [])
   }, [data])
+
+  useEffect(() => {
+    const remainingCount = queue.length
+    const previousRemainingCount = previousRemainingCountRef.current
+    const reachedZeroByAction =
+      previousRemainingCount !== null &&
+      previousRemainingCount > 0 &&
+      remainingCount === 0 &&
+      completionTriggeredByActionRef.current
+    const shouldPlayCompletion =
+      reachedZeroByAction || (remainingCount === 0 && hasCompletionPending())
+
+    if (shouldPlayCompletion && document.visibilityState === 'visible') {
+      setIsJustCompleted(true)
+      setCompletionPending(false)
+    }
+
+    previousRemainingCountRef.current = remainingCount
+    completionTriggeredByActionRef.current = false
+  }, [queue.length])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return
+      if (queue.length !== 0) return
+      if (!hasCompletionPending()) return
+
+      setIsJustCompleted(true)
+      setCompletionPending(false)
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [queue.length])
+
+  useEffect(() => {
+    if (!isJustCompleted) return
+
+    const timerId = window.setTimeout(() => {
+      setIsJustCompleted(false)
+    }, CompletionDisplayDurationMs)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
+  }, [isJustCompleted])
 
   const currentArticle = queue[0] ?? null
 
@@ -63,6 +138,7 @@ export default function useUnreadDigestion(enabled: boolean, selectedMedia: Medi
         throw new Error('Failed to skip article')
       }
 
+      completionTriggeredByActionRef.current = true
       setQueue((prev) => prev.slice(1))
     } catch (_error) {
       toast.error(SkipErrorMessage)
@@ -76,13 +152,21 @@ export default function useUnreadDigestion(enabled: boolean, selectedMedia: Medi
     setIsActionLoading(true)
 
     try {
+      const isLastArticle = queue.length === 1
       window.open(currentArticle.url, '_blank', 'noopener,noreferrer')
-      await markAsRead(currentArticle.articleId)
+      const isReadSuccess = await markAsRead(currentArticle.articleId)
+      if (!isReadSuccess) return
+
+      if (isLastArticle) {
+        setCompletionPending(true)
+      }
+
+      completionTriggeredByActionRef.current = true
       setQueue((prev) => prev.slice(1))
     } finally {
       setIsActionLoading(false)
     }
-  }, [currentArticle, markAsRead])
+  }, [currentArticle, markAsRead, queue.length])
 
   const handleLater = useCallback(() => {
     setQueue((prev) => {
@@ -94,6 +178,7 @@ export default function useUnreadDigestion(enabled: boolean, selectedMedia: Medi
 
   return {
     isLoading: isLoading || isActionLoading,
+    isJustCompleted,
     currentArticle,
     remainingCount: queue.length,
     handleSkip,
