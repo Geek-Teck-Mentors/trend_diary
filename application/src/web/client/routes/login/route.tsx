@@ -1,3 +1,4 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import {
   type ActionFunctionArgs,
   type MetaFunction,
@@ -5,7 +6,8 @@ import {
   useActionData,
   useNavigation,
 } from 'react-router'
-import { resolveInternalApiEndpoint } from '@/web/client/features/authenticate/internal-api-endpoint'
+import { ClientError, ServerError } from '@/common/errors'
+import { createAuthActionUseCase } from '@/web/client/features/authenticate/auth-action-use-case'
 import {
   type AuthenticateErrors,
   validateAuthenticateForm,
@@ -46,40 +48,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return { errors: validation.errors } satisfies LoginActionData
   }
 
-  let response: Response
   try {
-    const endpoint = resolveInternalApiEndpoint('/api/v2/auth/login', context)
-    response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: request.headers.get('Cookie') ?? '',
-      },
-      body: JSON.stringify(validation.data),
-    })
+    const { useCase, headers } = createAuthActionUseCase(request, context)
+    const result = await useCase.login(validation.data.email, validation.data.password)
+
+    if (isFailure(result)) {
+      if (
+        result.error instanceof ClientError &&
+        (result.error.statusCode === 401 || result.error.statusCode === 404)
+      ) {
+        return {
+          formError: 'メールアドレスまたはパスワードが正しくありません',
+        } satisfies LoginActionData
+      }
+
+      if (result.error instanceof ServerError && result.error.statusCode === 500) {
+        return {
+          formError: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
+        } satisfies LoginActionData
+      }
+
+      return { formError: '予期せぬエラーが発生しました。' } satisfies LoginActionData
+    }
+
+    return redirect('/trends', { headers })
   } catch {
     return { formError: '予期せぬエラーが発生しました。' } satisfies LoginActionData
   }
-
-  if (response.ok) {
-    const headers = new Headers()
-    copySetCookieHeaders(response.headers, headers)
-    return redirect('/trends', { headers })
-  }
-
-  if (response.status === 401 || response.status === 404) {
-    return {
-      formError: 'メールアドレスまたはパスワードが正しくありません',
-    } satisfies LoginActionData
-  }
-
-  if (response.status === 500) {
-    return {
-      formError: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
-    } satisfies LoginActionData
-  }
-
-  return { formError: '予期せぬエラーが発生しました。' } satisfies LoginActionData
 }
 
 export default function Login() {
@@ -93,19 +88,4 @@ export default function Login() {
       formError={actionData?.formError}
     />
   )
-}
-
-function copySetCookieHeaders(source: Headers, target: Headers) {
-  const getSetCookie = (source as Headers & { getSetCookie?: () => string[] }).getSetCookie
-  if (typeof getSetCookie === 'function') {
-    for (const cookie of getSetCookie.call(source)) {
-      target.append('Set-Cookie', cookie)
-    }
-    return
-  }
-
-  const setCookie = source.get('set-cookie')
-  if (setCookie) {
-    target.append('Set-Cookie', setCookie)
-  }
 }

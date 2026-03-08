@@ -1,3 +1,4 @@
+import { isFailure } from '@yuukihayashi0510/core'
 import {
   type ActionFunctionArgs,
   type MetaFunction,
@@ -5,7 +6,8 @@ import {
   useActionData,
   useNavigation,
 } from 'react-router'
-import { resolveInternalApiEndpoint } from '@/web/client/features/authenticate/internal-api-endpoint'
+import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
+import { createAuthActionUseCase } from '@/web/client/features/authenticate/auth-action-use-case'
 import {
   type AuthenticateErrors,
   validateAuthenticateForm,
@@ -46,36 +48,31 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return { errors: validation.errors } satisfies SignupActionData
   }
 
-  let response: Response
   try {
-    const endpoint = resolveInternalApiEndpoint('/api/v2/auth/signup', context)
-    response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: request.headers.get('Cookie') ?? '',
-      },
-      body: JSON.stringify(validation.data),
-    })
+    const { useCase } = createAuthActionUseCase(request, context)
+    const result = await useCase.signup(validation.data.email, validation.data.password)
+
+    if (isFailure(result)) {
+      if (
+        result.error instanceof AlreadyExistsError ||
+        (result.error instanceof ClientError && result.error.statusCode === 409)
+      ) {
+        return { formError: 'このメールアドレスは既に使用されています' } satisfies SignupActionData
+      }
+
+      if (result.error instanceof ServerError && result.error.statusCode === 500) {
+        return {
+          formError: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
+        } satisfies SignupActionData
+      }
+
+      return { formError: '予期せぬエラーが発生しました。' } satisfies SignupActionData
+    }
+
+    return redirect('/login')
   } catch {
     return { formError: '予期せぬエラーが発生しました。' } satisfies SignupActionData
   }
-
-  if (response.ok) {
-    return redirect('/login')
-  }
-
-  if (response.status === 409) {
-    return { formError: 'このメールアドレスは既に使用されています' } satisfies SignupActionData
-  }
-
-  if (response.status === 500) {
-    return {
-      formError: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
-    } satisfies SignupActionData
-  }
-
-  return { formError: '予期せぬエラーが発生しました。' } satisfies SignupActionData
 }
 
 export default function Signup() {
