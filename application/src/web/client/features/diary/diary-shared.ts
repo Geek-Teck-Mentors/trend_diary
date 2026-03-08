@@ -1,5 +1,5 @@
 import { isFailure } from '@yuukihayashi0510/core'
-import { toJstDateString } from '@/common/locale/date'
+import { toTodayJstDateString } from '@/common/locale/date'
 
 type SourceSummary = {
   read: number
@@ -7,7 +7,7 @@ type SourceSummary = {
 }
 
 export function getTodayJst(): string {
-  const result = toJstDateString(new Date())
+  const result = toTodayJstDateString()
   if (isFailure(result)) {
     throw new Error('Failed to resolve JST date')
   }

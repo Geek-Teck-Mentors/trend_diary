@@ -6,8 +6,11 @@ import {
   useActionData,
   useNavigation,
 } from 'react-router'
-import { ClientError, ServerError } from '@/common/errors'
 import { createAuthActionUseCase } from '@/web/client/features/authenticate/auth-action-use-case'
+import {
+  AUTH_ERROR_MESSAGES,
+  resolveLoginErrorMessage,
+} from '@/web/client/features/authenticate/error-message'
 import {
   type AuthenticateErrors,
   validateAuthenticateForm,
@@ -53,27 +56,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const result = await useCase.login(validation.data.email, validation.data.password)
 
     if (isFailure(result)) {
-      if (
-        result.error instanceof ClientError &&
-        (result.error.statusCode === 401 || result.error.statusCode === 404)
-      ) {
-        return {
-          formError: 'メールアドレスまたはパスワードが正しくありません',
-        } satisfies LoginActionData
-      }
-
-      if (result.error instanceof ServerError && result.error.statusCode === 500) {
-        return {
-          formError: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
-        } satisfies LoginActionData
-      }
-
-      return { formError: '予期せぬエラーが発生しました。' } satisfies LoginActionData
+      return { formError: resolveLoginErrorMessage(result.error) } satisfies LoginActionData
     }
 
     return redirect('/trends', { headers })
   } catch {
-    return { formError: '予期せぬエラーが発生しました。' } satisfies LoginActionData
+    return { formError: AUTH_ERROR_MESSAGES.unexpected } satisfies LoginActionData
   }
 }
 

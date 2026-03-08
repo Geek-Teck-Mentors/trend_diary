@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router'
 import useSWR from 'swr'
 import { DEFAULT_PAGE, offsetPaginationSchema } from '@/common/pagination/schema'
 import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
-import { getTodayJst, sumSourceSummary } from '@/web/client/routes/diary/hooks/diary-shared'
+import { getTodayJst, sumSourceSummary } from '@/web/client/features/diary/diary-shared'
 import useDiaryApi from './use-diary-api'
 
 type DiaryReadItem = {

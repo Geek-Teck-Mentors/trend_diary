@@ -1,5 +1,12 @@
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
-import { addJstDays, toJaDateString, toJstDate, toJstDateString } from './date'
+import { afterEach, beforeEach, vi } from 'vitest'
+import {
+  addJstDays,
+  toJaDateString,
+  toJstDate,
+  toJstDateString,
+  toTodayJstDateString,
+} from './date'
 
 describe('Common Date Module', () => {
   describe('toJaDateString', () => {
@@ -62,6 +69,26 @@ describe('Common Date Module', () => {
     it('不正な日付文字列は無効なDateになること', () => {
       const result = toJstDate('invalid')
       expect(Number.isNaN(result.getTime())).toBe(true)
+    })
+  })
+
+  describe('toTodayJstDateString', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('現在時刻をJSTのYYYY-MM-DD形式に変換できること', () => {
+      vi.setSystemTime(new Date('2024-01-01T23:30:00Z'))
+
+      const result = toTodayJstDateString()
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toBe('2024-01-02')
+      }
     })
   })
 

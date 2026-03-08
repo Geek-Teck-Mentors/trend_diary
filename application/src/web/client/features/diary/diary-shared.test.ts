@@ -10,13 +10,13 @@ describe('diary-shared', () => {
 
   describe('getTodayJst', () => {
     it('JSTの日付文字列を返す', () => {
-      vi.spyOn(dateModule, 'toJstDateString').mockReturnValue(success('2026-03-08'))
+      vi.spyOn(dateModule, 'toTodayJstDateString').mockReturnValue(success('2026-03-08'))
 
       expect(getTodayJst()).toBe('2026-03-08')
     })
 
     it('JST解決に失敗したら例外を投げる', () => {
-      vi.spyOn(dateModule, 'toJstDateString').mockReturnValue(
+      vi.spyOn(dateModule, 'toTodayJstDateString').mockReturnValue(
         failure(new Error('JST日付の取得に失敗しました')),
       )
 

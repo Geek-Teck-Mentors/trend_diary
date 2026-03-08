@@ -6,7 +6,7 @@ import { addJstDays } from '@/common/locale/date'
 import { DEFAULT_PAGE, offsetPaginationSchema } from '@/common/pagination/schema'
 import { DIARY_DAYS } from '@/domain/article/diary'
 import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
-import { getTodayJst, sumSourceSummary } from '@/web/client/routes/diary/hooks/diary-shared'
+import { getTodayJst, sumSourceSummary } from '@/web/client/features/diary/diary-shared'
 import useDiaryApi, {
   type DiaryRangeItemResponse,
   type DiaryResponse,

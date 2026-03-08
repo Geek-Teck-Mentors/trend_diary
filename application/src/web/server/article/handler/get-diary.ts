@@ -2,20 +2,16 @@ import { isFailure } from '@yuukihayashi0510/core'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { handleError } from '@/common/errors'
-import { addJstDays } from '@/common/locale/date'
+import { addJstDays, toJstDate, toJstDateString, toTodayJstDateString } from '@/common/locale/date'
 import { createArticleUseCase } from '@/domain/article'
 import { DIARY_DAYS } from '@/domain/article/diary'
 import type { DailyDiary, DailyDiaryRangeItem } from '@/domain/article/schema/diary-schema'
 import getRdbClient from '@/infrastructure/rdb'
 import CONTEXT_KEY from '@/web/middleware/context'
 import type { ZodValidatedQueryContext } from '@/web/middleware/zod-validator'
-import {
-  DATE_STRING_REGEX,
-  ensureValidDiaryDate,
-  resolveTodayJst,
-} from '@/web/server/article/handler/diary-date'
 
 const DIARY_READ_LIMIT = 10
+const DATE_STRING_REGEX = /^\d{4}-\d{2}-\d{2}$/
 
 export const diaryQuerySchema = z.object({
   from: z.string().regex(DATE_STRING_REGEX),
@@ -104,6 +100,38 @@ export default async function getDiary(c: ZodValidatedQueryContext<DiaryQuery>) 
 
   return c.json(response, 200)
 }
+
+function resolveTodayJst(): string {
+  const todayResult = toTodayJstDateString()
+  if (isFailure(todayResult)) {
+    throw new HTTPException(500, { message: 'Failed to resolve JST date' })
+  }
+  return todayResult.data
+}
+
+function ensureValidDiaryDate(inputDate: string): string {
+  const parsed = toJstDate(inputDate)
+  if (Number.isNaN(parsed.getTime())) {
+    throwInvalidDateError()
+  }
+
+  const normalized = toJstDateString(parsed)
+  if (isFailure(normalized) || normalized.data !== inputDate) {
+    throwInvalidDateError()
+  }
+
+  return inputDate
+}
+
+function throwInvalidDateError(): never {
+  throw new HTTPException(422, {
+    message: 'Invalid input',
+    cause: {
+      date: ['date must be a valid JST date'],
+    },
+  })
+}
+
 function validateDiaryDateRange(fromDate: string, toDate: string, todayJst: string) {
   if (fromDate > toDate) {
     throw new HTTPException(422, {

@@ -1,6 +1,7 @@
 import { NavigateFunction } from 'react-router'
 import { toast } from 'sonner'
 import useSWRMutation from 'swr/mutation'
+import { resolveLoginErrorMessage } from '../../features/authenticate/error-message'
 import { AuthenticateFormData } from '../../features/authenticate/validation'
 import { createSWRFetcher } from '../../features/create-swr-fetcher'
 
@@ -25,13 +26,7 @@ export default function useLogin(navigate: NavigateFunction) {
         navigate('/trends')
       },
       onError: (error: Error) => {
-        if (error.message.includes('401') || error.message.includes('404')) {
-          toast.error('メールアドレスまたはパスワードが正しくありません')
-        } else if (error.message.includes('500')) {
-          toast.error('サーバーエラーが発生しました。時間をおいて再度お試しください。')
-        } else {
-          toast.error('予期せぬエラーが発生しました。')
-        }
+        toast.error(resolveLoginErrorMessage(error))
       },
     },
   )

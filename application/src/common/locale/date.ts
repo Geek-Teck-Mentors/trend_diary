@@ -11,6 +11,8 @@ const jstDateFormatter = new Intl.DateTimeFormat('ja-JP', {
 
 export const toJstDate = (date: string) => new Date(`${date}T00:00:00+09:00`)
 
+export const toTodayJstDateString = (): Result<string, Error> => toJstDateString(new Date())
+
 const getJstDateParts = (
   rawDate: Date,
 ): Result<{ year: string; month: string; day: string }, Error> => {

@@ -6,8 +6,11 @@ import {
   useActionData,
   useNavigation,
 } from 'react-router'
-import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import { createAuthActionUseCase } from '@/web/client/features/authenticate/auth-action-use-case'
+import {
+  AUTH_ERROR_MESSAGES,
+  resolveSignupErrorMessage,
+} from '@/web/client/features/authenticate/error-message'
 import {
   type AuthenticateErrors,
   validateAuthenticateForm,
@@ -53,25 +56,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const result = await useCase.signup(validation.data.email, validation.data.password)
 
     if (isFailure(result)) {
-      if (
-        result.error instanceof AlreadyExistsError ||
-        (result.error instanceof ClientError && result.error.statusCode === 409)
-      ) {
-        return { formError: 'このメールアドレスは既に使用されています' } satisfies SignupActionData
-      }
-
-      if (result.error instanceof ServerError && result.error.statusCode === 500) {
-        return {
-          formError: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
-        } satisfies SignupActionData
-      }
-
-      return { formError: '予期せぬエラーが発生しました。' } satisfies SignupActionData
+      return { formError: resolveSignupErrorMessage(result.error) } satisfies SignupActionData
     }
 
     return redirect('/login')
   } catch {
-    return { formError: '予期せぬエラーが発生しました。' } satisfies SignupActionData
+    return { formError: AUTH_ERROR_MESSAGES.unexpected } satisfies SignupActionData
   }
 }
 
