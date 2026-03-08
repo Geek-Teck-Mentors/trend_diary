@@ -120,7 +120,9 @@ export default function AnalyticsPage({
                   tickLine={false}
                   tickMargin={8}
                   axisLine={false}
-                  tickFormatter={(value) => toJaDateString(toJstDate(value)).slice(5)}
+                  tickFormatter={(value) =>
+                    toJstDate(value).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })
+                  }
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />

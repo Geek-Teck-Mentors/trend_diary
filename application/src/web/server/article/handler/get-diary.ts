@@ -45,7 +45,7 @@ type DiaryRangeResponse = {
       media: string
       title: string
       url: string
-      readAt: Date
+      readAt: string
     }>
     page: number
     totalPages: number
@@ -163,7 +163,7 @@ function toDiaryDetailResponse(data: DailyDiary): DiaryRangeResponse {
         media: read.media,
         title: read.title,
         url: read.url,
-        readAt: read.readAt,
+        readAt: read.readAt.toISOString(),
       })),
       page: data.reads.page,
       totalPages: data.reads.totalPages,
