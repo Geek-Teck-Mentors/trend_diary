@@ -87,8 +87,7 @@ export default function useAnalytics(enabled: boolean) {
     },
   )
 
-  const swrKey =
-    enabled && selectedDate ? ['api/articles/diary', selectedDate, selectedDate, page] : null
+  const swrKey = enabled && selectedDate ? ['api/articles/diary', selectedDate, page] : null
   const { data, isLoading } = useSWR<DiaryResponse>(swrKey, () =>
     fetchDiary(selectedDate as string, page),
   )

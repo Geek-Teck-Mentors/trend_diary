@@ -8,7 +8,7 @@ import {
   wrapAsyncCall,
 } from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
-import { addJstDays } from '@/common/locale/date'
+import { addJstDays, toJstDate } from '@/common/locale/date'
 import { DEFAULT_LIMIT, DEFAULT_PAGE, OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/mapper'
@@ -497,8 +497,8 @@ export default class QueryImpl implements Query {
   private static buildDateRange(from?: string, to?: string): DateRange
   private static buildDateRange(from?: string, to?: string): DateRange {
     // INFO: APIの指定日はJST日付として扱う
-    const fromDate = from ? new Date(`${from}T00:00:00+09:00`) : undefined
-    const toDateExclusive = to ? new Date(`${to}T00:00:00+09:00`) : undefined
+    const fromDate = from ? toJstDate(from) : undefined
+    const toDateExclusive = to ? toJstDate(to) : undefined
     if (toDateExclusive) {
       toDateExclusive.setDate(toDateExclusive.getDate() + 1)
     }
