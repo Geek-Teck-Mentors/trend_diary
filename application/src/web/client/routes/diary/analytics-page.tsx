@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts'
-import { toJaDateString, toJstDate } from '@/common/locale/date'
+import { formatSummaryDateTick, toJaDateString, toJstDate } from '@/common/locale/date'
 import {
   ChartConfig,
   ChartContainer,
@@ -52,13 +52,6 @@ const chartConfig = {
     color: '#64748b',
   },
 } satisfies ChartConfig
-
-function formatSummaryDateTick(value: string | number): string {
-  if (typeof value !== 'string') {
-    return String(value)
-  }
-  return toJstDate(value).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })
-}
 
 export default function AnalyticsPage({
   isLoggedIn,

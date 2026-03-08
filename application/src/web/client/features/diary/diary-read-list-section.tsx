@@ -1,14 +1,7 @@
+import { toJaTimeString } from '@/common/locale/date'
 import { AnchorLink } from '@/web/client/components/ui/link'
 import type { ReadItem } from '@/web/client/features/diary/types'
 import MediaIcon from '@/web/client/routes/trends._index/components/media-icon'
-
-const toJstTimeString = (date: Date) =>
-  date.toLocaleTimeString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
 
 type Props = {
   isLoading: boolean
@@ -47,7 +40,7 @@ export default function DiaryReadListSection({ isLoading, shouldShowDailyDetails
                   {read.title}
                 </AnchorLink>
               </div>
-              <p className='shrink-0 text-xs text-gray-500'>{toJstTimeString(read.readAt)}</p>
+              <p className='shrink-0 text-xs text-gray-500'>{toJaTimeString(read.readAt)}</p>
             </li>
           ))}
         </ul>
