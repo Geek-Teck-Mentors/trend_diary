@@ -5,6 +5,7 @@ import {
   useActionData,
   useNavigation,
 } from 'react-router'
+import { resolveInternalApiEndpoint } from '@/web/client/features/authenticate/internal-api-endpoint'
 import {
   type AuthenticateErrors,
   validateAuthenticateForm,
@@ -38,7 +39,7 @@ export const meta: MetaFunction = () => [
   },
 ]
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData()
   const validation = validateAuthenticateForm(formData)
   if (!validation.isValid) {
@@ -47,7 +48,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
   let response: Response
   try {
-    response = await fetch(new URL('/api/v2/auth/login', request.url), {
+    const endpoint = resolveInternalApiEndpoint('/api/v2/auth/login', context)
+    response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
