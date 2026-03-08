@@ -58,7 +58,7 @@ gh api -X POST repos/<owner>/<repo>/pulls/<pr_number>/comments/<comment_id>/repl
 コマンド例:
 
 ```bash
-gh api graphql -f query='mutation($threadId:ID!){ resolveReviewThread(input:{threadId:$threadId}){ thread{ id isResolved } } }' \
+gh api graphql -f query='mutation ResolveReviewThread($threadId:ID!){ resolveReviewThread(input:{threadId:$threadId}){ thread{ id isResolved } } }' \
   -f threadId=<thread_id>
 ```
 
