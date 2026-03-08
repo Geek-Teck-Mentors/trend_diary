@@ -169,4 +169,3 @@ export async function runScheduledFetch(media: ArticleMedia, env: CronEnv): Prom
       return fetchHatenaArticles(env)
   }
 }
-
