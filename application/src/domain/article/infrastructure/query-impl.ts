@@ -204,22 +204,6 @@ export default class QueryImpl implements Query {
   ): AsyncResult<DailyDiary, ServerError> {
     const dbActiveUserId = toDbId(activeUserId)
     const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(targetDateJst, targetDateJst)
-    if (!fromDate || !toDateExclusive) {
-      return success({
-        date: targetDateJst,
-        summary: { read: 0, skip: 0 },
-        sources: [],
-        reads: {
-          data: [],
-          page,
-          limit,
-          total: 0,
-          totalPages: 0,
-          hasNext: false,
-          hasPrev: false,
-        },
-      })
-    }
     const readAtRangeSql = QueryImpl.buildClosedOpenDateRangeSql(
       'rh.read_at',
       fromDate,
@@ -503,7 +487,15 @@ export default class QueryImpl implements Query {
     return Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
   }
 
-  private static buildDateRange(from?: string, to?: string) {
+  private static buildDateRange(
+    from: string,
+    to: string,
+  ): {
+    fromDate: Date
+    toDateExclusive: Date
+  }
+  private static buildDateRange(from?: string, to?: string): DateRange
+  private static buildDateRange(from?: string, to?: string): DateRange {
     // INFO: APIの指定日はJST日付として扱う
     const fromDate = from ? new Date(`${from}T00:00:00+09:00`) : undefined
     const toDateExclusive = to ? new Date(`${to}T00:00:00+09:00`) : undefined

@@ -9,7 +9,7 @@ type SourceSummary = {
 export function getTodayJst(): string {
   const result = toJstDateString(new Date())
   if (isFailure(result)) {
-    return new Date().toISOString().slice(0, 10)
+    throw new Error('Failed to resolve JST date')
   }
   return result.data
 }
