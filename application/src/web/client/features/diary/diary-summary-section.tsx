@@ -1,4 +1,4 @@
-import { toJaDateString } from '@/common/locale/date'
+import { toJaDateString, toJstDate } from '@/common/locale/date'
 import type { ArticleMedia } from '@/domain/article/media'
 import {
   Table,
@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/web/client/components/shadcn/table'
-import { toJstDate } from '@/web/client/features/diary/date'
 import type { Source, Summary } from '@/web/client/features/diary/types'
 
 const mediaLabels: Record<ArticleMedia, string> = {

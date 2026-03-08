@@ -1,1 +1,1 @@
-export { addJstDays, toJaDateString, toJstDateString } from './date'
+export { addJstDays, toJaDateString, toJstDate, toJstDateString } from './date'

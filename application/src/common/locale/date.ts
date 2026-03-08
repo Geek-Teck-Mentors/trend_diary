@@ -9,6 +9,8 @@ const jstDateFormatter = new Intl.DateTimeFormat('ja-JP', {
   day: '2-digit',
 })
 
+export const toJstDate = (date: string) => new Date(`${date}T00:00:00+09:00`)
+
 const getJstDateParts = (
   rawDate: Date,
 ): Result<{ year: string; month: string; day: string }, Error> => {
@@ -39,7 +41,7 @@ export const toJstDateString = (rawDate: Date): Result<string, Error> => {
 }
 
 export const addJstDays = (baseDateString: string, days: number): Result<string, Error> => {
-  const baseDate = new Date(`${baseDateString}T00:00:00+09:00`)
+  const baseDate = toJstDate(baseDateString)
   if (Number.isNaN(baseDate.getTime())) {
     return failure(new Error(`不正な日付文字列です: ${baseDateString}`))
   }

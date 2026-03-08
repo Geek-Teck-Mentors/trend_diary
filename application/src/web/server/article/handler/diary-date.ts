@@ -1,6 +1,6 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import { HTTPException } from 'hono/http-exception'
-import { toJstDateString } from '@/common/locale/date'
+import { toJstDate, toJstDateString } from '@/common/locale/date'
 
 export const DATE_STRING_REGEX = /^\d{4}-\d{2}-\d{2}$/
 
@@ -13,7 +13,7 @@ export function resolveTodayJst(): string {
 }
 
 export function ensureValidDiaryDate(inputDate: string): string {
-  const parsed = new Date(`${inputDate}T00:00:00+09:00`)
+  const parsed = toJstDate(inputDate)
   if (Number.isNaN(parsed.getTime())) {
     throwInvalidDateError()
   }

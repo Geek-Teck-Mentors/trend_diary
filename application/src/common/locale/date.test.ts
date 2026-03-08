@@ -1,5 +1,5 @@
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
-import { addJstDays, toJaDateString, toJstDateString } from './date'
+import { addJstDays, toJaDateString, toJstDate, toJstDateString } from './date'
 
 describe('Common Date Module', () => {
   describe('toJaDateString', () => {
@@ -49,6 +49,19 @@ describe('Common Date Module', () => {
       if (isFailure(result)) {
         expect(result.error.message).toBe('無効な日付です')
       }
+    })
+  })
+
+  describe('toJstDate', () => {
+    it('YYYY-MM-DDをJSTのDateとして解釈できること', () => {
+      const result = toJstDate('2024-01-01')
+      expect(Number.isNaN(result.getTime())).toBe(false)
+      expect(result.toISOString()).toBe('2023-12-31T15:00:00.000Z')
+    })
+
+    it('不正な日付文字列は無効なDateになること', () => {
+      const result = toJstDate('invalid')
+      expect(Number.isNaN(result.getTime())).toBe(true)
     })
   })
 

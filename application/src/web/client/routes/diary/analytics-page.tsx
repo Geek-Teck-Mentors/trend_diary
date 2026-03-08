@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts'
-import { toJaDateString } from '@/common/locale/date'
+import { toJaDateString, toJstDate } from '@/common/locale/date'
 import {
   ChartConfig,
   ChartContainer,
@@ -9,7 +9,6 @@ import {
   ChartTooltipContent,
 } from '@/web/client/components/shadcn/chart'
 import { cn } from '@/web/client/components/shadcn/lib/utils'
-import { toJstDate } from '@/web/client/features/diary/date'
 import DiaryLoginRequired from '@/web/client/features/diary/diary-login-required'
 import DiaryReadListSection from '@/web/client/features/diary/diary-read-list-section'
 import DiaryReadPagination from '@/web/client/features/diary/diary-read-pagination'
