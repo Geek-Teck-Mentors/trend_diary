@@ -1,6 +1,20 @@
-import { type MetaFunction, useNavigate } from 'react-router'
+import {
+  type ActionFunctionArgs,
+  type MetaFunction,
+  redirect,
+  useActionData,
+  useNavigation,
+} from 'react-router'
+import {
+  type AuthenticateErrors,
+  validateAuthenticateForm,
+} from '../../features/authenticate/validation'
 import LoginPage from './page'
-import useLogin from './use-login'
+
+type LoginActionData = {
+  errors?: AuthenticateErrors
+  formError?: string
+}
 
 export const meta: MetaFunction = () => [
   { title: 'ログイン | TrendDiary' },
@@ -24,9 +38,72 @@ export const meta: MetaFunction = () => [
   },
 ]
 
-export default function Login() {
-  const navigate = useNavigate()
-  const { handleSubmit } = useLogin(navigate)
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData()
+  const validation = validateAuthenticateForm(formData)
+  if (!validation.isValid) {
+    return { errors: validation.errors } satisfies LoginActionData
+  }
 
-  return <LoginPage handleSubmit={handleSubmit} />
+  let response: Response
+  try {
+    response = await fetch(new URL('/api/v2/auth/login', request.url), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: request.headers.get('Cookie') ?? '',
+      },
+      body: JSON.stringify(validation.data),
+    })
+  } catch {
+    return { formError: '予期せぬエラーが発生しました。' } satisfies LoginActionData
+  }
+
+  if (response.ok) {
+    const headers = new Headers()
+    copySetCookieHeaders(response.headers, headers)
+    return redirect('/trends', { headers })
+  }
+
+  if (response.status === 401 || response.status === 404) {
+    return {
+      formError: 'メールアドレスまたはパスワードが正しくありません',
+    } satisfies LoginActionData
+  }
+
+  if (response.status === 500) {
+    return {
+      formError: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
+    } satisfies LoginActionData
+  }
+
+  return { formError: '予期せぬエラーが発生しました。' } satisfies LoginActionData
+}
+
+export default function Login() {
+  const actionData = useActionData<typeof action>()
+  const navigation = useNavigation()
+
+  return (
+    <LoginPage
+      isSubmitting={navigation.state === 'submitting'}
+      errors={actionData?.errors}
+      formError={actionData?.formError}
+    />
+  )
+}
+
+function copySetCookieHeaders(source: Headers, target: Headers) {
+  const getSetCookie = (source as Headers & { getSetCookie?: () => string[] }).getSetCookie
+  if (typeof getSetCookie === 'function') {
+    for (const cookie of getSetCookie.call(source)) {
+      target.append('Set-Cookie', cookie)
+    }
+    return
+  }
+
+  const setCookie = source.get('set-cookie')
+  if (setCookie) {
+    target.append('Set-Cookie', setCookie)
+  }
 }

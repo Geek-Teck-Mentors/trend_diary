@@ -10,13 +10,15 @@ import Footer from '../../components/ui/footer'
 import LandingHeader from '../../components/ui/landing-header'
 import { AnchorLink } from '../../components/ui/link'
 import { AuthenticateForm } from '../../features/authenticate/authenticate-form'
-import { AuthenticateFormData } from '../../features/authenticate/validation'
+import { AuthenticateErrors } from '../../features/authenticate/validation'
 
 type Props = {
-  handleSubmit: (data: AuthenticateFormData) => Promise<void>
+  isSubmitting: boolean
+  errors?: AuthenticateErrors
+  formError?: string
 }
 
-export default function SignupPage({ handleSubmit }: Props) {
+export default function SignupPage({ isSubmitting, errors, formError }: Props) {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 to-white'>
       <LandingHeader />
@@ -30,7 +32,9 @@ export default function SignupPage({ handleSubmit }: Props) {
             <AuthenticateForm
               submitButtonText='アカウント作成'
               loadingSubmitButtonText='アカウント作成中...'
-              handleSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+              errors={errors}
+              formError={formError}
             />
           </CardContent>
           <CardFooter className='flex flex-col gap-4 border-t pt-6'>

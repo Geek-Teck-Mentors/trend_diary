@@ -1,49 +1,26 @@
-import { useEffect, useState } from 'react'
+import { Form } from 'react-router'
 import { Button } from '../../components/shadcn/button'
 import { Input } from '../../components/shadcn/input'
 import { Label } from '../../components/shadcn/label'
-import { AuthenticateErrors, AuthenticateFormData, validateAuthenticateForm } from './validation'
+import { AuthenticateErrors } from './validation'
 
 type Props = {
   submitButtonText: string
   loadingSubmitButtonText: string
-  handleSubmit: (data: AuthenticateFormData) => Promise<void>
+  isSubmitting: boolean
+  errors?: AuthenticateErrors
+  formError?: string
 }
 
 export const AuthenticateForm = ({
   submitButtonText,
   loadingSubmitButtonText,
-  handleSubmit,
+  isSubmitting,
+  errors,
+  formError,
 }: Props) => {
-  const [isHydrated, setIsHydrated] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<AuthenticateErrors>({})
-
-  useEffect(() => {
-    setIsHydrated(true)
-  }, [])
-
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!isHydrated || isLoading) return
-
-    setIsLoading(true)
-    setErrors({})
-
-    const formData = new FormData(e.currentTarget)
-    const validation = validateAuthenticateForm(formData)
-    if (!validation.isValid) {
-      setErrors(validation.errors)
-      setIsLoading(false)
-      return
-    }
-
-    await handleSubmit(validation.data)
-    setIsLoading(false)
-  }
-
   return (
-    <form onSubmit={onSubmit} className='flex flex-1 flex-col gap-6'>
+    <Form method='post' className='flex flex-1 flex-col gap-6'>
       <div className='space-y-2'>
         <Label htmlFor='email'>メールアドレス</Label>
         <Input
@@ -52,7 +29,7 @@ export const AuthenticateForm = ({
           type='email'
           placeholder='taro@example.com'
           aria-invalid={errors?.email ? true : undefined}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
         {errors?.email && <p className='text-destructive text-sm'>{errors.email.at(0)}</p>}
       </div>
@@ -63,13 +40,14 @@ export const AuthenticateForm = ({
           name='password'
           type='password'
           aria-invalid={errors?.password ? true : undefined}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
         {errors?.password && <p className='text-destructive text-sm'>{errors.password.at(0)}</p>}
       </div>
-      <Button role='button' type='submit' className='w-full' disabled={!isHydrated || isLoading}>
-        {isLoading ? loadingSubmitButtonText : submitButtonText}
+      {formError && <p className='text-destructive text-sm'>{formError}</p>}
+      <Button role='button' type='submit' className='w-full' disabled={isSubmitting}>
+        {isSubmitting ? loadingSubmitButtonText : submitButtonText}
       </Button>
-    </form>
+    </Form>
   )
 }

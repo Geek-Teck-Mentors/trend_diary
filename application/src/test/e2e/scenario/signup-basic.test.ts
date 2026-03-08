@@ -45,17 +45,15 @@ test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ',
       const authPage = new AuthPage(page)
       await authPage.gotoSignup()
 
-      const signupStatus = await authPage.submitSignup(email, password)
-      expect([200, 201, 409]).toContain(signupStatus)
-
-      if (signupStatus === 409) {
+      const signupResult = await authPage.submitSignup(email, password)
+      if (signupResult === 'stayed') {
+        await authPage.expectSignupConflictError()
         await authPage.gotoLogin()
       }
 
       await authPage.waitForLoginPage()
 
-      const loginStatus = await authPage.submitLogin(email, password)
-      expect(loginStatus).toBe(200)
+      await authPage.submitLogin(email, password)
       await authPage.waitForTrendsPage()
     }).toPass({ timeout: AUTH_SCENARIO_TIMEOUT })
 

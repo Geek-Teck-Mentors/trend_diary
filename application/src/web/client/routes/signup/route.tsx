@@ -1,6 +1,20 @@
-import { type MetaFunction, useNavigate } from 'react-router'
+import {
+  type ActionFunctionArgs,
+  type MetaFunction,
+  redirect,
+  useActionData,
+  useNavigation,
+} from 'react-router'
+import {
+  type AuthenticateErrors,
+  validateAuthenticateForm,
+} from '../../features/authenticate/validation'
 import SignupPage from './page'
-import useSignup from './use-signup'
+
+type SignupActionData = {
+  errors?: AuthenticateErrors
+  formError?: string
+}
 
 export const meta: MetaFunction = () => [
   { title: 'アカウント作成 | TrendDiary' },
@@ -24,9 +38,53 @@ export const meta: MetaFunction = () => [
   },
 ]
 
-export default function Signup() {
-  const navigate = useNavigate()
-  const { handleSubmit } = useSignup(navigate)
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData()
+  const validation = validateAuthenticateForm(formData)
+  if (!validation.isValid) {
+    return { errors: validation.errors } satisfies SignupActionData
+  }
 
-  return <SignupPage handleSubmit={handleSubmit} />
+  let response: Response
+  try {
+    response = await fetch(new URL('/api/v2/auth/signup', request.url), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: request.headers.get('Cookie') ?? '',
+      },
+      body: JSON.stringify(validation.data),
+    })
+  } catch {
+    return { formError: '予期せぬエラーが発生しました。' } satisfies SignupActionData
+  }
+
+  if (response.ok) {
+    return redirect('/login')
+  }
+
+  if (response.status === 409) {
+    return { formError: 'このメールアドレスは既に使用されています' } satisfies SignupActionData
+  }
+
+  if (response.status === 500) {
+    return {
+      formError: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
+    } satisfies SignupActionData
+  }
+
+  return { formError: '予期せぬエラーが発生しました。' } satisfies SignupActionData
+}
+
+export default function Signup() {
+  const actionData = useActionData<typeof action>()
+  const navigation = useNavigation()
+
+  return (
+    <SignupPage
+      isSubmitting={navigation.state === 'submitting'}
+      errors={actionData?.errors}
+      formError={actionData?.formError}
+    />
+  )
 }
