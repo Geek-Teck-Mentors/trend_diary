@@ -22,7 +22,6 @@ export default function DiaryRoute() {
   return (
     <DiaryPage
       isLoggedIn={isLoggedIn}
-      mode='diary'
       targetDate={todayJst}
       dailySummary={dailySummary}
       sources={sources}

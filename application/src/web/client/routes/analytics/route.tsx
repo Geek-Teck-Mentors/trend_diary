@@ -1,8 +1,8 @@
 import type { MetaFunction } from 'react-router'
 import { useOutletContext } from 'react-router'
 import type { AppLayoutOutletContext } from '../app-layout'
+import AnalyticsPage from '../diary/analytics-page'
 import useAnalytics from '../diary/hooks/use-analytics'
-import DiaryPage from '../diary/page'
 
 export const meta: MetaFunction = () => [{ title: '統計 | TrendDiary' }]
 
@@ -24,9 +24,8 @@ export default function AnalyticsRoute() {
   } = useAnalytics(isLoggedIn)
 
   return (
-    <DiaryPage
+    <AnalyticsPage
       isLoggedIn={isLoggedIn}
-      mode='analytics'
       selectedDate={selectedDate}
       summaryRange={summaryRange}
       weeklySummary={weeklySummary}

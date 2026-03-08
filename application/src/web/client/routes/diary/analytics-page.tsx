@@ -1,0 +1,159 @@
+import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts'
+import { toJaDateString } from '@/common/locale/date'
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/web/client/components/shadcn/chart'
+import { cn } from '@/web/client/components/shadcn/lib/utils'
+import { toJstDate } from '@/web/client/features/diary/date'
+import DiaryLoginRequired from '@/web/client/features/diary/diary-login-required'
+import DiaryReadListSection from '@/web/client/features/diary/diary-read-list-section'
+import DiaryReadPagination from '@/web/client/features/diary/diary-read-pagination'
+import DiarySummarySection from '@/web/client/features/diary/diary-summary-section'
+import {
+  type ReadItem,
+  type ReadPagination,
+  type Source,
+  type Summary,
+} from '@/web/client/features/diary/types'
+
+type SummaryRangePoint = {
+  date: string
+  read: number
+  skip: number
+}
+
+type Props = {
+  isLoggedIn: boolean
+  selectedDate: string | null
+  summaryRange: SummaryRangePoint[]
+  weeklySummary: Summary
+  dailySummary: Summary
+  sources: Source[]
+  reads: ReadItem[]
+  readPagination: ReadPagination
+  isLoading: boolean
+  onSelectDate: (date: string) => void
+  onClearSelectedDate: () => void
+  onNextPage: () => void
+  onPrevPage: () => void
+}
+
+const chartConfig = {
+  read: {
+    label: '読了',
+    color: '#3b82f6',
+  },
+  skip: {
+    label: 'スキップ',
+    color: '#64748b',
+  },
+} satisfies ChartConfig
+
+export default function AnalyticsPage({
+  isLoggedIn,
+  selectedDate,
+  summaryRange,
+  weeklySummary,
+  dailySummary,
+  sources,
+  reads,
+  readPagination,
+  isLoading,
+  onSelectDate,
+  onClearSelectedDate,
+  onNextPage,
+  onPrevPage,
+}: Props) {
+  const pageTitle = '統計'
+  const displaySummary = selectedDate === null ? weeklySummary : dailySummary
+  const shouldShowDailyDetails = selectedDate !== null
+
+  const handleChartClick = (state: unknown) => {
+    if (!state || typeof state !== 'object' || !('activeLabel' in state)) return
+    const activeLabel = state.activeLabel
+    if (typeof activeLabel === 'string') {
+      onSelectDate(activeLabel)
+    }
+  }
+
+  if (!isLoggedIn) {
+    return <DiaryLoginRequired pageTitle={pageTitle} />
+  }
+
+  return (
+    <div className='min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
+      <div className='mx-auto w-full max-w-3xl rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-sm'>
+        <h1 className='text-xl font-semibold text-gray-900'>{pageTitle}</h1>
+
+        <div className='mt-5'>
+          <h2 className='text-sm font-semibold text-gray-700'>グラフ</h2>
+          <div
+            className='mt-2 rounded-lg border border-gray-200 bg-white p-4'
+            data-slot='diary-analytics'
+          >
+            <div className='flex min-h-8 items-center gap-2'>
+              <p className='text-sm font-semibold text-gray-700'>
+                選択日: {selectedDate ? toJaDateString(toJstDate(selectedDate)) : '未選択'}
+              </p>
+              <button
+                type='button'
+                onClick={onClearSelectedDate}
+                className={cn(
+                  'w-[96px] rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100',
+                  !selectedDate && 'pointer-events-none invisible',
+                )}
+                data-slot='diary-clear-selected-date'
+              >
+                選択をクリア
+              </button>
+            </div>
+            <ChartContainer config={chartConfig} className='mt-3 h-56 w-full'>
+              <BarChart data={summaryRange} onClick={handleChartClick}>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey='date'
+                  tickLine={false}
+                  tickMargin={8}
+                  axisLine={false}
+                  tickFormatter={(value) => toJaDateString(toJstDate(value)).slice(5)}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Bar
+                  dataKey='read'
+                  fill='var(--color-read)'
+                  radius={4}
+                  className='cursor-pointer'
+                />
+                <Bar
+                  dataKey='skip'
+                  fill='var(--color-skip)'
+                  radius={4}
+                  className='cursor-pointer'
+                />
+              </BarChart>
+            </ChartContainer>
+          </div>
+        </div>
+
+        <DiarySummarySection sources={sources} displaySummary={displaySummary} />
+        <DiaryReadListSection
+          isLoading={isLoading}
+          shouldShowDailyDetails={shouldShowDailyDetails}
+          reads={reads}
+        />
+        <DiaryReadPagination
+          onNextPage={onNextPage}
+          onPrevPage={onPrevPage}
+          readPagination={readPagination}
+          shouldShowDailyDetails={shouldShowDailyDetails}
+        />
+      </div>
+    </div>
+  )
+}
