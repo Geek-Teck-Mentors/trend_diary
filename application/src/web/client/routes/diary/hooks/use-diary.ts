@@ -21,7 +21,6 @@ export default function useDiary(enabled: boolean) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { fetchDiary } = useDiaryApi()
   const todayJst = getTodayJst()
-  const targetDate = todayJst ?? ''
   const hasDateResolveError = todayJst === null
 
   const pageParam = searchParams.get('page')
@@ -31,8 +30,10 @@ export default function useDiary(enabled: boolean) {
   })
   const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
 
-  const swrKey = enabled && targetDate ? ['api/articles/diary', targetDate, page] : null
-  const { data, isLoading } = useSWR(swrKey, () => fetchDiary(targetDate, page))
+  const swrKey = enabled && todayJst ? (['api/articles/diary', todayJst, page] as const) : null
+  const { data, isLoading } = useSWR(swrKey, ([, targetDate, targetPage]) =>
+    fetchDiary(targetDate, targetPage),
+  )
 
   const reads: DiaryReadItem[] =
     data?.reads.data.map((read) => ({ ...read, readAt: new Date(read.readAt) })) ?? []

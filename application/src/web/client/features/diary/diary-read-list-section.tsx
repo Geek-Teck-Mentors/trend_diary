@@ -16,7 +16,7 @@ function toSafeExternalPath(url: string): ExternalPath | null {
       return url as ExternalPath
     }
   } catch {
-    return null
+    // Invalid URL format is acceptable, so we just fall through.
   }
 
   return null
