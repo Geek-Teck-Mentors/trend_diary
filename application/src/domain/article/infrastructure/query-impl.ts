@@ -59,6 +59,11 @@ type RawDiaryReadRow = {
   readAt: string | Date | number | bigint
 }
 
+type DateRange = {
+  fromDate?: Date
+  toDateExclusive?: Date
+}
+
 export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
@@ -89,17 +94,7 @@ export default class QueryImpl implements Query {
       return failure(new ServerError(totalResult.error))
     }
 
-    const readStatusSql =
-      dbActiveUserId !== undefined
-        ? Prisma.sql`
-            EXISTS (
-              SELECT 1
-              FROM read_histories rh
-              WHERE rh.article_id = articles.article_id
-                AND rh.active_user_id = ${dbActiveUserId}
-            )
-          `
-        : Prisma.sql`NULL`
+    const readStatusSql = QueryImpl.buildIsReadSelectSql(dbActiveUserId)
 
     const articlesResult = await wrapAsyncCall(() =>
       this.db.$queryRaw<RawArticleRow[]>(Prisma.sql`
@@ -114,7 +109,7 @@ export default class QueryImpl implements Query {
           ${readStatusSql} as isRead
         FROM articles
         ${whereSql}
-        ORDER BY ${QueryImpl.getNormalizedCreatedAtSql()} DESC, article_id DESC
+        ORDER BY ${QueryImpl.getNormalizedDateTimeSql('created_at')} DESC, article_id DESC
         LIMIT ${limit}
         OFFSET ${(page - 1) * limit}
       `),
@@ -162,6 +157,11 @@ export default class QueryImpl implements Query {
     const dbActiveUserId = toDbId(activeUserId)
     const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(targetDateJst, targetDateJst)
     if (!fromDate || !toDateExclusive) return success([])
+    const createdAtRangeSql = QueryImpl.buildClosedOpenDateRangeSql(
+      'created_at',
+      fromDate,
+      toDateExclusive,
+    )
 
     const mediaCondition = media ? Prisma.sql`AND articles.media = ${media}` : Prisma.empty
 
@@ -177,14 +177,8 @@ export default class QueryImpl implements Query {
           created_at as createdAt
         FROM articles
         WHERE
-          ${QueryImpl.getNormalizedCreatedAtSql()} >= datetime(${fromDate.toISOString()})
-          AND ${QueryImpl.getNormalizedCreatedAtSql()} < datetime(${toDateExclusive.toISOString()})
-          AND NOT EXISTS (
-            SELECT 1
-            FROM read_histories rh
-            WHERE rh.article_id = articles.article_id
-              AND rh.active_user_id = ${dbActiveUserId}
-          )
+          ${createdAtRangeSql}
+          AND NOT (${QueryImpl.buildReadHistoryExistsSql(dbActiveUserId)})
           AND NOT EXISTS (
             SELECT 1
             FROM skipped_articles sa
@@ -192,7 +186,7 @@ export default class QueryImpl implements Query {
               AND sa.active_user_id = ${dbActiveUserId}
           )
           ${mediaCondition}
-        ORDER BY ${QueryImpl.getNormalizedCreatedAtSql()} DESC, article_id DESC
+        ORDER BY ${QueryImpl.getNormalizedDateTimeSql('created_at')} DESC, article_id DESC
       `),
     )
     if (isFailure(result)) {
@@ -226,26 +220,34 @@ export default class QueryImpl implements Query {
         },
       })
     }
+    const readAtRangeSql = QueryImpl.buildClosedOpenDateRangeSql(
+      'rh.read_at',
+      fromDate,
+      toDateExclusive,
+    )
+    const skipAtRangeSql = QueryImpl.buildClosedOpenDateRangeSql(
+      'sa.created_at',
+      fromDate,
+      toDateExclusive,
+    )
 
     const queryResultTuple = await Promise.all([
       wrapAsyncCall(() =>
         this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
             SELECT COUNT(*) as total
-            FROM read_histories
+            FROM read_histories rh
             WHERE
-              active_user_id = ${dbActiveUserId}
-              AND ${QueryImpl.getNormalizedDateTimeSql('read_at')} >= datetime(${fromDate.toISOString()})
-              AND ${QueryImpl.getNormalizedDateTimeSql('read_at')} < datetime(${toDateExclusive.toISOString()})
+              rh.active_user_id = ${dbActiveUserId}
+              AND ${readAtRangeSql}
           `),
       ),
       wrapAsyncCall(() =>
         this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
             SELECT COUNT(*) as total
-            FROM skipped_articles
+            FROM skipped_articles sa
             WHERE
-              active_user_id = ${dbActiveUserId}
-              AND ${QueryImpl.getNormalizedDateTimeSql('created_at')} >= datetime(${fromDate.toISOString()})
-              AND ${QueryImpl.getNormalizedDateTimeSql('created_at')} < datetime(${toDateExclusive.toISOString()})
+              sa.active_user_id = ${dbActiveUserId}
+              AND ${skipAtRangeSql}
           `),
       ),
       wrapAsyncCall(() =>
@@ -257,8 +259,7 @@ export default class QueryImpl implements Query {
             INNER JOIN articles a ON a.article_id = rh.article_id
             WHERE
               rh.active_user_id = ${dbActiveUserId}
-              AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} >= datetime(${fromDate.toISOString()})
-              AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} < datetime(${toDateExclusive.toISOString()})
+              AND ${readAtRangeSql}
             GROUP BY a.media
             ORDER BY count DESC, a.media ASC
           `),
@@ -272,8 +273,7 @@ export default class QueryImpl implements Query {
             INNER JOIN articles a ON a.article_id = sa.article_id
             WHERE
               sa.active_user_id = ${dbActiveUserId}
-              AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} >= datetime(${fromDate.toISOString()})
-              AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} < datetime(${toDateExclusive.toISOString()})
+              AND ${skipAtRangeSql}
             GROUP BY a.media
             ORDER BY count DESC, a.media ASC
           `),
@@ -291,8 +291,7 @@ export default class QueryImpl implements Query {
             INNER JOIN articles a ON a.article_id = rh.article_id
             WHERE
               rh.active_user_id = ${dbActiveUserId}
-              AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} >= datetime(${fromDate.toISOString()})
-              AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} < datetime(${toDateExclusive.toISOString()})
+              AND ${readAtRangeSql}
             ORDER BY ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} DESC, rh.read_history_id DESC
             LIMIT ${limit}
             OFFSET ${(page - 1) * limit}
@@ -339,36 +338,46 @@ export default class QueryImpl implements Query {
     const dbActiveUserId = toDbId(activeUserId)
     const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(fromDateJst, toDateJst)
     if (!fromDate || !toDateExclusive) return success([])
+    const readAtRangeSql = QueryImpl.buildClosedOpenDateRangeSql(
+      'rh.read_at',
+      fromDate,
+      toDateExclusive,
+    )
+    const skipAtRangeSql = QueryImpl.buildClosedOpenDateRangeSql(
+      'sa.created_at',
+      fromDate,
+      toDateExclusive,
+    )
+    const readAtJstDateSql = QueryImpl.getJstDateSql('rh.read_at')
+    const skipAtJstDateSql = QueryImpl.getJstDateSql('sa.created_at')
 
     const sourceResultTuple = await Promise.all([
       wrapAsyncCall(() =>
         this.db.$queryRaw<RawDiaryDateSourceRow[]>(Prisma.sql`
           SELECT
-            date(${QueryImpl.getNormalizedDateTimeSql('rh.read_at')}, '+9 hours') as date,
+            ${readAtJstDateSql} as date,
             a.media as media,
             COUNT(*) as count
           FROM read_histories rh
           INNER JOIN articles a ON a.article_id = rh.article_id
           WHERE
             rh.active_user_id = ${dbActiveUserId}
-            AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} >= datetime(${fromDate.toISOString()})
-            AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} < datetime(${toDateExclusive.toISOString()})
-          GROUP BY date(${QueryImpl.getNormalizedDateTimeSql('rh.read_at')}, '+9 hours'), a.media
+            AND ${readAtRangeSql}
+          GROUP BY ${readAtJstDateSql}, a.media
         `),
       ),
       wrapAsyncCall(() =>
         this.db.$queryRaw<RawDiaryDateSourceRow[]>(Prisma.sql`
           SELECT
-            date(${QueryImpl.getNormalizedDateTimeSql('sa.created_at')}, '+9 hours') as date,
+            ${skipAtJstDateSql} as date,
             a.media as media,
             COUNT(*) as count
           FROM skipped_articles sa
           INNER JOIN articles a ON a.article_id = sa.article_id
           WHERE
             sa.active_user_id = ${dbActiveUserId}
-            AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} >= datetime(${fromDate.toISOString()})
-            AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} < datetime(${toDateExclusive.toISOString()})
-          GROUP BY date(${QueryImpl.getNormalizedDateTimeSql('sa.created_at')}, '+9 hours'), a.media
+            AND ${skipAtRangeSql}
+          GROUP BY ${skipAtJstDateSql}, a.media
         `),
       ),
     ])
@@ -400,16 +409,6 @@ export default class QueryImpl implements Query {
     )
   }
 
-  private static getNormalizedCreatedAtSql() {
-    // INFO: created_atはSQLiteでinteger(text含む)が混在しうるため正規化して比較する
-    return Prisma.sql`
-      CASE
-        WHEN typeof(created_at) = 'integer' THEN datetime(created_at / 1000, 'unixepoch')
-        ELSE datetime(created_at)
-      END
-    `
-  }
-
   private static getNormalizedDateTimeSql(columnName: string) {
     const column = Prisma.raw(columnName)
     // INFO: typeof()はSQLite固有関数。timestampの型揺れ(integer/text)を吸収するためSQLite前提で正規化する
@@ -419,6 +418,60 @@ export default class QueryImpl implements Query {
         ELSE datetime(${column})
       END
     `
+  }
+
+  private static getJstDateSql(columnName: string) {
+    return Prisma.sql`date(${QueryImpl.getNormalizedDateTimeSql(columnName)}, '+9 hours')`
+  }
+
+  private static buildClosedOpenDateRangeSql(
+    columnName: string,
+    fromDate: Date,
+    toDateExclusive: Date,
+  ) {
+    const normalizedDateTime = QueryImpl.getNormalizedDateTimeSql(columnName)
+    return Prisma.sql`
+      ${normalizedDateTime} >= datetime(${fromDate.toISOString()})
+      AND ${normalizedDateTime} < datetime(${toDateExclusive.toISOString()})
+    `
+  }
+
+  private static buildDateRangeConditions(
+    columnName: string,
+    { fromDate, toDateExclusive }: DateRange,
+  ) {
+    const normalizedDateTime = QueryImpl.getNormalizedDateTimeSql(columnName)
+    const conditions: Prisma.Sql[] = []
+    if (fromDate) {
+      conditions.push(Prisma.sql`${normalizedDateTime} >= datetime(${fromDate.toISOString()})`)
+    }
+    if (toDateExclusive) {
+      conditions.push(
+        Prisma.sql`${normalizedDateTime} < datetime(${toDateExclusive.toISOString()})`,
+      )
+    }
+    return conditions
+  }
+
+  private static buildReadHistoryExistsSql(activeUserId: number) {
+    return Prisma.sql`
+      EXISTS (
+        SELECT 1
+        FROM read_histories rh
+        WHERE rh.article_id = articles.article_id
+          AND rh.active_user_id = ${activeUserId}
+      )
+    `
+  }
+
+  private static buildIsReadSelectSql(activeUserId?: number) {
+    if (activeUserId === undefined) return Prisma.sql`NULL`
+    return QueryImpl.buildReadHistoryExistsSql(activeUserId)
+  }
+
+  private static buildReadStatusCondition(readStatus: boolean, activeUserId: number) {
+    const readExistsSql = QueryImpl.buildReadHistoryExistsSql(activeUserId)
+    return readStatus ? readExistsSql : Prisma.sql`NOT (${readExistsSql})`
   }
 
   private static unwrapResultTuple<T extends readonly unknown[]>(
@@ -455,37 +508,12 @@ export default class QueryImpl implements Query {
     }
 
     const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(from, to)
-    if (fromDate) {
-      conditions.push(
-        Prisma.sql`${QueryImpl.getNormalizedCreatedAtSql()} >= datetime(${fromDate.toISOString()})`,
-      )
-    }
-    if (toDateExclusive) {
-      conditions.push(
-        Prisma.sql`${QueryImpl.getNormalizedCreatedAtSql()} < datetime(${toDateExclusive.toISOString()})`,
-      )
-    }
+    conditions.push(
+      ...QueryImpl.buildDateRangeConditions('created_at', { fromDate, toDateExclusive }),
+    )
 
     if (readStatus !== undefined && activeUserId !== undefined) {
-      if (readStatus) {
-        conditions.push(Prisma.sql`
-          EXISTS (
-            SELECT 1
-            FROM read_histories rh
-            WHERE rh.article_id = articles.article_id
-              AND rh.active_user_id = ${activeUserId}
-          )
-        `)
-      } else {
-        conditions.push(Prisma.sql`
-          NOT EXISTS (
-            SELECT 1
-            FROM read_histories rh
-            WHERE rh.article_id = articles.article_id
-              AND rh.active_user_id = ${activeUserId}
-          )
-        `)
-      }
+      conditions.push(QueryImpl.buildReadStatusCondition(readStatus, activeUserId))
     }
 
     if (conditions.length === 0) {
