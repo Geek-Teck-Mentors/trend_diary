@@ -164,8 +164,7 @@ export async function runScheduledFetch(media: ArticleMedia, env: CronEnv): Prom
       return fetchQiitaArticles(env)
     case 'zenn':
       return fetchZennArticles(env)
-    default:
-      // For any other media type, fall back to Hatena as in the original implementation.
+case 'hatena':
       return fetchHatenaArticles(env)
   }
 }
