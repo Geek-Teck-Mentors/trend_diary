@@ -156,7 +156,6 @@ export default class QueryImpl implements Query {
   ): AsyncResult<Article[], ServerError> {
     const dbActiveUserId = toDbId(activeUserId)
     const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(targetDateJst, targetDateJst)
-    if (!fromDate || !toDateExclusive) return success([])
     const createdAtRangeSql = QueryImpl.buildClosedOpenDateRangeSql(
       'created_at',
       fromDate,
@@ -301,7 +300,6 @@ export default class QueryImpl implements Query {
   ): AsyncResult<DailyDiaryRangeItem[], ServerError> {
     const dbActiveUserId = toDbId(activeUserId)
     const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(fromDateJst, toDateJst)
-    if (!fromDate || !toDateExclusive) return success([])
     const readAtRangeSql = QueryImpl.buildClosedOpenDateRangeSql(
       'rh.read_at',
       fromDate,
