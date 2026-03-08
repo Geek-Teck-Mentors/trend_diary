@@ -41,7 +41,7 @@ const loggedInMenuItems: MenuItem[] = [
     icon: BookOpenCheck,
   },
   {
-    title: '分析',
+    title: '統計',
     url: '/analytics',
     icon: BarChart3,
   },

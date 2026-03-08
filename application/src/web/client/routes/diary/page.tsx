@@ -113,7 +113,7 @@ export default function DiaryPage({
       hour12: false,
     })
   const isAnalyticsTab = mode === 'analytics'
-  const pageTitle = isAnalyticsTab ? '分析' : 'ダイアリー'
+  const pageTitle = isAnalyticsTab ? '統計' : 'ダイアリー'
   const displaySummary = isAnalyticsTab && !selectedDate ? weeklySummary : dailySummary
   const shouldShowDailyDetails = !isAnalyticsTab || !!selectedDate
   const paginationLabel =

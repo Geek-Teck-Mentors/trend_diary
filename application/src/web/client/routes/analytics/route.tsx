@@ -4,7 +4,7 @@ import type { AppLayoutOutletContext } from '../app-layout'
 import useAnalytics from '../diary/hooks/use-analytics'
 import DiaryPage from '../diary/page'
 
-export const meta: MetaFunction = () => [{ title: '分析 | TrendDiary' }]
+export const meta: MetaFunction = () => [{ title: '統計 | TrendDiary' }]
 
 export default function AnalyticsRoute() {
   const { isLoggedIn } = useOutletContext<AppLayoutOutletContext>()
