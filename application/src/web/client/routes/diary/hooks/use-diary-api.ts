@@ -59,7 +59,7 @@ export default function useDiaryApi() {
       ),
     )
 
-    if (!result || result.data.length === 0 || !result.reads) {
+    if (!result || !result.reads) {
       throw new Error('ダイアリーの取得に失敗しました')
     }
 

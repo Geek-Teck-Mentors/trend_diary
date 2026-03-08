@@ -97,13 +97,7 @@ export default function useAnalytics(enabled: boolean) {
   const reads = data?.reads.data.map((read) => ({ ...read, readAt: new Date(read.readAt) })) ?? []
   const normalizedSummaryRange =
     summaryRangeData?.points ?? availableDates.map((date) => ({ date, read: 0, skip: 0 }))
-  const weeklySummary = normalizedSummaryRange.reduce(
-    (acc, point) => ({
-      read: acc.read + point.read,
-      skip: acc.skip + point.skip,
-    }),
-    { read: 0, skip: 0 },
-  )
+  const weeklySummary = sumSourceSummary(normalizedSummaryRange)
   const weeklySources =
     summaryRangeData?.weeklySources ?? ARTICLE_MEDIA.map((media) => ({ media, read: 0, skip: 0 }))
   const dailySummary = data ? sumSourceSummary(data.sources) : { read: 0, skip: 0 }

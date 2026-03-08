@@ -8,7 +8,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/web/client/components/shadcn/chart'
-import { cn } from '@/web/client/components/shadcn/lib/utils'
 import DiaryLoginRequired from '@/web/client/features/diary/diary-login-required'
 import DiaryReadListSection from '@/web/client/features/diary/diary-read-list-section'
 import DiaryReadPagination from '@/web/client/features/diary/diary-read-pagination'
@@ -106,17 +105,16 @@ export default function AnalyticsPage({
               <p className='text-sm font-semibold text-gray-700'>
                 選択日: {selectedDate ? toJaDateString(toJstDate(selectedDate)) : '未選択'}
               </p>
-              <button
-                type='button'
-                onClick={onClearSelectedDate}
-                className={cn(
-                  'w-[96px] rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100',
-                  !selectedDate && 'hidden',
-                )}
-                data-slot='diary-clear-selected-date'
-              >
-                選択をクリア
-              </button>
+              {selectedDate && (
+                <button
+                  type='button'
+                  onClick={onClearSelectedDate}
+                  className='w-[96px] rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100'
+                  data-slot='diary-clear-selected-date'
+                >
+                  選択をクリア
+                </button>
+              )}
             </div>
             <ChartContainer config={chartConfig} className='mt-3 h-56 w-full'>
               <BarChart data={summaryRange} onClick={handleChartClick}>
