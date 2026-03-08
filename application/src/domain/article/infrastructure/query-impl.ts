@@ -412,6 +412,7 @@ export default class QueryImpl implements Query {
 
   private static getNormalizedDateTimeSql(columnName: string) {
     const column = Prisma.raw(columnName)
+    // INFO: typeof()はSQLite固有関数。timestampの型揺れ(integer/text)を吸収するためSQLite前提で正規化する
     return Prisma.sql`
       CASE
         WHEN typeof(${column}) = 'integer' THEN datetime(${column} / 1000, 'unixepoch')
@@ -547,29 +548,13 @@ export default class QueryImpl implements Query {
   }
 
   private static mergeDiarySources(readRows: RawDiarySourceRow[], skipRows: RawDiarySourceRow[]) {
-    const sourceMap = new Map<ArticleMedia, { read: number; skip: number }>()
-    for (const media of ARTICLE_MEDIA) {
-      sourceMap.set(media, { read: 0, skip: 0 })
-    }
-
-    for (const row of readRows) {
-      const media = row.media as ArticleMedia
-      const current = sourceMap.get(media)
-      if (!current) continue
-      current.read = Number(row.count)
-    }
-
-    for (const row of skipRows) {
-      const media = row.media as ArticleMedia
-      const current = sourceMap.get(media)
-      if (!current) continue
-      current.skip = Number(row.count)
-    }
+    const readMap = new Map(readRows.map((row) => [row.media as ArticleMedia, Number(row.count)]))
+    const skipMap = new Map(skipRows.map((row) => [row.media as ArticleMedia, Number(row.count)]))
 
     return ARTICLE_MEDIA.map((media) => ({
       media,
-      read: sourceMap.get(media)?.read ?? 0,
-      skip: sourceMap.get(media)?.skip ?? 0,
+      read: readMap.get(media) ?? 0,
+      skip: skipMap.get(media) ?? 0,
     }))
   }
 

@@ -91,12 +91,9 @@ export default function useAnalytics(enabled: boolean) {
   )
 
   const swrKey = enabled && selectedDate ? ['api/articles/diary', selectedDate, page] : null
-  const { data, isLoading } = useSWR<DiaryResponse>(swrKey, async () => {
-    if (!selectedDate) {
-      throw new Error('対象日が未選択です')
-    }
-    return fetchDiary(selectedDate, page)
-  })
+  const { data, isLoading } = useSWR<DiaryResponse>(swrKey, () =>
+    fetchDiary(selectedDate as string, page),
+  )
 
   const reads = data?.reads.data.map((read) => ({ ...read, readAt: new Date(read.readAt) })) ?? []
   const normalizedSummaryRange =

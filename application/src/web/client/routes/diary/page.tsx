@@ -9,6 +9,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/web/client/components/shadcn/chart'
+import { cn } from '@/web/client/components/shadcn/lib/utils'
 import {
   Table,
   TableBody,
@@ -115,6 +116,10 @@ export default function DiaryPage({
   const pageTitle = isAnalyticsTab ? '分析' : 'ダイアリー'
   const displaySummary = isAnalyticsTab && !selectedDate ? weeklySummary : dailySummary
   const shouldShowDailyDetails = !isAnalyticsTab || !!selectedDate
+  const paginationLabel =
+    shouldShowDailyDetails && readPagination.totalPages > 0
+      ? `${readPagination.page} / ${readPagination.totalPages}`
+      : '- / -'
   const handleChartClick = (state: unknown) => {
     if (!state || typeof state !== 'object' || !('activeLabel' in state)) return
     const activeLabel = state.activeLabel
@@ -151,9 +156,10 @@ export default function DiaryPage({
                 <button
                   type='button'
                   onClick={onClearSelectedDate}
-                  className={`w-[96px] rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 ${
-                    selectedDate ? '' : 'pointer-events-none invisible'
-                  }`}
+                  className={cn(
+                    'w-[96px] rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100',
+                    !selectedDate && 'pointer-events-none invisible',
+                  )}
                   data-slot='diary-clear-selected-date'
                 >
                   選択をクリア
@@ -193,7 +199,7 @@ export default function DiaryPage({
           <h2 className='text-sm font-semibold text-gray-700'>集計</h2>
           {!isAnalyticsTab && (
             <p className='mt-1 text-sm text-gray-600' data-slot='diary-target-date'>
-              対象日: {toJaDateString(toJstDate(selectedDate!))}
+              対象日: {selectedDate ? toJaDateString(toJstDate(selectedDate)) : '-'}
             </p>
           )}
           <div className='mt-2 rounded-lg border border-gray-200 bg-white p-3'>
@@ -275,10 +281,7 @@ export default function DiaryPage({
           >
             前へ
           </button>
-          <span className='text-sm text-gray-600'>
-            {shouldShowDailyDetails && readPagination.totalPages > 0 ? readPagination.page : 0} /{' '}
-            {shouldShowDailyDetails ? readPagination.totalPages : 0}
-          </span>
+          <span className='text-sm text-gray-600'>{paginationLabel}</span>
           <button
             type='button'
             className='rounded border border-gray-300 px-3 py-1 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-50'
