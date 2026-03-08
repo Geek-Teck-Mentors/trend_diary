@@ -28,7 +28,7 @@ export default function useDiary(enabled: boolean) {
   })
   const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
 
-  const swrKey = enabled ? ['api/articles/diary', todayJst, page] : null
+  const swrKey = enabled ? ['api/articles/diary', todayJst, todayJst, page] : null
   const { data, isLoading } = useSWR(swrKey, () => fetchDiary(todayJst, page))
 
   const reads: DiaryReadItem[] =

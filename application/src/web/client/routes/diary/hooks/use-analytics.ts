@@ -49,7 +49,7 @@ export default function useAnalytics(enabled: boolean) {
   })
   const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
 
-  const summaryKey = enabled ? ['api/articles/diary-summary-range', ...availableDates] : null
+  const summaryKey = enabled ? ['api/articles/diary-summary', ...availableDates] : null
   const { data: summaryRangeData, isLoading: isSummaryLoading } = useSWR<SummaryRangeData>(
     summaryKey,
     async () => {
@@ -88,7 +88,8 @@ export default function useAnalytics(enabled: boolean) {
     },
   )
 
-  const swrKey = enabled && selectedDate ? ['api/articles/diary', selectedDate, page] : null
+  const swrKey =
+    enabled && selectedDate ? ['api/articles/diary', selectedDate, selectedDate, page] : null
   const { data, isLoading } = useSWR<DiaryResponse>(swrKey, () =>
     fetchDiary(selectedDate as string, page),
   )

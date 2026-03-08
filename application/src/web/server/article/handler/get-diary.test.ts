@@ -6,28 +6,6 @@ import type { CleanUpIds } from '@/test/helper/user'
 import * as userHelper from '@/test/helper/user'
 import app from '@/web/server'
 
-type DiaryResponse = {
-  date: string
-  sources: Array<{
-    media: string
-    read: number
-    skip: number
-  }>
-  reads: {
-    data: Array<{
-      readHistoryId: string
-      articleId: string
-      media: string
-      title: string
-      readAt: string
-    }>
-    page: number
-    totalPages: number
-    hasNext: boolean
-    hasPrev: boolean
-  }
-}
-
 type DiaryRangeResponse = {
   data: Array<{
     date: string
@@ -41,6 +19,20 @@ type DiaryRangeResponse = {
       skip: number
     }>
   }>
+  reads?: {
+    data: Array<{
+      readHistoryId: string
+      articleId: string
+      media: string
+      title: string
+      url: string
+      readAt: string
+    }>
+    page: number
+    totalPages: number
+    hasNext: boolean
+    hasPrev: boolean
+  }
 }
 
 const getTodayJst = () => {
@@ -53,7 +45,7 @@ function toJstDateTime(date: string, time: string) {
   return new Date(`${date}T${time}+09:00`)
 }
 
-async function requestDiary(query?: string, cookies?: string) {
+async function requestDiaryRange(query?: string, cookies?: string) {
   const suffix = query ? `?${query}` : ''
   const headers: Record<string, string> = {}
   if (cookies) {
@@ -70,24 +62,7 @@ async function requestDiary(query?: string, cookies?: string) {
   )
 }
 
-async function requestDiaryRange(query?: string, cookies?: string) {
-  const suffix = query ? `?${query}` : ''
-  const headers: Record<string, string> = {}
-  if (cookies) {
-    headers.Cookie = cookies
-  }
-
-  return app.request(
-    `/api/articles/diary-range${suffix}`,
-    {
-      method: 'GET',
-      headers,
-    },
-    TEST_ENV,
-  )
-}
-
-describe('GET /api/articles/diary', () => {
+describe('GET /api/articles/diary (単日詳細)', () => {
   let authCookies: string
   let activeUserId: bigint
   let todayJst: string
@@ -147,44 +122,48 @@ describe('GET /api/articles/diary', () => {
     createdArticleIds.length = 0
   })
 
-  it('指定日のダイアリーを取得できる', async () => {
-    const response = await requestDiary(`date=${todayJst}`, authCookies)
+  it('指定日のダイアリー詳細を取得できる', async () => {
+    const response = await requestDiaryRange(`from=${todayJst}&to=${todayJst}&page=1`, authCookies)
 
     expect(response.status).toBe(200)
-    const json = (await response.json()) as DiaryResponse
-    expect(json.date).toBe(todayJst)
-    expect(json.sources).toEqual([
-      { media: 'qiita', read: 2, skip: 0 },
-      { media: 'zenn', read: 1, skip: 1 },
-      { media: 'hatena', read: 0, skip: 0 },
-    ])
-    expect(json.reads.page).toBe(1)
-    expect(json.reads.data).toHaveLength(3)
-    expect(json.reads.data[0].title).toBe('Bun runtime')
+    const json = (await response.json()) as DiaryRangeResponse
+    expect(json.data).toHaveLength(1)
+    expect(json.data[0]).toEqual({
+      date: todayJst,
+      summary: { read: 3, skip: 1 },
+      sources: [
+        { media: 'qiita', read: 2, skip: 0 },
+        { media: 'zenn', read: 1, skip: 1 },
+        { media: 'hatena', read: 0, skip: 0 },
+      ],
+    })
+    expect(json.reads?.page).toBe(1)
+    expect(json.reads?.data).toHaveLength(3)
+    expect(json.reads?.data[0].title).toBe('Bun runtime')
   })
 
   it('page指定でread一覧をページングできる', async () => {
-    const response = await requestDiary(`date=${todayJst}&page=2`, authCookies)
+    const response = await requestDiaryRange(`from=${todayJst}&to=${todayJst}&page=2`, authCookies)
 
     expect(response.status).toBe(200)
-    const json = (await response.json()) as DiaryResponse
-    expect(json.reads.page).toBe(2)
-    expect(json.reads.data).toHaveLength(0)
-    expect(json.reads.hasPrev).toBe(true)
+    const json = (await response.json()) as DiaryRangeResponse
+    expect(json.reads?.page).toBe(2)
+    expect(json.reads?.data).toHaveLength(0)
+    expect(json.reads?.hasPrev).toBe(true)
   })
 
   it('未認証時は401', async () => {
-    const response = await requestDiary(`date=${todayJst}`)
+    const response = await requestDiaryRange(`from=${todayJst}&to=${todayJst}&page=1`)
     expect(response.status).toBe(401)
   })
 
   it('不正なdate形式は422', async () => {
-    const response = await requestDiary('date=2026/03/07', authCookies)
+    const response = await requestDiaryRange(`from=2026/03/07&to=2026/03/07&page=1`, authCookies)
     expect(response.status).toBe(422)
   })
 
   it('存在しない日付は422', async () => {
-    const response = await requestDiary('date=2026-02-30', authCookies)
+    const response = await requestDiaryRange(`from=2026-02-30&to=2026-02-30&page=1`, authCookies)
     expect(response.status).toBe(422)
   })
 
@@ -192,7 +171,10 @@ describe('GET /api/articles/diary', () => {
     const tooOldDateResult = addJstDays(todayJst, -7)
     if (isFailure(tooOldDateResult)) throw tooOldDateResult.error
 
-    const response = await requestDiary(`date=${tooOldDateResult.data}`, authCookies)
+    const response = await requestDiaryRange(
+      `from=${tooOldDateResult.data}&to=${tooOldDateResult.data}&page=1`,
+      authCookies,
+    )
     expect(response.status).toBe(422)
   })
 
@@ -200,12 +182,26 @@ describe('GET /api/articles/diary', () => {
     const tomorrowResult = addJstDays(todayJst, 1)
     if (isFailure(tomorrowResult)) throw tomorrowResult.error
 
-    const response = await requestDiary(`date=${tomorrowResult.data}`, authCookies)
+    const response = await requestDiaryRange(
+      `from=${tomorrowResult.data}&to=${tomorrowResult.data}&page=1`,
+      authCookies,
+    )
+    expect(response.status).toBe(422)
+  })
+
+  it('page指定時にfromとtoが異なる場合は422', async () => {
+    const yesterdayResult = addJstDays(todayJst, -1)
+    if (isFailure(yesterdayResult)) throw yesterdayResult.error
+
+    const response = await requestDiaryRange(
+      `from=${yesterdayResult.data}&to=${todayJst}&page=1`,
+      authCookies,
+    )
     expect(response.status).toBe(422)
   })
 })
 
-describe('GET /api/articles/diary-range', () => {
+describe('GET /api/articles/diary', () => {
   let authCookies: string
   let activeUserId: bigint
   let todayJst: string
@@ -215,13 +211,13 @@ describe('GET /api/articles/diary-range', () => {
   beforeEach(async () => {
     todayJst = getTodayJst()
     const { userId, authenticationId } = await userHelper.create(
-      'diary-range-test@example.com',
+      'diary-test-range@example.com',
       'Test@password123',
     )
     createdUserIds.userIds.push(userId)
     createdUserIds.authIds.push(authenticationId)
 
-    const loginData = await userHelper.login('diary-range-test@example.com', 'Test@password123')
+    const loginData = await userHelper.login('diary-test-range@example.com', 'Test@password123')
     authCookies = loginData.cookies
     activeUserId = loginData.activeUserId
 
@@ -268,6 +264,7 @@ describe('GET /api/articles/diary-range', () => {
 
     expect(response.status).toBe(200)
     const json = (await response.json()) as DiaryRangeResponse
+    expect(json.reads).toBeUndefined()
     expect(json.data).toHaveLength(7)
     const today = json.data.find((item) => item.date === todayJst)
     expect(today).toEqual({
