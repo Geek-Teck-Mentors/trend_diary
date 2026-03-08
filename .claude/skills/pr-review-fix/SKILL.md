@@ -19,7 +19,7 @@ description: GitHub Pull Requestのレビューコメント対応を、修正実
 
 - `gh pr view <PR番号> --json number,title,headRefName,baseRefName`
 - `gh api graphql` で `reviewThreads` を取得し、`isResolved == false` を対象にする。
-- 返信先は `pulls/comments/{comment_id}/replies` を使う。
+- 返信先は `pulls/{pull_number}/comments/{comment_id}/replies` を使う。
 
 ## 2) 修正実装
 
