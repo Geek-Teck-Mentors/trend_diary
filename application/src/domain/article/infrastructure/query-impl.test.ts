@@ -229,13 +229,11 @@ describe('QueryImpl', () => {
     it('日次サマリーとsources、read一覧を取得できる', async () => {
       mockDb.$queryRaw
         .mockResolvedValueOnce([
-          { media: 'qiita', count: 2 },
-          { media: 'zenn', count: 1 },
-        ]) // read sources
-        .mockResolvedValueOnce([
-          { media: 'qiita', count: 1 },
-          { media: 'hatena', count: 1 },
-        ]) // skip sources
+          { sourceType: 'read', media: 'qiita', count: 2 },
+          { sourceType: 'read', media: 'zenn', count: 1 },
+          { sourceType: 'skip', media: 'qiita', count: 1 },
+          { sourceType: 'skip', media: 'hatena', count: 1 },
+        ]) // diary sources
         .mockResolvedValueOnce([
           {
             readHistoryId: 10,
@@ -258,6 +256,7 @@ describe('QueryImpl', () => {
       const result = await queryImpl.getDailyDiary(10n, '2026-03-07', 1, 10)
 
       expect(isSuccess(result)).toBe(true)
+      expect(mockDb.$queryRaw).toHaveBeenCalledTimes(2)
       if (isSuccess(result)) {
         expect(result.data.summary).toEqual({ read: 3, skip: 2 })
         expect(result.data.sources).toEqual([
@@ -287,16 +286,16 @@ describe('QueryImpl', () => {
 
   describe('getDailyDiaryRange', () => {
     it('指定期間の日次サマリーとsourcesを取得できる', async () => {
-      mockDb.$queryRaw
-        .mockResolvedValueOnce([
-          { date: '2026-03-06', media: 'qiita', count: 2 },
-          { date: '2026-03-07', media: 'zenn', count: 1 },
-        ])
-        .mockResolvedValueOnce([{ date: '2026-03-07', media: 'hatena', count: 1 }])
+      mockDb.$queryRaw.mockResolvedValueOnce([
+        { sourceType: 'read', date: '2026-03-06', media: 'qiita', count: 2 },
+        { sourceType: 'read', date: '2026-03-07', media: 'zenn', count: 1 },
+        { sourceType: 'skip', date: '2026-03-07', media: 'hatena', count: 1 },
+      ])
 
       const result = await queryImpl.getDailyDiaryRange(10n, '2026-03-06', '2026-03-07')
 
       expect(isSuccess(result)).toBe(true)
+      expect(mockDb.$queryRaw).toHaveBeenCalledTimes(1)
       if (isSuccess(result)) {
         expect(result.data).toEqual([
           {

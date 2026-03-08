@@ -44,7 +44,20 @@ type RawDiarySourceRow = {
   count: number | bigint
 }
 
+type RawDiaryTypedSourceRow = {
+  sourceType: 'read' | 'skip'
+  media: string
+  count: number | bigint
+}
+
 type RawDiaryDateSourceRow = {
+  date: string
+  media: string
+  count: number | bigint
+}
+
+type RawDiaryDateTypedSourceRow = {
+  sourceType: 'read' | 'skip'
   date: string
   media: string
   count: number | bigint
@@ -216,31 +229,37 @@ export default class QueryImpl implements Query {
 
     const queryResultTuple = await Promise.all([
       wrapAsyncCall(() =>
-        this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
+        this.db.$queryRaw<RawDiaryTypedSourceRow[]>(Prisma.sql`
             SELECT
-              a.media as media,
-              COUNT(*) as count
-            FROM read_histories rh
-            INNER JOIN articles a ON a.article_id = rh.article_id
-            WHERE
-              rh.active_user_id = ${dbActiveUserId}
-              AND ${readAtRangeSql}
-            GROUP BY a.media
-            ORDER BY count DESC, a.media ASC
-          `),
-      ),
-      wrapAsyncCall(() =>
-        this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
-            SELECT
-              a.media as media,
-              COUNT(*) as count
-            FROM skipped_articles sa
-            INNER JOIN articles a ON a.article_id = sa.article_id
-            WHERE
-              sa.active_user_id = ${dbActiveUserId}
-              AND ${skipAtRangeSql}
-            GROUP BY a.media
-            ORDER BY count DESC, a.media ASC
+              source_type as sourceType,
+              media,
+              count
+            FROM (
+              SELECT
+                'read' as source_type,
+                a.media as media,
+                COUNT(*) as count
+              FROM read_histories rh
+              INNER JOIN articles a ON a.article_id = rh.article_id
+              WHERE
+                rh.active_user_id = ${dbActiveUserId}
+                AND ${readAtRangeSql}
+              GROUP BY a.media
+
+              UNION ALL
+
+              SELECT
+                'skip' as source_type,
+                a.media as media,
+                COUNT(*) as count
+              FROM skipped_articles sa
+              INNER JOIN articles a ON a.article_id = sa.article_id
+              WHERE
+                sa.active_user_id = ${dbActiveUserId}
+                AND ${skipAtRangeSql}
+              GROUP BY a.media
+            ) diary_sources
+            ORDER BY count DESC, media ASC
           `),
       ),
       wrapAsyncCall(() =>
@@ -268,7 +287,9 @@ export default class QueryImpl implements Query {
       return failure(resolvedQueryResults.error)
     }
 
-    const [readSourcesRows, skipSourcesRows, readsRows] = resolvedQueryResults.data
+    const [sourceRows, readsRows] = resolvedQueryResults.data
+    const { readRows: readSourcesRows, skipRows: skipSourcesRows } =
+      QueryImpl.splitDiarySourceRows(sourceRows)
     const readCount = QueryImpl.sumDiarySourceCounts(readSourcesRows)
     const skipCount = QueryImpl.sumDiarySourceCounts(skipSourcesRows)
     const readsTotal = readCount
@@ -313,10 +334,16 @@ export default class QueryImpl implements Query {
     const readAtJstDateSql = QueryImpl.getJstDateSql('rh.read_at')
     const skipAtJstDateSql = QueryImpl.getJstDateSql('sa.created_at')
 
-    const sourceResultTuple = await Promise.all([
-      wrapAsyncCall(() =>
-        this.db.$queryRaw<RawDiaryDateSourceRow[]>(Prisma.sql`
+    const sourceResult = await wrapAsyncCall(() =>
+      this.db.$queryRaw<RawDiaryDateTypedSourceRow[]>(Prisma.sql`
+        SELECT
+          source_type as sourceType,
+          date,
+          media,
+          count
+        FROM (
           SELECT
+            'read' as source_type,
             ${readAtJstDateSql} as date,
             a.media as media,
             COUNT(*) as count
@@ -326,11 +353,11 @@ export default class QueryImpl implements Query {
             rh.active_user_id = ${dbActiveUserId}
             AND ${readAtRangeSql}
           GROUP BY ${readAtJstDateSql}, a.media
-        `),
-      ),
-      wrapAsyncCall(() =>
-        this.db.$queryRaw<RawDiaryDateSourceRow[]>(Prisma.sql`
+
+          UNION ALL
+
           SELECT
+            'skip' as source_type,
             ${skipAtJstDateSql} as date,
             a.media as media,
             COUNT(*) as count
@@ -340,14 +367,14 @@ export default class QueryImpl implements Query {
             sa.active_user_id = ${dbActiveUserId}
             AND ${skipAtRangeSql}
           GROUP BY ${skipAtJstDateSql}, a.media
-        `),
-      ),
-    ])
-    const resolvedSourceResults = QueryImpl.unwrapResultTuple(sourceResultTuple)
-    if (isFailure(resolvedSourceResults)) {
-      return failure(resolvedSourceResults.error)
+        ) diary_date_sources
+      `),
+    )
+    if (isFailure(sourceResult)) {
+      return failure(new ServerError(sourceResult.error))
     }
-    const [readSourceRows, skipSourceRows] = resolvedSourceResults.data
+    const { readRows: readSourceRows, skipRows: skipSourceRows } =
+      QueryImpl.splitDiaryDateSourceRows(sourceResult.data)
 
     const readByDate = QueryImpl.groupSourcesByDate(readSourceRows)
     const skipByDate = QueryImpl.groupSourcesByDate(skipSourceRows)
@@ -551,6 +578,38 @@ export default class QueryImpl implements Query {
       grouped.set(row.date, current)
     }
     return grouped
+  }
+
+  private static splitDiarySourceRows(rows: RawDiaryTypedSourceRow[]) {
+    const readRows: RawDiarySourceRow[] = []
+    const skipRows: RawDiarySourceRow[] = []
+
+    for (const row of rows) {
+      const sourceRow = { media: row.media, count: row.count }
+      if (row.sourceType === 'read') {
+        readRows.push(sourceRow)
+      } else {
+        skipRows.push(sourceRow)
+      }
+    }
+
+    return { readRows, skipRows }
+  }
+
+  private static splitDiaryDateSourceRows(rows: RawDiaryDateTypedSourceRow[]) {
+    const readRows: RawDiaryDateSourceRow[] = []
+    const skipRows: RawDiaryDateSourceRow[] = []
+
+    for (const row of rows) {
+      const sourceRow = { date: row.date, media: row.media, count: row.count }
+      if (row.sourceType === 'read') {
+        readRows.push(sourceRow)
+      } else {
+        skipRows.push(sourceRow)
+      }
+    }
+
+    return { readRows, skipRows }
   }
 
   private static sumDiarySourceCounts(rows: RawDiarySourceRow[]) {

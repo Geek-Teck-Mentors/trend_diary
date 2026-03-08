@@ -9,6 +9,7 @@ import {
   ChartTooltipContent,
 } from '@/web/client/components/shadcn/chart'
 import DiaryLoginRequired from '@/web/client/features/diary/diary-login-required'
+import DiaryPageLayout from '@/web/client/features/diary/diary-page-layout'
 import DiaryReadListSection from '@/web/client/features/diary/diary-read-list-section'
 import DiaryReadPagination from '@/web/client/features/diary/diary-read-pagination'
 import DiarySummarySection from '@/web/client/features/diary/diary-summary-section'
@@ -88,78 +89,67 @@ export default function AnalyticsPage({
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
-      <div className='mx-auto w-full max-w-3xl rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-sm'>
-        <h1 className='text-xl font-semibold text-gray-900'>{pageTitle}</h1>
-        {dateResolveError && (
-          <p className='mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700'>
-            JST日付の解決に失敗した。時間をおいて再読み込みして。
-          </p>
-        )}
-
-        <div className='mt-5'>
-          <h2 className='text-sm font-semibold text-gray-700'>グラフ</h2>
-          <div
-            className='mt-2 rounded-lg border border-gray-200 bg-white p-4'
-            data-slot='diary-analytics'
-          >
-            <div className='flex min-h-8 items-center gap-2'>
-              <p className='text-sm font-semibold text-gray-700'>
-                選択日: {selectedDate ? toJaDateString(toJstDate(selectedDate)) : '未選択'}
-              </p>
-              {selectedDate && (
-                <button
-                  type='button'
-                  onClick={onClearSelectedDate}
-                  className='w-24 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100'
-                  data-slot='diary-clear-selected-date'
-                >
-                  選択をクリア
-                </button>
-              )}
-            </div>
-            <ChartContainer config={chartConfig} className='mt-3 h-56 w-full'>
-              <BarChart data={summaryRange} onClick={handleChartClick}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey='date'
-                  tickLine={false}
-                  tickMargin={8}
-                  axisLine={false}
-                  tickFormatter={formatSummaryDateTick}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <ChartLegend content={<ChartLegendContent />} />
-                <Bar
-                  dataKey='read'
-                  fill='var(--color-read)'
-                  radius={4}
-                  className='cursor-pointer'
-                />
-                <Bar
-                  dataKey='skip'
-                  fill='var(--color-skip)'
-                  radius={4}
-                  className='cursor-pointer'
-                />
-              </BarChart>
-            </ChartContainer>
+    <DiaryPageLayout pageTitle={pageTitle} dateResolveError={dateResolveError}>
+      <div className='mt-5'>
+        <h2 className='text-sm font-semibold text-gray-700'>グラフ</h2>
+        <div
+          className='mt-2 rounded-lg border border-gray-200 bg-white p-4'
+          data-slot='diary-analytics'
+        >
+          <div className='flex min-h-8 items-center gap-2'>
+            <p className='text-sm font-semibold text-gray-700'>
+              選択日: {selectedDate ? toJaDateString(toJstDate(selectedDate)) : '未選択'}
+            </p>
+            {selectedDate && (
+              <button
+                type='button'
+                onClick={onClearSelectedDate}
+                className='w-24 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100'
+                data-slot='diary-clear-selected-date'
+              >
+                選択をクリア
+              </button>
+            )}
           </div>
+          <ChartContainer config={chartConfig} className='mt-3 h-56 w-full'>
+            <BarChart data={summaryRange} onClick={handleChartClick}>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey='date'
+                tickLine={false}
+                tickMargin={8}
+                axisLine={false}
+                tickFormatter={formatSummaryDateTick}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar dataKey='read' fill='var(--color-read)' radius={4} className='cursor-pointer' />
+              <Bar dataKey='skip' fill='var(--color-skip)' radius={4} className='cursor-pointer' />
+            </BarChart>
+          </ChartContainer>
         </div>
-
-        <DiarySummarySection sources={sources} displaySummary={displaySummary} />
-        <DiaryReadListSection
-          isLoading={isLoading}
-          shouldShowDailyDetails={shouldShowDailyDetails}
-          reads={reads}
-        />
-        <DiaryReadPagination
-          onNextPage={onNextPage}
-          onPrevPage={onPrevPage}
-          readPagination={readPagination}
-          shouldShowDailyDetails={shouldShowDailyDetails}
-        />
       </div>
-    </div>
+      <DiarySummarySection sources={sources} displaySummary={displaySummary} />
+      <DiaryReadListSection
+        isLoading={isLoading}
+        shouldShowDailyDetails={shouldShowDailyDetails}
+        reads={reads}
+        emptyState={
+          shouldShowDailyDetails ? (
+            <p className='mt-2 text-sm text-gray-500'>読了した記事はまだありません。</p>
+          ) : (
+            <p className='mt-2 text-sm text-gray-500'>
+              グラフの日付をクリックすると、読了記事一覧を表示します。
+            </p>
+          )
+        }
+      />
+      <DiaryReadPagination
+        onNextPage={onNextPage}
+        onPrevPage={onPrevPage}
+        readPagination={readPagination}
+        shouldShowDailyDetails={shouldShowDailyDetails}
+      />
+    </DiaryPageLayout>
   )
 }
