@@ -233,24 +233,6 @@ export default class QueryImpl implements Query {
 
     const queryResultTuple = await Promise.all([
       wrapAsyncCall(() =>
-        this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
-            SELECT COUNT(*) as total
-            FROM read_histories rh
-            WHERE
-              rh.active_user_id = ${dbActiveUserId}
-              AND ${readAtRangeSql}
-          `),
-      ),
-      wrapAsyncCall(() =>
-        this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
-            SELECT COUNT(*) as total
-            FROM skipped_articles sa
-            WHERE
-              sa.active_user_id = ${dbActiveUserId}
-              AND ${skipAtRangeSql}
-          `),
-      ),
-      wrapAsyncCall(() =>
         this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
             SELECT
               a.media as media,
@@ -303,11 +285,9 @@ export default class QueryImpl implements Query {
       return failure(resolvedQueryResults.error)
     }
 
-    const [readCountRows, skipCountRows, readSourcesRows, skipSourcesRows, readsRows] =
-      resolvedQueryResults.data
-
-    const readCount = Number(readCountRows[0]?.total ?? 0)
-    const skipCount = Number(skipCountRows[0]?.total ?? 0)
+    const [readSourcesRows, skipSourcesRows, readsRows] = resolvedQueryResults.data
+    const readCount = QueryImpl.sumDiarySourceCounts(readSourcesRows)
+    const skipCount = QueryImpl.sumDiarySourceCounts(skipSourcesRows)
     const readsTotal = readCount
     const totalPages = Math.ceil(readsTotal / limit)
 
@@ -573,6 +553,10 @@ export default class QueryImpl implements Query {
       grouped.set(row.date, current)
     }
     return grouped
+  }
+
+  private static sumDiarySourceCounts(rows: RawDiarySourceRow[]) {
+    return rows.reduce((sum, row) => sum + Number(row.count), 0)
   }
 
   private static mergeDiarySources(readRows: RawDiarySourceRow[], skipRows: RawDiarySourceRow[]) {

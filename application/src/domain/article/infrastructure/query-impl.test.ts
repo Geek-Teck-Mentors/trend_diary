@@ -226,8 +226,6 @@ describe('QueryImpl', () => {
   describe('getDailyDiary', () => {
     it('日次サマリーとsources、read一覧を取得できる', async () => {
       mockDb.$queryRaw
-        .mockResolvedValueOnce([{ total: 3 }]) // read count
-        .mockResolvedValueOnce([{ total: 2 }]) // skip count
         .mockResolvedValueOnce([
           { media: 'qiita', count: 2 },
           { media: 'zenn', count: 1 },
