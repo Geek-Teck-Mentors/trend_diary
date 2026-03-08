@@ -164,7 +164,7 @@ export async function runScheduledFetch(media: ArticleMedia, env: CronEnv): Prom
       return fetchQiitaArticles(env)
     case 'zenn':
       return fetchZennArticles(env)
-case 'hatena':
+    case 'hatena':
       return fetchHatenaArticles(env)
   }
 }
