@@ -43,7 +43,7 @@ export default function ArticleCard({
       tabIndex={0}
     >
       <CardContent className='flex h-full flex-col p-0'>
-        <CardTitle className='line-clamp-2 flex-1 overflow-hidden text-sm leading-relaxed font-bold text-gray-700'>
+        <CardTitle className='line-clamp-2 flex-1 text-sm leading-relaxed font-bold text-gray-700'>
           <MediaIcon media={toMediaType(article.media)} size='sm' />
           <span className='ml-1'>{article.title}</span>
           {isRead && (
