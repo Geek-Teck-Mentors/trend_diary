@@ -7,6 +7,7 @@ export class AuthPage {
   private readonly signupButton: Locator
   private readonly loginButton: Locator
   private readonly loginPageText: Locator
+  private readonly signupConflictErrorText: Locator
   private readonly trendsPageText: Locator
   private readonly readStatusFilter: Locator
 
@@ -16,6 +17,7 @@ export class AuthPage {
     this.signupButton = page.getByRole('button', { name: 'アカウント作成' })
     this.loginButton = page.getByRole('button', { name: 'ログイン' })
     this.loginPageText = page.getByText('アカウントをお持ちでないですか？')
+    this.signupConflictErrorText = page.getByText('このメールアドレスは既に使用されています')
     this.trendsPageText = page.getByText('絞り込み')
     this.readStatusFilter = page.getByRole('button', { name: '未読のみ' })
   }
@@ -28,9 +30,18 @@ export class AuthPage {
     await this.page.goto('/login')
   }
 
-  async submitSignup(email: string, password: string): Promise<void> {
+  async submitSignup(email: string, password: string): Promise<'redirected-to-login' | 'stayed'> {
     await this.fillCredentials(email, password)
     await this.signupButton.click()
+
+    return Promise.race([
+      this.page
+        .waitForURL(/\/login(?:\?.*)?$/, { timeout: AUTH_FLOW_TIMEOUT })
+        .then(() => 'redirected-to-login' as const),
+      this.signupConflictErrorText
+        .waitFor({ state: 'visible', timeout: AUTH_FLOW_TIMEOUT })
+        .then(() => 'stayed' as const),
+    ])
   }
 
   async waitForLoginPage(): Promise<void> {
@@ -41,6 +52,10 @@ export class AuthPage {
   async submitLogin(email: string, password: string): Promise<void> {
     await this.fillCredentials(email, password)
     await this.loginButton.click()
+  }
+
+  async expectSignupConflictError(): Promise<void> {
+    await expect(this.signupConflictErrorText).toBeVisible({ timeout: AUTH_FLOW_TIMEOUT })
   }
 
   async waitForTrendsPage(): Promise<void> {

@@ -1,4 +1,4 @@
-import { Inbox, TrendingUp } from 'lucide-react'
+import { BarChart3, BookOpenCheck, Inbox, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { InternalPath } from '../../../routes'
 import {
@@ -34,6 +34,16 @@ const loggedInMenuItems: MenuItem[] = [
     title: '未読消化',
     url: '/inbox',
     icon: Inbox,
+  },
+  {
+    title: 'ダイアリー',
+    url: '/diary',
+    icon: BookOpenCheck,
+  },
+  {
+    title: '統計',
+    url: '/analytics',
+    icon: BarChart3,
   },
 ]
 
