@@ -1,34 +1,30 @@
-import { PropsWithChildren } from 'react'
+import type { ComponentPropsWithoutRef, PropsWithChildren } from 'react'
 import { Link } from 'react-router'
-import { InternalPath } from '../../routes'
-import { Button } from '../shadcn/button'
-
-interface BaseProps {
-  className?: string
-}
+import { Button } from '@/web/client/components/shadcn/button'
+import { InternalPath } from '@/web/client/routes'
 
 export type ExternalPath = `https://${string}` | `http://${string}`
 
-interface ExternalLinkProps extends BaseProps {
+interface ExternalLinkProps extends Omit<ComponentPropsWithoutRef<'a'>, 'href'> {
   to: ExternalPath
 }
 
-function ExternalLink({ to, children, className }: PropsWithChildren<ExternalLinkProps>) {
+function ExternalLink({ to, children, ...props }: PropsWithChildren<ExternalLinkProps>) {
   return (
     // biome-ignore lint: plugin
-    <a href={to} className={className} target='_blank' rel='noopener noreferrer nofollow'>
+    <a href={to} target='_blank' rel='noopener noreferrer nofollow' {...props}>
       {children}
     </a>
   )
 }
 
-interface InternalLinkProps extends BaseProps {
+interface InternalLinkProps extends Omit<ComponentPropsWithoutRef<typeof Link>, 'to'> {
   to: InternalPath
 }
 
-function InternalLink({ to, children, className }: PropsWithChildren<InternalLinkProps>) {
+function InternalLink({ to, children, ...props }: PropsWithChildren<InternalLinkProps>) {
   return (
-    <Link to={to} className={className}>
+    <Link to={to} {...props}>
       {children}
     </Link>
   )
@@ -40,8 +36,8 @@ function isExternalPath(to: string): to is ExternalPath {
 
 type AnchorLinkProps = PropsWithChildren<{
   to: InternalPath | ExternalPath
-  className?: string
-}>
+}> &
+  Omit<ComponentPropsWithoutRef<'a'>, 'href'>
 
 /**
  * AnchorLink
@@ -51,13 +47,13 @@ type AnchorLinkProps = PropsWithChildren<{
  * @param children
  * @link Linkのperf参考: https://zenn.dev/atusi/articles/3e37d4d54736fa#link
  */
-export function AnchorLink({ to, className, children }: AnchorLinkProps) {
+export function AnchorLink({ to, children, ...props }: AnchorLinkProps) {
   return isExternalPath(to) ? (
-    <ExternalLink to={to} className={className}>
+    <ExternalLink to={to} {...props}>
       {children}
     </ExternalLink>
   ) : (
-    <InternalLink to={to} className={className}>
+    <InternalLink to={to} {...props}>
       {children}
     </InternalLink>
   )
