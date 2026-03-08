@@ -7,7 +7,7 @@ interface BaseProps {
   className?: string
 }
 
-export type ExternalPath = `https://${string}`
+export type ExternalPath = `https://${string}` | `http://${string}`
 
 interface ExternalLinkProps extends BaseProps {
   to: ExternalPath
@@ -35,7 +35,7 @@ function InternalLink({ to, children, className }: PropsWithChildren<InternalLin
 }
 
 function isExternalPath(to: string): to is ExternalPath {
-  return /^https:\/\//.test(to)
+  return /^https?:\/\//.test(to)
 }
 
 type AnchorLinkProps = PropsWithChildren<{
@@ -46,7 +46,7 @@ type AnchorLinkProps = PropsWithChildren<{
 /**
  * AnchorLink
  * @description aタグを薄くラップしたコンポーネント。内部リンクの際はReact RouterのLink
- * @param to InternalPath | `https://${string}`, InternalPathはルーティング定義から型推論される
+ * @param to InternalPath | `https://${string}` | `http://${string}`, InternalPathはルーティング定義から型推論される
  * @param className
  * @param children
  * @link Linkのperf参考: https://zenn.dev/atusi/articles/3e37d4d54736fa#link
@@ -68,7 +68,7 @@ type LinkAsButtonProps = AnchorLinkProps
 /**
  * LinkAsButton
  * @description 内部リンクの際はReact RouterのLink、外部リンクの際はaタグとして振る舞うボタンコンポーネント
- * @param to InternalPath | `https://${string}`
+ * @param to InternalPath | `https://${string}` | `http://${string}`
  * @param className Optional class name for styling
  */
 export function LinkAsButton({ to, className, children }: LinkAsButtonProps) {

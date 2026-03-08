@@ -5,6 +5,7 @@ import { NotFoundError, ServerError } from '@/common/errors'
 import { OffsetPaginationResult } from '@/common/pagination'
 import { Command, Query } from '@/domain/article/repository'
 import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import type { DailyDiary } from '@/domain/article/schema/diary-schema'
 import { QueryParams } from '@/domain/article/schema/query-schema'
 import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
 import type { SkippedArticle } from '@/domain/article/schema/skipped-article-schema'
@@ -38,6 +39,34 @@ const mockPaginationResultWithReadStatus: OffsetPaginationResult<ArticleWithOpti
   totalPages: 1,
   hasNext: false,
   hasPrev: false,
+}
+
+const mockDailyDiary: DailyDiary = {
+  date: '2026-03-07',
+  summary: { read: 8, skip: 2 },
+  sources: [
+    { media: 'qiita', read: 5, skip: 2 },
+    { media: 'zenn', read: 3, skip: 0 },
+    { media: 'hatena', read: 0, skip: 0 },
+  ],
+  reads: {
+    data: [
+      {
+        readHistoryId: 1n,
+        articleId: 10n,
+        media: 'qiita',
+        title: 'Go error handling',
+        url: 'https://example.com/go-error-handling',
+        readAt: new Date('2026-03-07T08:00:00.000Z'),
+      },
+    ],
+    page: 1,
+    limit: 10,
+    total: 1,
+    totalPages: 1,
+    hasNext: false,
+    hasPrev: false,
+  },
 }
 
 const queryMock = mockDeep<Query>()
@@ -409,6 +438,20 @@ describe('ArticleUseCase', () => {
 
       expect(isSuccess(result)).toBe(true)
       expect(queryMock.getUnreadDigestionArticles).toHaveBeenCalledWith(100n, '2026-03-07', media)
+    })
+  })
+
+  describe('getDailyDiary', () => {
+    it('指定日の日次ダイアリーを取得できる', async () => {
+      queryMock.getDailyDiary.mockResolvedValue(success(mockDailyDiary))
+
+      const result = await useCase.getDailyDiary(100n, '2026-03-07', 1, 10)
+
+      expect(isSuccess(result)).toBe(true)
+      expect(queryMock.getDailyDiary).toHaveBeenCalledWith(100n, '2026-03-07', 1, 10)
+      if (isSuccess(result)) {
+        expect(result.data.summary.read).toBe(8)
+      }
     })
   })
 

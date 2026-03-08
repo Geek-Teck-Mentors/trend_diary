@@ -7,6 +7,7 @@ import { isNull } from '@/common/types/utility'
 import type { ArticleMedia } from '@/domain/article/media'
 import { Command, Query } from '@/domain/article/repository'
 import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import type { DailyDiary, DailyDiaryRangeItem } from '@/domain/article/schema/diary-schema'
 import { QueryParams } from '@/domain/article/schema/query-schema'
 import type { ReadHistory } from '@/domain/article/schema/read-history-schema'
 import type { SkippedArticle } from '@/domain/article/schema/skipped-article-schema'
@@ -61,6 +62,23 @@ export class UseCase {
     }
 
     return this.query.getUnreadDigestionArticles(activeUserId, targetDateJstResult.data, media)
+  }
+
+  async getDailyDiary(
+    activeUserId: bigint,
+    targetDateJst: string,
+    page: number,
+    limit: number,
+  ): AsyncResult<DailyDiary, Error> {
+    return this.query.getDailyDiary(activeUserId, targetDateJst, page, limit)
+  }
+
+  async getDailyDiaryRange(
+    activeUserId: bigint,
+    fromDateJst: string,
+    toDateJst: string,
+  ): AsyncResult<DailyDiaryRangeItem[], Error> {
+    return this.query.getDailyDiaryRange(activeUserId, fromDateJst, toDateJst)
   }
 
   async createSkippedArticle(

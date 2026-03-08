@@ -1,6 +1,29 @@
-import { type MetaFunction, useNavigate } from 'react-router'
+import { isFailure } from '@yuukihayashi0510/core'
+import {
+  type ActionFunctionArgs,
+  type MetaFunction,
+  redirect,
+  useActionData,
+  useNavigation,
+} from 'react-router'
+import Logger from '@/common/logger'
+import { createAuthActionUseCase } from '@/web/client/features/authenticate/auth-action-use-case'
+import {
+  AUTH_ERROR_MESSAGES,
+  resolveLoginErrorMessage,
+} from '@/web/client/features/authenticate/error-message'
+import {
+  type AuthenticateErrors,
+  validateAuthenticateForm,
+} from '../../features/authenticate/validation'
 import LoginPage from './page'
-import useLogin from './use-login'
+
+type LoginActionData = {
+  errors?: AuthenticateErrors
+  formError?: string
+}
+
+const logger = new Logger('info', { route: 'web/client/routes/login/action' })
 
 export const meta: MetaFunction = () => [
   { title: 'ログイン | TrendDiary' },
@@ -24,9 +47,37 @@ export const meta: MetaFunction = () => [
   },
 ]
 
-export default function Login() {
-  const navigate = useNavigate()
-  const { handleSubmit } = useLogin(navigate)
+export async function action({ request, context }: ActionFunctionArgs) {
+  const formData = await request.formData()
+  const validation = validateAuthenticateForm(formData)
+  if (!validation.isValid) {
+    return { errors: validation.errors } satisfies LoginActionData
+  }
 
-  return <LoginPage handleSubmit={handleSubmit} />
+  try {
+    const { useCase, headers } = createAuthActionUseCase(request, context)
+    const result = await useCase.login(validation.data.email, validation.data.password)
+
+    if (isFailure(result)) {
+      return { formError: resolveLoginErrorMessage(result.error) } satisfies LoginActionData
+    }
+
+    return redirect('/trends', { headers })
+  } catch (error) {
+    logger.error('Unexpected error in login action', error)
+    return { formError: AUTH_ERROR_MESSAGES.unexpected } satisfies LoginActionData
+  }
+}
+
+export default function Login() {
+  const actionData = useActionData<typeof action>()
+  const navigation = useNavigation()
+
+  return (
+    <LoginPage
+      isSubmitting={navigation.state === 'submitting'}
+      errors={actionData?.errors}
+      formError={actionData?.formError}
+    />
+  )
 }
