@@ -34,7 +34,7 @@ const buildDailyResponse = (date: string, read: number, skip: number): DiaryResp
   ],
   reads: {
     data:
-      date === '2026-03-07'
+      read > 0
         ? [
             {
               readHistoryId: 'r1',
@@ -42,7 +42,7 @@ const buildDailyResponse = (date: string, read: number, skip: number): DiaryResp
               media: 'qiita',
               title: 'Analytics Article',
               url: 'https://example.com/analytics',
-              readAt: '2026-03-07T10:00:00.000Z',
+              readAt: `${date}T10:00:00.000Z`,
             },
           ]
         : [],
