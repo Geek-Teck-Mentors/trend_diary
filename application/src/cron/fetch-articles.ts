@@ -94,24 +94,26 @@ async function storeArticles(media: ArticleMedia, items: FeedItem[], env: CronEn
   return result.data
 }
 
-export async function fetchQiitaArticles(env: CronEnv): Promise<number> {
-  const items = await fetchRssFeed<{
-    title: string
-    author: string
-    content: string
-    link: string
-  }>('https://qiita.com/popular-items/feed.atom')
+type QiitaFeedItem = {
+  title: string
+  author: string
+  content: string
+  link: string
+}
 
-  return storeArticles(
-    'qiita',
-    items.map((item) => ({
-      title: item.title,
-      author: item.author,
-      description: item.content,
-      url: item.link,
-    })),
-    env,
-  )
+function mapQiitaItemToFeedItem(item: QiitaFeedItem): FeedItem {
+  return {
+    title: item.title,
+    author: item.author,
+    description: item.content,
+    url: item.link,
+  }
+}
+
+export async function fetchQiitaArticles(env: CronEnv): Promise<number> {
+  const items = await fetchRssFeed<QiitaFeedItem>('https://qiita.com/popular-items/feed.atom')
+
+  return storeArticles('qiita', items.map(mapQiitaItemToFeedItem), env)
 }
 
 export async function fetchZennArticles(env: CronEnv): Promise<number> {
