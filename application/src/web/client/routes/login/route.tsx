@@ -6,6 +6,7 @@ import {
   useActionData,
   useNavigation,
 } from 'react-router'
+import Logger from '@/common/logger'
 import { createAuthActionUseCase } from '@/web/client/features/authenticate/auth-action-use-case'
 import {
   AUTH_ERROR_MESSAGES,
@@ -21,6 +22,8 @@ type LoginActionData = {
   errors?: AuthenticateErrors
   formError?: string
 }
+
+const logger = new Logger('info', { route: 'web/client/routes/login/action' })
 
 export const meta: MetaFunction = () => [
   { title: 'ログイン | TrendDiary' },
@@ -60,7 +63,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     return redirect('/trends', { headers })
-  } catch {
+  } catch (error) {
+    logger.error('Unexpected error in login action', error)
     return { formError: AUTH_ERROR_MESSAGES.unexpected } satisfies LoginActionData
   }
 }

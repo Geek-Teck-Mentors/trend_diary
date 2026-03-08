@@ -53,6 +53,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+function formatSummaryDateTick(value: string | number): string {
+  if (typeof value !== 'string') {
+    return String(value)
+  }
+  return toJstDate(value).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })
+}
+
 export default function AnalyticsPage({
   isLoggedIn,
   selectedDate,
@@ -119,9 +126,7 @@ export default function AnalyticsPage({
                   tickLine={false}
                   tickMargin={8}
                   axisLine={false}
-                  tickFormatter={(value) =>
-                    toJstDate(value).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })
-                  }
+                  tickFormatter={formatSummaryDateTick}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />

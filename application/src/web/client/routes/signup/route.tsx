@@ -6,6 +6,7 @@ import {
   useActionData,
   useNavigation,
 } from 'react-router'
+import Logger from '@/common/logger'
 import { createAuthActionUseCase } from '@/web/client/features/authenticate/auth-action-use-case'
 import {
   AUTH_ERROR_MESSAGES,
@@ -21,6 +22,8 @@ type SignupActionData = {
   errors?: AuthenticateErrors
   formError?: string
 }
+
+const logger = new Logger('info', { route: 'web/client/routes/signup/action' })
 
 export const meta: MetaFunction = () => [
   { title: 'アカウント作成 | TrendDiary' },
@@ -60,7 +63,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     return redirect('/login')
-  } catch {
+  } catch (error) {
+    logger.error('Unexpected error in signup action', error)
     return { formError: AUTH_ERROR_MESSAGES.unexpected } satisfies SignupActionData
   }
 }
