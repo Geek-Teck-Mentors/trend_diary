@@ -86,7 +86,7 @@ export default function TrendsPage({
   }
 
   const getPaginationClass = (isDisabled: boolean) => {
-    const baseClass = 'border-solid border-1 border-b-slate-400 cursor-pointer'
+    const baseClass = 'border-solid border border-b-slate-400 cursor-pointer'
     return twMerge(baseClass, isDisabled ? 'opacity-50 cursor-not-allowed' : '')
   }
 
