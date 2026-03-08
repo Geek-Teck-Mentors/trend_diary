@@ -6,11 +6,10 @@ type SourceSummary = {
   skip: number
 }
 
-export function getTodayJst(): string {
+export function getTodayJst(): string | null {
   const result = toTodayJstDateString()
   if (isFailure(result)) {
-    // 通常のブラウザ環境では発生しないため、原因を保持して異常系として扱う。
-    throw new Error('Failed to resolve JST date', { cause: result.error })
+    return null
   }
   return result.data
 }

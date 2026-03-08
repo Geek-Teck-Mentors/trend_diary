@@ -57,6 +57,7 @@ describe('DiaryPage', () => {
       createElement(DiaryPage, {
         isLoggedIn: false,
         targetDate: '2026-03-08',
+        dateResolveError: false,
         dailySummary: { read: 6, skip: 3 },
         sources,
         reads,
@@ -76,6 +77,7 @@ describe('DiaryPage', () => {
       createElement(DiaryPage, {
         isLoggedIn: true,
         targetDate: '2026-03-08',
+        dateResolveError: false,
         dailySummary: { read: 6, skip: 3 },
         sources,
         reads,
@@ -91,6 +93,27 @@ describe('DiaryPage', () => {
     expect(screen.getByText('記事タイトル')).toBeInTheDocument()
     expect(screen.getByText('1 / 2')).toBeInTheDocument()
   })
+
+  it('日付解決に失敗したときはエラーメッセージを表示する', () => {
+    render(
+      createElement(DiaryPage, {
+        isLoggedIn: true,
+        targetDate: null,
+        dateResolveError: true,
+        dailySummary: { read: 0, skip: 0 },
+        sources,
+        reads: [],
+        readPagination: { page: 1, totalPages: 0, hasNext: false, hasPrev: false },
+        isLoading: false,
+        onNextPage: vi.fn(),
+        onPrevPage: vi.fn(),
+      }),
+    )
+
+    expect(
+      screen.getByText('JST日付の解決に失敗した。時間をおいて再読み込みして。'),
+    ).toBeInTheDocument()
+  })
 })
 
 describe('AnalyticsPage', () => {
@@ -99,6 +122,7 @@ describe('AnalyticsPage', () => {
       createElement(AnalyticsPage, {
         isLoggedIn: true,
         selectedDate: null,
+        dateResolveError: false,
         summaryRange: [
           { date: '2026-03-07', read: 1, skip: 0 },
           { date: '2026-03-08', read: 2, skip: 1 },
@@ -134,6 +158,7 @@ describe('AnalyticsPage', () => {
       createElement(AnalyticsPage, {
         isLoggedIn: true,
         selectedDate: '2026-03-08',
+        dateResolveError: false,
         summaryRange: [
           { date: '2026-03-07', read: 1, skip: 0 },
           { date: '2026-03-08', read: 2, skip: 1 },
@@ -159,5 +184,30 @@ describe('AnalyticsPage', () => {
     expect(screen.getByText('記事タイトル')).toBeInTheDocument()
     expect(screen.getByText('2 / 3')).toBeInTheDocument()
     expect(screen.getAllByText('3件').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('日付解決に失敗したときはエラーメッセージを表示する', () => {
+    render(
+      createElement(AnalyticsPage, {
+        isLoggedIn: true,
+        selectedDate: null,
+        dateResolveError: true,
+        summaryRange: [],
+        weeklySummary: { read: 0, skip: 0 },
+        dailySummary: { read: 0, skip: 0 },
+        sources,
+        reads: [],
+        readPagination: { page: 1, totalPages: 0, hasNext: false, hasPrev: false },
+        isLoading: false,
+        onSelectDate: vi.fn(),
+        onClearSelectedDate: vi.fn(),
+        onNextPage: vi.fn(),
+        onPrevPage: vi.fn(),
+      }),
+    )
+
+    expect(
+      screen.getByText('JST日付の解決に失敗した。時間をおいて再読み込みして。'),
+    ).toBeInTheDocument()
   })
 })

@@ -10,6 +10,7 @@ export default function AnalyticsRoute() {
   const { isLoggedIn } = useOutletContext<AppLayoutOutletContext>()
   const {
     selectedDate,
+    dateResolveError,
     summaryRange,
     weeklySummary,
     dailySummary,
@@ -27,6 +28,7 @@ export default function AnalyticsRoute() {
     <AnalyticsPage
       isLoggedIn={isLoggedIn}
       selectedDate={selectedDate}
+      dateResolveError={dateResolveError}
       summaryRange={summaryRange}
       weeklySummary={weeklySummary}
       dailySummary={dailySummary}

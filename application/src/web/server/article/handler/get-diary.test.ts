@@ -77,6 +77,19 @@ describe('diaryQuerySchema', () => {
     expect(errors.from).toContain('date must be a valid JST date')
     expect(errors.to).toContain('date must be a valid JST date')
   })
+
+  it('page指定時にfromとtoが異なる日付を拒否する', () => {
+    const result = diaryQuerySchema.safeParse({
+      from: '2026-03-07',
+      to: '2026-03-08',
+      page: 1,
+    })
+    expect(result.success).toBe(false)
+    if (result.success) return
+
+    const errors = result.error.flatten().fieldErrors
+    expect(errors.page).toContain('page is available only when from and to are the same date')
+  })
 })
 
 describe('GET /api/articles/diary (単日詳細)', () => {

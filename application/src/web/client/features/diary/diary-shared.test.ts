@@ -15,12 +15,12 @@ describe('diary-shared', () => {
       expect(getTodayJst()).toBe('2026-03-08')
     })
 
-    it('JST解決に失敗したら例外を投げる', () => {
+    it('JST解決に失敗したらnullを返す', () => {
       vi.spyOn(dateModule, 'toTodayJstDateString').mockReturnValue(
         failure(new Error('JST日付の取得に失敗しました')),
       )
 
-      expect(() => getTodayJst()).toThrowError('Failed to resolve JST date')
+      expect(getTodayJst()).toBeNull()
     })
   })
 

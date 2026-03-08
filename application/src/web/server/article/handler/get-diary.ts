@@ -23,11 +23,22 @@ const diaryDateSchema = z
     return !isFailure(normalized) && normalized.data === inputDate
   }, DIARY_DATE_MESSAGE)
 
-export const diaryQuerySchema = z.object({
-  from: diaryDateSchema,
-  to: diaryDateSchema,
-  page: z.coerce.number().int().min(1).optional(),
-})
+export const diaryQuerySchema = z
+  .object({
+    from: diaryDateSchema,
+    to: diaryDateSchema,
+    page: z.coerce.number().int().min(1).optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.page === undefined) return true
+      return data.from === data.to
+    },
+    {
+      message: 'page is available only when from and to are the same date',
+      path: ['page'],
+    },
+  )
 
 type DiaryQuery = z.infer<typeof diaryQuerySchema>
 
@@ -74,7 +85,6 @@ export default async function getDiary(c: ZodValidatedQueryContext<DiaryQuery>) 
   const useCase = createArticleUseCase(rdb)
 
   if (query.page !== undefined) {
-    validateDiaryDetailQuery(fromDate, toDate)
     const detailResult = await useCase.getDailyDiary(
       sessionUser.activeUserId,
       fromDate,
@@ -149,17 +159,6 @@ function validateDiaryDateRange(fromDate: string, toDate: string, todayJst: stri
       cause: causes,
     })
   }
-}
-
-function validateDiaryDetailQuery(fromDate: string, toDate: string) {
-  if (fromDate === toDate) return
-
-  throw new HTTPException(422, {
-    message: 'Invalid input',
-    cause: {
-      page: ['page is available only when from and to are the same date'],
-    },
-  })
 }
 
 function toDiaryDetailResponse(data: DailyDiary): DiaryRangeResponse {

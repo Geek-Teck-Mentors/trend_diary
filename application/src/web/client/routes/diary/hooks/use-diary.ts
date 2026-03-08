@@ -21,6 +21,8 @@ export default function useDiary(enabled: boolean) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { fetchDiary } = useDiaryApi()
   const todayJst = getTodayJst()
+  const targetDate = todayJst ?? ''
+  const hasDateResolveError = todayJst === null
 
   const pageParam = searchParams.get('page')
   const parseResult = offsetPaginationSchema.safeParse({
@@ -29,8 +31,8 @@ export default function useDiary(enabled: boolean) {
   })
   const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
 
-  const swrKey = enabled ? ['api/articles/diary', todayJst, page] : null
-  const { data, isLoading } = useSWR(swrKey, () => fetchDiary(todayJst, page))
+  const swrKey = enabled && targetDate ? ['api/articles/diary', targetDate, page] : null
+  const { data, isLoading } = useSWR(swrKey, () => fetchDiary(targetDate, page))
 
   const reads: DiaryReadItem[] =
     data?.reads.data.map((read) => ({ ...read, readAt: new Date(read.readAt) })) ?? []
@@ -48,6 +50,7 @@ export default function useDiary(enabled: boolean) {
 
   return {
     todayJst,
+    dateResolveError: hasDateResolveError,
     dailySummary,
     sources: data?.sources ?? emptySources,
     reads,

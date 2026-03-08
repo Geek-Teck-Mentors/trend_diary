@@ -10,6 +10,7 @@ export default function DiaryRoute() {
   const { isLoggedIn } = useOutletContext<AppLayoutOutletContext>()
   const {
     todayJst,
+    dateResolveError,
     dailySummary,
     sources,
     reads,
@@ -23,6 +24,7 @@ export default function DiaryRoute() {
     <DiaryPage
       isLoggedIn={isLoggedIn}
       targetDate={todayJst}
+      dateResolveError={dateResolveError}
       dailySummary={dailySummary}
       sources={sources}
       reads={reads}

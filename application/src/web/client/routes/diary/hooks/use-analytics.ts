@@ -36,7 +36,8 @@ export default function useAnalytics(enabled: boolean) {
   const { fetchDiary, fetchDiaryRange } = useDiaryApi()
 
   const todayJst = getTodayJst()
-  const availableDates = useMemo(() => buildAvailableDates(todayJst), [todayJst])
+  const hasDateResolveError = todayJst === null
+  const availableDates = useMemo(() => (todayJst ? buildAvailableDates(todayJst) : []), [todayJst])
   const dateParam = searchParams.get('date')
   const pageParam = searchParams.get('page')
 
@@ -48,7 +49,8 @@ export default function useAnalytics(enabled: boolean) {
   })
   const page = parseResult.success ? parseResult.data.page : DEFAULT_PAGE
 
-  const summaryKey = enabled ? ['api/articles/diary-summary', ...availableDates] : null
+  const summaryKey =
+    enabled && availableDates.length > 0 ? ['api/articles/diary-summary', ...availableDates] : null
   const { data: summaryRangeData, isLoading: isSummaryLoading } = useSWR<SummaryRangeData>(
     summaryKey,
     async () => {
@@ -144,6 +146,7 @@ export default function useAnalytics(enabled: boolean) {
       hasNext: false,
       hasPrev: false,
     },
+    dateResolveError: hasDateResolveError,
     isLoading: isLoading || isSummaryLoading,
     selectDate,
     clearSelectedDate,

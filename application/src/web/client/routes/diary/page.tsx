@@ -11,7 +11,8 @@ import {
 
 type Props = {
   isLoggedIn: boolean
-  targetDate: string
+  targetDate: string | null
+  dateResolveError: boolean
   dailySummary: Summary
   sources: Source[]
   reads: ReadItem[]
@@ -24,6 +25,7 @@ type Props = {
 export default function DiaryPage({
   isLoggedIn,
   targetDate,
+  dateResolveError,
   dailySummary,
   sources,
   reads,
@@ -42,10 +44,15 @@ export default function DiaryPage({
     <div className='min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6'>
       <div className='mx-auto w-full max-w-3xl rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-sm'>
         <h1 className='text-xl font-semibold text-gray-900'>{pageTitle}</h1>
+        {dateResolveError && (
+          <p className='mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700'>
+            JST日付の解決に失敗した。時間をおいて再読み込みして。
+          </p>
+        )}
         <DiarySummarySection
           sources={sources}
           displaySummary={dailySummary}
-          targetDate={targetDate}
+          targetDate={targetDate ?? undefined}
         />
         <DiaryReadListSection isLoading={isLoading} shouldShowDailyDetails={true} reads={reads} />
         <DiaryReadPagination
