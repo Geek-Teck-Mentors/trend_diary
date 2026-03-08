@@ -1,25 +1,13 @@
 import { toJaTimeString } from '@/common/locale/date'
-import { AnchorLink, type ExternalPath } from '@/web/client/components/ui/link'
+import { AnchorLink } from '@/web/client/components/ui/link'
 import type { ReadItem } from '@/web/client/features/diary/types'
+import { toSafeExternalPath } from '@/web/client/lib/url'
 import MediaIcon from '@/web/client/routes/trends._index/components/media-icon'
 
 type Props = {
   isLoading: boolean
   shouldShowDailyDetails: boolean
   reads: ReadItem[]
-}
-
-function toSafeExternalPath(url: string): ExternalPath | null {
-  try {
-    const parsed = new URL(url)
-    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-      return url as ExternalPath
-    }
-  } catch {
-    // Invalid URL format is acceptable, so we just fall through.
-  }
-
-  return null
 }
 
 export default function DiaryReadListSection({ isLoading, shouldShowDailyDetails, reads }: Props) {

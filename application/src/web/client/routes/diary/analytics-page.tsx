@@ -25,6 +25,10 @@ type SummaryRangePoint = {
   skip: number
 }
 
+type ChartClickState = {
+  activeLabel?: string
+} | null
+
 type Props = {
   isLoggedIn: boolean
   selectedDate: string | null
@@ -73,11 +77,9 @@ export default function AnalyticsPage({
   const displaySummary = selectedDate === null ? weeklySummary : dailySummary
   const shouldShowDailyDetails = selectedDate !== null
 
-  const handleChartClick = (state: unknown) => {
-    if (!state || typeof state !== 'object' || !('activeLabel' in state)) return
-    const activeLabel = state.activeLabel
-    if (typeof activeLabel === 'string') {
-      onSelectDate(activeLabel)
+  const handleChartClick = (state: ChartClickState) => {
+    if (typeof state?.activeLabel === 'string') {
+      onSelectDate(state.activeLabel)
     }
   }
 
