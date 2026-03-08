@@ -1,12 +1,25 @@
 import { Prisma } from '@prisma/client'
-import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
+import {
+  type AsyncResult,
+  failure,
+  isFailure,
+  type Result,
+  success,
+  wrapAsyncCall,
+} from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
+import { addJstDays } from '@/common/locale/date'
 import { DEFAULT_LIMIT, DEFAULT_PAGE, OffsetPaginationResult } from '@/common/pagination'
 import { Nullable } from '@/common/types/utility'
 import fromPrismaToArticle from '@/domain/article/infrastructure/mapper'
-import type { ArticleMedia } from '@/domain/article/media'
+import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
 import { Query } from '@/domain/article/repository'
 import type { Article, ArticleWithOptionalReadStatus } from '@/domain/article/schema/article-schema'
+import type {
+  DailyDiary,
+  DailyDiaryRangeItem,
+  DiaryReadItem,
+} from '@/domain/article/schema/diary-schema'
 import { QueryParams } from '@/domain/article/schema/query-schema'
 import { RdbClient } from '@/infrastructure/rdb'
 import { fromDbId, toDbId } from '@/infrastructure/rdb-id'
@@ -24,6 +37,26 @@ type RawArticleRow = {
 
 type RawCountRow = {
   total: number | bigint
+}
+
+type RawDiarySourceRow = {
+  media: string
+  count: number | bigint
+}
+
+type RawDiaryDateSourceRow = {
+  date: string
+  media: string
+  count: number | bigint
+}
+
+type RawDiaryReadRow = {
+  readHistoryId: number | bigint
+  articleId: number | bigint
+  media: string
+  title: string
+  url: string
+  readAt: string | Date | number | bigint
 }
 
 export default class QueryImpl implements Query {
@@ -169,6 +202,204 @@ export default class QueryImpl implements Query {
     return success(result.data.map(QueryImpl.mapRawArticle))
   }
 
+  async getDailyDiary(
+    activeUserId: bigint,
+    targetDateJst: string,
+    page: number,
+    limit: number,
+  ): AsyncResult<DailyDiary, ServerError> {
+    const dbActiveUserId = toDbId(activeUserId)
+    const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(targetDateJst, targetDateJst)
+    if (!fromDate || !toDateExclusive) {
+      return success({
+        date: targetDateJst,
+        summary: { read: 0, skip: 0 },
+        sources: [],
+        reads: {
+          data: [],
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      })
+    }
+
+    const queryResultTuple = await Promise.all([
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
+            SELECT COUNT(*) as total
+            FROM read_histories
+            WHERE
+              active_user_id = ${dbActiveUserId}
+              AND ${QueryImpl.getNormalizedDateTimeSql('read_at')} >= datetime(${fromDate.toISOString()})
+              AND ${QueryImpl.getNormalizedDateTimeSql('read_at')} < datetime(${toDateExclusive.toISOString()})
+          `),
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
+            SELECT COUNT(*) as total
+            FROM skipped_articles
+            WHERE
+              active_user_id = ${dbActiveUserId}
+              AND ${QueryImpl.getNormalizedDateTimeSql('created_at')} >= datetime(${fromDate.toISOString()})
+              AND ${QueryImpl.getNormalizedDateTimeSql('created_at')} < datetime(${toDateExclusive.toISOString()})
+          `),
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
+            SELECT
+              a.media as media,
+              COUNT(*) as count
+            FROM read_histories rh
+            INNER JOIN articles a ON a.article_id = rh.article_id
+            WHERE
+              rh.active_user_id = ${dbActiveUserId}
+              AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} >= datetime(${fromDate.toISOString()})
+              AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} < datetime(${toDateExclusive.toISOString()})
+            GROUP BY a.media
+            ORDER BY count DESC, a.media ASC
+          `),
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
+            SELECT
+              a.media as media,
+              COUNT(*) as count
+            FROM skipped_articles sa
+            INNER JOIN articles a ON a.article_id = sa.article_id
+            WHERE
+              sa.active_user_id = ${dbActiveUserId}
+              AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} >= datetime(${fromDate.toISOString()})
+              AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} < datetime(${toDateExclusive.toISOString()})
+            GROUP BY a.media
+            ORDER BY count DESC, a.media ASC
+          `),
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawDiaryReadRow[]>(Prisma.sql`
+            SELECT
+              rh.read_history_id as readHistoryId,
+              rh.article_id as articleId,
+              a.media as media,
+              a.title as title,
+              a.url as url,
+              rh.read_at as readAt
+            FROM read_histories rh
+            INNER JOIN articles a ON a.article_id = rh.article_id
+            WHERE
+              rh.active_user_id = ${dbActiveUserId}
+              AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} >= datetime(${fromDate.toISOString()})
+              AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} < datetime(${toDateExclusive.toISOString()})
+            ORDER BY ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} DESC, rh.read_history_id DESC
+            LIMIT ${limit}
+            OFFSET ${(page - 1) * limit}
+          `),
+      ),
+    ])
+    const resolvedQueryResults = QueryImpl.unwrapResultTuple(queryResultTuple)
+    if (isFailure(resolvedQueryResults)) {
+      return failure(resolvedQueryResults.error)
+    }
+
+    const [readCountRows, skipCountRows, readSourcesRows, skipSourcesRows, readsRows] =
+      resolvedQueryResults.data
+
+    const readCount = Number(readCountRows[0]?.total ?? 0)
+    const skipCount = Number(skipCountRows[0]?.total ?? 0)
+    const readsTotal = readCount
+    const totalPages = Math.ceil(readsTotal / limit)
+
+    return success({
+      date: targetDateJst,
+      summary: {
+        read: readCount,
+        skip: skipCount,
+      },
+      sources: QueryImpl.mergeDiarySources(readSourcesRows, skipSourcesRows),
+      reads: {
+        data: readsRows.map(QueryImpl.mapRawDiaryReadItem),
+        page,
+        limit,
+        total: readsTotal,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    })
+  }
+
+  async getDailyDiaryRange(
+    activeUserId: bigint,
+    fromDateJst: string,
+    toDateJst: string,
+  ): AsyncResult<DailyDiaryRangeItem[], ServerError> {
+    const dbActiveUserId = toDbId(activeUserId)
+    const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(fromDateJst, toDateJst)
+    if (!fromDate || !toDateExclusive) return success([])
+
+    const sourceResultTuple = await Promise.all([
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawDiaryDateSourceRow[]>(Prisma.sql`
+          SELECT
+            date(${QueryImpl.getNormalizedDateTimeSql('rh.read_at')}, '+9 hours') as date,
+            a.media as media,
+            COUNT(*) as count
+          FROM read_histories rh
+          INNER JOIN articles a ON a.article_id = rh.article_id
+          WHERE
+            rh.active_user_id = ${dbActiveUserId}
+            AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} >= datetime(${fromDate.toISOString()})
+            AND ${QueryImpl.getNormalizedDateTimeSql('rh.read_at')} < datetime(${toDateExclusive.toISOString()})
+          GROUP BY date(${QueryImpl.getNormalizedDateTimeSql('rh.read_at')}, '+9 hours'), a.media
+        `),
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawDiaryDateSourceRow[]>(Prisma.sql`
+          SELECT
+            date(${QueryImpl.getNormalizedDateTimeSql('sa.created_at')}, '+9 hours') as date,
+            a.media as media,
+            COUNT(*) as count
+          FROM skipped_articles sa
+          INNER JOIN articles a ON a.article_id = sa.article_id
+          WHERE
+            sa.active_user_id = ${dbActiveUserId}
+            AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} >= datetime(${fromDate.toISOString()})
+            AND ${QueryImpl.getNormalizedDateTimeSql('sa.created_at')} < datetime(${toDateExclusive.toISOString()})
+          GROUP BY date(${QueryImpl.getNormalizedDateTimeSql('sa.created_at')}, '+9 hours'), a.media
+        `),
+      ),
+    ])
+    const resolvedSourceResults = QueryImpl.unwrapResultTuple(sourceResultTuple)
+    if (isFailure(resolvedSourceResults)) {
+      return failure(resolvedSourceResults.error)
+    }
+    const [readSourceRows, skipSourceRows] = resolvedSourceResults.data
+
+    const readByDate = QueryImpl.groupSourcesByDate(readSourceRows)
+    const skipByDate = QueryImpl.groupSourcesByDate(skipSourceRows)
+    const dates = QueryImpl.enumerateJstDateRange(fromDateJst, toDateJst)
+
+    return success(
+      dates.map((date) => {
+        const sources = QueryImpl.mergeDiarySources(
+          readByDate.get(date) ?? [],
+          skipByDate.get(date) ?? [],
+        )
+        const summary = sources.reduce(
+          (acc, source) => ({
+            read: acc.read + source.read,
+            skip: acc.skip + source.skip,
+          }),
+          { read: 0, skip: 0 },
+        )
+        return { date, summary, sources }
+      }),
+    )
+  }
+
   private static getNormalizedCreatedAtSql() {
     // INFO: created_atはSQLiteでinteger(text含む)が混在しうるため正規化して比較する
     return Prisma.sql`
@@ -177,6 +408,27 @@ export default class QueryImpl implements Query {
         ELSE datetime(created_at)
       END
     `
+  }
+
+  private static getNormalizedDateTimeSql(columnName: string) {
+    const column = Prisma.raw(columnName)
+    return Prisma.sql`
+      CASE
+        WHEN typeof(${column}) = 'integer' THEN datetime(${column} / 1000, 'unixepoch')
+        ELSE datetime(${column})
+      END
+    `
+  }
+
+  private static unwrapResultTuple<T extends readonly unknown[]>(
+    results: { [K in keyof T]: Result<T[K], Error> },
+  ): Result<T, ServerError> {
+    const firstFailure = results.find(isFailure)
+    if (firstFailure) {
+      return failure(new ServerError(firstFailure.error))
+    }
+    const successResults = results as unknown as { [K in keyof T]: { data: T[K] } }
+    return success(successResults.map((result) => result.data) as unknown as T)
   }
 
   private static buildSqlWhereClause(params: {
@@ -269,17 +521,77 @@ export default class QueryImpl implements Query {
       author: row.author,
       description: row.description,
       url: row.url,
-      createdAt: QueryImpl.convertRawCreatedAt(row.createdAt),
+      createdAt: QueryImpl.convertRawDateTime(row.createdAt),
     }
   }
 
-  private static convertRawCreatedAt(rawCreatedAt: RawArticleRow['createdAt']): Date {
-    if (rawCreatedAt instanceof Date) {
-      return rawCreatedAt
+  private static mapRawDiaryReadItem(row: RawDiaryReadRow): DiaryReadItem {
+    return {
+      readHistoryId: fromDbId(row.readHistoryId),
+      articleId: fromDbId(row.articleId),
+      media: row.media as ArticleMedia,
+      title: row.title,
+      url: row.url,
+      readAt: QueryImpl.convertRawDateTime(row.readAt),
     }
-    if (typeof rawCreatedAt === 'bigint') {
-      return new Date(Number(rawCreatedAt))
+  }
+
+  private static groupSourcesByDate(rows: RawDiaryDateSourceRow[]) {
+    const grouped = new Map<string, RawDiarySourceRow[]>()
+    for (const row of rows) {
+      const current = grouped.get(row.date) ?? []
+      current.push({ media: row.media, count: row.count })
+      grouped.set(row.date, current)
     }
-    return new Date(rawCreatedAt)
+    return grouped
+  }
+
+  private static mergeDiarySources(readRows: RawDiarySourceRow[], skipRows: RawDiarySourceRow[]) {
+    const sourceMap = new Map<ArticleMedia, { read: number; skip: number }>()
+    for (const media of ARTICLE_MEDIA) {
+      sourceMap.set(media, { read: 0, skip: 0 })
+    }
+
+    for (const row of readRows) {
+      const media = row.media as ArticleMedia
+      const current = sourceMap.get(media)
+      if (!current) continue
+      current.read = Number(row.count)
+    }
+
+    for (const row of skipRows) {
+      const media = row.media as ArticleMedia
+      const current = sourceMap.get(media)
+      if (!current) continue
+      current.skip = Number(row.count)
+    }
+
+    return ARTICLE_MEDIA.map((media) => ({
+      media,
+      read: sourceMap.get(media)?.read ?? 0,
+      skip: sourceMap.get(media)?.skip ?? 0,
+    }))
+  }
+
+  private static convertRawDateTime(rawDateTime: string | Date | number | bigint): Date {
+    if (rawDateTime instanceof Date) {
+      return rawDateTime
+    }
+    if (typeof rawDateTime === 'bigint') {
+      return new Date(Number(rawDateTime))
+    }
+    return new Date(rawDateTime)
+  }
+
+  private static enumerateJstDateRange(fromDateJst: string, toDateJst: string) {
+    const dates: string[] = []
+    let current = fromDateJst
+    while (current <= toDateJst) {
+      dates.push(current)
+      const next = addJstDays(current, 1)
+      if (isFailure(next)) break
+      current = next.data
+    }
+    return dates
   }
 }

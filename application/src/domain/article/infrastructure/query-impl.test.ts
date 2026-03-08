@@ -222,4 +222,114 @@ describe('QueryImpl', () => {
       }
     })
   })
+
+  describe('getDailyDiary', () => {
+    it('日次サマリーとsources、read一覧を取得できる', async () => {
+      mockDb.$queryRaw
+        .mockResolvedValueOnce([{ total: 3 }]) // read count
+        .mockResolvedValueOnce([{ total: 2 }]) // skip count
+        .mockResolvedValueOnce([
+          { media: 'qiita', count: 2 },
+          { media: 'zenn', count: 1 },
+        ]) // read sources
+        .mockResolvedValueOnce([
+          { media: 'qiita', count: 1 },
+          { media: 'hatena', count: 1 },
+        ]) // skip sources
+        .mockResolvedValueOnce([
+          {
+            readHistoryId: 10,
+            articleId: 1,
+            media: 'qiita',
+            title: 'Go error handling',
+            url: 'https://example.com/go-error-handling',
+            readAt: '2026-03-07T03:00:00.000Z',
+          },
+          {
+            readHistoryId: 9,
+            articleId: 1,
+            media: 'qiita',
+            title: 'Go error handling',
+            url: 'https://example.com/go-error-handling',
+            readAt: '2026-03-07T02:00:00.000Z',
+          },
+        ]) // reads page
+
+      const result = await queryImpl.getDailyDiary(10n, '2026-03-07', 1, 10)
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data.summary).toEqual({ read: 3, skip: 2 })
+        expect(result.data.sources).toEqual([
+          { media: 'qiita', read: 2, skip: 1 },
+          { media: 'zenn', read: 1, skip: 0 },
+          { media: 'hatena', read: 0, skip: 1 },
+        ])
+        expect(result.data.reads.total).toBe(3)
+        expect(result.data.reads.data).toHaveLength(2)
+        expect(result.data.reads.data[0].readHistoryId).toBe(10n)
+        expect(result.data.reads.data[0].url).toBe('https://example.com/go-error-handling')
+        expect(result.data.reads.data[1].readHistoryId).toBe(9n)
+      }
+    })
+
+    it('DB取得失敗時はエラーを返す', async () => {
+      mockDb.$queryRaw.mockRejectedValue(new Error('daily diary failed'))
+
+      const result = await queryImpl.getDailyDiary(10n, '2026-03-07', 1, 10)
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error.message).toBe('daily diary failed')
+      }
+    })
+  })
+
+  describe('getDailyDiaryRange', () => {
+    it('指定期間の日次サマリーとsourcesを取得できる', async () => {
+      mockDb.$queryRaw
+        .mockResolvedValueOnce([
+          { date: '2026-03-06', media: 'qiita', count: 2 },
+          { date: '2026-03-07', media: 'zenn', count: 1 },
+        ])
+        .mockResolvedValueOnce([{ date: '2026-03-07', media: 'hatena', count: 1 }])
+
+      const result = await queryImpl.getDailyDiaryRange(10n, '2026-03-06', '2026-03-07')
+
+      expect(isSuccess(result)).toBe(true)
+      if (isSuccess(result)) {
+        expect(result.data).toEqual([
+          {
+            date: '2026-03-06',
+            summary: { read: 2, skip: 0 },
+            sources: [
+              { media: 'qiita', read: 2, skip: 0 },
+              { media: 'zenn', read: 0, skip: 0 },
+              { media: 'hatena', read: 0, skip: 0 },
+            ],
+          },
+          {
+            date: '2026-03-07',
+            summary: { read: 1, skip: 1 },
+            sources: [
+              { media: 'qiita', read: 0, skip: 0 },
+              { media: 'zenn', read: 1, skip: 0 },
+              { media: 'hatena', read: 0, skip: 1 },
+            ],
+          },
+        ])
+      }
+    })
+
+    it('DB取得失敗時はエラーを返す', async () => {
+      mockDb.$queryRaw.mockRejectedValue(new Error('daily diary range failed'))
+
+      const result = await queryImpl.getDailyDiaryRange(10n, '2026-03-06', '2026-03-07')
+
+      expect(isFailure(result)).toBe(true)
+      if (isFailure(result)) {
+        expect(result.error.message).toBe('daily diary range failed')
+      }
+    })
+  })
 })

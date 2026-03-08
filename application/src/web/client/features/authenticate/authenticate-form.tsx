@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../../components/shadcn/button'
 import { Input } from '../../components/shadcn/input'
 import { Label } from '../../components/shadcn/label'
@@ -15,11 +15,18 @@ export const AuthenticateForm = ({
   loadingSubmitButtonText,
   handleSubmit,
 }: Props) => {
+  const [isHydrated, setIsHydrated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<AuthenticateErrors>({})
 
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (!isHydrated || isLoading) return
+
     setIsLoading(true)
     setErrors({})
 
@@ -60,7 +67,7 @@ export const AuthenticateForm = ({
         />
         {errors?.password && <p className='text-destructive text-sm'>{errors.password.at(0)}</p>}
       </div>
-      <Button role='button' type='submit' className='w-full' disabled={isLoading}>
+      <Button role='button' type='submit' className='w-full' disabled={!isHydrated || isLoading}>
         {isLoading ? loadingSubmitButtonText : submitButtonText}
       </Button>
     </form>

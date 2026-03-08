@@ -39,17 +39,25 @@ test.describe('新規登録・ログイン後の記事詳細閲覧シナリオ',
   })
 
   test('ログイン後にトレンド記事の詳細を開ける', async ({ page }) => {
-    {
+    test.setTimeout(AUTH_SCENARIO_TIMEOUT)
+
+    await expect(async () => {
       const authPage = new AuthPage(page)
-      await expect(async () => {
-        await authPage.gotoSignup()
-        await authPage.submitSignup(email, password)
+      await authPage.gotoSignup()
+
+      const signupStatus = await authPage.submitSignup(email, password)
+      expect([200, 201, 409]).toContain(signupStatus)
+
+      if (signupStatus === 409) {
         await authPage.gotoLogin()
-        await authPage.waitForLoginPage()
-        await authPage.submitLogin(email, password)
-        await authPage.waitForTrendsPage()
-      }).toPass({ timeout: AUTH_SCENARIO_TIMEOUT })
-    }
+      }
+
+      await authPage.waitForLoginPage()
+
+      const loginStatus = await authPage.submitLogin(email, password)
+      expect(loginStatus).toBe(200)
+      await authPage.waitForTrendsPage()
+    }).toPass({ timeout: AUTH_SCENARIO_TIMEOUT })
 
     {
       const trendsPage = new TrendsPage(page)

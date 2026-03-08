@@ -37,6 +37,8 @@ const appLayoutGroup = {
   routes: [
     { path: '/trends', file: './routes/trends._index/route.tsx' },
     { path: '/inbox', file: './routes/inbox/route.tsx' },
+    { path: '/diary', file: './routes/diary/route.tsx' },
+    { path: '/analytics', file: './routes/analytics/route.tsx' },
   ],
 } as const satisfies GroupRoute
 
