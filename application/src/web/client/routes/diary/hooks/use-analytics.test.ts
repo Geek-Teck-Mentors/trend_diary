@@ -106,7 +106,6 @@ describe('useAnalytics', () => {
 
     const expectedDates = buildDates(getTodayJst())
     expect(fetchDiaryRange).toHaveBeenCalledWith(expectedDates[0], expectedDates[6])
-    expect(result.current.mode).toBe('analytics')
     expect(result.current.selectedDate).toBeNull()
     expect(result.current.summaryRange).toHaveLength(7)
     expect(result.current.weeklySummary).toEqual({ read: 28, skip: 0 })

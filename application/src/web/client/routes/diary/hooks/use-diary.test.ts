@@ -68,8 +68,7 @@ describe('useDiary', () => {
     const [todayDate, page] = fetchDiary.mock.calls[0]
     expect(todayDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     expect(page).toBe(2)
-    expect(result.current.mode).toBe('diary')
-    expect(result.current.selectedDate).toBe(todayDate)
+    expect(result.current.todayJst).toBe(todayDate)
     expect(result.current.dailySummary).toEqual({ read: 3, skip: 2 })
     expect(result.current.readPagination.page).toBe(2)
     expect(result.current.reads[0].readAt).toBeInstanceOf(Date)

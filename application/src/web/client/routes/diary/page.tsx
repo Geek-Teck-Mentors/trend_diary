@@ -37,25 +37,20 @@ type ReadItem = {
   readAt: Date
 }
 
-type DiaryMode = 'diary' | 'analytics'
+type Summary = {
+  read: number
+  skip: number
+}
 
-type Props = {
+type SummaryRangePoint = {
+  date: string
+  read: number
+  skip: number
+}
+
+type BaseProps = {
   isLoggedIn: boolean
-  mode: DiaryMode
-  selectedDate: string | null
-  summaryRange: Array<{
-    date: string
-    read: number
-    skip: number
-  }>
-  weeklySummary: {
-    read: number
-    skip: number
-  }
-  dailySummary: {
-    read: number
-    skip: number
-  }
+  dailySummary: Summary
   sources: Source[]
   reads: ReadItem[]
   readPagination: {
@@ -65,11 +60,25 @@ type Props = {
     hasPrev: boolean
   }
   isLoading: boolean
-  onSelectDate: (date: string) => void
-  onClearSelectedDate: () => void
   onNextPage: () => void
   onPrevPage: () => void
 }
+
+type DiaryProps = BaseProps & {
+  mode: 'diary'
+  targetDate: string
+}
+
+type AnalyticsProps = BaseProps & {
+  mode: 'analytics'
+  selectedDate: string | null
+  summaryRange: SummaryRangePoint[]
+  weeklySummary: Summary
+  onSelectDate: (date: string) => void
+  onClearSelectedDate: () => void
+}
+
+type Props = DiaryProps | AnalyticsProps
 
 const mediaLabels: Record<ArticleMedia, string> = {
   qiita: 'Qiita',
@@ -88,22 +97,18 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export default function DiaryPage({
-  isLoggedIn,
-  mode,
-  selectedDate,
-  summaryRange,
-  weeklySummary,
-  dailySummary,
-  sources,
-  reads,
-  readPagination,
-  isLoading,
-  onSelectDate,
-  onClearSelectedDate,
-  onNextPage,
-  onPrevPage,
-}: Props) {
+export default function DiaryPage(props: Props) {
+  const {
+    isLoggedIn,
+    mode,
+    dailySummary,
+    sources,
+    reads,
+    readPagination,
+    isLoading,
+    onNextPage,
+    onPrevPage,
+  } = props
   const toJstDate = (date: string) => new Date(`${date}T00:00:00+09:00`)
   const toJstTimeString = (date: Date) =>
     date.toLocaleTimeString('ja-JP', {
@@ -112,19 +117,21 @@ export default function DiaryPage({
       minute: '2-digit',
       hour12: false,
     })
-  const isAnalyticsTab = mode === 'analytics'
-  const pageTitle = isAnalyticsTab ? '統計' : 'ダイアリー'
-  const displaySummary = isAnalyticsTab && !selectedDate ? weeklySummary : dailySummary
-  const shouldShowDailyDetails = !isAnalyticsTab || !!selectedDate
+  const pageTitle = mode === 'analytics' ? '統計' : 'ダイアリー'
+  const displaySummary =
+    mode === 'analytics' && props.selectedDate === null ? props.weeklySummary : dailySummary
+  const shouldShowDailyDetails =
+    mode === 'diary' || (mode === 'analytics' && props.selectedDate !== null)
   const paginationLabel =
     shouldShowDailyDetails && readPagination.totalPages > 0
       ? `${readPagination.page} / ${readPagination.totalPages}`
       : '- / -'
   const handleChartClick = (state: unknown) => {
+    if (mode !== 'analytics') return
     if (!state || typeof state !== 'object' || !('activeLabel' in state)) return
     const activeLabel = state.activeLabel
     if (typeof activeLabel === 'string') {
-      onSelectDate(activeLabel)
+      props.onSelectDate(activeLabel)
     }
   }
 
@@ -142,7 +149,7 @@ export default function DiaryPage({
       <div className='mx-auto w-full max-w-3xl rounded-2xl border border-white/40 bg-white/60 p-6 shadow-xl backdrop-blur-sm'>
         <h1 className='text-xl font-semibold text-gray-900'>{pageTitle}</h1>
 
-        {isAnalyticsTab && (
+        {mode === 'analytics' && (
           <div className='mt-5'>
             <h2 className='text-sm font-semibold text-gray-700'>グラフ</h2>
             <div
@@ -151,14 +158,15 @@ export default function DiaryPage({
             >
               <div className='flex min-h-8 items-center gap-2'>
                 <p className='text-sm font-semibold text-gray-700'>
-                  選択日: {selectedDate ? toJaDateString(toJstDate(selectedDate)) : '未選択'}
+                  選択日:{' '}
+                  {props.selectedDate ? toJaDateString(toJstDate(props.selectedDate)) : '未選択'}
                 </p>
                 <button
                   type='button'
-                  onClick={onClearSelectedDate}
+                  onClick={props.onClearSelectedDate}
                   className={cn(
                     'w-[96px] rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100',
-                    !selectedDate && 'pointer-events-none invisible',
+                    !props.selectedDate && 'pointer-events-none invisible',
                   )}
                   data-slot='diary-clear-selected-date'
                 >
@@ -166,7 +174,7 @@ export default function DiaryPage({
                 </button>
               </div>
               <ChartContainer config={chartConfig} className='mt-3 h-56 w-full'>
-                <BarChart data={summaryRange} onClick={handleChartClick}>
+                <BarChart data={props.summaryRange} onClick={handleChartClick}>
                   <CartesianGrid vertical={false} />
                   <XAxis
                     dataKey='date'
@@ -197,9 +205,9 @@ export default function DiaryPage({
 
         <div className='mt-4'>
           <h2 className='text-sm font-semibold text-gray-700'>集計</h2>
-          {!isAnalyticsTab && (
+          {mode === 'diary' && (
             <p className='mt-1 text-sm text-gray-600' data-slot='diary-target-date'>
-              対象日: {selectedDate ? toJaDateString(toJstDate(selectedDate)) : '-'}
+              対象日: {toJaDateString(toJstDate(props.targetDate))}
             </p>
           )}
           <div className='mt-2 rounded-lg border border-gray-200 bg-white p-3'>

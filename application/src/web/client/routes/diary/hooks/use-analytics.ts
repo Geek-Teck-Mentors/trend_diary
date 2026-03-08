@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router'
 import useSWR from 'swr'
 import { addJstDays } from '@/common/locale/date'
 import { DEFAULT_PAGE, offsetPaginationSchema } from '@/common/pagination/schema'
-import type { ArticleMedia } from '@/domain/article/media'
+import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
 import { getTodayJst, sumSourceSummary } from '@/web/client/routes/diary/hooks/diary-shared'
 import useDiaryApi, {
   type DiaryRangeItemResponse,
@@ -66,11 +66,9 @@ export default function useAnalytics(enabled: boolean) {
         skip: response.summary.skip,
       }))
 
-      const sourceMap: Record<ArticleMedia, { read: number; skip: number }> = {
-        qiita: { read: 0, skip: 0 },
-        zenn: { read: 0, skip: 0 },
-        hatena: { read: 0, skip: 0 },
-      }
+      const sourceMap = Object.fromEntries(
+        ARTICLE_MEDIA.map((media) => [media, { read: 0, skip: 0 }]),
+      ) as Record<ArticleMedia, { read: number; skip: number }>
 
       for (const response of normalizedResponses) {
         for (const source of response.sources) {
@@ -81,7 +79,7 @@ export default function useAnalytics(enabled: boolean) {
 
       return {
         points,
-        weeklySources: (Object.keys(sourceMap) as ArticleMedia[]).map((media) => ({
+        weeklySources: ARTICLE_MEDIA.map((media) => ({
           media,
           read: sourceMap[media].read,
           skip: sourceMap[media].skip,
@@ -105,11 +103,8 @@ export default function useAnalytics(enabled: boolean) {
     }),
     { read: 0, skip: 0 },
   )
-  const weeklySources = summaryRangeData?.weeklySources ?? [
-    { media: 'qiita' as const, read: 0, skip: 0 },
-    { media: 'zenn' as const, read: 0, skip: 0 },
-    { media: 'hatena' as const, read: 0, skip: 0 },
-  ]
+  const weeklySources =
+    summaryRangeData?.weeklySources ?? ARTICLE_MEDIA.map((media) => ({ media, read: 0, skip: 0 }))
   const dailySummary = data ? sumSourceSummary(data.sources) : { read: 0, skip: 0 }
 
   const updatePage = (nextPage: number) => {
@@ -137,8 +132,6 @@ export default function useAnalytics(enabled: boolean) {
   }
 
   return {
-    mode: 'analytics' as const,
-    todayJst,
     selectedDate,
     summaryRange: normalizedSummaryRange,
     weeklySummary,
@@ -153,7 +146,6 @@ export default function useAnalytics(enabled: boolean) {
       hasPrev: false,
     },
     isLoading: isLoading || isSummaryLoading,
-    isDateSelected: selectedDate !== null,
     selectDate,
     clearSelectedDate,
     toNextPage: () => updatePage(page + 1),
@@ -165,10 +157,6 @@ function buildEmptyRangeItem(date: string): DiaryRangeItemResponse {
   return {
     date,
     summary: { read: 0, skip: 0 },
-    sources: [
-      { media: 'qiita', read: 0, skip: 0 },
-      { media: 'zenn', read: 0, skip: 0 },
-      { media: 'hatena', read: 0, skip: 0 },
-    ],
+    sources: ARTICLE_MEDIA.map((media) => ({ media, read: 0, skip: 0 })),
   }
 }

@@ -9,17 +9,12 @@ export const meta: MetaFunction = () => [{ title: 'ダイアリー | TrendDiary'
 export default function DiaryRoute() {
   const { isLoggedIn } = useOutletContext<AppLayoutOutletContext>()
   const {
-    mode,
-    selectedDate,
-    summaryRange,
-    weeklySummary,
+    todayJst,
     dailySummary,
     sources,
     reads,
     readPagination,
     isLoading,
-    selectDate,
-    clearSelectedDate,
     toNextPage,
     toPrevPage,
   } = useDiary(isLoggedIn)
@@ -27,17 +22,13 @@ export default function DiaryRoute() {
   return (
     <DiaryPage
       isLoggedIn={isLoggedIn}
-      mode={mode}
-      selectedDate={selectedDate}
-      summaryRange={summaryRange}
-      weeklySummary={weeklySummary}
+      mode='diary'
+      targetDate={todayJst}
       dailySummary={dailySummary}
       sources={sources}
       reads={reads}
       readPagination={readPagination}
       isLoading={isLoading}
-      onSelectDate={selectDate}
-      onClearSelectedDate={clearSelectedDate}
       onNextPage={toNextPage}
       onPrevPage={toPrevPage}
     />

@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router'
 import useSWR from 'swr'
 import { DEFAULT_PAGE, offsetPaginationSchema } from '@/common/pagination/schema'
-import type { ArticleMedia } from '@/domain/article/media'
+import { ARTICLE_MEDIA, type ArticleMedia } from '@/domain/article/media'
 import { getTodayJst, sumSourceSummary } from '@/web/client/routes/diary/hooks/diary-shared'
 import useDiaryApi from './use-diary-api'
 
@@ -14,11 +14,7 @@ type DiaryReadItem = {
   readAt: Date
 }
 
-const emptySources = [
-  { media: 'qiita' as const, read: 0, skip: 0 },
-  { media: 'zenn' as const, read: 0, skip: 0 },
-  { media: 'hatena' as const, read: 0, skip: 0 },
-]
+const emptySources = ARTICLE_MEDIA.map((media) => ({ media, read: 0, skip: 0 }))
 
 export default function useDiary(enabled: boolean) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -50,11 +46,7 @@ export default function useDiary(enabled: boolean) {
   }
 
   return {
-    mode: 'diary' as const,
     todayJst,
-    selectedDate: todayJst,
-    summaryRange: [],
-    weeklySummary: dailySummary,
     dailySummary,
     sources: data?.sources ?? emptySources,
     reads,
@@ -66,8 +58,6 @@ export default function useDiary(enabled: boolean) {
       hasPrev: false,
     },
     isLoading,
-    selectDate: () => undefined,
-    clearSelectedDate: () => undefined,
     toNextPage: () => updatePage(page + 1),
     toPrevPage: () => updatePage(page - 1),
   }

@@ -9,7 +9,6 @@ export const meta: MetaFunction = () => [{ title: '統計 | TrendDiary' }]
 export default function AnalyticsRoute() {
   const { isLoggedIn } = useOutletContext<AppLayoutOutletContext>()
   const {
-    mode,
     selectedDate,
     summaryRange,
     weeklySummary,
@@ -27,7 +26,7 @@ export default function AnalyticsRoute() {
   return (
     <DiaryPage
       isLoggedIn={isLoggedIn}
-      mode={mode}
+      mode='analytics'
       selectedDate={selectedDate}
       summaryRange={summaryRange}
       weeklySummary={weeklySummary}
