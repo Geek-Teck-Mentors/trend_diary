@@ -98,14 +98,20 @@ function validateDiaryDateRange(fromDate: string, toDate: string, todayJst: stri
   if (isFailure(earliestResult)) {
     throw new HTTPException(500, { message: 'Failed to resolve diary date range' })
   }
+  const earliestDate = earliestResult.data
 
-  if (fromDate < earliestResult.data || toDate > todayJst) {
+  const causes: { from?: string[]; to?: string[] } = {}
+  if (fromDate < earliestDate) {
+    causes.from = [`from must be on or after ${earliestDate}`]
+  }
+  if (toDate > todayJst) {
+    causes.to = [`to must be on or before ${todayJst}`]
+  }
+
+  if (causes.from || causes.to) {
     throw new HTTPException(422, {
       message: 'Invalid input',
-      cause: {
-        from: [`from must be between ${earliestResult.data} and ${todayJst}`],
-        to: [`to must be between ${earliestResult.data} and ${todayJst}`],
-      },
+      cause: causes,
     })
   }
 }

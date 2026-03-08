@@ -1,5 +1,12 @@
 import { Prisma } from '@prisma/client'
-import { AsyncResult, failure, isFailure, success, wrapAsyncCall } from '@yuukihayashi0510/core'
+import {
+  type AsyncResult,
+  failure,
+  isFailure,
+  type Result,
+  success,
+  wrapAsyncCall,
+} from '@yuukihayashi0510/core'
 import { ServerError } from '@/common/errors'
 import { addJstDays } from '@/common/locale/date'
 import { DEFAULT_LIMIT, DEFAULT_PAGE, OffsetPaginationResult } from '@/common/pagination'
@@ -220,10 +227,9 @@ export default class QueryImpl implements Query {
       })
     }
 
-    const [readCountResult, skipCountResult, readSourcesResult, skipSourcesResult, readsResult] =
-      await Promise.all([
-        wrapAsyncCall(() =>
-          this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
+    const queryResultTuple = await Promise.all([
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
             SELECT COUNT(*) as total
             FROM read_histories
             WHERE
@@ -231,9 +237,9 @@ export default class QueryImpl implements Query {
               AND ${QueryImpl.getNormalizedDateTimeSql('read_at')} >= datetime(${fromDate.toISOString()})
               AND ${QueryImpl.getNormalizedDateTimeSql('read_at')} < datetime(${toDateExclusive.toISOString()})
           `),
-        ),
-        wrapAsyncCall(() =>
-          this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawCountRow[]>(Prisma.sql`
             SELECT COUNT(*) as total
             FROM skipped_articles
             WHERE
@@ -241,9 +247,9 @@ export default class QueryImpl implements Query {
               AND ${QueryImpl.getNormalizedDateTimeSql('created_at')} >= datetime(${fromDate.toISOString()})
               AND ${QueryImpl.getNormalizedDateTimeSql('created_at')} < datetime(${toDateExclusive.toISOString()})
           `),
-        ),
-        wrapAsyncCall(() =>
-          this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
             SELECT
               a.media as media,
               COUNT(*) as count
@@ -256,9 +262,9 @@ export default class QueryImpl implements Query {
             GROUP BY a.media
             ORDER BY count DESC, a.media ASC
           `),
-        ),
-        wrapAsyncCall(() =>
-          this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawDiarySourceRow[]>(Prisma.sql`
             SELECT
               a.media as media,
               COUNT(*) as count
@@ -271,9 +277,9 @@ export default class QueryImpl implements Query {
             GROUP BY a.media
             ORDER BY count DESC, a.media ASC
           `),
-        ),
-        wrapAsyncCall(() =>
-          this.db.$queryRaw<RawDiaryReadRow[]>(Prisma.sql`
+      ),
+      wrapAsyncCall(() =>
+        this.db.$queryRaw<RawDiaryReadRow[]>(Prisma.sql`
             SELECT
               rh.read_history_id as readHistoryId,
               rh.article_id as articleId,
@@ -291,16 +297,18 @@ export default class QueryImpl implements Query {
             LIMIT ${limit}
             OFFSET ${(page - 1) * limit}
           `),
-        ),
-      ])
-    if (isFailure(readCountResult)) return failure(new ServerError(readCountResult.error))
-    if (isFailure(skipCountResult)) return failure(new ServerError(skipCountResult.error))
-    if (isFailure(readSourcesResult)) return failure(new ServerError(readSourcesResult.error))
-    if (isFailure(skipSourcesResult)) return failure(new ServerError(skipSourcesResult.error))
-    if (isFailure(readsResult)) return failure(new ServerError(readsResult.error))
+      ),
+    ])
+    const resolvedQueryResults = QueryImpl.unwrapResultTuple(queryResultTuple)
+    if (isFailure(resolvedQueryResults)) {
+      return failure(resolvedQueryResults.error)
+    }
 
-    const readCount = Number(readCountResult.data[0]?.total ?? 0)
-    const skipCount = Number(skipCountResult.data[0]?.total ?? 0)
+    const [readCountRows, skipCountRows, readSourcesRows, skipSourcesRows, readsRows] =
+      resolvedQueryResults.data
+
+    const readCount = Number(readCountRows[0]?.total ?? 0)
+    const skipCount = Number(skipCountRows[0]?.total ?? 0)
     const readsTotal = readCount
     const totalPages = Math.ceil(readsTotal / limit)
 
@@ -310,9 +318,9 @@ export default class QueryImpl implements Query {
         read: readCount,
         skip: skipCount,
       },
-      sources: QueryImpl.mergeDiarySources(readSourcesResult.data, skipSourcesResult.data),
+      sources: QueryImpl.mergeDiarySources(readSourcesRows, skipSourcesRows),
       reads: {
-        data: readsResult.data.map(QueryImpl.mapRawDiaryReadItem),
+        data: readsRows.map(QueryImpl.mapRawDiaryReadItem),
         page,
         limit,
         total: readsTotal,
@@ -332,7 +340,7 @@ export default class QueryImpl implements Query {
     const { fromDate, toDateExclusive } = QueryImpl.buildDateRange(fromDateJst, toDateJst)
     if (!fromDate || !toDateExclusive) return success([])
 
-    const [readSourcesResult, skipSourcesResult] = await Promise.all([
+    const sourceResultTuple = await Promise.all([
       wrapAsyncCall(() =>
         this.db.$queryRaw<RawDiaryDateSourceRow[]>(Prisma.sql`
           SELECT
@@ -364,11 +372,14 @@ export default class QueryImpl implements Query {
         `),
       ),
     ])
-    if (isFailure(readSourcesResult)) return failure(new ServerError(readSourcesResult.error))
-    if (isFailure(skipSourcesResult)) return failure(new ServerError(skipSourcesResult.error))
+    const resolvedSourceResults = QueryImpl.unwrapResultTuple(sourceResultTuple)
+    if (isFailure(resolvedSourceResults)) {
+      return failure(resolvedSourceResults.error)
+    }
+    const [readSourceRows, skipSourceRows] = resolvedSourceResults.data
 
-    const readByDate = QueryImpl.groupSourcesByDate(readSourcesResult.data)
-    const skipByDate = QueryImpl.groupSourcesByDate(skipSourcesResult.data)
+    const readByDate = QueryImpl.groupSourcesByDate(readSourceRows)
+    const skipByDate = QueryImpl.groupSourcesByDate(skipSourceRows)
     const dates = QueryImpl.enumerateJstDateRange(fromDateJst, toDateJst)
 
     return success(
@@ -407,6 +418,19 @@ export default class QueryImpl implements Query {
         ELSE datetime(${column})
       END
     `
+  }
+
+  private static unwrapResultTuple<T extends readonly unknown[]>(
+    results: { [K in keyof T]: Result<T[K], Error> },
+  ): Result<T, ServerError> {
+    const data: unknown[] = []
+    for (const result of results) {
+      if (isFailure(result)) {
+        return failure(new ServerError(result.error))
+      }
+      data.push(result.data)
+    }
+    return success(data as unknown as T)
   }
 
   private static buildSqlWhereClause(params: {
