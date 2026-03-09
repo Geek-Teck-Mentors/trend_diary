@@ -1,9 +1,9 @@
 import TEST_ENV from '@/test/env'
 import type { CleanUpIds } from '@/test/helper/user'
 import * as userHelper from '@/test/helper/user'
-import app from '../../../../server'
+import app from '../../../server'
 
-describe('DELETE /api/v2/auth/logout', () => {
+describe('DELETE /api/auth/logout', () => {
   const TEST_EMAIL = 'logout-test@example.com'
   const TEST_PASSWORD = 'Test@password123'
   const createdIds: CleanUpIds = { userIds: [], authIds: [] }
@@ -27,7 +27,7 @@ describe('DELETE /api/v2/auth/logout', () => {
     }
 
     return app.request(
-      '/api/v2/auth/logout',
+      '/api/auth/logout',
       {
         method: 'DELETE',
         headers,

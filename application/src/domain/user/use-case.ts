@@ -2,7 +2,7 @@ import { type AsyncResult, failure, isFailure, success } from '@yuukihayashi0510
 import { ClientError, ServerError } from '@/common/errors'
 import type { Command, Query } from '@/domain/user/repository'
 import type { CurrentUser } from '@/domain/user/schema/active-user-schema'
-import type { AuthV2Repository } from './repository'
+import type { AuthRepository } from './repository'
 import type { AuthenticationSession } from './schema/auth-schema'
 
 /**
@@ -21,9 +21,9 @@ export type LoginResult = {
   activeUser: CurrentUser
 }
 
-export class AuthV2UseCase {
+export class AuthUseCase {
   constructor(
-    private readonly repository: AuthV2Repository,
+    private readonly repository: AuthRepository,
     private readonly userCommand: Command,
     private readonly userQuery: Query,
   ) {}
@@ -32,7 +32,7 @@ export class AuthV2UseCase {
     email: string,
     password: string,
   ): AsyncResult<SignupResult, ClientError | ServerError> {
-    // 認証v2でユーザー作成
+    // 認証でユーザー作成
     const authResult = await this.repository.signup(email, password)
     if (isFailure(authResult)) return authResult
 
@@ -72,7 +72,7 @@ export class AuthV2UseCase {
     email: string,
     password: string,
   ): AsyncResult<LoginResult, ClientError | ServerError> {
-    // 認証v2でログイン
+    // 認証でログイン
     const authResult = await this.repository.login(email, password)
     if (isFailure(authResult)) return authResult
 
@@ -102,7 +102,7 @@ export class AuthV2UseCase {
   }
 
   async refreshSession(): AsyncResult<LoginResult, ClientError | ServerError> {
-    // 認証v2でセッション更新
+    // 認証でセッション更新
     const authResult = await this.repository.refreshSession()
     if (isFailure(authResult)) return authResult
 

@@ -1,9 +1,9 @@
 import TEST_ENV from '@/test/env'
 import type { CleanUpIds } from '@/test/helper/user'
 import * as userHelper from '@/test/helper/user'
-import app from '../../../../server'
+import app from '../../../server'
 
-describe('GET /api/v2/auth/me', () => {
+describe('GET /api/auth/me', () => {
   const TEST_EMAIL = 'me-test@example.com'
   const TEST_PASSWORD = 'Test@password123'
   const createdIds: CleanUpIds = { userIds: [], authIds: [] }
@@ -30,7 +30,7 @@ describe('GET /api/v2/auth/me', () => {
     }
 
     return app.request(
-      '/api/v2/auth/me',
+      '/api/auth/me',
       {
         method: 'GET',
         headers,

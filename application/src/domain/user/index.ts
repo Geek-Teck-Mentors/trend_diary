@@ -1,4 +1,4 @@
-import { createAuthV2UseCase } from './factory'
+import { createAuthUseCase } from './factory'
 import {
   ActiveUser,
   ActiveUserInput,
@@ -15,4 +15,4 @@ export type { ActiveUser, ActiveUserInput, CurrentUser, AuthenticationSession, A
 export { activeUserSchema, activeUserInputSchema, authInputSchema }
 
 // ファクトリ
-export { createAuthV2UseCase }
+export { createAuthUseCase }
