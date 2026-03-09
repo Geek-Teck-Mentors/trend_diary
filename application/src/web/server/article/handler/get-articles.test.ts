@@ -224,7 +224,7 @@ describe('GET /api/articles 既読情報', () => {
     const db = getTestRdb()
     const staleArticles = await db.article.findMany({
       where: {
-        title: { in: ['既読記事', '未読記事'] },
+        title: { in: ['既読記事', '未読記事', 'スキップ記事'] },
       },
       select: { articleId: true },
     })
@@ -238,7 +238,7 @@ describe('GET /api/articles 既読情報', () => {
     }
     await db.article.deleteMany({
       where: {
-        title: { in: ['既読記事', '未読記事'] },
+        title: { in: ['既読記事', '未読記事', 'スキップ記事'] },
       },
     })
 
@@ -269,6 +269,14 @@ describe('GET /api/articles 既読情報', () => {
 
     // article1を既読にする
     await articleHelper.createReadHistory(testActiveUserId, article1.articleId)
+
+    const skippedArticle = await articleHelper.createArticle({
+      title: 'スキップ記事',
+      author: 'テスト著者3',
+    })
+    createdArticleIds.push(skippedArticle.articleId)
+
+    await articleHelper.createSkippedArticle(testActiveUserId, skippedArticle.articleId)
   })
 
   afterEach(async () => {
@@ -288,7 +296,12 @@ describe('GET /api/articles 既読情報', () => {
     const res = await requestGetArticles()
     expect(res.status).toBe(200)
     const data: ArticleListResponse = await res.json()
-    expect(data.data).toHaveLength(2)
+    expect(data.data).toHaveLength(3)
+    expect(data.data.map((article) => article.title)).toEqual([
+      'スキップ記事',
+      '未読記事',
+      '既読記事',
+    ])
     for (const article of data.data) {
       expect(article.isRead).toBeUndefined()
     }
@@ -310,6 +323,14 @@ describe('GET /api/articles 既読情報', () => {
     const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
     expect(data.data).toHaveLength(1)
     expect(data.data[0].isRead).toBe(false)
+  })
+
+  it('ログイン時はスキップ済み記事が一覧に含まれない', async () => {
+    const res = await requestGetArticles('', authCookies)
+
+    expect(res.status).toBe(200)
+    const data = (await res.json()) as { data: ArticleWithReadStatusResponse[] }
+    expect(data.data.map((article) => article.title)).toEqual(['未読記事', '既読記事'])
   })
 
   it('ログイン時にread_status=0を指定すると未読記事のみ返る', async () => {
