@@ -467,6 +467,17 @@ export default class QueryImpl implements Query {
     return readStatus ? readExistsSql : Prisma.sql`NOT (${readExistsSql})`
   }
 
+  private static buildSkippedArticleExistsSql(activeUserId: number) {
+    return Prisma.sql`
+      EXISTS (
+        SELECT 1
+        FROM skipped_articles sa
+        WHERE sa.article_id = articles.article_id
+          AND sa.active_user_id = ${activeUserId}
+      )
+    `
+  }
+
   private static unwrapResultTuple<T extends readonly unknown[]>(
     results: { [K in keyof T]: Result<T[K], Error> },
   ): Result<T, ServerError> {
@@ -511,6 +522,10 @@ export default class QueryImpl implements Query {
 
     if (readStatus !== undefined && activeUserId !== undefined) {
       conditions.push(QueryImpl.buildReadStatusCondition(readStatus, activeUserId))
+    }
+
+    if (activeUserId !== undefined) {
+      conditions.push(Prisma.sql`NOT (${QueryImpl.buildSkippedArticleExistsSql(activeUserId)})`)
     }
 
     if (conditions.length === 0) {

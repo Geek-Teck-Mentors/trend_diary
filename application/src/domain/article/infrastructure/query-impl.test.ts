@@ -102,6 +102,18 @@ describe('QueryImpl', () => {
       }
     })
 
+    it('activeUserId指定時はスキップ済み記事を除外する条件を付与する', async () => {
+      mockDb.$queryRaw.mockResolvedValueOnce([{ total: 0 }]).mockResolvedValueOnce([])
+
+      const result = await queryImpl.searchArticles({ page: 1, limit: 20 }, 10n)
+
+      expect(isSuccess(result)).toBe(true)
+      expect(mockDb.$queryRaw).toHaveBeenCalledTimes(2)
+      const rawSql = mockDb.$queryRaw.mock.calls[0]?.[0] as { strings?: string[] }
+      const joinedSql = rawSql?.strings?.join(' ') ?? ''
+      expect(joinedSql).toContain('skipped_articles')
+    })
+
     it('件数取得失敗時はエラーを返す', async () => {
       mockDb.$queryRaw.mockRejectedValue(new Error('count failed'))
 
