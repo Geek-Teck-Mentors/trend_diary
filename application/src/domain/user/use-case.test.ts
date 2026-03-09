@@ -2,12 +2,12 @@ import { failure, isFailure, isSuccess, success } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import { ClientError, ServerError } from '@/common/errors'
-import type { AuthV2Repository, Command, Query } from '@/domain/user/repository'
+import type { AuthRepository, Command, Query } from '@/domain/user/repository'
 import type { CurrentUser } from '@/domain/user/schema/active-user-schema'
 import type { AuthenticationSession, AuthenticationUser } from '@/domain/user/schema/auth-schema'
-import { AuthV2UseCase } from './use-case'
+import { AuthUseCase } from './use-case'
 
-const repositoryMock = mockDeep<AuthV2Repository>()
+const repositoryMock = mockDeep<AuthRepository>()
 const commandMock = mockDeep<Command>()
 const queryMock = mockDeep<Query>()
 
@@ -35,8 +35,8 @@ const mockActiveUser: CurrentUser = {
   updatedAt: new Date(),
 }
 
-describe('AuthV2UseCase', () => {
-  const useCase = new AuthV2UseCase(repositoryMock, commandMock, queryMock)
+describe('AuthUseCase', () => {
+  const useCase = new AuthUseCase(repositoryMock, commandMock, queryMock)
 
   beforeEach(() => {
     vi.clearAllMocks()

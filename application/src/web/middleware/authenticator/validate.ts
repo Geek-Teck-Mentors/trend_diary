@@ -2,7 +2,7 @@ import { failure, isFailure, type Result, success } from '@yuukihayashi0510/core
 import type { Context } from 'hono'
 import { ClientError, ServerError } from '@/common/errors'
 import UnauthorizedError from '@/common/errors/client-error/unauthorized-error'
-import { createAuthV2UseCase } from '@/domain/user'
+import { createAuthUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
 import type { Env, SessionUser } from '../../env'
@@ -29,7 +29,7 @@ function createAuthValidationError(
 }
 
 /**
- * セッション検証の共通ロジック（auth v2）
+ * セッション検証の共通ロジック（auth）
  * @param c Honoコンテキスト
  * @returns セッション検証結果
  */
@@ -40,7 +40,7 @@ export async function validateSession(
   try {
     const supabaseClient = createSupabaseAuthClient(c)
     const rdb = getRdbClient({ db: c.env.DB, databaseUrl: c.env.DATABASE_URL })
-    const useCase = createAuthV2UseCase(supabaseClient, rdb)
+    const useCase = createAuthUseCase(supabaseClient, rdb)
 
     const result = await useCase.getCurrentActiveUser()
     if (isFailure(result)) {

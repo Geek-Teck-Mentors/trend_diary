@@ -1,6 +1,6 @@
 import { isFailure } from '@yuukihayashi0510/core'
 import { ExternalServiceError, handleError } from '@/common/errors'
-import { type AuthInput, createAuthV2UseCase } from '@/domain/user'
+import { type AuthInput, createAuthUseCase } from '@/domain/user'
 import getRdbClient from '@/infrastructure/rdb'
 import { createSupabaseAuthClient } from '@/infrastructure/supabase'
 import CONTEXT_KEY from '@/web/middleware/context'
@@ -12,7 +12,7 @@ export default async function signup(c: ZodValidatedContext<AuthInput>) {
 
   const client = createSupabaseAuthClient(c)
   const rdb = getRdbClient({ db: c.env.DB, databaseUrl: c.env.DATABASE_URL })
-  const useCase = createAuthV2UseCase(client, rdb)
+  const useCase = createAuthUseCase(client, rdb)
 
   const result = await useCase.signup(valid.email, valid.password)
   if (isFailure(result)) {

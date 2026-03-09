@@ -17,7 +17,7 @@ export default function AppLayout() {
     const client = getApiClientForClient()
 
     const fetchAuthState = async () => {
-      const res = await client.v2.auth.me.$get({}, { init: { credentials: 'include' } })
+      const res = await client.auth.me.$get({}, { init: { credentials: 'include' } })
       if (!isCancelled) {
         setIsLoggedIn(res.status === 200)
       }

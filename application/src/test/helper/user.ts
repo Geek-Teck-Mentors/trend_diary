@@ -154,7 +154,7 @@ export async function login(email: string, password: string): Promise<LoginResul
 
   // Hono経由でログイン
   const res = await app.request(
-    '/api/v2/auth/login',
+    '/api/auth/login',
     {
       method: 'POST',
       body: JSON.stringify({ email, password }),

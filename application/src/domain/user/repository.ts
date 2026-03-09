@@ -20,34 +20,31 @@ export interface Command {
 }
 
 /**
- * 認証v2のサインアップ結果
+ * 認証のサインアップ結果
  */
-export type AuthV2SignupResult = {
+export type AuthSignupResult = {
   user: AuthenticationUser
   session: AuthenticationSession | null
 }
 
 /**
- * 認証v2のログイン結果
+ * 認証のログイン結果
  */
-export type AuthV2LoginResult = {
+export type AuthLoginResult = {
   user: AuthenticationUser
   session: AuthenticationSession
 }
 
-export interface AuthV2Repository {
+export interface AuthRepository {
   /**
    * ユーザーを作成する
    */
-  signup(
-    email: string,
-    password: string,
-  ): AsyncResult<AuthV2SignupResult, ClientError | ServerError>
+  signup(email: string, password: string): AsyncResult<AuthSignupResult, ClientError | ServerError>
 
   /**
    * ログインする
    */
-  login(email: string, password: string): AsyncResult<AuthV2LoginResult, ClientError | ServerError>
+  login(email: string, password: string): AsyncResult<AuthLoginResult, ClientError | ServerError>
 
   /**
    * ログアウトする
@@ -62,7 +59,7 @@ export interface AuthV2Repository {
   /**
    * セッションを更新する
    */
-  refreshSession(): AsyncResult<AuthV2LoginResult, ServerError>
+  refreshSession(): AsyncResult<AuthLoginResult, ServerError>
 
   /**
    * ユーザーを削除する（補償トランザクション用）

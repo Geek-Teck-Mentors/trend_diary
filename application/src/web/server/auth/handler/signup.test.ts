@@ -1,8 +1,8 @@
 import TEST_ENV from '@/test/env'
 import * as userHelper from '@/test/helper/user'
-import app from '../../../../server'
+import app from '../../../server'
 
-describe('POST /api/v2/auth/signup', () => {
+describe('POST /api/auth/signup', () => {
   let emailSequence = 0
   const nextEmail = (prefix: string) => {
     emailSequence += 1
@@ -26,7 +26,7 @@ describe('POST /api/v2/auth/signup', () => {
 
   async function requestSignup(body: string) {
     return app.request(
-      '/api/v2/auth/signup',
+      '/api/auth/signup',
       {
         method: 'POST',
         body,

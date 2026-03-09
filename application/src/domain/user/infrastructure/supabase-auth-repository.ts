@@ -15,7 +15,7 @@ import {
 } from '@yuukihayashi0510/core'
 import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import UnauthorizedError from '@/common/errors/client-error/unauthorized-error'
-import type { AuthV2LoginResult, AuthV2Repository, AuthV2SignupResult } from '../repository'
+import type { AuthLoginResult, AuthRepository, AuthSignupResult } from '../repository'
 import type { AuthenticationUser } from '../schema/auth-schema'
 
 /**
@@ -44,7 +44,7 @@ function isInvalidCredentialsError(error: unknown): boolean {
   return false
 }
 
-export class SupabaseAuthRepository implements AuthV2Repository {
+export class SupabaseAuthRepository implements AuthRepository {
   constructor(private readonly client: SupabaseClient) {}
 
   /**
@@ -83,7 +83,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
   async signup(
     email: string,
     password: string,
-  ): AsyncResult<AuthV2SignupResult, ClientError | ServerError> {
+  ): AsyncResult<AuthSignupResult, ClientError | ServerError> {
     const result = await wrapAsyncCall(() =>
       this.client.auth.signUp({
         email,
@@ -115,7 +115,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
       return userResult
     }
 
-    let session: AuthV2SignupResult['session'] = null
+    let session: AuthSignupResult['session'] = null
     if (data.session) {
       session = this.toSessionObject(data.session, userResult.data)
     }
@@ -129,7 +129,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
   async login(
     email: string,
     password: string,
-  ): AsyncResult<AuthV2LoginResult, ClientError | ServerError> {
+  ): AsyncResult<AuthLoginResult, ClientError | ServerError> {
     const result = await wrapAsyncCall(() =>
       this.client.auth.signInWithPassword({
         email,
@@ -214,7 +214,7 @@ export class SupabaseAuthRepository implements AuthV2Repository {
     return success(authUserResult.data)
   }
 
-  async refreshSession(): AsyncResult<AuthV2LoginResult, ServerError> {
+  async refreshSession(): AsyncResult<AuthLoginResult, ServerError> {
     const result = await wrapAsyncCall(() => this.client.auth.refreshSession())
     if (isFailure(result)) {
       return failure(new ServerError(result.error))
