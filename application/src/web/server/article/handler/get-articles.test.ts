@@ -296,7 +296,12 @@ describe('GET /api/articles 既読情報', () => {
     const res = await requestGetArticles()
     expect(res.status).toBe(200)
     const data: ArticleListResponse = await res.json()
-    expect(data.data).toHaveLength(2)
+    expect(data.data).toHaveLength(3)
+    expect(data.data.map((article) => article.title)).toEqual([
+      'スキップ記事',
+      '未読記事',
+      '既読記事',
+    ])
     for (const article of data.data) {
       expect(article.isRead).toBeUndefined()
     }
