@@ -81,10 +81,13 @@ async function storeArticles(media: ArticleMedia, items: FeedItem[], env: CronEn
 
       if (toInsert.length === 0) return 0
 
-      const result = await db.article.createMany({
-        data: toInsert,
-      })
-      return result.count
+      for (const article of toInsert) {
+        await db.article.create({
+          data: article,
+        })
+      }
+
+      return toInsert.length
     },
     () => db.$disconnect(),
   )
