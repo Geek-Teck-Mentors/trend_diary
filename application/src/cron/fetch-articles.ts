@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
 import Parser from 'rss-parser'
 import type { ArticleMedia } from '@/domain/article/media'
@@ -77,17 +78,27 @@ async function storeArticles(media: ArticleMedia, items: FeedItem[], env: CronEn
       })
 
       const existingUrlSet = new Set(existing.map((item) => item.url))
-      const toInsert = normalized.filter((item) => !existingUrlSet.has(item.url))
+      const uniqueNormalized = Array.from(
+        new Map(normalized.map((item) => [item.url, item])).values(),
+      )
+      const toInsert = uniqueNormalized.filter((item) => !existingUrlSet.has(item.url))
 
       if (toInsert.length === 0) return 0
 
+      let insertedCount = 0
       for (const article of toInsert) {
-        await db.article.create({
-          data: article,
-        })
+        try {
+          await db.article.create({
+            data: article,
+          })
+          insertedCount += 1
+        } catch (error) {
+          if (isUniqueConstraintError(error)) continue
+          throw error
+        }
       }
 
-      return toInsert.length
+      return insertedCount
     },
     () => db.$disconnect(),
   )
@@ -95,6 +106,10 @@ async function storeArticles(media: ArticleMedia, items: FeedItem[], env: CronEn
     throw result.error
   }
   return result.data
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002'
 }
 
 export async function fetchQiitaArticles(env: CronEnv): Promise<number> {

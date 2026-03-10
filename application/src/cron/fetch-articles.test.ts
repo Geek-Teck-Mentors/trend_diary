@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const fetchMock = vi.hoisted(() => vi.fn())
@@ -96,6 +97,62 @@ describe('fetchHatenaArticles', () => {
     const count = await fetchHatenaArticles(env)
 
     expect(count).toBe(2)
+    expect(createMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('同一URLの重複記事は1件だけ保存する', async () => {
+    parseStringMock.mockResolvedValue({
+      items: [
+        {
+          title: '記事A',
+          creator: '投稿者A',
+          content: '本文A',
+          link: 'https://example.com/a',
+        },
+        {
+          title: '記事A重複',
+          creator: '投稿者A',
+          content: '本文A重複',
+          link: 'https://example.com/a',
+        },
+      ],
+    })
+
+    const count = await fetchHatenaArticles(env)
+
+    expect(count).toBe(1)
+    expect(createMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('保存時に一意制約違反が発生した記事はスキップして継続する', async () => {
+    parseStringMock.mockResolvedValue({
+      items: [
+        {
+          title: '記事A',
+          creator: '投稿者A',
+          content: '本文A',
+          link: 'https://example.com/a',
+        },
+        {
+          title: '記事B',
+          creator: '投稿者B',
+          content: '本文B',
+          link: 'https://example.com/b',
+        },
+      ],
+    })
+    createMock
+      .mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('duplicate', {
+          code: 'P2002',
+          clientVersion: '6.7.0',
+        }),
+      )
+      .mockResolvedValueOnce({})
+
+    const count = await fetchHatenaArticles(env)
+
+    expect(count).toBe(1)
     expect(createMock).toHaveBeenCalledTimes(2)
   })
 
