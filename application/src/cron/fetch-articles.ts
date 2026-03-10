@@ -77,14 +77,31 @@ async function storeArticles(media: ArticleMedia, items: FeedItem[], env: CronEn
       })
 
       const existingUrlSet = new Set(existing.map((item) => item.url))
-      const toInsert = normalized.filter((item) => !existingUrlSet.has(item.url))
+      const feedUrlSet = new Set<string>()
+      const uniqueNormalized: typeof normalized = []
+      for (const article of normalized) {
+        if (feedUrlSet.has(article.url)) continue
+        feedUrlSet.add(article.url)
+        uniqueNormalized.push(article)
+      }
+      const toInsert = uniqueNormalized.filter((item) => !existingUrlSet.has(item.url))
 
       if (toInsert.length === 0) return 0
 
-      const result = await db.article.createMany({
-        data: toInsert,
-      })
-      return result.count
+      let insertedCount = 0
+      for (const article of toInsert) {
+        try {
+          await db.article.create({
+            data: article,
+          })
+          insertedCount += 1
+        } catch (error) {
+          if (isUniqueConstraintError(error)) continue
+          throw error
+        }
+      }
+
+      return insertedCount
     },
     () => db.$disconnect(),
   )
@@ -92,6 +109,12 @@ async function storeArticles(media: ArticleMedia, items: FeedItem[], env: CronEn
     throw result.error
   }
   return result.data
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false
+  const errorWithCode = error as { code?: unknown }
+  return errorWithCode.code === 'P2002'
 }
 
 export async function fetchQiitaArticles(env: CronEnv): Promise<number> {

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const fetchMock = vi.hoisted(() => vi.fn())
 const parseStringMock = vi.hoisted(() => vi.fn())
 const findManyMock = vi.hoisted(() => vi.fn())
-const createManyMock = vi.hoisted(() => vi.fn())
+const createMock = vi.hoisted(() => vi.fn())
 const disconnectMock = vi.hoisted(() => vi.fn())
 const prismaDisconnectKey = vi.hoisted(() => '$disconnect')
 
@@ -21,7 +21,7 @@ vi.mock('@/infrastructure/rdb', () => ({
   default: vi.fn(() => ({
     article: {
       findMany: findManyMock,
-      createMany: createManyMock,
+      create: createMock,
     },
     [prismaDisconnectKey]: disconnectMock,
   })),
@@ -39,7 +39,7 @@ describe('fetchHatenaArticles', () => {
     fetchMock.mockReset()
     parseStringMock.mockReset()
     findManyMock.mockReset()
-    createManyMock.mockReset()
+    createMock.mockReset()
     disconnectMock.mockReset()
 
     fetchMock.mockResolvedValue({
@@ -47,9 +47,7 @@ describe('fetchHatenaArticles', () => {
       text: vi.fn().mockResolvedValue('<rss />'),
     })
     findManyMock.mockResolvedValue([])
-    createManyMock.mockImplementation(async ({ data }: { data: unknown[] }) => ({
-      count: data.length,
-    }))
+    createMock.mockResolvedValue({})
     disconnectMock.mockResolvedValue(undefined)
   })
 
@@ -68,13 +66,86 @@ describe('fetchHatenaArticles', () => {
 
     expect(count).toBe(1)
     expect(fetchMock).toHaveBeenCalledWith('https://b.hatena.ne.jp/hotentry/it.rss')
-    const createManyArg = createManyMock.mock.calls[0][0] as {
-      data: Array<{ author: string; description: string }>
+    const createArg = createMock.mock.calls[0][0] as {
+      data: { author: string; description: string }
     }
-    expect(createManyArg.data[0]).toMatchObject({
+    expect(createArg.data).toMatchObject({
       author: 'はてなブックマーク',
       description: '本文',
     })
+  })
+
+  it('D1互換のため記事は1件ずつ保存する', async () => {
+    parseStringMock.mockResolvedValue({
+      items: [
+        {
+          title: '記事A',
+          creator: '投稿者A',
+          content: '本文A',
+          link: 'https://example.com/a',
+        },
+        {
+          title: '記事B',
+          creator: '投稿者B',
+          content: '本文B',
+          link: 'https://example.com/b',
+        },
+      ],
+    })
+
+    const count = await fetchHatenaArticles(env)
+
+    expect(count).toBe(2)
+    expect(createMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('同一URLの重複記事は1件だけ保存する', async () => {
+    parseStringMock.mockResolvedValue({
+      items: [
+        {
+          title: '記事A',
+          creator: '投稿者A',
+          content: '本文A',
+          link: 'https://example.com/a',
+        },
+        {
+          title: '記事A重複',
+          creator: '投稿者A',
+          content: '本文A重複',
+          link: 'https://example.com/a',
+        },
+      ],
+    })
+
+    const count = await fetchHatenaArticles(env)
+
+    expect(count).toBe(1)
+    expect(createMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('保存時に一意制約違反が発生した記事はスキップして継続する', async () => {
+    parseStringMock.mockResolvedValue({
+      items: [
+        {
+          title: '記事A',
+          creator: '投稿者A',
+          content: '本文A',
+          link: 'https://example.com/a',
+        },
+        {
+          title: '記事B',
+          creator: '投稿者B',
+          content: '本文B',
+          link: 'https://example.com/b',
+        },
+      ],
+    })
+    createMock.mockRejectedValueOnce({ code: 'P2002' }).mockResolvedValueOnce({})
+
+    const count = await fetchHatenaArticles(env)
+
+    expect(count).toBe(1)
+    expect(createMock).toHaveBeenCalledTimes(2)
   })
 
   it('contentが欠損した記事は優先順位でdescriptionを補完する', async () => {
@@ -103,12 +174,10 @@ describe('fetchHatenaArticles', () => {
     const count = await fetchHatenaArticles(env)
 
     expect(count).toBe(3)
-    const createManyArg = createManyMock.mock.calls[0][0] as {
-      data: Array<{ description: string }>
-    }
-    expect(createManyArg.data[0].description).toBe('encoded本文')
-    expect(createManyArg.data[1].description).toBe('snippet本文')
-    expect(createManyArg.data[2].description).toBe('')
+    const createArgs = createMock.mock.calls as Array<[{ data: { description: string } }]>
+    expect(createArgs[0][0].data.description).toBe('encoded本文')
+    expect(createArgs[1][0].data.description).toBe('snippet本文')
+    expect(createArgs[2][0].data.description).toBe('')
   })
 })
 
