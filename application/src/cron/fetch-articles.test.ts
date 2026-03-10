@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const fetchMock = vi.hoisted(() => vi.fn())
@@ -141,14 +140,7 @@ describe('fetchHatenaArticles', () => {
         },
       ],
     })
-    createMock
-      .mockRejectedValueOnce(
-        new Prisma.PrismaClientKnownRequestError('duplicate', {
-          code: 'P2002',
-          clientVersion: '6.7.0',
-        }),
-      )
-      .mockResolvedValueOnce({})
+    createMock.mockRejectedValueOnce({ code: 'P2002' }).mockResolvedValueOnce({})
 
     const count = await fetchHatenaArticles(env)
 
