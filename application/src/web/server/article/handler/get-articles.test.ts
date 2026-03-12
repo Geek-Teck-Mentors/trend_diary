@@ -220,7 +220,7 @@ describe('GET /api/articles 既読情報', () => {
   const createdArticleIds: bigint[] = []
   const createdUserIds: CleanUpIds = { userIds: [], authIds: [] }
 
-  beforeEach(async () => {
+  async function cleanupReadStatusTestArticles() {
     const db = getTestRdb()
     const staleArticles = await db.article.findMany({
       where: {
@@ -241,6 +241,10 @@ describe('GET /api/articles 既読情報', () => {
         title: { in: ['既読記事', '未読記事', 'スキップ記事'] },
       },
     })
+  }
+
+  beforeEach(async () => {
+    await cleanupReadStatusTestArticles()
 
     // アカウント作成・ログイン
     const { userId, authenticationId } = await userHelper.create(
