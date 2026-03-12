@@ -11,6 +11,11 @@ const menuItems: MenuItem[] = [
     url: '/trends',
     icon: () => null,
   },
+  {
+    title: '人気記事',
+    url: '/popular',
+    icon: () => null,
+  },
 ]
 
 describe('NavMenu', () => {
@@ -22,15 +27,15 @@ describe('NavMenu', () => {
     }
 
     const children = (element.props as { children: ReactNode[] }).children
-    const menuItemElement = Children.toArray(children).find(
+    const sheetCloseChildren = Children.toArray(children).filter(
       (child) => isValidElement(child) && child.type === SheetClose,
     )
 
-    if (!menuItemElement || !isValidElement(menuItemElement)) {
-      throw new Error('メニュー項目がReactElementではない')
+    if (sheetCloseChildren.length === 0) {
+      throw new Error('SheetCloseでラップされたメニュー項目が存在しない')
     }
 
-    expect(menuItemElement.type).toBe(SheetClose)
+    expect(sheetCloseChildren).toHaveLength(menuItems.length)
   })
 
   it('sidebar表示ではSheetCloseを使用しない', () => {
