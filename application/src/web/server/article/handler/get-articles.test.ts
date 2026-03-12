@@ -63,8 +63,6 @@ describe('GET /api/articles', () => {
 
   beforeAll(async () => {
     const db = getTestRdb()
-    await db.readHistory.deleteMany()
-    await db.article.deleteMany()
 
     const articles = await Promise.all(
       testArticlesData.map((article) => articleHelper.createArticle(article)),
@@ -74,6 +72,12 @@ describe('GET /api/articles', () => {
 
   afterAll(async () => {
     await articleHelper.cleanUp(createdArticleIds)
+    const db = getTestRdb()
+    await db.readHistory.deleteMany({
+      where: {
+        articleId: { in: createdArticleIds },
+      },
+    })
   })
 
   describe('正常系', () => {
