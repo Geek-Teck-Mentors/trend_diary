@@ -41,7 +41,8 @@ type AnchorLinkProps = PropsWithChildren<{
 
 /**
  * AnchorLink
- * @description aタグを薄くラップしたコンポーネント。内部リンクの際はReact RouterのLink
+ * @description aタグを薄くラップしたコンポーネント。内部リンクの際はReact RouterのLinkコンポーネントとして動作し、
+ *              外部リンクの際は新しいタブで開くaタグとして動作する。
  * @param to InternalPath | `https://${string}` | `http://${string}`, InternalPathはルーティング定義から型推論される
  * @param className
  * @param children
