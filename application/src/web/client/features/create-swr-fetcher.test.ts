@@ -49,6 +49,20 @@ describe('createSWRFetcher', () => {
   })
 
   describe('apiCall関数', () => {
+    it('ClientResponse互換オブジェクトを受け取れる', async () => {
+      const mockApiFunction = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: vi.fn().mockResolvedValue({ data: 'typed' }),
+      })
+
+      const { apiCall } = createSWRFetcher()
+      const result = await apiCall<{ data: string }>(mockApiFunction)
+
+      expect(result).toEqual({ data: 'typed' })
+    })
+
     describe('正常なレスポンス(200番台)', () => {
       const testCases: Array<{
         outline: string

@@ -1,5 +1,12 @@
 import getApiClientForClient from '../infrastructure/api'
 
+type ApiCallResponse = {
+  ok: boolean
+  status: number
+  statusText: string
+  json: () => Promise<unknown>
+}
+
 export const createSWRFetcher = () => {
   const client = getApiClientForClient()
 
@@ -15,7 +22,7 @@ export const createSWRFetcher = () => {
     return response.json()
   }
 
-  const apiCall = async <T>(apiCall: () => Promise<Response>): Promise<T | null> => {
+  const apiCall = async <T>(apiCall: () => Promise<ApiCallResponse>): Promise<T | null> => {
     const response = await apiCall()
 
     if (!response.ok) {
@@ -26,7 +33,7 @@ export const createSWRFetcher = () => {
       case 204:
         return null
       default:
-        return response.json()
+        return (await response.json()) as T
     }
   }
 
