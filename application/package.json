@@ -52,7 +52,7 @@
     "@supabase/supabase-js": "^2.76.1",
     "@tailwindcss/vite": "^4.0.8",
     "@yuukihayashi0510/core": "npm:@jsr/yuukihayashi0510__core@^0.2.0",
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "hono": "^4.12.7",
