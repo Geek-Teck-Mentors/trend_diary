@@ -35,7 +35,7 @@ jobs:
     environment: production
     if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'web' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
@@ -46,7 +46,7 @@ jobs:
 
       - name: デプロイ
         id: deploy
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -72,14 +72,14 @@ jobs:
     environment: production
     if: ${{ github.event.workflow_run && github.event.workflow_run.conclusion == 'success' || github.event.inputs.deploy_type == 'database' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
           node-version-file: .node-version
 
       - name: D1のマイグレーション適用
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
