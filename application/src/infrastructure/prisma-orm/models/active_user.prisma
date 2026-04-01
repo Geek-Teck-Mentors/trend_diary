@@ -11,8 +11,8 @@ model ActiveUser {
 
   userId Int @unique @map("user_id")
 
-  user          User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  readHistories ReadHistory[]
+  user            User             @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  readHistories   ReadHistory[]
   skippedArticles SkippedArticle[]
 
   @@map("active_users")
