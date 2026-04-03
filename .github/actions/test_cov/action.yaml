@@ -16,7 +16,7 @@ runs:
 
     - name: カバレッジの可視化
       if: github.event_name == 'pull_request'
-      uses: davelosert/vitest-coverage-report-action@v2
+      uses: davelosert/vitest-coverage-report-action@c0c9b09c93750ee1d8335d14e94ce3d6fc61df50 # v2
       with:
         name: ${{ inputs.target }}
         working-directory: ./application
