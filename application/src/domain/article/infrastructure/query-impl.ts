@@ -77,6 +77,8 @@ type DateRange = {
   toDateExclusive?: Date
 }
 
+type NormalizedDateTimeColumn = 'created_at' | 'rh.read_at'
+
 export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
 
@@ -398,11 +400,11 @@ export default class QueryImpl implements Query {
     )
   }
 
-  private static getNormalizedDateTimeSql(columnName: string) {
+  private static getNormalizedDateTimeSql(columnName: NormalizedDateTimeColumn) {
     return QueryImpl.getNormalizedDateTimeSqlForSqlite(columnName)
   }
 
-  private static getNormalizedDateTimeSqlForSqlite(columnName: string) {
+  private static getNormalizedDateTimeSqlForSqlite(columnName: NormalizedDateTimeColumn) {
     const column = Prisma.raw(columnName)
     // INFO: typeof()はSQLite固有関数。方言差分はこのメソッドに閉じ込める
     return Prisma.sql`
@@ -413,12 +415,12 @@ export default class QueryImpl implements Query {
     `
   }
 
-  private static getJstDateSql(columnName: string) {
+  private static getJstDateSql(columnName: NormalizedDateTimeColumn) {
     return Prisma.sql`date(${QueryImpl.getNormalizedDateTimeSql(columnName)}, '+9 hours')`
   }
 
   private static buildClosedOpenDateRangeSql(
-    columnName: string,
+    columnName: NormalizedDateTimeColumn,
     fromDate: Date,
     toDateExclusive: Date,
   ) {
@@ -430,7 +432,7 @@ export default class QueryImpl implements Query {
   }
 
   private static buildDateRangeConditions(
-    columnName: string,
+    columnName: NormalizedDateTimeColumn,
     { fromDate, toDateExclusive }: DateRange,
   ) {
     const normalizedDateTime = QueryImpl.getNormalizedDateTimeSql(columnName)
@@ -506,10 +508,12 @@ export default class QueryImpl implements Query {
     const conditions: Prisma.Sql[] = []
 
     if (title) {
-      conditions.push(Prisma.sql`title LIKE ${`%${title}%`}`)
+      const escapedTitle = title.replace(/[%_\\]/g, '\\$&')
+      conditions.push(Prisma.sql`title LIKE ${`%${escapedTitle}%`} ESCAPE '\\'`)
     }
     if (author) {
-      conditions.push(Prisma.sql`author LIKE ${`%${author}%`}`)
+      const escapedAuthor = author.replace(/[%_\\]/g, '\\$&')
+      conditions.push(Prisma.sql`author LIKE ${`%${escapedAuthor}%`} ESCAPE '\\'`)
     }
     if (media) {
       conditions.push(Prisma.sql`media = ${media}`)

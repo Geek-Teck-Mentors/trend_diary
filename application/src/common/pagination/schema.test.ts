@@ -40,6 +40,23 @@ describe('offsetPaginationSchema', () => {
     )
   })
 
+  it('pageが1未満ならバリデーションエラー', () => {
+    expect(() => offsetPaginationSchema.parse({ page: 0 })).toThrow(
+      'Number must be greater than or equal to 1',
+    )
+    expect(() => offsetPaginationSchema.parse({ page: -1 })).toThrow(
+      'Number must be greater than or equal to 1',
+    )
+    expect(() => offsetPaginationSchema.parse({ page: -999 })).toThrow(
+      'Number must be greater than or equal to 1',
+    )
+  })
+
+  it('pageが非整数ならバリデーションエラー', () => {
+    expect(() => offsetPaginationSchema.parse({ page: 1.5 })).toThrow('Expected integer')
+    expect(() => offsetPaginationSchema.parse({ page: 0.9 })).toThrow('Expected integer')
+  })
+
   it(`limitが${MIN_LIMIT}未満ならバリデーションエラー`, () => {
     expect(() => offsetPaginationSchema.parse({ limit: 0 })).toThrow(
       `Number must be greater than or equal to ${MIN_LIMIT}`,
@@ -87,6 +104,19 @@ describe('offsetPaginationMobileSchema', () => {
     expect(() => offsetPaginationMobileSchema.parse({ limit: 'invalid' })).toThrow(
       'Expected number, received nan',
     )
+  })
+
+  it('pageが1未満ならバリデーションエラー', () => {
+    expect(() => offsetPaginationMobileSchema.parse({ page: 0 })).toThrow(
+      'Number must be greater than or equal to 1',
+    )
+    expect(() => offsetPaginationMobileSchema.parse({ page: -1 })).toThrow(
+      'Number must be greater than or equal to 1',
+    )
+  })
+
+  it('pageが非整数ならバリデーションエラー', () => {
+    expect(() => offsetPaginationMobileSchema.parse({ page: 1.5 })).toThrow('Expected integer')
   })
 
   it(`limitが${MIN_LIMIT}未満ならバリデーションエラー`, () => {
