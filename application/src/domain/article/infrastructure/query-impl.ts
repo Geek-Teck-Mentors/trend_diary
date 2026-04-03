@@ -495,6 +495,11 @@ export default class QueryImpl implements Query {
     return success(unwrapped as unknown as T)
   }
 
+  private static buildLikeConditionSql(column: string, value: string) {
+    const escaped = value.replace(/[%_\\]/g, '\\$&')
+    return Prisma.sql`${Prisma.raw(column)} LIKE ${`%${escaped}%`} ESCAPE '\\'`
+  }
+
   private static buildSqlWhereClause(params: {
     title?: string
     author?: string
@@ -508,12 +513,10 @@ export default class QueryImpl implements Query {
     const conditions: Prisma.Sql[] = []
 
     if (title) {
-      const escapedTitle = title.replace(/[%_\\]/g, '\\$&')
-      conditions.push(Prisma.sql`title LIKE ${`%${escapedTitle}%`} ESCAPE '\\'`)
+      conditions.push(QueryImpl.buildLikeConditionSql('title', title))
     }
     if (author) {
-      const escapedAuthor = author.replace(/[%_\\]/g, '\\$&')
-      conditions.push(Prisma.sql`author LIKE ${`%${escapedAuthor}%`} ESCAPE '\\'`)
+      conditions.push(QueryImpl.buildLikeConditionSql('author', author))
     }
     if (media) {
       conditions.push(Prisma.sql`media = ${media}`)
