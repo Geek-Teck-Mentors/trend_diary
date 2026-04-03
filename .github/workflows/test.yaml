@@ -43,7 +43,7 @@ jobs:
       run_server_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-server.outputs.diff-count != 0 }}
       run_common_test: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || steps.check-test-config.outputs.diff-count != 0 || steps.check-common.outputs.diff-count != 0 }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: テスト設定ファイルの差分チェック
         id: check-test-config
@@ -97,7 +97,7 @@ jobs:
     runs-on: ${{ needs.setup.outputs.test_runner }}
     if: ${{ needs.setup.outputs.run_client_test == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
@@ -113,7 +113,7 @@ jobs:
     runs-on: ${{ needs.setup.outputs.test_runner }}
     if: ${{ needs.setup.outputs.run_domain_test == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
@@ -129,7 +129,7 @@ jobs:
     runs-on: ${{ needs.setup.outputs.test_runner }}
     if: ${{ needs.setup.outputs.run_server_test == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
@@ -151,7 +151,7 @@ jobs:
     runs-on: ${{ needs.setup.outputs.test_runner }}
     if: ${{ needs.setup.outputs.run_common_test == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
