@@ -5,6 +5,7 @@ import { handleError } from '@/common/errors'
 import { addJstDays, toJstDate, toJstDateString, toTodayJstDateString } from '@/common/locale/date'
 import { createArticleUseCase } from '@/domain/article'
 import { DIARY_DAYS, DIARY_READ_LIMIT } from '@/domain/article/diary'
+import { MAX_PAGE } from '@/common/pagination'
 import type { DailyDiary, DailyDiaryRangeItem } from '@/domain/article/schema/diary-schema'
 import getRdbClient from '@/infrastructure/rdb'
 import CONTEXT_KEY from '@/web/middleware/context'
@@ -27,7 +28,7 @@ export const diaryQuerySchema = z
   .object({
     from: diaryDateSchema,
     to: diaryDateSchema,
-    page: z.coerce.number().int().min(1).optional(),
+    page: z.coerce.number().int().min(1).max(MAX_PAGE).optional(),
   })
   .refine(
     (data) => {
