@@ -20,22 +20,17 @@ defaults:
     shell: bash
     working-directory: ./application
 
-x-trusted-only: &trusted-only
-  if: >
-    github.event_name == 'push' ||
-    github.event.workflow_run.head_repository.full_name == github.repository
-
-x-checkout: &checkout
-  uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-  with:
-    ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-
 jobs:
   code-quality:
-    <<: *trusted-only
+    if: &trusted-only >
+      github.event_name == 'push' ||
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
-      - *checkout
+      - &checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Setup Biome
         uses: biomejs/setup-biome@a05c02a1304287da45f13648675a70d5841acdbc # v2
         with:
@@ -46,7 +41,7 @@ jobs:
 
   # 本来であれば、概念的にコンパイルはLint/Formatと同列ではないが、実行時間短縮のために並列実行にしている
   ts-compile:
-    <<: *trusted-only
+    if: *trusted-only
     runs-on: ubuntu-latest
     steps:
       - *checkout
@@ -59,7 +54,7 @@ jobs:
         run: npm run typecheck
 
   build:
-    <<: *trusted-only
+    if: *trusted-only
     runs-on: ubuntu-latest
     steps:
       - *checkout
