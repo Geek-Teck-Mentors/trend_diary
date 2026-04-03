@@ -8,7 +8,11 @@ export const MAX_LIMIT = 100
 
 const numericString = z.string().pipe(z.coerce.number())
 
-const page = z.union([z.number(), numericString]).optional().default(DEFAULT_PAGE)
+const page = z
+  .union([z.number(), numericString])
+  .optional()
+  .default(DEFAULT_PAGE)
+  .pipe(z.number().int().min(1))
 
 const limit = z
   .union([z.number(), numericString])
