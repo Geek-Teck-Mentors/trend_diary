@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { secureHeaders } from 'hono/secure-headers'
 import { timeout } from 'hono/timeout'
 import { AppLoadContext, createRequestHandler } from 'react-router'
 import { Env } from './env'
@@ -8,6 +9,7 @@ import apiApp from './server/route'
 
 const app = new Hono<Env>()
 
+app.use(secureHeaders())
 app.use(requestLogger)
 app.onError(errorHandler)
 
