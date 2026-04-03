@@ -3,6 +3,7 @@ import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { handleError } from '@/common/errors'
 import { addJstDays, toJstDate, toJstDateString, toTodayJstDateString } from '@/common/locale/date'
+import { MAX_PAGE } from '@/common/pagination'
 import { createArticleUseCase } from '@/domain/article'
 import { DIARY_DAYS, DIARY_READ_LIMIT } from '@/domain/article/diary'
 import type { DailyDiary, DailyDiaryRangeItem } from '@/domain/article/schema/diary-schema'
@@ -27,7 +28,7 @@ export const diaryQuerySchema = z
   .object({
     from: diaryDateSchema,
     to: diaryDateSchema,
-    page: z.coerce.number().int().min(1).optional(),
+    page: z.coerce.number().int().min(1).max(MAX_PAGE).optional(),
   })
   .refine(
     (data) => {
