@@ -20,9 +20,9 @@ jobs:
   code-quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Setup Biome
-        uses: biomejs/setup-biome@v2
+        uses: biomejs/setup-biome@a05c02a1304287da45f13648675a70d5841acdbc # v2
         with:
           version: ${{ env.BIOME_VERSION }}
 
@@ -33,7 +33,7 @@ jobs:
   ts-compile:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
@@ -45,7 +45,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
