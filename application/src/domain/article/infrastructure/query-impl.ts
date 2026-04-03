@@ -77,7 +77,7 @@ type DateRange = {
   toDateExclusive?: Date
 }
 
-type NormalizedDateTimeColumn = 'created_at' | 'rh.read_at'
+type NormalizedDateTimeColumn = 'created_at' | 'rh.read_at' | 'sa.created_at'
 
 export default class QueryImpl implements Query {
   constructor(private readonly db: RdbClient) {}
