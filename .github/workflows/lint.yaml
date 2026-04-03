@@ -27,8 +27,7 @@ jobs:
       github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
-      - &checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Setup Biome
@@ -44,7 +43,9 @@ jobs:
     if: *trusted-only
     runs-on: ubuntu-latest
     steps:
-      - *checkout
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
@@ -57,7 +58,9 @@ jobs:
     if: *trusted-only
     runs-on: ubuntu-latest
     steps:
-      - *checkout
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Node.jsの構築
         uses: ./.github/actions/setup_node
         with:
