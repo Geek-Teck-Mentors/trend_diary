@@ -5,7 +5,7 @@ export const DEFAULT_MOBILE_LIMIT = 10
 export const DEFAULT_PAGE = 1
 export const MIN_LIMIT = 1
 export const MAX_LIMIT = 100
-export const MAX_PAGE = 1000
+export const MAX_PAGE = 10
 
 const numericString = z.string().pipe(z.coerce.number())
 
