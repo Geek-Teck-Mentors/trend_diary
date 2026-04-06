@@ -66,8 +66,5 @@ jobs:
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
 
-      - name: Prismaクライアント生成
-        run: npx prisma generate
-
       - name: ビルド
         run: npm run build

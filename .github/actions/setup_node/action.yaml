@@ -23,4 +23,4 @@ runs:
     - name: Prismaクライアントの生成
       shell: bash
       working-directory: ${{ github.workspace }}/application
-      run: npx prisma generate
+      run: npm run setup
