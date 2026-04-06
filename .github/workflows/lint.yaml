@@ -2,7 +2,6 @@ name: Lint
 
 on:
   push:
-  workflow_dispatch:
   workflow_run:
     workflows: ["Auto Format"]
     types: [completed]
@@ -66,6 +65,9 @@ jobs:
         uses: ./.github/actions/setup_node
         with:
           node-version-file: ${{ env.NODE_VERSION_FILE }}
+
+      - name: Prismaクライアント生成
+        run: npx prisma generate
 
       - name: ビルド
         run: npm run build
