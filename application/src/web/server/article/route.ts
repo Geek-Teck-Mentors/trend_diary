@@ -16,30 +16,17 @@ import unreadDigestionArticles, {
 } from './handler/unread-digestion-articles'
 
 const app = new Hono<Env>()
-  .get(
-    '/',
-    defaultRateLimiter,
-    optionalAuthenticator,
-    zodValidator('query', apiArticleQuerySchema),
-    getArticles,
-  )
-  .get(
-    '/diary',
-    defaultRateLimiter,
-    authenticator,
-    zodValidator('query', diaryQuerySchema),
-    getDiary,
-  )
+  .use('*', defaultRateLimiter)
+  .get('/', optionalAuthenticator, zodValidator('query', apiArticleQuerySchema), getArticles)
+  .get('/diary', authenticator, zodValidator('query', diaryQuerySchema), getDiary)
   .get(
     '/unread-digestion',
-    defaultRateLimiter,
     authenticator,
     zodValidator('query', unreadDigestionQuerySchema),
     unreadDigestionArticles,
   )
   .post(
     '/:article_id/read',
-    defaultRateLimiter,
     authenticator,
     zodValidator('param', articleIdParamSchema),
     zodValidator('json', createReadHistoryApiSchema),
@@ -47,14 +34,12 @@ const app = new Hono<Env>()
   )
   .post(
     '/:article_id/skip',
-    defaultRateLimiter,
     authenticator,
     zodValidator('param', articleIdParamSchema),
     skipArticle,
   )
   .delete(
     '/:article_id/unread',
-    defaultRateLimiter,
     authenticator,
     zodValidator('param', articleIdParamSchema),
     unreadArticle,
