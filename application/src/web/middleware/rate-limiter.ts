@@ -10,8 +10,7 @@ const createRateLimiter = (binding: 'STRICT_RATE_LIMITER' | 'DEFAULT_RATE_LIMITE
     // bindingが未設定の場合はスキップ（テスト・ローカル開発環境）
     if (!rateLimiter) return next()
 
-    const ip =
-      c.req.header('CF-Connecting-IP') ?? c.req.header('X-Forwarded-For') ?? 'unknown'
+    const ip = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Forwarded-For') ?? 'unknown'
 
     const { success } = await rateLimiter.limit({ key: ip })
 

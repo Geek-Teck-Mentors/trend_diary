@@ -16,8 +16,20 @@ import unreadDigestionArticles, {
 } from './handler/unread-digestion-articles'
 
 const app = new Hono<Env>()
-  .get('/', defaultRateLimiter, optionalAuthenticator, zodValidator('query', apiArticleQuerySchema), getArticles)
-  .get('/diary', defaultRateLimiter, authenticator, zodValidator('query', diaryQuerySchema), getDiary)
+  .get(
+    '/',
+    defaultRateLimiter,
+    optionalAuthenticator,
+    zodValidator('query', apiArticleQuerySchema),
+    getArticles,
+  )
+  .get(
+    '/diary',
+    defaultRateLimiter,
+    authenticator,
+    zodValidator('query', diaryQuerySchema),
+    getDiary,
+  )
   .get(
     '/unread-digestion',
     defaultRateLimiter,
