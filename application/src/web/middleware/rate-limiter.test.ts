@@ -91,4 +91,12 @@ describe('IPアドレスの決定ロジック', () => {
     await app.request('/test', { headers: { 'X-Forwarded-For': '1.1.1.1, 2.2.2.2, 3.3.3.3' } }, env)
     expect(limitMock).toHaveBeenCalledWith({ key: '1.1.1.1' })
   })
+
+  it('X-Forwarded-ForのIPにスペースが含まれる場合、trimして使う', async () => {
+    const limitMock = vi.fn().mockResolvedValue({ success: true })
+    const app = buildApp(defaultRateLimiter)
+    const env = { ...TEST_ENV, DEFAULT_RATE_LIMITER: { limit: limitMock } }
+    await app.request('/test', { headers: { 'X-Forwarded-For': ' 1.1.1.1,  2.2.2.2, 3.3.3.3' } }, env)
+    expect(limitMock).toHaveBeenCalledWith({ key: '1.1.1.1' })
+  })
 })
