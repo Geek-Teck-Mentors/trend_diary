@@ -3,7 +3,7 @@ import TEST_ENV from '@/test/env'
 import { Env } from '@/web/env'
 import { defaultRateLimiter, strictRateLimiter } from './rate-limiter'
 
-type RateLimiterMiddleware = ReturnType<typeof defaultRateLimiter>
+type RateLimiterMiddleware = typeof defaultRateLimiter
 
 function buildApp(middleware: RateLimiterMiddleware) {
   return new Hono<Env>().get('/test', middleware, (c) => c.json({ ok: true }))
