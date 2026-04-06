@@ -7,10 +7,12 @@ const createRateLimiter = (binding: 'STRICT_RATE_LIMITER' | 'DEFAULT_RATE_LIMITE
   createMiddleware<Env>(async (c, next) => {
     const rateLimiter = c.env[binding]
 
-    // bindingが未設定の場合はスキップ（テスト・ローカル開発環境）
     if (!rateLimiter) return next()
 
-    const ip = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Forwarded-For') ?? 'unknown'
+    const ip =
+      c.req.header('CF-Connecting-IP') ??
+      c.req.header('X-Forwarded-For')?.split(',')[0]?.trim() ??
+      'unknown'
 
     const { success } = await rateLimiter.limit({ key: ip })
 
@@ -23,8 +25,5 @@ const createRateLimiter = (binding: 'STRICT_RATE_LIMITER' | 'DEFAULT_RATE_LIMITE
     return next()
   })
 
-// 重要エンドポイント用（5リクエスト / 60秒 / IP）
 export const strictRateLimiter = createRateLimiter('STRICT_RATE_LIMITER')
-
-// 通常エンドポイント用（60リクエスト / 60秒 / IP）
 export const defaultRateLimiter = createRateLimiter('DEFAULT_RATE_LIMITER')
