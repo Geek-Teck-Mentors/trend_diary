@@ -56,7 +56,11 @@ describe.each([
     const app = buildApp(limiter)
     const env = {
       ...TEST_ENV,
-      [binding]: { limit: async () => { throw new Error('binding error') } },
+      [binding]: {
+        limit: async () => {
+          throw new Error('binding error')
+        },
+      },
     }
     const res = await app.request('/test', { headers: { 'CF-Connecting-IP': '1.2.3.4' } }, env)
     expect(res.status).toBe(200)
