@@ -49,9 +49,9 @@ jobs:
           git commit -m "chore: biome format"
           git push
 
-      - name: Testワークフローを再トリガー
-        # botのpushはGITHUB_TOKENによるものでpull_requestイベントを発火しないため、明示的に実行する
+      - name: Lintワークフローを再トリガー
+        # botのpushはGITHUB_TOKENによるものでpushイベントを発火しないため、明示的に実行する
         if: steps.check.outcome == 'failure'
-        run: gh workflow run test.yaml --ref ${{ github.ref }}
+        run: gh workflow run lint.yaml --ref ${{ github.ref }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

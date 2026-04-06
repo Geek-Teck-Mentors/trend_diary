@@ -17,7 +17,6 @@ on:
       - 'application/src/**'
       - 'application/package.json'
       - 'application/package-lock.json'
-  workflow_dispatch:
 
 # カバレッジの可視化で、コメントを残すための権限
 permissions:
