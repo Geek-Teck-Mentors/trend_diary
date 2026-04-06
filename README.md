@@ -17,12 +17,6 @@ Nodeモジュールのインストール
 npm ci
 ```
 
-Prismaクライアントの生成
-
-```sh
-npm run setup
-```
-
 Supabaseを起動（Auth用途）
 
 ```sh

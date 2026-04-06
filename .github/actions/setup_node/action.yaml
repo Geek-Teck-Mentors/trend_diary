@@ -19,8 +19,3 @@ runs:
       shell: bash
       working-directory: ${{ github.workspace }}/application
       run: npm ci
-
-    - name: Prismaクライアントの生成
-      shell: bash
-      working-directory: ${{ github.workspace }}/application
-      run: npm run setup
