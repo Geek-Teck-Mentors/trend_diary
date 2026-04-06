@@ -1,3 +1,4 @@
+import { isFailure, wrapAsyncCall } from '@yuukihayashi0510/core'
 import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import type { Env } from '@/web/env'
@@ -16,12 +17,15 @@ const createRateLimiter = (binding: 'STRICT_RATE_LIMITER' | 'DEFAULT_RATE_LIMITE
     // CF環境ではIPが必ず付与されるため、IP不明はbindingのない非CF環境でのみ起こりうる
     if (!ip) return next()
 
-    const { success } = await rateLimiter.limit({ key: ip }).catch((e) => {
-      c.get(CONTEXT_KEY.APP_LOG)?.error('Rate limiter error', { error: e, binding })
-      return { success: true }
-    })
+    const limitResult = await wrapAsyncCall(() => rateLimiter.limit({ key: ip }))
 
-    if (!success) {
+    if (isFailure(limitResult)) {
+      // bindingのエラー時はフェイルオープンとして処理を継続
+      c.get(CONTEXT_KEY.APP_LOG)?.error('Rate limiter error', { error: limitResult.error, binding })
+      return next()
+    }
+
+    if (!limitResult.data.success) {
       const logger = c.get(CONTEXT_KEY.APP_LOG)
       logger?.warn('Rate limit exceeded', { ip, path: c.req.path, binding })
       throw new HTTPException(429, { message: 'Too Many Requests' })
