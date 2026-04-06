@@ -10,8 +10,7 @@ const createRateLimiter = (binding: 'STRICT_RATE_LIMITER' | 'DEFAULT_RATE_LIMITE
     if (!rateLimiter) return next()
 
     const ip =
-      c.req.header('CF-Connecting-IP') ||
-      c.req.header('X-Forwarded-For')?.split(',')[0]?.trim()
+      c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For')?.split(',')[0]?.trim()
 
     // IPアドレスが特定できない場合はレートリミットをスキップ
     if (!ip) return next()
