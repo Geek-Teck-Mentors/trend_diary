@@ -105,5 +105,13 @@
     "vitest": "^3.2.4",
     "vitest-mock-extended": "^3.1.1",
     "wrangler": "^4.80.0"
+  },
+  "overrides": {
+    "@hono/node-server": "^1.19.13",
+    "brace-expansion": "^2.0.3",
+    "defu": "^6.1.5",
+    "effect": "^3.20.0",
+    "lodash": "^4.18.1",
+    "picomatch": "^4.0.4"
   }
 }
