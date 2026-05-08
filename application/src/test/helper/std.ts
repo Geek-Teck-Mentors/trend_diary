@@ -31,8 +31,7 @@ export class StdTestHelper {
       return true
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: process.stdout.writeのオーバーロードがmockImplementationの型推論を阻害するため
-    spy.mockImplementation(impl as any)
+    spy.mockImplementation(impl as typeof process.stdout.write)
 
     return {
       logs,
