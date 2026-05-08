@@ -49,13 +49,10 @@ describe('diarySummarySchema', () => {
 
 describe('diarySourceSchema', () => {
   describe('正常系', () => {
-    it.each(['qiita', 'zenn', 'hatena'])(
-      'media=%s で有効な集計データを受け入れること',
-      (media) => {
-        const result = diarySourceSchema.safeParse({ media, read: 1, skip: 1 })
-        expect(result.success).toBe(true)
-      },
-    )
+    it.each(['qiita', 'zenn', 'hatena'])('media=%s で有効な集計データを受け入れること', (media) => {
+      const result = diarySourceSchema.safeParse({ media, read: 1, skip: 1 })
+      expect(result.success).toBe(true)
+    })
   })
 
   describe('異常系', () => {
