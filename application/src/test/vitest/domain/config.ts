@@ -21,7 +21,8 @@ export default defineConfig({
       },
       include: coverageInclude,
       // 集約export用のindexを除外
-      exclude: ['src/domain/**/index.ts'],
+      // Supabase外部APIへのアダプタ実装はユニットテスト対象外
+      exclude: ['src/domain/**/index.ts', 'src/domain/user/infrastructure/supabase-auth-repository.ts'],
     },
   },
 })

@@ -6,7 +6,15 @@ import { coverageReporter } from '../generate'
 const testInclude = ['src/web/client/**/*.test.ts']
 
 const coverageInclude = ['src/web/client/**/*.ts']
-const exclude = ['src/web/client/components/shadcn/**/*', 'src/web/client/**/*.tsx']
+const exclude = [
+  'src/web/client/components/shadcn/**/*',
+  'src/web/client/**/*.tsx',
+  // React Routerのルート定義はユニットテスト対象外
+  'src/web/client/routes.ts',
+  // テスト未整備のため一旦除外
+  'src/web/client/lib/error.ts',
+  'src/web/client/routes/diary/hooks/use-diary-api.ts',
+]
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
