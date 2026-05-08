@@ -8,11 +8,7 @@ export default defineConfig({
     globals: true,
     include: ['src/cron/**/*.test.ts'],
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
+    maxWorkers: 1,
     watch: false,
   },
 })

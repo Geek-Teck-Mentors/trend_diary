@@ -18,11 +18,7 @@ export default defineConfig({
     // テスト間の影響が無いようにする
     // 参考: https://zenn.dev/microcms/articles/c3b9d48b5647b4#%E8%A8%AD%E5%AE%9A%E6%96%B9%E6%B3%95
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: true, // シングルスレッドで実行
-      },
-    },
+    maxWorkers: 1,
     include: testInclude,
     coverage: {
       reporter: coverageReporter,

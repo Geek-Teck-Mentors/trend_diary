@@ -1,32 +1,37 @@
-import { VitestUtils } from 'vitest'
+import type { VitestUtils } from 'vitest'
+
+type StdoutWriteImpl = (
+  chunk: string | Uint8Array,
+  encodingOrCallback?: BufferEncoding | ((err?: Error | null) => void),
+  callback?: (err?: Error | null) => void,
+) => boolean
 
 export class StdTestHelper {
   static captureStdout = (vi: VitestUtils): { logs: string[]; restore: () => void } => {
     const logs: string[] = []
-    const spy = vi
-      .spyOn(process.stdout, 'write')
-      .mockImplementation((chunk, encodingOrCallback, callback) => {
-        let encoding: BufferEncoding | undefined
-        let cb: ((error?: Error | null) => void) | undefined
+    const spy = vi.spyOn(process.stdout, 'write')
 
-        if (typeof encodingOrCallback === 'string') {
-          encoding = encodingOrCallback
-        }
-        if (typeof encodingOrCallback === 'function') {
-          cb = encodingOrCallback
-        }
-        if (typeof callback === 'function') {
-          cb = callback
-        }
+    const impl: StdoutWriteImpl = (chunk, encodingOrCallback, callback) => {
+      let encoding: BufferEncoding | undefined
+      let cb: ((error?: Error | null) => void) | undefined
 
-        const logLine =
-          typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString(encoding ?? 'utf8')
-        logs.push(logLine)
+      if (typeof encodingOrCallback === 'function') {
+        cb = encodingOrCallback
+      } else {
+        encoding = encodingOrCallback
+        cb = callback
+      }
 
-        cb?.()
+      const logLine =
+        typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString(encoding ?? 'utf8')
+      logs.push(logLine)
 
-        return true
-      })
+      cb?.()
+
+      return true
+    }
+
+    spy.mockImplementation(impl as typeof process.stdout.write)
 
     return {
       logs,
