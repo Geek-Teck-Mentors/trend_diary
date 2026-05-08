@@ -1,7 +1,9 @@
 import {
   AuthInvalidCredentialsError,
   AuthSessionMissingError,
+  type Session,
   type SupabaseClient,
+  type User,
 } from '@supabase/supabase-js'
 import { isFailure, isSuccess } from '@yuukihayashi0510/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -10,7 +12,7 @@ import { AlreadyExistsError, ClientError, ServerError } from '@/common/errors'
 import UnauthorizedError from '@/common/errors/client-error/unauthorized-error'
 import { SupabaseAuthRepository } from './supabase-auth-repository'
 
-const buildSupabaseUser = (overrides: Record<string, unknown> = {}) => ({
+const buildSupabaseUser = (overrides: Partial<User> = {}): User => ({
   id: 'auth-user-id-123',
   app_metadata: {},
   user_metadata: {},
@@ -21,7 +23,7 @@ const buildSupabaseUser = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 })
 
-const buildSupabaseSession = (overrides: Record<string, unknown> = {}) => ({
+const buildSupabaseSession = (overrides: Partial<Session> = {}): Session => ({
   access_token: 'access-token',
   refresh_token: 'refresh-token',
   expires_in: 3600,
@@ -57,6 +59,10 @@ describe('SupabaseAuthRepository', () => {
           expect(result.data.user.email).toBe('test@example.com')
           expect(result.data.user.createdAt).toBeInstanceOf(Date)
           expect(result.data.user.emailConfirmedAt).toBeInstanceOf(Date)
+          expect(result.data.user.createdAt.toISOString()).toBe(supabaseUser.created_at)
+          expect(result.data.user.emailConfirmedAt?.toISOString()).toBe(
+            supabaseUser.email_confirmed_at,
+          )
           expect(result.data.session?.accessToken).toBe('access-token')
           expect(result.data.session?.refreshToken).toBe('refresh-token')
           expect(result.data.session?.expiresIn).toBe(3600)
