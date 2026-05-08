@@ -18,34 +18,36 @@ describe('readHistorySchema', () => {
   })
 
   describe('異常系', () => {
-    it('readHistoryIdがbigintでない場合に検証失敗すること', () => {
-      const result = readHistorySchema.safeParse({ ...validData, readHistoryId: 1 })
-      expect(result.success).toBe(false)
-    })
+    const { readHistoryId: _readHistoryId, ...withoutRequiredField } = validData
+    const invalidTestCases = [
+      {
+        name: 'readHistoryIdがbigintでない場合に検証失敗すること',
+        data: { ...validData, readHistoryId: 1 },
+      },
+      {
+        name: 'activeUserIdがbigintでない場合に検証失敗すること',
+        data: { ...validData, activeUserId: '10' },
+      },
+      {
+        name: 'articleIdがbigintでない場合に検証失敗すること',
+        data: { ...validData, articleId: 100 },
+      },
+      {
+        name: 'readAtがDate型でない場合に検証失敗すること',
+        data: { ...validData, readAt: '2026-03-07' },
+      },
+      {
+        name: 'createdAtがDate型でない場合に検証失敗すること',
+        data: { ...validData, createdAt: '2026-03-07' },
+      },
+      {
+        name: '必須フィールドが欠落している場合に検証失敗すること',
+        data: withoutRequiredField,
+      },
+    ]
 
-    it('activeUserIdがbigintでない場合に検証失敗すること', () => {
-      const result = readHistorySchema.safeParse({ ...validData, activeUserId: '10' })
-      expect(result.success).toBe(false)
-    })
-
-    it('articleIdがbigintでない場合に検証失敗すること', () => {
-      const result = readHistorySchema.safeParse({ ...validData, articleId: 100 })
-      expect(result.success).toBe(false)
-    })
-
-    it('readAtがDate型でない場合に検証失敗すること', () => {
-      const result = readHistorySchema.safeParse({ ...validData, readAt: '2026-03-07' })
-      expect(result.success).toBe(false)
-    })
-
-    it('createdAtがDate型でない場合に検証失敗すること', () => {
-      const result = readHistorySchema.safeParse({ ...validData, createdAt: '2026-03-07' })
-      expect(result.success).toBe(false)
-    })
-
-    it('必須フィールドが欠落している場合に検証失敗すること', () => {
-      const { readHistoryId: _readHistoryId, ...withoutId } = validData
-      const result = readHistorySchema.safeParse(withoutId)
+    it.each(invalidTestCases)('$name', ({ data }) => {
+      const result = readHistorySchema.safeParse(data)
       expect(result.success).toBe(false)
     })
   })
