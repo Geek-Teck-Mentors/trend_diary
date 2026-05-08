@@ -15,13 +15,10 @@ export class StdTestHelper {
       let encoding: BufferEncoding | undefined
       let cb: ((error?: Error | null) => void) | undefined
 
-      if (typeof encodingOrCallback === 'string') {
-        encoding = encodingOrCallback
-      }
       if (typeof encodingOrCallback === 'function') {
         cb = encodingOrCallback
-      }
-      if (typeof callback === 'function') {
+      } else {
+        encoding = encodingOrCallback
         cb = callback
       }
 
