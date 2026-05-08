@@ -15,9 +15,7 @@ export default defineConfig({
       // ベタガキしないと、Github Actionsに閾値が反映されない
       thresholds: {
         statements: 60, // 命令網羅, ソースコードの全ての命令が実行されるかどうか
-        // Vitest v4 の AST-based remapping に伴い計測値が下がったため一時的に緩和
-        // 不足しているテストの追加で復帰させる予定
-        branches: 50, // 分岐網羅, 処理のパスの通過率とほぼ同義
+        branches: 80, // 分岐網羅, 処理のパスの通過率とほぼ同義
         functions: 60, // 関数網羅, 関数の実行パスの通過率
         lines: 60, // 行網羅, ソースコードの全ての行が実行されるかどうか
       },
