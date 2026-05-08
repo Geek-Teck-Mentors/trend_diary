@@ -131,7 +131,9 @@ describe('useDiaryApi', () => {
 
       const { result } = renderHook(() => useDiaryApi())
 
-      await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow(TypeError)
+      await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow(
+        'ダイアリーの取得に失敗しました',
+      )
     })
   })
 
