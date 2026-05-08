@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import createSWRFetcher from '@/web/client/features/create-swr-fetcher'
 import useDiaryApi, { type DiaryRangeItemResponse, type DiaryResponse } from './use-diary-api'
 
@@ -44,10 +44,11 @@ const buildRangeItem = (date: string, read: number, skip: number): DiaryRangeIte
   ],
 })
 
-const setupMocks = () => {
-  const diaryGet = vi.fn()
-  const apiCall = vi.fn()
+const diaryGet = vi.fn()
+const apiCall = vi.fn()
 
+beforeEach(() => {
+  vi.clearAllMocks()
   mockedCreateSWRFetcher.mockReturnValue({
     fetcher: vi.fn(),
     apiCall,
@@ -60,14 +61,11 @@ const setupMocks = () => {
       },
     },
   } as unknown as ReturnType<typeof createSWRFetcher>)
-
-  return { diaryGet, apiCall }
-}
+})
 
 describe('useDiaryApi', () => {
   describe('fetchDiary', () => {
     it('日次APIを正しいクエリで呼び出し、当日分を整形して返す', async () => {
-      const { diaryGet, apiCall } = setupMocks()
       const targetDate = '2026-03-01'
       const dailyResponse = buildDailyResponse(targetDate, 2, 1)
 
@@ -104,7 +102,6 @@ describe('useDiaryApi', () => {
     })
 
     it('apiCallがnullを返した場合はエラーを投げる', async () => {
-      const { apiCall } = setupMocks()
       apiCall.mockResolvedValue(null)
 
       const { result } = renderHook(() => useDiaryApi())
@@ -115,7 +112,6 @@ describe('useDiaryApi', () => {
     })
 
     it('readsが含まれないレスポンスではエラーを投げる', async () => {
-      const { apiCall } = setupMocks()
       apiCall.mockResolvedValue({
         data: [buildRangeItem('2026-03-01', 1, 0)],
       })
@@ -126,11 +122,21 @@ describe('useDiaryApi', () => {
         'ダイアリーの取得に失敗しました',
       )
     })
+
+    it('dataが空配列の場合はエラーを投げる', async () => {
+      apiCall.mockResolvedValue({
+        data: [],
+        reads: buildDailyResponse('2026-03-01', 0, 0).reads,
+      })
+
+      const { result } = renderHook(() => useDiaryApi())
+
+      await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow()
+    })
   })
 
   describe('fetchDiaryRange', () => {
     it('範囲APIを正しいクエリで呼び出し、data配列を返す', async () => {
-      const { diaryGet, apiCall } = setupMocks()
       const items = [
         buildRangeItem('2026-02-23', 1, 0),
         buildRangeItem('2026-02-24', 0, 1),
@@ -158,7 +164,6 @@ describe('useDiaryApi', () => {
     })
 
     it('apiCallがnullを返した場合はエラーを投げる', async () => {
-      const { apiCall } = setupMocks()
       apiCall.mockResolvedValue(null)
 
       const { result } = renderHook(() => useDiaryApi())

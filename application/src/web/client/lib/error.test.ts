@@ -17,9 +17,18 @@ describe('getApiErrorMessage', () => {
     expect(getApiErrorMessage(error, 'デフォルトメッセージ')).toBe('デフォルトメッセージ')
   })
 
+  it('messageプロパティの値がnullの場合はデフォルトメッセージを返す', () => {
+    const error = { message: null }
+    expect(getApiErrorMessage(error, 'デフォルトメッセージ')).toBe('デフォルトメッセージ')
+  })
+
   it('messageプロパティを持たないオブジェクトの場合はデフォルトメッセージを返す', () => {
     const error = { code: 'UNKNOWN' }
     expect(getApiErrorMessage(error, 'デフォルトメッセージ')).toBe('デフォルトメッセージ')
+  })
+
+  it('errorが配列の場合はデフォルトメッセージを返す', () => {
+    expect(getApiErrorMessage([], 'デフォルトメッセージ')).toBe('デフォルトメッセージ')
   })
 
   it('errorがnullの場合はデフォルトメッセージを返す', () => {
