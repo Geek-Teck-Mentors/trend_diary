@@ -1,0 +1,171 @@
+import { renderHook } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import createSWRFetcher from '@/web/client/features/create-swr-fetcher'
+import useDiaryApi, { type DiaryRangeItemResponse, type DiaryResponse } from './use-diary-api'
+
+vi.mock('@/web/client/features/create-swr-fetcher', () => ({
+  default: vi.fn(),
+}))
+
+const mockedCreateSWRFetcher = vi.mocked(createSWRFetcher)
+
+const buildDailyResponse = (date: string, read: number, skip: number): DiaryResponse => ({
+  date,
+  sources: [
+    { media: 'qiita', read, skip },
+    { media: 'zenn', read: 0, skip: 0 },
+    { media: 'hatena', read: 0, skip: 0 },
+  ],
+  reads: {
+    data: [
+      {
+        readHistoryId: 'r1',
+        articleId: 'a1',
+        media: 'qiita',
+        title: 'Diary Article',
+        url: 'https://example.com/diary',
+        readAt: `${date}T01:23:00.000Z`,
+      },
+    ],
+    page: 1,
+    totalPages: 1,
+    hasNext: false,
+    hasPrev: false,
+  },
+})
+
+const buildRangeItem = (date: string, read: number, skip: number): DiaryRangeItemResponse => ({
+  date,
+  summary: { read, skip },
+  sources: [
+    { media: 'qiita', read, skip },
+    { media: 'zenn', read: 0, skip: 0 },
+    { media: 'hatena', read: 0, skip: 0 },
+  ],
+})
+
+const setupMocks = () => {
+  const diaryGet = vi.fn()
+  const apiCall = vi.fn()
+
+  mockedCreateSWRFetcher.mockReturnValue({
+    fetcher: vi.fn(),
+    apiCall,
+    client: {
+      articles: {
+        diary: {
+          // biome-ignore lint/style/useNamingConvention: $get is a Hono client method name
+          $get: diaryGet,
+        },
+      },
+    },
+  } as unknown as ReturnType<typeof createSWRFetcher>)
+
+  return { diaryGet, apiCall }
+}
+
+describe('useDiaryApi', () => {
+  describe('fetchDiary', () => {
+    it('日次APIを正しいクエリで呼び出し、当日分を整形して返す', async () => {
+      const { diaryGet, apiCall } = setupMocks()
+      const targetDate = '2026-03-01'
+      const dailyResponse = buildDailyResponse(targetDate, 2, 1)
+
+      apiCall.mockImplementation(async (apiFn: () => Promise<unknown>) => {
+        await apiFn()
+        return {
+          data: [buildRangeItem(targetDate, 2, 1)],
+          reads: dailyResponse.reads,
+        }
+      })
+
+      const { result } = renderHook(() => useDiaryApi())
+      const value = await result.current.fetchDiary(targetDate, 2)
+
+      expect(diaryGet).toHaveBeenCalledWith(
+        {
+          query: {
+            from: targetDate,
+            to: targetDate,
+            page: 2,
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+      expect(value).toEqual({
+        date: targetDate,
+        sources: [
+          { media: 'qiita', read: 2, skip: 1 },
+          { media: 'zenn', read: 0, skip: 0 },
+          { media: 'hatena', read: 0, skip: 0 },
+        ],
+        reads: dailyResponse.reads,
+      })
+    })
+
+    it('apiCallがnullを返した場合はエラーを投げる', async () => {
+      const { apiCall } = setupMocks()
+      apiCall.mockResolvedValue(null)
+
+      const { result } = renderHook(() => useDiaryApi())
+
+      await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow(
+        'ダイアリーの取得に失敗しました',
+      )
+    })
+
+    it('readsが含まれないレスポンスではエラーを投げる', async () => {
+      const { apiCall } = setupMocks()
+      apiCall.mockResolvedValue({
+        data: [buildRangeItem('2026-03-01', 1, 0)],
+      })
+
+      const { result } = renderHook(() => useDiaryApi())
+
+      await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow(
+        'ダイアリーの取得に失敗しました',
+      )
+    })
+  })
+
+  describe('fetchDiaryRange', () => {
+    it('範囲APIを正しいクエリで呼び出し、data配列を返す', async () => {
+      const { diaryGet, apiCall } = setupMocks()
+      const items = [
+        buildRangeItem('2026-02-23', 1, 0),
+        buildRangeItem('2026-02-24', 0, 1),
+        buildRangeItem('2026-03-01', 3, 2),
+      ]
+
+      apiCall.mockImplementation(async (apiFn: () => Promise<unknown>) => {
+        await apiFn()
+        return { data: items }
+      })
+
+      const { result } = renderHook(() => useDiaryApi())
+      const value = await result.current.fetchDiaryRange('2026-02-23', '2026-03-01')
+
+      expect(diaryGet).toHaveBeenCalledWith(
+        {
+          query: {
+            from: '2026-02-23',
+            to: '2026-03-01',
+          },
+        },
+        { init: { credentials: 'include' } },
+      )
+      expect(value).toEqual(items)
+    })
+
+    it('apiCallがnullを返した場合はエラーを投げる', async () => {
+      const { apiCall } = setupMocks()
+      apiCall.mockResolvedValue(null)
+
+      const { result } = renderHook(() => useDiaryApi())
+
+      await expect(result.current.fetchDiaryRange('2026-02-23', '2026-03-01')).rejects.toThrow(
+        'ダイアリー範囲の取得に失敗しました',
+      )
+    })
+  })
+})
