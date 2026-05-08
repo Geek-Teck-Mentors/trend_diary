@@ -101,39 +101,31 @@ describe('useDiaryApi', () => {
       })
     })
 
-    it('apiCallがnullを返した場合はエラーを投げる', async () => {
-      apiCall.mockResolvedValue(null)
+    const invalidResponseCases: Array<{ outline: string; response: unknown }> = [
+      {
+        outline: 'apiCallがnullを返した場合',
+        response: null,
+      },
+      {
+        outline: 'readsが含まれないレスポンスの場合',
+        response: { data: [buildRangeItem('2026-03-01', 1, 0)] },
+      },
+      {
+        outline: 'dataが空配列の場合',
+        response: { data: [], reads: buildDailyResponse('2026-03-01', 0, 0).reads },
+      },
+    ]
 
-      const { result } = renderHook(() => useDiaryApi())
+    invalidResponseCases.forEach(({ outline, response }) => {
+      it(`${outline}はエラーを投げる`, async () => {
+        apiCall.mockResolvedValue(response)
 
-      await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow(
-        'ダイアリーの取得に失敗しました',
-      )
-    })
+        const { result } = renderHook(() => useDiaryApi())
 
-    it('readsが含まれないレスポンスではエラーを投げる', async () => {
-      apiCall.mockResolvedValue({
-        data: [buildRangeItem('2026-03-01', 1, 0)],
+        await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow(
+          'ダイアリーの取得に失敗しました',
+        )
       })
-
-      const { result } = renderHook(() => useDiaryApi())
-
-      await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow(
-        'ダイアリーの取得に失敗しました',
-      )
-    })
-
-    it('dataが空配列の場合はエラーを投げる', async () => {
-      apiCall.mockResolvedValue({
-        data: [],
-        reads: buildDailyResponse('2026-03-01', 0, 0).reads,
-      })
-
-      const { result } = renderHook(() => useDiaryApi())
-
-      await expect(result.current.fetchDiary('2026-03-01', 1)).rejects.toThrow(
-        'ダイアリーの取得に失敗しました',
-      )
     })
   })
 
