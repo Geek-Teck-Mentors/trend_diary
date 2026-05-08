@@ -30,7 +30,7 @@ export default defineConfig({
       thresholds: {
         // Vitest v4 の AST-based remapping に伴い計測値が下がったため一時的に緩和
         // 不足しているテストの追加で復帰させる予定
-        branches: 70, // 分岐網羅
+        branches: 75, // 分岐網羅
         functions: 60, // 関数網羅
       },
     },
